@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="option" default="" basedir=".">
+    <!-- build date -->
+    <tstamp>
+        <format property="build.date" pattern="yyMMdd" />
+    </tstamp>
+
+    <!-- compilation options -->
+    <property name="java.source" value="1.7" />
+    <property name="java.target" value="1.7" />
+    <property name="version.major" value="1" />
+    <property name="version.minor" value="0" />
+    <property name="external.jar.dir" value="E:\Include\android" />
+
+    <!-- app version code 10 -->
+    <condition property="versionCode" value="${version.major}${version.minor}"
+        else="${env.MajorVersion}${env.MinorVersion}">
+        <os family="windows" />
+    </condition>
+
+    <!-- app version name 1.0 -->
+    <condition property="versionName" value="${version.major}.${version.minor}"
+        else="${env.MajorVersion}.${env.MinorVersion}">
+        <os family="windows" />
+    </condition>
+
+    <!-- build version 140321 -->
+    <condition property="build.version" value="${build.date}" else="${env.FixVersion}">
+        <os family="windows" />
+    </condition>
+
+    <!-- AndroidManifest versionCode 10140321, versionName 1.0.140321 -->
+    <property name="version.code" value="${versionCode}${build.version}" />
+    <property name="version.name" value="${versionName}.${build.version}" />
+
+    <!-- build no 1.0.140321.123 -->
+    <condition property="build.no" value="${version.name}" else="${version.name}.${env.BuildNo}">
+        <os family="windows" />
+    </condition>
+
+    <!-- pre-build target -->
+    <target name="-pre-build">
+        <!-- clean bin and gen dir -->
+        <delete dir="${out.absolute.dir}" verbose="${verbose}" />
+        <delete dir="${gen.absolute.dir}" verbose="${verbose}" />
+    </target>
+
+    <!-- include jars -->
+    <target name="-pre-compile">
+        <path id="barcode.jar.path">
+            <path path="${toString:project.all.jars.path}" />
+            <pathelement location="${external.jar.dir}\zxing\release\zxing.jar" />
+        </path>
+
+        <path id="support.v4.jar.path">
+            <path path="${toString:project.all.jars.path}" />
+            <pathelement location="${sdk.dir}\extras\android\support\v7\appcompat\libs\android-support-v4.jar" />
+        </path>
+
+        <path id="recyclerview.jar.path">
+            <path path="${toString:project.all.jars.path}" />
+            <pathelement location="${external.jar.dir}\recyclerview\release\recyclerview-v7.jar" />
+        </path>
+
+        <path id="project.all.jars.path">
+            <path refid="barcode.jar.path" />
+            <path refid="support.v4.jar.path" />
+            <path refid="recyclerview.jar.path" />
+        </path>
+
+        <echo message="jars=${toString:project.all.jars.path}" />
+    </target>
+
+    <!-- debug output filename -->
+    <target name="-rename-debug-out-file">
+        <!-- call native build -->
+        <ant antfile="${basedir}\jni\build.xml" target="debug" inheritAll="false" inheritRefs="false" />
+
+        <property name="out.file.name" value="${ant.project.name}_${build.no}_debug.apk" />
+        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
+    </target>
+
+    <target name="-set-debug-files" depends="-rename-debug-out-file, android_rules.-set-debug-files" />
+
+    <!-- release output filename -->
+    <target name="-rename-release-out-file">
+        <!-- call native build -->
+        <ant antfile="${basedir}\jni\build.xml" target="release" inheritAll="false" inheritRefs="false" />
+
+        <property name="out.file.name" value="${ant.project.name}_${build.no}_release.apk" />
+        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
+    </target>
+
+    <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
+
+    <!-- properties for signing -->
+    <property name="key.store" value="${basedir}/AuroraKS.keystore" />
+    <property name="key.alias" value="aurora" />
+    <property name="key.store.password" value="QEDdfx@!34" />
+    <property name="key.alias.password" value="lk#$AA78YG" />
+
+    <!-- post-build target -->
+    <target name="-post-build">
+        <property name="mapping.file.name" value="${ant.project.name}_${build.no}_mapping.txt" />
+
+        <!-- copy mapping file -->
+        <echo level="info">Copy mapping file : ${mapping.file.name}</echo>
+        <copy file="${out.absolute.dir}/proguard/mapping.txt" tofile="${out.absolute.dir}/${mapping.file.name}"/>
+
+        <!-- clean temp files -->
+        <echo level="info">Deletes temp file...</echo>
+        <delete includeEmptyDirs="true" verbose="${verbose}">
+            <fileset dir="${out.absolute.dir}" excludes="${out.file.name} ${mapping.file.name}"/>
+        </delete>
+    </target>
+</project>

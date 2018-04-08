@@ -1,0 +1,8 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.txt property as described in that file.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Keep the source file, line number
+-keepattributes SourceFile, LineNumberTable

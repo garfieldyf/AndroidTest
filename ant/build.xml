@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module" basedir="." default="release">
+    <!-- properties -->
+    <property name="author" value="yuanfeng" />
+    <property name="java.package" value="com.funshion" />
+    <property name="native.module" value="funshion" />
+    <property name="native.package" value="com/funshion" />
+    <property name="barcode.package" value="com.google.zxing" />
+    <property name="jar.file.name" value="${native.module}.jar" />
+    <property name="ndk.build.args" value="-B all=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" />
+    <!-- <property name="ndk.build.args" value="-B NDK_STL=1 errors=1 gifimage=1 fileutils=1 messagedigests=1 bitmaputils=1 processutils=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" /> -->
+
+    <property name="src.dir" value="${basedir}/src" />
+    <property name="out.dir" value="${basedir}/out" />
+
+    <property name="api.level" value="22" />
+    <property name="external.jar.dir" value="E:\Include\android" />
+    <property name="sdk.dir" value="D:\Google\android-sdk-windows" />
+    <property name="barcode.jar.path" value="${external.jar.dir}/zxing/release/zxing.jar" />
+    <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
+    <property name="recyclerview.v7.jar.path" value="${external.jar.dir}/recyclerview/release/recyclerview-v7.jar" />
+    <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
+
+    <!-- target -copy -->
+    <target name="-copy">
+        <!-- copy the java files -->
+        <copy todir="${src.dir}/${native.package}" overwrite="true">
+            <fileset dir="${basedir}/../src/android/ext">
+                <exclude name="**/temp/**" />
+                <exclude name="**/reference/**" />
+                <exclude name="**/util/TimeUtils.java" />
+                <exclude name="**/graphics/ShapeLayer.java" />
+                <exclude name="**/graphics/OutlineUtils.java" />
+                <exclude name="**/service/SyncService.java" />
+                <exclude name="**/service/SyncMessenger.java" />
+                <exclude name="**/widget/FocusViewPager.java" />
+                <exclude name="**/widget/ExpandableCursorAdapter.java" />
+                <exclude name="**/widget/ExpandableCursorTreeAdapter.java" />
+            </fileset>
+        </copy>
+
+        <!-- copy the android support v7 files -->
+        <copy todir="${src.dir}/android/support/v7" overwrite="true">
+            <fileset dir="${basedir}/../src/android/support/v7" />
+        </copy>
+
+        <!-- copy the aidl files -->
+        <copy todir="${out.dir}/aidl/${native.package}" overwrite="true">
+            <fileset dir="${basedir}/../aidl/android/ext" />
+        </copy>
+
+        <!-- replace the package name -->
+        <replace dir="${out.dir}/aidl" includes="**/*.aidl" encoding="UTF-8">
+            <replacefilter token="android.ext" value="${java.package}" />
+        </replace>
+
+        <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
+            <replacefilter token="@author Garfield" value="@author ${author}" />
+            <replacefilter token="android.ext" value="${java.package}" />
+            <replacefilter token="com.google.zxing" value="${barcode.package}" />
+        </replace>
+    </target>
+
+    <!-- target -pre-compile-debug -->
+    <target name="-pre-compile-debug">
+        <property name="ndk.build.debug" value="1" />
+        <property name="java.build.debug" value="true" />
+        <property name="class.dir" value="${basedir}/src" />
+        <property name="file.out.dir" value="${out.dir}/debug" />
+        <echo level="info">ndk-build NDK_DEBUG=${ndk.build.debug} ${ndk.build.args}</echo>
+
+        <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
+            <replacefilter token="this.storeUncaughtException" value="this.writeUncaughtException" />
+        </replace>
+    </target>
+
+    <!-- target -pre-compile-release -->
+    <target name="-pre-compile-release">
+        <property name="ndk.build.debug" value="0" />
+        <property name="java.build.debug" value="false" />
+        <property name="class.dir" value="${basedir}/classes" />
+        <property name="file.out.dir" value="${out.dir}/release" />
+        <echo level="info">ndk-build NDK_DEBUG=${ndk.build.debug} ${ndk.build.args}</echo>
+
+        <!-- delete call the _checkPotentialXXX methods -->
+        <replaceregexp match="(.*)_checkPotential(.*);" replace="" flags="g" byline="true" >
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </replaceregexp>
+    </target>
+
+    <!-- target -compile-jar -->
+    <target name="-compile-jar">
+        <!-- compile java files -->
+        <mkdir dir="${class.dir}" />
+        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="${java.build.debug}" source="1.7" target="1.7" includeantruntime="false"
+            classpath="${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}" />
+
+        <!-- build jar file -->
+        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}" />
+    </target>
+
+    <!-- target -compile-so -->
+    <target name="-compile-so">
+        <!-- compile c++ files -->
+        <exec executable="cmd.exe">
+            <arg line="/C ndk-build NDK_DEBUG=${ndk.build.debug} ${ndk.build.args}" />
+        </exec>
+
+        <!-- copy so file -->
+        <copy todir="${file.out.dir}" overwrite="true">
+            <fileset dir="${basedir}/../libs" />
+        </copy>
+
+        <!-- delete obj, libs files -->
+        <delete dir="${basedir}/../obj" />
+        <delete dir="${basedir}/../libs" />
+    </target>
+
+    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
+    <!-- target -obfuscate -->
+    <target name="-obfuscate">
+        <!-- add proguard tasks -->
+        <property name="proguard.dir" value="${sdk.dir}/tools/proguard" />
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
+
+        <!-- build jar file -->
+        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}" />
+
+        <proguard>
+            -include        "${basedir}/../proguard.txt"
+            -injars         ${file.out.dir}/${jar.file.name}
+            -outjars        "${file.out.dir}/${jar.file.name}"
+            -libraryjars    ${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}
+            -dump           "${file.out.dir}/dump.txt"
+            -printseeds     "${file.out.dir}/seeds.txt"
+            -printusage     "${file.out.dir}/usage.txt"
+            -printmapping   "${file.out.dir}/mapping.txt"
+        </proguard>
+    </target>
+
+    <!-- target -compile-dex -->
+    <target name="-compile-dex">
+        <property name="dx.dir" value="${sdk.dir}/build-tools/25.0.3" />
+        <property name="out.dex.file" value="${file.out.dir}/${native.module}-dex.jar" />
+
+        <!-- compile dex file -->
+        <echo level="info">dx --dex --output=${native.module}-dex.jar ${jar.file.name}</echo>
+        <exec executable="cmd.exe">
+            <arg line="/C ${dx.dir}/dx.bat --dex --output=${out.dex.file} ${file.out.dir}/${jar.file.name}" />
+        </exec>
+    </target>
+    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
+
+    <!-- target -post-compile -->
+    <target name="-post-compile">
+        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_widget.xml" />
+        <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${native.module}-proguard.txt" />
+        <echo level="info">Deletes temp files...</echo>
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}">
+                <exclude name="build.xml" />
+                <exclude name="**/out/**" />
+            </fileset>
+        </delete>
+    </target>
+
+    <!-- target -clean -->
+    <target name="-clean">
+        <echo level="info">Deletes output files...</echo>
+        <delete dir="${file.out.dir}"/>
+    </target>
+
+    <!-- target clean -->
+    <target name="clean">
+        <echo level="info">Deletes output files...</echo>
+        <delete includeemptydirs="true">
+            <fileset dir="${basedir}" includes="**/*" excludes="build.xml" />
+        </delete>
+    </target>
+
+    <!-- target debug -->
+    <target name="debug" depends="-clean, -copy, -pre-compile-debug, -compile-jar, -compile-so, -post-compile">
+        <echo level="info">Builds the ${native.module} modules in debug mode.</echo>
+        <echo level="info">Install: ${file.out.dir}</echo>
+        <echo level="info">Install: ${file.out.dir}\${jar.file.name}</echo>
+        <echo level="info">Install: ${out.dir}\attrs_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}\${native.module}-proguard.txt</echo>
+    </target>
+
+    <!-- target release -->
+    <target name="release" depends="-clean, -copy, -pre-compile-release, -compile-jar, -compile-so, -post-compile">
+        <echo level="info">Builds the ${native.module} modules in release mode.</echo>
+        <echo level="info">Install: ${file.out.dir}</echo>
+        <echo level="info">Install: ${file.out.dir}\${jar.file.name}</echo>
+        <echo level="info">Install: ${out.dir}\attrs_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}\${native.module}-proguard.txt</echo>
+    </target>
+</project>

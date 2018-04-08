@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module" basedir="." default="debug">
+    <!-- properties -->
+    <property name="out.dir" value="${basedir}/../libs" />
+    <property name="obj.dir" value="${basedir}/../obj" />
+    <property name="ndk.args" value="-B all=1" />
+    <!-- <property name="ndk.args" value="-B NDK_STL=1 gifimage=1 LOCAL_MODULE_NAME=gifimage PACKAGE_GRAPHICS=com/funshion/graphics/" /> -->
+
+    <!-- target -debug-flags -->
+    <target name="-debug-flags">
+        <property name="ndk.debug" value="1" />
+        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
+    </target>
+
+    <!-- target -release-flags -->
+    <target name="-release-flags">
+        <property name="ndk.debug" value="0" />
+        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
+    </target>
+
+    <!-- target -compile -->
+    <target name="-compile">
+        <!-- compile c++ files -->
+        <exec executable="cmd.exe">
+            <arg line="/C ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}" />
+        </exec>
+    </target>
+
+    <!-- target -post-compile -->
+    <target name="-post-compile">
+        <echo level="info">Deletes temp files...</echo>
+        <delete dir="${obj.dir}"/>
+    </target>
+
+    <!-- target clean -->
+    <target name="clean">
+        <echo level="info">Deletes output files...</echo>
+        <delete dir="${obj.dir}" />
+        <delete dir="${out.dir}" />
+    </target>
+
+    <!-- target debug -->
+    <target name="debug" depends="clean, -debug-flags, -compile, -post-compile">
+        <echo level="info">Builds the module in debug mode.</echo>
+        <echo level="info">Install: ${out.dir}</echo>
+    </target>
+
+    <!-- target release -->
+    <target name="release" depends="clean, -release-flags, -compile, -post-compile">
+        <echo level="info">Builds the module in release mode.</echo>
+        <echo level="info">Install: ${out.dir}</echo>
+    </target>
+
+</project>

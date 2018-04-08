@@ -59,6 +59,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #loadSync(Key, int, Params[])
      */
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
+        DebugUtils._checkPotentialAssertion(target == null, "target == null");
         DebugUtils._checkPotentialUIThread("load");
         if (mState != SHUTDOWN) {
             if (key == null) {
@@ -258,8 +259,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         int STATE_LOAD_FROM_BACKGROUND = 0x80000000;
 
         /**
-         * Binds the specified <em>value</em> to the specified <em>target</em>.
-         * <p>This method called on the UI thread.</p>
+         * Binds the specified <em>value</em> to the specified <em>target</em>
+         * on the UI thread.</p>
          * @param key The key, passed earlier by {@link AsyncLoader#load}.
          * @param params The parameters, passed earlier by {@link AsyncLoader#load}.
          * @param target The <tt>Object</tt> to bind the <em>value</em>, passed

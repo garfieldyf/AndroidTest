@@ -76,12 +76,50 @@ public final class JSONUtils {
     }
 
     /**
+     * Inserts the specified <em>value</em> into the <em>array</em> at the specified
+     * <em>index</em>. The <em>value</em> is inserted before the current value at the
+     * specified <em>index</em>.
+     * @param array The {@link JSONArray} to add to.
+     * @param index The index at which to insert.
+     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
+     * {@link JSONObject#NULL}, or <tt>null</tt>.
+     * @throws IndexOutOfBoundsException if <tt> index < 0 || index > array.length()</tt>.
+     * @return The <em>array</em>.
+     * @see #putOpt(JSONArray, int, Object)
+     * @see #putOpt(JSONObject, String, Object)
+     */
+    public static JSONArray add(JSONArray array, int index, Object value) {
+        JSON.toList(array).add(index, value);
+        return array;
+    }
+
+    /**
+     * Equivalent to calling {@link JSONArray#put(int, Object)}.
+     * @param array The <tt>JSONArray</tt> to add to.
+     * @param index The index at which to put.
+     * @param value A <tt>JSONObject, JSONArray, String, Boolean,
+     * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
+     * @return The <em>array</em>.
+     * @see #add(JSONArray, int, Object)
+     * @see #putOpt(JSONObject, String, Object)
+     */
+    public static JSONArray putOpt(JSONArray array, int index, Object value) {
+        try {
+            return array.put(index, value);
+        } catch (JSONException e) {
+            return array;
+        }
+    }
+
+    /**
      * Equivalent to calling {@link JSONObject#putOpt(String, Object)}.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
-     * @param value a <tt>JSONObject, JSONArray, String, Boolean,
-     * Integer, Long, Double,</tt> or <tt>null</tt>.
+     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
+     * {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>object</em>.
+     * @see #add(JSONArray, int, Object)
+     * @see #putOpt(JSONArray, int, Object)
      */
     public static JSONObject putOpt(JSONObject object, String name, Object value) {
         try {

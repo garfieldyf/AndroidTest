@@ -173,14 +173,11 @@ public final class NetworkUtils {
         /**
          * Constructor
          * @param url The url to connect the remote HTTP server.
+         * @throws IOException if an error occurs while opening the connection.
          */
-        public DownloadRequest(String url) {
-            try {
-                connection = (HttpURLConnection)new URL(url).openConnection();
-                connection.setInstanceFollowRedirects(true);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+        public DownloadRequest(String url) throws IOException {
+            connection = (HttpURLConnection)new URL(url).openConnection();
+            connection.setInstanceFollowRedirects(true);
         }
 
         /**
@@ -369,11 +366,11 @@ public final class NetworkUtils {
         }
 
         /**
-         * Executes the download task with the arguments supplied to this request.
-         * @param params The parameters of the download task.
-         * @return The instance of download task.
+         * Executes the download task with the arguments supplied to this request. The <tt>DownloadRequest</tt>
+         * instance must be call {@link AsyncDownloadTask#newDownloadRequest(String)} to create.
+         * @param params The parameters of the task.
+         * @return The instance of task.
          * @see #execute(Executor, Params[])
-         * @see AsyncTask#execute(Params[])
          * @see AsyncDownloadTask#newDownloadRequest(String)
          */
         public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Params... params) {
@@ -382,12 +379,12 @@ public final class NetworkUtils {
         }
 
         /**
-         * Executes the download task with the arguments supplied to this request.
+         * Executes the download task with the arguments supplied to this request. The <tt>DownloadRequest</tt>
+         * instance must be call {@link AsyncDownloadTask#newDownloadRequest(String)} to create.
          * @param exec The {@link Executor} to use.
-         * @param params The parameters of the download task.
-         * @return The instance of download task.
+         * @param params The parameters of the task.
+         * @return The instance of task.
          * @see #execute(Params[])
-         * @see AsyncTask#executeOnExecutor(Executor, Params[])
          * @see AsyncDownloadTask#newDownloadRequest(String)
          */
         public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Executor exec, Params... params) {
@@ -399,8 +396,9 @@ public final class NetworkUtils {
          * Constructor
          * @param task The owner {@link AsyncTask}.
          * @param url The url to connect the remote HTTP server.
+         * @throws IOException if an error occurs while opening the connection.
          */
-        /* package */ DownloadRequest(AsyncTask task, String url) {
+        /* package */ DownloadRequest(AsyncTask task, String url) throws IOException {
             this(url);
             this.task = task;
         }
@@ -568,7 +566,11 @@ public final class NetworkUtils {
          * @return The instance of <tt>DownloadRequest</tt>.
          */
         public final DownloadRequest newDownloadRequest(String url) {
-            return (mRequest = new DownloadRequest(this, url));
+            try {
+                return (mRequest = new DownloadRequest(this, url));
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         @Override

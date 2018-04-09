@@ -67,6 +67,7 @@ public final class StringUtils {
      * @see #newString(char[])
      */
     public static String newString(char[] chars, int offset, int count) {
+        ArrayUtils.checkRange(offset, count, chars.length);
         return StringFactory.newString(chars, offset, count);
     }
 
@@ -218,7 +219,6 @@ public final class StringUtils {
 
         public static String newString(char[] chars, int offset, int count) {
             try {
-                ArrayUtils.checkRange(offset, count, chars.length);
                 return sInstance.newInstance(offset, count, chars);
             } catch (ReflectiveOperationException e) {
                 throw new Error(e);

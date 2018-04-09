@@ -277,6 +277,7 @@ public final class NetworkUtils {
          * @see #post(Object)
          */
         public final DownloadRequest post(byte[] data, int offset, int count) {
+            ArrayUtils.checkRange(offset, count, data.length);
             this.data   = data;
             this.count  = count;
             this.offset = offset;
@@ -474,7 +475,7 @@ public final class NetworkUtils {
         }
 
         /**
-         * Posts the JSONArray or JSONObject to the remote HTTP server.
+         * Posts the data to the remote HTTP server.
          */
         private void postData(Object data) throws IOException {
             final JsonWriter writer = new JsonWriter(new OutputStreamWriter(connection.getOutputStream()));

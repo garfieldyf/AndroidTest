@@ -532,28 +532,30 @@ public final class DatabaseUtils {
      * @param cursor The {@link Cursor} from which to get the data. The cursor
      * must be move to the correct position.
      * @param columnIndexes The index of the columns which the values to write.
-     * @param columnNames The name of the columns which the names to write.
+     * @param names The name of the properties which the names to write. The
+     * <em>names</em> length must be equals the <em>columnIndexes</em> length.
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeCursor(JsonWriter, Cursor)
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
-    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String[] columnNames) throws IOException {
+    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String[] names) throws IOException {
+        DebugUtils._checkPotentialAssertion(columnIndexes.length != names.length, "columnIndexes.length != names.length");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
+            final String name = names[i];
             final int columnIndex = columnIndexes[i];
-            final String columnName = columnNames[i];
             switch (cursor.getType(columnIndex)) {
             case Cursor.FIELD_TYPE_INTEGER:
-                writer.name(columnName).value(cursor.getLong(columnIndex));
+                writer.name(name).value(cursor.getLong(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_FLOAT:
-                writer.name(columnName).value(cursor.getDouble(columnIndex));
+                writer.name(name).value(cursor.getDouble(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_STRING:
-                writer.name(columnName).value(cursor.getString(columnIndex));
+                writer.name(name).value(cursor.getString(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:

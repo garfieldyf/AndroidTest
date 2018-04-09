@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -18,6 +20,7 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
@@ -487,9 +490,10 @@ public final class ProcessUtils {
         /**
          * Writes the crash infos which the date less the <em>date</em> into a {@link JsonWriter}.
          * @param context The <tt>Context</tt>.
-         * @param writer The {@link JsonWriter}.
+         * @param writer The {@link JsonWriter} to write to.
          * @param date The date to query in milliseconds.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
+         * @see #writeTo(Context, OutputStream, long)
          */
         public final void writeTo(Context context, JsonWriter writer, long date) throws IOException {
             final Cursor cursor = query(date);
@@ -499,6 +503,25 @@ public final class ProcessUtils {
                 }
             } finally {
                 cursor.close();
+            }
+        }
+
+        /**
+         * Compresses and writes the crash infos which the date less the <em>date</em>
+         * into an {@link OutputStream}. The crash infos encoding a JSON encoded value.
+         * <p>The <em>out</em> will be close when this method was returned.</p>
+         * @param context The <tt>Context</tt>.
+         * @param out The {@link OutputStream} to write to.
+         * @param date The date to query in milliseconds.
+         * @throws IOException if an error occurs while writing to the <em>out</em>.
+         * @see #writeTo(Context, JsonWriter, long)
+         */
+        public final void writeTo(Context context, OutputStream out, long date) throws IOException {
+            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new GZIPOutputStream(out)));
+            try {
+                writeTo(context, writer, date);
+            } finally {
+                writer.close();
             }
         }
 

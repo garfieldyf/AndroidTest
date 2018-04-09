@@ -378,7 +378,7 @@ public final class JSONUtils {
 
         @Override
         public Object remove(int index) {
-            return null;
+            throw new UnsupportedOperationException();
         }
 
         @Override

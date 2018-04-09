@@ -17,11 +17,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.ext.content.Loader.Task;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.SimplePool;
-import android.ext.util.Pools.TaskWrapper;
-import android.os.AsyncTask;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
@@ -469,7 +466,7 @@ public final class FileUtils {
      * @param dst The destination file to write, must be absolute file path.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      * @see #copyStream(InputStream, OutputStream, byte[])
-     * @see #copyStream(InputStream, OutputStream, Object, byte[])
+     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
     public static boolean copyStream(InputStream src, String dst) {
         OutputStream os = null;
@@ -497,7 +494,7 @@ public final class FileUtils {
      * @return The <em>dst</em>.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
      * @see #copyStream(InputStream, String)
-     * @see #copyStream(InputStream, OutputStream, Object, byte[])
+     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
     public static <T extends OutputStream> T copyStream(InputStream src, T dst, byte[] buffer) throws IOException {
         return copyStreamImpl(src, dst, null, -1, buffer);
@@ -507,8 +504,8 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream</tt> the contents into <tt>OutputStream</tt>.
      * @param src The <tt>InputStream</tt> to read.
      * @param dst The <tt>OutputStream</tt> to write.
-     * @param task The task whose executing this method. May be one of {@link AsyncTask},
-     * {@link Task} or <tt>null</tt>. If the <tt>task</tt> was cancelled the <em>dst's</em>
+     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if
+     * none. If the operation was cancelled before it completed normally then the <em>dst's</em>
      * contents undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @return The <em>dst</em>.
@@ -516,8 +513,8 @@ public final class FileUtils {
      * @see #copyStream(InputStream, String)
      * @see #copyStream(InputStream, OutputStream, byte[])
      */
-    public static <T extends OutputStream> T copyStream(InputStream src, T dst, Object task, byte[] buffer) throws IOException {
-        return copyStreamImpl(src, dst, task, -1, buffer);
+    public static <T extends OutputStream> T copyStream(InputStream src, T dst, Cancelable cancelable, byte[] buffer) throws IOException {
+        return copyStreamImpl(src, dst, cancelable, -1, buffer);
     }
 
     /**
@@ -671,28 +668,32 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyStreamImpl(InputStream is, OutputStream os, Object task, byte[] buffer) throws IOException {
-        final TaskWrapper wrapper = TaskWrapper.obtain(task);
-        for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !wrapper.isCancelled(); ) {
-            os.write(buffer, 0, readBytes);
+    private static void copyStreamImpl(InputStream is, OutputStream os, Cancelable cancelable, byte[] buffer) throws IOException {
+        int readBytes;
+        if (cancelable == null) {
+            while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {
+                os.write(buffer, 0, readBytes);
+            }
+        } else {
+            while ((readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled()) {
+                os.write(buffer, 0, readBytes);
+            }
         }
-
-        TaskWrapper.recycle(wrapper);
     }
 
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Object task, int capacity, byte[] buffer) throws IOException {
+    private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Cancelable cancelable, int capacity, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             final ByteArrayBuffer buf = (ByteArrayBuffer)out;
             buf.ensureCapacity(capacity >= 0 ? capacity : is.available());
-            buf.readFrom(is, task);
+            buf.readFrom(is, cancelable);
         } else if (buffer != null) {
-            copyStreamImpl(is, out, task, buffer);
+            copyStreamImpl(is, out, cancelable, buffer);
         } else {
             buffer = ByteArrayPool.sInstance.obtain();
-            copyStreamImpl(is, out, task, buffer);
+            copyStreamImpl(is, out, cancelable, buffer);
             ByteArrayPool.sInstance.recycle(buffer);
         }
 

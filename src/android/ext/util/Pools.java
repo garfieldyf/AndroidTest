@@ -5,8 +5,6 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.content.Context;
-import android.ext.content.Loader.Task;
-import android.os.AsyncTask;
 import android.support.annotation.Keep;
 import android.util.Printer;
 
@@ -334,104 +332,6 @@ public final class Pools {
                 ((ArrayPool<?>)pool).dump(printer, "SynchronizedPool");
             }
         }
-    }
-
-    /**
-     * Class <tt>TaskWrapper</tt> that wraps a {@link Task}, {@link AsyncTask}.
-     */
-    /* package */ static class TaskWrapper {
-        private static final TaskWrapper sInstance = new TaskWrapper();
-
-        /**
-         * Retrieves a <tt>TaskWrapper</tt> object with the specified <em>task</em>.
-         */
-        public static TaskWrapper obtain(Object task) {
-            if (task instanceof Task) {
-                return LoadTaskWrapper.obtain((Task<?, ?>)task);
-            } else if (task instanceof AsyncTask) {
-                return AsyncTaskWrapper.obtain((AsyncTask<?, ?, ?>)task);
-            } else {
-                return sInstance;
-            }
-        }
-
-        /**
-         * Recycles the specified <em>wrapper</em> to the pool.
-         */
-        public static void recycle(TaskWrapper wrapper) {
-            if (wrapper instanceof LoadTaskWrapper) {
-                LoadTaskWrapper.recycle((LoadTaskWrapper)wrapper);
-            } else if (wrapper instanceof AsyncTaskWrapper) {
-                AsyncTaskWrapper.recycle((AsyncTaskWrapper)wrapper);
-            }
-        }
-
-        /**
-         * Tests the task was cancelled.
-         */
-        public boolean isCancelled() {
-            return false;
-        }
-    }
-
-    /**
-     * Class <tt>LoadTaskWrapper</tt> is an implementation of a {@link TaskWrapper}.
-     */
-    /* package */ static final class LoadTaskWrapper extends TaskWrapper {
-        private Task<?, ?> task;
-
-        public static TaskWrapper obtain(Task<?, ?> task) {
-            final LoadTaskWrapper wrapper = POOL.obtain();
-            wrapper.task = task;
-            return wrapper;
-        }
-
-        public static void recycle(LoadTaskWrapper wrapper) {
-            wrapper.task = null;
-            POOL.recycle(wrapper);
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return task.isCancelled();
-        }
-
-        private static final Pool<LoadTaskWrapper> POOL = new SimplePool<LoadTaskWrapper>() {
-            @Override
-            public LoadTaskWrapper newInstance() {
-                return new LoadTaskWrapper();
-            }
-        };
-    }
-
-    /**
-     * Class <tt>AsyncTaskWrapper</tt> is an implementation of a {@link TaskWrapper}.
-     */
-    /* package */ static final class AsyncTaskWrapper extends TaskWrapper {
-        private AsyncTask<?, ?, ?> task;
-
-        public static TaskWrapper obtain(AsyncTask<?, ?, ?> task) {
-            final AsyncTaskWrapper wrapper = POOL.obtain();
-            wrapper.task = task;
-            return wrapper;
-        }
-
-        public static void recycle(AsyncTaskWrapper wrapper) {
-            wrapper.task = null;
-            POOL.recycle(wrapper);
-        }
-
-        @Override
-        public boolean isCancelled() {
-            return task.isCancelled();
-        }
-
-        private static final Pool<AsyncTaskWrapper> POOL = new SimplePool<AsyncTaskWrapper>() {
-            @Override
-            public AsyncTaskWrapper newInstance() {
-                return new AsyncTaskWrapper();
-            }
-        };
     }
 
     public static void dumpPool(Pool<?> pool, Printer printer) {

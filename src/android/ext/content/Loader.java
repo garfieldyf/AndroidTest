@@ -5,6 +5,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.ext.content.Loader.Task;
 import android.ext.util.ArrayUtils;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
@@ -175,7 +176,7 @@ public abstract class Loader<Key> implements Factory<Task> {
     /**
      * This abstract class should be implemented by any class whose instances are intended to be execute.
      */
-    public static abstract class Task<Params, Result> implements Runnable {
+    public static abstract class Task<Params, Result> implements Runnable, Cancelable {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
@@ -190,15 +191,6 @@ public abstract class Loader<Key> implements Factory<Task> {
          */
         /* package */ Task() {
             state = new AtomicInteger(RUNNING);
-        }
-
-        /**
-         * Returns <tt>true</tt> if this task was cancelled before it completed normally.
-         * @return <tt>false</tt> if this task could not be cancelled, typically because
-         * it has already completed normally, <tt>true</tt> otherwise.
-         */
-        public final boolean isCancelled() {
-            return (state.get() == CANCELLED);
         }
 
         /**
@@ -225,6 +217,21 @@ public abstract class Loader<Key> implements Factory<Task> {
         }
 
         @Override
+        public final boolean isCancelled() {
+            return (state.get() == CANCELLED);
+        }
+
+        @Override
+        public final boolean cancel(boolean mayInterruptIfRunning) {
+            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
+            if (result && mayInterruptIfRunning && runner != null) {
+                runner.interrupt();
+            }
+
+            return result;
+        }
+
+        @Override
         public final void run() {
             if (state.get() == RUNNING) {
                 try {
@@ -237,23 +244,6 @@ public abstract class Loader<Key> implements Factory<Task> {
             }
 
             UIHandler.sInstance.finish(this);
-        }
-
-        /**
-         * Attempts to stop execution of this task. This attempt will fail if this task
-         * has already completed, or already been cancelled.
-         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this task
-         * should be interrupted, <tt>false</tt> otherwise.
-         * @return <tt>false</tt> if this task could not be cancelled, <tt>true</tt> otherwise.
-         * @see #isCancelled()
-         */
-        /* package */ final boolean cancel(boolean mayInterruptIfRunning) {
-            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
-            if (result && mayInterruptIfRunning && runner != null) {
-                runner.interrupt();
-            }
-
-            return result;
         }
 
         /**

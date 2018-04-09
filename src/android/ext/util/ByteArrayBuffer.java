@@ -7,9 +7,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import android.content.Context;
-import android.ext.content.Loader.Task;
-import android.ext.util.Pools.TaskWrapper;
-import android.os.AsyncTask;
 import android.text.format.Formatter;
 import android.util.Printer;
 
@@ -162,7 +159,7 @@ public final class ByteArrayBuffer extends OutputStream {
     /**
      * Writes the <tt>ByteBuffer</tt> remaining contents to this buffer.
      * @param buffer The <tt>ByteBuffer</tt> to read the contents.
-     * @see #readFrom(InputStream, Object)
+     * @see #readFrom(InputStream, Cancelable)
      */
     public final void readFrom(ByteBuffer buffer) {
         DebugUtils._checkPotentialAssertion(buffer == null, "buffer == null");
@@ -177,17 +174,16 @@ public final class ByteArrayBuffer extends OutputStream {
     /**
      * Writes the specified <tt>InputStream</tt> contents to this buffer.
      * @param is The <tt>InputStream</tt> to read the contents.
-     * @param task The task whose executing this method. May be one of
-     * {@link AsyncTask}, {@link Task} or <tt>null</tt>. If the <tt>task</tt>
-     * was cancelled this buffer's contents undefined.
+     * @param cancelable A {@link Cancelable} that can be cancelled,
+     * or <tt>null</tt> if none. If the operation was cancelled before it
+     * completed normally then this buffer's contents undefined.
      * @throws IOException if an error occurs while read from <em>is</em>.
      * @see #readFrom(ByteBuffer)
      */
-    public final void readFrom(InputStream is, Object task) throws IOException {
+    public final void readFrom(InputStream is, Cancelable cancelable) throws IOException {
         DebugUtils._checkPotentialAssertion(is == null, "is == null");
-        final TaskWrapper wrapper = TaskWrapper.obtain(task);
         int count, readBytes, expandCount = 256;
-        while (!wrapper.isCancelled()) {
+        while (cancelable == null || !cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
                 count = expandCount;
                 expandCapacity(size + count);
@@ -203,8 +199,6 @@ public final class ByteArrayBuffer extends OutputStream {
 
             size += readBytes;
         }
-
-        TaskWrapper.recycle(wrapper);
     }
 
     /**

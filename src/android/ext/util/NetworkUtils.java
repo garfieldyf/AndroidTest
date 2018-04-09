@@ -22,7 +22,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.Context;
-import android.ext.content.Loader.Task;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -286,23 +285,23 @@ public final class NetworkUtils {
 
         /**
          * Downloads the JSON data from the remote HTTP server with the arguments supplied to this request.
-         * @param task The task whose executing this method. May be one of {@link AsyncTask}, {@link Task}
-         * or <tt>null</tt>.
-         * @return If download succeeded return a {@link JSONObject} or {@link JSONArray} object, If the
-         * <tt>task</tt> was cancelled the returned value undefined, Otherwise return <tt>null</tt>.
+         * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
+         * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray} object,
+         * If the operation was cancelled before it completed normally then the returned value undefined,
+         * If the operation failed return <tt>null</tt>.
          * @throws IOException if an error occurs while downloading the resource.
          * @throws JSONException if data can not be parsed.
-         * @see #download(String, Object, byte[])
-         * @see #download(OutputStream, Object, byte[])
-         * @see JSONUtils#newInstance(JsonReader, Object)
+         * @see #download(String, Cancelable, byte[])
+         * @see #download(OutputStream, Cancelable, byte[])
+         * @see JSONUtils#newInstance(JsonReader, Cancelable)
          */
-        public final <T> T download(Object task) throws IOException, JSONException {
+        public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
             T result = null;
             try {
                 // Connects to the remote HTTP server.
                 if (connect(null) == HttpURLConnection.HTTP_OK) {
                     // Downloads the JSON data from the HTTP server.
-                    result = downloadImpl(task);
+                    result = downloadImpl(cancelable);
                 }
             } finally {
                 connection.disconnect();
@@ -312,23 +311,23 @@ public final class NetworkUtils {
         }
 
         /**
-         * Downloads the resource from the remote HTTP server with the arguments supplied to this
-         * request. <p>Note: This method will be create the necessary directories.</p>
+         * Downloads the resource from the remote HTTP server with the arguments supplied to this request.
+         * <p>Note: This method will be create the necessary directories.</p>
          * @param filename The file name to write the resource, must be absolute file path.
-         * @param task The task whose executing this method. May be one of {@link AsyncTask},
-         * {@link Task} or null. If the <tt>task</tt> was cancelled the file's contents undefined.
+         * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
+         * operation was cancelled before it completed normally then the file's contents undefined.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
          * @return The response code returned by the remote HTTP server.
          * @throws IOException if an error occurs while downloading to the resource.
-         * @see #download(Object)
-         * @see #download(OutputStream, Object, byte[])
+         * @see #download(Cancelable)
+         * @see #download(OutputStream, Cancelable, byte[])
          * @see HttpURLConnection#getResponseCode()
          */
-        public final int download(String filename, Object task, byte[] tempBuffer) throws IOException {
+        public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
             FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
             final OutputStream os = new FileOutputStream(filename);
             try {
-                return download(os, task, tempBuffer);
+                return download(os, cancelable, tempBuffer);
             } finally {
                 os.close();
             }
@@ -337,16 +336,16 @@ public final class NetworkUtils {
         /**
          * Downloads the resource from the remote HTTP server with the arguments supplied to this request.
          * @param out The {@link OutputStream} to write the resource.
-         * @param task The task whose executing this method. May be one of {@link AsyncTask}, {@link Task}
-         * or <tt>null</tt>. If the <tt>task</tt> was cancelled the <em>out's</em> contents undefined.
+         * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
+         * operation was cancelled before it completed normally then the <em>out's</em> contents undefined.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
          * @return The response code returned by the remote HTTP server.
          * @throws IOException if an error occurs while downloading the resource.
-         * @see #download(Object)
-         * @see #download(String, Object, byte[])
+         * @see #download(Cancelable)
+         * @see #download(String, Cancelable, byte[])
          * @see HttpURLConnection#getResponseCode()
          */
-        public final int download(OutputStream out, Object task, byte[] tempBuffer) throws IOException {
+        public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
             InputStream is = null;
             int statusCode = -1;
 
@@ -355,7 +354,7 @@ public final class NetworkUtils {
                 if ((statusCode = connect(tempBuffer)) == HttpURLConnection.HTTP_OK) {
                     // Downloads the resource from the HTTP server.
                     is = connection.getInputStream();
-                    FileUtils.copyStream(is, out, task, tempBuffer);
+                    FileUtils.copyStream(is, out, cancelable, tempBuffer);
                 }
             } finally {
                 FileUtils.close(is);
@@ -432,10 +431,10 @@ public final class NetworkUtils {
         /**
          * Downloads the JSON data from the remote HTTP server with the arguments supplied to this request.
          */
-        /* package */ final <T> T downloadImpl(Object task) throws IOException, JSONException {
+        /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
             final JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));
             try {
-                return JSONUtils.newInstance(reader, task);
+                return JSONUtils.newInstance(reader, cancelable);
             } finally {
                 reader.close();
             }
@@ -505,7 +504,7 @@ public final class NetworkUtils {
      * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
      *     protected void onPostExecute(JSONObject result) {
      *         if (result != null) {
-     *             Log.i("JSONDownloadTask", "onPostExecute" + result.toString());
+     *             Log.i("JSONDownloadTask", result.toString());
      *         }
      *     }
      * }
@@ -519,7 +518,7 @@ public final class NetworkUtils {
      *     .execute((Object[])null);
      * </pre>
      */
-    public static class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> {
+    public static class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
         private DownloadRequest mRequest;
         private WeakReference<Object> mOwner;
 

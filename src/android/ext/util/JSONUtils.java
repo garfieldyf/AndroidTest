@@ -13,9 +13,6 @@ import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.ext.content.Loader.Task;
-import android.ext.util.Pools.TaskWrapper;
-import android.os.AsyncTask;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
@@ -132,50 +129,41 @@ public final class JSONUtils {
     /**
      * Returns a new instance parsed from the specified <em>reader</em>.
      * @param reader The {@link JsonReader} to read the data.
-     * @param task The task whose executing this method. May be one of
-     * {@link AsyncTask}, {@link Task} or <tt>null</tt>.
-     * @return If parse succeeded return a {@link JSONObject} or {@link JSONArray}
-     * object, If the <tt>task</tt> was cancelled the returned value undefined.
+     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
+     * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If
+     * the operation was cancelled before it completed normally then the returned value undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
-     * @see #newInstance(String, Object)
+     * @see #newInstance(String, Cancelable)
      */
-    public static <T> T newInstance(JsonReader reader, Object task) throws IOException, JSONException {
-        final TaskWrapper wrapper = TaskWrapper.obtain(task);
-        final T result;
+    public static <T> T newInstance(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
-            result = (T)newArrayImpl(reader, wrapper);
-            break;
+            return (T)newArrayImpl(reader, cancelable);
 
         case BEGIN_OBJECT:
-            result = (T)newInstanceImpl(reader, wrapper);
-            break;
+            return (T)newInstanceImpl(reader, cancelable);
 
         default:
             DebugUtils._checkPotentialAssertion(true, "Invalid json token - " + reader.peek());
-            result = null;
+            return null;
         }
-
-        TaskWrapper.recycle(wrapper);
-        return result;
     }
 
     /**
      * Returns a new instance parsed from the specified <em>jsonFile</em>.
      * @param jsonFile The json file to read the data.
-     * @param task The task whose executing this method. May be one of
-     * {@link AsyncTask}, {@link Task} or <tt>null</tt>.
-     * @return If parse succeeded return a {@link JSONObject} or {@link JSONArray}
-     * object, If the <tt>task</tt> was cancelled the returned value undefined.
+     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
+     * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If
+     * the operation was cancelled before it completed normally then the returned value undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
-     * @see #newInstance(JsonReader, Object)
+     * @see #newInstance(JsonReader, Cancelable)
      */
-    public static <T> T newInstance(String jsonFile, Object task) throws IOException, JSONException {
+    public static <T> T newInstance(String jsonFile, Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new FileReader(jsonFile));
         try {
-            return newInstance(reader, task);
+            return newInstance(reader, cancelable);
         } finally {
             reader.close();
         }
@@ -231,19 +219,19 @@ public final class JSONUtils {
         }
     }
 
-    private static JSONObject newInstanceImpl(JsonReader reader, TaskWrapper wrapper) throws IOException, JSONException {
+    private static JSONObject newInstanceImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONObject result = new JSONObject();
         reader.beginObject();
 
-        while (reader.hasNext() && !wrapper.isCancelled()) {
+        while (reader.hasNext() && !isCancelled(cancelable)) {
             final String name = reader.nextName();
             switch (reader.peek()) {
             case BEGIN_ARRAY:
-                result.put(name, newArrayImpl(reader, wrapper));
+                result.put(name, newArrayImpl(reader, cancelable));
                 break;
 
             case BEGIN_OBJECT:
-                result.put(name, newInstanceImpl(reader, wrapper));
+                result.put(name, newInstanceImpl(reader, cancelable));
                 break;
 
             case STRING:
@@ -263,25 +251,25 @@ public final class JSONUtils {
             }
         }
 
-        if (!wrapper.isCancelled()) {
+        if (!isCancelled(cancelable)) {
             reader.endObject();
         }
 
         return result;
     }
 
-    private static JSONArray newArrayImpl(JsonReader reader, TaskWrapper wrapper) throws IOException, JSONException {
+    private static JSONArray newArrayImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONArray result = new JSONArray();
         reader.beginArray();
 
-        while (reader.hasNext() && !wrapper.isCancelled()) {
+        while (reader.hasNext() && !isCancelled(cancelable)) {
             switch (reader.peek()) {
             case BEGIN_ARRAY:
-                result.put(newArrayImpl(reader, wrapper));
+                result.put(newArrayImpl(reader, cancelable));
                 break;
 
             case BEGIN_OBJECT:
-                result.put(newInstanceImpl(reader, wrapper));
+                result.put(newInstanceImpl(reader, cancelable));
                 break;
 
             case STRING:
@@ -301,11 +289,15 @@ public final class JSONUtils {
             }
         }
 
-        if (!wrapper.isCancelled()) {
+        if (!isCancelled(cancelable)) {
             reader.endArray();
         }
 
         return result;
+    }
+
+    private static boolean isCancelled(Cancelable cancelable) {
+        return (cancelable != null && cancelable.isCancelled());
     }
 
     private static Number readNumber(JsonReader reader) throws IOException {

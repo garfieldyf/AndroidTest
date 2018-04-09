@@ -30,7 +30,7 @@ public class CacheImageDecoder<Params> extends ImageDecoder<Params> {
 
     @Override
     protected Object decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
-        if (GIF_MIME_TYPE.equals(opts.outMimeType)) {
+        if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
             return decodeGIFImage(uri, params, flags, opts);
         } else {

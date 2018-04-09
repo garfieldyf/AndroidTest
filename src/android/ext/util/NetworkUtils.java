@@ -553,10 +553,12 @@ public final class NetworkUtils {
         /**
          * Sets the object that owns this task.
          * @param owner The owner object.
+         * @return This task.
          * @see #getOwner()
          */
-        public final void setOwner(Object owner) {
+        public final AsyncDownloadTask<Params, Progress, Result> setOwner(Object owner) {
             mOwner = new WeakReference<Object>(owner);
+            return this;
         }
 
         /**
@@ -566,6 +568,7 @@ public final class NetworkUtils {
          */
         public final DownloadRequest newDownloadRequest(String url) {
             try {
+                DebugUtils._checkPotentialAssertion(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
                 return (mRequest = new DownloadRequest(this, url));
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -574,7 +577,7 @@ public final class NetworkUtils {
 
         @Override
         protected Result doInBackground(Params... params) {
-            DebugUtils._checkPotentialAssertion(mRequest == null, getClass().getName() + " did not call newDownloadRequest()");
+            DebugUtils._checkPotentialAssertion(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
             Result result = null;
             try {
                 if (mRequest.connect(null) == HttpURLConnection.HTTP_OK) {

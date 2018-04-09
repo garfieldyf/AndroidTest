@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
 
@@ -147,7 +148,7 @@ public class ThreadPoolManager extends ThreadPool {
      * This abstract class should be implemented by any class whose
      * instances are intended to be executed by {@link ThreadPoolManager}.
      */
-    public static abstract class Task implements Runnable {
+    public static abstract class Task implements Runnable, Cancelable {
         private static final int RUNNING   = 0;
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
@@ -182,6 +183,7 @@ public class ThreadPoolManager extends ThreadPool {
          * because it has already completed, <tt>true</tt> otherwise.
          * @see #isCancelled()
          */
+        @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             final boolean result = state.compareAndSet(RUNNING, CANCELLED);
             if (result && mayInterruptIfRunning && runner != null) {
@@ -198,6 +200,7 @@ public class ThreadPoolManager extends ThreadPool {
          * @return <tt>true</tt> if this task was cancelled, <tt>false</tt> otherwise.
          * @see #cancel(int)
          */
+        @Override
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);
         }

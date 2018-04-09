@@ -51,25 +51,25 @@ public final class JSONUtils {
     }
 
     /**
-     * Returns an unmodifiable {@link List} from the specified <em>array</em>.
+     * Returns an unmodifiable {@link List} of the objects in the specified <em>array</em>.
      * @param array The <tt>JSONArray</tt>.
      * @return An unmodifiable <tt>List</tt>.
-     * @see #toMap(JSONObject)
+     * @see #asMap(JSONObject)
      */
-    public static <T> List<T> toList(JSONArray array) {
+    public static <T> List<T> asList(JSONArray array) {
         DebugUtils._checkPotentialAssertion(array == null, "array == null");
-        return Collections.unmodifiableList(JSON.<T>toList(array));
+        return Collections.unmodifiableList(JSON.<T>asList(array));
     }
 
     /**
-     * Returns an unmodifiable {@link Map} from the specified <em>object</em>.
+     * Returns an unmodifiable {@link Map} of the objects in the specified <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @return An unmodifiable <tt>Map</tt>.
-     * @see #toList(JSONArray)
+     * @see #asList(JSONArray)
      */
-    public static <T> Map<String, T> toMap(JSONObject object) {
+    public static <T> Map<String, T> asMap(JSONObject object) {
         DebugUtils._checkPotentialAssertion(object == null, "object == null");
-        return Collections.unmodifiableMap(JSON.<T>toMap(object));
+        return Collections.unmodifiableMap(JSON.<T>asMap(object));
     }
 
     /**
@@ -86,7 +86,7 @@ public final class JSONUtils {
      * @see #putOpt(JSONObject, String, Object)
      */
     public static JSONArray add(JSONArray array, int index, Object value) {
-        JSON.toList(array).add(index, value);
+        JSON.asList(array).add(index, value);
         return array;
     }
 
@@ -194,9 +194,9 @@ public final class JSONUtils {
         } else if (object instanceof Collection) {
             return writeColl(writer, (Collection<?>)object);
         } else if (object instanceof JSONObject) {
-            return writeMap(writer, JSON.toMap((JSONObject)object));
+            return writeMap(writer, JSON.asMap((JSONObject)object));
         } else if (object instanceof JSONArray) {
-            return writeColl(writer, JSON.toList((JSONArray)object));
+            return writeColl(writer, JSON.asList((JSONArray)object));
         } else {
             return writer.value(object.toString());
         }
@@ -334,7 +334,7 @@ public final class JSONUtils {
         private static final Field sMapField;
         private static final Field sListField;
 
-        public static <T> List<T> toList(JSONArray array) {
+        public static <T> List<T> asList(JSONArray array) {
             try {
                 return (List<T>)sListField.get(array);
             } catch (Exception e) {
@@ -342,7 +342,7 @@ public final class JSONUtils {
             }
         }
 
-        public static <T> Map<String, T> toMap(JSONObject object) {
+        public static <T> Map<String, T> asMap(JSONObject object) {
             try {
                 return (Map<String, T>)sMapField.get(object);
             } catch (Exception e) {

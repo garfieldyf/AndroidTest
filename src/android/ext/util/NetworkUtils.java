@@ -8,9 +8,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
-import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
@@ -49,23 +47,12 @@ public final class NetworkUtils {
     public static final String ETHERNET = "eth0";
 
     /**
-     * Closes the {@link HttpURLConnection} and releases resources associated with the <em>conn</em>,
-     * handling <tt>null</tt> <em>conn</em>.<p>Unlike other Java implementations, this will not
-     * necessarily close socket connections that can be reused. You can pass the <em>forceClose</em>
-     * is <tt>true</tt> to disable the connection reused.
+     * Closes the {@link HttpURLConnection} and releases resources associated
+     * with the <em>conn</em>, handling <tt>null</tt> <em>conn</em>.
      * @param conn The <tt>HttpURLConnection</tt> to close.
-     * @param forceClose Whether to close the socket connection.
      */
-    public static void close(HttpURLConnection conn, boolean forceClose) {
+    public static void close(HttpURLConnection conn) {
         if (conn != null) {
-            if (forceClose) {
-                try {
-                    HttpConnectionImpl.close(conn);
-                } catch (Exception e) {
-                    Log.e(NetworkUtils.class.getName(), "Couldn't force close - " + conn.getClass().getName(), e);
-                }
-            }
-
             conn.disconnect();
         }
     }
@@ -146,6 +133,19 @@ public final class NetworkUtils {
                 printer.println(result.toString());
             }
         }
+    }
+
+    /**
+     * Callback interface used to post the data to the remote HTTP server.
+     */
+    public static interface PostCallback {
+        /**
+         * Called on a background thread to post the data to the remote HTTP server.
+         * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
+         * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post.
+         * @throws IOException if an error occurs while posting the data.
+         */
+        void onPostData(HttpURLConnection conn, byte[] tempBuffer) throws IOException;
     }
 
     /**
@@ -255,7 +255,7 @@ public final class NetworkUtils {
 
         /**
          * Sets the <em>data</em> to post to the remote HTTP server.
-         * @param data May be a <tt>JSONObject, JSONArray, String, InputStream</tt>
+         * @param data May be a <tt>JSONObject, JSONArray, InputStream</tt>
          * or a container of the <tt>JSONArray or JSONObject</tt>.
          * @return This request.
          * @see #post(byte[])
@@ -281,6 +281,16 @@ public final class NetworkUtils {
             this.data   = data;
             this.count  = count;
             this.offset = offset;
+            return this;
+        }
+
+        /**
+         * Sets the {@link PostCallback} to post the data to the remote HTTP server.
+         * @param callback The <tt>PostCallback</tt>.
+         * @return This request.
+         */
+        public final DownloadRequest callback(PostCallback callback) {
+            this.data = callback;
             return this;
         }
 
@@ -417,10 +427,10 @@ public final class NetworkUtils {
             } else if (data instanceof InputStream) {
                 connectImpl("POST");
                 postData((InputStream)data, tempBuffer);
-            } else if (data instanceof String) {
-                final byte[] data = ((String)this.data).getBytes();
+            } else if (data instanceof PostCallback) {
                 connectImpl("POST");
-                postData(data, 0, data.length);
+                ((PostCallback)data).onPostData(connection, tempBuffer);
+                data = null;  // Clears the callback to avoid potential memory leaks.
             } else {
                 connectImpl("GET");
             }
@@ -596,7 +606,7 @@ public final class NetworkUtils {
         /**
          * Override this method to downloads the resource from the remote HTTP server on a background thread.
          * <p>The default implementation returns a {@link JSONObject} or {@link JSONArray} object.</p>
-         * @param conn The <tt>HttpURLConnection</tt> whose connecting the remote HTTP server.
+         * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
          * @param params The parameters of this task, passed earlier by {@link DownloadRequest#execute}.
          * @return A result, defined by the subclass of this task.
          * @throws Exception if an error occurs while downloading the resource.
@@ -619,44 +629,6 @@ public final class NetworkUtils {
                 sInstance = ctor.newInstance(ConnectivityManager.TYPE_DUMMY, ConnectivityManager.TYPE_DUMMY, "DUMMY", "");
             } catch (Exception e) {
                 throw new Error(e);
-            }
-        }
-    }
-
-    /**
-     * Class <tt>HttpConnectionImpl</tt> to close the {@link HttpURLConnection}.
-     */
-    private static final class HttpConnectionImpl {
-        private static Field sSocket;
-        private static Field sConnection;
-        private static Field sHttpEngine;
-
-        /**
-         * Closes the <em>conn</em> and releases any system resources associated with it.
-         */
-        public static synchronized void close(HttpURLConnection conn) throws Exception {
-            if (sHttpEngine == null) {
-                sHttpEngine = conn.getClass().getDeclaredField("httpEngine");
-                sHttpEngine.setAccessible(true);
-            }
-
-            final Object httpEngine = sHttpEngine.get(conn);
-            if (sConnection == null) {
-                sConnection = httpEngine.getClass().getDeclaredField("connection");
-                sConnection.setAccessible(true);
-            }
-
-            final Object connection = sConnection.get(httpEngine);
-            if (connection != null) {
-                if (sSocket == null) {
-                    sSocket = connection.getClass().getDeclaredField("socket");
-                    sSocket.setAccessible(true);
-                }
-
-                final Socket socket = (Socket)sSocket.get(connection);
-                if (socket != null) {
-                    socket.close();
-                }
             }
         }
     }

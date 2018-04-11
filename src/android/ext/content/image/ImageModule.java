@@ -15,9 +15,9 @@ import android.ext.util.Caches.FileCache;
 import android.ext.util.Caches.LruBitmapCache2;
 import android.ext.util.Caches.LruFileCache;
 import android.ext.util.Caches.LruImageCache;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.Printer;
 import android.widget.ImageView;
 
@@ -317,8 +317,10 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @return The <tt>ImageLoader</tt>.
          */
         public final <Params> ImageLoader<URI, Params, Image> create() {
+            DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
+            DebugUtils.__checkWarning((mFlags & FLAG_NO_MEMORY_CACHE) != 0 && mImageCache != null, Builder.class.getName(), "The builder has no memory cache, setImageCache will be ignore.");
+
             // Retrieves the image and file cache from image module, may be null.
-            _checkPotentialBuilder();
             final Cache<URI, Image> imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? (mImageCache != null ? mImageCache : mModule.mImageCache) : null);
             final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
 
@@ -338,16 +340,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
                 return new ImageLoader<URI, Params, Image>(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
             } else {
                 return (ImageLoader<URI, Params, Image>)newInstance(mClass, new Class<?>[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
-            }
-        }
-
-        private void _checkPotentialBuilder() {
-            if ((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null) {
-                Log.e(Builder.class.getName(), "WARNING", new IllegalArgumentException("The builder has no file cache, setFileCache will be ignore."));
-            }
-
-            if ((mFlags & FLAG_NO_MEMORY_CACHE) != 0 && mImageCache != null) {
-                Log.e(Builder.class.getName(), "WARNING", new IllegalArgumentException("The builder has no memory cache, setImageCache will be ignore."));
             }
         }
 

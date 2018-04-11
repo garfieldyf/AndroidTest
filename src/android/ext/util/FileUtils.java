@@ -1186,7 +1186,7 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            DebugUtils._checkPotentialAssertion(path == null, "path == null");
+            DebugUtils.__checkError(path == null, "path == null");
             setPath(path);
         }
 
@@ -1198,7 +1198,7 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            DebugUtils._checkPotentialAssertion(path == null, "path == null");
+            DebugUtils.__checkError(path == null, "path == null");
             this.path = path;
             this.type = type;
         }
@@ -1212,7 +1212,7 @@ public final class FileUtils {
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
-            DebugUtils._checkPotentialAssertion(dir == null || name == null, "dirPath == null || name == null");
+            DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
             this.path = buildPath(dir, name);
             this.type = type;
         }
@@ -1269,7 +1269,7 @@ public final class FileUtils {
          * <tt>0</tt> otherwise.
          */
         public long length() {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return getFileLength(path);
         }
 
@@ -1327,7 +1327,7 @@ public final class FileUtils {
          * @see #stat(Stat)
          */
         public Stat stat() {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             final Stat stat = new Stat();
             return (FileUtils.stat(path, stat) == 0 ? stat : null);
         }
@@ -1338,7 +1338,7 @@ public final class FileUtils {
          * @see #stat()
          */
         public int stat(Stat outStat) {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return FileUtils.stat(path, outStat);
         }
 
@@ -1347,7 +1347,7 @@ public final class FileUtils {
          * @see FileUtils#scanFiles(String, ScanCallback, int)
          */
         public int scanFiles(ScanCallback callback, int flags) {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return FileUtils.scanFiles(path, callback, flags);
         }
 
@@ -1358,7 +1358,7 @@ public final class FileUtils {
          * @see #listFiles(int, Factory, List)
          */
         public List<Dirent> listFiles() {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return listFiles(FLAG_ABSOLUTE_FILE_PATH, Dirent.FACTORY);
         }
 
@@ -1369,7 +1369,7 @@ public final class FileUtils {
          * @see #listFiles(int, Factory, List)
          */
         public <T extends Dirent> List<T> listFiles(int flags, Factory<T> factory) {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             final List<T> dirents = new ArrayList<T>();
             return (FileUtils.listFiles(path, flags, factory, dirents) == 0 ? dirents : null);
         }
@@ -1381,7 +1381,7 @@ public final class FileUtils {
          * @see #listFiles(int, Factory)
          */
         public <T extends Dirent> int listFiles(int flags, Factory<T> factory, List<? super T> outDirents) {
-            DebugUtils._checkPotentialAssertion(!isAbsolute(), "The path must be absolute file path.");
+            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return FileUtils.listFiles(path, flags, factory, outDirents);
         }
 
@@ -1523,7 +1523,7 @@ public final class FileUtils {
         /* package */ final void setPath(String path) {
             this.path = path;
             this.type = getType(getFileMode(path));
-            _checkPotentialType(this);
+            __checkDirentType(this);
         }
 
         private static String toString(int type) {
@@ -1554,7 +1554,7 @@ public final class FileUtils {
             }
         }
 
-        private static void _checkPotentialType(Dirent dirent) {
+        private static void __checkDirentType(Dirent dirent) {
             final int type;
             switch (getFileType(dirent.path)) {
             case Stat.S_IFIFO:
@@ -1666,7 +1666,7 @@ public final class FileUtils {
          * @see #store()
          */
         public final boolean load() {
-            DebugUtils._checkPotentialAssertion(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
+            DebugUtils.__checkError(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
             return load(mPath);
         }
 
@@ -1677,7 +1677,7 @@ public final class FileUtils {
          * @see #load()
          */
         public final boolean store() {
-            DebugUtils._checkPotentialAssertion(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
+            DebugUtils.__checkError(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
             return store(mPath);
         }
 

@@ -86,31 +86,6 @@ public final class DebugUtils {
         Log.d(tag, String.format("%s running time = %d%cs", prefix, runningTime, timeUnit));
     }
 
-    /**
-     * This ant task is imported by the project build file. It can be delete the
-     * <b>_checkPotentialXXX</b> method invocation.<pre>
-     * &lt;replaceregexp match="(.*)_checkPotential(.*);" replace="" flags="g" byline="true" &gt;
-     *     &lt;fileset dir="${src.dir}" includes="**\*.java" /&gt;
-     * &lt;/replaceregexp&gt;</pre>
-     */
-    public static void _checkPotentialLeaks(Class<?> clazz) {
-        if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
-            Log.w(clazz.getName(), "WARNING", new IllegalStateException(new StringBuilder("The ").append(clazz.getName()).append(" class should be a static inner member class to avoid memory leaks").toString()));
-        }
-    }
-
-    public static void _checkPotentialAssertion(boolean condition, String message) {
-        if (condition) {
-            throw new AssertionError(message);
-        }
-    }
-
-    public static void _checkPotentialUIThread(String method) {
-        if (Looper.getMainLooper() != Looper.myLooper()) {
-            throw new AssertionError("The " + method + " method must be invoked on the UI thread.");
-        }
-    }
-
     public static void dumpSummary(Printer printer, StringBuilder result, int maxLength, String format, Object... args) {
         final String summary = String.format(format, args);
         final int length = (maxLength - summary.length()) / 2;
@@ -134,6 +109,39 @@ public final class DebugUtils {
 
     public static StringBuilder toSimpleString(Object object, StringBuilder result) {
         return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+    }
+
+    /**
+     * This ant task is imported by the project build file. It can be delete the
+     * <b>__checkXXX</b> methods invocation.
+     * <pre>
+     * &lt;replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" &gt;
+     *     &lt;fileset dir="${src.dir}" includes="**\*.java" /&gt;
+     * &lt;/replaceregexp&gt;
+     * </pre>
+     */
+    public static void __checkUIThread(String method) {
+        if (Looper.getMainLooper() != Looper.myLooper()) {
+            throw new AssertionError("The " + method + " method must be invoked on the UI thread.");
+        }
+    }
+
+    public static void __checkError(boolean condition, String message) {
+        if (condition) {
+            throw new AssertionError(message);
+        }
+    }
+
+    public static void __checkWarning(boolean condition, String tag, String message) {
+        if (condition) {
+            Log.w(tag, "WARNING", new RuntimeException(message));
+        }
+    }
+
+    public static void __checkMemoryLeaks(Class<?> clazz) {
+        if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
+            Log.w(clazz.getName(), "WARNING", new IllegalStateException(new StringBuilder("The ").append(clazz.getName()).append(" class should be a static inner member class to avoid memory leaks").toString()));
+        }
     }
 
     /**

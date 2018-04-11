@@ -82,8 +82,8 @@
         <property name="file.out.dir" value="${out.dir}/release" />
         <echo level="info">ndk-build NDK_DEBUG=${ndk.build.debug} ${ndk.build.args}</echo>
 
-        <!-- delete call the _checkPotentialXXX methods -->
-        <replaceregexp match="(.*)_checkPotential(.*);" replace="" flags="g" byline="true" >
+        <!-- delete call the __checkXXX methods -->
+        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>
     </target>

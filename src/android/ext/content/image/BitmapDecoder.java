@@ -218,7 +218,7 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
         public SizeParameters(Config config, int desiredWidth, int desiredHeight) {
             super(desiredWidth, config);
             this.desiredHeight = desiredHeight;
-            DebugUtils._checkPotentialAssertion(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
+            DebugUtils.__checkError(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
         }
 
         @Override

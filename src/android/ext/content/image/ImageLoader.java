@@ -59,7 +59,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(sFactory, computeMaximumPoolSize(executor)));
-        ImageBinder._checkPotentialBinder(getClass(), imageCache, binder);
+        ImageBinder.__checkBinder(getClass(), imageCache, binder);
     }
 
     /**

@@ -477,7 +477,7 @@ public final class DatabaseUtils {
      */
     public static <T> List<T> newList(Cursor cursor, Class<T> componentType) {
         try {
-            DebugUtils._checkPotentialAssertion(componentType.isPrimitive(), "Unsupported primitive type - " + componentType.toString());
+            DebugUtils.__checkError(componentType.isPrimitive(), "Unsupported primitive type - " + componentType.toString());
             return Arrays.asList(DatabaseUtils.<T[]>newArray(cursor, componentType));
         } catch (ReflectiveOperationException e) {
             return Collections.emptyList();
@@ -540,7 +540,7 @@ public final class DatabaseUtils {
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String[] names) throws IOException {
-        DebugUtils._checkPotentialAssertion(columnIndexes.length != names.length, "columnIndexes.length != names.length");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final String name = names[i];
@@ -559,7 +559,7 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                DebugUtils._checkPotentialAssertion(true, "Unsupported column type - BLOB");
+                DebugUtils.__checkError(true, "Unsupported column type - BLOB");
                 break;
             }
         }
@@ -583,7 +583,7 @@ public final class DatabaseUtils {
     }
 
     private static <T> T newInstanceImpl(Cursor cursor, Class<? extends T> clazz, List<Field> fields) throws ReflectiveOperationException {
-        DebugUtils._checkPotentialAssertion(clazz == Object.class || clazz == Void.class || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
+        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final T result = clazz.newInstance();
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);

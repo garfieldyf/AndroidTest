@@ -163,7 +163,7 @@ public final class Pools {
          * @see #ArrayPool(Factory, int)
          */
         public ArrayPool(int maxSize) {
-            DebugUtils._checkPotentialAssertion(maxSize <= 0, "maxSize <= 0");
+            DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.factory  = this;
             this.elements = new Object[maxSize];
         }
@@ -178,7 +178,7 @@ public final class Pools {
          * @see #ArrayPool(int)
          */
         public ArrayPool(Factory<T> factory, int maxSize) {
-            DebugUtils._checkPotentialAssertion(maxSize <= 0, "maxSize <= 0");
+            DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.factory  = factory;
             this.elements = new Object[maxSize];
         }

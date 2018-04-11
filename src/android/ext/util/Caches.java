@@ -155,7 +155,7 @@ public final class Caches {
          * @param maxSize The maximum number of values to allow in this cache.
          */
         public SimpleLruCache(int maxSize) {
-            DebugUtils._checkPotentialAssertion(maxSize <= 0, "maxSize <= 0");
+            DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.maxSize = maxSize;
             this.map = new LinkedHashMap<K, V>(0, 0.75f, true);
         }
@@ -194,7 +194,7 @@ public final class Caches {
          */
         @Override
         public V get(K key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             return map.get(key);
         }
 
@@ -210,7 +210,7 @@ public final class Caches {
          */
         @Override
         public V put(K key, V value) {
-            DebugUtils._checkPotentialAssertion(key == null || value == null, "key == null || value == null");
+            DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
             final V previous = putImpl(key, value);
             if (previous != null) {
                 entryRemoved(false, key, previous, value);
@@ -226,7 +226,7 @@ public final class Caches {
          */
         @Override
         public V remove(K key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             final V previous = removeImpl(key);
             if (previous != null) {
                 entryRemoved(false, key, previous, null);
@@ -364,7 +364,7 @@ public final class Caches {
 
         @Override
         public synchronized V get(K key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             return map.get(key);
         }
 
@@ -658,13 +658,13 @@ public final class Caches {
 
         @Override
         public String get(String key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             return FileUtils.buildPath(mCacheDir, key);
         }
 
         @Override
         public String remove(String key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             final String result = FileUtils.buildPath(mCacheDir, key);
             return (FileUtils.deleteFiles(result, false) == 0 ? result : null);
         }
@@ -834,7 +834,7 @@ public final class Caches {
          * @param maxSize The maximum number of bitmaps to allow in this pool.
          */
         public LinkedBitmapPool(int maxSize) {
-            DebugUtils._checkPotentialAssertion(maxSize <= 0, "maxSize <= 0");
+            DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             mMaxSize = maxSize;
             mBitmaps = new LinkedList<Bitmap>();
         }
@@ -910,19 +910,19 @@ public final class Caches {
 
         @Override
         public Object remove(Object key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             return null;
         }
 
         @Override
         public Object get(Object key) {
-            DebugUtils._checkPotentialAssertion(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "key == null");
             return null;
         }
 
         @Override
         public Object put(Object key, Object value) {
-            DebugUtils._checkPotentialAssertion(key == null || value == null, "key == null || value == null");
+            DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
             return null;
         }
     }

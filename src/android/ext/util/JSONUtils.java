@@ -57,7 +57,7 @@ public final class JSONUtils {
      * @see #asMap(JSONObject)
      */
     public static <T> List<T> asList(JSONArray array) {
-        DebugUtils._checkPotentialAssertion(array == null, "array == null");
+        DebugUtils.__checkError(array == null, "array == null");
         return Collections.unmodifiableList(JSON.<T>asList(array));
     }
 
@@ -68,7 +68,7 @@ public final class JSONUtils {
      * @see #asList(JSONArray)
      */
     public static <T> Map<String, T> asMap(JSONObject object) {
-        DebugUtils._checkPotentialAssertion(object == null, "object == null");
+        DebugUtils.__checkError(object == null, "object == null");
         return Collections.unmodifiableMap(JSON.<T>asMap(object));
     }
 
@@ -145,7 +145,7 @@ public final class JSONUtils {
             return (T)newInstanceImpl(reader, cancelable);
 
         default:
-            DebugUtils._checkPotentialAssertion(true, "Invalid json token - " + reader.peek());
+            DebugUtils.__checkError(true, "Invalid json token - " + reader.peek());
             return null;
         }
     }

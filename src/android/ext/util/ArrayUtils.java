@@ -421,7 +421,7 @@ public final class ArrayUtils {
      * @see #toMap(Collection, Collection)
      */
     public static <K, V> Map<K, V> toMap(K[] keys, V... values) {
-        DebugUtils._checkPotentialAssertion(keys == null || values == null, "keys == null || values == null");
+        DebugUtils.__checkError(keys == null || values == null, "keys == null || values == null");
         return toMap(Arrays.asList(keys), Arrays.asList(values));
     }
 
@@ -434,11 +434,11 @@ public final class ArrayUtils {
      * @see #toMap(K[], V[])
      */
     public static <K, V> Map<K, V> toMap(Collection<? extends K> keys, Collection<? extends V> values) {
-        DebugUtils._checkPotentialAssertion(keys == null || values == null, "keys == null || values == null");
+        DebugUtils.__checkError(keys == null || values == null, "keys == null || values == null");
         final int size = keys.size();
         final Map<K, V> result = new ArrayMap<K, V>(size);
         if (size > 0) {
-            DebugUtils._checkPotentialAssertion(size != values.size(), "keys.size() != values.size()");
+            DebugUtils.__checkError(size != values.size(), "keys.size() != values.size()");
             final Iterator<? extends K> itor = keys.iterator();
             final Iterator<? extends V> iter = values.iterator();
             while (itor.hasNext() && iter.hasNext()) {

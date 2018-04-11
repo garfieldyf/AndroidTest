@@ -138,7 +138,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     @Override
     public void write(byte[] buffer) {
-        DebugUtils._checkPotentialAssertion(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "buffer == null");
         write(buffer, 0, buffer.length);
     }
 
@@ -162,7 +162,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #readFrom(InputStream, Cancelable)
      */
     public final void readFrom(ByteBuffer buffer) {
-        DebugUtils._checkPotentialAssertion(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "buffer == null");
         final int count = buffer.remaining();
         if (count > 0) {
             expandCapacity(size + count);
@@ -181,7 +181,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #readFrom(ByteBuffer)
      */
     public final void readFrom(InputStream is, Cancelable cancelable) throws IOException {
-        DebugUtils._checkPotentialAssertion(is == null, "is == null");
+        DebugUtils.__checkError(is == null, "is == null");
         int count, readBytes, expandCount = 256;
         while (cancelable == null || !cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
@@ -208,7 +208,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #writeTo(OutputStream)
      */
     public final ByteBuffer writeTo(ByteBuffer buffer) {
-        DebugUtils._checkPotentialAssertion(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "buffer == null");
         return buffer.put(data, 0, size);
     }
 
@@ -219,7 +219,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #writeTo(ByteBuffer)
      */
     public final void writeTo(OutputStream out) throws IOException {
-        DebugUtils._checkPotentialAssertion(out == null, "out == null");
+        DebugUtils.__checkError(out == null, "out == null");
         out.write(data, 0, size);
     }
 

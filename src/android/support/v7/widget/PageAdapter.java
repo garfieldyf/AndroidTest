@@ -45,7 +45,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #PageAdapter(int, int)
      */
     public PageAdapter(Cache<Integer, Page<E>> pageCache, int pageSize) {
-        DebugUtils._checkPotentialAssertion(pageSize <= 0, "pageSize <= 0");
+        DebugUtils.__checkError(pageSize <= 0, "pageSize <= 0");
         mPageSize   = pageSize;
         mPageCache  = pageCache;
         mPageStates = new BitSet();
@@ -106,7 +106,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #peekItem(ViewHolder)
      */
     public E peekItem(int position) {
-        DebugUtils._checkPotentialUIThread("peekItem");
+        DebugUtils.__checkUIThread("peekItem");
         final Page<E> page = mPageCache.get(position / mPageSize);
         return (page != null ? page.getItem(position % mPageSize) : null);
     }
@@ -143,7 +143,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #getPage(int)
      */
     public final Page<E> peekPage(int page) {
-        DebugUtils._checkPotentialUIThread("peekPage");
+        DebugUtils.__checkUIThread("peekPage");
         return mPageCache.get(page);
     }
 
@@ -159,7 +159,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #setPage(int, JSONArray, Object)
      */
     public void setPage(int page, Page<E> data, Object payload) {
-        DebugUtils._checkPotentialUIThread("setPage");
+        DebugUtils.__checkUIThread("setPage");
         // Clears the page loading state when the page is load complete.
         mPageStates.clear(page);
         final int count = getCount(data);
@@ -298,7 +298,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
     protected Page<E> getPage(int page, int adapterPosition) {
-        DebugUtils._checkPotentialUIThread("getPage");
+        DebugUtils.__checkUIThread("getPage");
         Page<E> result = mPageCache.get(page);
         if (result == null && !mPageStates.get(page)) {
             // Marks the page loading state, if the page is not load.
@@ -385,7 +385,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
          * @param data A {@link List} of this page data.
          */
         public ListPage(List<E> data) {
-            DebugUtils._checkPotentialAssertion(data == null || data.size() <= 0, "data == null || data.size() <= 0");
+            DebugUtils.__checkError(data == null || data.size() <= 0, "data == null || data.size() <= 0");
             mData = data;
         }
 
@@ -416,7 +416,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
          * @param data A {@link JSONArray} of this page data.
          */
         public JSONPage(JSONArray data) {
-            DebugUtils._checkPotentialAssertion(data == null || data.length() <= 0, "data == null || data.length() <= 0");
+            DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
             mData = data;
         }
 

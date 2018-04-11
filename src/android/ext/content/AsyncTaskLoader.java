@@ -45,7 +45,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * @see #loadSync(Key, Params[])
      */
     public final void load(Key key, Params... params) {
-        DebugUtils._checkPotentialUIThread("load");
+        DebugUtils.__checkUIThread("load");
+        DebugUtils.__checkError(key == null, "key == null");
         if (mState != SHUTDOWN) {
             final LoadTask task = (LoadTask)mRunningTasks.get(key);
             if (task == null || !rejectedRequest(key, params, task.params)) {

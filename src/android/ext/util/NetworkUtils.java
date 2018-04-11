@@ -267,6 +267,7 @@ public final class NetworkUtils {
          * @see JSONUtils#writeObject(JsonWriter, Object)
          */
         public final DownloadRequest post(Object data) {
+            DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
             this.data = data;
             return this;
         }
@@ -281,6 +282,7 @@ public final class NetworkUtils {
          * @see #post(byte[], int, int)
          */
         public final DownloadRequest post(PostCallback callback, int arg) {
+            DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
             this.count = arg;
             this.data  = callback;
             return this;
@@ -297,6 +299,7 @@ public final class NetworkUtils {
          * @see #post(PostCallback, int)
          */
         public final DownloadRequest post(byte[] data, int offset, int count) {
+            DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
             ArrayUtils.checkRange(offset, count, data.length);
             this.data   = data;
             this.count  = count;
@@ -394,7 +397,7 @@ public final class NetworkUtils {
          * @see AsyncDownloadTask#newDownloadRequest(String)
          */
         public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Params... params) {
-            DebugUtils._checkPotentialAssertion(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
+            DebugUtils.__checkError(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
             return (T)task.execute(params);
         }
 
@@ -408,7 +411,7 @@ public final class NetworkUtils {
          * @see AsyncDownloadTask#newDownloadRequest(String)
          */
         public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Executor exec, Params... params) {
-            DebugUtils._checkPotentialAssertion(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
+            DebugUtils.__checkError(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
             return (T)task.executeOnExecutor(exec, params);
         }
 
@@ -427,7 +430,7 @@ public final class NetworkUtils {
          * Connects to the remote HTTP server with the arguments supplied to this request.
          */
         /* package */ final int connect(byte[] tempBuffer) throws IOException {
-            DownloadRequest._checkPotentialHeaders(connection, true);
+            DownloadRequest.__checkHeaders(connection, true);
             if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
                 connectImpl("POST");
                 postData(data);
@@ -449,7 +452,7 @@ public final class NetworkUtils {
                 connectImpl("GET");
             }
 
-            DownloadRequest._checkPotentialHeaders(connection, false);
+            DownloadRequest.__checkHeaders(connection, false);
             return connection.getResponseCode();
         }
 
@@ -510,7 +513,7 @@ public final class NetworkUtils {
             }
         }
 
-        private static void _checkPotentialHeaders(URLConnection conn, boolean request) {
+        private static void __checkHeaders(URLConnection conn, boolean request) {
             final Printer printer = new LogPrinter(Log.DEBUG, DownloadRequest.class.getName());
             if (request) {
                 dumpRequestHeaders(conn, printer);
@@ -552,7 +555,7 @@ public final class NetworkUtils {
          * @see #AsyncDownloadTask(Object)
          */
         public AsyncDownloadTask() {
-            DebugUtils._checkPotentialLeaks(getClass());
+            DebugUtils.__checkMemoryLeaks(getClass());
         }
 
         /**
@@ -561,7 +564,7 @@ public final class NetworkUtils {
          * @see #AsyncDownloadTask()
          */
         public AsyncDownloadTask(Object owner) {
-            DebugUtils._checkPotentialLeaks(getClass());
+            DebugUtils.__checkMemoryLeaks(getClass());
             mOwner = new WeakReference<Object>(owner);
         }
 
@@ -593,7 +596,7 @@ public final class NetworkUtils {
          */
         public final DownloadRequest newDownloadRequest(String url) {
             try {
-                DebugUtils._checkPotentialAssertion(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
+                DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
                 return (mRequest = new DownloadRequest(this, url));
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -602,7 +605,7 @@ public final class NetworkUtils {
 
         @Override
         protected Result doInBackground(Params... params) {
-            DebugUtils._checkPotentialAssertion(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
+            DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
             Result result = null;
             try {
                 if (mRequest.connect(null) == HttpURLConnection.HTTP_OK) {

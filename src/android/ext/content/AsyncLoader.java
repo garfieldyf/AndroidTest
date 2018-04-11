@@ -59,8 +59,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #loadSync(Key, int, Params[])
      */
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
-        DebugUtils._checkPotentialAssertion(target == null, "target == null");
-        DebugUtils._checkPotentialUIThread("load");
+        DebugUtils.__checkUIThread("load");
+        DebugUtils.__checkError(target == null, "target == null");
+        DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0x800000]");
         if (mState != SHUTDOWN) {
             if (key == null) {
                 bindValue(key, params, target, null, flags, binder);

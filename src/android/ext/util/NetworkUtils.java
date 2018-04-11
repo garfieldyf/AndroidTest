@@ -142,7 +142,7 @@ public final class NetworkUtils {
         /**
          * Called on a background thread to post the data to the remote HTTP server.
          * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
-         * @param arg The user-defined data, passed earlier by {@link DownloadRequest#callback}.
+         * @param arg The user-defined data, passed earlier by {@link DownloadRequest#post}.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
          * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while posting the data.
@@ -250,6 +250,7 @@ public final class NetworkUtils {
          * @return This request.
          * @see #post(Object)
          * @see #post(byte[], int, int)
+         * @see #post(PostCallback, int)
          */
         public final DownloadRequest post(byte[] data) {
             return post(data, 0, data.length);
@@ -257,15 +258,31 @@ public final class NetworkUtils {
 
         /**
          * Sets the <em>data</em> to post to the remote HTTP server.
-         * @param data May be a <tt>JSONObject, JSONArray, InputStream</tt>
+         * @param data May be a <tt>JSONObject, JSONArray, String, InputStream</tt>
          * or a container of the <tt>JSONArray or JSONObject</tt>.
          * @return This request.
          * @see #post(byte[])
          * @see #post(byte[], int, int)
+         * @see #post(PostCallback, int)
          * @see JSONUtils#writeObject(JsonWriter, Object)
          */
         public final DownloadRequest post(Object data) {
             this.data = data;
+            return this;
+        }
+
+        /**
+         * Sets the {@link PostCallback} to post the data to the remote HTTP server.
+         * @param callback The <tt>PostCallback</tt>.
+         * @param arg The user-defined data passed by the {@link PostCallback#onPostData}.
+         * @return This request.
+         * @see #post(byte[])
+         * @see #post(Object)
+         * @see #post(byte[], int, int)
+         */
+        public final DownloadRequest post(PostCallback callback, int arg) {
+            this.count = arg;
+            this.data  = callback;
             return this;
         }
 
@@ -277,35 +294,13 @@ public final class NetworkUtils {
          * @return This request.
          * @see #post(byte[])
          * @see #post(Object)
+         * @see #post(PostCallback, int)
          */
         public final DownloadRequest post(byte[] data, int offset, int count) {
             ArrayUtils.checkRange(offset, count, data.length);
             this.data   = data;
             this.count  = count;
             this.offset = offset;
-            return this;
-        }
-
-        /**
-         * Equivalent to calling <tt>callback(callback, 0)</tt>.
-         * @param callback The {@link PostCallback}.
-         * @return This request.
-         * @see #callback(PostCallback, int)
-         */
-        public final DownloadRequest callback(PostCallback callback) {
-            return callback(callback, 0);
-        }
-
-        /**
-         * Sets the {@link PostCallback} to post the data to the remote HTTP server.
-         * @param callback The <tt>PostCallback</tt>.
-         * @param arg The user-defined data passed by the {@link PostCallback#onPostData}.
-         * @return This request.
-         * @see #callback(PostCallback)
-         */
-        public final DownloadRequest callback(PostCallback callback, int arg) {
-            this.count = arg;
-            this.data  = callback;
             return this;
         }
 
@@ -442,6 +437,10 @@ public final class NetworkUtils {
             } else if (data instanceof InputStream) {
                 connectImpl("POST");
                 postData((InputStream)data, tempBuffer);
+            } else if (data instanceof String) {
+                final byte[] data = ((String)this.data).getBytes();
+                connectImpl("POST");
+                postData(data, 0, data.length);
             } else if (data instanceof PostCallback) {
                 connectImpl("POST");
                 ((PostCallback)data).onPostData(connection, count, tempBuffer);

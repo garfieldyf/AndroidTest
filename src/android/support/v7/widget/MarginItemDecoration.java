@@ -75,8 +75,7 @@ public final class MarginItemDecoration extends ItemDecoration {
     @Override
     public String toString() {
         return new StringBuilder(80)
-            .append(getClass().getSimpleName())
-            .append(" { leftMargin = ").append(leftMargin)
+            .append("MarginItemDecoration { leftMargin = ").append(leftMargin)
             .append(", topMargin = ").append(topMargin)
             .append(", rightMargin = ").append(rightMargin)
             .append(", bottomMargin = ").append(bottomMargin)

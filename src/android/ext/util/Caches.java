@@ -674,7 +674,7 @@ public final class Caches {
             final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, FileUtils.FLAG_ABSOLUTE_FILE_PATH, Dirent.FACTORY);
             final int size = ArrayUtils.getSize(dirents);
 
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s Storage Cache [ files = %d ] ", getClass().getSimpleName(), size);
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping SimpleFileCache Storage Cache [ files = %d ] ", size);
             for (int i = 0; i < size; ++i) {
                 final Dirent dirent = dirents.get(i);
                 result.setLength(0);

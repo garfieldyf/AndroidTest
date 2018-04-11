@@ -159,7 +159,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
         }
     }
 
-    /* package */ static void _checkPotentialBinder(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
+    /* package */ static void _checkBinder(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
         if (imageCache == null && binder instanceof ImageBinder) {
             final Transformer<?, ?> transformer = ((ImageBinder<?, ?, ?>)binder).mTransformer;
             if (transformer instanceof CacheTransformer) {

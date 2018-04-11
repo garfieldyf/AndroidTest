@@ -205,7 +205,7 @@ public class SyncMessenger implements ServiceConnection {
     }
 
     private synchronized boolean bindService() {
-        DebugUtils._checkPotentialAssertion(Looper.myLooper() == Looper.getMainLooper(), "This method can NOT be called from the UI thread");
+        DebugUtils._checkError(Looper.myLooper() == Looper.getMainLooper(), "This method can NOT be called from the UI thread");
         if (mService != null) {
             return true;
         }

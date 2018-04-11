@@ -37,7 +37,7 @@ public abstract class Loader<Key> implements Factory<Task> {
      * @param executor The <tt>Executor</tt> to executing load task.
      */
     public Loader(Executor executor) {
-        DebugUtils._checkPotentialLeaks(getClass());
+        DebugUtils._checkMemoryLeaks(getClass());
         final int maxSize = computeMaximumPoolSize(executor);
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, maxSize << 2);
@@ -117,13 +117,13 @@ public abstract class Loader<Key> implements Factory<Task> {
      * @see #isTaskCancelled(Task)
      */
     public final boolean cancelTask(Key key, boolean mayInterruptIfRunning) {
-        DebugUtils._checkPotentialUIThread("cancelTask");
+        DebugUtils._checkUIThread("cancelTask");
         final Task task = mRunningTasks.remove(key);
         return (task != null && task.cancel(mayInterruptIfRunning));
     }
 
     public final void dumpTasks(Printer printer) {
-        DebugUtils._checkPotentialUIThread("dumpTasks");
+        DebugUtils._checkUIThread("dumpTasks");
         Pools.dumpPool(mTaskPool, printer);
         final int size = mRunningTasks.size();
         if (size > 0) {

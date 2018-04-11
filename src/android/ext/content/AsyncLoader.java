@@ -59,8 +59,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #loadSync(Key, int, Params[])
      */
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
-        DebugUtils._checkPotentialAssertion(target == null, "target == null");
-        DebugUtils._checkPotentialUIThread("load");
+        DebugUtils._checkUIThread("load");
+        DebugUtils._checkError(target == null, "target == null");
         if (mState != SHUTDOWN) {
             if (key == null) {
                 bindValue(key, params, target, null, flags, binder);

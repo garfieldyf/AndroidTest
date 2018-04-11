@@ -42,7 +42,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyDataSetChanged(RecyclerView recyclerView) {
         final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils._checkPotentialAssertion(adapter == null, "adapter == null");
+        DebugUtils._checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_DATA_CHANGED, adapter));
         } else {
@@ -90,7 +90,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemMoved(RecyclerView recyclerView, int fromPosition, int toPosition) {
         final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils._checkPotentialAssertion(adapter == null, "adapter == null");
+        DebugUtils._checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_MOVED, fromPosition, toPosition, adapter));
         } else {
@@ -107,7 +107,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeRemoved(RecyclerView recyclerView, int positionStart, int itemCount) {
         final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils._checkPotentialAssertion(adapter == null, "adapter == null");
+        DebugUtils._checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_REMOVED, positionStart, itemCount, adapter));
         } else {
@@ -124,7 +124,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeInserted(RecyclerView recyclerView, int positionStart, int itemCount) {
         final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils._checkPotentialAssertion(adapter == null, "adapter == null");
+        DebugUtils._checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_INSERTED, positionStart, itemCount, adapter));
         } else {
@@ -142,7 +142,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeChanged(RecyclerView recyclerView, int positionStart, int itemCount, Object payload) {
         final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils._checkPotentialAssertion(adapter == null, "adapter == null");
+        DebugUtils._checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair<Adapter<?>, Object>(adapter, payload)));
         } else {

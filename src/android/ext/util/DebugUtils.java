@@ -88,24 +88,30 @@ public final class DebugUtils {
 
     /**
      * This ant task is imported by the project build file. It can be delete the
-     * <b>_checkPotentialXXX</b> method invocation.<pre>
-     * &lt;replaceregexp match="(.*)_checkPotential(.*);" replace="" flags="g" byline="true" &gt;
+     * <b>_checkXXX</b> method invocation.<pre>
+     * &lt;replaceregexp match="(.*)_check(.*);" replace="" flags="g" byline="true" &gt;
      *     &lt;fileset dir="${src.dir}" includes="**\*.java" /&gt;
      * &lt;/replaceregexp&gt;</pre>
      */
-    public static void _checkPotentialLeaks(Class<?> clazz) {
+    public static void _checkMemoryLeaks(Class<?> clazz) {
         if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
             Log.w(clazz.getName(), "WARNING", new IllegalStateException(new StringBuilder("The ").append(clazz.getName()).append(" class should be a static inner member class to avoid memory leaks").toString()));
         }
     }
 
-    public static void _checkPotentialAssertion(boolean condition, String message) {
+    public static void _checkError(boolean condition, String message) {
         if (condition) {
             throw new AssertionError(message);
         }
     }
 
-    public static void _checkPotentialUIThread(String method) {
+    public static void _checkWarning(boolean condition, String tag, String message) {
+        if (condition) {
+            Log.w(tag, "WARNING", new RuntimeException(message));
+        }
+    }
+
+    public static void _checkUIThread(String method) {
         if (Looper.getMainLooper() != Looper.myLooper()) {
             throw new AssertionError("The " + method + " method must be invoked on the UI thread.");
         }

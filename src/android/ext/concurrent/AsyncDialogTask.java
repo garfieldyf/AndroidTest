@@ -41,7 +41,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
      * @see #AsyncDialogTask(Activity)
      */
     public AsyncDialogTask(Activity activity, long showDelayMillis) {
-        DebugUtils._checkPotentialLeaks(getClass());
+        DebugUtils._checkMemoryLeaks(getClass());
         mActivity = new WeakReference<Activity>(activity);
         mDelayMillis = showDelayMillis;
         mApplication = activity.getApplication();

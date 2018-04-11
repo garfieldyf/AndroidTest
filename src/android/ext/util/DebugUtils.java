@@ -126,14 +126,14 @@ public final class DebugUtils {
         }
     }
 
-    public static void __checkError(boolean condition, String message) {
-        if (condition) {
+    public static void __checkError(boolean checked, String message) {
+        if (checked) {
             throw new AssertionError(message);
         }
     }
 
-    public static void __checkWarning(boolean condition, String tag, String message) {
-        if (condition) {
+    public static void __checkWarning(boolean checked, String tag, String message) {
+        if (checked) {
             Log.w(tag, "WARNING", new RuntimeException(message));
         }
     }

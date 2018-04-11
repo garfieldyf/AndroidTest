@@ -150,7 +150,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Sets the {@link Page} at the specified <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.
-     * @param page The position of the page.
+     * @param page The position of the page or <tt>null</tt> if load failed.
      * @param data The <tt>Page</tt>.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, List)
@@ -173,11 +173,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data), null)</tt>.
      * @param page The position of the page.
-     * @param data The {@link List} of the page data.
+     * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
      * @see #setPage(int, Page, Object)
      * @see #setPage(int, List, Object)
-     * @see #setPage(int, JSONArray)
-     * @see #setPage(int, JSONArray, Object)
      */
     public final void setPage(int page, List<E> data) {
         setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null), null);
@@ -186,12 +184,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data), payload)</tt>.
      * @param page The position of the page.
-     * @param data The {@link List} of the page data.
+     * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
-     * @see #setPage(int, Page, Object)
      * @see #setPage(int, List)
-     * @see #setPage(int, JSONArray)
-     * @see #setPage(int, JSONArray, Object)
+     * @see #setPage(int, Page, Object)
      */
     public final void setPage(int page, List<E> data, Object payload) {
         setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null), payload);
@@ -200,10 +196,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Equivalent to calling <tt>setPage(page, new JSONPage(data), null)</tt>.
      * @param page The position of the page.
-     * @param data The {@link JSONArray} of the page data.
+     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
      * @see #setPage(int, Page, Object)
-     * @see #setPage(int, List)
-     * @see #setPage(int, List, Object)
      * @see #setPage(int, JSONArray, Object)
      */
     public final void setPage(int page, JSONArray data) {
@@ -213,12 +207,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Equivalent to calling <tt>setPage(page, new JSONPage(data), payload)</tt>.
      * @param page The position of the page.
-     * @param data The {@link JSONArray} of the page data.
+     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
-     * @see #setPage(int, Page, Object)
-     * @see #setPage(int, List)
-     * @see #setPage(int, List, Object)
      * @see #setPage(int, JSONArray)
+     * @see #setPage(int, Page, Object)
      */
     public final void setPage(int page, JSONArray data, Object payload) {
         setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), payload);

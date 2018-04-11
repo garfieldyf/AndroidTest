@@ -194,7 +194,9 @@ public class ThreadPoolManager extends ThreadPool {
                     run(runner = Thread.currentThread());
                 } finally {
                     runner = null;
-                    state.compareAndSet(RUNNING, COMPLETED);
+                    if (state.compareAndSet(RUNNING, COMPLETED)) {
+                        onCompletion();
+                    }
                 }
             }
         }
@@ -206,9 +208,19 @@ public class ThreadPoolManager extends ThreadPool {
         public abstract long getId();
 
         /**
-         * Callback method to be invoked when this task is executing on a background
-         * thread. This method will not be invoked if this task was cancelled.
+         * Callback method to be invoked when this task was finished.
+         * The default implementation do nothing. If you write your
+         * own implementation, do not call <tt>super.onCompletion()</tt>
+         * <p>This method won't be invoked if this task was cancelled.</p>
+         * @see #run(Thread)
+         */
+        protected void onCompletion() {
+        }
+
+        /**
+         * Callback method to be invoked when this task is executing.
          * @param thread The <tt>Thread</tt> whose executing this task.
+         * @see #onCompletion()
          */
         protected abstract void run(Thread thread);
 

@@ -65,8 +65,11 @@ public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantSt
         android.R.attr.autoMirrored,
     };
 
-    protected T mState;
+    /**
+     * The flags, can be user-defined (must be range of [0 - 0xFFFFFF]).
+     */
     protected int mFlags;
+    protected T mState;
     private final RectF mBounds;
 
     /**

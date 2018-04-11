@@ -12,6 +12,7 @@ public interface Cancelable {
      * Returns <tt>true</tt> if the task was cancelled before it completed normally.
      * @return <tt>false</tt> if the task could not be cancelled, typically because
      * it has already completed normally, <tt>true</tt> otherwise.
+     * @see #cancel(boolean)
      */
     boolean isCancelled();
 
@@ -21,6 +22,7 @@ public interface Cancelable {
      * @param mayInterruptIfRunning <tt>true</tt> if the thread executing the task
      * should be interrupted, <tt>false</tt> otherwise.
      * @return <tt>false</tt> if the task could not be cancelled, <tt>true</tt> otherwise.
+     * @see #isCancelled()
      */
     boolean cancel(boolean mayInterruptIfRunning);
 }

@@ -172,17 +172,6 @@ public class ThreadPoolManager extends ThreadPool {
             state = new AtomicInteger(RUNNING);
         }
 
-        /**
-         * Attempts to stop execution of this task. To ensure that this task is
-         * stopped as quickly as possible, you should always check the return
-         * value of {@link #isCancelled()} periodically from {@link #run(Thread)},
-         * if possible (inside a loop for instance.)
-         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this
-         * task should be interrupted, <tt>false</tt> otherwise.
-         * @return <tt>false</tt> if this task could not be cancelled, typically
-         * because it has already completed, <tt>true</tt> otherwise.
-         * @see #isCancelled()
-         */
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {
             final boolean result = state.compareAndSet(RUNNING, CANCELLED);
@@ -193,13 +182,6 @@ public class ThreadPoolManager extends ThreadPool {
             return result;
         }
 
-        /**
-         * Returns <tt>true</tt> if this task was cancelled before it completed
-         * normally. The value returned by this method should be checked periodically
-         * from {@link #run(Thread)} to end this task as soon as possible.
-         * @return <tt>true</tt> if this task was cancelled, <tt>false</tt> otherwise.
-         * @see #cancel(int)
-         */
         @Override
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);

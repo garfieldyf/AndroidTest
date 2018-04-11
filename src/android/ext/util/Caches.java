@@ -732,7 +732,7 @@ public final class Caches {
         /**
          * Builds the cache file with the specified <em>key</em>.
          * @param key The key.
-         * @return The absolute file path of the cache file. Never <tt>null</tt>.
+         * @return The absolute path of the cache file. Never <tt>null</tt>.
          */
         protected String buildCacheFile(String key) {
             return new StringBuilder(mCacheDir.length() + key.length() + 3).append(mCacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString();

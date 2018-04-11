@@ -142,10 +142,12 @@ public final class NetworkUtils {
         /**
          * Called on a background thread to post the data to the remote HTTP server.
          * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
-         * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post.
+         * @param arg The user-defined data, passed earlier by {@link DownloadRequest#callback}.
+         * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
+         * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while posting the data.
          */
-        void onPostData(HttpURLConnection conn, byte[] tempBuffer) throws IOException;
+        void onPostData(HttpURLConnection conn, int arg, byte[] tempBuffer) throws IOException;
     }
 
     /**
@@ -285,12 +287,25 @@ public final class NetworkUtils {
         }
 
         /**
-         * Sets the {@link PostCallback} to post the data to the remote HTTP server.
-         * @param callback The <tt>PostCallback</tt>.
+         * Equivalent to calling <tt>callback(callback, 0)</tt>.
+         * @param callback The {@link PostCallback}.
          * @return This request.
+         * @see #callback(PostCallback, int)
          */
         public final DownloadRequest callback(PostCallback callback) {
-            this.data = callback;
+            return callback(callback, 0);
+        }
+
+        /**
+         * Sets the {@link PostCallback} to post the data to the remote HTTP server.
+         * @param callback The <tt>PostCallback</tt>.
+         * @param arg The user-defined data passed by the {@link PostCallback#onPostData}.
+         * @return This request.
+         * @see #callback(PostCallback)
+         */
+        public final DownloadRequest callback(PostCallback callback, int arg) {
+            this.count = arg;
+            this.data  = callback;
             return this;
         }
 
@@ -429,7 +444,7 @@ public final class NetworkUtils {
                 postData((InputStream)data, tempBuffer);
             } else if (data instanceof PostCallback) {
                 connectImpl("POST");
-                ((PostCallback)data).onPostData(connection, tempBuffer);
+                ((PostCallback)data).onPostData(connection, count, tempBuffer);
                 data = null;  // Clears the callback to avoid potential memory leaks.
             } else {
                 connectImpl("GET");

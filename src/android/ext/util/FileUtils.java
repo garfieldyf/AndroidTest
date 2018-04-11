@@ -459,45 +459,16 @@ public final class FileUtils {
     public static native int getFileCount(String dirPath, int flags);
 
     /**
-     * Copies the specified <tt>InputStream</tt> the contents into <em>dst</em>
-     * file. If the <em>dst</em> file already exists, it can be overrided to.
-     * <p>Note: This method will be create the necessary directories.</p>
-     * @param src The <tt>InputStream</tt> to read.
-     * @param dst The destination file to write, must be absolute file path.
-     * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
-     * @see #copyStream(InputStream, OutputStream, byte[])
-     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
-     */
-    public static boolean copyStream(InputStream src, String dst) {
-        OutputStream os = null;
-        try {
-            if (mkdirs(dst, FLAG_IGNORE_FILENAME) == 0) {
-                os = new FileOutputStream(dst);
-                copyStreamImpl(src, os, null, -1, null);
-                return (access(dst, F_OK) == 0);
-            }
-        } catch (Exception e) {
-            Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't copy - ").append(src).append(" to ").append(dst).toString(), e);
-            deleteFiles(dst, false);
-        } finally {
-            FileUtils.close(os);
-        }
-
-        return false;
-    }
-
-    /**
      * Equivalent to calling <tt>copyStream(src, dst, null, buffer)</tt>.
      * @param src The <tt>InputStream</tt> to read.
      * @param dst The <tt>OutputStream</tt> to write.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @return The <em>dst</em>.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
-     * @see #copyStream(InputStream, String)
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
     public static <T extends OutputStream> T copyStream(InputStream src, T dst, byte[] buffer) throws IOException {
-        return copyStreamImpl(src, dst, null, -1, buffer);
+        return copyStreamImpl(src, dst, null, buffer);
     }
 
     /**
@@ -510,11 +481,10 @@ public final class FileUtils {
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @return The <em>dst</em>.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
-     * @see #copyStream(InputStream, String)
      * @see #copyStream(InputStream, OutputStream, byte[])
      */
     public static <T extends OutputStream> T copyStream(InputStream src, T dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        return copyStreamImpl(src, dst, cancelable, -1, buffer);
+        return copyStreamImpl(src, dst, cancelable, buffer);
     }
 
     /**
@@ -544,26 +514,13 @@ public final class FileUtils {
      * @param filename The file to read, must be absolute file path.
      * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded,
      * <tt>null</tt> otherwise.
-     * @see #readFile(String, int)
-     * @see #readFile(String, int, OutputStream)
+     * @see #readFile(String, T)
      */
     public static ByteArrayBuffer readFile(String filename) {
-        return readFile(filename, -1);
-    }
-
-    /**
-     * Reads the specified file contents into a {@link ByteArrayBuffer}.
-     * @param filename The file to read, must be absolute file path.
-     * @param capacity May be <tt>-1</tt>. The initial capacity of the returned <tt>ByteArrayBuffer</tt>.
-     * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #readFile(String)
-     * @see #readFile(String, int, OutputStream)
-     */
-    public static ByteArrayBuffer readFile(String filename, int capacity) {
         InputStream is = null;
         try {
             is = new FileInputStream(filename);
-            return copyStreamImpl(is, new ByteArrayBuffer(), null, capacity, null);
+            return copyStreamImpl(is, new ByteArrayBuffer(), null, null);
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read file - ").append(filename).toString(), e);
             return null;
@@ -575,17 +532,15 @@ public final class FileUtils {
     /**
      * Reads the specified file contents into the specified <em>out</em>.
      * @param filename The file to read, must be absolute file path.
-     * @param capacity May be <tt>-1</tt>. The minimum capacity of the <em>out</em>.
      * @param out The <tt>OutputStream</tt> to write to.
      * @return The <em>out</em>.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readFile(String)
-     * @see #readFile(String, int)
      */
-    public static <T extends OutputStream> T readFile(String filename, int capacity, T out) throws IOException {
+    public static <T extends OutputStream> T readFile(String filename, T out) throws IOException {
         final InputStream is = new FileInputStream(filename);
         try {
-            return copyStreamImpl(is, out, null, capacity, null);
+            return copyStreamImpl(is, out, null, null);
         } finally {
             is.close();
         }
@@ -596,13 +551,13 @@ public final class FileUtils {
      * @param assetManager The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #readAssetFile(AssetManager, String, OutputStream)
+     * @see #readAssetFile(AssetManager, String, T)
      */
     public static ByteArrayBuffer readAssetFile(AssetManager assetManager, String filename) {
         InputStream is = null;
         try {
             is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
-            return copyStreamImpl(is, new ByteArrayBuffer(), null, is.available(), null);
+            return copyStreamImpl(is, new ByteArrayBuffer(), null, null);
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read asset file - ").append(filename).toString(), e);
             return null;
@@ -623,7 +578,7 @@ public final class FileUtils {
     public static <T extends OutputStream> T readAssetFile(AssetManager assetManager, String filename, T out) throws IOException {
         final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
         try {
-            return copyStreamImpl(is, out, null, is.available(), null);
+            return copyStreamImpl(is, out, null, null);
         } finally {
             is.close();
         }
@@ -668,7 +623,26 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyStreamImpl(InputStream is, OutputStream os, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Cancelable cancelable, byte[] buffer) throws IOException {
+        if (out instanceof ByteArrayBuffer) {
+            final ByteArrayBuffer buf = (ByteArrayBuffer)out;
+            buf.ensureCapacity(is.available());
+            buf.readFrom(is, cancelable);
+        } else if (buffer != null) {
+            readStreamImpl(is, out, cancelable, buffer);
+        } else {
+            buffer = ByteArrayPool.sInstance.obtain();
+            readStreamImpl(is, out, cancelable, buffer);
+            ByteArrayPool.sInstance.recycle(buffer);
+        }
+
+        return out;
+    }
+
+    /**
+     * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
+     */
+    private static void readStreamImpl(InputStream is, OutputStream os, Cancelable cancelable, byte[] buffer) throws IOException {
         int readBytes;
         if (cancelable == null) {
             while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {
@@ -679,25 +653,6 @@ public final class FileUtils {
                 os.write(buffer, 0, readBytes);
             }
         }
-    }
-
-    /**
-     * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
-     */
-    private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Cancelable cancelable, int capacity, byte[] buffer) throws IOException {
-        if (out instanceof ByteArrayBuffer) {
-            final ByteArrayBuffer buf = (ByteArrayBuffer)out;
-            buf.ensureCapacity(capacity >= 0 ? capacity : is.available());
-            buf.readFrom(is, cancelable);
-        } else if (buffer != null) {
-            copyStreamImpl(is, out, cancelable, buffer);
-        } else {
-            buffer = ByteArrayPool.sInstance.obtain();
-            copyStreamImpl(is, out, cancelable, buffer);
-            ByteArrayPool.sInstance.recycle(buffer);
-        }
-
-        return out;
     }
 
     /**

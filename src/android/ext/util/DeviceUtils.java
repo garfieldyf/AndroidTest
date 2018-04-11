@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
+import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
@@ -88,6 +89,41 @@ public final class DeviceUtils {
         }
 
         return String.format(StringUtils.newString(format, 0, format.length), result);
+    }
+
+    /**
+     * Returns an array of ABIs supported by this device.
+     */
+    @SuppressLint("NewApi")
+    @SuppressWarnings("deprecation")
+    public static String[] getSupportedABIs() {
+        if (Build.VERSION.SDK_INT > 20) {
+            return Build.SUPPORTED_ABIS;
+        } else {
+            return new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
+        }
+    }
+
+    /**
+     * Reads the specified device file contents from the filesystem.
+     * @param deviceFile The device filename, must be absolute file path.
+     * @param maxSize The maximum number of byte to allow to read.
+     * @return The file contents as a string.
+     * @throws IOException if an error occurs while reading the data.
+     */
+    public static String readDeviceFile(String deviceFile, int maxSize) throws IOException {
+        final InputStream is = new FileInputStream(deviceFile);
+        try {
+            final byte[] data = new byte[maxSize];
+            int byteCount = is.read(data, 0, data.length);
+            if (data[byteCount - 1] == '\n') {
+                --byteCount;    // skip the '\n'
+            }
+
+            return new String(data, 0, byteCount);
+        } finally {
+            is.close();
+        }
     }
 
     public static void dumpSystemInfo(Context context, Printer printer) {
@@ -216,37 +252,6 @@ public final class DeviceUtils {
     }
 
     /**
-     * Returns an array of ABIs supported by this device.
-     */
-    @SuppressLint("NewApi")
-    @SuppressWarnings("deprecation")
-    public static String[] getSupportedABIs() {
-        if (Build.VERSION.SDK_INT > 20) {
-            return Build.SUPPORTED_ABIS;
-        } else {
-            return new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
-        }
-    }
-
-    /**
-     * Reads the specified device file contents from the filesystem.
-     */
-    /* package */ static String readDeviceFile(String filename) throws Exception {
-        final InputStream is = new FileInputStream(filename);
-        try {
-            final byte[] data = new byte[32];
-            int byteCount = is.read(data, 0, data.length);
-            if (data[byteCount - 1] == '\n') {
-                --byteCount;    // skip the '\n'
-            }
-
-            return new String(data, 0, byteCount);
-        } finally {
-            is.close();
-        }
-    }
-
-    /**
      * Writes the supported ABIs into a {@link JsonWriter}.
      */
     /* package */ static JsonWriter writeABIs(JsonWriter writer) throws IOException {
@@ -327,7 +332,7 @@ public final class DeviceUtils {
 
     private static int readCpuFrequency(int coreIndex, String filename) {
         try {
-            return Integer.parseInt(readDeviceFile(new StringBuilder(64).append("/sys/devices/system/cpu/cpu").append(coreIndex).append("/cpufreq/").append(filename).toString()));
+            return Integer.parseInt(readDeviceFile(new StringBuilder(64).append("/sys/devices/system/cpu/cpu").append(coreIndex).append("/cpufreq/").append(filename).toString(), 24));
         } catch (Exception e) {
             return -1;
         }

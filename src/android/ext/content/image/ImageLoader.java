@@ -187,7 +187,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
         } finally {
-            NetworkUtils.close(conn, false);
+            NetworkUtils.close(conn);
         }
 
         return result;

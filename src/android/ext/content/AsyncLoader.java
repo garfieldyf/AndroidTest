@@ -245,7 +245,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Class <tt>Binder</tt> can be used to bind the value to the target.
+     * Callback interface used to bind the value to the target.
      */
     public static interface Binder<Key, Params, Value> {
         /**

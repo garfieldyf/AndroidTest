@@ -73,8 +73,8 @@ public final class FileUtils {
 
     /**
      * This flag use with {@link #listFiles(String, int, Factory)}.
-     * If set the returned {@link Dirent#path} is an absolute file
-     * path. Otherwise the returned {@link Dirent#path} is a filename.
+     * If set the {@link Dirent#path} is an absolute file path.
+     * Otherwise the {@link Dirent#path} is a filename.
      */
     public static final int FLAG_ABSOLUTE_FILE_PATH = 0x02;
 

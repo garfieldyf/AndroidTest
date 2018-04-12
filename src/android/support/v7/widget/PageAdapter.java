@@ -99,8 +99,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>Unlike {@link #getItem}, this method do not call {@link #loadPage(int, int, int)} when
-     * the item was not present.</p>
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)}
+     * when the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #peekItem(ViewHolder)
@@ -150,8 +150,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Sets the {@link Page} at the specified <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.
-     * @param page The position of the page or <tt>null</tt> if load failed.
-     * @param data The <tt>Page</tt>.
+     * @param page The position of the page.
+     * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, List)
      * @see #setPage(int, List, Object)

@@ -24,13 +24,13 @@ import android.util.Log;
  *     }
  * }
  *
- * final JSONDownloadTask task = new JSONDownloadTask()
- *     .newDownloadRequest(url)
+ * final JSONDownloadTask task = new JSONDownloadTask();
+ * task.newDownloadRequest(url)
  *     .connectTimeout(60000)
  *     .readTimeout(60000)
  *     .requestHeader("Content-Type", "application/json")
- *     .post(obj)
- *     .execute((Object[])null);
+ *     .post(obj);
+ * task.execute((Object[])null);
  * </pre>
  * @author Garfield
  * @version 1.0
@@ -87,7 +87,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     public final DownloadRequest newDownloadRequest(String url) {
         try {
             DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
-            return (mRequest = new DownloadRequest(this, url));
+            return (mRequest = new DownloadRequest(url));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -115,7 +115,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * Override this method to downloads the resource from the remote HTTP server on a background thread.
      * <p>The default implementation returns a {@link JSONObject} or {@link JSONArray} object.</p>
      * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
-     * @param params The parameters of this task, passed earlier by {@link DownloadRequest#execute}.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
      */

@@ -12,7 +12,6 @@ import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.Executor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +20,6 @@ import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
-import android.os.AsyncTask;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 import android.util.Log;
@@ -44,12 +42,10 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class DownloadRequest {
     /* package */ int offset;
     /* package */ int count;
     /* package */ Object data;
-    /* package */ AsyncTask task;
     /* package */ final HttpURLConnection connection;
 
     /**
@@ -156,15 +152,15 @@ public final class DownloadRequest {
     /**
      * Sets the {@link PostCallback} to post the data to the remote HTTP server.
      * @param callback The <tt>PostCallback</tt>.
-     * @param arg The user-defined data passed by the {@link PostCallback#onPostData}.
+     * @param param The user-defined data passed by the {@link PostCallback#onPostData}.
      * @return This request.
      * @see #post(byte[])
      * @see #post(Object)
      * @see #post(byte[], int, int)
      */
-    public final DownloadRequest post(PostCallback callback, int arg) {
+    public final DownloadRequest post(PostCallback callback, int param) {
         DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
-        this.count = arg;
+        this.count = param;
         this.data  = callback;
         return this;
     }
@@ -270,44 +266,6 @@ public final class DownloadRequest {
     }
 
     /**
-     * Executes the download task with the arguments supplied to this request. The <tt>DownloadRequest</tt>
-     * instance must be call {@link AsyncDownloadTask#newDownloadRequest(String)} to create.
-     * @param params The parameters of the task.
-     * @return The instance of task.
-     * @see #execute(Executor, Params[])
-     * @see AsyncDownloadTask#newDownloadRequest(String)
-     */
-    public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Params... params) {
-        DebugUtils.__checkError(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
-        return (T)task.execute(params);
-    }
-
-    /**
-     * Executes the download task with the arguments supplied to this request. The <tt>DownloadRequest</tt>
-     * instance must be call {@link AsyncDownloadTask#newDownloadRequest(String)} to create.
-     * @param exec The {@link Executor} to use.
-     * @param params The parameters of the task.
-     * @return The instance of task.
-     * @see #execute(Params[])
-     * @see AsyncDownloadTask#newDownloadRequest(String)
-     */
-    public final <Params, T extends AsyncTask<Params, ?, ?>> T execute(Executor exec, Params... params) {
-        DebugUtils.__checkError(task == null, "The DownloadRequest must be call AsyncDownloadTask.newDownloadRequest() to create");
-        return (T)task.executeOnExecutor(exec, params);
-    }
-
-    /**
-     * Constructor
-     * @param task The owner {@link AsyncTask}.
-     * @param url The url to connect the remote HTTP server.
-     * @throws IOException if an error occurs while opening the connection.
-     */
-    /* package */ DownloadRequest(AsyncTask task, String url) throws IOException {
-        this(url);
-        this.task = task;
-    }
-
-    /**
      * Connects to the remote HTTP server with the arguments supplied to this request.
      */
     /* package */ final int connect(byte[] tempBuffer) throws IOException {
@@ -328,11 +286,11 @@ public final class DownloadRequest {
         } else if (data instanceof PostCallback) {
             connectImpl("POST");
             ((PostCallback)data).onPostData(connection, count, tempBuffer);
-            data = null;  // Clears the callback to avoid potential memory leaks.
         } else {
             connectImpl("GET");
         }
 
+        this.data = null;  // Clears the data to avoid potential memory leaks.
         DownloadRequest.__checkHeaders(connection, false);
         return connection.getResponseCode();
     }
@@ -410,11 +368,11 @@ public final class DownloadRequest {
         /**
          * Called on a background thread to post the data to the remote HTTP server.
          * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
-         * @param arg The user-defined data, passed earlier by {@link DownloadRequest#post}.
+         * @param param The user-defined data, passed earlier by {@link DownloadRequest#post}.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
          * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while posting the data.
          */
-        void onPostData(HttpURLConnection conn, int arg, byte[] tempBuffer) throws IOException;
+        void onPostData(HttpURLConnection conn, int param, byte[] tempBuffer) throws IOException;
     }
 }

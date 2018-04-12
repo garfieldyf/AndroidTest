@@ -191,7 +191,7 @@ public class ThreadPoolManager extends ThreadPool {
         public final void run() {
             if (state.get() == RUNNING) {
                 try {
-                    run(runner = Thread.currentThread());
+                    onExecute(runner = Thread.currentThread());
                 } finally {
                     runner = null;
                     if (state.compareAndSet(RUNNING, COMPLETED)) {
@@ -212,7 +212,7 @@ public class ThreadPoolManager extends ThreadPool {
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCompletion()</tt>
          * <p>This method won't be invoked if this task was cancelled.</p>
-         * @see #run(Thread)
+         * @see #onExecute(Thread)
          */
         protected void onCompletion() {
         }
@@ -222,7 +222,7 @@ public class ThreadPoolManager extends ThreadPool {
          * @param thread The <tt>Thread</tt> whose executing this task.
          * @see #onCompletion()
          */
-        protected abstract void run(Thread thread);
+        protected abstract void onExecute(Thread thread);
 
         /**
          * Attempts to stop execution of this task.

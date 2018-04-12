@@ -625,14 +625,12 @@ public final class FileUtils {
      */
     private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
-            final ByteArrayBuffer buf = (ByteArrayBuffer)out;
-            buf.ensureCapacity(is.available());
-            buf.readFrom(is, cancelable);
+            ((ByteArrayBuffer)out).readFrom(is, cancelable);
         } else if (buffer != null) {
-            readStreamImpl(is, out, cancelable, buffer);
+            copyToStreamImpl(is, out, cancelable, buffer);
         } else {
             buffer = ByteArrayPool.sInstance.obtain();
-            readStreamImpl(is, out, cancelable, buffer);
+            copyToStreamImpl(is, out, cancelable, buffer);
             ByteArrayPool.sInstance.recycle(buffer);
         }
 
@@ -642,15 +640,15 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void readStreamImpl(InputStream is, OutputStream os, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyToStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         int readBytes;
         if (cancelable == null) {
             while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {
-                os.write(buffer, 0, readBytes);
+                out.write(buffer, 0, readBytes);
             }
         } else {
             while ((readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled()) {
-                os.write(buffer, 0, readBytes);
+                out.write(buffer, 0, readBytes);
             }
         }
     }

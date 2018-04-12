@@ -73,17 +73,6 @@ public final class ByteArrayBuffer extends OutputStream {
     }
 
     /**
-     * Increases the capacity of this buffer, if necessary, to ensure that it can hold
-     * at least the number of bytes specified by the <em>minCapacity</em>.
-     * @param minCapacity The desired minimum capacity.
-     */
-    public final void ensureCapacity(int minCapacity) {
-        if (minCapacity > data.length) {
-            data = copyOf(minCapacity + 1);
-        }
-    }
-
-    /**
      * Returns the contents of this buffer as a byte array.
      * @return A copy of byte array.
      * @see #array()
@@ -128,7 +117,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     @Override
     public void write(int oneByte) {
-        expandCapacity(size + 1);
+        expandCapacity(size + 1, true);
         data[size++] = (byte)oneByte;
     }
 
@@ -150,7 +139,7 @@ public final class ByteArrayBuffer extends OutputStream {
     public void write(byte[] buffer, int offset, int count) {
         ArrayUtils.checkRange(offset, count, buffer.length);
         if (count > 0) {
-            expandCapacity(size + count);
+            expandCapacity(size + count, true);
             System.arraycopy(buffer, offset, data, size, count);
             size += count;
         }
@@ -165,7 +154,7 @@ public final class ByteArrayBuffer extends OutputStream {
         DebugUtils.__checkError(buffer == null, "buffer == null");
         final int count = buffer.remaining();
         if (count > 0) {
-            expandCapacity(size + count);
+            expandCapacity(size + count, false);
             buffer.get(data, size, count);
             size += count;
         }
@@ -182,16 +171,12 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     public final void readFrom(InputStream is, Cancelable cancelable) throws IOException {
         DebugUtils.__checkError(is == null, "is == null");
-        if (cancelable == null) {
-            readFromImpl(is);
-            return;
-        }
-
+        expandCapacity(is.available(), false);
         int count, readBytes, expandCount = 256;
-        while (!cancelable.isCancelled()) {
+        while (cancelable == null || !cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
                 count = expandCount;
-                expandCapacity(size + count);
+                expandCapacity(size + count, true);
 
                 if (expandCount < 8192) {
                     expandCount <<= 1;  // expandCount * 2
@@ -242,29 +227,9 @@ public final class ByteArrayBuffer extends OutputStream {
         return newData;
     }
 
-    private void expandCapacity(int minCapacity) {
+    private void expandCapacity(int minCapacity, boolean expand) {
         if (minCapacity > data.length) {
-            data = copyOf(Math.max(minCapacity, (data.length * 3) / 2));
-        }
-    }
-
-    private void readFromImpl(InputStream is) throws IOException {
-        int count, readBytes, expandCount = 256;
-        while (true) {
-            if ((count = data.length - size) <= 0) {
-                count = expandCount;
-                expandCapacity(size + count);
-
-                if (expandCount < 8192) {
-                    expandCount <<= 1;  // expandCount * 2
-                }
-            }
-
-            if ((readBytes = is.read(data, size, count)) <= 0) {
-                break;
-            }
-
-            size += readBytes;
+            data = copyOf(expand ? Math.max(minCapacity, (data.length * 3) / 2) : minCapacity + 1);
         }
     }
 }

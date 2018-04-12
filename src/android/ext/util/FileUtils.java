@@ -463,12 +463,11 @@ public final class FileUtils {
      * @param src The <tt>InputStream</tt> to read.
      * @param dst The <tt>OutputStream</tt> to write.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @return The <em>dst</em>.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
-    public static <T extends OutputStream> T copyStream(InputStream src, T dst, byte[] buffer) throws IOException {
-        return copyStreamImpl(src, dst, null, buffer);
+    public static void copyStream(InputStream src, OutputStream dst, byte[] buffer) throws IOException {
+        copyStreamImpl(src, dst, null, buffer);
     }
 
     /**
@@ -479,12 +478,11 @@ public final class FileUtils {
      * none. If the operation was cancelled before it completed normally then the <em>dst's</em>
      * contents undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @return The <em>dst</em>.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
      * @see #copyStream(InputStream, OutputStream, byte[])
      */
-    public static <T extends OutputStream> T copyStream(InputStream src, T dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        return copyStreamImpl(src, dst, cancelable, buffer);
+    public static void copyStream(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
+        copyStreamImpl(src, dst, cancelable, buffer);
     }
 
     /**
@@ -514,13 +512,15 @@ public final class FileUtils {
      * @param filename The file to read, must be absolute file path.
      * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded,
      * <tt>null</tt> otherwise.
-     * @see #readFile(String, T)
+     * @see #readFile(String, OutputStream)
      */
     public static ByteArrayBuffer readFile(String filename) {
         InputStream is = null;
         try {
             is = new FileInputStream(filename);
-            return copyStreamImpl(is, new ByteArrayBuffer(), null, null);
+            final ByteArrayBuffer result = new ByteArrayBuffer();
+            copyStreamImpl(is, result, null, null);
+            return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read file - ").append(filename).toString(), e);
             return null;
@@ -533,14 +533,13 @@ public final class FileUtils {
      * Reads the specified file contents into the specified <em>out</em>.
      * @param filename The file to read, must be absolute file path.
      * @param out The <tt>OutputStream</tt> to write to.
-     * @return The <em>out</em>.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readFile(String)
      */
-    public static <T extends OutputStream> T readFile(String filename, T out) throws IOException {
+    public static void readFile(String filename, OutputStream out) throws IOException {
         final InputStream is = new FileInputStream(filename);
         try {
-            return copyStreamImpl(is, out, null, null);
+            copyStreamImpl(is, out, null, null);
         } finally {
             is.close();
         }
@@ -551,13 +550,15 @@ public final class FileUtils {
      * @param assetManager The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #readAssetFile(AssetManager, String, T)
+     * @see #readAssetFile(AssetManager, String, OutputStream)
      */
     public static ByteArrayBuffer readAssetFile(AssetManager assetManager, String filename) {
         InputStream is = null;
         try {
             is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
-            return copyStreamImpl(is, new ByteArrayBuffer(), null, null);
+            final ByteArrayBuffer result = new ByteArrayBuffer();
+            copyStreamImpl(is, result, null, null);
+            return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read asset file - ").append(filename).toString(), e);
             return null;
@@ -571,14 +572,13 @@ public final class FileUtils {
      * @param assetManager The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @param out The <tt>OutputStream</tt> to write to.
-     * @return The <em>out</em>.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readAssetFile(AssetManager, String)
      */
-    public static <T extends OutputStream> T readAssetFile(AssetManager assetManager, String filename, T out) throws IOException {
+    public static void readAssetFile(AssetManager assetManager, String filename, OutputStream out) throws IOException {
         final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
         try {
-            return copyStreamImpl(is, out, null, null);
+            copyStreamImpl(is, out, null, null);
         } finally {
             is.close();
         }
@@ -623,7 +623,7 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static <T extends OutputStream> T copyStreamImpl(InputStream is, T out, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
         } else if (buffer != null) {
@@ -633,8 +633,6 @@ public final class FileUtils {
             copyToStreamImpl(is, out, cancelable, buffer);
             ByteArrayPool.sInstance.recycle(buffer);
         }
-
-        return out;
     }
 
     /**

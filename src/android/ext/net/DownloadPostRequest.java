@@ -142,7 +142,8 @@ public final class DownloadPostRequest extends DownloadRequest {
     private void postData(InputStream is, byte[] tempBuffer) throws IOException {
         final OutputStream os = connection.getOutputStream();
         try {
-            FileUtils.copyStream(is, os, null, tempBuffer).flush();
+            FileUtils.copyStream(is, os, null, tempBuffer);
+            os.flush();
         } finally {
             os.close();
         }

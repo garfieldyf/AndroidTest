@@ -165,8 +165,14 @@ public final class DatabaseUtils {
      * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
     public static ByteArrayBuffer simpleQueryBlob(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final ByteArrayBuffer result = new ByteArrayBuffer();
-        return (simpleQueryBlob(db, result, sql, bindArgs) ? result : null);
+        try {
+            final ByteArrayBuffer result = new ByteArrayBuffer();
+            simpleQueryBlob(db, result, sql, bindArgs);
+            return result;
+        } catch (Exception e) {
+            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query blob - ").append(sql).toString(), e);
+            return null;
+        }
     }
 
     /**
@@ -178,20 +184,16 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return <tt>true</tt> if query successful, <tt>false</tt> otherwise.
+     * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
      * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
-    public static boolean simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) {
-        InputStream is = null;
+    public static void simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) throws IOException {
+        final InputStream is = simpleQuery(db, sql, bindArgs);
         try {
-            is = simpleQuery(db, sql, bindArgs);
             FileUtils.copyStream(is, out, null);
-            return true;
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query blob - ").append(sql).toString(), e);
-            return false;
         } finally {
-            FileUtils.close(is);
+            is.close();
         }
     }
 

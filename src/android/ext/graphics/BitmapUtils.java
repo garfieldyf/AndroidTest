@@ -1,7 +1,6 @@
 package android.ext.graphics;
 
 import java.io.FileOutputStream;
-import java.io.OutputStream;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.ext.graphics.DrawUtils.MatrixPool;
@@ -211,7 +210,7 @@ public final class BitmapUtils {
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static boolean saveBitmap(String filename, Bitmap bitmap, CompressFormat format, int quality) {
-        OutputStream os = null;
+        FileOutputStream os = null;
         try {
             os = new FileOutputStream(filename);
             return bitmap.compress(format, quality, os);

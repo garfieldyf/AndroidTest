@@ -2,18 +2,13 @@ package android.ext.content.image;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.concurrent.Executor;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.content.AsyncLoader;
 import android.ext.content.image.BitmapDecoder.Parameters;
-import android.ext.net.NetworkUtils;
+import android.ext.net.DownloadRequest;
 import android.ext.util.Caches.Cache;
 import android.ext.util.Caches.FileCache;
 import android.ext.util.FileUtils;
@@ -165,79 +160,15 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * @param flags Loading flags, passed earlier by {@link #loadImage}.
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
-     * @see #loadImage(Task, URLConnection, String, Params[], int, byte[])
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Params[] params, int flags, byte[] buffer) {
-        Image result = null;
-        HttpURLConnection conn = null;
-
         try {
-            // Connects to remote HTTP server.
-            conn = (HttpURLConnection)new URL(url).openConnection();
-            conn.setInstanceFollowRedirects(true);
-            conn.setReadTimeout(60000);
-            conn.setConnectTimeout(60000);
-            conn.setRequestProperty("Accept", "*/*");
-            conn.connect();
-
-            // Loads the image from the HTTP server.
-            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                result = loadImage(task, conn, imageFile, params, flags, buffer);
-            }
+            new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).requestHeader("Accept", "*/*").download(imageFile, task, buffer);
+            return (isTaskCancelled(task) ? null : mDecoder.decodeImage(imageFile, params, flags, buffer));
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
-        } finally {
-            NetworkUtils.close(conn);
+            return null;
         }
-
-        return result;
-    }
-
-    /**
-     * Loads an image from the specified <em>conn</em>.
-     * @param task The current {@link Task} whose executing this method.
-     * @param conn The {@link URLConnection} to download image data.
-     * @param imageFile The image file to store the image data.
-     * @param params The parameters, passed earlier by {@link #loadImage}.
-     * @param flags Loading flags, passed earlier by {@link #loadImage}.
-     * @param buffer The temporary byte array to used for loading image data.
-     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
-     * @throws Exception if an error occurs while loading image data.
-     * @see #loadImage(Task, String, String, Params[], int, byte[])
-     */
-    protected Image loadImage(Task<?, ?> task, URLConnection conn, String imageFile, Params[] params, int flags, byte[] buffer) throws Exception {
-        InputStream is  = null;
-        OutputStream os = null;
-
-        try {
-            // Creates the image file directory.
-            FileUtils.mkdirs(imageFile, FileUtils.FLAG_IGNORE_FILENAME);
-
-            // Creates the image file.
-            is = conn.getInputStream();
-            os = new FileOutputStream(imageFile);
-
-            // Reads the image data from the stream.
-            for (int readBytes, offset = 0; !isTaskCancelled(task); ) {
-                if ((readBytes = is.read(buffer, offset, buffer.length - offset)) <= 0) {
-                    // Writes the last remaining bytes of the buffer.
-                    os.write(buffer, 0, offset);
-                    break;
-                }
-
-                offset += readBytes;
-                if (offset == buffer.length) {
-                    // The buffer full, write to OutputStream and reset the offset.
-                    offset = 0;
-                    os.write(buffer, 0, buffer.length);
-                }
-            }
-        } finally {
-            FileUtils.close(is);
-            FileUtils.close(os);
-        }
-
-        return (isTaskCancelled(task) ? null : mDecoder.decodeImage(imageFile, params, flags, buffer));
     }
 
     /**

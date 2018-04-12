@@ -1,6 +1,5 @@
 package android.ext.net;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import org.json.JSONArray;
@@ -14,8 +13,7 @@ import android.util.Log;
  * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote HTTP server on a background
  * thread and publish results on the UI thread. This class both support HTTP "GET" and "POST" methods.
  * <h2>Usage</h2>
- * <p>Here is an example:</p>
- * <pre>
+ * <p>Here is an example:</p><pre>
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
  *     protected void onPostExecute(JSONObject result) {
  *         if (result != null) {
@@ -25,16 +23,16 @@ import android.util.Log;
  * }
  *
  * final JSONDownloadTask task = new JSONDownloadTask();
- * task.newDownloadRequest(url)
- *     .connectTimeout(60000)
+ * task.newDownloadRequest(url, DownloadPostRequest.class)
+ *     .post(obj)
  *     .readTimeout(60000)
- *     .requestHeader("Content-Type", "application/json")
- *     .post(obj);
- * task.execute((Object[])null);
- * </pre>
+ *     .connectTimeout(60000)
+ *     .requestHeader("Content-Type", "application/json");
+ * task.execute((Object[])null);</pre>
  * @author Garfield
  * @version 1.0
  */
+@SuppressWarnings("unchecked")
 public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
     private DownloadRequest mRequest;
     private WeakReference<Object> mOwner;
@@ -63,7 +61,6 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * no owner set or the owner released by the GC.
      * @see #setOwner(Object)
      */
-    @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         return (mOwner != null ? (T)mOwner.get() : null);
     }
@@ -80,21 +77,21 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     }
 
     /**
-     * Returns a new {@link DownloadRequest} with the specified <em>url</em>.
+     * Returns a new download request with the specified <em>url</em>.
      * @param url The url to connect the remote HTTP server.
-     * @return The instance of <tt>DownloadRequest</tt>.
+     * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
+     * @return Returns the instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
      */
-    public final DownloadRequest newDownloadRequest(String url) {
+    public final <T extends DownloadRequest> T newDownloadRequest(String url, Class<T> clazz) {
         try {
             DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
-            return (mRequest = new DownloadRequest(url));
-        } catch (IOException e) {
+            return (T)(mRequest = clazz.getDeclaredConstructor(String.class).newInstance(url));
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
         DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
         Result result = null;

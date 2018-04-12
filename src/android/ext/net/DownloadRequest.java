@@ -5,47 +5,36 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
-import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
+import android.support.annotation.Keep;
 import android.util.JsonReader;
-import android.util.JsonWriter;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Printer;
 
 /**
- * Class <tt>DownloadRequest</tt> used to downloads the resource from the
- * remote HTTP server. This class both support HTTP "GET" and "POST" methods.
+ * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote HTTP server.
  * <h2>Usage</h2>
- * <p>Here is an example:</p>
- * <pre>
+ * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadRequest(url)
  *     .connectTimeout(60000)
  *     .readTimeout(60000)
  *     .requestHeader("Content-Type", "application/json")
- *     .post(data)
- *     .download(null);
- * </pre>
+ *     .download(null);</pre>
  * @author Garfield
  * @version 1.0
  */
-public final class DownloadRequest {
-    /* package */ int offset;
-    /* package */ int count;
-    /* package */ Object data;
+public class DownloadRequest {
     /* package */ final HttpURLConnection connection;
 
     /**
@@ -53,6 +42,7 @@ public final class DownloadRequest {
      * @param url The url to connect the remote HTTP server.
      * @throws IOException if an error occurs while opening the connection.
      */
+    @Keep
     public DownloadRequest(String url) throws IOException {
         connection = (HttpURLConnection)new URL(url).openConnection();
         connection.setInstanceFollowRedirects(true);
@@ -118,69 +108,6 @@ public final class DownloadRequest {
             connection.setRequestProperty(header.getKey(), header.getValue());
         }
 
-        return this;
-    }
-
-    /**
-     * Equivalent to calling <tt>post(data, 0, data.length)</tt>.
-     * @param data The byte array to post.
-     * @return This request.
-     * @see #post(Object)
-     * @see #post(byte[], int, int)
-     * @see #post(PostCallback, int)
-     */
-    public final DownloadRequest post(byte[] data) {
-        return post(data, 0, data.length);
-    }
-
-    /**
-     * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be a <tt>JSONObject, JSONArray, String, InputStream</tt>
-     * or a container of the <tt>JSONArray or JSONObject</tt>.
-     * @return This request.
-     * @see #post(byte[])
-     * @see #post(byte[], int, int)
-     * @see #post(PostCallback, int)
-     * @see JSONUtils#writeObject(JsonWriter, Object)
-     */
-    public final DownloadRequest post(Object data) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
-        this.data = data;
-        return this;
-    }
-
-    /**
-     * Sets the {@link PostCallback} to post the data to the remote HTTP server.
-     * @param callback The <tt>PostCallback</tt>.
-     * @param param The user-defined data passed by the {@link PostCallback#onPostData}.
-     * @return This request.
-     * @see #post(byte[])
-     * @see #post(Object)
-     * @see #post(byte[], int, int)
-     */
-    public final DownloadRequest post(PostCallback callback, int param) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
-        this.count = param;
-        this.data  = callback;
-        return this;
-    }
-
-    /**
-     * Sets the byte array to post to the remote HTTP server.
-     * @param data The byte array to post.
-     * @param offset The start position in <em>data</em> from where to get bytes.
-     * @param count The number of bytes from <em>data</em> to write to.
-     * @return This request.
-     * @see #post(byte[])
-     * @see #post(Object)
-     * @see #post(PostCallback, int)
-     */
-    public final DownloadRequest post(byte[] data, int offset, int count) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadRequest", "The post data is already exists. Do you want overrides it.");
-        ArrayUtils.checkRange(offset, count, data.length);
-        this.data   = data;
-        this.count  = count;
-        this.offset = offset;
         return this;
     }
 
@@ -268,31 +195,19 @@ public final class DownloadRequest {
     /**
      * Connects to the remote HTTP server with the arguments supplied to this request.
      */
-    /* package */ final int connect(byte[] tempBuffer) throws IOException {
+    /* package */ int connect(byte[] tempBuffer) throws IOException {
         DownloadRequest.__checkHeaders(connection, true);
-        if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
-            connectImpl("POST");
-            postData(data);
-        } else if (data instanceof byte[]) {
-            connectImpl("POST");
-            postData((byte[])data, offset, count);
-        } else if (data instanceof InputStream) {
-            connectImpl("POST");
-            postData((InputStream)data, tempBuffer);
-        } else if (data instanceof String) {
-            final byte[] data = ((String)this.data).getBytes();
-            connectImpl("POST");
-            postData(data, 0, data.length);
-        } else if (data instanceof PostCallback) {
-            connectImpl("POST");
-            ((PostCallback)data).onPostData(connection, count, tempBuffer);
-        } else {
-            connectImpl("GET");
-        }
-
-        this.data = null;  // Clears the data to avoid potential memory leaks.
+        connectImpl("GET");
         DownloadRequest.__checkHeaders(connection, false);
         return connection.getResponseCode();
+    }
+
+    /**
+     * Connects to the remote HTTP server with the specified method.
+     */
+    /* package */ final void connectImpl(String method) throws IOException {
+        connection.setRequestMethod(method);
+        connection.connect();
     }
 
     /**
@@ -307,72 +222,12 @@ public final class DownloadRequest {
         }
     }
 
-    /**
-     * Connects to the remote HTTP server with the specified method.
-     */
-    private void connectImpl(String method) throws IOException {
-        connection.setRequestMethod(method);
-        connection.connect();
-    }
-
-    /**
-     * Posts the <tt>InputStream</tt> contents to the remote HTTP server.
-     */
-    private void postData(InputStream is, byte[] tempBuffer) throws IOException {
-        final OutputStream os = connection.getOutputStream();
-        try {
-            FileUtils.copyStream(is, os, null, tempBuffer).flush();
-        } finally {
-            os.close();
-        }
-    }
-
-    /**
-     * Posts the byte array to the remote HTTP server.
-     */
-    private void postData(byte[] data, int offset, int count) throws IOException {
-        final OutputStream os = connection.getOutputStream();
-        try {
-            os.write(data, offset, count);
-            os.flush();
-        } finally {
-            os.close();
-        }
-    }
-
-    /**
-     * Posts the data to the remote HTTP server.
-     */
-    private void postData(Object data) throws IOException {
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(connection.getOutputStream()));
-        try {
-            JSONUtils.writeObject(writer, data).flush();
-        } finally {
-            writer.close();
-        }
-    }
-
-    private static void __checkHeaders(URLConnection conn, boolean request) {
+    /* package */ static void __checkHeaders(URLConnection conn, boolean request) {
         final Printer printer = new LogPrinter(Log.DEBUG, DownloadRequest.class.getName());
         if (request) {
             NetworkUtils.dumpRequestHeaders(conn, printer);
         } else {
             NetworkUtils.dumpResponseHeaders(conn, printer);
         }
-    }
-
-    /**
-     * Callback interface used to post the data to the remote HTTP server.
-     */
-    public static interface PostCallback {
-        /**
-         * Called on a background thread to post the data to the remote HTTP server.
-         * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
-         * @param param The user-defined data, passed earlier by {@link DownloadRequest#post}.
-         * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
-         * passed earlier by {@link DownloadRequest#download}.
-         * @throws IOException if an error occurs while posting the data.
-         */
-        void onPostData(HttpURLConnection conn, int param, byte[] tempBuffer) throws IOException;
     }
 }

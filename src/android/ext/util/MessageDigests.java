@@ -1,7 +1,5 @@
 package android.ext.util;
 
-import java.nio.ByteBuffer;
-
 /**
  * Class MessageDigests
  * @author Garfield
@@ -178,44 +176,6 @@ public final class MessageDigests {
         ArrayUtils.checkRange(dataOffset, dataCount, data.length);
         ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
         return computeByteArray(data, dataOffset, dataCount, result, offset, algorithm.ordinal());
-    }
-
-    /**
-     * Computes the final hash value using the given <tt>ByteBuffer</tt> and <em>algorithm</em>.
-     * @param data The <tt>ByteBuffer</tt> to compute.
-     * @param algorithm The {@link Algorithm} to compute.
-     * @return The computed hash value.
-     * @see #computeByteBuffer(ByteBuffer, byte[], int, Algorithm)
-     */
-    public static byte[] computeByteBuffer(ByteBuffer data, Algorithm algorithm) {
-        final byte[] result = new byte[algorithm.digestLength];
-        computeByteBuffer(data, result, 0, algorithm);
-        return result;
-    }
-
-    /**
-     * Computes the final hash value using the given <tt>ByteBuffer</tt> and
-     * <em>algorithm</em>, Stores the result in <em>result</em>.
-     * @param data The <tt>ByteBuffer</tt> to compute.
-     * @param result The byte array to store the computed hash value.
-     * @param offset The start position in the <em>result</em>.
-     * @param algorithm The {@link Algorithm} to compute.
-     * @return The number of bytes written to <em>result</em>.
-     * @see #computeByteBuffer(ByteBuffer, Algorithm)
-     */
-    public static int computeByteBuffer(ByteBuffer data, byte[] result, int offset, Algorithm algorithm) {
-        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
-        final int writtenBytes, count = data.remaining();
-        if (data.hasArray()) {
-            writtenBytes = computeByteArray(data.array(), data.arrayOffset() + data.position(), count, result, offset, algorithm.ordinal());
-            data.position(data.limit());
-        } else {
-            final byte[] buf = new byte[count];
-            data.get(buf, 0, count);
-            writtenBytes = computeByteArray(buf, 0, count, result, offset, algorithm.ordinal());
-        }
-
-        return writtenBytes;
     }
 
     private static native int computeString(String string, byte[] result, int offset, int algorithm);

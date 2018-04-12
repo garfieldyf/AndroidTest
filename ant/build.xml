@@ -7,8 +7,8 @@
     <property name="native.package" value="com/funshion" />
     <property name="barcode.package" value="com.google.zxing" />
     <property name="jar.file.name" value="${native.module}.jar" />
-    <property name="ndk.build.args" value="-B all=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" />
-    <!-- <property name="ndk.build.args" value="-B NDK_STL=1 errors=1 gifimage=1 fileutils=1 messagedigests=1 bitmaputils=1 processutils=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" /> -->
+    <property name="ndk.build.args" value="-B gifimage=1 fileutils=1 messagedigests=1 bitmaputils=1 processutils=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" />
+    <!-- <property name="ndk.build.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${native.module} PACKAGE_GRAPHICS=${native.package}/graphics/ PACKAGE_UTILITIES=${native.package}/util/" /> -->
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />

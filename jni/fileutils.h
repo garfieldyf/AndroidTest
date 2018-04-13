@@ -432,9 +432,7 @@ JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, 
 
     struct stat buf;
     const JNI::jstring_t jpath(env, path);
-
-    const jint errnum = __NS::fileStatus(jpath, buf);
-    return (errnum == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errnum);
+    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

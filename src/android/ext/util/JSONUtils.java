@@ -173,7 +173,7 @@ public final class JSONUtils {
      * Writes the specified <em>object</em> into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
      * @param object May be a <tt>JSONObject, JSONArray, String, Boolean,
-     * Number</tt> or a container of the <tt>JSONArray or JSONObject</tt>.
+     * Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeObject(String, Object)
@@ -206,7 +206,7 @@ public final class JSONUtils {
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
      * @param jsonFile The json file to write.
      * @param object May be a <tt>JSONObject, JSONArray, String, Boolean,
-     * Number</tt> or a container of the <tt>JSONArray or JSONObject</tt>.
+     * Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @throws IOException if an error occurs while writing to the file.
      * @see #writeObject(JsonWriter, Object)
      */

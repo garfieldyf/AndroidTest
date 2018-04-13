@@ -59,8 +59,8 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be a <tt>JSONObject, JSONArray, String, InputStream</tt>
-     * or a container of the <tt>JSONArray or JSONObject</tt>.
+     * @param data May be an <tt>InputStream</tt> or a <tt>JSONObject, JSONArray,
+     * String</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[])
      * @see #post(byte[], int, int)
@@ -184,7 +184,7 @@ public final class DownloadPostRequest extends DownloadRequest {
          * @param param The user-defined data, passed earlier by {@link DownloadPostRequest#post}.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
          * passed earlier by {@link DownloadRequest#download}.
-         * @throws IOException if an error occurs while posting the data.
+         * @throws IOException if an error occurs while writing the data to the remote HTTP server.
          */
         void onPostData(HttpURLConnection conn, int param, byte[] tempBuffer) throws IOException;
     }

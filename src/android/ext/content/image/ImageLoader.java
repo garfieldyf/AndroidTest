@@ -3,6 +3,7 @@ package android.ext.content.image;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -152,7 +153,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     }
 
     /**
-     * Loads an image from the specified <em>url</em>.
+     * Called on a background thread to load an image from the specified <em>url</em>.
      * @param task The current {@link Task} whose executing this method.
      * @param url The url to load.
      * @param imageFile The image file to store the image data.
@@ -163,8 +164,8 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Params[] params, int flags, byte[] buffer) {
         try {
-            new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).requestHeader("Accept", "*/*").download(imageFile, task, buffer);
-            return (isTaskCancelled(task) ? null : mDecoder.decodeImage(imageFile, params, flags, buffer));
+            final int statusCode = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).requestHeader("Accept", "*/*").download(imageFile, task, buffer);
+            return (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
             return null;
@@ -187,7 +188,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      */
     private static interface Loader<Params, Image> {
         /**
-         * Loads an image from the specified <em>url</em>.
+         * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
          * @param params The parameters, passed earlier by <tt>loadInBackground</tt>.

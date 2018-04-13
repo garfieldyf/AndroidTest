@@ -29,7 +29,7 @@ import android.util.Printer;
  * final JSONObject result = new DownloadRequest(url)
  *     .connectTimeout(60000)
  *     .readTimeout(60000)
- *     .requestHeader("Content-Type", "application/json")
+ *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
  * @version 1.0
@@ -80,6 +80,36 @@ public class DownloadRequest {
      */
     public final DownloadRequest connectTimeout(int timeoutMillis) {
         connection.setConnectTimeout(timeoutMillis);
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("Accept", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest accept(String value) {
+        connection.setRequestProperty("Accept", value);
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("User-Agent", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest userAgent(String value) {
+        connection.setRequestProperty("User-Agent", value);
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("Content-Type", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest contentType(String value) {
+        connection.setRequestProperty("Content-Type", value);
         return this;
     }
 

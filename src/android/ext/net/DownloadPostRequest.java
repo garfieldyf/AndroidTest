@@ -25,7 +25,7 @@ import android.util.JsonWriter;
  *     .post(obj)
  *     .connectTimeout(60000)
  *     .readTimeout(60000)
- *     .requestHeader("Content-Type", "application/json")
+ *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
  * @version 1.0

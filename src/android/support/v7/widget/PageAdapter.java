@@ -333,19 +333,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Returns a string containing a human-readable description of the <em>page</em>.
-     */
-    /* package */ static String toString(Page<?> page, Object data) {
-        final int count = page.getCount();
-        final StringBuilder result = DebugUtils.toSimpleString(data, new StringBuilder(64)).append(" { count = ").append(count);
-        if (count > 0) {
-            result.append(", itemType = ").append(page.getItem(0).getClass().getName());
-        }
-
-        return result.append(" }").toString();
-    }
-
-    /**
      * A <tt>Page</tt> is a collection used to adds the page data to the adapter.
      */
     public static interface Page<E> {
@@ -393,7 +380,17 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
         @Override
         public String toString() {
-            return PageAdapter.toString(this, mData);
+            return toString(this, mData);
+        }
+
+        /* package */ static String toString(Page<?> page, Object data) {
+            final int count = page.getCount();
+            final StringBuilder result = DebugUtils.toSimpleString(data, new StringBuilder(64)).append(" { count = ").append(count);
+            if (count > 0) {
+                result.append(", itemType = ").append(page.getItem(0).getClass().getName());
+            }
+
+            return result.append(" }").toString();
         }
     }
 
@@ -425,7 +422,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
         @Override
         public String toString() {
-            return PageAdapter.toString(this, mData);
+            return ListPage.toString(this, mData);
         }
     }
 

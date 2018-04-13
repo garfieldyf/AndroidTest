@@ -10,8 +10,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote HTTP server on a background
- * thread and publish results on the UI thread. This class both support HTTP "GET" and "POST" methods.
+ * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote HTTP server
+ * on a background thread and publish results on the UI thread.
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {

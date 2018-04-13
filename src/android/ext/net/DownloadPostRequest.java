@@ -110,7 +110,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     @Override
     /* package */ int connect(byte[] tempBuffer) throws IOException {
-        DownloadRequest.__checkHeaders(connection, true);
+        DownloadRequest.__checkHeaders(connection, getClass().getName(), true);
         if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
             connectImpl("POST");
             postData(data);
@@ -132,7 +132,7 @@ public final class DownloadPostRequest extends DownloadRequest {
         }
 
         this.data = null;  // Clears the data to avoid potential memory leaks.
-        DownloadRequest.__checkHeaders(connection, false);
+        DownloadRequest.__checkHeaders(connection, getClass().getName(), false);
         return connection.getResponseCode();
     }
 

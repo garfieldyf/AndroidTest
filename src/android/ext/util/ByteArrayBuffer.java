@@ -117,7 +117,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     @Override
     public void write(int oneByte) {
-        expandCapacity(size + 1, true);
+        expandCapacity(1, true);
         data[size++] = (byte)oneByte;
     }
 
@@ -139,7 +139,7 @@ public final class ByteArrayBuffer extends OutputStream {
     public void write(byte[] buffer, int offset, int count) {
         ArrayUtils.checkRange(offset, count, buffer.length);
         if (count > 0) {
-            expandCapacity(size + count, true);
+            expandCapacity(count, true);
             System.arraycopy(buffer, offset, data, size, count);
             size += count;
         }
@@ -154,7 +154,7 @@ public final class ByteArrayBuffer extends OutputStream {
         DebugUtils.__checkError(buffer == null, "buffer == null");
         final int count = buffer.remaining();
         if (count > 0) {
-            expandCapacity(size + count, false);
+            expandCapacity(count, false);
             buffer.get(data, size, count);
             size += count;
         }
@@ -176,7 +176,7 @@ public final class ByteArrayBuffer extends OutputStream {
         while (cancelable == null || !cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
                 count = expandCount;
-                expandCapacity(size + count, true);
+                expandCapacity(count, true);
 
                 if (expandCount < 8192) {
                     expandCount <<= 1;  // expandCount * 2
@@ -227,9 +227,10 @@ public final class ByteArrayBuffer extends OutputStream {
         return newData;
     }
 
-    private void expandCapacity(int minCapacity, boolean expand) {
+    private void expandCapacity(int expandCount, boolean growUp) {
+        final int minCapacity = expandCount + size;
         if (minCapacity > data.length) {
-            data = copyOf(expand ? Math.max(minCapacity, (data.length * 3) / 2) : minCapacity + 1);
+            data = copyOf(growUp ? Math.max(minCapacity, (data.length * 3) / 2) : minCapacity + 1);
         }
     }
 }

@@ -26,3 +26,24 @@ public interface Cancelable {
      */
     boolean cancel(boolean mayInterruptIfRunning);
 }
+
+/**
+ * A dummy <tt>DummyCancelable</tt>.
+ */
+/* package */ final class DummyCancelable implements Cancelable {
+    private static final Cancelable sInstance = new DummyCancelable();
+
+    public static Cancelable wrap(Cancelable cancelable) {
+        return (cancelable != null ? cancelable : sInstance);
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return false;
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        return false;
+    }
+}

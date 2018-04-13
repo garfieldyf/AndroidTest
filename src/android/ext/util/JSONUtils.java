@@ -141,10 +141,10 @@ public final class JSONUtils {
     public static <T> T newInstance(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
-            return (T)newArrayImpl(reader, cancelable);
+            return (T)newArrayImpl(reader, DummyCancelable.wrap(cancelable));
 
         case BEGIN_OBJECT:
-            return (T)newInstanceImpl(reader, cancelable);
+            return (T)newInstanceImpl(reader, DummyCancelable.wrap(cancelable));
 
         default:
             DebugUtils.__checkError(true, "Invalid json token - " + reader.peek());
@@ -225,7 +225,7 @@ public final class JSONUtils {
         final JSONObject result = new JSONObject();
         reader.beginObject();
 
-        while (reader.hasNext() && !isCancelled(cancelable)) {
+        while (reader.hasNext() && !cancelable.isCancelled()) {
             final String name = reader.nextName();
             switch (reader.peek()) {
             case BEGIN_ARRAY:
@@ -253,7 +253,7 @@ public final class JSONUtils {
             }
         }
 
-        if (!isCancelled(cancelable)) {
+        if (!cancelable.isCancelled()) {
             reader.endObject();
         }
 
@@ -264,7 +264,7 @@ public final class JSONUtils {
         final JSONArray result = new JSONArray();
         reader.beginArray();
 
-        while (reader.hasNext() && !isCancelled(cancelable)) {
+        while (reader.hasNext() && !cancelable.isCancelled()) {
             switch (reader.peek()) {
             case BEGIN_ARRAY:
                 result.put(newArrayImpl(reader, cancelable));
@@ -291,15 +291,11 @@ public final class JSONUtils {
             }
         }
 
-        if (!isCancelled(cancelable)) {
+        if (!cancelable.isCancelled()) {
             reader.endArray();
         }
 
         return result;
-    }
-
-    private static boolean isCancelled(Cancelable cancelable) {
-        return (cancelable != null && cancelable.isCancelled());
     }
 
     private static Number readNumber(JsonReader reader) throws IOException {

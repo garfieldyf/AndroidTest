@@ -170,10 +170,14 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #readFrom(ByteBuffer)
      */
     public final void readFrom(InputStream is, Cancelable cancelable) throws IOException {
+        // Expands this buffer capacity to available bytes.
         DebugUtils.__checkError(is == null, "is == null");
         expandCapacity(is.available(), false);
+        cancelable = DummyCancelable.wrap(cancelable);
+
+        // Reads the all bytes from the InputStream.
         int count, readBytes, expandCount = 256;
-        while (cancelable == null || !cancelable.isCancelled()) {
+        while (!cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
                 count = expandCount;
                 expandCapacity(count, true);

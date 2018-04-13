@@ -191,7 +191,7 @@ public final class DatabaseUtils {
     public static void simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) throws IOException {
         final InputStream is = simpleQuery(db, sql, bindArgs);
         try {
-            FileUtils.copyStream(is, out, null);
+            FileUtils.copyStream(is, out, null, null);
         } finally {
             is.close();
         }

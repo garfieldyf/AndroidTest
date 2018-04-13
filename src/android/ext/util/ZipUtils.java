@@ -14,6 +14,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import android.ext.util.FileUtils.ByteArrayPool;
 import android.ext.util.FileUtils.Dirent;
 
 /**
@@ -33,7 +34,7 @@ public final class ZipUtils {
     public static void compress(InputStream is, OutputStream out) throws IOException {
         final GZIPOutputStream gzip = new GZIPOutputStream(out);
         try {
-            FileUtils.copyStream(is, gzip, null);
+            FileUtils.copyStream(is, gzip, null, null);
             gzip.finish();
         } finally {
             gzip.close();
@@ -71,7 +72,7 @@ public final class ZipUtils {
     public static void uncompress(InputStream is, OutputStream out) throws IOException {
         final GZIPInputStream gzip = new GZIPInputStream(is);
         try {
-            FileUtils.copyStream(gzip, out, null);
+            FileUtils.copyStream(gzip, out, null, null);
         } finally {
             gzip.close();
         }
@@ -113,10 +114,9 @@ public final class ZipUtils {
         try {
             // Compresses the files.
             final Dirent dirent = new Dirent();
-            final byte[] buffer = new byte[8192];
             for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
                 dirent.setPath(files.get(i));
-                compress(os, dirent, dirent.getName(), buffer);
+                compress(os, dirent, dirent.getName());
             }
         } finally {
             os.close();
@@ -138,21 +138,18 @@ public final class ZipUtils {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
 
-            // Creates the CRC32.
-            final CRC32 crc  = new CRC32();
-            final byte[] buf = new byte[8192];
-
             // Enumerates the ZIP file entries.
+            final CRC32 crc = new CRC32();
             final Enumeration<? extends ZipEntry> entries = file.entries();
             while (entries.hasMoreElements()) {
                 final ZipEntry entry  = entries.nextElement();
                 final String pathName = FileUtils.buildPath(outPath, entry.getName());
 
+                // Creates the sub directory.
                 if (entry.isDirectory()) {
-                    // Creates the sub directory.
                     FileUtils.mkdirs(pathName, 0);
                 } else {
-                    uncompress(file, entry, pathName, buf, crc);
+                    uncompress(file, entry, pathName, crc);
                 }
             }
         } finally {
@@ -160,7 +157,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void compress(ZipOutputStream os, Dirent dirent, String name, byte[] buffer) throws IOException {
+    private static void compress(ZipOutputStream os, Dirent dirent, String name) throws IOException {
         if (dirent.isDirectory()) {
             // Adds the directory ZipEntry.
             name += '/';
@@ -170,7 +167,7 @@ public final class ZipUtils {
             final List<Dirent> dirents = dirent.listFiles();
             for (int i = 0, size = dirents.size(); i < size; ++i) {
                 final Dirent child = dirents.get(i);
-                compress(os, child, name + child.getName(), buffer);
+                compress(os, child, name + child.getName());
             }
         } else {
             // Adds the file ZipEntry.
@@ -179,14 +176,14 @@ public final class ZipUtils {
             // Reads the file's contents to ZipOutputStream.
             final InputStream is = new FileInputStream(dirent.path);
             try {
-                FileUtils.copyStream(is, os, buffer);
+                FileUtils.copyStream(is, os, null, null);
             } finally {
                 is.close();
             }
         }
     }
 
-    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, byte[] buf, CRC32 crc) throws IOException {
+    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, CRC32 crc) throws IOException {
         InputStream is  = null;
         OutputStream os = null;
         try {
@@ -197,25 +194,34 @@ public final class ZipUtils {
             final long crcValue = entry.getCrc();
             if (crcValue <= 0) {
                 // Uncompress the ZIP entry.
-                FileUtils.copyStream(is, os, buf);
+                FileUtils.copyStream(is, os, null, null);
             } else {
                 // Uncompress the ZIP entry with check CRC32.
-                crc.reset();
-                int readBytes;
-                while ((readBytes = is.read(buf, 0, buf.length)) > 0) {
-                    os.write(buf, 0, readBytes);
-                    crc.update(buf, 0, readBytes);
-                }
-
-                // Checks the uncompressed content CRC32.
-                final long computedValue = crc.getValue();
-                if (crcValue != computedValue) {
-                    throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(computedValue).append(" ]").toString());
-                }
+                uncompress(is, os, entry, crc, crcValue);
             }
         } finally {
             FileUtils.close(is);
             FileUtils.close(os);
+        }
+    }
+
+    private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue) throws IOException {
+        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        try {
+            // Uncompress the ZIP entry with check CRC32.
+            crc.reset();
+            for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0; ) {
+                os.write(buffer, 0, readBytes);
+                crc.update(buffer, 0, readBytes);
+            }
+
+            // Checks the uncompressed content CRC32.
+            final long computedValue = crc.getValue();
+            if (crcValue != computedValue) {
+                throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(computedValue).append(" ]").toString());
+            }
+        } finally {
+            ByteArrayPool.sInstance.recycle(buffer);
         }
     }
 

@@ -467,7 +467,7 @@ public final class FileUtils {
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
     public static void copyStream(InputStream src, OutputStream dst, byte[] buffer) throws IOException {
-        copyStreamInternal(src, dst, null, buffer);
+        copyStream(src, dst, null, buffer);
     }
 
     /**
@@ -482,7 +482,15 @@ public final class FileUtils {
      * @see #copyStream(InputStream, OutputStream, byte[])
      */
     public static void copyStream(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        copyStreamInternal(src, dst, cancelable, buffer);
+        if (dst instanceof ByteArrayBuffer) {
+            ((ByteArrayBuffer)dst).readFrom(src, cancelable);
+        } else if (buffer != null) {
+            copyStreamImpl(src, dst, cancelable, buffer);
+        } else {
+            buffer = ByteArrayPool.sInstance.obtain();
+            copyStreamImpl(src, dst, cancelable, buffer);
+            ByteArrayPool.sInstance.recycle(buffer);
+        }
     }
 
     /**
@@ -519,7 +527,7 @@ public final class FileUtils {
         try {
             is = new FileInputStream(filename);
             final ByteArrayBuffer result = new ByteArrayBuffer();
-            copyStreamInternal(is, result, null, null);
+            result.readFrom(is, null);
             return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read file - ").append(filename).toString(), e);
@@ -539,7 +547,7 @@ public final class FileUtils {
     public static void readFile(String filename, OutputStream out) throws IOException {
         final InputStream is = new FileInputStream(filename);
         try {
-            copyStreamInternal(is, out, null, null);
+            copyStream(is, out, null, null);
         } finally {
             is.close();
         }
@@ -557,7 +565,7 @@ public final class FileUtils {
         try {
             is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
             final ByteArrayBuffer result = new ByteArrayBuffer();
-            copyStreamInternal(is, result, null, null);
+            result.readFrom(is, null);
             return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read asset file - ").append(filename).toString(), e);
@@ -578,7 +586,7 @@ public final class FileUtils {
     public static void readAssetFile(AssetManager assetManager, String filename, OutputStream out) throws IOException {
         final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
         try {
-            copyStreamInternal(is, out, null, null);
+            copyStream(is, out, null, null);
         } finally {
             is.close();
         }
@@ -623,25 +631,10 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyStreamInternal(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
-        if (out instanceof ByteArrayBuffer) {
-            ((ByteArrayBuffer)out).readFrom(is, cancelable);
-        } else if (buffer != null) {
-            copyStreamImpl(is, out, cancelable, buffer);
-        } else {
-            buffer = ByteArrayPool.sInstance.obtain();
-            copyStreamImpl(is, out, cancelable, buffer);
-            ByteArrayPool.sInstance.recycle(buffer);
-        }
-    }
-
-    /**
-     * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
-     */
-    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
         cancelable = DummyCancelable.wrap(cancelable);
-        for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
-            out.write(buffer, 0, readBytes);
+        for (int readBytes; (readBytes = src.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
+            dst.write(buffer, 0, readBytes);
         }
     }
 
@@ -1714,7 +1707,7 @@ public final class FileUtils {
     /**
      * Class <tt>ByteArrayPool</tt> used to obtain the byte array.
      */
-    private static final class ByteArrayPool extends SimplePool<byte[]> {
+    /* package */ static final class ByteArrayPool extends SimplePool<byte[]> {
         public static final ByteArrayPool sInstance = new ByteArrayPool();
 
         @Override

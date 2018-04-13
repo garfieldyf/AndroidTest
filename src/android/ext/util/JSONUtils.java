@@ -228,14 +228,6 @@ public final class JSONUtils {
         while (reader.hasNext() && !cancelable.isCancelled()) {
             final String name = reader.nextName();
             switch (reader.peek()) {
-            case BEGIN_ARRAY:
-                result.put(name, newArrayImpl(reader, cancelable));
-                break;
-
-            case BEGIN_OBJECT:
-                result.put(name, newInstanceImpl(reader, cancelable));
-                break;
-
             case STRING:
                 result.put(name, reader.nextString());
                 break;
@@ -246,6 +238,14 @@ public final class JSONUtils {
 
             case BOOLEAN:
                 result.put(name, reader.nextBoolean());
+                break;
+
+            case BEGIN_ARRAY:
+                result.put(name, newArrayImpl(reader, cancelable));
+                break;
+
+            case BEGIN_OBJECT:
+                result.put(name, newInstanceImpl(reader, cancelable));
                 break;
 
             default:
@@ -266,14 +266,6 @@ public final class JSONUtils {
 
         while (reader.hasNext() && !cancelable.isCancelled()) {
             switch (reader.peek()) {
-            case BEGIN_ARRAY:
-                result.put(newArrayImpl(reader, cancelable));
-                break;
-
-            case BEGIN_OBJECT:
-                result.put(newInstanceImpl(reader, cancelable));
-                break;
-
             case STRING:
                 result.put(reader.nextString());
                 break;
@@ -284,6 +276,14 @@ public final class JSONUtils {
 
             case BOOLEAN:
                 result.put(reader.nextBoolean());
+                break;
+
+            case BEGIN_ARRAY:
+                result.put(newArrayImpl(reader, cancelable));
+                break;
+
+            case BEGIN_OBJECT:
+                result.put(newInstanceImpl(reader, cancelable));
                 break;
 
             default:

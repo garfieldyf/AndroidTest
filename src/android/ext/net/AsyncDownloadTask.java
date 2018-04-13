@@ -27,7 +27,7 @@ import android.util.Log;
  *     .post(obj)
  *     .readTimeout(60000)
  *     .connectTimeout(60000)
- *     .requestHeader("Content-Type", "application/json");
+ *     .contentType("application/json")
  * task.execute((Object[])null);</pre>
  * @author Garfield
  * @version 1.0
@@ -85,7 +85,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     public final <T extends DownloadRequest> T newDownloadRequest(String url, Class<T> clazz) {
         try {
             DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
-            return (T)(mRequest = clazz.getDeclaredConstructor(String.class).newInstance(url));
+            return (T)(mRequest = clazz.getConstructor(String.class).newInstance(url));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

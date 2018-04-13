@@ -7,12 +7,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
@@ -20,15 +17,14 @@ import android.support.annotation.Keep;
 import android.util.JsonReader;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.util.Printer;
 
 /**
  * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote HTTP server.
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadRequest(url)
- *     .connectTimeout(60000)
  *     .readTimeout(60000)
+ *     .connectTimeout(60000)
  *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
@@ -104,6 +100,16 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Connection", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest connection(String value) {
+        connection.setRequestProperty("Connection", value);
+        return this;
+    }
+
+    /**
      * Equivalent to calling <tt>requestHeader("Content-Type", value)</tt>.
      * @param value The value of the field.
      * @return This request.
@@ -144,9 +150,9 @@ public class DownloadRequest {
     /**
      * Downloads the JSON data from the remote HTTP server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
-     * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray} object,
-     * If the operation was cancelled before it completed normally then the returned value undefined,
-     * If the operation failed return <tt>null</tt>.
+     * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object,
+     * If the download was cancelled before it completed normally then the returned value undefined,
+     * If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
      * @throws JSONException if data can not be parsed.
      * @see #download(String, Cancelable, byte[])
@@ -173,7 +179,7 @@ public class DownloadRequest {
      * <p>Note: This method will be create the necessary directories.</p>
      * @param filename The file name to write the resource, must be absolute file path.
      * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
-     * operation was cancelled before it completed normally then the file's contents undefined.
+     * download was cancelled before it completed normally then the file's contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @return The response code returned by the remote HTTP server.
      * @throws IOException if an error occurs while downloading to the resource.
@@ -195,7 +201,7 @@ public class DownloadRequest {
      * Downloads the resource from the remote HTTP server with the arguments supplied to this request.
      * @param out The {@link OutputStream} to write the resource.
      * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
-     * operation was cancelled before it completed normally then the <em>out's</em> contents undefined.
+     * download was cancelled before it completed normally then the <em>out's</em> contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @return The response code returned by the remote HTTP server.
      * @throws IOException if an error occurs while downloading the resource.
@@ -252,8 +258,8 @@ public class DownloadRequest {
         }
     }
 
-    /* package */ static void __checkHeaders(URLConnection conn, String tag, boolean request) {
-        final Printer printer = new LogPrinter(Log.DEBUG, tag);
+    /* package */ static void __checkHeaders(HttpURLConnection conn, String tag, boolean request) {
+        final LogPrinter printer = new LogPrinter(Log.DEBUG, tag);
         if (request) {
             NetworkUtils.dumpRequestHeaders(conn, printer);
         } else {

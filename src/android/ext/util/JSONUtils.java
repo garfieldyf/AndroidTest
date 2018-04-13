@@ -1,8 +1,10 @@
 package android.ext.util;
 
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
@@ -161,7 +163,7 @@ public final class JSONUtils {
      * @see #newInstance(JsonReader, Cancelable)
      */
     public static <T> T newInstance(String jsonFile, Cancelable cancelable) throws IOException, JSONException {
-        final JsonReader reader = new JsonReader(new FileReader(jsonFile));
+        final JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(jsonFile)));
         try {
             return newInstance(reader, cancelable);
         } finally {
@@ -211,7 +213,7 @@ public final class JSONUtils {
      * @see #writeObject(JsonWriter, Object)
      */
     public static void writeObject(String jsonFile, Object object) throws IOException {
-        final JsonWriter writer = new JsonWriter(new FileWriter(jsonFile));
+        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile)));
         try {
             writeObject(writer, object);
         } finally {

@@ -467,7 +467,7 @@ public final class FileUtils {
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
     public static void copyStream(InputStream src, OutputStream dst, byte[] buffer) throws IOException {
-        copyStreamImpl(src, dst, null, buffer);
+        copyStreamInternal(src, dst, null, buffer);
     }
 
     /**
@@ -482,7 +482,7 @@ public final class FileUtils {
      * @see #copyStream(InputStream, OutputStream, byte[])
      */
     public static void copyStream(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        copyStreamImpl(src, dst, cancelable, buffer);
+        copyStreamInternal(src, dst, cancelable, buffer);
     }
 
     /**
@@ -519,7 +519,7 @@ public final class FileUtils {
         try {
             is = new FileInputStream(filename);
             final ByteArrayBuffer result = new ByteArrayBuffer();
-            copyStreamImpl(is, result, null, null);
+            copyStreamInternal(is, result, null, null);
             return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read file - ").append(filename).toString(), e);
@@ -539,7 +539,7 @@ public final class FileUtils {
     public static void readFile(String filename, OutputStream out) throws IOException {
         final InputStream is = new FileInputStream(filename);
         try {
-            copyStreamImpl(is, out, null, null);
+            copyStreamInternal(is, out, null, null);
         } finally {
             is.close();
         }
@@ -557,7 +557,7 @@ public final class FileUtils {
         try {
             is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
             final ByteArrayBuffer result = new ByteArrayBuffer();
-            copyStreamImpl(is, result, null, null);
+            copyStreamInternal(is, result, null, null);
             return result;
         } catch (Exception e) {
             Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read asset file - ").append(filename).toString(), e);
@@ -578,7 +578,7 @@ public final class FileUtils {
     public static void readAssetFile(AssetManager assetManager, String filename, OutputStream out) throws IOException {
         final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
         try {
-            copyStreamImpl(is, out, null, null);
+            copyStreamInternal(is, out, null, null);
         } finally {
             is.close();
         }
@@ -623,14 +623,14 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyStreamInternal(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
         } else if (buffer != null) {
-            copyToStreamImpl(is, out, cancelable, buffer);
+            copyStreamImpl(is, out, cancelable, buffer);
         } else {
             buffer = ByteArrayPool.sInstance.obtain();
-            copyToStreamImpl(is, out, cancelable, buffer);
+            copyStreamImpl(is, out, cancelable, buffer);
             ByteArrayPool.sInstance.recycle(buffer);
         }
     }
@@ -638,7 +638,7 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyToStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         int readBytes;
         if (cancelable == null) {
             while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {

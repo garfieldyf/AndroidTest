@@ -201,7 +201,8 @@ public final class ZipUtils {
             } else {
                 // Uncompress the ZIP entry with check CRC32.
                 crc.reset();
-                for (int readBytes = 0; (readBytes = is.read(buf, 0, buf.length)) > 0; ) {
+                int readBytes;
+                while ((readBytes = is.read(buf, 0, buf.length)) > 0) {
                     os.write(buf, 0, readBytes);
                     crc.update(buf, 0, readBytes);
                 }

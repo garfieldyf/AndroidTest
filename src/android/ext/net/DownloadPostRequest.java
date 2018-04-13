@@ -23,8 +23,8 @@ import android.util.JsonWriter;
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadPostRequest(url)
  *     .post(obj)
- *     .connectTimeout(60000)
  *     .readTimeout(60000)
+ *     .connectTimeout(60000)
  *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
@@ -68,7 +68,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The post data is already exists. Do you want overrides it.");
+        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         this.data = data;
         return this;
     }
@@ -83,7 +83,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(byte[], int, int)
      */
     public final DownloadPostRequest post(PostCallback callback, int param) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The post data is already exists. Do you want overrides it.");
+        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         this.count = param;
         this.data  = callback;
         return this;
@@ -100,7 +100,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(PostCallback, int)
      */
     public final DownloadPostRequest post(byte[] data, int offset, int count) {
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The post data is already exists. Do you want overrides it.");
+        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         ArrayUtils.checkRange(offset, count, data.length);
         this.data   = data;
         this.count  = count;

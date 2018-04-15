@@ -216,9 +216,9 @@ public final class ZipUtils {
             }
 
             // Checks the uncompressed content CRC32.
-            final long computedValue = crc.getValue();
-            if (crcValue != computedValue) {
-                throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(computedValue).append(" ]").toString());
+            final long checksum = crc.getValue();
+            if (crcValue != checksum) {
+                throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(checksum).append(" ]").toString());
             }
         } finally {
             ByteArrayPool.sInstance.recycle(buffer);

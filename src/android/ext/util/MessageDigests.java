@@ -92,6 +92,7 @@ public final class MessageDigests {
 
     /**
      * Computes the final hash value using the given <em>string</em>.
+     * The <em>string</em> converted using the system's default charset.
      * @param string The <tt>String</tt> to compute.
      * @param algorithm The {@link Algorithm} to compute.
      * @return The computed hash value.
@@ -110,6 +111,7 @@ public final class MessageDigests {
     /**
      * Computes the final hash value using the given <em>string</em>
      * and <em>algorithm</em>, Stores the result in <em>result</em>.
+     * The <em>string</em> converted using the system's default charset.
      * @param string The <tt>String</tt> to compute.
      * @param result The byte array to store the computed hash value.
      * @param offset The start position in the <em>result</em>.

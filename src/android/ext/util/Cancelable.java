@@ -28,7 +28,7 @@ public interface Cancelable {
 }
 
 /**
- * A dummy <tt>DummyCancelable</tt>.
+ * A dummy <tt>Cancelable</tt>.
  */
 /* package */ final class DummyCancelable implements Cancelable {
     private static final Cancelable sInstance = new DummyCancelable();

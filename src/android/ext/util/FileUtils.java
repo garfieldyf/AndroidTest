@@ -72,13 +72,6 @@ public final class FileUtils {
     public static final int FLAG_IGNORE_HIDDEN_FILE = 0x01;
 
     /**
-     * This flag use with {@link #listFiles(String, int, Factory)}.
-     * If set the {@link Dirent#path} is an absolute file path.
-     * Otherwise the {@link Dirent#path} is a filename.
-     */
-    public static final int FLAG_ABSOLUTE_FILE_PATH = 0x02;
-
-    /**
      * This flag use with {@link #scanFiles(String, ScanCallback, int)}.
      * If set the <tt>scanFiles</tt> will scan the descendent files.
      */
@@ -295,8 +288,7 @@ public final class FileUtils {
      * directories in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing
      * the current and parent directory are not returned as part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The list flags. May be <tt>0</tt> or any combination of
-     * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_ABSOLUTE_FILE_PATH}.
+     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
      * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded,
      * <tt>null</tt> otherwise.
@@ -313,8 +305,7 @@ public final class FileUtils {
      * directories in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing
      * the current and parent directory are not returned as part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The list flags. May be <tt>0</tt> or any combination of
-     * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_ABSOLUTE_FILE_PATH}.
+     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
      * @param outDirents A <tt>List</tt> to store the <tt>Dirent</tt> or subclass objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code.
@@ -1107,7 +1098,7 @@ public final class FileUtils {
         public static final int DT_SOCK = 12;
 
         /**
-         * The relative or absolute file path.
+         * The absolute file path.
          */
         public String path;
 
@@ -1185,20 +1176,9 @@ public final class FileUtils {
          * Tests if this <tt>Dirent</tt> is a hidden file.
          * @return <tt>true</tt> if this <tt>Dirent</tt>
          * is a hidden file, <tt>false</tt> otherwise.
-         * @see #isAbsolute()
          */
         public boolean isHidden() {
             return FileUtils.isHidden(path);
-        }
-
-        /**
-         * Tests if this <tt>Dirent's</tt> path is absolute.
-         * @return <tt>true</tt> if this <tt>Dirent's</tt>
-         * path is absolute, <tt>false</tt> otherwise.
-         * @see #isHidden()
-         */
-        public boolean isAbsolute() {
-            return (StringUtils.getLength(path) > 0 && path.charAt(0) == '/');
         }
 
         /**
@@ -1207,7 +1187,6 @@ public final class FileUtils {
          * <tt>0</tt> otherwise.
          */
         public long length() {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return getFileLength(path);
         }
 
@@ -1260,24 +1239,46 @@ public final class FileUtils {
         }
 
         /**
+         * Equivalent to calling <tt>FileUtils.access(path, mode)</tt>.
+         * @see FileUtils#access(String, int)
+         */
+        public int access(int mode) {
+            return FileUtils.access(path, mode);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.mkdirs(path, flags)</tt>.
+         * @see FileUtils#mkdirs(String, int)
+         */
+        public int mkdirs(int flags) {
+            return FileUtils.mkdirs(path, flags);
+        }
+
+        /**
          * Equivalent to calling <tt>FileUtils.stat(path)</tt>.
-         * @see FileUtils#stat(String)
          * @see #stat(Stat)
+         * @see FileUtils#stat(String)
          */
         public Stat stat() {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             final Stat stat = new Stat();
             return (FileUtils.stat(path, stat) == 0 ? stat : null);
         }
 
         /**
          * Equivalent to calling <tt>FileUtils.stat(path, outStat)</tt>.
-         * @see FileUtils#stat(String, Stat)
          * @see #stat()
+         * @see FileUtils#stat(String, Stat)
          */
         public int stat(Stat outStat) {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return FileUtils.stat(path, outStat);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.listFiles(path, 0, Dirent.FACTORY)</tt>.
+         * @see FileUtils#listFiles(String, int, Factory)
+         */
+        public List<Dirent> listFiles() {
+            return FileUtils.listFiles(path, 0, Dirent.FACTORY);
         }
 
         /**
@@ -1285,42 +1286,7 @@ public final class FileUtils {
          * @see FileUtils#scanFiles(String, ScanCallback, int)
          */
         public int scanFiles(ScanCallback callback, int flags) {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
             return FileUtils.scanFiles(path, callback, flags);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.listFiles(path, FileUtils.FLAG_ABSOLUTE_FILE_PATH, Dirent.FACTORY)</tt>.
-         * @see FileUtils#listFiles(String, int, Factory)
-         * @see #listFiles(int, Factory)
-         * @see #listFiles(int, Factory, List)
-         */
-        public List<Dirent> listFiles() {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
-            return listFiles(FLAG_ABSOLUTE_FILE_PATH, Dirent.FACTORY);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.listFiles(path, flags, factory)</tt>.
-         * @see FileUtils#listFiles(String, int, Factory)
-         * @see #listFiles()
-         * @see #listFiles(int, Factory, List)
-         */
-        public <T extends Dirent> List<T> listFiles(int flags, Factory<T> factory) {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
-            final List<T> dirents = new ArrayList<T>();
-            return (FileUtils.listFiles(path, flags, factory, dirents) == 0 ? dirents : null);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.listFiles(path, flags, factory, outDirents)</tt>.
-         * @see FileUtils#listFiles(String, int, Factory, List)
-         * @see #listFiles()
-         * @see #listFiles(int, Factory)
-         */
-        public <T extends Dirent> int listFiles(int flags, Factory<T> factory, List<? super T> outDirents) {
-            DebugUtils.__checkError(!isAbsolute(), "The path must be absolute file path.");
-            return FileUtils.listFiles(path, flags, factory, outDirents);
         }
 
         /**
@@ -1454,7 +1420,6 @@ public final class FileUtils {
                    .append(", extension = ").append(extension != null ? extension : "N/A")
                    .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
                    .append(", hidden = ").append(isHidden())
-                   .append(", absolute = ").append(isAbsolute())
                    .append(" }").toString());
         }
 

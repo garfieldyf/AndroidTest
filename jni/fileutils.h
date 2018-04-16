@@ -53,9 +53,6 @@ enum
     // Ignores the hidden file (start with ".").
     FLAG_IGNORE_HIDDEN_FILE = 0x01,
 
-    // The flag use with listFiles function.
-    FLAG_ABSOLUTE_FILE_PATH = 0x02,
-
     // The flag use with scanFiles function.
     FLAG_SCAN_FOR_DESCENDENTS = 0x02,
 };
@@ -250,21 +247,12 @@ JNIEXPORT_METHOD(jint) listFiles(JNIEnv* env, jclass clazz, jstring dirPath, jin
     jint errnum = dir.open(jdirPath);
     if (errnum == 0)
     {
-        if (flags & FLAG_ABSOLUTE_FILE_PATH)
+        char path[MAX_PATH];
+        const int length = ::snprintf(path, _countof(path), "%s/", jdirPath.str());
+        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
-            char path[MAX_PATH];
-            const int length = ::snprintf(path, _countof(path), "%s/", jdirPath.str());
-
-            for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-            {
-                ::strlcpy(path + length, entry->d_name, _countof(path) - length);
-                env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef(env, path).str, (jint)entry->d_type, factory);
-            }
-        }
-        else
-        {
-            for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-                env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef(env, entry->d_name).str, (jint)entry->d_type, factory);
+            ::strlcpy(path + length, entry->d_name, _countof(path) - length);
+            env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef(env, path).str, (jint)entry->d_type, factory);
         }
     }
 

@@ -51,7 +51,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @return This request.
      * @see #post(Object)
      * @see #post(byte[], int, int)
-     * @see #post(int, PostCallback)
+     * @see #post(PostCallback, int)
      */
     public final DownloadPostRequest post(byte[] data) {
         return post(data, 0, data.length);
@@ -64,7 +64,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @return This request.
      * @see #post(byte[])
      * @see #post(byte[], int, int)
-     * @see #post(int, PostCallback)
+     * @see #post(PostCallback, int)
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
@@ -83,7 +83,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(Object)
      * @see #post(byte[], int, int)
      */
-    public final DownloadPostRequest post(int token, PostCallback callback) {
+    public final DownloadPostRequest post(PostCallback callback, int token) {
         DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         this.count = token;
         this.data  = callback;
@@ -98,7 +98,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @return This request.
      * @see #post(byte[])
      * @see #post(Object)
-     * @see #post(int, PostCallback)
+     * @see #post(PostCallback, int)
      */
     public final DownloadPostRequest post(byte[] data, int offset, int count) {
         DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
@@ -127,7 +127,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             postData(data, 0, data.length);
         } else if (data instanceof PostCallback) {
             connectImpl("POST");
-            ((PostCallback)data).onPostData(count, connection, tempBuffer);
+            ((PostCallback)data).onPostData(connection, count, tempBuffer);
         } else {
             connectImpl("GET");
         }
@@ -181,12 +181,12 @@ public final class DownloadPostRequest extends DownloadRequest {
     public static interface PostCallback {
         /**
          * Called on a background thread to post the data to the remote HTTP server.
-         * @param token A token to identify the post, passed earlier by {@link DownloadPostRequest#post}.
          * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
+         * @param token A token to identify the post, passed earlier by {@link DownloadPostRequest#post}.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
          * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while writing the data to the remote HTTP server.
          */
-        void onPostData(int token, HttpURLConnection conn, byte[] tempBuffer) throws IOException;
+        void onPostData(HttpURLConnection conn, int token, byte[] tempBuffer) throws IOException;
     }
 }

@@ -671,7 +671,7 @@ public final class Caches {
 
         /* package */ final void dump(Context context, Printer printer) {
             final StringBuilder result = new StringBuilder(136);
-            final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0, Dirent.FACTORY);
+            final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0);
             final int size = ArrayUtils.getSize(dirents);
 
             DebugUtils.dumpSummary(printer, result, 130, " Dumping SimpleFileCache Storage Cache [ files = %d ] ", size);
@@ -758,7 +758,7 @@ public final class Caches {
         }
 
         private void dumpCachedFiles(Context context, Printer printer, StringBuilder result, String className) {
-            final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0, Dirent.FACTORY);
+            final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0);
             final int size = ArrayUtils.getSize(dirents);
             result.setLength(0);
             if (size > 0) {

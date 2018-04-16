@@ -216,14 +216,26 @@ public final class FileUtils {
      * @param dir The path to the directory.
      * @param name The file's name.
      */
-    public static String buildPath(String dir, String name) {
-        final int length  = dir.length();
-        boolean haveSlash = (length > 0 && dir.charAt(length - 1) == '/');
-        if (!haveSlash) {
-            haveSlash = (name.length() > 0 && name.charAt(0) == '/');
+    public static String buildPath(CharSequence dir, CharSequence name) {
+        final int length = dir.length() + name.length() + 1;
+        final StringBuilder path = new StringBuilder(length).append(dir).append('/').append(name);
+
+        boolean haveSlash = false;
+        int newLength = 0;
+        for (int i = 0; i < length; ++i) {
+            final char ch = path.charAt(i);
+            if (ch == '/') {
+                if (!haveSlash) {
+                    haveSlash = true;
+                    path.setCharAt(newLength++, '/');
+                }
+            } else {
+                haveSlash = false;
+                path.setCharAt(newLength++, ch);
+            }
         }
 
-        return (haveSlash ? dir + name : dir + '/' + name);
+        return path.substring(0, (haveSlash && newLength > 1 ? newLength - 1 : newLength));
     }
 
     /**
@@ -284,15 +296,30 @@ public final class FileUtils {
     public static native int scanFiles(String dirPath, ScanCallback callback, int flags);
 
     /**
-     * Returns a <tt>List</tt> of {@link Dirent} or subclass objects with the sub files and
-     * directories in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing
-     * the current and parent directory are not returned as part of the list.</p>
+     * Equivalent to calling <tt>listFiles(dirPath, flags, Dirent.FACTORY, new ArrayList())</tt>.
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
      * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded,
      * <tt>null</tt> otherwise.
      * @see Dirent#FACTORY
+     * @see #listFiles(String, int, Factory)
+     * @see #listFiles(String, int, Factory, List)
+     */
+    public static List<Dirent> listFiles(String dirPath, int flags) {
+        final List<Dirent> dirents = new ArrayList<Dirent>();
+        return (listFiles(dirPath, flags, Dirent.FACTORY, dirents) == 0 ? dirents : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>listFiles(dirPath, flags, factory, new ArrayList())</tt>.
+     * @param dirPath The directory path, must be absolute file path.
+     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
+     * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
+     * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded,
+     * <tt>null</tt> otherwise.
+     * @see Dirent#FACTORY
+     * @see #listFiles(String, int)
      * @see #listFiles(String, int, Factory, List)
      */
     public static <T extends Dirent> List<T> listFiles(String dirPath, int flags, Factory<T> factory) {
@@ -311,6 +338,7 @@ public final class FileUtils {
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code.
      * See {@link ErrnoException}.
      * @see Dirent#FACTORY
+     * @see #listFiles(String, int)
      * @see #listFiles(String, int, Factory)
      */
     public static native <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents);
@@ -1274,11 +1302,11 @@ public final class FileUtils {
         }
 
         /**
-         * Equivalent to calling <tt>FileUtils.listFiles(path, 0, Dirent.FACTORY)</tt>.
-         * @see FileUtils#listFiles(String, int, Factory)
+         * Equivalent to calling <tt>FileUtils.listFiles(path, 0)</tt>.
+         * @see FileUtils#listFiles(String, int)
          */
         public List<Dirent> listFiles() {
-            return FileUtils.listFiles(path, 0, Dirent.FACTORY);
+            return FileUtils.listFiles(path, 0);
         }
 
         /**

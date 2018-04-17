@@ -232,18 +232,10 @@ public class DownloadRequest {
      * Connects to the remote HTTP server with the arguments supplied to this request.
      */
     /* package */ int connect(byte[] tempBuffer) throws IOException {
-        __checkDumpHeaders(true);
-        connectImpl("GET");
-        __checkDumpHeaders(false);
-        return connection.getResponseCode();
-    }
-
-    /**
-     * Connects to the remote HTTP server with the specified method.
-     */
-    /* package */ final void connectImpl(String method) throws IOException {
-        connection.setRequestMethod(method);
+        __checkHeaders(true);
         connection.connect();
+        __checkHeaders(false);
+        return connection.getResponseCode();
     }
 
     /**
@@ -258,7 +250,7 @@ public class DownloadRequest {
         }
     }
 
-    /* package */ final void __checkDumpHeaders(boolean request) {
+    /* package */ final void __checkHeaders(boolean request) {
         final LogPrinter printer = new LogPrinter(Log.DEBUG, getClass().getName());
         if (request) {
             NetworkUtils.dumpRequestHeaders(connection, printer);

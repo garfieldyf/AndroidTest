@@ -111,7 +111,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     @Override
     /* package */ int connect(byte[] tempBuffer) throws IOException {
-        __checkDumpHeaders(true);
+        __checkHeaders(true);
         if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
             connectImpl("POST");
             postData(data);
@@ -133,8 +133,16 @@ public final class DownloadPostRequest extends DownloadRequest {
         }
 
         this.data = null;  // Clears the data to avoid potential memory leaks.
-        __checkDumpHeaders(false);
+        __checkHeaders(false);
         return connection.getResponseCode();
+    }
+
+    /**
+     * Connects to the remote HTTP server with the specified method.
+     */
+    private void connectImpl(String method) throws IOException {
+        connection.setRequestMethod(method);
+        connection.connect();
     }
 
     /**

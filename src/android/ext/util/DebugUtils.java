@@ -46,7 +46,8 @@ public final class DebugUtils {
      * Print the method running time to logcat since call {@link #startMethodTracing()}.
      * @param tag Used to identify the source of a log message.
      * @param prefix The prefix to print. It usually identifies the method name.
-     * @param timeUnit The time unit to print. Pass 'n', 'u' or 'm'.
+     * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
+     * or 'm' (milliseconds).
      * @see #startMethodTracing()
      * @see #stopMethodTracing(String, String)
      */
@@ -60,7 +61,8 @@ public final class DebugUtils {
      * @param prefix The prefix to print. It usually identifies the method name.
      * @param nanoTime The method running time returned by {@link #stopMethodTracing()}
      * in nanoseconds.
-     * @param timeUnit The time unit to print. Pass 'n', 'u' or 'm'.
+     * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
+     * or 'm' (milliseconds).
      * @see #startMethodTracing()
      * @see #stopMethodTracing()
      */

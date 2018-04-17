@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -184,9 +184,9 @@ public final class FileUtils {
      * Tests if the <em>path</em> is linux root directory ('/').
      * @param path The path to test.
      * @return <tt>true</tt> if the path is root directory, <tt>false</tt> otherwise.
-     * @see #isAbsolutePath(CharSequence)
+     * @see #isAbsolutePath(String)
      */
-    public static boolean isRootDir(CharSequence path) {
+    public static boolean isRootDir(String path) {
         return (StringUtils.getLength(path) == 1 && path.charAt(0) == '/');
     }
 
@@ -194,9 +194,9 @@ public final class FileUtils {
      * Tests if the <em>path</em> is an absolute path.
      * @param path The path to test.
      * @return <tt>true</tt> if the path is an absolute path, <tt>false</tt> otherwise.
-     * @see #isRootDir(CharSequence)
+     * @see #isRootDir(String)
      */
-    public static boolean isAbsolutePath(CharSequence path) {
+    public static boolean isAbsolutePath(String path) {
         return (StringUtils.getLength(path) > 0 && path.charAt(0) == '/');
     }
 
@@ -216,22 +216,22 @@ public final class FileUtils {
      * @param dir The path to the directory.
      * @param name The file's name.
      */
-    public static String buildPath(CharSequence dir, CharSequence name) {
+    public static String buildPath(String dir, String name) {
         final int length = dir.length() + name.length() + 1;
         final StringBuilder path = new StringBuilder(length).append(dir).append('/').append(name);
 
         boolean haveSlash = false;
         int newLength = 0;
         for (int i = 0; i < length; ++i) {
-            final char ch = path.charAt(i);
-            if (ch == '/') {
+            final char c = path.charAt(i);
+            if (c == '/') {
                 if (!haveSlash) {
                     haveSlash = true;
                     path.setCharAt(newLength++, '/');
                 }
             } else {
                 haveSlash = false;
-                path.setCharAt(newLength++, ch);
+                path.setCharAt(newLength++, c);
             }
         }
 
@@ -435,7 +435,7 @@ public final class FileUtils {
      * @see #getFileExtension(String)
      */
     public static String getFileMimeType(String path) {
-        return (path != null ? HttpURLConnection.getFileNameMap().getContentTypeFor(path) : null);
+        return (path != null ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
     }
 
     /**
@@ -506,9 +506,7 @@ public final class FileUtils {
         } else if (buffer != null) {
             copyStreamImpl(src, dst, cancelable, buffer);
         } else {
-            buffer = ByteArrayPool.sInstance.obtain();
-            copyStreamImpl(src, dst, cancelable, buffer);
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteArrayPool.sInstance.recycle(copyStreamImpl(src, dst, cancelable, ByteArrayPool.sInstance.obtain()));
         }
     }
 
@@ -650,11 +648,13 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static byte[] copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
         cancelable = DummyCancelable.wrap(cancelable);
         for (int readBytes; (readBytes = src.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
             dst.write(buffer, 0, readBytes);
         }
+
+        return buffer;
     }
 
     /**
@@ -1263,7 +1263,7 @@ public final class FileUtils {
          * this <tt>Dirent</tt> is a directory or the MIME type was not found.
          */
         public String getMimeType() {
-            return (type != DT_DIR ? HttpURLConnection.getFileNameMap().getContentTypeFor(path) : null);
+            return (type != DT_DIR ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
         }
 
         /**

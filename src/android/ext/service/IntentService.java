@@ -87,9 +87,7 @@ public abstract class IntentService extends Service implements Callback {
             // msg.arg2 -- startId
             // msg.obj  -- intent
             onHandleIntent((Intent)msg.obj, msg.arg1, msg.arg2);
-            if (!mHandler.hasMessages(MESSAGE_INTENT)) {
-                mHandler.sendMessageDelayed(Message.obtain(mHandler, MESSAGE_QUIT, msg.arg2, 0), mKeepAliveTime);
-            }
+            sendQuitMessage(msg.arg2);
             break;
         }
 
@@ -99,6 +97,17 @@ public abstract class IntentService extends Service implements Callback {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    /**
+     * Sends a QUIT message to the end of the worker thread's message queue.
+     * This service will be stop at sometime in the future.
+     * @param startId A unique integer, passed earlier by {@link #onStartCommand(Intent, int, int)}.
+     */
+    protected void sendQuitMessage(int startId) {
+        if (!mHandler.hasMessages(MESSAGE_INTENT)) {
+            mHandler.sendMessageDelayed(Message.obtain(mHandler, MESSAGE_QUIT, startId, 0), mKeepAliveTime);
+        }
     }
 
     /**

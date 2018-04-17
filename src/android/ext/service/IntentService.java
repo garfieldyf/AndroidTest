@@ -79,7 +79,7 @@ public abstract class IntentService extends Service implements Callback {
         switch (msg.what) {
         case MESSAGE_QUIT:
             // msg.arg1 -- startId
-            stopSelf(msg.arg1);
+            stopSelfResult(msg.arg1);
             break;
 
         case MESSAGE_INTENT:

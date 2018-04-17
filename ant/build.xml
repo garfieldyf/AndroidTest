@@ -61,6 +61,18 @@
         </replace>
     </target>
 
+    <!-- target -pre-compile-test -->
+    <target name="-pre-compile-test">
+        <property name="java.debug" value="true" />
+        <property name="class.dir" value="${basedir}/src" />
+        <property name="file.out.dir" value="${out.dir}/debug" />
+
+        <!-- delete call the __checkXXX methods -->
+        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </replaceregexp>
+    </target>
+
     <!-- target -pre-compile-debug -->
     <target name="-pre-compile-debug">
         <property name="ndk.debug" value="1" />
@@ -176,6 +188,15 @@
         <delete includeemptydirs="true">
             <fileset dir="${basedir}" includes="**/*" excludes="build.xml" />
         </delete>
+    </target>
+
+    <!-- target test -->
+    <target name="test" depends="-clean, -copy, -pre-compile-test, -compile-jar, -post-compile">
+        <echo level="info">Builds the ${ndk.module} modules in test mode.</echo>
+        <echo level="info">Install: ${file.out.dir}</echo>
+        <echo level="info">Install: ${file.out.dir}\${jar.file.name}</echo>
+        <echo level="info">Install: ${out.dir}\attrs_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}\${ndk.module}-proguard.txt</echo>
     </target>
 
     <!-- target debug -->

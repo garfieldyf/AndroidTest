@@ -21,7 +21,6 @@ public abstract class IntentService extends Service implements Callback {
     private static final int MESSAGE_INTENT = 1;
 
     private Handler mHandler;
-    private final int mPriority;
     private final long mKeepAliveTime;
     private final boolean mRedelivery;
 
@@ -29,10 +28,10 @@ public abstract class IntentService extends Service implements Callback {
      * Constructor
      * @param keepAliveTime The maximum time in milliseconds that this
      * service will wait for a new <tt>Intent</tt> before terminating.
-     * @see #IntentService(long, boolean, int)
+     * @see #IntentService(long, boolean)
      */
     public IntentService(long keepAliveTime) {
-        this(keepAliveTime, false, Process.THREAD_PRIORITY_BACKGROUND);
+        this(keepAliveTime, false);
     }
 
     /**
@@ -42,12 +41,9 @@ public abstract class IntentService extends Service implements Callback {
      * @param redelivery The intent redelivery preferences. If <tt>true</tt>
      * {@link #onStartCommand(Intent, int, int)} will return {@link Service#START_REDELIVER_INTENT},
      * otherwise return {@link Service#START_NOT_STICKY}.
-     * @param priority The priority to run the worker thread at. The value supplied must
-     * be from {@link android.os.Process} and <b>not</b> from {@link java.lang.Thread}.
      * @see #IntentService(long)
      */
-    public IntentService(long keepAliveTime, boolean redelivery, int priority) {
-        mPriority   = priority;
+    public IntentService(long keepAliveTime, boolean redelivery) {
         mRedelivery = redelivery;
         mKeepAliveTime = keepAliveTime;
     }
@@ -56,7 +52,7 @@ public abstract class IntentService extends Service implements Callback {
     public void onCreate() {
         super.onCreate();
 
-        final HandlerThread thread = new HandlerThread(getClass().getSimpleName() + "-thread", mPriority);
+        final HandlerThread thread = new HandlerThread(getClass().getSimpleName() + "-thread", Process.THREAD_PRIORITY_BACKGROUND);
         thread.start();
         mHandler = new Handler(thread.getLooper(), this);
     }

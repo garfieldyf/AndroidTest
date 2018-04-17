@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -41,6 +42,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     private Camera mCamera;
     private int mZoom;
     private int mMaxZoom;
+    private String mFlashMode;
 
     private final Rect mClipBounds;
     private final Point mPreviewSize;
@@ -78,17 +80,6 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
-     * Returns current zoom value of the camera device.
-     * @return The current zoom value. The value range
-     * is 0 to {@link #getCameraMaxZoom}.
-     * @see #setCameraZoom(int)
-     * @see #getCameraMaxZoom()
-     */
-    public int getCameraZoom() {
-        return mZoom;
-    }
-
-    /**
      * Sets current zoom value of the camera device. If the zoom is not supported
      * invoke this method has no effect.
      * @param zoom The zoom value. The valid range is 0 to {@link #getCameraMaxZoom}.
@@ -111,6 +102,17 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
+     * Returns current zoom value of the camera device.
+     * @return The current zoom value. The value range
+     * is 0 to {@link #getCameraMaxZoom}.
+     * @see #setCameraZoom(int)
+     * @see #getCameraMaxZoom()
+     */
+    public final int getCameraZoom() {
+        return mZoom;
+    }
+
+    /**
      * Returns the maximum zoom value of the camera device.
      * @return The maximum zoom value supported by the camera
      * device, or {@link #INVALID_ZOOM} if the zoom is not supported.
@@ -119,6 +121,35 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
      */
     public final int getCameraMaxZoom() {
         return mMaxZoom;
+    }
+
+    /**
+     * Sets the flash mode of the camera device.
+     * @param mode The flash mode. May be one of
+     * <tt>Parameters.FLASH_MODE_XXX</tt> constants.
+     * @see #getCameraFlashMode()
+     */
+    public void setCameraFlashMode(String mode) {
+        DebugUtils.__checkError(mode == null, "mode == null");
+        if (mCamera == null) {
+            // The camera device uninitialize, We will set the
+            // flash mode after the camera device initialize.
+            mFlashMode = mode;
+        } else if (!mode.equals(mFlashMode)) {
+            final Parameters params = mCamera.getParameters();
+            params.setFlashMode(mFlashMode = mode);
+            mCamera.setParameters(params);
+        }
+    }
+
+    /**
+     * Returns the current flash mode of the camera device.
+     * @return The current flash mode. <tt>null</tt> if
+     * flash mode is not supported.
+     * @see #setCameraFlashMode(String)
+     */
+    public final String getCameraFlashMode() {
+        return mFlashMode;
     }
 
     /**
@@ -240,6 +271,13 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
             mMaxZoom = params.getMaxZoom();
             mZoom = ArrayUtils.rangeOf(mZoom, 0, mMaxZoom);
             params.setZoom(mZoom);
+        }
+
+        // Sets the camera flash mode.
+        if (mFlashMode != null) {
+            params.setFlashMode(mFlashMode);
+        } else {
+            mFlashMode = params.getFlashMode();
         }
 
         // Computes the camera preview size.

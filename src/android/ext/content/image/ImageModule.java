@@ -186,7 +186,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
         private Object mDecoder;
         private Object mParameters;
         private FileCache mFileCache;
-        private Cache<URI, Image> mImageCache;
         private final ImageModule<URI, Image> mModule;
 
         /**
@@ -223,16 +222,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          */
         public final Builder<URI, Image> setFileCache(FileCache cache) {
             mFileCache = cache;
-            return this;
-        }
-
-        /**
-         * Sets the {@link Cache} used to store the images.
-         * @param cache The <tt>Cache</tt>.
-         * @return This builder.
-         */
-        public final Builder<URI, Image> setImageCache(Cache<URI, Image> cache) {
-            mImageCache = cache;
             return this;
         }
 
@@ -317,11 +306,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @return The <tt>ImageLoader</tt>.
          */
         public final <Params> ImageLoader<URI, Params, Image> create() {
-            DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
-            DebugUtils.__checkWarning((mFlags & FLAG_NO_MEMORY_CACHE) != 0 && mImageCache != null, Builder.class.getName(), "The builder has no memory cache, setImageCache will be ignore.");
-
             // Retrieves the image and file cache from image module, may be null.
-            final Cache<URI, Image> imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? (mImageCache != null ? mImageCache : mModule.mImageCache) : null);
+            DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
+            final Cache<URI, Image> imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? mModule.mImageCache : null);
             final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
 
             // Creates the binder.

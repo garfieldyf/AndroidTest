@@ -131,7 +131,7 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
         try {
             bitmap = decodeBitmap(uri, params, flags, opts);
         } catch (IllegalArgumentException e) {
-            // Decodes the bitmap again, If decode falied and the inBitmap is not null.
+            // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 opts.inBitmap = null;
                 Log.w(getClass().getName(), e.toString());

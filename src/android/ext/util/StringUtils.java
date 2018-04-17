@@ -183,10 +183,10 @@ public final class StringUtils {
      * @see #toHexString(byte[], int, int, boolean)
      */
     public static StringBuilder toHexString(StringBuilder out, byte[] data, int start, int end, boolean lowerCase) {
-        final char firstLetter = (lowerCase ? 'a' : 'A');
+        final char letter = (lowerCase ? 'a' : 'A');
         for (int digit; start < end; ++start) {
             digit = data[start];
-            out.append(toChar((digit >> 4) & 0xf, firstLetter)).append(toChar(digit & 0xf, firstLetter));
+            out.append(toChar((digit >> 4) & 0xf, letter)).append(toChar(digit & 0xf, letter));
         }
 
         return out;
@@ -207,8 +207,8 @@ public final class StringUtils {
         return true;
     }
 
-    private static char toChar(int digit, char firstLetter) {
-        return (char)(digit < 10 ? digit + '0' : digit + firstLetter - 10);
+    private static char toChar(int digit, char letter) {
+        return (char)(digit < 10 ? digit + '0' : digit + letter - 10);
     }
 
     /**

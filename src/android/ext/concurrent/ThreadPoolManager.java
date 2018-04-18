@@ -7,7 +7,6 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
 
@@ -150,7 +149,7 @@ public class ThreadPoolManager extends ThreadPool {
      * This abstract class should be implemented by any class whose
      * instances are intended to be executed by {@link ThreadPoolManager}.
      */
-    public static abstract class Task implements Runnable, Cancelable {
+    public static abstract class Task implements Runnable {
         private static final int RUNNING   = 0;
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
@@ -174,14 +173,15 @@ public class ThreadPoolManager extends ThreadPool {
             state = new AtomicInteger(RUNNING);
         }
 
-        @Override
+        /**
+         * Returns <tt>true</tt> if this task was cancelled before it completed
+         * normally. If you are cancel this task, the value returned by this method
+         * should be checked periodically from {@link #onExecute(Thread)} to end this
+         * task as soon as possible.
+         * @return <tt>true</tt> if this task was cancelled, <tt>false</tt> otherwise.
+         */
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);
-        }
-
-        @Override
-        public final boolean cancel(boolean mayInterruptIfRunning) {
-            return cancel(mayInterruptIfRunning, true);
         }
 
         @Override
@@ -208,7 +208,6 @@ public class ThreadPoolManager extends ThreadPool {
          * Callback method to be invoked when this task was cancelled.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCancelled()</tt>
-         * <p>This method won't be invoked if this task was finished.</p>
          * @see #onExecute(Thread)
          * @see #onCompletion()
          */

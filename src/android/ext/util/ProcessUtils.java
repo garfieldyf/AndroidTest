@@ -191,7 +191,7 @@ public final class ProcessUtils {
      * @param context The <tt>Context</tt>.
      */
     public static void installUncaughtExceptionHandler(Context context) {
-        new CrashHandler(context);
+        new UncaughtHandler(context);
     }
 
     /**
@@ -583,13 +583,13 @@ public final class ProcessUtils {
     }
 
     /**
-     * Class <tt>CrashHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
+     * Class <tt>UncaughtHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
      */
-    private static final class CrashHandler implements UncaughtExceptionHandler {
+    private static final class UncaughtHandler implements UncaughtExceptionHandler {
         private final Context mContext;
         private final UncaughtExceptionHandler mDefaultHandler;
 
-        public CrashHandler(Context context) {
+        public UncaughtHandler(Context context) {
             mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);

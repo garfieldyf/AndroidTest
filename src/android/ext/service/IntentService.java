@@ -22,29 +22,13 @@ public abstract class IntentService extends Service implements Callback {
 
     private Handler mHandler;
     private final long mKeepAliveTime;
-    private final boolean mRedelivery;
-
-    /**
-     * Constructor
-     * @param keepAliveTime The maximum time in milliseconds that this
-     * service will wait for a new <tt>Intent</tt> before terminating.
-     * @see #IntentService(long, boolean)
-     */
-    public IntentService(long keepAliveTime) {
-        this(keepAliveTime, false);
-    }
 
     /**
      * Constructor
      * @param keepAliveTime The maximum time in milliseconds that this service will wait
      * for a new <tt>Intent</tt> before terminating.
-     * @param redelivery The intent redelivery preferences. If <tt>true</tt>
-     * {@link #onStartCommand(Intent, int, int)} will return {@link Service#START_REDELIVER_INTENT},
-     * otherwise return {@link Service#START_NOT_STICKY}.
-     * @see #IntentService(long)
      */
-    public IntentService(long keepAliveTime, boolean redelivery) {
-        mRedelivery = redelivery;
+    public IntentService(long keepAliveTime) {
         mKeepAliveTime = keepAliveTime;
     }
 
@@ -67,7 +51,7 @@ public abstract class IntentService extends Service implements Callback {
     public int onStartCommand(Intent intent, int flags, int startId) {
         mHandler.removeMessages(MESSAGE_QUIT);
         mHandler.sendMessage(Message.obtain(mHandler, MESSAGE_INTENT, flags, startId, intent));
-        return (mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY);
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -109,7 +93,7 @@ public abstract class IntentService extends Service implements Callback {
     /**
      * Callback method is invoked on the worker thread with a request to process. Only
      * one <tt>Intent</tt> is processed at a time. When all requests have been handled,
-     * the <tt>IntentService</tt> stops itself, so you should not call <tt>stopSelf</tt>.
+     * this <tt>IntentService</tt> stops itself, so you should not call <tt>stopSelf</tt>.
      * @param intent The <tt>Intent</tt>, passed earlier by {@link Context#startService(Intent)}.
      * @param flags The flags, passed earlier by {@link #onStartCommand(Intent, int, int)}.
      * @param startId A unique integer, passed earlier by {@link #onStartCommand(Intent, int, int)}.

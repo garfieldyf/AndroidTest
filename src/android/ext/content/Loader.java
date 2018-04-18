@@ -221,6 +221,9 @@ public abstract class Loader<Key> implements Factory<Task> {
             return (state.get() == CANCELLED);
         }
 
+        /**
+         * Called on the {@link Loader} internal, do not call this method directly.
+         */
         @Override
         public final boolean cancel(boolean mayInterruptIfRunning) {
             final boolean result = state.compareAndSet(RUNNING, CANCELLED);

@@ -2,6 +2,7 @@ package android.ext.net;
 
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.ext.util.Cancelable;
@@ -10,8 +11,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote HTTP server
- * on a background thread and publish results on the UI thread.
+ * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote server on a
+ * background thread and publish results on the UI thread.
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
@@ -78,7 +79,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
 
     /**
      * Returns a new download request with the specified <em>url</em>.
-     * @param url The url to connect the remote HTTP server.
+     * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
      * @return Returns the instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
      */
@@ -102,21 +103,21 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't download from - " + mRequest.connection.getURL().toString(), e);
         } finally {
-            mRequest.connection.disconnect();
+            mRequest.disconnect();
         }
 
         return result;
     }
 
     /**
-     * Override this method to downloads the resource from the remote HTTP server on a background thread.
+     * Override this method to downloads the resource from the remote server on a background thread.
      * <p>The default implementation returns a {@link JSONObject} or {@link JSONArray} object.</p>
-     * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
+     * @param conn The {@link URLConnection} whose connecting the remote server.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
      */
-    protected Result onDownload(HttpURLConnection conn, Params[] params) throws Exception {
+    protected Result onDownload(URLConnection conn, Params[] params) throws Exception {
         return mRequest.downloadImpl(this);
     }
 }

@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
@@ -19,7 +20,7 @@ import android.util.Log;
 import android.util.LogPrinter;
 
 /**
- * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote HTTP server.
+ * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote server.
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadRequest(url)
@@ -31,17 +32,19 @@ import android.util.LogPrinter;
  * @version 1.0
  */
 public class DownloadRequest {
-    /* package */ final HttpURLConnection connection;
+    /* package */ final URLConnection connection;
 
     /**
      * Constructor
-     * @param url The url to connect the remote HTTP server.
+     * @param url The url to connect the remote server.
      * @throws IOException if an error occurs while opening the connection.
      */
     @Keep
     public DownloadRequest(String url) throws IOException {
-        connection = (HttpURLConnection)new URL(url).openConnection();
-        connection.setInstanceFollowRedirects(true);
+        connection = new URL(url).openConnection();
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection)connection).setInstanceFollowRedirects(true);
+        }
     }
 
     /**
@@ -49,7 +52,7 @@ public class DownloadRequest {
      * @param useCaches <tt>true</tt> if the connection
      * allows to use caches, <tt>false</tt> otherwise.
      * @return This request.
-     * @see HttpURLConnection#setUseCaches(boolean)
+     * @see URLConnection#setUseCaches(boolean)
      */
     public final DownloadRequest useCaches(boolean useCaches) {
         connection.setUseCaches(useCaches);
@@ -61,7 +64,7 @@ public class DownloadRequest {
      * to complete before giving up.
      * @param timeoutMillis The read timeout in milliseconds.
      * @return This request.
-     * @see HttpURLConnection#setReadTimeout(int)
+     * @see URLConnection#setReadTimeout(int)
      */
     public final DownloadRequest readTimeout(int timeoutMillis) {
         connection.setReadTimeout(timeoutMillis);
@@ -72,7 +75,7 @@ public class DownloadRequest {
      * Sets the maximum time in milliseconds to wait while connecting.
      * @param timeoutMillis The connect timeout in milliseconds.
      * @return This request.
-     * @see HttpURLConnection#setConnectTimeout(int)
+     * @see URLConnection#setConnectTimeout(int)
      */
     public final DownloadRequest connectTimeout(int timeoutMillis) {
         connection.setConnectTimeout(timeoutMillis);
@@ -125,7 +128,7 @@ public class DownloadRequest {
      * @param value The value of the request header field.
      * @return This request.
      * @see #requestHeaders(Map)
-     * @see HttpURLConnection#setRequestProperty(String, String)
+     * @see URLConnection#setRequestProperty(String, String)
      */
     public final DownloadRequest requestHeader(String field, String value) {
         connection.setRequestProperty(field, value);
@@ -137,7 +140,6 @@ public class DownloadRequest {
      * @param headers The request header fields to be set.
      * @return This request.
      * @see #requestHeader(String, String)
-     * @see HttpURLConnection#setRequestProperty(String, String)
      */
     public final DownloadRequest requestHeaders(Map<String, String> headers) {
         for (Entry<String, String> header : headers.entrySet()) {
@@ -148,7 +150,7 @@ public class DownloadRequest {
     }
 
     /**
-     * Downloads the JSON data from the remote HTTP server with the arguments supplied to this request.
+     * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object,
      * If the download was cancelled before it completed normally then the returned value undefined,
@@ -160,32 +162,24 @@ public class DownloadRequest {
      * @see JSONUtils#newInstance(JsonReader, Cancelable)
      */
     public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
-        T result = null;
         try {
-            // Connects to the remote HTTP server.
-            if (connect(null) == HttpURLConnection.HTTP_OK) {
-                // Downloads the JSON data from the HTTP server.
-                result = downloadImpl(cancelable);
-            }
+            return (connect(null) == HttpURLConnection.HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
-            connection.disconnect();
+            disconnect();
         }
-
-        return result;
     }
 
     /**
-     * Downloads the resource from the remote HTTP server with the arguments supplied to this request.
+     * Downloads the resource from the remote server with the arguments supplied to this request.
      * <p>Note: This method will be create the necessary directories.</p>
      * @param filename The file name to write the resource, must be absolute file path.
-     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
-     * download was cancelled before it completed normally then the file's contents undefined.
+     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If
+     * the download was cancelled before it completed normally then the file's contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @return The response code returned by the remote HTTP server.
+     * @return The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download(Cancelable)
      * @see #download(OutputStream, Cancelable, byte[])
-     * @see HttpURLConnection#getResponseCode()
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
@@ -198,48 +192,53 @@ public class DownloadRequest {
     }
 
     /**
-     * Downloads the resource from the remote HTTP server with the arguments supplied to this request.
+     * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param out The {@link OutputStream} to write the resource.
      * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
      * download was cancelled before it completed normally then the <em>out's</em> contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @return The response code returned by the remote HTTP server.
+     * @return The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
-     * @see HttpURLConnection#getResponseCode()
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         InputStream is = null;
-        int statusCode = -1;
-
         try {
-            // Connects to the remote HTTP server.
-            if ((statusCode = connect(tempBuffer)) == HttpURLConnection.HTTP_OK) {
-                // Downloads the resource from the HTTP server.
+            final int statusCode = connect(tempBuffer);
+            if (statusCode == HttpURLConnection.HTTP_OK) {
                 is = connection.getInputStream();
                 FileUtils.copyStream(is, out, cancelable, tempBuffer);
             }
-        } finally {
-            FileUtils.close(is);
-            connection.disconnect();
-        }
 
-        return statusCode;
+            return statusCode;
+        } finally {
+            disconnect();
+            FileUtils.close(is);
+        }
     }
 
     /**
-     * Connects to the remote HTTP server with the arguments supplied to this request.
+     * Connects to the remote server with the arguments supplied to this request.
      */
     /* package */ int connect(byte[] tempBuffer) throws IOException {
         __checkHeaders(true);
         connection.connect();
         __checkHeaders(false);
-        return connection.getResponseCode();
+        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HttpURLConnection.HTTP_OK);
     }
 
     /**
-     * Downloads the JSON data from the remote HTTP server with the arguments supplied to this request.
+     * Disconnects the connection and release any system resources it holds.
+     */
+    /* package */ final void disconnect() {
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection)connection).disconnect();
+        }
+    }
+
+    /**
+     * Downloads the JSON data from the remote server with the arguments supplied to this request.
      */
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));

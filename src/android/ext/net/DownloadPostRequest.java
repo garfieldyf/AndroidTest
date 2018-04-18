@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Map;
 import org.json.JSONArray;
@@ -134,14 +135,14 @@ public final class DownloadPostRequest extends DownloadRequest {
 
         this.data = null;  // Clears the data to avoid potential memory leaks.
         __checkHeaders(false);
-        return connection.getResponseCode();
+        return ((HttpURLConnection)connection).getResponseCode();
     }
 
     /**
      * Connects to the remote HTTP server with the specified method.
      */
     private void connectImpl(String method) throws IOException {
-        connection.setRequestMethod(method);
+        ((HttpURLConnection)connection).setRequestMethod(method);
         connection.connect();
     }
 
@@ -184,17 +185,17 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Callback interface used to post the data to the remote HTTP server.
+     * Callback interface used to post the data to the remote server.
      */
     public static interface PostCallback {
         /**
-         * Called on a background thread to post the data to the remote HTTP server.
-         * @param conn The {@link HttpURLConnection} whose connecting the remote HTTP server.
+         * Called on a background thread to post the data to the remote server.
+         * @param conn The {@link URLConnection} whose connecting the remote server.
          * @param token A token to identify the post, passed earlier by {@link DownloadPostRequest#post}.
          * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
          * passed earlier by {@link DownloadRequest#download}.
-         * @throws IOException if an error occurs while writing the data to the remote HTTP server.
+         * @throws IOException if an error occurs while writing the data to the remote server.
          */
-        void onPostData(HttpURLConnection conn, int token, byte[] tempBuffer) throws IOException;
+        void onPostData(URLConnection conn, int token, byte[] tempBuffer) throws IOException;
     }
 }

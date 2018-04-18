@@ -53,41 +53,12 @@ public class ThreadPoolManager extends ThreadPool {
     }
 
     /**
-     * Attempts to stop all pending and running {@link Task}s from the internal queue.
-     * @param mayInterruptIfRunning <tt>true</tt> if this pool executing all the running
-     * <tt>Tasks</tt> should be interrupted, <tt>false</tt> otherwise.
-     * @return <tt>true</tt> if at least one task was cancelled, <tt>false</tt> otherwise.
-     * @see #cancel(long, boolean)
-     */
-    public boolean cancelAll(boolean mayInterruptIfRunning) {
-        // Cancel and remove from pending task queue.
-        boolean result = false;
-        final Iterator<Runnable> iter = mPendingTasks.iterator();
-        while (iter.hasNext()) {
-            final Runnable task = iter.next();
-            if (task instanceof Task) {
-                result |= ((Task)task).cancel(false);
-                iter.remove();
-            }
-        }
-
-        // Cancel and remove from running task queue.
-        final Iterator<Task> itor = mRunningTasks.iterator();
-        while (itor.hasNext()) {
-            result |= itor.next().cancel(mayInterruptIfRunning);
-            itor.remove();
-        }
-
-        return result;
-    }
-
-    /**
      * Attempts to stop the {@link Task} with specified identifier from the internal queue.
      * @param id The identifier of the task to cancel.
      * @param mayInterruptIfRunning <tt>true</tt> if the specified <tt>Task</tt> should be
      * interrupted, <tt>false</tt> otherwise.
      * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
-     * @see #cancelAll(boolean)
+     * @see #cancelAll(boolean, boolean)
      */
     public boolean cancel(long id, boolean mayInterruptIfRunning) {
         // Cancel and remove from running task queue.
@@ -110,6 +81,37 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         return false;
+    }
+
+    /**
+     * Attempts to stop all pending and running {@link Task}s from the internal queue.
+     * @param mayInterruptIfRunning <tt>true</tt> if this pool executing all the running
+     * <tt>Tasks</tt> should be interrupted, <tt>false</tt> otherwise.
+     * @param mayNotifyIfCancelled <tt>true</tt> if this pool every cancelled {@link Task}
+     * should be call {@link Task#onCancelled() onCancelled()} method, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if at least one task was cancelled, <tt>false</tt> otherwise.
+     * @see #cancel(long, boolean)
+     */
+    public boolean cancelAll(boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
+        // Cancel and remove from pending task queue.
+        boolean result = false;
+        final Iterator<Runnable> iter = mPendingTasks.iterator();
+        while (iter.hasNext()) {
+            final Runnable task = iter.next();
+            if (task instanceof Task) {
+                result |= ((Task)task).cancel(false, mayNotifyIfCancelled);
+                iter.remove();
+            }
+        }
+
+        // Cancel and remove from running task queue.
+        final Iterator<Task> itor = mRunningTasks.iterator();
+        while (itor.hasNext()) {
+            result |= itor.next().cancel(mayInterruptIfRunning, mayNotifyIfCancelled);
+            itor.remove();
+        }
+
+        return result;
     }
 
     public final void dump(Printer printer) {
@@ -173,18 +175,13 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
-            if (result && mayInterruptIfRunning && runner != null) {
-                runner.interrupt();
-            }
-
-            return result;
+        public final boolean isCancelled() {
+            return (state.get() == CANCELLED);
         }
 
         @Override
-        public final boolean isCancelled() {
-            return (state.get() == CANCELLED);
+        public final boolean cancel(boolean mayInterruptIfRunning) {
+            return cancel(mayInterruptIfRunning, true);
         }
 
         @Override
@@ -208,11 +205,23 @@ public class ThreadPoolManager extends ThreadPool {
         public abstract long getId();
 
         /**
+         * Callback method to be invoked when this task was cancelled.
+         * The default implementation do nothing. If you write your
+         * own implementation, do not call <tt>super.onCancelled()</tt>
+         * <p>This method won't be invoked if this task was finished.</p>
+         * @see #onExecute(Thread)
+         * @see #onCompletion()
+         */
+        protected void onCancelled() {
+        }
+
+        /**
          * Callback method to be invoked when this task was finished.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCompletion()</tt>
          * <p>This method won't be invoked if this task was cancelled.</p>
          * @see #onExecute(Thread)
+         * @see #onCancelled()
          */
         protected void onCompletion() {
         }
@@ -220,6 +229,7 @@ public class ThreadPoolManager extends ThreadPool {
         /**
          * Callback method to be invoked when this task is executing.
          * @param thread The <tt>Thread</tt> whose executing this task.
+         * @see #onCancelled()
          * @see #onCompletion()
          */
         protected abstract void onExecute(Thread thread);
@@ -227,8 +237,27 @@ public class ThreadPoolManager extends ThreadPool {
         /**
          * Attempts to stop execution of this task.
          */
+        /* package */ final boolean cancel(boolean interrupt, boolean notify) {
+            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
+            if (result) {
+                if (interrupt && runner != null) {
+                    runner.interrupt();
+                }
+
+                // Notify the callback method.
+                if (notify) {
+                    onCancelled();
+                }
+            }
+
+            return result;
+        }
+
+        /**
+         * Attempts to stop execution of this task.
+         */
         /* package */ final boolean cancel(long id, boolean mayInterruptIfRunning) {
-            return (getId() == id && cancel(mayInterruptIfRunning));
+            return (getId() == id && cancel(mayInterruptIfRunning, true));
         }
     }
 }

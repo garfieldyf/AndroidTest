@@ -608,7 +608,7 @@ public final class ProcessUtils {
                     processName = pi.applicationInfo.processName;
                 }
 
-                this.storeUncaughtException(pi, processName, thread, e);
+                this.writeUncaughtException(pi, processName, thread, e);
             } catch (Throwable ex) {
                 Log.e(ProcessUtils.class.getName(), "Couldn't write crash infos", ex);
             } finally {
@@ -619,6 +619,7 @@ public final class ProcessUtils {
             }
         }
 
+        @SuppressWarnings("unused")
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {
@@ -630,7 +631,6 @@ public final class ProcessUtils {
             }
         }
 
-        @SuppressWarnings("unused")
         private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             Formatter formatter = null;
             try {

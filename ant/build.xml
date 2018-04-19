@@ -61,16 +61,31 @@
         </replace>
     </target>
 
+    <!-- target -delete-debug-call -->
+    <target name="-delete-debug-call">
+        <!-- delete call the __checkXXX methods -->
+        <echo level="info">Delete __checkXXX() methods call</echo>
+        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </replaceregexp>
+    </target>
+
+    <!-- target -replace-release-call -->
+    <target name="-replace-release-call">
+        <!-- replace call this.writeUncaughtException() to this.storeUncaughtException() method -->
+        <echo level="info">Replace this.writeUncaughtException() to this.storeUncaughtException() in the ProcessUtils.java</echo>
+        <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
+            <replacefilter token="this.writeUncaughtException" value="this.storeUncaughtException" />
+        </replace>
+    </target>
+
     <!-- target -pre-compile-test -->
     <target name="-pre-compile-test">
         <property name="java.debug" value="true" />
         <property name="class.dir" value="${basedir}/src" />
         <property name="file.out.dir" value="${out.dir}/debug" />
-
-        <!-- delete call the __checkXXX methods -->
-        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
-            <fileset dir="${src.dir}" includes="**/*.java" />
-        </replaceregexp>
+        <echo level="info">java.debug: ${java.debug}</echo>
+        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -pre-compile-debug -->
@@ -80,10 +95,8 @@
         <property name="class.dir" value="${basedir}/src" />
         <property name="file.out.dir" value="${out.dir}/debug" />
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
-
-        <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
-            <replacefilter token="this.storeUncaughtException" value="this.writeUncaughtException" />
-        </replace>
+        <echo level="info">java.debug: ${java.debug}</echo>
+        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -pre-compile-release -->
@@ -93,11 +106,8 @@
         <property name="class.dir" value="${basedir}/classes" />
         <property name="file.out.dir" value="${out.dir}/release" />
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
-
-        <!-- delete call the __checkXXX methods -->
-        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
-            <fileset dir="${src.dir}" includes="**/*.java" />
-        </replaceregexp>
+        <echo level="info">java.debug: ${java.debug}</echo>
+        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -compile-jar -->
@@ -191,7 +201,7 @@
     </target>
 
     <!-- target test -->
-    <target name="test" depends="-clean, -copy, -pre-compile-test, -compile-jar, -post-compile">
+    <target name="test" depends="-clean, -copy, -pre-compile-test, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile">
         <echo level="info">Builds the ${ndk.module} modules in test mode.</echo>
         <echo level="info">Install: ${file.out.dir}</echo>
         <echo level="info">Install: ${file.out.dir}\${jar.file.name}</echo>
@@ -209,7 +219,7 @@
     </target>
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -pre-compile-release, -compile-jar, -compile-so, -post-compile">
+    <target name="release" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile">
         <echo level="info">Builds the ${ndk.module} modules in release mode.</echo>
         <echo level="info">Install: ${file.out.dir}</echo>
         <echo level="info">Install: ${file.out.dir}\${jar.file.name}</echo>

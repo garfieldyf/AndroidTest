@@ -51,8 +51,8 @@ public final class XmlResources {
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the object to load.
      * @param inflater The {@link XmlResourceInflater} to inflating XML data.
-     * @param params The parameters to inflate. If no parameters, you can pass
-     * <em>(Object[])null</em> instead of allocating an empty array.
+     * @param params The parameters to inflate, passed into the {@link XmlResourceInflater#inflate}.
+     * If no parameters, you can pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The newly object.
      * @throws NotFoundException if the given <em>id</em> cannot be loaded.
      * @see XmlResourceInflater#inflate(Context, XmlPullParser, Object[])

@@ -2,6 +2,7 @@ package android.ext.net;
 
 import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.Locale;
@@ -106,10 +107,11 @@ public final class NetworkUtils {
      * Prints the contents of the connection headers.
      */
     private static void dumpHeaders(URLConnection conn, Printer printer, String format, Map<String, List<String>> headers) {
+        final URL url = conn.getURL();
         final StringBuilder result = new StringBuilder(80);
-        DebugUtils.dumpSummary(printer, result, 80, format, conn.getURL().getProtocol().toUpperCase(Locale.getDefault()));
+        DebugUtils.dumpSummary(printer, result, 80, format, url.getProtocol().toUpperCase(Locale.getDefault()));
         result.setLength(0);
-        printer.println(result.append("  URL = ").append(conn.getURL().toString()).toString());
+        printer.println(result.append("  URL = ").append(url.toString()).toString());
 
         if (ArrayUtils.getSize(headers) > 0) {
             for (Entry<String, List<String>> header : headers.entrySet()) {

@@ -177,10 +177,10 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     }
 
     /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation matches
+     * Matches the scheme of the specified <em>uri</em>. The default implementation match
      * the {@link #SCHEME_HTTP}, {@link #SCHEME_HTTPS} and {@link #SCHEME_FTP}.
      * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme matches successful, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
      */
     protected boolean matchScheme(URI uri) {
         final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());

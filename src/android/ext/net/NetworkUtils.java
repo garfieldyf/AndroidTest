@@ -107,8 +107,7 @@ public final class NetworkUtils {
      */
     private static void dumpHeaders(URLConnection conn, Printer printer, String format, Map<String, List<String>> headers) {
         final StringBuilder result = new StringBuilder(80);
-        final String protocol = conn.getURL().getProtocol();
-        DebugUtils.dumpSummary(printer, result, 80, format, (protocol != null ? protocol.toUpperCase(Locale.getDefault()) : "Unknown Protocol"));
+        DebugUtils.dumpSummary(printer, result, 80, format, conn.getURL().getProtocol().toUpperCase(Locale.getDefault()));
         result.setLength(0);
         printer.println(result.append("  URL = ").append(conn.getURL().toString()).toString());
 

@@ -1,7 +1,7 @@
 package android.ext.net;
 
+import static java.net.HttpURLConnection.HTTP_OK;
 import java.lang.ref.WeakReference;
-import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -96,7 +96,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     protected Result doInBackground(Params... params) {
         DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
         try {
-            return (mRequest.connect(null) == HttpURLConnection.HTTP_OK ? onDownload(mRequest.connection, params) : null);
+            return (mRequest.connect(null) == HTTP_OK ? onDownload(mRequest.connection, params) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't download from - " + mRequest.connection.getURL().toString(), e);
             return null;

@@ -1,9 +1,9 @@
 package android.ext.content;
 
+import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -101,7 +101,7 @@ public final class XmlResources {
      */
     public static String buildResourceUri(String packageName, Object resource) {
         final String res = resource.toString();
-        return new StringBuilder(ContentResolver.SCHEME_ANDROID_RESOURCE.length() + packageName.length() + res.length() + 4).append(ContentResolver.SCHEME_ANDROID_RESOURCE).append("://").append(packageName).append('/').append(res).toString();
+        return new StringBuilder(SCHEME_ANDROID_RESOURCE.length() + packageName.length() + res.length() + 4).append(SCHEME_ANDROID_RESOURCE).append("://").append(packageName).append('/').append(res).toString();
     }
 
     /**

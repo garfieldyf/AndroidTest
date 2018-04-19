@@ -31,6 +31,7 @@ import android.util.Printer;
  * @version 6.0
  */
 public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Image> {
+    public static final String SCHEME_FTP   = "ftp";
     public static final String SCHEME_HTTP  = "http";
     public static final String SCHEME_HTTPS = "https";
 
@@ -47,7 +48,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
-     * @param binder The {@link Binder} used to bind the image to target.
+     * @param binder The {@link Binder} to bind the image to target.
      */
     public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Params, Image> decoder, Binder<URI, Params, Image> binder) {
         super(executor, imageCache);
@@ -88,6 +89,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h5>The default implementation accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
+     * <li>ftp ({@link #SCHEME_FTP})</li>
      * <li>http ({@link #SCHEME_HTTP})</li>
      * <li>https ({@link #SCHEME_HTTPS})</li>
      * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
@@ -165,8 +167,9 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Params[] params, int flags, byte[] buffer) {
         try {
-            final int statusCode = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).accept("*/*").download(imageFile, task, buffer);
-            return (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+            final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).accept("*/*");
+            request.__checkHeaders = false;
+            return (request.download(imageFile, task, buffer) == HttpURLConnection.HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
             return null;
@@ -175,13 +178,13 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
 
     /**
      * Matches the scheme of the specified <em>uri</em>. The default implementation matches
-     * the {@link #SCHEME_HTTP} and {@link #SCHEME_HTTPS}.
+     * the {@link #SCHEME_HTTP}, {@link #SCHEME_HTTPS} and {@link #SCHEME_FTP}.
      * @param uri The uri to match.
      * @return <tt>true</tt> if the scheme matches successful, <tt>false</tt> otherwise.
      */
     protected boolean matchScheme(URI uri) {
         final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());
-        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5));
+        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5) || SCHEME_FTP.regionMatches(true, 0, scheme, 0, 3));
     }
 
     /**

@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import android.content.Context;
@@ -88,7 +89,7 @@ public final class NetworkUtils {
      * @see #dumpResponseHeaders(URLConnection, Printer)
      */
     public static void dumpRequestHeaders(URLConnection conn, Printer printer) {
-        dumpHeaders(conn, printer, " Http Request Headers ", conn.getRequestProperties());
+        dumpHeaders(conn, printer, " %s Request Headers ", conn.getRequestProperties());
     }
 
     /**
@@ -98,15 +99,16 @@ public final class NetworkUtils {
      * @see #dumpRequestHeaders(URLConnection, Printer)
      */
     public static void dumpResponseHeaders(URLConnection conn, Printer printer) {
-        dumpHeaders(conn, printer, " Http Response Headers ", conn.getHeaderFields());
+        dumpHeaders(conn, printer, " %s Response Headers ", conn.getHeaderFields());
     }
 
     /**
      * Prints the contents of the connection headers.
      */
-    private static void dumpHeaders(URLConnection conn, Printer printer, String title, Map<String, List<String>> headers) {
+    private static void dumpHeaders(URLConnection conn, Printer printer, String format, Map<String, List<String>> headers) {
         final StringBuilder result = new StringBuilder(80);
-        DebugUtils.dumpSummary(printer, result, 80, title, (Object[])null);
+        final String protocol = conn.getURL().getProtocol();
+        DebugUtils.dumpSummary(printer, result, 80, format, (protocol != null ? protocol.toUpperCase(Locale.getDefault()) : "Unknown Protocol"));
         result.setLength(0);
         printer.println(result.append("  URL = ").append(conn.getURL().toString()).toString());
 

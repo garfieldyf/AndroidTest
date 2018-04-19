@@ -186,12 +186,12 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
         private Object mDecoder;
         private Object mParameters;
         private FileCache mFileCache;
-        private final ImageModule<URI, Image> mModule;
+        private final ImageModule mModule;
 
         /**
          * Constructor
          */
-        /* package */ Builder(ImageModule<URI, Image> module) {
+        /* package */ Builder(ImageModule module) {
             mModule = module;
         }
 
@@ -303,34 +303,34 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
 
         /**
          * Creates an {@link ImageLoader} with the arguments supplied to this builder.
-         * @return The <tt>ImageLoader</tt>.
+         * @return The instance of <tt>ImageLoader</tt>.
          */
         public final <Params> ImageLoader<URI, Params, Image> create() {
-            // Retrieves the image and file cache from image module, may be null.
+            // Retrieves the image cache and file cache from image module, may be null.
             DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
-            final Cache<URI, Image> imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? mModule.mImageCache : null);
+            final Cache imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? mModule.mImageCache : null);
             final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
 
             // Creates the binder.
-            final Binder<URI, Params, Image> binder;
+            final Binder binder;
             if (mBinder instanceof Binder) {
-                binder = (Binder<URI, Params, Image>)mBinder;
+                binder = (Binder)mBinder;
             } else if (mBinder instanceof Integer) {
-                binder = XmlResources.<URI, Params, Image, Binder<URI, Params, Image>>loadBinder(mModule.mContext, (int)mBinder);
+                binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
             } else {
-                binder = (Binder<URI, Params, Image>)mModule;
+                binder = (Binder)mModule;
             }
 
             // Creates the image loader.
-            final ImageLoader.ImageDecoder<Params, Image> decoder = (ImageLoader.ImageDecoder<Params, Image>)createImageDecoder(imageCache);
+            final ImageLoader.ImageDecoder decoder = (ImageLoader.ImageDecoder)createImageDecoder(imageCache);
             if (mClass == null) {
-                return new ImageLoader<URI, Params, Image>(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
+                return new ImageLoader(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
             } else {
-                return (ImageLoader<URI, Params, Image>)newInstance(mClass, new Class<?>[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
+                return (ImageLoader)newInstance(mClass, new Class[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
             }
         }
 
-        private static Object newInstance(Class<?> clazz, Class<?>[] parameterTypes, Object... args) {
+        private static Object newInstance(Class clazz, Class[] parameterTypes, Object... args) {
             try {
                 return clazz.getConstructor(parameterTypes).newInstance(args);
             } catch (Throwable e) {
@@ -338,7 +338,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
             }
         }
 
-        private Object createImageDecoder(Cache<?, ?> imageCache) {
+        private Object createImageDecoder(Cache imageCache) {
             if (mDecoder instanceof ImageLoader.ImageDecoder) {
                 return mDecoder;
             }
@@ -353,31 +353,31 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
             }
 
             final int maxPoolSize = ImageLoader.computeMaximumPoolSize(mModule.mExecutor);
-            return (mDecoder instanceof Class ? createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class<?>)mDecoder) : createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize));
+            return (mDecoder instanceof Class ? createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class)mDecoder) : createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize));
         }
 
-        private static Object createImageDecoder(Context context, Cache<?, ?> imageCache, Parameters parameters, int maxPoolSize) {
+        private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, int maxPoolSize) {
             if (imageCache instanceof LruBitmapCache2) {
-                return new CacheBitmapDecoder(context, parameters, maxPoolSize, ((LruBitmapCache2<?>)imageCache).getBitmapPool());
+                return new CacheBitmapDecoder(context, parameters, maxPoolSize, ((LruBitmapCache2)imageCache).getBitmapPool());
             } else if (imageCache instanceof LruImageCache) {
-                final BitmapPool bitmapPool = ((LruImageCache<?, ?>)imageCache).getBitmapPool();
+                final BitmapPool bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
                 return (bitmapPool != null ? new CacheImageDecoder(context, parameters, maxPoolSize, bitmapPool) : new ImageDecoder(context, parameters, maxPoolSize));
             } else {
                 return new BitmapDecoder(context, parameters, maxPoolSize);
             }
         }
 
-        private static Object createImageDecoder(Context context, Cache<?, ?> imageCache, Parameters parameters, int maxPoolSize, Class<?> clazz) {
+        private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, int maxPoolSize, Class clazz) {
             final BitmapPool bitmapPool;
             if (imageCache instanceof LruBitmapCache2) {
-                bitmapPool = ((LruBitmapCache2<?>)imageCache).getBitmapPool();
+                bitmapPool = ((LruBitmapCache2)imageCache).getBitmapPool();
             } else if (imageCache instanceof LruImageCache) {
-                bitmapPool = ((LruImageCache<?, ?>)imageCache).getBitmapPool();
+                bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
             } else {
                 bitmapPool = null;
             }
 
-            return (bitmapPool != null ? newInstance(clazz, new Class<?>[] { Context.class, Parameters.class, int.class, BitmapPool.class }, context, parameters, maxPoolSize, bitmapPool) : newInstance(clazz, new Class<?>[] { Context.class, Parameters.class, int.class }, context, parameters, maxPoolSize));
+            return (bitmapPool != null ? newInstance(clazz, new Class[] { Context.class, Parameters.class, int.class, BitmapPool.class }, context, parameters, maxPoolSize, bitmapPool) : newInstance(clazz, new Class[] { Context.class, Parameters.class, int.class }, context, parameters, maxPoolSize));
         }
     }
 }

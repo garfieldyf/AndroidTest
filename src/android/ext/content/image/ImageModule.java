@@ -174,6 +174,12 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
 
     /**
      * Class <tt>Builder</tt> to creates the {@link ImageLoader}.
+     * <h2>Usage</h2>
+     * <p>Here is an example:</p><pre>
+     * final ImageLoader&lt;String, Object, Bitmap&gt; loader = mModule.createImageLoader()
+     *     .setParameters(R.xml.decode_params)
+     *     .setBinder(R.xml.image_binder)
+     *     .create();</pre>
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final class Builder<URI, Image> {

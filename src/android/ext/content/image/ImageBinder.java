@@ -25,7 +25,32 @@ import android.view.View;
 import android.widget.ImageView;
 
 /**
- * Class ImageBinder
+ * Class <tt>ImageBinder</tt> allows to bind the image to the <tt>ImageView</tt>.
+ * <h2>Usage</h2>
+ * <p>Here is a xml resource example:</p><pre>
+ * &lt;[ ImageBinder | TransitionBinder | binder ]
+ *     xmlns:android="http://schemas.android.com/apk/res/android"
+ *     xmlns:namespace="http://schemas.android.com/apk/res/<em>packageName</em>"
+ *     class="classFullName"
+ *     android:duration="@android:integer/config_longAnimTime"
+ *     namespace:defaultImage="@drawable/ic_placeholder"
+ *     namespace:maxCacheSize="128" &gt;
+ *
+ * &lt;Transformer
+ *     android:name="[ rectangle | roundRect | drawable | oval | gif | classFullName ]"
+ *     android:topLeftRadius="10dp"
+ *     android:topRightRadius="10dp"
+ *     android:bottomLeftRadius="10dp"
+ *     android:bottomRightRadius="10dp"
+ *     android:radius="20dp" /&gt;
+ *
+ * &lt;!-- Optional Transformer --&gt;
+ * &lt;Transformer
+ *     android:name="<em>packageName.CustomTransformer</em>"
+ *     namespace:attributes1="value1"
+ *     namespace:attributes2="value2"
+ *     ... ... /&gt;
+ * &lt;/[ ImageBinder | TransitionBinder | binder ]&gt;</pre>
  * @author Garfield
  * @version 3.0
  */

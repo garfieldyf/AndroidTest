@@ -5,7 +5,8 @@ import android.ext.util.Caches.Cache;
 import android.ext.util.DebugUtils;
 
 /**
- * Abstract class AsyncLoader
+ * Class <tt>AsyncLoader</tt> allows to load the resource on
+ * a background thread and bind it to target on the UI thread.
  * @author Garfield
  * @version 4.0
  */

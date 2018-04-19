@@ -5,7 +5,8 @@ import java.util.concurrent.Executor;
 import android.ext.util.DebugUtils;
 
 /**
- * Abstract class AsyncTaskLoader
+ * Class <tt>AsyncTaskLoader</tt> allows to load the resource
+ * on a background thread and publish results on the UI thread.
  * @author Garfield
  * @version 1.0
  */

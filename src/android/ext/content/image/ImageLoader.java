@@ -25,7 +25,8 @@ import android.util.Log;
 import android.util.Printer;
 
 /**
- * Class ImageLoader
+ * Class <tt>ImageLoader</tt> allows to load the image from the URI
+ * on a background thread and bind it to target on the UI thread.
  * @author Garfield
  * @version 6.0
  */

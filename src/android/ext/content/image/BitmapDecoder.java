@@ -60,6 +60,18 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
 
     /**
      * Class <tt>Parameters</tt> can be used to decode bitmap.
+     * <h2>Usage</h2>
+     * <p>Here is a xml resource example:</p><pre>
+     * &lt;[ Parameters | SizeParameters | parameters ]
+     *      xmlns:android="http://schemas.android.com/apk/res/android"
+     *      xmlns:namespace="http://schemas.android.com/apk/res/<em>packageName</em>"
+     *      class="classFullName"
+     *      android:width="200dp"
+     *      android:height="300dp"
+     *      namespace:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+     *      namespace:sampleSize="2"
+     *      namespace:attributes1="value1"
+     *      namespace:attributes2="value2" /&gt;</pre>
      */
     public static class Parameters {
         private static final int ALPHA_8 = 0;

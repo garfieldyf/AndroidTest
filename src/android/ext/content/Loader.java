@@ -16,7 +16,7 @@ import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
- * Abstract class Loader
+ * An abstract class that performs asynchronous loading of data.
  * @author Garfield
  * @version 3.0
  */

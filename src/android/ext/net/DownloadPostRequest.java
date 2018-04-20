@@ -76,7 +76,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the {@link PostCallback} to post the data to the remote HTTP server.
-     * @param callback The <tt>PostCallback</tt>.
+     * @param callback The <tt>PostCallback</tt> to set.
      * @param token A token passed into the {@link PostCallback#onPostData} to
      * identify the post.
      * @return This request.
@@ -133,9 +133,10 @@ public final class DownloadPostRequest extends DownloadRequest {
             connectImpl("GET");
         }
 
-        this.data = null;  // Clears the data to avoid potential memory leaks.
+        // Clears the data to avoid potential memory leaks.
+        this.data = null;
         __checkHeaders(false);
-        return ((HttpURLConnection)connection).getResponseCode();
+        return getResponseCode();
     }
 
     /**

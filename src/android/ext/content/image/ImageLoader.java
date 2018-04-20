@@ -31,12 +31,19 @@ import android.util.Printer;
  * @version 6.0
  */
 public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Image> {
+    /**
+     * Indicates the image loader will be ignore the file cache when the image load from the
+     * remote server. If the image load from the local filesystem this flag will be ignore.
+     */
+    public static final int FLAG_IGNORE_FILE_CACHE = 0x01;
+
+    // The URI schemes.
     public static final String SCHEME_FTP   = "ftp";
     public static final String SCHEME_HTTP  = "http";
     public static final String SCHEME_HTTPS = "https";
 
+    private final Loader mLoader;
     private final Pool<byte[]> mBufferPool;
-    private final Loader<Params, Image> mLoader;
 
     protected final Binder<URI, Params, Image> mBinder;
     protected final ImageDecoder<Params, Image> mDecoder;
@@ -55,8 +62,8 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
 
         mDecoder = decoder;
         mBinder  = binder;
-        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(sFactory, computeMaximumPoolSize(executor)));
+        mLoader  = (fileCache != null ? new FileCacheLoader(context, fileCache) : new Loader(context));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
         ImageBinder.__checkBinder(getClass(), imageCache, binder);
     }
 
@@ -188,9 +195,24 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     }
 
     /**
-     * The <tt>Loader</tt> interface used to load image from the specified url.
+     * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private static interface Loader<Params, Image> {
+    private class Loader implements Factory<byte[]> {
+        private final String mCacheDir;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         */
+        public Loader(Context context) {
+            mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache").getPath();
+        }
+
+        @Override
+        public byte[] newInstance() {
+            return new byte[16384];
+        }
+
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
@@ -200,20 +222,6 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer);
-    }
-
-    /**
-     * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
-     */
-    private final class URLLoader implements Loader<Params, Image> {
-        private final String mCacheDir;
-
-        public URLLoader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache").getPath();
-        }
-
-        @Override
         public Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer) {
             final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
             try {
@@ -227,15 +235,25 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader<Params, Image> {
+    private final class FileCacheLoader extends Loader {
         private final FileCache mCache;
 
-        public FileCacheLoader(FileCache cache) {
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         * @param fileCache The {@link FileCache} to store the loaded image files.
+         */
+        public FileCacheLoader(Context context, FileCache cache) {
+            super(context);
             mCache = cache;
         }
 
         @Override
         public Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer) {
+            if ((flags & FLAG_IGNORE_FILE_CACHE) != 0) {
+                return super.load(task, url, params, flags, buffer);
+            }
+
             final StringBuilder builder = StringUtils.toHexString(new StringBuilder(mCache.getCacheDir().length() + 16), buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1), true);
             final String hashKey = builder.toString();
             final String imageFile = mCache.get(hashKey);
@@ -267,16 +285,6 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
             return result;
         }
     }
-
-    /**
-     * The byte array factory.
-     */
-    private static final Factory<byte[]> sFactory = new Factory<byte[]>() {
-        @Override
-        public byte[] newInstance() {
-            return new byte[16384];
-        }
-    };
 
     /**
      * Class <tt>DefaultParameters</tt> (The default parameters sample size = 1, config = RGB_565).

@@ -253,7 +253,7 @@ public class DownloadRequest {
     }
 
     /* package */ final void __checkHeaders(boolean request) {
-        if (getCheckHeaders()) {
+        if (checkDumpHeaders()) {
             final LogPrinter printer = new LogPrinter(Log.DEBUG, getClass().getName());
             if (request) {
                 NetworkUtils.dumpRequestHeaders(connection, printer);
@@ -263,13 +263,13 @@ public class DownloadRequest {
         }
     }
 
-    private boolean getCheckHeaders() {
+    private boolean checkDumpHeaders() {
         Field field = null;
         try {
             field = DownloadRequest.class.getField("__checkHeaders");
             return (field != null && field.getBoolean(this));
         } catch (Throwable e) {
-            return false;
+            return true;
         }
     }
 }

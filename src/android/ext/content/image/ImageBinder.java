@@ -47,7 +47,7 @@ import android.widget.ImageView;
  *
  * &lt;!-- Optional Transformer --&gt;
  * &lt;Transformer
- *     android:name="<em>packageName.CustomTransformer</em>"
+ *     android:name="<em>classFullName</em>"
  *     namespace:attributes1="value1"
  *     namespace:attributes2="value2"
  *     ... ... /&gt;

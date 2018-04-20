@@ -81,7 +81,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * Returns a new download request with the specified <em>url</em>.
      * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
-     * @return Returns the instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
+     * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
      */
     public final <T extends DownloadRequest> T newDownloadRequest(String url, Class<T> clazz) {
         try {

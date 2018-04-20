@@ -167,7 +167,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Params[] params, int flags, byte[] buffer) {
         try {
-            final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000).accept("*/*");
+            final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
             request.__checkHeaders = false;
             return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {

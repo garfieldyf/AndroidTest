@@ -255,12 +255,16 @@ public final class DeviceUtils {
      * Writes the supported ABIs into a {@link JsonWriter}.
      */
     /* package */ static JsonWriter writeABIs(JsonWriter writer) throws IOException {
-        writer.beginArray();
-        for (String abi : getSupportedABIs()) {
-            writer.value(abi);
+        final StringBuilder result = new StringBuilder(32);
+        final String[] abis = getSupportedABIs();
+        if (abis.length > 0) {
+            result.append(abis[0]);
+            for (int i = 1; i < abis.length; ++i) {
+                result.append(',').append(abis[i]);
+            }
         }
 
-        return writer.endArray();
+        return writer.value(result.toString());
     }
 
     private static void dumpInternalStorageInfo(Context context, StatFs statFs, StringBuilder out, String prefix) {

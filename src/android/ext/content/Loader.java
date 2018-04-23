@@ -223,6 +223,7 @@ public abstract class Loader<Key> implements Factory<Task> {
 
         /**
          * Called on the {@link Loader} internal, do not call this method directly.
+         * @see Loader#cancelTask(Object, boolean)
          */
         @Override
         public final boolean cancel(boolean mayInterruptIfRunning) {

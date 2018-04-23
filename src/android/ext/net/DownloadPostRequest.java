@@ -136,7 +136,7 @@ public final class DownloadPostRequest extends DownloadRequest {
         // Clears the data to avoid potential memory leaks.
         this.data = null;
         __checkHeaders(false);
-        return getResponseCode();
+        return ((HttpURLConnection)connection).getResponseCode();
     }
 
     /**

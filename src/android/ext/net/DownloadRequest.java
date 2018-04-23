@@ -35,7 +35,6 @@ import android.util.LogPrinter;
  */
 public class DownloadRequest {
     public boolean __checkHeaders = true;
-    /* package */ ConnectionCallback callback;
     /* package */ final URLConnection connection;
 
     /**
@@ -83,16 +82,6 @@ public class DownloadRequest {
      */
     public final DownloadRequest connectTimeout(int timeoutMillis) {
         connection.setConnectTimeout(timeoutMillis);
-        return this;
-    }
-
-    /**
-     * Sets the connection callback while the connection is established.
-     * @param callback The {@link ConnectionCallback} to set.
-     * @return This request.
-     */
-    public final DownloadRequest callback(ConnectionCallback callback) {
-        this.callback = callback;
         return this;
     }
 
@@ -239,7 +228,7 @@ public class DownloadRequest {
         __checkHeaders(true);
         connection.connect();
         __checkHeaders(false);
-        return getResponseCode();
+        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HTTP_OK);
     }
 
     /**
@@ -249,19 +238,6 @@ public class DownloadRequest {
         if (connection instanceof HttpURLConnection) {
             ((HttpURLConnection)connection).disconnect();
         }
-    }
-
-    /**
-     * Returns the response code returned by the remote server.
-     */
-    /* package */ final int getResponseCode() throws IOException {
-        final int statusCode = (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HTTP_OK);
-        if (callback != null) {
-            callback.onConnected(this, connection, statusCode);
-            callback = null;  // Clears the callback to avoid potential memory leaks.
-        }
-
-        return statusCode;
     }
 
     /**
@@ -295,18 +271,5 @@ public class DownloadRequest {
         } catch (Throwable e) {
             return true;
         }
-    }
-
-    /**
-     * Callback interface for {@link DownloadRequest} connection event.
-     */
-    public static interface ConnectionCallback {
-        /**
-         * Called on a background thread after to connect to the remote server.
-         * @param request The <tt>DownloadRequest</tt>.
-         * @param conn The {@link URLConnection} whose connecting the remote server.
-         * @param statusCode The response code returned by the remote server.
-         */
-        void onConnected(DownloadRequest request, URLConnection conn, int statusCode);
     }
 }

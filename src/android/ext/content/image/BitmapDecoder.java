@@ -1,7 +1,6 @@
 package android.ext.content.image;
 
 import android.content.Context;
-import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.ext.content.image.ImageLoader.ImageDecoder;
 import android.ext.graphics.BitmapUtils;
@@ -206,19 +205,12 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
             super(context, attrs);
 
             final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-            final int desiredWidth = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
-            if (desiredWidth <= 0) {
-                throw new NotFoundException("The tag requires a valid 'width' attribute");
-            }
-
-            final int desiredHeight = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
-            if (desiredHeight <= 0) {
-                throw new NotFoundException("The tag requires a valid 'height' attribute");
-            }
-
+            this.value = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
+            this.desiredHeight = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
             a.recycle();
-            this.value = desiredWidth;
-            this.desiredHeight = desiredHeight;
+
+            DebugUtils.__checkError((int)value <= 0, "The tag requires a valid 'width' attribute");
+            DebugUtils.__checkError(desiredHeight <= 0, "The tag requires a valid 'height' attribute");
         }
 
         /**

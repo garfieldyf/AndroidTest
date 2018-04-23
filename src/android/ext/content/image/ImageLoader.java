@@ -131,14 +131,15 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
         return mDecoder;
     }
 
+    @SuppressWarnings("rawtypes")
     public final void dump(Context context, Printer printer) {
         Pools.dumpPool(mBufferPool, printer);
         if (mDecoder instanceof AbsImageDecoder) {
-            ((AbsImageDecoder<?, ?>)mDecoder).dump(printer);
+            ((AbsImageDecoder)mDecoder).dump(printer);
         }
 
         if (mBinder instanceof ImageBinder) {
-            ((ImageBinder<?, ?, ?>)mBinder).dump(context, printer);
+            ((ImageBinder)mBinder).dump(context, printer);
         }
 
         dumpTasks(printer);

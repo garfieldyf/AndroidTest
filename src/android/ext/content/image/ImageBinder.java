@@ -55,7 +55,7 @@ import android.widget.ImageView;
  * @author Garfield
  * @version 3.0
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Image> {
     private static int[] IMAGE_BINDER_ATTRS;
 
@@ -147,18 +147,18 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
     protected Transformer<URI, Image> inflateTransformer(Context context, XmlPullParser parser, AttributeSet attrs, int maxSize) {
         try {
             // Inflates the bitmap transformer from XML parser.
-            Object transformer = Transformer.inflate(context, parser, attrs);
+            Transformer transformer = Transformer.inflate(context, parser, attrs);
             if (transformer == null) {
                 transformer = BitmapTransformer.getInstance();
             }
 
             // Inflates the image transformer from XML parser.
-            final Transformer<Object, Object> imageTransformer = Transformer.inflate(context, parser, attrs);
+            final Transformer imageTransformer = Transformer.inflate(context, parser, attrs);
             if (imageTransformer != null) {
-                transformer = new ImageTransformer((Transformer<Object, Object>)transformer, imageTransformer);
+                transformer = new ImageTransformer(transformer, imageTransformer);
             }
 
-            return (Transformer<URI, Image>)(maxSize > 0 ? new CacheTransformer<Object, Object>(new SimpleLruCache<Object, Drawable>(maxSize), (Transformer<Object, Object>)transformer) : transformer);
+            return (Transformer<URI, Image>)(maxSize > 0 ? new CacheTransformer(new SimpleLruCache<Object, Drawable>(maxSize), transformer) : transformer);
         } catch (Exception e) {
             throw new IllegalArgumentException(parser.getPositionDescription() + ": Couldn't inflate transformer from xml", e);
         }
@@ -182,13 +182,13 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
 
     /* package */ final void dump(Context context, Printer printer) {
         if (mTransformer instanceof CacheTransformer) {
-            ((CacheTransformer<?, ?>)mTransformer).dump(context, printer);
+            ((CacheTransformer)mTransformer).dump(context, printer);
         }
     }
 
-    /* package */ static void __checkBinder(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
+    /* package */ static void __checkBinder(Class clazz, Cache imageCache, Binder binder) {
         if (imageCache == null && binder instanceof ImageBinder) {
-            final Transformer<?, ?> transformer = ((ImageBinder<?, ?, ?>)binder).mTransformer;
+            final Transformer transformer = ((ImageBinder)binder).mTransformer;
             if (transformer instanceof CacheTransformer) {
                 Log.e(clazz.getName(), "WARNING", new IllegalArgumentException("The " + clazz.getSimpleName() + " has no memory cache, The internal binder should be no drawable cache!!!"));
             }
@@ -217,7 +217,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
          * @param attrs The base set of attribute values.
          * @return The <tt>Transformer</tt>.
          */
-        public static Transformer<Object, Object> inflate(Context context, XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException, ReflectiveOperationException {
+        public static Transformer inflate(Context context, XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException, ReflectiveOperationException {
             // Moves to the start tag position.
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
@@ -237,7 +237,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
             final String name  = a.getString(0 /* android.R.attr.name */);
             a.recycle();
 
-            return (Transformer<Object, Object>)createTransformer(context, attrs, name);
+            return createTransformer(context, attrs, name);
         }
 
         /**
@@ -247,26 +247,26 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
          * @param name May be <tt>null</tt>. The name of the <tt>Transformer</tt>.
          * @return The <tt>Transformer</tt>.
          */
-        private static Object createTransformer(Context context, AttributeSet attrs, String name) throws ReflectiveOperationException {
+        private static Transformer createTransformer(Context context, AttributeSet attrs, String name) throws ReflectiveOperationException {
             if (StringUtils.getLength(name) <= 0 || "rectangle".equals(name)) {
-                return BitmapTransformer.getInstance();
+                return BitmapTransformer.sInstance;
             }
 
             switch (name) {
             case "gif":
-                return GIFImageTransformer.getInstance();
+                return GIFImageTransformer.sInstance;
 
             case "oval":
-                return OvalBitmapTransformer.getInstance();
+                return OvalBitmapTransformer.sInstance;
 
             case "drawable":
-                return DrawableTransformer.getInstance();
+                return DrawableTransformer.sInstance;
 
             case "roundRect":
-                return new RoundedBitmapTransformer<Object>(context, attrs);
+                return new RoundedBitmapTransformer(context, attrs);
 
             default:
-                return Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);
+                return (Transformer)Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }
@@ -275,7 +275,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
      * Class <tt>BitmapTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class BitmapTransformer extends Transformer<Object, Bitmap> {
-        private static final BitmapTransformer sInstance = new BitmapTransformer();
+        /* package */ static final BitmapTransformer sInstance = new BitmapTransformer();
 
         /**
          * This class cannot be instantiated.
@@ -301,7 +301,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
      * Class <tt>OvalBitmapTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class OvalBitmapTransformer extends Transformer<Object, Bitmap> {
-        private static final OvalBitmapTransformer sInstance = new OvalBitmapTransformer();
+        /* package */ static final OvalBitmapTransformer sInstance = new OvalBitmapTransformer();
 
         /**
          * This class cannot be instantiated.
@@ -379,7 +379,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
      * Class <tt>GIFImageTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class GIFImageTransformer extends Transformer<Object, GIFImage> {
-        private static final GIFImageTransformer sInstance = new GIFImageTransformer();
+        /* package */ static final GIFImageTransformer sInstance = new GIFImageTransformer();
 
         /**
          * This class cannot be instantiated.
@@ -405,7 +405,7 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
      * Class <tt>DrawableTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class DrawableTransformer extends Transformer<Object, Drawable> {
-        private static final DrawableTransformer sInstance = new DrawableTransformer();
+        /* package */ static final DrawableTransformer sInstance = new DrawableTransformer();
 
         /**
          * This class cannot be instantiated.
@@ -430,16 +430,16 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
     /**
      * Class <tt>ImageTransformer</tt> is an implementation of a {@link Transformer}.
      */
-    private static final class ImageTransformer extends Transformer<Object, Object> {
-        private final Transformer<Object, Object> mImageTransformer;
-        private final Transformer<Object, Object> mBitmapTransformer;
+    private static final class ImageTransformer extends Transformer {
+        private final Transformer mImageTransformer;
+        private final Transformer mBitmapTransformer;
 
         /**
          * Constructor
          * @param bitmapTransformer The {@link Transformer} used to transforms a <tt>Bitmap</tt> to a <tt>Drawable</tt>.
          * @param imageTransformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
          */
-        public ImageTransformer(Transformer<Object, Object> bitmapTransformer, Transformer<Object, Object> imageTransformer) {
+        public ImageTransformer(Transformer bitmapTransformer, Transformer imageTransformer) {
             mImageTransformer  = imageTransformer;
             mBitmapTransformer = bitmapTransformer;
         }

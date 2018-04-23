@@ -206,18 +206,15 @@ public class DownloadRequest {
      * @see #download(String, Cancelable, byte[])
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        InputStream is = null;
         try {
             final int statusCode = connect(tempBuffer);
             if (statusCode == HTTP_OK) {
-                is = connection.getInputStream();
-                FileUtils.copyStream(is, out, cancelable, tempBuffer);
+                downloadImpl(out, cancelable, tempBuffer);
             }
 
             return statusCode;
         } finally {
             disconnect();
-            FileUtils.close(is);
         }
     }
 
@@ -249,6 +246,18 @@ public class DownloadRequest {
             return JSONUtils.newInstance(reader, cancelable);
         } finally {
             reader.close();
+        }
+    }
+
+    /**
+     * Downloads the resource from the remote server with the arguments supplied to this request.
+     */
+    /* package */ final void downloadImpl(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
+        final InputStream is = connection.getInputStream();
+        try {
+            FileUtils.copyStream(is, out, cancelable, tempBuffer);
+        } finally {
+            is.close();
         }
     }
 

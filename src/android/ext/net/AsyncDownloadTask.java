@@ -1,12 +1,16 @@
 package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.FileUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -106,12 +110,41 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     }
 
     /**
+     * Downloads the resource from the remote server write to the specified file.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param filename The file name to write the resource, must be absolute file path.
+     * @throws IOException if an error occurs while downloading to the resource.
+     * @see #download(OutputStream)
+     */
+    protected final void download(String filename) throws IOException {
+        FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(filename);
+        try {
+            mRequest.downloadImpl(os, this, null);
+        } finally {
+            os.close();
+        }
+    }
+
+    /**
+     * Downloads the resource from the remote server write to the specified <em>out</em>.
+     * @param out The {@link OutputStream} to write the resource.
+     * @throws IOException if an error occurs while downloading to the resource.
+     * @see #download(String)
+     */
+    protected final void download(OutputStream out) throws IOException {
+        mRequest.downloadImpl(out, this, null);
+    }
+
+    /**
      * Override this method to downloads the resource from the remote server on a background thread.
      * <p>The default implementation returns a {@link JSONObject} or {@link JSONArray} object.</p>
      * @param conn The {@link URLConnection} whose connecting the remote server.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
+     * @see #download(String)
+     * @see #download(OutputStream)
      */
     protected Result onDownload(URLConnection conn, Params[] params) throws Exception {
         return mRequest.downloadImpl(this);

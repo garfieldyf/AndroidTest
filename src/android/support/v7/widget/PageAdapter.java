@@ -228,8 +228,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * Returns the {@link Page} {@link Cache} associated with this adapter.
      * @return The page cache.
      */
-    public final Cache<Integer, Page<E>> getPageCache() {
-        return mPageCache;
+    @SuppressWarnings("unchecked")
+    public final <T extends Cache<Integer, Page<E>>> T getPageCache() {
+        return (T)mPageCache;
     }
 
     /**

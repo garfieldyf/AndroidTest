@@ -50,7 +50,7 @@ public abstract class IntentService extends Service implements Callback {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         mHandler.removeMessages(MESSAGE_QUIT);
-        mHandler.sendMessage(Message.obtain(mHandler, MESSAGE_INTENT, flags, startId, intent));
+        mHandler.sendMessage(Message.obtain(mHandler, MESSAGE_INTENT, startId, flags, intent));
         return START_NOT_STICKY;
     }
 
@@ -63,11 +63,11 @@ public abstract class IntentService extends Service implements Callback {
             break;
 
         case MESSAGE_INTENT:
-            // msg.arg1 -- flags
-            // msg.arg2 -- startId
+            // msg.arg1 -- startId
+            // msg.arg2 -- flags
             // msg.obj  -- intent
             onHandleIntent((Intent)msg.obj, msg.arg1, msg.arg2);
-            sendQuitMessage(msg.arg2);
+            sendQuitMessage(msg.arg1);
             break;
         }
 
@@ -85,7 +85,9 @@ public abstract class IntentService extends Service implements Callback {
      * @param startId A unique integer, passed earlier by {@link #onStartCommand(Intent, int, int)}.
      */
     protected void sendQuitMessage(int startId) {
-        if (!mHandler.hasMessages(MESSAGE_INTENT)) {
+        if (mKeepAliveTime <= 0) {
+            stopSelfResult(startId);
+        } else if (!mHandler.hasMessages(MESSAGE_INTENT)) {
             mHandler.sendMessageDelayed(Message.obtain(mHandler, MESSAGE_QUIT, startId, 0), mKeepAliveTime);
         }
     }
@@ -95,8 +97,8 @@ public abstract class IntentService extends Service implements Callback {
      * one <tt>Intent</tt> is processed at a time. When all requests have been handled,
      * this <tt>IntentService</tt> stops itself, so you should not call <tt>stopSelf</tt>.
      * @param intent The <tt>Intent</tt>, passed earlier by {@link Context#startService(Intent)}.
-     * @param flags The flags, passed earlier by {@link #onStartCommand(Intent, int, int)}.
      * @param startId A unique integer, passed earlier by {@link #onStartCommand(Intent, int, int)}.
+     * @param flags The flags, passed earlier by {@link #onStartCommand(Intent, int, int)}.
      */
-    protected abstract void onHandleIntent(Intent intent, int flags, int startId);
+    protected abstract void onHandleIntent(Intent intent, int startId, int flags);
 }

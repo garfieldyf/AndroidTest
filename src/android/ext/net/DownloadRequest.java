@@ -13,6 +13,7 @@ import java.net.URLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
+import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
@@ -145,8 +146,10 @@ public class DownloadRequest {
      * @see #requestHeader(String, String)
      */
     public final DownloadRequest requestHeaders(Map<String, String> headers) {
-        for (Entry<String, String> header : headers.entrySet()) {
-            connection.setRequestProperty(header.getKey(), header.getValue());
+        if (ArrayUtils.getSize(headers) > 0) {
+            for (Entry<String, String> header : headers.entrySet()) {
+                connection.setRequestProperty(header.getKey(), header.getValue());
+            }
         }
 
         return this;

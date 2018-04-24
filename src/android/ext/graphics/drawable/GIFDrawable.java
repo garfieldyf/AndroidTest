@@ -147,7 +147,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
      * @see #isOneShot()
      */
     public void setOneShot(boolean oneShot) {
-        setFlags(oneShot, FLAG_ONESHOT);
+        mState.setFlags(oneShot, FLAG_ONESHOT);
     }
 
     /**
@@ -166,7 +166,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
      * @see #isFillAfter()
      */
     public void setFillAfter(boolean fillAfter) {
-        setFlags(fillAfter, FLAG_FILLAFTER);
+        mState.setFlags(fillAfter, FLAG_FILLAFTER);
     }
 
     public final void setAnimationCallback(AnimationCallback callback) {
@@ -319,14 +319,6 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         canvas.drawBitmap(frame, null, bounds, paint);
     }
 
-    private void setFlags(boolean set, int flags) {
-        if (set) {
-            mState.mFlags |= flags;
-        } else {
-            mState.mFlags &= ~flags;
-        }
-    }
-
     private void scheduleSelf(int delayMillis) {
         final Callback callback = getCallback();
         if (callback != null) {
@@ -405,6 +397,14 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             if (image != null) {
                 mImage  = image;
                 mCanvas = image.createBitmapCanvas();
+            }
+        }
+
+        /* package */ final void setFlags(boolean set, int flags) {
+            if (set) {
+                mFlags |= flags;
+            } else {
+                mFlags &= ~flags;
             }
         }
     }

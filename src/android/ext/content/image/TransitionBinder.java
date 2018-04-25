@@ -9,7 +9,8 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * Class TransitionBinder
+ * Class <tt>TransitionBinder</tt> allows to play transition
+ * animation while the image first bind to the {@link ImageView}.
  * @author Garfield
  * @version 1.0
  */

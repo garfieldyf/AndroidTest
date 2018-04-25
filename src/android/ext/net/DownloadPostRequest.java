@@ -154,7 +154,6 @@ public final class DownloadPostRequest extends DownloadRequest {
         final OutputStream os = connection.getOutputStream();
         try {
             FileUtils.copyStream(is, os, null, tempBuffer);
-            os.flush();
         } finally {
             os.close();
         }
@@ -167,7 +166,6 @@ public final class DownloadPostRequest extends DownloadRequest {
         final OutputStream os = connection.getOutputStream();
         try {
             os.write(data, offset, count);
-            os.flush();
         } finally {
             os.close();
         }
@@ -179,7 +177,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     private void postData(Object data) throws IOException {
         final JsonWriter writer = new JsonWriter(new OutputStreamWriter(connection.getOutputStream()));
         try {
-            JSONUtils.writeObject(writer, data).flush();
+            JSONUtils.writeObject(writer, data);
         } finally {
             writer.close();
         }

@@ -488,50 +488,54 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos which the date less the <em>date</em> into a {@link JsonWriter}.
-         * @param context The <tt>Context</tt>.
-         * @param writer The {@link JsonWriter} to write to.
-         * @param date The date to query in milliseconds.
-         * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see #writeTo(Context, OutputStream, long)
-         */
-        public final void writeTo(Context context, JsonWriter writer, long date) throws IOException {
-            final Cursor cursor = query(date);
-            try {
-                if (cursor.getCount() > 0) {
-                    writeTo(context, writer, cursor);
-                }
-            } finally {
-                cursor.close();
-            }
-        }
-
-        /**
-         * Compresses and writes the crash infos which the date less the <em>date</em>
-         * into an {@link OutputStream}. The crash infos encoding a JSON encoded value.
-         * <p>The <em>out</em> will be close when this method was returned.</p>
-         * @param context The <tt>Context</tt>.
-         * @param out The {@link OutputStream} to write to.
-         * @param date The date to query in milliseconds.
-         * @throws IOException if an error occurs while writing to the <em>out</em>.
-         * @see #writeTo(Context, JsonWriter, long)
-         */
-        public final void writeTo(Context context, OutputStream out, long date) throws IOException {
-            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new GZIPOutputStream(out)));
-            try {
-                writeTo(context, writer, date);
-            } finally {
-                writer.close();
-            }
-        }
-
-        /**
          * Deletes the crash infos from table which the date less the <em>date</em>.
          * @param date The date to delete in milliseconds.
          * @return The number of rows to delete.
          */
         public final int delete(long date) {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);
+        }
+
+        /**
+         * Writes the specified crash infos into a {@link JsonWriter}.
+         * The position is restored after writing.
+         * @param context The <tt>Context</tt>.
+         * @param writer The {@link JsonWriter} to write to.
+         * @param cursor The {@link Cursor} from which to get the data.
+         * May be returned earlier by {@link #query(long)}.
+         * @throws IOException if an error occurs while writing to the <em>writer</em>.
+         * @see #writeTo(Context, OutputStream, Cursor)
+         */
+        public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
+            DatabaseUtils.writeCursor(onWrite(DeviceUtils.writeABIs(writer.beginObject()
+                .name("brand").value(Build.BRAND)
+                .name("mode").value(Build.MODEL)
+                .name("sdk").value(Build.VERSION.SDK_INT)
+                .name("ver").value(Build.VERSION.RELEASE).name("abis")))
+                .name("uid").value(Process.myUid())
+                .name("package").value(context.getPackageName())
+                .name("crashes"), cursor)
+                .endObject().flush();
+        }
+
+        /**
+         * Compresses and writes the specified crash infos into an {@link OutputStream}.
+         * The crash infos encoding a JSON encoded value. The position is restored after
+         * writing. <p>The <em>out</em> will be close when this method was returned.</p>
+         * @param context The <tt>Context</tt>.
+         * @param out The {@link OutputStream} to write to.
+         * @param cursor The {@link Cursor} from which to get the data.
+         * May be returned earlier by {@link #query(long)}.
+         * @throws IOException if an error occurs while writing to the <em>out</em>.
+         * @see #writeTo(Context, JsonWriter, Cursor)
+         */
+        public final void writeTo(Context context, OutputStream out, Cursor cursor) throws IOException {
+            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new GZIPOutputStream(out)));
+            try {
+                writeTo(context, writer, cursor);
+            } finally {
+                writer.close();
+            }
         }
 
         @Override
@@ -564,21 +568,6 @@ public final class ProcessUtils {
          */
         protected JsonWriter onWrite(JsonWriter writer) throws IOException {
             return writer;
-        }
-
-        /**
-         * Writes the crash infos into a {@link JsonWriter}.
-         */
-        private void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            DatabaseUtils.writeCursor(onWrite(DeviceUtils.writeABIs(writer.beginObject()
-                .name("brand").value(Build.BRAND)
-                .name("mode").value(Build.MODEL)
-                .name("sdk").value(Build.VERSION.SDK_INT)
-                .name("ver").value(Build.VERSION.RELEASE).name("abis")))
-                .name("uid").value(Process.myUid())
-                .name("package").value(context.getPackageName())
-                .name("crashes"), cursor)
-                .endObject().flush();
         }
     }
 

@@ -127,6 +127,16 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Content-Encoding", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest contentEncoding(String value) {
+        connection.setRequestProperty("Content-Encoding", value);
+        return this;
+    }
+
+    /**
      * Sets the value of the specified request header field.
      * @param field The request header field to be set.
      * @param value The value of the request header field.

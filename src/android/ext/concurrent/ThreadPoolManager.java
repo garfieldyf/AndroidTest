@@ -7,6 +7,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
 
@@ -149,7 +150,7 @@ public class ThreadPoolManager extends ThreadPool {
      * This abstract class should be implemented by any class whose
      * instances are intended to be executed by {@link ThreadPoolManager}.
      */
-    public static abstract class Task implements Runnable {
+    public static abstract class Task implements Runnable, Cancelable {
         private static final int RUNNING   = 0;
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
@@ -173,13 +174,7 @@ public class ThreadPoolManager extends ThreadPool {
             state = new AtomicInteger(RUNNING);
         }
 
-        /**
-         * Returns <tt>true</tt> if this task was cancelled before it completed
-         * normally. If you are cancel this task, the value returned by this method
-         * should be checked periodically from {@link #onExecute(Thread)} to end this
-         * task as soon as possible.
-         * @return <tt>true</tt> if this task was cancelled, <tt>false</tt> otherwise.
-         */
+        @Override
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);
         }
@@ -234,7 +229,8 @@ public class ThreadPoolManager extends ThreadPool {
         protected abstract void onExecute(Thread thread);
 
         /**
-         * Attempts to stop execution of this task.
+         * Attempts to stop execution of this task. This attempt will fail
+         * if this task has already completed, or already been cancelled.
          */
         /* package */ final boolean cancel(boolean interrupt, boolean notify) {
             final boolean result = state.compareAndSet(RUNNING, CANCELLED);
@@ -253,7 +249,8 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         /**
-         * Attempts to stop execution of this task.
+         * Attempts to stop execution of this task. This attempt will fail
+         * if this task has already completed, or already been cancelled.
          */
         /* package */ final boolean cancel(long id, boolean mayInterruptIfRunning) {
             return (getId() == id && cancel(mayInterruptIfRunning, true));

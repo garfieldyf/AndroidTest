@@ -205,7 +205,7 @@ public abstract class Loader<Key> implements Factory<Task> {
 
         /**
          * Called on the UI thread when this task handle messages.
-         * <p>Note: Do not call this method directly.</p>
+         * <p><b>Note: Do not call this method directly.</b></p>
          * @param msg A {@link Message} to handle.
          */
         public final void handleMessage(Message msg) {
@@ -219,20 +219,6 @@ public abstract class Loader<Key> implements Factory<Task> {
         @Override
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);
-        }
-
-        /**
-         * Called on the {@link Loader} internal, do not call this method directly.
-         * @see Loader#cancelTask(Object, boolean)
-         */
-        @Override
-        public final boolean cancel(boolean mayInterruptIfRunning) {
-            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
-            if (result && mayInterruptIfRunning && runner != null) {
-                runner.interrupt();
-            }
-
-            return result;
         }
 
         @Override
@@ -258,6 +244,19 @@ public abstract class Loader<Key> implements Factory<Task> {
             params = null;
             runner = null;
             state.set(RUNNING);
+        }
+
+        /**
+         * Attempts to stop execution of this task. This attempt will fail
+         * if this task has already completed, or already been cancelled.
+         */
+        /* package */ final boolean cancel(boolean mayInterruptIfRunning) {
+            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
+            if (result && mayInterruptIfRunning && runner != null) {
+                runner.interrupt();
+            }
+
+            return result;
         }
 
         /**

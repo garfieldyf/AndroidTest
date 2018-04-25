@@ -507,7 +507,7 @@ public final class ProcessUtils {
          * @see #writeTo(Context, OutputStream, Cursor)
          */
         public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            DatabaseUtils.writeCursor(onWrite(DeviceUtils.writeABIs(writer.beginObject()
+            DatabaseUtils.writeCursor(onWrite(context, DeviceUtils.writeABIs(writer.beginObject()
                 .name("brand").value(Build.BRAND)
                 .name("mode").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
@@ -515,7 +515,7 @@ public final class ProcessUtils {
                 .name("uid").value(Process.myUid())
                 .name("package").value(context.getPackageName())
                 .name("crashes"), cursor)
-                .endObject().flush();
+                .endObject();
         }
 
         /**
@@ -562,11 +562,12 @@ public final class ProcessUtils {
 
         /**
          * Callback method to be invoked when the {@link #writeTo} method invoking.
+         * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter}.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          */
-        protected JsonWriter onWrite(JsonWriter writer) throws IOException {
+        protected JsonWriter onWrite(Context context, JsonWriter writer) throws IOException {
             return writer;
         }
     }

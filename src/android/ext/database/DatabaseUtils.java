@@ -541,6 +541,10 @@ public final class DatabaseUtils {
             final String name = names[i];
             final int columnIndex = columnIndexes[i];
             switch (cursor.getType(columnIndex)) {
+            case Cursor.FIELD_TYPE_NULL:
+                writer.name(name).nullValue();
+                break;
+
             case Cursor.FIELD_TYPE_INTEGER:
                 writer.name(name).value(cursor.getLong(columnIndex));
                 break;

@@ -264,7 +264,7 @@ public final class DeviceUtils {
             }
         }
 
-        return writer.value(result.toString());
+        return writer.name("abis").value(result.toString());
     }
 
     private static void dumpInternalStorageInfo(Context context, StatFs statFs, StringBuilder out, String prefix) {

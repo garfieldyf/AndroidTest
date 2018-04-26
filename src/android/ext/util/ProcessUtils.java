@@ -567,7 +567,7 @@ public final class ProcessUtils {
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          */
         protected JsonWriter onWrite(Context context, JsonWriter writer) throws IOException {
-            return DeviceUtils.writeABIs(writer.name("abis"));
+            return DeviceUtils.writeABIs(writer);
         }
     }
 

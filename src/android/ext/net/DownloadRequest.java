@@ -269,6 +269,7 @@ public class DownloadRequest {
         final InputStream is = connection.getInputStream();
         try {
             FileUtils.copyStream(is, out, cancelable, tempBuffer);
+            out.flush();
         } finally {
             is.close();
         }

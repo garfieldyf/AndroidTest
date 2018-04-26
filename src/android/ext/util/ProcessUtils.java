@@ -507,15 +507,14 @@ public final class ProcessUtils {
          * @see #writeTo(Context, OutputStream, Cursor)
          */
         public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            DatabaseUtils.writeCursor(onWrite(context, DeviceUtils.writeABIs(writer.beginObject()
+            DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()
                 .name("brand").value(Build.BRAND)
                 .name("mode").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
-                .name("ver").value(Build.VERSION.RELEASE).name("abis")))
-                .name("uid").value(Process.myUid())
+                .name("ver").value(Build.VERSION.RELEASE))
                 .name("package").value(context.getPackageName())
                 .name("crashes"), cursor)
-                .endObject();
+                .endObject().flush();
         }
 
         /**
@@ -568,7 +567,7 @@ public final class ProcessUtils {
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          */
         protected JsonWriter onWrite(Context context, JsonWriter writer) throws IOException {
-            return writer;
+            return DeviceUtils.writeABIs(writer.name("abis"));
         }
     }
 

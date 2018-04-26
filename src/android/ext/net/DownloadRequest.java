@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -276,23 +275,16 @@ public class DownloadRequest {
     }
 
     /* package */ final void __checkHeaders(boolean request) {
-        if (checkDumpHeaders()) {
+        boolean checkHeaders = false;
+        checkHeaders = this.__checkHeaders;
+
+        if (checkHeaders) {
             final LogPrinter printer = new LogPrinter(Log.DEBUG, getClass().getName());
             if (request) {
                 NetworkUtils.dumpRequestHeaders(connection, printer);
             } else {
                 NetworkUtils.dumpResponseHeaders(connection, printer);
             }
-        }
-    }
-
-    private boolean checkDumpHeaders() {
-        Field field = null;
-        try {
-            field = DownloadRequest.class.getField("__checkHeaders");
-            return (field != null && field.getBoolean(this));
-        } catch (Throwable e) {
-            return true;
         }
     }
 }

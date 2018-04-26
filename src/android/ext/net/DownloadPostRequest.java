@@ -111,7 +111,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     @Override
-    /* package */ int connect(byte[] tempBuffer) throws IOException {
+    /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
         __checkHeaders(true);
         if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
             connectImpl("POST");
@@ -191,7 +191,7 @@ public final class DownloadPostRequest extends DownloadRequest {
          * Called on a background thread to post the data to the remote server.
          * @param conn The {@link URLConnection} whose connecting the remote server.
          * @param token A token to identify the post, passed earlier by {@link DownloadPostRequest#post}.
-         * @param tempBuffer May be <tt>null</tt>. The temporary byte array used to post,
+         * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post,
          * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while writing the data to the remote server.
          */

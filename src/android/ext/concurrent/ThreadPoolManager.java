@@ -62,20 +62,20 @@ public class ThreadPoolManager extends ThreadPool {
      */
     public boolean cancel(long id, boolean mayInterruptIfRunning) {
         // Cancel and remove from running task queue.
-        final Iterator<Task> iter = mRunningTasks.iterator();
-        while (iter.hasNext()) {
-            if (iter.next().cancel(id, mayInterruptIfRunning)) {
-                iter.remove();
+        final Iterator<Task> itor = mRunningTasks.iterator();
+        while (itor.hasNext()) {
+            if (itor.next().cancel(id, mayInterruptIfRunning)) {
+                itor.remove();
                 return true;
             }
         }
 
         // Cancel and remove from pending task queue.
-        final Iterator<Runnable> itor = mPendingTasks.iterator();
-        while (itor.hasNext()) {
-            final Runnable task = itor.next();
+        final Iterator<Runnable> iter = mPendingTasks.iterator();
+        while (iter.hasNext()) {
+            final Runnable task = iter.next();
             if (task instanceof Task && ((Task)task).cancel(id, false)) {
-                itor.remove();
+                iter.remove();
                 return true;
             }
         }
@@ -95,20 +95,20 @@ public class ThreadPoolManager extends ThreadPool {
     public boolean cancelAll(boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
         // Cancel and remove from pending task queue.
         boolean result = false;
-        final Iterator<Runnable> iter = mPendingTasks.iterator();
-        while (iter.hasNext()) {
-            final Runnable task = iter.next();
+        final Iterator<Runnable> itor = mPendingTasks.iterator();
+        while (itor.hasNext()) {
+            final Runnable task = itor.next();
             if (task instanceof Task) {
                 result |= ((Task)task).cancel(false, mayNotifyIfCancelled);
-                iter.remove();
+                itor.remove();
             }
         }
 
         // Cancel and remove from running task queue.
-        final Iterator<Task> itor = mRunningTasks.iterator();
-        while (itor.hasNext()) {
-            result |= itor.next().cancel(mayInterruptIfRunning, mayNotifyIfCancelled);
-            itor.remove();
+        final Iterator<Task> iter = mRunningTasks.iterator();
+        while (iter.hasNext()) {
+            result |= iter.next().cancel(mayInterruptIfRunning, mayNotifyIfCancelled);
+            iter.remove();
         }
 
         return result;

@@ -359,17 +359,15 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
             }
 
             final int maxPoolSize = ImageLoader.computeMaximumPoolSize(mModule.mExecutor);
-            return (mDecoder instanceof Class ? createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class)mDecoder) : createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize));
-        }
-
-        private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, int maxPoolSize) {
-            if (imageCache instanceof LruBitmapCache2) {
-                return new CacheBitmapDecoder(context, parameters, maxPoolSize, ((LruBitmapCache2)imageCache).getBitmapPool());
+            if (mDecoder instanceof Class) {
+                return createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class)mDecoder);
+            } else if (imageCache instanceof LruBitmapCache2) {
+                return new CacheBitmapDecoder(mModule.mContext, parameters, maxPoolSize, ((LruBitmapCache2)imageCache).getBitmapPool());
             } else if (imageCache instanceof LruImageCache) {
                 final BitmapPool bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
-                return (bitmapPool != null ? new CacheImageDecoder(context, parameters, maxPoolSize, bitmapPool) : new ImageDecoder(context, parameters, maxPoolSize));
+                return (bitmapPool != null ? new CacheImageDecoder(mModule.mContext, parameters, maxPoolSize, bitmapPool) : new ImageDecoder(mModule.mContext, parameters, maxPoolSize));
             } else {
-                return new BitmapDecoder(context, parameters, maxPoolSize);
+                return new BitmapDecoder(mModule.mContext, parameters, maxPoolSize);
             }
         }
 

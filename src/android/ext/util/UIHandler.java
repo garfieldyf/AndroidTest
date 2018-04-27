@@ -14,6 +14,7 @@ import android.util.Pair;
  * @author Garfield
  * @version 1.0
  */
+@SuppressWarnings("rawtypes")
 public final class UIHandler extends Handler {
     /**
      * The {@link Handler} associated with the UI thread's message queue.
@@ -41,7 +42,7 @@ public final class UIHandler extends Handler {
      * @param recyclerView The {@link RecyclerView}.
      */
     public static void notifyDataSetChanged(RecyclerView recyclerView) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
+        final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_DATA_CHANGED, adapter));
@@ -89,7 +90,7 @@ public final class UIHandler extends Handler {
      * @param toPosition The new position of the item.
      */
     public static void notifyItemMoved(RecyclerView recyclerView, int fromPosition, int toPosition) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
+        final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_MOVED, fromPosition, toPosition, adapter));
@@ -106,7 +107,7 @@ public final class UIHandler extends Handler {
      * @param itemCount The number of items removed.
      */
     public static void notifyItemRangeRemoved(RecyclerView recyclerView, int positionStart, int itemCount) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
+        final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_REMOVED, positionStart, itemCount, adapter));
@@ -123,7 +124,7 @@ public final class UIHandler extends Handler {
      * @param itemCount The number of items inserted.
      */
     public static void notifyItemRangeInserted(RecyclerView recyclerView, int positionStart, int itemCount) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
+        final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_INSERTED, positionStart, itemCount, adapter));
@@ -141,10 +142,10 @@ public final class UIHandler extends Handler {
      * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
      */
     public static void notifyItemRangeChanged(RecyclerView recyclerView, int positionStart, int itemCount, Object payload) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
+        final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "adapter == null");
         if (recyclerView.isComputingLayout()) {
-            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair<Adapter<?>, Object>(adapter, payload)));
+            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair<Adapter, Object>(adapter, payload)));
         } else {
             adapter.notifyItemRangeChanged(positionStart, itemCount, payload);
         }
@@ -163,7 +164,7 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void finish(Task<?, ?> task) {
+    public final void finish(Task task) {
         final Message msg = Message.obtain(this, task);
         msg.what = MESSAGE_FINISHED;
         sendMessage(msg);
@@ -172,7 +173,7 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void setProgress(Task<?, ?> task, Object[] values) {
+    public final void setProgress(Task task, Object[] values) {
         final Message msg = Message.obtain(this, task);
         msg.what = MESSAGE_PROGRESS;
         msg.obj  = values;
@@ -184,7 +185,7 @@ public final class UIHandler extends Handler {
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
         case MESSAGE_DATA_CHANGED:
-            ((Adapter<?>)msg.obj).notifyDataSetChanged();
+            ((Adapter)msg.obj).notifyDataSetChanged();
             break;
 
         case MESSAGE_EXECUTE:
@@ -193,23 +194,23 @@ public final class UIHandler extends Handler {
 
         case MESSAGE_PROGRESS:
         case MESSAGE_FINISHED:
-            ((Task<?, ?>)msg.getCallback()).handleMessage(msg);
+            ((Task)msg.getCallback()).handleMessage(msg);
             break;
 
         case MESSAGE_ITEM_MOVED:
-            ((Adapter<?>)msg.obj).notifyItemMoved(msg.arg1, msg.arg2);
+            ((Adapter)msg.obj).notifyItemMoved(msg.arg1, msg.arg2);
             break;
 
         case MESSAGE_ITEM_REMOVED:
-            ((Adapter<?>)msg.obj).notifyItemRangeRemoved(msg.arg1, msg.arg2);
+            ((Adapter)msg.obj).notifyItemRangeRemoved(msg.arg1, msg.arg2);
             break;
 
         case MESSAGE_ITEM_INSERTED:
-            ((Adapter<?>)msg.obj).notifyItemRangeInserted(msg.arg1, msg.arg2);
+            ((Adapter)msg.obj).notifyItemRangeInserted(msg.arg1, msg.arg2);
             break;
 
         case MESSAGE_ITEM_CHANGED:
-            final Pair<Adapter<?>, ?> params = (Pair<Adapter<?>, ?>)msg.obj;
+            final Pair<Adapter, Object> params = (Pair<Adapter, Object>)msg.obj;
             params.first.notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
             break;
 

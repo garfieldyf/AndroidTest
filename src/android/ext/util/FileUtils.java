@@ -217,25 +217,23 @@ public final class FileUtils {
      * @param name The file's name.
      */
     public static String buildPath(String dir, String name) {
-        final int length = dir.length() + name.length() + 1;
-        final StringBuilder path = new StringBuilder(length).append(dir).append('/').append(name);
-
+        final char[] path = join(dir, name);
         boolean haveSlash = false;
-        int newLength = 0;
-        for (int i = 0; i < length; ++i) {
-            final char c = path.charAt(i);
+        int length = 0;
+        for (int i = 0; i < path.length; ++i) {
+            final char c = path[i];
             if (c == '/') {
                 if (!haveSlash) {
                     haveSlash = true;
-                    path.setCharAt(newLength++, '/');
+                    path[length++] = '/';
                 }
             } else {
                 haveSlash = false;
-                path.setCharAt(newLength++, c);
+                path[length++] = c;
             }
         }
 
-        return path.substring(0, (haveSlash && newLength > 1 ? newLength - 1 : newLength));
+        return StringUtils.newString(path, 0, (haveSlash && length > 1 ? length - 1 : length));
     }
 
     /**
@@ -644,6 +642,21 @@ public final class FileUtils {
      * @see #createFile(String, long)
      */
     public static native String createUniqueFile(String filename, long length);
+
+    /**
+     * Concatenates the <em>dir</em> and the <em>name</em>.
+     */
+    private static char[] join(String dir, String name) {
+        final int length = dir.length();
+        final int count  = name.length();
+        final char[] result = new char[length + count + 1];
+
+        dir.getChars(0, length, result, 0);
+        result[length] = '/';
+        name.getChars(0, count, result, length + 1);
+
+        return result;
+    }
 
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.

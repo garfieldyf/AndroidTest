@@ -222,6 +222,8 @@ public class ThreadPoolManager extends ThreadPool {
 
         /**
          * Callback method to be invoked when this task is executing.
+         * <p>This method won't be invoked if this task was cancelled
+         * when it has no start.</p>
          * @param thread The <tt>Thread</tt> whose executing this task.
          * @see #onCancelled()
          * @see #onCompletion()

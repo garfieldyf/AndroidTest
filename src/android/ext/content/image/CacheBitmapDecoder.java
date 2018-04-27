@@ -10,7 +10,7 @@ import android.graphics.BitmapFactory.Options;
  * @author Garfield
  * @version 1.0
  */
-public class CacheBitmapDecoder<Params> extends BitmapDecoder<Params> {
+public class CacheBitmapDecoder extends BitmapDecoder {
     /**
      * The {@link BitmapPool} to reuse the bitmap when the bitmap decode.
      */
@@ -29,7 +29,7 @@ public class CacheBitmapDecoder<Params> extends BitmapDecoder<Params> {
     }
 
     @Override
-    protected Bitmap decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         opts.inPreferredConfig = mParameters.config;
         mParameters.computeSampleSize(mContext, uri, opts);

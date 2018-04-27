@@ -13,7 +13,7 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-public class ImageDecoder<Params> extends AbsImageDecoder<Params, Object> {
+public class ImageDecoder extends AbsImageDecoder<Object> {
     /**
      * The MIME type of the gif image.
      */
@@ -43,7 +43,7 @@ public class ImageDecoder<Params> extends AbsImageDecoder<Params, Object> {
     }
 
     @Override
-    protected Object decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
             return decodeGIFImage(uri, params, flags, opts);
@@ -67,7 +67,7 @@ public class ImageDecoder<Params> extends AbsImageDecoder<Params, Object> {
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected Object decodeGIFImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Object decodeGIFImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         final InputStream is = openInputStream(mContext, uri);
         try {
             return GIFImage.decodeStream(is, opts.inTempStorage);

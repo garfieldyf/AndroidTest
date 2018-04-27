@@ -30,16 +30,16 @@ import android.util.Printer;
  * @author Garfield
  * @version 6.0
  */
-public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Image> {
+public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public static final String SCHEME_FTP   = "ftp";
     public static final String SCHEME_HTTP  = "http";
     public static final String SCHEME_HTTPS = "https";
 
+    private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
-    private final Loader<Params, Image> mLoader;
 
-    protected final Binder<URI, Params, Image> mBinder;
-    protected final ImageDecoder<Params, Image> mDecoder;
+    protected final ImageDecoder<Image> mDecoder;
+    protected final Binder<URI, Object, Image> mBinder;
 
     /**
      * Constructor
@@ -50,7 +50,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * @param decoder The {@link ImageDecoder} to decode the image data.
      * @param binder The {@link Binder} to bind the image to target.
      */
-    public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Params, Image> decoder, Binder<URI, Params, Image> binder) {
+    public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(executor, imageCache);
 
         mDecoder = decoder;
@@ -61,26 +61,26 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     }
 
     /**
-     * Equivalent to calling <tt>loadImage(uri, 0, target, (Params[])null)</tt>.
+     * Equivalent to calling <tt>loadImage(uri, 0, target, (Object[])null)</tt>.
      * @param uri The uri to load.
      * @param target The <tt>Object</tt> to bind the image.
      * @see #loadImage(URI, Object, int)
-     * @see #loadImage(URI, int, Object, Params[])
+     * @see #loadImage(URI, int, Object, Object[])
      */
     public final void loadImage(URI uri, Object target) {
-        load(uri, target, 0, mBinder, (Params[])null);
+        load(uri, target, 0, mBinder, (Object[])null);
     }
 
     /**
-     * Equivalent to calling <tt>loadImage(uri, flags, target, (Params[])null)</tt>.
+     * Equivalent to calling <tt>loadImage(uri, flags, target, (Object[])null)</tt>.
      * @param uri The uri to load.
      * @param target The <tt>Object</tt> to bind the image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @see #loadImage(URI, Object)
-     * @see #loadImage(URI, int, Object, Params[])
+     * @see #loadImage(URI, int, Object, Object[])
      */
     public final void loadImage(URI uri, Object target, int flags) {
-        load(uri, target, flags, mBinder, (Params[])null);
+        load(uri, target, flags, mBinder, (Object[])null);
     }
 
     /**
@@ -98,13 +98,12 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * @param uri The uri to load.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @param target The <tt>Object</tt> to bind the image.
-     * @param params The parameters of the load task. If the task no parameters, you can pass <em>(Params[])null</em>
+     * @param params The parameters of the load task. If the task no parameters, you can pass <em>(Object[])null</em>
      * instead of allocating an empty array.
      * @see #loadImage(URI, Object)
      * @see #loadImage(URI, Object, int)
      */
-    @SuppressWarnings("unchecked")
-    public final void loadImage(URI uri, int flags, Object target, Params... params) {
+    public final void loadImage(URI uri, int flags, Object target, Object... params) {
         load(uri, target, flags, mBinder, params);
     }
 
@@ -112,7 +111,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
-    public final Binder<URI, Params, Image> getBinder() {
+    public final Binder<URI, Object, Image> getBinder() {
         return mBinder;
     }
 
@@ -120,7 +119,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * Returns the {@link ImageDecoder} associated with this loader.
      * @return The <tt>ImageDecoder</tt>.
      */
-    public final ImageDecoder<Params, Image> getImageDecoder() {
+    public final ImageDecoder<Image> getImageDecoder() {
         return mDecoder;
     }
 
@@ -147,7 +146,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     }
 
     @Override
-    protected Image loadInBackground(Task<?, ?> task, URI uri, Params[] params, int flags) {
+    protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mBufferPool.obtain();
         try {
             return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
@@ -166,7 +165,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?> task, String url, String imageFile, Params[] params, int flags, byte[] buffer) {
+    protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
             request.__checkHeaders = false;
@@ -191,7 +190,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     /**
      * The <tt>Loader</tt> interface used to load image from the specified url.
      */
-    private static interface Loader<Params, Image> {
+    private static interface Loader<Image> {
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
@@ -201,13 +200,13 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer);
+        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader implements Loader<Params, Image> {
+    private final class URLLoader implements Loader<Image> {
         private final String mCacheDir;
 
         /**
@@ -219,7 +218,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer) {
+        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
@@ -232,7 +231,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader<Params, Image> {
+    private final class FileCacheLoader implements Loader<Image> {
         private final FileCache mCache;
 
         /**
@@ -244,7 +243,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Params[] params, int flags, byte[] buffer) {
+        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final StringBuilder builder = StringUtils.toHexString(new StringBuilder(mCache.getCacheDir().length() + 16), buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1), true);
             final String hashKey = builder.toString();
             final String imageFile = mCache.get(hashKey);
@@ -297,7 +296,7 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
     /**
      * The <tt>ImageDecoder</tt> class used to decode the image data.
      */
-    public static abstract class ImageDecoder<Params, Image> {
+    public static abstract class ImageDecoder<Image> {
         /**
          * Returns the scheme with the specified <em>uri</em>. Example: "http".
          * @param uri The uri to parse.
@@ -352,6 +351,6 @@ public class ImageLoader<URI, Params, Image> extends AsyncLoader<URI, Params, Im
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
          * @see #openInputStream(Context, Object)
          */
-        public abstract Image decodeImage(Object uri, Params[] params, int flags, byte[] tempStorage);
+        public abstract Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);
     }
 }

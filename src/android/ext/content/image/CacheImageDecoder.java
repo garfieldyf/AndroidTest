@@ -10,7 +10,7 @@ import android.graphics.BitmapFactory.Options;
  * @author Garfield
  * @version 1.0
  */
-public class CacheImageDecoder<Params> extends ImageDecoder<Params> {
+public class CacheImageDecoder extends ImageDecoder {
     /**
      * The {@link BitmapPool} to reuse the bitmap when the bitmap decode.
      */
@@ -29,7 +29,7 @@ public class CacheImageDecoder<Params> extends ImageDecoder<Params> {
     }
 
     @Override
-    protected Object decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
             return decodeGIFImage(uri, params, flags, opts);

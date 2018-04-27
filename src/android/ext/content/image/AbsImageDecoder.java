@@ -20,7 +20,7 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params, Image> implements Factory<Options> {
+public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> implements Factory<Options> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -68,10 +68,10 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
      * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.
      * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeImage(Object, Params[], int, Options)
+     * @see #decodeImage(Object, Object[], int, Options)
      */
     @Override
-    public Image decodeImage(Object uri, Params[] params, int flags, byte[] tempStorage) {
+    public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
             // Decodes the image bounds.
@@ -102,9 +102,9 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
      * @param opts The {@link Options} used to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeBitmap(Object, Params[], int, Options, BitmapPool)
+     * @see #decodeBitmap(Object, Object[], int, Options, BitmapPool)
      */
-    protected Bitmap decodeBitmap(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts) throws Exception {
         final InputStream is = openInputStream(mContext, uri);
         try {
             return BitmapFactory.decodeStream(is, null, opts);
@@ -122,9 +122,9 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
      * @param bitmapPool The {@link BitmapPool} to reuse the bitmap to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeBitmap(Object, Params[], int, Options)
+     * @see #decodeBitmap(Object, Object[], int, Options)
      */
-    protected Bitmap decodeBitmap(Object uri, Params[] params, int flags, Options opts, BitmapPool bitmapPool) throws Exception {
+    protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts, BitmapPool bitmapPool) throws Exception {
         // Retrieves the bitmap from bitmap pool to reuse it.
         opts.inBitmap = bitmapPool.get((int)Math.ceil((double)opts.outWidth / opts.inSampleSize) * (int)Math.ceil((double)opts.outHeight / opts.inSampleSize) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig));
         Bitmap bitmap = null;
@@ -150,7 +150,7 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
      * @param opts The {@link Options} to store the <tt>out...</tt> fields.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected void decodeImageBounds(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
         opts.inJustDecodeBounds = true;
         decodeBitmap(uri, params, flags, opts);
         opts.inJustDecodeBounds = false;
@@ -165,7 +165,7 @@ public abstract class AbsImageDecoder<Params, Image> extends ImageDecoder<Params
      * and <tt>out...</tt> fields are set.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeImage(Object, Params[], int, byte[])
+     * @see #decodeImage(Object, Object[], int, byte[])
      */
-    protected abstract Image decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception;
+    protected abstract Image decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception;
 }

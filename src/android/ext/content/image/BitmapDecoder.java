@@ -16,7 +16,7 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
+public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     /**
      * The {@link Parameters} to decode bitmap.
      */
@@ -41,7 +41,7 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
     }
 
     @Override
-    protected Bitmap decodeImage(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         opts.inPreferredConfig = mParameters.config;
         mParameters.computeSampleSize(mContext, uri, opts);
@@ -51,7 +51,7 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
     }
 
     @Override
-    protected void decodeImageBounds(Object uri, Params[] params, int flags, Options opts) throws Exception {
+    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
         if (mParameters instanceof SizeParameters || this instanceof CacheBitmapDecoder) {
             super.decodeImageBounds(uri, params, flags, opts);
         }
@@ -98,8 +98,8 @@ public class BitmapDecoder<Params> extends AbsImageDecoder<Params, Bitmap> {
          * @see #Parameters(Context, AttributeSet)
          */
         public Parameters(Config config, int sampleSize) {
-            this.config = config;
             this.value  = BitmapUtils.fixSampleSize(sampleSize);
+            this.config = (config != null ? config : Config.ARGB_8888);
         }
 
         /**

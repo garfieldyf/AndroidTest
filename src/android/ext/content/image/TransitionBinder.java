@@ -14,7 +14,7 @@ import android.widget.ImageView;
  * @author Garfield
  * @version 1.0
  */
-public class TransitionBinder<URI, Params, Image> extends ImageBinder<URI, Params, Image> {
+public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     private static final int[] TRANSITION_BINDER_ATTRS = { android.R.attr.duration };
 
     /**
@@ -54,8 +54,8 @@ public class TransitionBinder<URI, Params, Image> extends ImageBinder<URI, Param
     }
 
     @Override
-    public TransitionBinder<URI, Params, Image> copy(Drawable defaultImage) {
-        return new TransitionBinder<URI, Params, Image>(null, mTransformer, defaultImage, mDuration);
+    public TransitionBinder<URI, Image> copy(Drawable defaultImage) {
+        return new TransitionBinder<URI, Image>(null, mTransformer, defaultImage, mDuration);
     }
 
     @Override
@@ -66,7 +66,7 @@ public class TransitionBinder<URI, Params, Image> extends ImageBinder<URI, Param
     }
 
     @Override
-    public void bindValue(URI uri, Params[] params, Object target, Image value, int state) {
+    public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
         if (value == null) {
             view.setImageDrawable(mDefaultImage);

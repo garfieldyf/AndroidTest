@@ -270,7 +270,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @return This builder.
          * @see #setBinder(int)
          */
-        public final <Params> Builder<URI, Image> setBinder(Binder<URI, Params, Image> binder) {
+        public final Builder<URI, Image> setBinder(Binder<URI, Object, Image> binder) {
             mBinder = binder;
             return this;
         }
@@ -281,7 +281,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @return This builder.
          * @see #setImageDecoder(Class)
          */
-        public final <Params> Builder<URI, Image> setImageDecoder(ImageLoader.ImageDecoder<Params, Image> decoder) {
+        public final Builder<URI, Image> setImageDecoder(ImageLoader.ImageDecoder<Image> decoder) {
             mDecoder = decoder;
             return this;
         }
@@ -292,7 +292,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @return This builder.
          * @see #setImageDecoder(ImageLoader.ImageDecoder)
          */
-        public final <Params> Builder<URI, Image> setImageDecoder(Class<? extends ImageLoader.ImageDecoder<Params, Image>> clazz) {
+        public final Builder<URI, Image> setImageDecoder(Class<? extends ImageLoader.ImageDecoder<Image>> clazz) {
             mDecoder = clazz;
             return this;
         }
@@ -302,7 +302,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * @param clazz The <tt>ImageLoader</tt> subclass.
          * @return This builder.
          */
-        public final <Params> Builder<URI, Image> setClass(Class<? extends ImageLoader<URI, Params, Image>> clazz) {
+        public final Builder<URI, Image> setClass(Class<? extends ImageLoader<URI, Image>> clazz) {
             mClass = clazz;
             return this;
         }
@@ -311,7 +311,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
          * Creates an {@link ImageLoader} with the arguments supplied to this builder.
          * @return The instance of <tt>ImageLoader</tt>.
          */
-        public final <Params> ImageLoader<URI, Params, Image> create() {
+        public final ImageLoader<URI, Image> create() {
             // Retrieves the image cache and file cache from image module, may be null.
             DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
             final Cache imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? mModule.mImageCache : null);

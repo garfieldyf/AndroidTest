@@ -181,6 +181,7 @@ public final class XmlResources {
         public static final XmlBinderInflater sInstance = new XmlBinderInflater();
 
         @Override
+        @SuppressWarnings("rawtypes")
         public Object inflate(Context context, XmlPullParser parser, Object[] params) throws XmlPullParserException, ReflectiveOperationException {
             String name = parser.getName();
             if (name.equals("binder") && (name = parser.getAttributeValue(null, "class")) == null) {
@@ -190,10 +191,10 @@ public final class XmlResources {
             final AttributeSet attrs = Xml.asAttributeSet(parser);
             switch (name) {
             case "ImageBinder":
-                return new ImageBinder<Object, Object, Object>(context, attrs);
+                return new ImageBinder(context, attrs);
 
             case "TransitionBinder":
-                return new TransitionBinder<Object, Object, Object>(context, attrs);
+                return new TransitionBinder(context, attrs);
 
             default:
                 return Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);

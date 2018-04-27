@@ -56,7 +56,7 @@ import android.widget.ImageView;
  * @version 3.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Image> {
+public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     private static int[] IMAGE_BINDER_ATTRS;
 
     /**
@@ -119,12 +119,12 @@ public class ImageBinder<URI, Params, Image> implements Binder<URI, Params, Imag
      * @param defaultImage May be <tt>null</tt>. The default image of the returned binder.
      * @return A copy of this binder.
      */
-    public ImageBinder<URI, Params, Image> copy(Drawable defaultImage) {
-        return new ImageBinder<URI, Params, Image>(null, mTransformer, defaultImage);
+    public ImageBinder<URI, Image> copy(Drawable defaultImage) {
+        return new ImageBinder<URI, Image>(null, mTransformer, defaultImage);
     }
 
     @Override
-    public void bindValue(URI uri, Params[] params, Object target, Image value, int state) {
+    public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         ((ImageView)target).setImageDrawable(value != null ? mTransformer.transform(uri, target, value) : mDefaultImage);
     }
 

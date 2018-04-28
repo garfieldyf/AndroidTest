@@ -68,11 +68,10 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
      * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.
      * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
      * @see #decodeImage(Object, Object[], int, Options)
      */
     @Override
-    public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) throws Exception {
+    public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
             // Decodes the image bounds.
@@ -81,6 +80,9 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
 
             // Decodes the image pixels.
             return decodeImage(uri, params, flags, opts);
+        } catch (Exception e) {
+            Log.e(getClass().getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
+            return null;
         } finally {
             opts.inBitmap = null;
             opts.inJustDecodeBounds = false;

@@ -150,9 +150,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         final byte[] buffer = mBufferPool.obtain();
         try {
             return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
-        } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't load image from - '").append(uri).append("'\n").append(e).toString());
-            return null;
         } finally {
             mBufferPool.recycle(buffer);
         }
@@ -166,13 +163,17 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param params The parameters, passed earlier by {@link #loadImage}.
      * @param flags Loading flags, passed earlier by {@link #loadImage}.
      * @param buffer The temporary byte array to used for loading image data.
-     * @return The image object, or <tt>null</tt> if the load cancelled.
-     * @throws Exception if an error occurs while loading from <em>url</em>.
+     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) throws Exception {
-        final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
-        request.__checkHeaders = false;
-        return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+    protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) {
+        try {
+            final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
+            request.__checkHeaders = false;
+            return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+        } catch (Exception e) {
+            Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
+            return null;
+        }
     }
 
     /**
@@ -197,10 +198,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param params The parameters, passed earlier by <tt>loadInBackground</tt>.
          * @param flags Loading flags, passed earlier by by <tt>loadInBackground</tt>.
          * @param buffer The temporary byte array to use for loading image data.
-         * @return The image object, or <tt>null</tt> if the load cancelled.
-         * @throws Exception if an error occurs while loading from <em>url</em>.
+         * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) throws Exception;
+        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
@@ -218,7 +218,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) throws Exception {
+        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
@@ -243,7 +243,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) throws Exception {
+        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final StringBuilder builder = StringUtils.toHexString(new StringBuilder(mCache.getCacheDir().length() + 16), buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1), true);
             final String hashKey = builder.toString();
             final String imageFile = mCache.get(hashKey);
@@ -349,9 +349,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.
          * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-         * @throws Exception if an error occurs while decode from <em>uri</em>.
          * @see #openInputStream(Context, Object)
          */
-        public abstract Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) throws Exception;
+        public abstract Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);
     }
 }

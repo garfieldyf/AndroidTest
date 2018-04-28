@@ -20,7 +20,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
@@ -514,13 +513,13 @@ public final class ProcessUtils {
                 .name("ver").value(Build.VERSION.RELEASE))
                 .name("package").value(context.getPackageName())
                 .name("crashes"), cursor)
-                .endObject().flush();
+                .endObject();
         }
 
         /**
-         * Compresses and writes the specified crash infos into an {@link OutputStream}.
-         * The crash infos encoding a JSON encoded value. The position is restored after
-         * writing. <p>The <em>out</em> will be close when this method was returned.</p>
+         * Writes the specified crash infos into an {@link OutputStream}. The crash
+         * infos encoding a JSON encoded value. The position is restored after writing.
+         * <p>The <em>out</em> will be close while this method was returned.</p>
          * @param context The <tt>Context</tt>.
          * @param out The {@link OutputStream} to write to.
          * @param cursor The {@link Cursor} from which to get the data.
@@ -529,7 +528,7 @@ public final class ProcessUtils {
          * @see #writeTo(Context, JsonWriter, Cursor)
          */
         public final void writeTo(Context context, OutputStream out, Cursor cursor) throws IOException {
-            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new GZIPOutputStream(out)));
+            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(out));
             try {
                 writeTo(context, writer, cursor);
             } finally {

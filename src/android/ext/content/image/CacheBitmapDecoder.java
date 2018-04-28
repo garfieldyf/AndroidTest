@@ -37,4 +37,11 @@ public class CacheBitmapDecoder extends BitmapDecoder {
         // Decodes the bitmap pixels.
         return decodeBitmap(uri, params, flags, opts, mBitmapPool);
     }
+
+    @Override
+    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
+        opts.inJustDecodeBounds = true;
+        decodeBitmap(uri, params, flags, opts);
+        opts.inJustDecodeBounds = false;
+    }
 }

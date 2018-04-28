@@ -52,7 +52,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
     @Override
     protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        if (mParameters instanceof SizeParameters || this instanceof CacheBitmapDecoder) {
+        if (mParameters instanceof SizeParameters) {
             super.decodeImageBounds(uri, params, flags, opts);
         }
     }

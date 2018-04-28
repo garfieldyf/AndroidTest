@@ -1,6 +1,5 @@
 package android.ext.net;
 
-import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,7 +192,7 @@ public class DownloadRequest {
      */
     public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
         try {
-            return (connectImpl(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connectImpl(null) == HttpURLConnection.HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -235,7 +234,7 @@ public class DownloadRequest {
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
             final int statusCode = connectImpl(tempBuffer);
-            if (statusCode == HTTP_OK) {
+            if (statusCode == HttpURLConnection.HTTP_OK) {
                 downloadImpl(out, cancelable, tempBuffer);
             }
 
@@ -252,7 +251,7 @@ public class DownloadRequest {
         __checkHeaders(true);
         connection.connect();
         __checkHeaders(false);
-        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HTTP_OK);
+        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HttpURLConnection.HTTP_OK);
     }
 
     /**

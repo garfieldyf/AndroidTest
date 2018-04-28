@@ -2,14 +2,9 @@ package android.ext.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -476,6 +471,18 @@ public final class FileUtils {
     public static native int getFileCount(String dirPath, int flags);
 
     /**
+     * Reads the specified <tt>InputStream</tt> the contents into a {@link ByteArrayBuffer}.
+     * @param is The <tt>InputStream</tt> to read.
+     * @return A <tt>ByteArrayBuffer</tt> contains the contents.
+     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
+     */
+    public static ByteArrayBuffer readStream(InputStream is) throws IOException {
+        final ByteArrayBuffer result = new ByteArrayBuffer();
+        result.readFrom(is, null);
+        return result;
+    }
+
+    /**
      * Equivalent to calling <tt>copyStream(src, dst, null, buffer)</tt>.
      * @param src The <tt>InputStream</tt> to read.
      * @param dst The <tt>OutputStream</tt> to write.
@@ -533,22 +540,16 @@ public final class FileUtils {
     /**
      * Reads the specified file contents into a {@link ByteArrayBuffer}.
      * @param filename The file to read, must be absolute file path.
-     * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded,
-     * <tt>null</tt> otherwise.
+     * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
+     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
      * @see #readFile(String, OutputStream)
      */
-    public static ByteArrayBuffer readFile(String filename) {
-        InputStream is = null;
+    public static ByteArrayBuffer readFile(String filename) throws IOException {
+        final InputStream is = new FileInputStream(filename);
         try {
-            is = new FileInputStream(filename);
-            final ByteArrayBuffer result = new ByteArrayBuffer();
-            result.readFrom(is, null);
-            return result;
-        } catch (Exception e) {
-            Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read file - ").append(filename).toString(), e);
-            return null;
+            return readStream(is);
         } finally {
-            FileUtils.close(is);
+            is.close();
         }
     }
 
@@ -572,21 +573,16 @@ public final class FileUtils {
      * Reads the "assets" directory file contents into a {@link ByteArrayBuffer}.
      * @param assetManager The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-     * @return A <tt>ByteArrayBuffer</tt> if the operation succeeded, <tt>null</tt> otherwise.
+     * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
+     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
      * @see #readAssetFile(AssetManager, String, OutputStream)
      */
-    public static ByteArrayBuffer readAssetFile(AssetManager assetManager, String filename) {
-        InputStream is = null;
+    public static ByteArrayBuffer readAssetFile(AssetManager assetManager, String filename) throws IOException {
+        final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
         try {
-            is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
-            final ByteArrayBuffer result = new ByteArrayBuffer();
-            result.readFrom(is, null);
-            return result;
-        } catch (Exception e) {
-            Log.e(FileUtils.class.getName(), new StringBuilder("Couldn't read asset file - ").append(filename).toString(), e);
-            return null;
+            return readStream(is);
         } finally {
-            FileUtils.close(is);
+            is.close();
         }
     }
 
@@ -653,7 +649,9 @@ public final class FileUtils {
 
         dir.getChars(0, length, result, 0);
         result[length] = '/';
-        name.getChars(0, count, result, length + 1);
+        if (count > 0) {
+            name.getChars(0, count, result, length + 1);
+        }
 
         return result;
     }
@@ -1563,131 +1561,6 @@ public final class FileUtils {
                 return new Dirent[size];
             }
         };
-    }
-
-    /**
-     * Class <tt>Properties</tt> is an implementation of a {@link java.util.Properties}.
-     */
-    public static class Properties extends java.util.Properties {
-        private static final long serialVersionUID = -927424267767072217L;
-        private final String mPath;
-
-        /**
-         * Constructor
-         * @see #Properties(String)
-         * @see #Properties(java.util.Properties)
-         */
-        public Properties() {
-            mPath = null;
-        }
-
-        /**
-         * Constructor
-         * @param filename The properties filename,
-         * must be absolute file path.
-         * @see #Properties()
-         * @see #Properties(java.util.Properties)
-         */
-        public Properties(String filename) {
-            mPath = filename;
-        }
-
-        /**
-         * Constructor
-         * @param properties The default properties.
-         * @see #Properties()
-         * @see #Properties(String)
-         */
-        public Properties(java.util.Properties properties) {
-            super(properties);
-            mPath = null;
-        }
-
-        /**
-         * Loads properties, assumed to be default charset.
-         * @return <tt>true</tt> if the operation succeeded,
-         * <tt>false</tt> otherwise.
-         * @see #store()
-         */
-        public final boolean load() {
-            DebugUtils.__checkError(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
-            return load(mPath);
-        }
-
-        /**
-         * Stores the mappings in this {@link Properties} object.
-         * @return <tt>true</tt> if the operation succeeded,
-         * <tt>false</tt> otherwise.
-         * @see #load()
-         */
-        public final boolean store() {
-            DebugUtils.__checkError(mPath == null, "path == null, Must be invoke 'new Properties(filename)' constructor.");
-            return store(mPath);
-        }
-
-        /**
-         * Loads properties from the specified file, assumed to be default charset.
-         * @param filename The properties file to load, must be absolute file path.
-         * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
-         * @see #load(AssetManager, String)
-         * @see #store(String)
-         */
-        public boolean load(String filename) {
-            Reader reader = null;
-            try {
-                load(reader = new InputStreamReader(new FileInputStream(filename)));
-                return true;
-            } catch (Exception e) {
-                Log.e(getClass().getName(), new StringBuilder("Couldn't load properties from - ").append(filename).append('\n').append(e).toString());
-                return false;
-            } finally {
-                FileUtils.close(reader);
-            }
-        }
-
-        /**
-         * Stores the mappings in this {@link Properties} object to the specified
-         * file, using default charset. <p>Note: This method will be create the
-         * necessary directories.</p>
-         * @param filename The properties file to store, must be absolute file path.
-         * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
-         * @see #load(String)
-         * @see #load(AssetManager, String)
-         */
-        public boolean store(String filename) {
-            Writer writer = null;
-            try {
-                mkdirs(filename, FLAG_IGNORE_FILENAME);
-                store(writer = new OutputStreamWriter(new FileOutputStream(filename)), null);
-                return true;
-            } catch (Exception e) {
-                Log.e(getClass().getName(), new StringBuilder("Couldn't store properties to - ").append(filename).toString(), e);
-                return false;
-            } finally {
-                FileUtils.close(writer);
-            }
-        }
-
-        /**
-         * Loads properties from the "assets" directory's file, assumed to be default charset.
-         * @param assetManager The <tt>AssetManager</tt>.
-         * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-         * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
-         * @see #load(String)
-         * @see #store(String)
-         */
-        public boolean load(AssetManager assetManager, String filename) {
-            Reader reader = null;
-            try {
-                load(reader = new InputStreamReader(assetManager.open(filename, AssetManager.ACCESS_STREAMING)));
-                return true;
-            } catch (Exception e) {
-                Log.e(getClass().getName(), new StringBuilder("Couldn't load properties from - ").append(filename).toString(), e);
-                return false;
-            } finally {
-                FileUtils.close(reader);
-            }
-        }
     }
 
     /**

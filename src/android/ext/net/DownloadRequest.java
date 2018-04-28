@@ -44,9 +44,7 @@ public class DownloadRequest {
     @Keep
     public DownloadRequest(String url) throws IOException {
         connection = new URL(url).openConnection();
-        if (connection instanceof HttpURLConnection) {
-            ((HttpURLConnection)connection).setInstanceFollowRedirects(true);
-        }
+        redirects(true);
     }
 
     /**
@@ -58,6 +56,21 @@ public class DownloadRequest {
      */
     public final DownloadRequest useCaches(boolean useCaches) {
         connection.setUseCaches(useCaches);
+        return this;
+    }
+
+    /**
+     * Sets whether the connection follows redirects.
+     * @param redirects <tt>true</tt> if the connection will
+     * follows redirects, <tt>false</tt> otherwise.
+     * @return This request.
+     * @see HttpURLConnection#setInstanceFollowRedirects(boolean)
+     */
+    public final DownloadRequest redirects(boolean redirects) {
+        if (connection instanceof HttpURLConnection) {
+            ((HttpURLConnection)connection).setInstanceFollowRedirects(redirects);
+        }
+
         return this;
     }
 

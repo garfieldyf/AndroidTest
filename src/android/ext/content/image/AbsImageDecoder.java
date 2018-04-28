@@ -143,7 +143,7 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
     }
 
     /**
-     * Decodes an image bounds (width and height) from the specified <em>uri</em>.
+     * Decodes an image bounds (width, height and MIME type) from the specified <em>uri</em>.
      * @param uri The uri to decode.
      * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.

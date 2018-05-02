@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Map;
@@ -40,10 +41,22 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Constructor
      * @param url The url to connect the remote HTTP server.
      * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadPostRequest(String)
+     */
+    @Keep
+    public DownloadPostRequest(URL url) throws IOException {
+        super(url);
+    }
+
+    /**
+     * Constructor
+     * @param url The url to connect the remote HTTP server.
+     * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadPostRequest(URL)
      */
     @Keep
     public DownloadPostRequest(String url) throws IOException {
-        super(url);
+        super(new URL(url));
     }
 
     /**

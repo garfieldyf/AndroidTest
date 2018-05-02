@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -86,14 +87,21 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
      * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
+     * @see #newDownloadRequest(String, Class)
+     */
+    public final <T extends DownloadRequest> T newDownloadRequest(URL url, Class<T> clazz) {
+        return newDownloadRequestImpl(url, clazz);
+    }
+
+    /**
+     * Equivalent to calling <tt>newDownloadRequest(new URL(url), clazz)</tt>.
+     * @param url The url to connect the remote server.
+     * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
+     * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
+     * @see #newDownloadRequest(URL, Class)
      */
     public final <T extends DownloadRequest> T newDownloadRequest(String url, Class<T> clazz) {
-        try {
-            DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
-            return (T)(mRequest = clazz.getConstructor(String.class).newInstance(url));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return newDownloadRequestImpl(url, clazz);
     }
 
     @Override
@@ -148,5 +156,17 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      */
     protected Result onDownload(URLConnection conn, Params[] params) throws Exception {
         return mRequest.downloadImpl(this);
+    }
+
+    /**
+     * Returns a new download request with the specified <em>url</em>.
+     */
+    private <T extends DownloadRequest> T newDownloadRequestImpl(Object url, Class<T> clazz) {
+        try {
+            DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
+            return (T)(mRequest = clazz.getConstructor(url.getClass()).newInstance(url));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

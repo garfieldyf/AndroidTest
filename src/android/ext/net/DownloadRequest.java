@@ -40,11 +40,23 @@ public class DownloadRequest {
      * Constructor
      * @param url The url to connect the remote server.
      * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadRequest(String)
+     */
+    @Keep
+    public DownloadRequest(URL url) throws IOException {
+        connection = url.openConnection();
+        redirects(true);
+    }
+
+    /**
+     * Constructor
+     * @param url The url to connect the remote server.
+     * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadRequest(URL)
      */
     @Keep
     public DownloadRequest(String url) throws IOException {
-        connection = new URL(url).openConnection();
-        redirects(true);
+        this(new URL(url));
     }
 
     /**

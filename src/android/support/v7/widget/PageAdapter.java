@@ -15,15 +15,21 @@ import android.util.ArrayMap;
 import android.util.SparseArray;
 
 /**
- * Abstract class PageAdapter
+ * Class <tt>PageAdapter</tt> allows to loading data by page. The <tt>PageAdapter</tt> must be subclassed
+ * to be used. The subclass will override at least one method {@link #loadPage(int, int, int, int)}.
+ * <h5>PageAdapter's generic types</h5>
+ * <p>The two types used by a page adapter are the following:</p>
+ * <ol><li><tt>E</tt>, The item data type of the adapter.</li>
+ * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will be used by the adapter.</li></ol>
  * @author Garfield
- * @version 2.0
+ * @version 3.0
  */
 public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> {
     private int mItemCount;
     private final int mPageSize;
-    private RecyclerView mRecyclerView;
+    private final int mFirstPageSize;
 
+    private RecyclerView mRecyclerView;
     private final BitSet mPageStates;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -32,23 +38,26 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @param maxPages The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
      * @param pageSize The item count of per-page.
-     * @see #PageAdapter(Cache, int)
+     * @param firstPageSize The item count of the first page (page index == 0).
+     * @see #PageAdapter(Cache, int, int)
      */
-    public PageAdapter(int maxPages, int pageSize) {
-        this(PageAdapter.<E>createPageCache(maxPages), pageSize);
+    public PageAdapter(int maxPages, int pageSize, int firstPageSize) {
+        this(PageAdapter.<E>createPageCache(maxPages), pageSize, firstPageSize);
     }
 
     /**
      * Constructor
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
      * @param pageSize The item count of per-page.
-     * @see #PageAdapter(int, int)
+     * @param firstPageSize The item count of the first page (page index == 0).
+     * @see #PageAdapter(int, int, int)
      */
-    public PageAdapter(Cache<Integer, Page<E>> pageCache, int pageSize) {
-        DebugUtils.__checkError(pageSize <= 0, "pageSize <= 0");
+    public PageAdapter(Cache<Integer, Page<E>> pageCache, int pageSize, int firstPageSize) {
+        DebugUtils.__checkError(pageSize <= 0 || firstPageSize <= 0, "pageSize <= 0 || firstPageSize <= 0");
         mPageSize   = pageSize;
         mPageCache  = pageCache;
         mPageStates = new BitSet();
+        mFirstPageSize = firstPageSize;
     }
 
     /**
@@ -75,15 +84,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the item when the
-     * item was not present.</p>
+     * <p>This method will be call {@link #loadPage(int, int, int, int)} to obtain the item when
+     * the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(ViewHolder)
      */
     public E getItem(int position) {
-        final Page<E> page = getPage(position / mPageSize, position);
-        return (page != null ? page.getItem(position % mPageSize) : null);
+        final Page<E> page = getPage(getPageIndex(position), position);
+        return (page != null ? page.getItem(getPagePosition(position)) : null);
     }
 
     /**
@@ -99,7 +108,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)}
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int, int)}
      * when the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
@@ -107,8 +116,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public E peekItem(int position) {
         DebugUtils.__checkUIThread("peekItem");
-        final Page<E> page = mPageCache.get(position / mPageSize);
-        return (page != null ? page.getItem(position % mPageSize) : null);
+        final Page<E> page = mPageCache.get(getPageIndex(position));
+        return (page != null ? page.getItem(getPagePosition(position)) : null);
     }
 
     /**
@@ -123,23 +132,23 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Returns the {@link Page} associated with the specified position <em>page</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the page when the page
-     * was not present.</p>
-     * @param page The position of the page.
-     * @return The <tt>Page</tt> at the specified position, or <tt>null</tt> if there was not present.
+     * Returns the {@link Page} associated with the specified index <em>page</em> in this adapter.
+     * <p>This method will be call {@link #loadPage(int, int, int, int)} to obtain the page when
+     * the page was not present.</p>
+     * @param page The index of the page.
+     * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #peekPage(int)
      */
     public final Page<E> getPage(int page) {
-        return getPage(page, page * mPageSize);
+        return getPage(page, getAdapterPosition(page, 0));
     }
 
     /**
-     * Returns the {@link Page} associated with the specified position <em>page</em> in this adapter.
-     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int)} when the
-     * page was not present.</p>
-     * @param page The position of the page.
-     * @return The <tt>Page</tt> at the specified position, or <tt>null</tt> if there was not present.
+     * Returns the {@link Page} associated with the specified index <em>page</em> in this adapter.
+     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int, int)}
+     * when the page was not present.</p>
+     * @param page The index of the page.
+     * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #getPage(int)
      */
     public final Page<E> peekPage(int page) {
@@ -150,7 +159,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Sets the {@link Page} at the specified <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.
-     * @param page The position of the page.
+     * @param page The index of the page.
      * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, List)
@@ -166,13 +175,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         if (count > 0) {
             // Adds the page to page cache and notify UI.
             mPageCache.put(page, data);
-            UIHandler.notifyItemRangeChanged(mRecyclerView, page * mPageSize, count, payload);
+            UIHandler.notifyItemRangeChanged(mRecyclerView, getAdapterPosition(page, 0), count, payload);
         }
     }
 
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data), null)</tt>.
-     * @param page The position of the page.
+     * @param page The index of the page.
      * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
      * @see #setPage(int, Page, Object)
      * @see #setPage(int, List, Object)
@@ -183,7 +192,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data), payload)</tt>.
-     * @param page The position of the page.
+     * @param page The index of the page.
      * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, List)
@@ -195,7 +204,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Equivalent to calling <tt>setPage(page, new JSONPage(data), null)</tt>.
-     * @param page The position of the page.
+     * @param page The index of the page.
      * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
      * @see #setPage(int, Page, Object)
      * @see #setPage(int, JSONArray, Object)
@@ -206,7 +215,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Equivalent to calling <tt>setPage(page, new JSONPage(data), payload)</tt>.
-     * @param page The position of the page.
+     * @param page The index of the page.
      * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, JSONArray)
@@ -217,11 +226,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Returns the item count of per-page.
-     * @return The item count of per-page.
+     * Returns the item count of the specified <em>page</em>.
+     * @param page The index of the page.
+     * @return The item count.
      */
-    public final int getPageSize() {
-        return mPageSize;
+    public final int getPageSize(int page) {
+        return (page > 0 ? mPageSize : mFirstPageSize);
     }
 
     /**
@@ -234,37 +244,37 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Returns the position of the page with the given the adapter position.
-     * @param adapterPosition The adapter position of the item.
-     * @return The position of the page.
+     * Returns the index of the page with the given the adapter position.
+     * @param position The adapter position of the item.
+     * @return The index of the page.
      * @see #getPagePosition(int)
      * @see #getAdapterPosition(int, int)
      */
-    public final int getPosition(int adapterPosition) {
-        return (adapterPosition / mPageSize);
+    public final int getPageIndex(int position) {
+        return (position < mFirstPageSize ? 0 : (position - mFirstPageSize) / mPageSize + 1);
     }
 
     /**
      * Returns the position of the item in the page with the given the adapter position.
-     * @param adapterPosition The adapter position of the item.
+     * @param position The adapter position of the item.
      * @return The position of the item in the page.
-     * @see #getPosition(int)
+     * @see #getPageIndex(int)
      * @see #getAdapterPosition(int, int)
      */
-    public final int getPagePosition(int adapterPosition) {
-        return (adapterPosition % mPageSize);
+    public final int getPagePosition(int position) {
+        return (position < mFirstPageSize ? position : (position - mFirstPageSize) % mPageSize);
     }
 
     /**
      * Returns the adapter position with the given <em>page</em> and <em>pagePosition</em>.
-     * @param page The position of the page.
-     * @param pagePosition The position of the item in the page.
+     * @param page The index of the page.
+     * @param pagePosition The position of the item in the <em>page</em>.
      * @return The adapter position of the item in this adapter.
-     * @see #getPosition(int)
+     * @see #getPageIndex(int)
      * @see #getPagePosition(int)
      */
     public final int getAdapterPosition(int page, int pagePosition) {
-        return (page * mPageSize + pagePosition);
+        return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + pagePosition : pagePosition);
     }
 
     @Override
@@ -284,19 +294,26 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Returns the {@link Page} associated with the specified position in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the page
-     * when the page was not present.</p>
-     * @param page The position of the page whose data should be returned.
-     * @param adapterPosition The adapter position of the item in this adapter.
+     * <p>This method will be call {@link #loadPage(int, int, int, int)} to obtain the
+     * page when the page was not present.</p>
+     * @param page The index of the page whose data should be returned.
+     * @param position The adapter position of the item in this adapter.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
-    protected Page<E> getPage(int page, int adapterPosition) {
+    protected Page<E> getPage(int page, int position) {
         DebugUtils.__checkUIThread("getPage");
         Page<E> result = mPageCache.get(page);
         if (result == null && !mPageStates.get(page)) {
+            // Computes the page offset and page size.
+            int pageOffset = 0, pageSize = mFirstPageSize;
+            if (page > 0) {
+                pageSize   = mPageSize;
+                pageOffset = (page - 1) * mPageSize + mFirstPageSize;
+            }
+
             // Marks the page loading state, if the page is not load.
             mPageStates.set(page);
-            result = loadPage(page, mPageSize, adapterPosition);
+            result = loadPage(page, pageOffset, pageSize, position);
             if (getCount(result) > 0) {
                 // If the page is load successful.
                 // 1. Adds the page to page cache.
@@ -315,13 +332,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * <p>If you want to asynchronously load the page data to prevent blocking
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
-     * @param page The position of the page whose data should be returned.
+     * @param page The index of the page whose data should be returned.
+     * @param pageOffset The start index of the first item.
      * @param pageSize The number of items in the <em>page</em>.
-     * @param adapterPosition The adapter position of the item in this adapter.
+     * @param position The adapter position of the item in this adapter.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    protected abstract Page<E> loadPage(int page, int pageSize, int adapterPosition);
+    protected abstract Page<E> loadPage(int page, int pageOffset, int pageSize, int position);
 
     /**
      * Returns a new {@link Page} {@link Cache} instance.

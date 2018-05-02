@@ -45,8 +45,8 @@ public final class NetworkUtils {
 
     /**
      * Returns the mac address from the network interface.
-     * @param ifname The network interface name.
-     * Pass {@link #WLAN} or {@link #ETHERNET}.
+     * @param ifname The network interface name. Pass {@link #WLAN},
+     * {@link #ETHERNET} or other interface name.
      * @return The mac address or <tt>null</tt>.
      */
     public static String getMacAddress(String ifname) {

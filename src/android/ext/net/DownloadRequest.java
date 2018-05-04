@@ -205,10 +205,9 @@ public class DownloadRequest {
 
     /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
-     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none.
-     * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object,
-     * If the download was cancelled before it completed normally then the returned value undefined,
-     * If the download failed return <tt>null</tt>.
+     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
+     * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download
+     * was cancelled before it completed normally then the returned value undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
      * @throws JSONException if data can not be parsed.
      * @see #download(String, Cancelable, byte[])
@@ -227,8 +226,8 @@ public class DownloadRequest {
      * Downloads the resource from the remote server with the arguments supplied to this request.
      * <p>Note: This method will be create the necessary directories.</p>
      * @param filename The file name to write the resource, must be absolute file path.
-     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If
-     * the download was cancelled before it completed normally then the file's contents undefined.
+     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
+     * none. If the download was cancelled before it completed normally then the file's contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading to the resource.
@@ -248,8 +247,8 @@ public class DownloadRequest {
     /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param out The {@link OutputStream} to write the resource.
-     * @param cancelable A {@link Cancelable} that can be cancelled, or <tt>null</tt> if none. If the
-     * download was cancelled before it completed normally then the <em>out's</em> contents undefined.
+     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
+     * If the download was cancelled before it completed normally then the <em>out's</em> contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading the resource.

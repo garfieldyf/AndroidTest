@@ -163,9 +163,9 @@ public final class ByteArrayBuffer extends OutputStream {
     /**
      * Writes the specified <tt>InputStream</tt> contents to this buffer.
      * @param is The <tt>InputStream</tt> to read the contents.
-     * @param cancelable A {@link Cancelable} that can be cancelled,
-     * or <tt>null</tt> if none. If the operation was cancelled before it
-     * completed normally then this buffer's contents undefined.
+     * @param cancelable A {@link Cancelable} can be check the operation is
+     * cancelled, or <tt>null</tt> if none. If the operation was cancelled
+     * before it completed normally then this buffer's contents undefined.
      * @throws IOException if an error occurs while read from <em>is</em>.
      * @see #readFrom(ByteBuffer)
      */

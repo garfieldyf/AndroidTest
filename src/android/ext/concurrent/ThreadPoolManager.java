@@ -88,7 +88,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @param mayInterruptIfRunning <tt>true</tt> if this pool executing all the running
      * <tt>Tasks</tt> should be interrupted, <tt>false</tt> otherwise.
      * @param mayNotifyIfCancelled <tt>true</tt> if this pool every cancelled {@link Task}
-     * should be call {@link Task#onCancelled() onCancelled()} method, <tt>false</tt> otherwise.
+     * should be call {@link Task#onCancelled() onCancelled()}, <tt>false</tt> otherwise.
      * @return <tt>true</tt> if at least one task was cancelled, <tt>false</tt> otherwise.
      * @see #cancel(long, boolean)
      */

@@ -173,7 +173,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
     }
 
     /**
-     * Class <tt>Builder</tt> to creates the {@link ImageLoader}.
+     * Class <tt>Builder</tt> to creates an {@link ImageLoader}.
      * <h2>Usage</h2>
      * <p>Here is an example:</p><pre>
      * final ImageLoader&lt;String, Object, Bitmap&gt; loader = mModule.createImageLoader()

@@ -110,7 +110,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     }
 
     /**
-     * Called on the UI thread when a load is complete. <p>The default
+     * Called on the UI thread when a load is complete.<p>This method
+     * won't be invoked if the task was cancelled.</p> <p>The default
      * implementation do nothing. If you write your own implementation,
      * do not call <tt>super.onLoadComplete()</tt>.</p>
      * @param key The key, passed earlier by {@link #load}.
@@ -123,7 +124,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     }
 
     /**
-     * Called on the UI thread when a load is cancelled. <p>The default
+     * Called on the UI thread when a load was cancelled.<p>The default
      * implementation do nothing. If you write your own implementation,
      * do not call <tt>super.onLoadCancelled()</tt>.</p>
      * @param key The key, passed earlier by {@link #load}.

@@ -560,6 +560,8 @@ public final class ProcessUtils {
 
         /**
          * Callback method to be invoked when the {@link #writeTo} method invoking.
+         * <p>The default implementation write the ABIs supported by this device to
+         * the <em>writer</em>.</p>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter}.
          * @return The <em>writer</em>.

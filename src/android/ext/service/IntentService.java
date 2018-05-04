@@ -25,8 +25,8 @@ public abstract class IntentService extends Service implements Callback {
 
     /**
      * Constructor
-     * @param keepAliveTime The maximum time in milliseconds that this service will wait
-     * for a new <tt>Intent</tt> before terminating.
+     * @param keepAliveTime The maximum time in milliseconds that this
+     * service will wait for a new <tt>Intent</tt> before terminating.
      */
     public IntentService(long keepAliveTime) {
         mKeepAliveTime = keepAliveTime;

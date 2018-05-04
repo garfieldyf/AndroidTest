@@ -12,7 +12,6 @@ import android.content.Context;
 import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
-import android.os.Environment;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
 import android.text.format.Formatter;
@@ -284,27 +283,23 @@ public final class DeviceUtils {
             for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
                 final Object volume  = volumes[i];
                 final Class<?> clazz = volume.getClass();
-                final String state = invoke(clazz, volume, "getState", null);
+                final String path = invoke(clazz, volume, "getPath", "");
+                statFs.restat(path);
 
-                if (Environment.MEDIA_MOUNTED.equals(state)) {
-                    final String path = invoke(clazz, volume, "getPath", "N/A");
-                    statFs.restat(path);
-
-                    if (out.length() <= 0) {
-                        out.append("  ");
-                    } else {
-                        out.append("\n  ");
-                    }
-
-                    out.append(getDescription(clazz, volume, context))
-                       .append(" [ path = ").append(path)
-                       .append(", primary = ").append(invoke(clazz, volume, "isPrimary", false))
-                       .append(", state = ").append(state)
-                       .append(", total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
-                       .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
-                       .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
-                       .append(" ]");
+                if (out.length() <= 0) {
+                    out.append("  ");
+                } else {
+                    out.append("\n  ");
                 }
+
+                out.append(getDescription(clazz, volume, context))
+                   .append(" [ path = ").append(path)
+                   .append(", primary = ").append(invoke(clazz, volume, "isPrimary", false))
+                   .append(", state = ").append(invoke(clazz, volume, "getState", "unknown"))
+                   .append(", total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
+                   .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
+                   .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
+                   .append(" ]");
             }
         } catch (Exception e) {
             Log.e(DeviceUtils.class.getName(), "Couldn't dump storage info.", e);
@@ -317,9 +312,10 @@ public final class DeviceUtils {
         try {
             final Method method = clazz.getDeclaredMethod("getDescription", Context.class);
             method.setAccessible(true);
-            return (String)method.invoke(object, context);
+            final String description = (String)method.invoke(object, context);
+            return (description != null ? description : "unknown");
         } catch (Exception e) {
-            return "Unknown";
+            return "unknown";
         }
     }
 

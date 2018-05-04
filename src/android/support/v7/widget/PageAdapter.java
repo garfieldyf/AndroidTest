@@ -116,6 +116,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public E peekItem(int position) {
         DebugUtils.__checkUIThread("peekItem");
+        DebugUtils.__checkError(position >= getItemCount(), "Index out of bounds - position = " + position + ", itemCount = " + getItemCount());
         final Page<E> page = mPageCache.get(getPageIndex(position));
         return (page != null ? page.getItem(getPagePosition(position)) : null);
     }
@@ -157,7 +158,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Sets the {@link Page} at the specified <em>page</em> in this adapter.
+     * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.
      * @param page The index of the page.
      * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
@@ -226,7 +227,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Returns the item count of the specified <em>page</em>.
+     * Returns the item count of the specified index <em>page</em>.
      * @param page The index of the page.
      * @return The item count.
      */
@@ -302,6 +303,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     protected Page<E> getPage(int page, int position) {
         DebugUtils.__checkUIThread("getPage");
+        DebugUtils.__checkError(position >= getItemCount(), "Index out of bounds - position = " + position + ", itemCount = " + getItemCount());
         Page<E> result = mPageCache.get(page);
         if (result == null && !mPageStates.get(page)) {
             // Computes the page offset and page size.

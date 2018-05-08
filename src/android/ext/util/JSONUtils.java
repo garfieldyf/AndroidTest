@@ -26,9 +26,12 @@ import android.util.JsonWriter;
 @SuppressWarnings("unchecked")
 public final class JSONUtils {
     /**
-     * The <tt>0-length</tt> {@link JSONArray}.
+     * Returns a <tt>0-length</tt>, immutable {@link JSONArray}.
+     * @return An empty {@link JSONArray}.
      */
-    public static final JSONArray EMPTY_ARRAY = new EmptyJSONArray();
+    public static JSONArray emptyArray() {
+        return EmptyJSONArray.sInstance;
+    }
 
     /**
      * Returns the number of values in the <em>array</em>,
@@ -82,13 +85,15 @@ public final class JSONUtils {
      * @param index The index at which to insert.
      * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
      * {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @throws IndexOutOfBoundsException if <tt> index < 0 || index > array.length()</tt>.
      * @return The <em>array</em>.
      * @see #putOpt(JSONArray, int, Object)
      * @see #putOpt(JSONObject, String, Object)
      */
-    public static JSONArray add(JSONArray array, int index, Object value) {
-        JSON.asList(array).add(index, value);
+    public static JSONArray addOpt(JSONArray array, int index, Object value) {
+        if (index >= 0 && index <= array.length()) {
+            JSON.asList(array).add(index, value);
+        }
+
         return array;
     }
 
@@ -99,7 +104,7 @@ public final class JSONUtils {
      * @param value A <tt>JSONObject, JSONArray, String, Boolean,
      * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>array</em>.
-     * @see #add(JSONArray, int, Object)
+     * @see #addOpt(JSONArray, int, Object)
      * @see #putOpt(JSONObject, String, Object)
      */
     public static JSONArray putOpt(JSONArray array, int index, Object value) {
@@ -117,7 +122,7 @@ public final class JSONUtils {
      * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
      * {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>object</em>.
-     * @see #add(JSONArray, int, Object)
+     * @see #addOpt(JSONArray, int, Object)
      * @see #putOpt(JSONArray, int, Object)
      */
     public static JSONObject putOpt(JSONObject object, String name, Object value) {
@@ -363,7 +368,9 @@ public final class JSONUtils {
     /**
      * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
      */
-    /* package */ static final class EmptyJSONArray extends JSONArray {
+    private static final class EmptyJSONArray extends JSONArray {
+        public static final JSONArray sInstance = new EmptyJSONArray();
+
         @Override
         public int length() {
             return 0;

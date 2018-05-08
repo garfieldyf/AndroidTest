@@ -26,10 +26,11 @@ import android.util.SparseArray;
  */
 public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> {
     private int mItemCount;
+    private RecyclerView mRecyclerView;
+
     private final int mPageSize;
     private final int mFirstPageSize;
 
-    private RecyclerView mRecyclerView;
     private final BitSet mPageStates;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -37,7 +38,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * Constructor
      * @param maxPages The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
-     * @param pageSize The item count of per-page.
+     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
      * @see #PageAdapter(Cache, int, int)
      */
@@ -48,7 +49,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     /**
      * Constructor
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
-     * @param pageSize The item count of per-page.
+     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
      * @see #PageAdapter(int, int, int)
      */
@@ -74,6 +75,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #getItemCount()
      */
     public void setItemCount(int count) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         if (mItemCount != count) {
             mItemCount = count;
             mPageCache.clear();
@@ -170,6 +172,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public void setPage(int page, Page<E> data, Object payload) {
         DebugUtils.__checkUIThread("setPage");
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         // Clears the page loading state when the page is load complete.
         mPageStates.clear(page);
         final int count = getCount(data);
@@ -306,16 +309,16 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkError(position >= getItemCount(), "Index out of bounds - position = " + position + ", itemCount = " + getItemCount());
         Page<E> result = mPageCache.get(page);
         if (result == null && !mPageStates.get(page)) {
-            // Computes the page offset and page size.
-            int pageOffset = 0, pageSize = mFirstPageSize;
+            // Computes the page offset and item count.
+            int offset = 0, itemCount = mFirstPageSize;
             if (page > 0) {
-                pageSize   = mPageSize;
-                pageOffset = (page - 1) * mPageSize + mFirstPageSize;
+                itemCount = mPageSize;
+                offset = (page - 1) * mPageSize + mFirstPageSize;
             }
 
             // Marks the page loading state, if the page is not load.
             mPageStates.set(page);
-            result = loadPage(page, pageOffset, pageSize, position);
+            result = loadPage(page, offset, itemCount, position);
             if (getCount(result) > 0) {
                 // If the page is load successful.
                 // 1. Adds the page to page cache.
@@ -335,13 +338,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
      * @param page The index of the page whose data should be returned.
-     * @param pageOffset The start index of the first item.
-     * @param pageSize The number of items in the <em>page</em>.
+     * @param offset The start index of the first item.
+     * @param itemCount The number of items in the <em>page</em>.
      * @param position The adapter position of the item in this adapter.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    protected abstract Page<E> loadPage(int page, int pageOffset, int pageSize, int position);
+    protected abstract Page<E> loadPage(int page, int offset, int itemCount, int position);
 
     /**
      * Returns a new {@link Page} {@link Cache} instance.

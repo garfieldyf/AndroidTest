@@ -116,11 +116,9 @@ public final class DebugUtils {
     /**
      * This ant task is imported by the project build file. It can be delete the
      * <b>__checkXXX</b> methods invocation.
-     * <pre>
-     * &lt;replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" &gt;
+     * <pre>&lt;replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" &gt;
      *     &lt;fileset dir="${src.dir}" includes="**\*.java" /&gt;
-     * &lt;/replaceregexp&gt;
-     * </pre>
+     * &lt;/replaceregexp&gt;</pre>
      */
     public static void __checkUIThread(String method) {
         if (Looper.getMainLooper() != Looper.myLooper()) {

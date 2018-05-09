@@ -137,10 +137,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
 
     @Override
     public void onLowMemory() {
-        if (mFileCache != null) {
-            mFileCache.clear();
-        }
-
         if (mImageCache != null) {
             mImageCache.clear();
         }

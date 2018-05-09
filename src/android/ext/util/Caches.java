@@ -744,9 +744,9 @@ public final class Caches {
             final Collection<String> files = entries().values();
 
             if (this instanceof LruFileCache2) {
-                DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %s, maxSize = %s ] ", className, files.size(), Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));
+                DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", className, files.size(), Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));
             } else {
-                DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", className, files.size(), maxSize());
+                DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", className, files.size(), maxSize());
             }
 
             for (String file : files) {
@@ -782,7 +782,7 @@ public final class Caches {
                 }
             }
 
-            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " [ dirs = %d, files = %d, size = %s ] ", size, fileCount, Formatter.formatFileSize(context, fileBytes));
+            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", className, size, fileCount, Formatter.formatFileSize(context, fileBytes));
             if (result.length() > 0) {
                 printer.println(result.toString());
             }

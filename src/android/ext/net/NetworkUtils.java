@@ -66,7 +66,8 @@ public final class NetworkUtils {
      * @see ConnectivityManager#getActiveNetworkInfo()
      */
     public static NetworkInfo getActiveNetworkInfo(Context context) {
-        return getActiveNetworkInfo((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE));
+        final NetworkInfo info = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return (info != null ? info : DummyNetworkInfo.sInstance);
     }
 
     /**

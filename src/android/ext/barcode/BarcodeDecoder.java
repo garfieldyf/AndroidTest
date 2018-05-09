@@ -137,6 +137,7 @@ public class BarcodeDecoder {
      * to {@link #decode} can reuse the same set of readers without reallocating
      * memory. This is important for performance in continuous scan clients.
      * @param hints The set of hints to use for subsequent calls to <em>decode</em>.
+     * @see Builder
      */
     public final void setHints(Map<DecodeHintType, ?> hints) {
         mReader.setHints(hints);
@@ -219,6 +220,12 @@ public class BarcodeDecoder {
 
     /**
      * Class <tt>Builder</tt> to creates the barcode decoder hints.
+     * <h2>Usage</h2>
+     * <p>Here is an example:</p><pre>
+     * final Map&lt;DecodeHintType, Object&gt; hints = new BarcodeDecoder.Builder()
+     *     .charset("UTF-8")
+     *     .formats(BarcodeFormat.QR_CODE)
+     *     .create();</pre>
      */
     public static final class Builder {
         private final Map<DecodeHintType, Object> mHints;

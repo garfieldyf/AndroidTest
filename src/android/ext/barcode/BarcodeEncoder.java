@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import android.content.Context;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -110,6 +111,7 @@ public class BarcodeEncoder {
     /**
      * Sets the additional parameters to supply to this encoder.
      * @param hints The parameters to set.
+     * @see Builder
      */
     public final void setHints(Map<EncodeHintType, ?> hints) {
         mHints = hints;
@@ -125,156 +127,6 @@ public class BarcodeEncoder {
     public static int computeQRCodeSize(Context context, float scale) {
         final DisplayMetrics dm = context.getResources().getDisplayMetrics();
         return (int)(Math.min(dm.widthPixels, dm.heightPixels) * scale + 0.5f);
-    }
-
-    /**
-     * Equivalent to calling <tt>convertToBitmap(bitMatrix, Config.RGB_565, Color.WHITE, Color.BLACK, padding, padding, padding, padding, null, 0)</tt>.
-     * @param bitMatrix The <tt>BitMatrix</tt> to convert.
-     * @param padding The padding of the contents in pixels.
-     * @return The <tt>Bitmap</tt>.
-     * @see #convertToBitmap(BitMatrix, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, int, int, int, Drawable, int)
-     */
-    public static Bitmap convertToBitmap(BitMatrix bitMatrix, int padding) {
-        return convertToBitmap(bitMatrix, Config.RGB_565, Color.WHITE, Color.BLACK, padding, padding, padding, padding, null, 0);
-    }
-
-    /**
-     * Equivalent to calling <tt>convertToBitmap(bitMatrix, config, white, black, padding, padding, padding, padding, null, 0)</tt>.
-     * @param bitMatrix The <tt>BitMatrix</tt> to convert.
-     * @param config The bitmap {@link Config} to create.
-     * @param white The "white" color to set.
-     * @param black The "black" color to set.
-     * @param padding The padding of the contents in pixels.
-     * @return The <tt>Bitmap</tt>.
-     * @see #convertToBitmap(BitMatrix, int)
-     * @see #convertToBitmap(BitMatrix, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, int, int, int, Drawable, int)
-     */
-    public static Bitmap convertToBitmap(BitMatrix bitMatrix, Config config, int white, int black, int padding) {
-        return convertToBitmap(bitMatrix, config, white, black, padding, padding, padding, padding, null, 0);
-    }
-
-    /**
-     * Equivalent to calling <tt>convertToBitmap(bitMatrix, Config.RGB_565, Color.WHITE, Color.BLACK, padding, padding, padding, padding, logo, gravity)</tt>.
-     * @param bitMatrix The <tt>BitMatrix</tt> to convert.
-     * @param padding The padding of the contents in pixels.
-     * @param logo May be <tt>null</tt>. The logo will be draw into the returned <tt>Bitmap</tt>.
-     * @param gravity The gravity used to position/stretch the <em>logo</em> within its bounds.
-     * If the <em>logo</em> is <tt>null</tt>, This parameter will be ignored.
-     * @return The <tt>Bitmap</tt>.
-     * @see #convertToBitmap(BitMatrix, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, int, int, int, Drawable, int)
-     */
-    public static Bitmap convertToBitmap(BitMatrix bitMatrix, int padding, Drawable logo, int gravity) {
-        return convertToBitmap(bitMatrix, Config.RGB_565, Color.WHITE, Color.BLACK, padding, padding, padding, padding, logo, gravity);
-    }
-
-    /**
-     * Equivalent to calling <tt>convertToBitmap(bitMatrix, config, white, black, padding, padding, padding, padding, logo, gravity)</tt>.
-     * @param bitMatrix The <tt>BitMatrix</tt> to convert.
-     * @param config The bitmap {@link Config} to create.
-     * @param white The "white" color to set.
-     * @param black The "black" color to set.
-     * @param padding The padding of the contents in pixels.
-     * @param logo May be <tt>null</tt>. The logo will be draw into the returned <tt>Bitmap</tt>.
-     * @param gravity The gravity used to position/stretch the <em>logo</em> within its bounds.
-     * If the <em>logo</em> is <tt>null</tt>, This parameter will be ignored.
-     * @return The <tt>Bitmap</tt>.
-     * @see #convertToBitmap(BitMatrix, int)
-     * @see #convertToBitmap(BitMatrix, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, int, int, int, Drawable, int)
-     */
-    public static Bitmap convertToBitmap(BitMatrix bitMatrix, Config config, int white, int black, int padding, Drawable logo, int gravity) {
-        return convertToBitmap(bitMatrix, config, white, black, padding, padding, padding, padding, logo, gravity);
-    }
-
-    /**
-     * Converts the specified {@link BitMatrix} to a mutable {@link Bitmap}.
-     * @param bitMatrix The <tt>BitMatrix</tt> to convert.
-     * @param config The bitmap {@link Config} to create.
-     * @param white The "white" color to set.
-     * @param black The "black" color to set.
-     * @param paddingLeft The left padding of the contents in pixels.
-     * @param paddingTop The top padding of the contents in pixels.
-     * @param paddingRight The right padding of the contents in pixels.
-     * @param paddingBottom The bottom padding of the contents in pixels.
-     * @param logo May be <tt>null</tt>. The logo will be draw into the returned <tt>Bitmap</tt>.
-     * @param gravity The gravity used to position/stretch the <em>logo</em> within its bounds.
-     * If the <em>logo</em> is <tt>null</tt>, This parameter will be ignored.
-     * @return The <tt>Bitmap</tt>.
-     * @see #convertToBitmap(BitMatrix, int)
-     * @see #convertToBitmap(BitMatrix, int, Drawable, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int)
-     * @see #convertToBitmap(BitMatrix, Config, int, int, int, Drawable, int)
-     */
-    public static Bitmap convertToBitmap(BitMatrix bitMatrix, Config config, int white, int black, int paddingLeft, int paddingTop, int paddingRight, int paddingBottom, Drawable logo, int gravity) {
-        final int left, top, right, bottom, width, height;
-        final int[] bounds = bitMatrix.getEnclosingRectangle();
-        if (bounds != null) {
-            left   = bounds[0];
-            top    = bounds[1];
-            right  = left + bounds[2];
-            bottom = top  + bounds[3];
-            width  = bounds[2] + paddingLeft + paddingRight;
-            height = bounds[3] + paddingTop + paddingBottom;
-        } else {
-            paddingLeft = paddingTop = left = top = 0;
-            width  = right  = bitMatrix.getWidth();
-            height = bottom = bitMatrix.getHeight();
-        }
-
-        final int[] rowPixels = new int[width];
-        final Bitmap result = Bitmap.createBitmap(width, height, config);
-        result.eraseColor(white);
-
-        for (int y = top, start = paddingLeft + right - left; y < bottom; ++y, ++paddingTop) {
-            // Fills the padding area ([0 - paddingLeft], [paddingRight - width]) to the 'white' color.
-            Arrays.fill(rowPixels, 0, paddingLeft, white);
-            Arrays.fill(rowPixels, start, width, white);
-
-            // Converts the barcode image current row bits to pixels.
-            for (int x = left, outputX = paddingLeft; x < right; ++x, ++outputX) {
-                rowPixels[outputX] = (bitMatrix.get(x, y) ? black : white);
-            }
-
-            // Copy the result current row pixels from rowPixels array.
-            result.setPixels(rowPixels, 0, width, 0, paddingTop, width, 1);
-        }
-
-        if (logo != null) {
-            final Canvas canvas = new Canvas(result);
-            drawLogo(canvas, logo, width, height, gravity);
-            canvas.setBitmap(null);
-        }
-
-        return result;
-    }
-
-    private static void drawLogo(Canvas canvas, Drawable logo, int width, int height, int gravity) {
-        final int size = (int)(width * 0.25f);
-        final int left = (width  - size) / 2;
-        final int top  = (height - size) / 2;
-
-        final int logoWidth  = logo.getIntrinsicWidth();
-        final int logoHeight = logo.getIntrinsicHeight();
-        final Rect container = new Rect(left, top, left + size, top + size);
-
-        if (logoWidth > 0 && logoHeight > 0) {
-            final Rect bounds = new Rect();
-            Gravity.apply(gravity, logoWidth, logoHeight, container, 0, 0, bounds);
-            logo.setBounds(bounds);
-        } else {
-            logo.setBounds(container);
-        }
-
-        logo.draw(canvas);
     }
 
     /**
@@ -312,6 +164,13 @@ public class BarcodeEncoder {
 
     /**
      * Class <tt>Builder</tt> to creates the barcode encoder hints.
+     * <h2>Usage</h2>
+     * <p>Here is an example:</p><pre>
+     * final Map&lt;EncodeHintType, Object&gt; hints = new BarcodeEncoder.Builder()
+     *     .charset("UTF-8")
+     *     .margin(0)
+     *     .errorCorrection(ErrorCorrectionLevel.H)
+     *     .create();</pre>
      */
     public static final class Builder {
         private final Map<EncodeHintType, Object> mHints;
@@ -412,6 +271,178 @@ public class BarcodeEncoder {
     }
 
     /**
+     * Class <tt>BitmapBuilder</tt> used to converts the {@link BitMatrix} to a mutable {@link Bitmap}.
+     * <h2>Usage</h2>
+     * <p>Here is an example:</p><pre>
+     * final Bitmap bitmap = new BitmapBuilder(bitMatrix)
+     *     .logo(logo)
+     *     .gravity(Gravity.FILL)
+     *     .padding(30, 30, 30, 30)
+     *     .create();</pre>
+     */
+    public static final class BitmapBuilder {
+        private Config config;
+        private int white;
+        private int black;
+        private int gravity;
+        private Drawable logo;
+        private int paddingLeft;
+        private int paddingTop;
+        private int paddingRight;
+        private int paddingBottom;
+        private final BitMatrix bitMatrix;
+
+        /**
+         * Constructor
+         * @param bitMatrix The <tt>BitMatrix</tt> to convert.
+         */
+        public BitmapBuilder(BitMatrix bitMatrix) {
+            DebugUtils.__checkError(bitMatrix == null, "bitMatrix == null");
+            this.bitMatrix = bitMatrix;
+            this.white  = Color.WHITE;
+            this.black  = Color.BLACK;
+            this.config = Config.RGB_565;
+        }
+
+        /**
+         * Sets the bitmap config to used to build the bitmap.
+         * @param config The bitmap {@link Config} to set.
+         * @return This builder.
+         */
+        public BitmapBuilder config(Config config) {
+            this.config = config;
+            return this;
+        }
+
+        /**
+         * Sets the "white" color will be draw the bitmap.
+         * @param white The "white" color to set.
+         * @return This builder.
+         */
+        public BitmapBuilder white(int white) {
+            this.white = white;
+            return this;
+        }
+
+        /**
+         * Sets the "black" color will be draw the bitmap.
+         * @param black The "black" color to set.
+         * @return This builder.
+         */
+        public BitmapBuilder black(int black) {
+            this.black = black;
+            return this;
+        }
+
+        /**
+         * Sets the logo will be draw into the bitmap.
+         * @param logo The <tt>Drawable</tt> to set.
+         * @return This builder.
+         */
+        public BitmapBuilder logo(Drawable logo) {
+            this.logo = logo;
+            return this;
+        }
+
+        /**
+         * Sets the gravity used to position/stretch the logo within its bounds.
+         * @param gravity The gravity to set.
+         * @return This builder.
+         * @see Gravity
+         */
+        public BitmapBuilder gravity(int gravity) {
+            this.gravity = gravity;
+            return this;
+        }
+
+        /**
+         * Sets the padding of the bitmap.
+         * @param left The left padding in pixels.
+         * @param top The top padding in pixels.
+         * @param right The right padding in pixels.
+         * @param bottom The bottom padding in pixels.
+         * @return This builder.
+         */
+        public BitmapBuilder padding(int left, int top, int right, int bottom) {
+            this.paddingLeft   = left;
+            this.paddingTop    = top;
+            this.paddingRight  = right;
+            this.paddingBottom = bottom;
+            return this;
+        }
+
+        /**
+         * Creates a {@link Bitmap} with the arguments supplied to this builder.
+         * @return The instance of <tt>Bitmap</tt>.
+         */
+        public final Bitmap create() {
+            int inputX, inputY;
+            final int left, top, right, bottom, width, height;
+            final int[] bounds = bitMatrix.getEnclosingRectangle();
+            if (bounds != null) {
+                left   = bounds[0];
+                top    = bounds[1];
+                right  = left + bounds[2];
+                bottom = top  + bounds[3];
+                inputX = paddingLeft;
+                inputY = paddingTop;
+                width  = bounds[2] + paddingLeft + paddingRight;
+                height = bounds[3] + paddingTop + paddingBottom;
+            } else {
+                inputX = inputY = left = top = 0;
+                width  = right  = bitMatrix.getWidth();
+                height = bottom = bitMatrix.getHeight();
+            }
+
+            final int[] rowPixels = new int[width];
+            final Bitmap result = Bitmap.createBitmap(width, height, config);
+            result.eraseColor(white);
+
+            for (int y = top, start = inputX + right - left; y < bottom; ++y, ++inputY) {
+                // Fills the padding area ([0 - paddingLeft], [paddingRight - width]) to the 'white' color.
+                Arrays.fill(rowPixels, 0, inputX, white);
+                Arrays.fill(rowPixels, start, width, white);
+
+                // Converts the barcode image current row bits to pixels.
+                for (int x = left, outputX = inputX; x < right; ++x, ++outputX) {
+                    rowPixels[outputX] = (bitMatrix.get(x, y) ? black : white);
+                }
+
+                // Copy the result current row pixels from rowPixels array.
+                result.setPixels(rowPixels, 0, width, 0, inputY, width, 1);
+            }
+
+            if (logo != null) {
+                final Canvas canvas = new Canvas(result);
+                drawLogo(canvas, width, height);
+                canvas.setBitmap(null);
+            }
+
+            return result;
+        }
+
+        private void drawLogo(Canvas canvas, int width, int height) {
+            final int size = (int)(width * 0.25f);
+            final int left = (width - size) / 2;
+            final int top  = (height - size) / 2;
+
+            final int logoWidth  = logo.getIntrinsicWidth();
+            final int logoHeight = logo.getIntrinsicHeight();
+            final Rect container = new Rect(left, top, left + size, top + size);
+
+            if (logoWidth > 0 && logoHeight > 0) {
+                final Rect bounds = new Rect();
+                Gravity.apply(gravity, logoWidth, logoHeight, container, 0, 0, bounds);
+                logo.setBounds(bounds);
+            } else {
+                logo.setBounds(container);
+            }
+
+            logo.draw(canvas);
+        }
+    }
+
+    /**
      * Used for being notified when the contents was encoded an barcode image.
      */
     public static interface OnEncodeListener {
@@ -422,15 +453,15 @@ public class BarcodeEncoder {
          * @param result The {@link Bitmap} representing encoded barcode image,
          * or <tt>null</tt> if encode failed.
          * @see #convertToBitmap(BitMatrix, Map)
-         * @see BarcodeEncoder#convertToBitmap(BitMatrix, int)
          */
         void onEncodeComplete(BitMatrix bitMatrix, Bitmap result);
 
         /**
          * Called on a background thread when the {@link BitMatrix} converts to {@link Bitmap}.
-         * @param bitMatrix The <tt>BitMatrix</tt> to convert.
+         * @param bitMatrix The <tt>BitMatrix</tt> to convert, or <tt>null</tt> if encode failed.
          * @param hints The additional parameters, passed earlier by {@link BarcodeEncoder#startEncode}.
          * @return The <tt>Bitmap</tt>, or <tt>null</tt> if convert failed.
+         * @see BitmapBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
         Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints);

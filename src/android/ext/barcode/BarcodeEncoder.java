@@ -376,8 +376,7 @@ public class BarcodeEncoder {
          * @return The instance of <tt>Bitmap</tt>.
          */
         public final Bitmap create() {
-            int inputX, inputY;
-            final int left, top, right, bottom, width, height;
+            int left, top, right, bottom, inputX, inputY, width, height;
             final int[] bounds = bitMatrix.getEnclosingRectangle();
             if (bounds != null) {
                 left   = bounds[0];

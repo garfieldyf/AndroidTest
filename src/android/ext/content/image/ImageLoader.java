@@ -27,6 +27,10 @@ import android.util.Printer;
 /**
  * Class <tt>ImageLoader</tt> allows to load the image from the URI
  * on a background thread and bind it to target on the UI thread.
+ * <h5>ImageLoader's generic types</h5>
+ * <p>The two types used by an image loader are the following:</p>
+ * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
+ * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * @author Garfield
  * @version 6.0
  */

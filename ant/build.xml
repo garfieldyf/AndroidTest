@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="module" basedir="." default="release">
     <!-- properties -->
-    <property name="author" value="yuanfeng" />
+    <property name="author" value="Garfield" />
+    <property name="version" value="1.0.1" />
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
@@ -14,6 +15,7 @@
     <property name="out.dir" value="${basedir}/out" />
 
     <property name="api.level" value="22" />
+    <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
     <property name="external.jar.dir" value="E:\Include\android" />
     <property name="sdk.dir" value="D:\Google\android-sdk-windows" />
     <property name="barcode.jar.path" value="${external.jar.dir}/zxing/release/zxing.jar" />
@@ -118,7 +120,13 @@
             classpath="${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}" />
 
         <!-- build jar file -->
-        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}" />
+        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Built-By" value="${author}" />
+                <attribute name="Version" value="${version}" />
+                <attribute name="SDK-Version" value="${sdk.version}" />
+            </manifest>
+        </jar>
     </target>
 
     <!-- target -compile-so -->

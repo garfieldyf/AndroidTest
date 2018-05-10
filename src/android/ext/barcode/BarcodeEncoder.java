@@ -170,7 +170,7 @@ public class BarcodeEncoder {
      *     .charset("UTF-8")
      *     .margin(0)
      *     .errorCorrection(ErrorCorrectionLevel.H)
-     *     .create();</pre>
+     *     .build();</pre>
      */
     public static final class Builder {
         private final Map<EncodeHintType, Object> mHints;
@@ -265,22 +265,23 @@ public class BarcodeEncoder {
          * Creates a barcode encoder hints with the arguments supplied to this builder.
          * @return The barcode encoder hints.
          */
-        public final Map<EncodeHintType, Object> create() {
+        public final Map<EncodeHintType, Object> build() {
             return mHints;
         }
     }
 
     /**
-     * Class <tt>BitmapBuilder</tt> used to converts the {@link BitMatrix} to a mutable {@link Bitmap}.
+     * Class <tt>BarcodeBuilder</tt> used to converts the {@link BitMatrix}
+     * to a barcode image.
      * <h2>Usage</h2>
      * <p>Here is an example:</p><pre>
-     * final Bitmap bitmap = new BitmapBuilder(bitMatrix)
+     * final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
      *     .logo(logo)
      *     .gravity(Gravity.FILL)
      *     .padding(30, 30, 30, 30)
-     *     .create();</pre>
+     *     .build();</pre>
      */
-    public static final class BitmapBuilder {
+    public static final class BarcodeBuilder {
         private Config config;
         private int white;
         private int black;
@@ -296,7 +297,7 @@ public class BarcodeEncoder {
          * Constructor
          * @param bitMatrix The <tt>BitMatrix</tt> to convert.
          */
-        public BitmapBuilder(BitMatrix bitMatrix) {
+        public BarcodeBuilder(BitMatrix bitMatrix) {
             DebugUtils.__checkError(bitMatrix == null, "bitMatrix == null");
             this.bitMatrix = bitMatrix;
             this.white  = Color.WHITE;
@@ -305,65 +306,58 @@ public class BarcodeEncoder {
         }
 
         /**
-         * Sets the bitmap config to used to build the bitmap.
-         * @param config The bitmap {@link Config} to set.
+         * Sets the config to used to build the barcode image.
+         * @param config The {@link Config} to set.
          * @return This builder.
          */
-        public BitmapBuilder config(Config config) {
+        public final BarcodeBuilder config(Config config) {
             this.config = config;
             return this;
         }
 
         /**
-         * Sets the "white" color will be draw the bitmap.
+         * Sets the "white" color will be draw the barcode image.
          * @param white The "white" color to set.
          * @return This builder.
          */
-        public BitmapBuilder white(int white) {
+        public final BarcodeBuilder white(int white) {
             this.white = white;
             return this;
         }
 
         /**
-         * Sets the "black" color will be draw the bitmap.
+         * Sets the "black" color will be draw the barcode image.
          * @param black The "black" color to set.
          * @return This builder.
          */
-        public BitmapBuilder black(int black) {
+        public final BarcodeBuilder black(int black) {
             this.black = black;
             return this;
         }
 
         /**
-         * Sets the logo will be draw into the bitmap.
+         * Sets the logo will be draw into the barcode image.
          * @param logo The <tt>Drawable</tt> to set.
-         * @return This builder.
-         */
-        public BitmapBuilder logo(Drawable logo) {
-            this.logo = logo;
-            return this;
-        }
-
-        /**
-         * Sets the gravity used to position/stretch the logo within its bounds.
-         * @param gravity The gravity to set.
+         * @param gravity The gravity used to position/stretch
+         * the <em>logo</em> within its bounds.
          * @return This builder.
          * @see Gravity
          */
-        public BitmapBuilder gravity(int gravity) {
+        public final BarcodeBuilder logo(Drawable logo, int gravity) {
+            this.logo = logo;
             this.gravity = gravity;
             return this;
         }
 
         /**
-         * Sets the padding of the bitmap.
+         * Sets the padding of the barcode image.
          * @param left The left padding in pixels.
          * @param top The top padding in pixels.
          * @param right The right padding in pixels.
          * @param bottom The bottom padding in pixels.
          * @return This builder.
          */
-        public BitmapBuilder padding(int left, int top, int right, int bottom) {
+        public final BarcodeBuilder padding(int left, int top, int right, int bottom) {
             this.paddingLeft   = left;
             this.paddingTop    = top;
             this.paddingRight  = right;
@@ -372,10 +366,10 @@ public class BarcodeEncoder {
         }
 
         /**
-         * Creates a {@link Bitmap} with the arguments supplied to this builder.
-         * @return The instance of <tt>Bitmap</tt>.
+         * Creates a barcode image with the arguments supplied to this builder.
+         * @return The instance of barcode image.
          */
-        public final Bitmap create() {
+        public final Bitmap build() {
             int left, top, right, bottom, inputX, inputY, width, height;
             final int[] bounds = bitMatrix.getEnclosingRectangle();
             if (bounds != null) {
@@ -398,7 +392,7 @@ public class BarcodeEncoder {
             result.eraseColor(white);
 
             for (int y = top, start = inputX + right - left; y < bottom; ++y, ++inputY) {
-                // Fills the padding area ([0 - paddingLeft], [paddingRight - width]) to the 'white' color.
+                // Fills the padding area ([0 - inputX], [inputY - width]) to the 'white' color.
                 Arrays.fill(rowPixels, 0, inputX, white);
                 Arrays.fill(rowPixels, start, width, white);
 
@@ -460,7 +454,7 @@ public class BarcodeEncoder {
          * @param bitMatrix The <tt>BitMatrix</tt> to convert, or <tt>null</tt> if encode failed.
          * @param hints The additional parameters, passed earlier by {@link BarcodeEncoder#startEncode}.
          * @return The <tt>Bitmap</tt>, or <tt>null</tt> if convert failed.
-         * @see BitmapBuilder
+         * @see BarcodeBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
         Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints);

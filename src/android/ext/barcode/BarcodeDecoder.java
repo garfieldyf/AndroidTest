@@ -225,7 +225,7 @@ public class BarcodeDecoder {
      * final Map&lt;DecodeHintType, Object&gt; hints = new BarcodeDecoder.Builder()
      *     .charset("UTF-8")
      *     .formats(BarcodeFormat.QR_CODE)
-     *     .create();</pre>
+     *     .build();</pre>
      */
     public static final class Builder {
         private final Map<DecodeHintType, Object> mHints;
@@ -329,7 +329,7 @@ public class BarcodeDecoder {
          * Creates a barcode decoder hints with the arguments supplied to this builder.
          * @return The barcode decoder hints.
          */
-        public final Map<DecodeHintType, Object> create() {
+        public final Map<DecodeHintType, Object> build() {
             return mHints;
         }
     }

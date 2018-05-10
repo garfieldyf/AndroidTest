@@ -114,7 +114,7 @@
     <target name="-compile-jar">
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
-        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="${java.debug}" source="1.7" target="1.7" includeantruntime="false"
+        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="${java.debug}" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
             classpath="${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}" />
 
         <!-- build jar file -->

@@ -80,15 +80,15 @@ public final class XmlResources {
     }
 
     /**
-     * Equivalent to calling <tt>buildResourceUri(context.getPackageName(), resource)</tt>.
+     * Equivalent to calling <tt>getResourceUri(context.getPackageName(), resource)</tt>.
      * @param context The <tt>Context</tt>.
      * @param resource Type {@link Integer}, or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
      * @return The uri string.
-     * @see #buildResourceUri(String, Object)
+     * @see #getResourceUri(String, Object)
      */
-    public static String buildResourceUri(Context context, Object resource) {
-        return buildResourceUri(context.getPackageName(), resource);
+    public static String getResourceUri(Context context, Object resource) {
+        return getResourceUri(context.getPackageName(), resource);
     }
 
     /**
@@ -97,9 +97,9 @@ public final class XmlResources {
      * @param resource Type {@link Integer}, or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
      * @return The uri string.
-     * @see #buildResourceUri(Context, Object)
+     * @see #getResourceUri(Context, Object)
      */
-    public static String buildResourceUri(String packageName, Object resource) {
+    public static String getResourceUri(String packageName, Object resource) {
         final String res = resource.toString();
         return new StringBuilder(SCHEME_ANDROID_RESOURCE.length() + packageName.length() + res.length() + 4).append(SCHEME_ANDROID_RESOURCE).append("://").append(packageName).append('/').append(res).toString();
     }

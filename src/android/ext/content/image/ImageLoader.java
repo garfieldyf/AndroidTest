@@ -259,12 +259,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
                     return result;
                 }
 
-                // Removes the hash key from file cache, If decode failed.
+                // Removes the image file from file cache, If decode failed.
                 mCache.remove(hashKey);
             }
 
             if (!isTaskCancelled(task)) {
-                // Loads the image from url, If the image file not exists or decode failed.
+                // Loads the image from url, If the image file is not exists or decode failed.
                 builder.setLength(0);
                 final String tempFile = builder.append(imageFile, 0, imageFile.lastIndexOf('/') + 1).append(Thread.currentThread().hashCode()).toString();
                 if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile, imageFile) == 0) {

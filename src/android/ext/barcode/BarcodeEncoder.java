@@ -1,11 +1,10 @@
 package android.ext.barcode;
 
-import java.lang.ref.WeakReference;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import android.content.Context;
+import android.content.res.Resources;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -51,6 +50,7 @@ public class BarcodeEncoder {
      * @return The {@link BitMatrix} representing encoded barcode image if succeeded,
      * <tt>null</tt> otherwise.
      * @see #encode(String, BarcodeFormat, int, int, Map)
+     * @see BarcodeBuilder
      */
     public BitMatrix encode(String contents, BarcodeFormat format, int width, int height) {
         return encode(contents, format, width, height, mHints);
@@ -67,6 +67,7 @@ public class BarcodeEncoder {
      * @return The {@link BitMatrix} representing encoded barcode image if succeeded,
      * <tt>null</tt> otherwise.
      * @see #encode(String, BarcodeFormat, int, int)
+     * @see BarcodeBuilder
      */
     public BitMatrix encode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints) {
         try {
@@ -133,32 +134,24 @@ public class BarcodeEncoder {
      * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
     private final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
-        private final WeakReference<OnEncodeListener> mListener;
+        private OnEncodeListener mListener;
 
         public EncodeTask(OnEncodeListener listener) {
-            mListener = new WeakReference<OnEncodeListener>(listener);
+            mListener = listener;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         protected Pair<BitMatrix, Bitmap> doInBackground(Object... params) {
-            final OnEncodeListener listener = mListener.get();
-            Pair<BitMatrix, Bitmap> result  = null;
-            if (listener != null) {
-                final Map<EncodeHintType, ?> hints = (Map<EncodeHintType, ?>)params[4];
-                final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (Integer)params[2], (Integer)params[3], hints);
-                result = new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? listener.convertToBitmap(bitMatrix, hints) : null));
-            }
-
-            return result;
+            final Map<EncodeHintType, ?> hints = (Map<EncodeHintType, ?>)params[4];
+            final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (Integer)params[2], (Integer)params[3], hints);
+            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, hints) : null));
         }
 
         @Override
         protected void onPostExecute(Pair<BitMatrix, Bitmap> result) {
-            final OnEncodeListener listener = mListener.get();
-            if (listener != null) {
-                listener.onEncodeComplete(result.first, result.second);
-            }
+            mListener.onEncodeComplete(result.first, result.second);
+            mListener = null;   // Clears the listener to avoid potential memory leaks.
         }
     }
 
@@ -356,6 +349,7 @@ public class BarcodeEncoder {
          * @param right The right padding in pixels.
          * @param bottom The bottom padding in pixels.
          * @return This builder.
+         * @see #padding(Resources, int)
          */
         public final BarcodeBuilder padding(int left, int top, int right, int bottom) {
             this.paddingLeft   = left;
@@ -366,43 +360,51 @@ public class BarcodeEncoder {
         }
 
         /**
+         * Sets the padding of the barcode image.
+         * @param res The <tt>Resources</tt>.
+         * @param resId The resource id of the padding dimension.
+         * @return This builder.
+         * @see #padding(int, int, int, int)
+         */
+        public final BarcodeBuilder padding(Resources res, int resId) {
+            paddingLeft = paddingTop = paddingRight = paddingBottom = res.getDimensionPixelOffset(resId);
+            return this;
+        }
+
+        /**
          * Creates a barcode image with the arguments supplied to this builder.
-         * @return The instance of barcode image.
+         * @return A mutable {@link Bitmap} of the barcode image.
          */
         public final Bitmap build() {
-            int left, top, right, bottom, inputX, inputY, width, height;
+            int left, top, right, bottom, offsetX, offsetY, width, height;
             final int[] bounds = bitMatrix.getEnclosingRectangle();
             if (bounds != null) {
-                left   = bounds[0];
-                top    = bounds[1];
-                right  = left + bounds[2];
-                bottom = top  + bounds[3];
-                inputX = paddingLeft;
-                inputY = paddingTop;
-                width  = bounds[2] + paddingLeft + paddingRight;
-                height = bounds[3] + paddingTop + paddingBottom;
+                left    = bounds[0];
+                top     = bounds[1];
+                right   = left + bounds[2];
+                bottom  = top  + bounds[3];
+                offsetX = paddingLeft;
+                offsetY = paddingTop;
+                width   = bounds[2] + paddingLeft + paddingRight;
+                height  = bounds[3] + paddingTop + paddingBottom;
             } else {
-                inputX = inputY = left = top = 0;
-                width  = right  = bitMatrix.getWidth();
-                height = bottom = bitMatrix.getHeight();
+                offsetX = offsetY = left = top = 0;
+                width   = right   = bitMatrix.getWidth();
+                height  = bottom  = bitMatrix.getHeight();
             }
 
-            final int[] rowPixels = new int[width];
+            final int[] bitPixels = new int[right - left];
             final Bitmap result = Bitmap.createBitmap(width, height, config);
             result.eraseColor(white);
 
-            for (int y = top, start = inputX + right - left; y < bottom; ++y, ++inputY) {
-                // Fills the padding area ([0 - inputX], [inputY - width]) to the 'white' color.
-                Arrays.fill(rowPixels, 0, inputX, white);
-                Arrays.fill(rowPixels, start, width, white);
-
-                // Converts the barcode image current row bits to pixels.
-                for (int x = left, outputX = inputX; x < right; ++x, ++outputX) {
-                    rowPixels[outputX] = (bitMatrix.get(x, y) ? black : white);
+            for (int y = top; y < bottom; ++y, ++offsetY) {
+                // Converts the bitMatrix current row bits to pixels.
+                for (int x = left, i = 0; x < right; ++x, ++i) {
+                    bitPixels[i] = (bitMatrix.get(x, y) ? black : white);
                 }
 
-                // Copy the result current row pixels from rowPixels array.
-                result.setPixels(rowPixels, 0, width, 0, inputY, width, 1);
+                // Sets the result current row pixels from [offsetX, offsetY] to bit width.
+                result.setPixels(bitPixels, 0, width, offsetX, offsetY, bitPixels.length, 1);
             }
 
             if (logo != null) {
@@ -450,10 +452,10 @@ public class BarcodeEncoder {
         void onEncodeComplete(BitMatrix bitMatrix, Bitmap result);
 
         /**
-         * Called on a background thread when the {@link BitMatrix} converts to {@link Bitmap}.
-         * @param bitMatrix The <tt>BitMatrix</tt> to convert, or <tt>null</tt> if encode failed.
+         * Called on a background thread when the {@link BitMatrix} converts to a barcode image.
+         * @param bitMatrix The <tt>BitMatrix</tt> to convert. Never <tt>null</tt>.
          * @param hints The additional parameters, passed earlier by {@link BarcodeEncoder#startEncode}.
-         * @return The <tt>Bitmap</tt>, or <tt>null</tt> if convert failed.
+         * @return A {@link Bitmap} of the barcode image, or <tt>null</tt> if convert failed.
          * @see BarcodeBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */

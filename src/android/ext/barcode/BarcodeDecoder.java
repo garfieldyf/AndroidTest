@@ -200,6 +200,7 @@ public class BarcodeDecoder {
             final OnDecodeListener listener = mListener.get();
             if (listener != null) {
                 listener.onDecodeComplete(result);
+                mListener.clear();  // Clears the listener to avoid potential memory leaks.
             }
         }
     }

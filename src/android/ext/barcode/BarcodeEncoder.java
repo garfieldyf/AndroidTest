@@ -271,7 +271,7 @@ public class BarcodeEncoder {
      * final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
      *     .logo(logo)
      *     .gravity(Gravity.FILL)
-     *     .padding(30, 30, 30, 30)
+     *     .margins(30, 30, 30, 30)
      *     .build();</pre>
      */
     public static final class BarcodeBuilder {
@@ -280,10 +280,10 @@ public class BarcodeEncoder {
         private int black;
         private int gravity;
         private Drawable logo;
-        private int paddingLeft;
-        private int paddingTop;
-        private int paddingRight;
-        private int paddingBottom;
+        private int leftMargin;
+        private int topMargin;
+        private int rightMargin;
+        private int bottomMargin;
         private final BitMatrix bitMatrix;
 
         /**
@@ -343,31 +343,45 @@ public class BarcodeEncoder {
         }
 
         /**
-         * Sets the padding of the barcode image.
-         * @param left The left padding in pixels.
-         * @param top The top padding in pixels.
-         * @param right The right padding in pixels.
-         * @param bottom The bottom padding in pixels.
+         * Sets the margins of the barcode image.
+         * @param margin The margin size in pixels.
          * @return This builder.
-         * @see #padding(Resources, int)
+         * @see #margins(Resources, int)
+         * @see #margins(int, int, int, int)
          */
-        public final BarcodeBuilder padding(int left, int top, int right, int bottom) {
-            this.paddingLeft   = left;
-            this.paddingTop    = top;
-            this.paddingRight  = right;
-            this.paddingBottom = bottom;
+        public final BarcodeBuilder margins(int margin) {
+            leftMargin = topMargin = rightMargin = bottomMargin = margin;
             return this;
         }
 
         /**
-         * Sets the padding of the barcode image.
-         * @param res The <tt>Resources</tt>.
-         * @param resId The resource id of the padding dimension.
+         * Sets the margins of the barcode image.
+         * @param left The left margin size in pixels.
+         * @param top The top margin size in pixels.
+         * @param right The right margin size in pixels.
+         * @param bottom The bottom margin size in pixels.
          * @return This builder.
-         * @see #padding(int, int, int, int)
+         * @see #margins(int)
+         * @see #margins(Resources, int)
          */
-        public final BarcodeBuilder padding(Resources res, int resId) {
-            paddingLeft = paddingTop = paddingRight = paddingBottom = res.getDimensionPixelOffset(resId);
+        public final BarcodeBuilder margins(int left, int top, int right, int bottom) {
+            this.leftMargin   = left;
+            this.topMargin    = top;
+            this.rightMargin  = right;
+            this.bottomMargin = bottom;
+            return this;
+        }
+
+        /**
+         * Sets the margins of the barcode image.
+         * @param res The <tt>Resources</tt>.
+         * @param id The resource id of the margin dimension.
+         * @return This builder.
+         * @see #margins(int)
+         * @see #margins(int, int, int, int)
+         */
+        public final BarcodeBuilder margins(Resources res, int id) {
+            leftMargin = topMargin = rightMargin = bottomMargin = res.getDimensionPixelOffset(id);
             return this;
         }
 
@@ -383,10 +397,10 @@ public class BarcodeEncoder {
                 top     = bounds[1];
                 right   = left + bounds[2];
                 bottom  = top  + bounds[3];
-                offsetX = paddingLeft;
-                offsetY = paddingTop;
-                width   = bounds[2] + paddingLeft + paddingRight;
-                height  = bounds[3] + paddingTop + paddingBottom;
+                offsetX = leftMargin;
+                offsetY = topMargin;
+                width   = bounds[2] + leftMargin + rightMargin;
+                height  = bounds[3] + topMargin  + bottomMargin;
             } else {
                 offsetX = offsetY = left = top = 0;
                 width   = right   = bitMatrix.getWidth();

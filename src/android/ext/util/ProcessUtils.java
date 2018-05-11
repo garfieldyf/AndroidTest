@@ -90,6 +90,10 @@ public final class ProcessUtils {
      */
     public static native String getGroupName(int gid);
 
+    public static int getParentPid(int pid) {
+        return -1;
+    }
+
     /**
      * Checks the device is rooted.
      * @return <tt>true</tt> if the device is rooted, <tt>false</tt> otherwise.
@@ -389,6 +393,11 @@ public final class ProcessUtils {
      * Information you can retrieve about a native running process.
      */
     public static final class RunningNativeProcessInfo extends RunningAppProcessInfo implements Cloneable, Filter<RunningAppProcessInfo> {
+        /**
+         * The parent pid of this process; 0 if none
+         */
+        public int ppid;
+
         @Override
         public boolean accept(RunningAppProcessInfo info) {
             return (this.uid == info.uid && this.pid == info.pid);
@@ -413,8 +422,9 @@ public final class ProcessUtils {
                 // USER     PID   PPID  VSIZE  RSS     WCHAN    PC         NAME
                 // root      1     0     608   444    ffffffff 00000000 S /init
                 this.processName = processInfo[8];
-                this.pid = Integer.parseInt(processInfo[1]);
-                this.uid = Process.getUidForName(processInfo[0]);
+                this.uid  = Process.getUidForName(processInfo[0]);
+                this.pid  = Integer.parseInt(processInfo[1]);
+                this.ppid = Integer.parseInt(processInfo[2]);
 
                 if (ArrayUtils.indexOf(results, 0, size, this) == -1 && (filter == null || filter.accept(this))) {
                     results.add(clone());
@@ -478,18 +488,46 @@ public final class ProcessUtils {
         }
 
         /**
-         * Returns the crash infos which the date less the <em>date</em>.
+         * Returns the number of the crash infos from table.
+         * @return The number of the crash infos.
+         */
+        public final int getCount() {
+            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(_date) FROM crashes", (Object[])null).intValue();
+        }
+
+        /**
+         * Returns all crash infos from table.
+         * @return The {@link Cursor}.
+         * @see #query(long)
+         */
+        public final Cursor query() {
+            return getWritableDatabase().rawQuery("SELECT * FROM crashes", null);
+        }
+
+        /**
+         * Returns the crash infos from table which the date less the <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The {@link Cursor}.
+         * @see #query()
          */
         public final Cursor query(long date) {
             return getWritableDatabase().rawQuery("SELECT * FROM crashes WHERE _date < " + date, null);
         }
 
         /**
-         * Deletes the crash infos from table which the date less the <em>date</em>.
-         * @param date The date to delete in milliseconds.
+         * Deletes all crash infos from table.
          * @return The number of rows to delete.
+         * @see #delete(long)
+         */
+        public final int delete() {
+            return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes", (Object[])null);
+        }
+
+        /**
+         * Deletes the crash infos from table which the date less the <em>date</em>.
+         * @param date The date to query in milliseconds.
+         * @return The number of rows to delete.
+         * @see #delete()
          */
         public final int delete(long date) {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);
@@ -506,14 +544,7 @@ public final class ProcessUtils {
          * @see #writeTo(Context, OutputStream, Cursor)
          */
         public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()
-                .name("brand").value(Build.BRAND)
-                .name("mode").value(Build.MODEL)
-                .name("sdk").value(Build.VERSION.SDK_INT)
-                .name("ver").value(Build.VERSION.RELEASE))
-                .name("package").value(context.getPackageName())
-                .name("crashes"), cursor)
-                .endObject();
+            DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()).name("crashes"), cursor).endObject();
         }
 
         /**
@@ -560,15 +591,19 @@ public final class ProcessUtils {
 
         /**
          * Callback method to be invoked when the {@link #writeTo} method invoking.
-         * <p>The default implementation write the ABIs supported by this device to
-         * the <em>writer</em>.</p>
+         * <p>The default implementation writes the device infos (e.g. brand, mode,
+         * version, abis and package name) to the <em>writer</em>.</p>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter}.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          */
         protected JsonWriter onWrite(Context context, JsonWriter writer) throws IOException {
-            return DeviceUtils.writeABIs(writer);
+            return DeviceUtils.writeABIs(writer.name("brand").value(Build.BRAND)
+                .name("mode").value(Build.MODEL)
+                .name("sdk").value(Build.VERSION.SDK_INT)
+                .name("version").value(Build.VERSION.RELEASE))
+                .name("package").value(context.getPackageName());
         }
     }
 

@@ -60,8 +60,8 @@ public final class NetworkUtils {
     /**
      * Returns details about the currently active default data network.
      * @param context The <tt>Context</tt>.
-     * @return A {@link NetworkInfo} object for the current default
-     * network or a dummy {@link NetworkInfo} object if no network is active.
+     * @return A {@link NetworkInfo} object for the current default network
+     * or a dummy <tt>NetworkInfo</tt> object if no network is active.
      * @see #getActiveNetworkInfo(ConnectivityManager)
      * @see ConnectivityManager#getActiveNetworkInfo()
      */
@@ -73,8 +73,8 @@ public final class NetworkUtils {
     /**
      * Returns details about the currently active default data network.
      * @param cm The {@link ConnectivityManager}.
-     * @return A {@link NetworkInfo} object for the current default
-     * network or a dummy {@link NetworkInfo} object if no network is active.
+     * @return A {@link NetworkInfo} object for the current default network
+     * or a dummy <tt>NetworkInfo</tt> object if no network is active.
      * @see #getActiveNetworkInfo(Context)
      * @see ConnectivityManager#getActiveNetworkInfo()
      */

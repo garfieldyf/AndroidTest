@@ -52,7 +52,7 @@ public class BarcodeEncoder {
      * @see #encode(String, BarcodeFormat, int, int, Map)
      * @see BarcodeBuilder
      */
-    public BitMatrix encode(String contents, BarcodeFormat format, int width, int height) {
+    public final BitMatrix encode(String contents, BarcodeFormat format, int width, int height) {
         return encode(contents, format, width, height, mHints);
     }
 

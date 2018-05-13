@@ -90,10 +90,6 @@ public final class ProcessUtils {
      */
     public static native String getGroupName(int gid);
 
-    public static int getParentPid(int pid) {
-        return -1;
-    }
-
     /**
      * Checks the device is rooted.
      * @return <tt>true</tt> if the device is rooted, <tt>false</tt> otherwise.

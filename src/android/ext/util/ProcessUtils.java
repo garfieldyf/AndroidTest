@@ -6,8 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -535,32 +533,12 @@ public final class ProcessUtils {
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.
          * @param cursor The {@link Cursor} from which to get the data.
-         * May be returned earlier by {@link #query(long)}.
+         * May be returned earlier by {@link #query}.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see #writeTo(Context, OutputStream, Cursor)
+         * @see DatabaseUtils#writeCursor(JsonWriter, Cursor)
          */
         public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
             DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()).name("crashes"), cursor).endObject();
-        }
-
-        /**
-         * Writes the specified crash infos into an {@link OutputStream}. The crash
-         * infos encoding a JSON encoded value. The position is restored after writing.
-         * <p>The <em>out</em> will be close while this method was returned.</p>
-         * @param context The <tt>Context</tt>.
-         * @param out The {@link OutputStream} to write to.
-         * @param cursor The {@link Cursor} from which to get the data.
-         * May be returned earlier by {@link #query(long)}.
-         * @throws IOException if an error occurs while writing to the <em>out</em>.
-         * @see #writeTo(Context, JsonWriter, Cursor)
-         */
-        public final void writeTo(Context context, OutputStream out, Cursor cursor) throws IOException {
-            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(out));
-            try {
-                writeTo(context, writer, cursor);
-            } finally {
-                writer.close();
-            }
         }
 
         @Override

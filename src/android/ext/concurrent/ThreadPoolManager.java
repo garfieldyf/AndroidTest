@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.UIHandler;
+import android.os.Looper;
 import android.util.Printer;
 
 /**
@@ -174,6 +176,17 @@ public class ThreadPoolManager extends ThreadPool {
             state = new AtomicInteger(RUNNING);
         }
 
+        /**
+         * This method can be invoked to publish progress values to update UI.
+         * @param values The progress values to update.
+         * @see #onProgress(Object[])
+         */
+        public final void setProgress(Object... values) {
+            if (state.get() == RUNNING) {
+                UIHandler.sInstance.setProgress(this, values);
+            }
+        }
+
         @Override
         public final boolean isCancelled() {
             return (state.get() == CANCELLED);
@@ -187,7 +200,7 @@ public class ThreadPoolManager extends ThreadPool {
                 } finally {
                     runner = null;
                     if (state.compareAndSet(RUNNING, COMPLETED)) {
-                        onCompletion();
+                        UIHandler.sInstance.completion(this);
                     }
                 }
             }
@@ -200,30 +213,39 @@ public class ThreadPoolManager extends ThreadPool {
         public abstract long getId();
 
         /**
-         * Callback method to be invoked when this task was cancelled.
-         * The default implementation do nothing. If you write your
-         * own implementation, do not call <tt>super.onCancelled()</tt>
+         * Runs on the UI thread when this task was cancelled. The
+         * default implementation do nothing. If you write your own
+         * implementation, do not call <tt>super.onCancelled()</tt>
          * @see #onExecute(Thread)
          * @see #onCompletion()
          */
-        protected void onCancelled() {
+        public void onCancelled() {
         }
 
         /**
-         * Callback method to be invoked when this task was finished.
+         * Runs on the UI thread after {@link #onExecute(Thread)}.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCompletion()</tt>
          * <p>This method won't be invoked if this task was cancelled.</p>
          * @see #onExecute(Thread)
          * @see #onCancelled()
          */
-        protected void onCompletion() {
+        public void onCompletion() {
         }
 
         /**
-         * Callback method to be invoked when this task is executing.
-         * <p>This method won't be invoked if this task was cancelled
-         * when it has no start.</p>
+         * Runs on the UI thread after {@link #setProgress(Object[])} is
+         * invoked. The default implementation do nothing. If you write
+         * your own implementation, do not call <tt>super.onProgress()</tt>
+         * @param values The progress values, passed earlier by {@link #setProgress}.
+         * @see #setProgress(Object[])
+         */
+        public void onProgress(Object[] values) {
+        }
+
+        /**
+         * Runs on a background thread when this task is executing. <p>This method
+         * won't be invoked if this task was cancelled when it has no start.</p>
          * @param thread The <tt>Thread</tt> whose executing this task.
          * @see #onCancelled()
          * @see #onCompletion()
@@ -243,7 +265,11 @@ public class ThreadPoolManager extends ThreadPool {
 
                 // Notify the callback method.
                 if (notify) {
-                    onCancelled();
+                    if (Looper.getMainLooper() == Looper.myLooper()) {
+                        onCancelled();
+                    } else {
+                        UIHandler.sInstance.cancel(this);
+                    }
                 }
             }
 

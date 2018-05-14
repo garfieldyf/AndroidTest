@@ -1,7 +1,8 @@
 package android.ext.util;
 
 import java.util.concurrent.Executor;
-import android.ext.content.Loader.Task;
+import android.ext.concurrent.ThreadPoolManager.Task;
+import android.ext.content.Loader;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -164,16 +165,40 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void finish(Task task) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_FINISHED;
-        sendMessage(msg);
+    public final void cancel(Task task) {
+        sendMessage(Message.obtain(this, MESSAGE_CANCELLED, task));
+    }
+
+    /**
+     * Called on the {@link Task} internal, do not call this method directly.
+     */
+    public final void completion(Task task) {
+        sendMessage(Message.obtain(this, MESSAGE_COMPLETED, task));
     }
 
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
     public final void setProgress(Task task, Object[] values) {
+        final Message msg = Message.obtain(this, task);
+        msg.what = MESSAGE_TASK_PROGRESS;
+        msg.obj  = values;
+        sendMessage(msg);
+    }
+
+    /**
+     * Called on the {@link Loader#Task} internal, do not call this method directly.
+     */
+    public final void finish(Loader.Task task) {
+        final Message msg = Message.obtain(this, task);
+        msg.what = MESSAGE_FINISHED;
+        sendMessage(msg);
+    }
+
+    /**
+     * Called on the {@link Loader#Task} internal, do not call this method directly.
+     */
+    public final void setProgress(Loader.Task task, Object[] values) {
         final Message msg = Message.obtain(this, task);
         msg.what = MESSAGE_PROGRESS;
         msg.obj  = values;
@@ -184,17 +209,32 @@ public final class UIHandler extends Handler {
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
-        case MESSAGE_DATA_CHANGED:
-            ((Adapter)msg.obj).notifyDataSetChanged();
-            break;
-
+        // The ThreadPool and Loader.Task message handle.
         case MESSAGE_EXECUTE:
             ((Executor)msg.obj).execute(msg.getCallback());
             break;
 
         case MESSAGE_PROGRESS:
         case MESSAGE_FINISHED:
-            ((Task)msg.getCallback()).handleMessage(msg);
+            ((Loader.Task)msg.getCallback()).handleMessage(msg);
+            break;
+
+        // The ThreadPoolManager.Task message handle.
+        case MESSAGE_CANCELLED:
+            ((Task)msg.obj).onCancelled();
+            break;
+
+        case MESSAGE_COMPLETED:
+            ((Task)msg.obj).onCompletion();
+            break;
+
+        case MESSAGE_TASK_PROGRESS:
+            ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
+            break;
+
+        // The RecyclerView.Adapter message handle.
+        case MESSAGE_DATA_CHANGED:
+            ((Adapter)msg.obj).notifyDataSetChanged();
             break;
 
         case MESSAGE_ITEM_MOVED:
@@ -219,12 +259,20 @@ public final class UIHandler extends Handler {
         }
     }
 
-    private static final int MESSAGE_EXECUTE       = 0xF8F8F8F8;
-    private static final int MESSAGE_PROGRESS      = 0xF9F9F9F9;
-    public  static final int MESSAGE_FINISHED      = 0xFAFAFAFA;
+    // The ThreadPool and Loader.Task message.
+    private static final int MESSAGE_EXECUTE       = 0xCFCFCFCF;
+    private static final int MESSAGE_PROGRESS      = 0xDEDEDEDE;
+    public static final int MESSAGE_FINISHED       = 0xDFDFDFDF;
+
+    // The ThreadPoolManager.Task message.
+    private static final int MESSAGE_CANCELLED     = 0xEDEDEDED;
+    private static final int MESSAGE_COMPLETED     = 0xEEEEEEEE;
+    private static final int MESSAGE_TASK_PROGRESS = 0xEFEFEFEF;
+
+    // The RecyclerView.Adapter message.
     private static final int MESSAGE_ITEM_MOVED    = 0xFBFBFBFB;
+    private static final int MESSAGE_DATA_CHANGED  = 0xFAFAFAFA;
     private static final int MESSAGE_ITEM_REMOVED  = 0xFCFCFCFC;
-    private static final int MESSAGE_DATA_CHANGED  = 0xF7F7F7F7;
     private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
     private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
 

@@ -16,7 +16,7 @@ import android.ext.util.DebugUtils;
  * @version 1.0
  */
 @SuppressWarnings("unchecked")
-public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
+public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     private WeakReference<Object> mOwner;
 
     /**
@@ -68,9 +68,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * Loads the value synchronously. Call this method, Pass the {@link #loadInBackground}
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
-     * @param key The key.
-     * @param params The parameters to load. If no parameters, you can pass <em>(Params[])null</em>
-     * instead of allocating an empty array.
+     * @param key The key passed to the {@link #loadInBackground}.
+     * @param params The parameters passed to the {@link #loadInBackground}. If no parameters,
+     * you can pass <em>(Params[])null</em> instead of allocating an empty array.
      * @return The result, or <tt>null</tt> if load failed or this loader was shut down.
      * @see #load(Key, Params[])
      */
@@ -156,11 +156,11 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * method to cancel the running task and return <tt>false</tt> to add a new task.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
-     * @param prevParams The previous mapped load task's parameters.
+     * @param oldParams The previous mapped load task's parameters.
      * @return <tt>true</tt> the load request will be rejected, <tt>false</tt> otherwise.
      * @see #load(Key, Params[])
      */
-    protected boolean rejectedRequest(Key key, Params[] params, Params[] prevParams) {
+    protected boolean rejectedRequest(Key key, Params[] params, Params[] oldParams) {
         return true;
     }
 

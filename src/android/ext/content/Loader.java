@@ -21,7 +21,7 @@ import android.util.Printer;
  * @version 3.0
  */
 @SuppressWarnings("rawtypes")
-public abstract class Loader<Key> implements Factory<Task> {
+public abstract class Loader implements Factory<Task> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
     /* package */ static final int SHUTDOWN = 2;
@@ -30,7 +30,7 @@ public abstract class Loader<Key> implements Factory<Task> {
     /* package */ final Executor mExecutor;
 
     /* package */ final Pool<Task> mTaskPool;
-    /* package */ final ArrayMap<Key, Task> mRunningTasks;
+    /* package */ final ArrayMap<Object, Task> mRunningTasks;
 
     /**
      * Constructor
@@ -41,7 +41,7 @@ public abstract class Loader<Key> implements Factory<Task> {
         final int maxSize = computeMaximumPoolSize(executor);
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, maxSize << 2);
-        mRunningTasks = new ArrayMap<Key, Task>(maxSize);
+        mRunningTasks = new ArrayMap<Object, Task>(maxSize);
     }
 
     /**
@@ -96,7 +96,7 @@ public abstract class Loader<Key> implements Factory<Task> {
      * @param task The {@link Task} to test.
      * @return <tt>true</tt> if the <em>task</em> was cancelled
      * or this loader has been shut down, <tt>false</tt> otherwise.
-     * @see #cancelTask(Key, boolean)
+     * @see #cancelTask(Object, boolean)
      */
     public final boolean isTaskCancelled(Task task) {
         return (mState == SHUTDOWN || (task != null && task.isCancelled()));
@@ -116,7 +116,7 @@ public abstract class Loader<Key> implements Factory<Task> {
      * @see #shutdown()
      * @see #isTaskCancelled(Task)
      */
-    public final boolean cancelTask(Key key, boolean mayInterruptIfRunning) {
+    public final boolean cancelTask(Object key, boolean mayInterruptIfRunning) {
         DebugUtils.__checkUIThread("cancelTask");
         final Task task = mRunningTasks.remove(key);
         return (task != null && task.cancel(mayInterruptIfRunning));

@@ -318,7 +318,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
             // Marks the page loading state, if the page is not load.
             mPageStates.set(page);
-            result = loadPage(page, offset, itemCount, position);
+            result = loadPage(position, page, offset, itemCount);
             if (getCount(result) > 0) {
                 // If the page is load successful.
                 // 1. Adds the page to page cache.
@@ -337,14 +337,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * <p>If you want to asynchronously load the page data to prevent blocking
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
+     * @param position The adapter position of the item in this adapter.
      * @param page The index of the page whose data should be returned.
      * @param offset The start index of the first item.
      * @param itemCount The number of items in the <em>page</em>.
-     * @param position The adapter position of the item in this adapter.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    protected abstract Page<E> loadPage(int page, int offset, int itemCount, int position);
+    protected abstract Page<E> loadPage(int position, int page, int offset, int itemCount);
 
     /**
      * Returns a new {@link Page} {@link Cache} instance.

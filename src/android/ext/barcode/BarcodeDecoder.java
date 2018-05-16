@@ -6,8 +6,10 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
+import android.ext.util.DebugUtils;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -26,7 +28,6 @@ import com.google.zxing.common.HybridBinarizer;
  */
 public class BarcodeDecoder {
     private final MultiFormatReader mReader;
-    private PlanarYUVLuminanceSource mSource;
 
     /**
      * Constructor
@@ -45,7 +46,7 @@ public class BarcodeDecoder {
      * @see #decode(byte[], int, int, Rect)
      * @see #decode(byte[], int, int, int, int, int, int)
      */
-    public Result decode(int[] pixels, int width, int height) {
+    public final Result decode(int[] pixels, int width, int height) {
         return decode(new RGBLuminanceSource(width, height, pixels));
     }
 
@@ -78,8 +79,8 @@ public class BarcodeDecoder {
      * @see #decode(int[], int, int)
      * @see #decode(byte[], int, int, Rect)
      */
-    public Result decode(byte[] data, int width, int height, int left, int top, int right, int bottom) {
-        return decode(mSource = new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false));
+    public final Result decode(byte[] data, int width, int height, int left, int top, int right, int bottom) {
+        return decode(new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false));
     }
 
     /**
@@ -144,15 +145,6 @@ public class BarcodeDecoder {
     }
 
     /**
-     * Returns the last decode the barcode image {@link PlanarYUVLuminanceSource}.
-     * @return The <tt>PlanarYUVLuminanceSource</tt> or <tt>null</tt> if the decoded
-     * the data not from the camera device.
-     */
-    public final PlanarYUVLuminanceSource getLuminanceSource() {
-        return mSource;
-    }
-
-    /**
      * Returns the raw text from the decoded {@link Result}. The returned text removing the
      * white space characters from the beginning and end of the raw text.
      * @param result The decoded <tt>Result</tt>.
@@ -170,7 +162,12 @@ public class BarcodeDecoder {
         return null;
     }
 
-    private synchronized Result decode(LuminanceSource source) {
+    /**
+     * Decodes the barcode image using the <em>source</em> provided.
+     * @param source The {@link LuminanceSource} to decode.
+     * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
+     */
+    protected synchronized Result decode(LuminanceSource source) {
         try {
             return mReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
         } catch (Exception e) {
@@ -183,24 +180,27 @@ public class BarcodeDecoder {
     /**
      * Class <tt>YUVDecodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private class YUVDecodeTask extends AsyncTask<Object, Object, Result> {
+    private class YUVDecodeTask extends AsyncTask<Object, Object, Pair<LuminanceSource, Result>> {
         private final WeakReference<OnDecodeListener> mListener;
 
         public YUVDecodeTask(OnDecodeListener listener) {
+            DebugUtils.__checkError(listener == null, "listener == null");
             mListener = new WeakReference<OnDecodeListener>(listener);
         }
 
         @Override
-        protected Result doInBackground(Object... params) {
-            return decode((byte[])params[0], (Integer)params[1], (Integer)params[2], (Integer)params[3], (Integer)params[4], (Integer)params[5], (Integer)params[6]);
+        protected Pair<LuminanceSource, Result> doInBackground(Object... params) {
+            final int left = (Integer)params[3];
+            final int top  = (Integer)params[4];
+            final LuminanceSource source = new PlanarYUVLuminanceSource((byte[])params[0], (Integer)params[1], (Integer)params[2], left, top, (Integer)params[5] - left, (Integer)params[6] - top, false);
+            return new Pair<LuminanceSource, Result>(source, decode(source));
         }
 
         @Override
-        protected void onPostExecute(Result result) {
+        protected void onPostExecute(Pair<LuminanceSource, Result> result) {
             final OnDecodeListener listener = mListener.get();
             if (listener != null) {
-                listener.onDecodeComplete(result);
-                mListener.clear();  // Clears the listener to avoid potential memory leaks.
+                listener.onDecodeComplete(result.first, result.second);
             }
         }
     }
@@ -214,8 +214,9 @@ public class BarcodeDecoder {
         }
 
         @Override
-        protected Result doInBackground(Object... params) {
-            return decode((int[])params[0], (Integer)params[1], (Integer)params[2]);
+        protected Pair<LuminanceSource, Result> doInBackground(Object... params) {
+            final LuminanceSource source = new RGBLuminanceSource((Integer)params[1], (Integer)params[2], (int[])params[0]);
+            return new Pair<LuminanceSource, Result>(source, decode(source));
         }
     }
 
@@ -341,8 +342,9 @@ public class BarcodeDecoder {
     public static interface OnDecodeListener {
         /**
          * Callback method to be invoked when the barcode image was decoded.
-         * @param result The contents of the image, or <tt>null</tt> if decode failed.
+         * @param source The {@link LuminanceSource} to decode.
+         * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
          */
-        void onDecodeComplete(Result result);
+        void onDecodeComplete(LuminanceSource source, Result result);
     }
 }

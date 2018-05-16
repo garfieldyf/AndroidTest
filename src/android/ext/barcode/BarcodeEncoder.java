@@ -137,6 +137,7 @@ public class BarcodeEncoder {
         private OnEncodeListener mListener;
 
         public EncodeTask(OnEncodeListener listener) {
+            DebugUtils.__checkError(listener == null, "listener == null");
             mListener = listener;
         }
 

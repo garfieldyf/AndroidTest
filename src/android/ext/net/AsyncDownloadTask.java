@@ -29,7 +29,7 @@ import android.util.Log;
  * }
  *
  * final JSONDownloadTask task = new JSONDownloadTask();
- * task.newDownloadRequest(url, DownloadPostRequest.class)
+ * task.createDownloadRequest(url, DownloadPostRequest.class)
  *     .post(obj)
  *     .readTimeout(60000)
  *     .connectTimeout(60000)
@@ -87,26 +87,26 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
      * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
-     * @see #newDownloadRequest(String, Class)
+     * @see #createDownloadRequest(String, Class)
      */
-    public final <T extends DownloadRequest> T newDownloadRequest(URL url, Class<T> clazz) {
-        return newDownloadRequestImpl(url, clazz);
+    public final <T extends DownloadRequest> T createDownloadRequest(URL url, Class<T> clazz) {
+        return createDownloadRequestImpl(url, clazz);
     }
 
     /**
-     * Equivalent to calling <tt>newDownloadRequest(new URL(url), clazz)</tt>.
+     * Equivalent to calling <tt>createDownloadRequest(new URL(url), clazz)</tt>.
      * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
      * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
-     * @see #newDownloadRequest(URL, Class)
+     * @see #createDownloadRequest(URL, Class)
      */
-    public final <T extends DownloadRequest> T newDownloadRequest(String url, Class<T> clazz) {
-        return newDownloadRequestImpl(url, clazz);
+    public final <T extends DownloadRequest> T createDownloadRequest(String url, Class<T> clazz) {
+        return createDownloadRequestImpl(url, clazz);
     }
 
     @Override
     protected Result doInBackground(Params... params) {
-        DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
+        DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call createDownloadRequest()");
         try {
             return (mRequest.connectImpl(null) == HttpURLConnection.HTTP_OK ? onDownload(mRequest.connection, params) : null);
         } catch (Exception e) {
@@ -161,7 +161,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     /**
      * Returns a new download request with the specified <em>url</em>.
      */
-    private <T extends DownloadRequest> T newDownloadRequestImpl(Object url, Class<T> clazz) {
+    private <T extends DownloadRequest> T createDownloadRequestImpl(Object url, Class<T> clazz) {
         try {
             DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
             return (T)(mRequest = clazz.getConstructor(url.getClass()).newInstance(url));

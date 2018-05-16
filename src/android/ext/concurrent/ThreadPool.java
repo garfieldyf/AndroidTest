@@ -157,6 +157,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
                     task.run();
                 }
             } finally {
+                // Reset the state to idle.
                 mState.set(IDLE);
             }
         }

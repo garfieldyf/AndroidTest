@@ -20,7 +20,7 @@ import android.os.Bundle;
 public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Runnable, ActivityLifecycleCallbacks {
     private Dialog mDialog;
     private final long mDelayMillis;
-    private volatile boolean mShowing;
+    private volatile boolean mCancelled;
 
     private final Application mApplication;
     private final WeakReference<Activity> mActivity;
@@ -87,7 +87,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     public void run() {
-        if (mShowing) {
+        if (!mCancelled) {
             final Activity activity = mActivity.get();
             if (activity != null && !activity.isDestroyed()) {
                 mDialog = onCreateDialog(activity);
@@ -99,7 +99,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     protected void onPreExecute() {
-        mShowing = true;
+        mCancelled = false;
         if (mDelayMillis <= 0) {
             run();
         } else {
@@ -111,7 +111,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     protected Result doInBackground(Params... params) {
         final Result result = doInBackground(params, mApplication);
         if (mDelayMillis > 0) {
-            mShowing = false;
+            mCancelled = true;
             UIHandler.sInstance.removeCallbacks(this);
         }
 

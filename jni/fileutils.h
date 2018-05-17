@@ -101,7 +101,7 @@ __STATIC_INLINE__ void buildUniqueFileName(char* path, size_t length, const stdu
 }
 
 #ifdef __NDK_STLP__
-__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*filter)(const struct dirent*), jobject callback, jint& result)
+__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*filter)(const struct dirent*), jobject callback, jobject userData, jint& result)
 {
     assert(env);
     assert(path);
@@ -124,7 +124,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type);
+                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, userData);
                 if (result == SC_STOP) {
                     dirPaths.clear();
                     break;
@@ -146,7 +146,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     return errnum;
 }
 #else
-static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*filter)(const struct dirent*), jobject callback, jint& result)
+static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*filter)(const struct dirent*), jobject callback, jobject userData, jint& result)
 {
     assert(env);
     assert(filter);
@@ -163,7 +163,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type);
+            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, userData);
             if (result == SC_BREAK) {
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
@@ -171,7 +171,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
             }
 
             // Scans the sub directory.
-            if (entry->d_type == DT_DIR && ::access(filePath, F_OK) == 0 && ((errnum = scanDescendentFiles(env, filePath, filter, callback, result)) != 0 || result == SC_STOP)) {
+            if (entry->d_type == DT_DIR && ::access(filePath, F_OK) == 0 && ((errnum = scanDescendentFiles(env, filePath, filter, callback, userData, result)) != 0 || result == SC_STOP)) {
                 break;
             }
         }
@@ -198,9 +198,9 @@ JNIEXPORT_METHOD(jint) mkdirs(JNIEnv* env, jclass /*clazz*/, jstring path, jint 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
 // Method:    scanFiles
-// Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$ScanCallback;I)I
+// Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$ScanCallback;ILjava/lang/Object;)I
 
-JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath, jobject callback, jint flags)
+JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath, jobject callback, jint flags, jobject userData)
 {
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || callback == NULL, "dirPath == null || dirPath.length() == 0 || callback == null", EINVAL);
@@ -210,7 +210,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     if (flags & FLAG_SCAN_FOR_DESCENDENTS)
     {
         jint result;
-        errnum = scanDescendentFiles(env, jdirPath, ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter), callback, result);
+        errnum = scanDescendentFiles(env, jdirPath, ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter), callback, userData, result);
     }
     else
     {
@@ -223,7 +223,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(path + length, entry->d_name, _countof(path) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, path).str, (jint)entry->d_type) != SC_CONTINUE)
+                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, path).str, (jint)entry->d_type, userData) != SC_CONTINUE)
                     break;
             }
         }
@@ -494,7 +494,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
     LOGD("Register class " PACKAGE_UTILITIES "FileUtils native methods.\n");
 
     // Initializes class ScanCallback method IDs.
-    _onScanFileID = JNI::jclass_t(env, PACKAGE_UTILITIES "FileUtils$ScanCallback").getMethodID("onScanFile", "(Ljava/lang/String;I)I");
+    _onScanFileID = JNI::jclass_t(env, PACKAGE_UTILITIES "FileUtils$ScanCallback").getMethodID("onScanFile", "(Ljava/lang/String;ILjava/lang/Object;)I");
     assert(_onScanFileID != NULL);
 
     // Initializes class FileUtils method IDs.
@@ -517,8 +517,8 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
         { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)fileStatus },
-        { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;I)I", (void*)scanFiles },
         { "listFiles", "(Ljava/lang/String;IL" PACKAGE_UTILITIES "Pools$Factory;Ljava/util/List;)I", (void*)listFiles },
+        { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;ILjava/lang/Object;)I", (void*)scanFiles },
     };
 
     return clazz.registerNatives(methods, _countof(methods));

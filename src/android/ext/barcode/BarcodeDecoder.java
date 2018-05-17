@@ -343,7 +343,8 @@ public class BarcodeDecoder {
         /**
          * Callback method to be invoked when the barcode image was decoded.
          * @param source The {@link LuminanceSource} to decode.
-         * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
+         * @param result The contents of the image if succeeded,
+         * <tt>null</tt> otherwise.
          */
         void onDecodeComplete(LuminanceSource source, Result result);
     }

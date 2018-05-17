@@ -67,8 +67,8 @@ public final class FileUtils {
     public static final int FLAG_IGNORE_HIDDEN_FILE = 0x01;
 
     /**
-     * This flag use with {@link #scanFiles(String, ScanCallback, int)}.
-     * If set the <tt>scanFiles</tt> will scan the descendent files.
+     * This flag use with {@link #scanFiles}. If set the
+     * <tt>scanFiles</tt> will scan the descendent files.
      */
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;
 
@@ -276,18 +276,16 @@ public final class FileUtils {
     public static native int stat(String path, Stat outStat);
 
     /**
-     * Scans all the sub files and directories in the specified <em>dirPath</em>.
-     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and
-     * parent directory are not scanned.</p>
+     * Scans all the sub files and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
+     * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param callback The {@link ScanCallback} used to scan.
-     * @param flags The scan flags. May be <tt>0</tt> or any combination of
-     * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
-     * an error code. See {@link ErrnoException}.
-     * @see ScanCallback#onScanFile(String, int)
+     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @param userData An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      */
-    public static native int scanFiles(String dirPath, ScanCallback callback, int flags);
+    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object userData);
 
     /**
      * Equivalent to calling <tt>listFiles(dirPath, flags, Dirent.FACTORY, new ArrayList())</tt>.
@@ -695,42 +693,43 @@ public final class FileUtils {
     }
 
     /**
-     * Callback interface used to {@link FileUtils#scanFiles(String, ScanCallback, int)}.
+     * Callback interface used to {@link FileUtils#scanFiles(String, ScanCallback, int, Object)}.
      */
     public static interface ScanCallback {
         /**
-         * The returned value of {@link #onScanFile(String, int)}
+         * The returned value of {@link #onScanFile}
          * indicates to continue to scan.
          */
-        int SC_CONTINUE = 0;
+        public int SC_CONTINUE = 0;
 
         /**
-         * The returned value of {@link #onScanFile(String, int)}
+         * The returned value of {@link #onScanFile}
          * indicates to stop all scans.
          */
-        int SC_STOP = 1;
+        public int SC_STOP = 1;
 
         /**
-         * The returned value of {@link #onScanFile(String, int)}
+         * The returned value of {@link #onScanFile}
          * indicates to stop the current directory scan.
          */
-        int SC_BREAK = 2;
+        public int SC_BREAK = 2;
 
         /**
-         * The returned value of {@link #onScanFile(String, int)}
+         * The returned value of {@link #onScanFile}
          * indicates to stop the current file's parent directory.
          */
-        int SC_BREAK_PARENT = 3;
+        public int SC_BREAK_PARENT = 3;
 
         /**
          * This callback is invoked on the {@link FileUtils#scanFiles} was called from.
          * @param path The absolute file path.
          * @param type The file type. May be one of <tt>Dirent.DT_XXX</tt> constants.
+         * @param userData An object, passed earlier by {@link FileUtils#scanFiles}.
          * @return One of {@link #SC_CONTINUE}, {@link #SC_STOP}, {@link #SC_BREAK}
          * or {@link #SC_BREAK_PARENT}.
          */
         @Keep
-        public int onScanFile(String path, int type);
+        public int onScanFile(String path, int type, Object userData);
     }
 
     /**
@@ -1321,11 +1320,11 @@ public final class FileUtils {
         }
 
         /**
-         * Equivalent to calling <tt>FileUtils.scanFiles(path, callback, flags)</tt>.
-         * @see FileUtils#scanFiles(String, ScanCallback, int)
+         * Equivalent to calling <tt>FileUtils.scanFiles(path, callback, flags, userData)</tt>.
+         * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */
-        public int scanFiles(ScanCallback callback, int flags) {
-            return FileUtils.scanFiles(path, callback, flags);
+        public int scanFiles(ScanCallback callback, int flags, Object userData) {
+            return FileUtils.scanFiles(path, callback, flags, userData);
         }
 
         /**

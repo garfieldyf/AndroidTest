@@ -7,14 +7,15 @@ import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
+import android.ext.util.Pools.Factory;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -24,96 +25,93 @@ import android.util.Printer;
  */
 public final class PackageUtils {
     /**
-     * Equivalent to calling <tt>parsePackage(context.getPackageManager(), context.getResources(), sourceFile, flags)</tt>.
+     * Equivalent to calling <tt>parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
      * @param sourceFile The path to the archive file, must be absolute file path.
-     * @param flags Additional option flags. May be <tt>0</tt> or any combination
-     * of <tt>PackageManager.GET_XXX</tt> constants.
+     * @return A {@link PackageArchiveInfo} object.
      * @throws Exception if the package archive file cannot be parsed.
-     * @see #parsePackage(PackageManager, Resources, String, int)
+     * @see #parsePackage(Context, String, int, Factory)
      */
-    public static PackageArchiveInfo parsePackage(Context context, String sourceFile, int flags) throws Exception {
-        return parsePackage(context.getPackageManager(), context.getResources(), sourceFile, flags);
+    public static PackageArchiveInfo parsePackage(Context context, String sourceFile) throws Exception {
+        return parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY);
     }
 
     /**
      * Parses a package archive file with the specified <em>sourceFile</em>.
-     * @param pm The {@link PackageManager} to retrieve the package information.
-     * @param resources The {@link Resources}.
+     * @param context The <tt>Context</tt>.
      * @param sourceFile The path to the archive file, must be absolute file path.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination
      * of <tt>PackageManager.GET_XXX</tt> constants.
+     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo}
+     * or subclass object.
+     * @return A {@link PackageArchiveInfo} or subclass object.
      * @throws Exception if the package archive file cannot be parsed.
-     * @see #parsePackage(Context, String, int)
+     * @see #parsePackage(Context, String)
      */
-    public static PackageArchiveInfo parsePackage(PackageManager pm, Resources resources, String sourceFile, int flags) throws Exception {
-        final Resources res = getResources(resources, sourceFile);
+    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String sourceFile, int flags, Factory<T> factory) throws Exception {
+        DebugUtils.__checkError(factory == null, "factory == null");
+        final Resources res = createResources(context, sourceFile);
         try {
-            final PackageInfo pi = pm.getPackageArchiveInfo(sourceFile, flags);
-            pi.applicationInfo.sourceDir = pi.applicationInfo.publicSourceDir = sourceFile;
-            return new PackageArchiveInfo(pi, loadIcon(pm, res, pi), loadLabel(pm, res, pi));
+            // Retrieve the package information from the package archive file.
+            final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(sourceFile, flags);
+            packageInfo.applicationInfo.sourceDir = sourceFile;
+
+            // Creates a PackageArchiveInfo or subclass object.
+            final T result = factory.newInstance();
+            result.initialize(context, res, packageInfo);
+            return result;
         } finally {
-            // Close the AssetManager to avoid ProcessKiller kill my process after unmounting usb disk.
+            // Close the underlying AssetManager for the res to avoid
+            // ProcessKiller kill my process after unmounting usb disk.
             res.getAssets().close();
         }
     }
 
-    public static void dumpPackageArchiveInfos(Printer printer, Collection<PackageArchiveInfo> infos) {
+    public static void dump(Printer printer, Collection<? extends PackageArchiveInfo> infos) {
+        final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
-        final StringBuilder result = new StringBuilder(192);
-        DebugUtils.dumpSummary(printer, result, 150, " Dumping PackageArchiveInfos [ size = %d ] ", size);
+        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageArchiveInfo collection [ size = %d ] ", size);
+
         for (PackageArchiveInfo info : infos) {
             result.setLength(0);
-            info.dump(printer, result, "  ");
+            printer.println(info.dump(result.append("  ")).append(" }").toString());
         }
     }
 
-    private static Resources getResources(Resources res, String sourceFile) throws Exception {
-        final AssetManager am = AssetManager.class.newInstance();
-        sMethod.invoke(am, sourceFile);
-        return new Resources(am, res.getDisplayMetrics(), res.getConfiguration());
-    }
-
-    @SuppressWarnings("deprecation")
-    private static Drawable loadIcon(PackageManager pm, Resources res, PackageInfo packageInfo) {
-        final Drawable icon = res.getDrawable(packageInfo.applicationInfo.icon);
-        return (icon != null ? icon : pm.getDefaultActivityIcon());
-    }
-
-    private static CharSequence loadLabel(PackageManager pm, Resources res, PackageInfo packageInfo) {
-        final CharSequence label = res.getText(packageInfo.applicationInfo.labelRes);
-        return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
+    /**
+     * Create a new <tt>Resources</tt> object base on an existing <em>sourceFile</em>.
+     */
+    private static Resources createResources(Context context, String sourceFile) throws Exception {
+        final AssetManager assets = AssetManager.class.newInstance();
+        sAddAssetPath.invoke(assets, sourceFile);
+        return new Resources(assets, context.getResources().getDisplayMetrics(), null);
     }
 
     /**
      * Class <tt>PackageArchiveInfo</tt> contains an application
      * package information defined in a package archive file.
      */
-    public static final class PackageArchiveInfo implements Comparable<PackageArchiveInfo> {
+    public static class PackageArchiveInfo implements Comparable<PackageArchiveInfo> {
         /**
          * The {@link PackageInfo}, parse from the <tt>AndroidManifest.xml</tt>.
          */
-        public final PackageInfo packageInfo;
+        public PackageInfo packageInfo;
 
         /**
-         * The application icon, load from the &lt;application&gt
-         * tag's <em>icon</em> attribute;
+         * The application's icon, load from the &lt;application&gt
+         * tag's "icon" attribute;
          */
-        public final Drawable icon;
+        public Drawable icon;
 
         /**
-         * The application label, load from the &lt;application&gt
-         * tag's <em>label</em> attribute;
+         * The application's label, load from the &lt;application&gt
+         * tag's "label" attribute;
          */
-        public final CharSequence label;
+        public CharSequence label;
 
-        /**
-         * Constructor
-         */
-        public PackageArchiveInfo(PackageInfo packageInfo, Drawable icon, CharSequence label) {
-            this.packageInfo = packageInfo;
-            this.icon  = icon;
-            this.label = label;
+        @Override
+        public String toString() {
+            return packageInfo.packageName;
         }
 
         @Override
@@ -121,59 +119,130 @@ public final class PackageUtils {
             return label.toString().compareTo(another.label.toString());
         }
 
-        public final void dump(Printer printer) {
-            dump(printer, new StringBuilder(192), "");
+        /**
+         * Returns the application's label that removing the white
+         * spaces and control characters from the start and end.
+         */
+        public final CharSequence getTrimmedLabel() {
+            return StringUtils.trim(label);
         }
 
-        /* package */ final void dump(Printer printer, StringBuilder result, String indentSpaces) {
-            printer.println(result.append(indentSpaces)
-                   .append("PackageArchiveInfo { package = ").append(packageInfo.packageName)
-                   .append(", version = ").append(packageInfo.versionName)
-                   .append(", label = ").append(label)
-                   .append(", source = ").append(packageInfo.applicationInfo.sourceDir)
-                   .append(" }").toString());
+        /**
+         * Initializes this object with the specified <em>packageInfo</em>.
+         * @param context The <tt>Context</tt>.
+         * @param res The <tt>Resources</tt> to load the application's label and icon.
+         * @param packageInfo The <tt>PackageInfo</tt> to set.
+         */
+        protected void initialize(Context context, Resources res, PackageInfo packageInfo) {
+            this.packageInfo = packageInfo;
+            this.icon  = loadIcon(context, res);
+            this.label = loadLabel(context, res);
         }
+
+        /**
+         * Loads the application's icon with the arguments supplied to the {@link #packageInfo}.
+         * @param context The <tt>Context</tt>.
+         * @param res The <tt>Resources</tt> to load the icon.
+         * @return A <tt>Drawable</tt> containing the application's icon. If the application does
+         * not have an icon, the default icon is returned.
+         * @see #loadLabel(Context, Resources)
+         */
+        @SuppressWarnings("deprecation")
+        protected Drawable loadIcon(Context context, Resources res) {
+            final Drawable icon = res.getDrawable(packageInfo.applicationInfo.icon);
+            return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
+        }
+
+        /**
+         * Loads the application's label with the arguments supplied to the {@link #packageInfo}.
+         * @param context The <tt>Context</tt>.
+         * @param res The <tt>Resources</tt> to load the label.
+         * @return A <tt>CharSequence</tt> containing the application's label. If the application
+         * does not have a label, the package name is returned.
+         * @see #loadIcon(Context, Resources)
+         */
+        protected CharSequence loadLabel(Context context, Resources res) {
+            final CharSequence label = res.getText(packageInfo.applicationInfo.labelRes);
+            return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
+        }
+
+        public final void dump(Printer printer) {
+            printer.println(dump(new StringBuilder(256)).append(" }").toString());
+        }
+
+        protected StringBuilder dump(StringBuilder out) {
+            return out.append(getClass().getSimpleName())
+                .append(" { package = ").append(packageInfo.packageName)
+                .append(", version = ").append(packageInfo.versionName)
+                .append(", label = ").append(label)
+                .append(", sourceFile = ").append(packageInfo.applicationInfo.sourceDir);
+        }
+
+        public static final Factory<PackageArchiveInfo> FACTORY = new Factory<PackageArchiveInfo>() {
+            @Override
+            public PackageArchiveInfo newInstance() {
+                return new PackageArchiveInfo();
+            }
+        };
     }
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
+     * @param <T> A class that extends {@link PackageArchiveInfo} that will
+     * be the parser result type.
      */
-    public static final class PackageParser implements ScanCallback {
-        private List<PackageArchiveInfo> mResults;
-        private final Resources mResources;
-        private final PackageManager mPackageManager;
+    public static final class PackageParser<T extends PackageArchiveInfo> implements ScanCallback {
+        private final Context mContext;
+        private final Factory<T> mFactory;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
+         * @param factory The {@link Factory} to create the
+         * {@link PackageArchiveInfo} or subclass object.
          */
-        public PackageParser(Context context) {
-            mResources = context.getResources();
-            mPackageManager = context.getPackageManager();
+        public PackageParser(Context context, Factory<T> factory) {
+            mFactory = factory;
+            mContext = context.getApplicationContext();
+        }
+
+        /**
+         * Equivalent to calling <tt>parsePackages(FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, dirPaths)</tt>.
+         * @param dirPaths An array of directories.
+         * @return A <tt>List</tt> of {@link PackageArchiveInfo} or subclass objects.
+         * @see #parsePackages(int, int, String[])
+         */
+        public final List<T> parsePackages(String... dirPaths) {
+            return parsePackages(FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0, dirPaths);
         }
 
         /**
          * Parses the package archive files in the specified <em>dirPaths</em>.
-         * @param flags The flags. May be <tt>0</tt> or any combination of
-         * {@link FileUtils#FLAG_IGNORE_HIDDEN_FILE FLAG_IGNORE_HIDDEN_FILE},
+         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination
+         * of {@link FileUtils#FLAG_IGNORE_HIDDEN_FILE FLAG_IGNORE_HIDDEN_FILE},
          * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
-         * @param dirPaths An array of directories.
-         * @return A <tt>List</tt> of {@link PackageArchiveInfo}.
+         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
+         * of <tt>PackageManager.GET_XXX</tt> constants.
+         * @param dirPaths An array of directory paths.
+         * @return A <tt>List</tt> of {@link PackageArchiveInfo} or subclass objects.
+         * @see #parsePackages(String[])
          */
-        public final List<PackageArchiveInfo> parsePackages(int flags, String... dirPaths) {
-            mResults = new ArrayList<PackageArchiveInfo>();
+        public final List<T> parsePackages(int scanFlags, int parseFlags, String... dirPaths) {
+            final Pair<Integer, List<T>> parseResult = new Pair<Integer, List<T>>(parseFlags, new ArrayList<T>());
             for (int i = 0, size = ArrayUtils.getSize(dirPaths); i < size; ++i) {
-                FileUtils.scanFiles(dirPaths[i], this, flags);
+                FileUtils.scanFiles(dirPaths[i], this, scanFlags, parseResult);
             }
 
-            return mResults;
+            return parseResult.second;
         }
 
         @Override
-        public int onScanFile(String path, int type) {
+        @SuppressWarnings("unchecked")
+        public int onScanFile(String path, int type, Object userData) {
             if (accept(path, type)) {
                 try {
-                    mResults.add(parsePackage(mPackageManager, mResources, path, 0));
+                    final Pair<Integer, List<T>> parseResult = (Pair<Integer, List<T>>)userData;
+                    parseResult.second.add(parsePackage(mContext, path, parseResult.first, mFactory));
                 } catch (Exception e) {
                     Log.e(PackageParser.class.getName(), "Couldn't parse archive file - " + path, e);
                 }
@@ -182,7 +251,7 @@ public final class PackageUtils {
             return SC_CONTINUE;
         }
 
-        private boolean accept(String path, int type) {
+        private static boolean accept(String path, int type) {
             if (type != Dirent.DT_DIR) {
                 final int index = FileUtils.findFileExtension(path);
                 return (index >= 0 && "apk".regionMatches(true, 0, path, index, 3));
@@ -210,12 +279,12 @@ public final class PackageUtils {
         }
     }
 
-    private static final Method sMethod;
+    private static final Method sAddAssetPath;
 
     static {
         try {
-            sMethod = AssetManager.class.getDeclaredMethod("addAssetPath", String.class);
-            sMethod.setAccessible(true);
+            sAddAssetPath = AssetManager.class.getDeclaredMethod("addAssetPath", String.class);
+            sAddAssetPath.setAccessible(true);
         } catch (NoSuchMethodException e) {
             throw new Error(e);
         }

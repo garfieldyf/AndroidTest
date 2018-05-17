@@ -285,6 +285,7 @@ public final class FileUtils {
      * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
      * an error code. See {@link ErrnoException}.
+     * @see ScanCallback#onScanFile(String, int)
      */
     public static native int scanFiles(String dirPath, ScanCallback callback, int flags);
 
@@ -722,15 +723,14 @@ public final class FileUtils {
         int SC_BREAK_PARENT = 3;
 
         /**
-         * This callback is invoked on the <tt>scanFiles</tt> was called from.
+         * This callback is invoked on the {@link FileUtils#scanFiles} was called from.
          * @param path The absolute file path.
          * @param type The file type. May be one of <tt>Dirent.DT_XXX</tt> constants.
          * @return One of {@link #SC_CONTINUE}, {@link #SC_STOP}, {@link #SC_BREAK}
          * or {@link #SC_BREAK_PARENT}.
-         * @see {@link FileUtils#scanFiles}
          */
         @Keep
-        int onScanFile(String path, int type);
+        public int onScanFile(String path, int type);
     }
 
     /**

@@ -67,6 +67,35 @@ public final class PackageUtils {
         }
     }
 
+    /**
+     * Equivalent to calling <tt>parsePackages(context, dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, PackageArchiveInfo.FACTORY)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param dirPath The path of directory, must be absolute file path.
+     * @return A {@link List} of {@link PackageArchiveInfo}s.
+     * @see #parsePackages(Context, String, int, int, Factory)
+     */
+    public final List<PackageArchiveInfo> parsePackages(Context context, String dirPath) {
+        return new PackageParser<PackageArchiveInfo>(context, PackageArchiveInfo.FACTORY).parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0);
+    }
+
+    /**
+     * Parses the package archive files in the specified <em>dirPath</em>.
+     * @param context The <tt>Context</tt>.
+     * @param dirPath The path of directory, must be absolute file path.
+     * @param scanFlags The scan flags. May be <tt>0</tt> or any combination
+     * of {@link FileUtils#FLAG_IGNORE_HIDDEN_FILE FLAG_IGNORE_HIDDEN_FILE},
+     * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
+     * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
+     * of <tt>PackageManager.GET_XXX</tt> constants.
+     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo}
+     * or subclass object.
+     * @return A {@link List} of {@link PackageArchiveInfo} or subclass objects.
+     * @see #parsePackages(Context, String)
+     */
+    public final <T extends PackageArchiveInfo> List<T> parsePackages(Context context, String dirPath, int scanFlags, int parseFlags, Factory<? extends T> factory) {
+        return new PackageParser<T>(context, factory).parsePackages(dirPath, scanFlags, parseFlags);
+    }
+
     public static void dump(Printer printer, Collection<? extends PackageArchiveInfo> infos) {
         final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
@@ -193,65 +222,61 @@ public final class PackageUtils {
      */
     public static final class PackageParser<T extends PackageArchiveInfo> implements ScanCallback {
         private final Context mContext;
-        private final Factory<T> mFactory;
+        private final Factory<? extends T> mFactory;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
-         * @param factory The {@link Factory} to create the
-         * {@link PackageArchiveInfo} or subclass object.
+         * @param factory The {@link Factory} to create the {@link PackageArchiveInfo} or subclass object.
          */
-        public PackageParser(Context context, Factory<T> factory) {
+        public PackageParser(Context context, Factory<? extends T> factory) {
             mFactory = factory;
             mContext = context.getApplicationContext();
         }
 
         /**
-         * Equivalent to calling <tt>parsePackages(FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, dirPaths)</tt>.
-         * @param dirPaths An array of directories.
-         * @return A <tt>List</tt> of {@link PackageArchiveInfo} or subclass objects.
-         * @see #parsePackages(int, int, String[])
+         * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0)</tt>.
+         * @param dirPath The path of directory, must be absolute file path.
+         * @return A {@link List} of {@link PackageArchiveInfo}s.
+         * @see #parsePackages(String)
          */
-        public final List<T> parsePackages(String... dirPaths) {
-            return parsePackages(FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0, dirPaths);
+        public final List<T> parsePackages(String dirPath) {
+            return parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0);
         }
 
         /**
-         * Parses the package archive files in the specified <em>dirPaths</em>.
+         * Parses the package archive files in the specified <em>dirPath</em>.
+         * @param dirPath The path of directory, must be absolute file path.
          * @param scanFlags The scan flags. May be <tt>0</tt> or any combination
          * of {@link FileUtils#FLAG_IGNORE_HIDDEN_FILE FLAG_IGNORE_HIDDEN_FILE},
          * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
          * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
          * of <tt>PackageManager.GET_XXX</tt> constants.
-         * @param dirPaths An array of directory paths.
-         * @return A <tt>List</tt> of {@link PackageArchiveInfo} or subclass objects.
-         * @see #parsePackages(String[])
+         * @return A {@link List} of {@link PackageArchiveInfo} or subclass objects.
+         * @see #parsePackages(String, int, int)
          */
-        public final List<T> parsePackages(int scanFlags, int parseFlags, String... dirPaths) {
+        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags) {
             final Pair<Integer, List<T>> parseResult = new Pair<Integer, List<T>>(parseFlags, new ArrayList<T>());
-            for (int i = 0, size = ArrayUtils.getSize(dirPaths); i < size; ++i) {
-                FileUtils.scanFiles(dirPaths[i], this, scanFlags, parseResult);
-            }
-
+            FileUtils.scanFiles(dirPath, this, scanFlags, parseResult);
             return parseResult.second;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object userData) {
-            if (accept(path, type)) {
+            if (isArchiveFile(path, type)) {
                 try {
                     final Pair<Integer, List<T>> parseResult = (Pair<Integer, List<T>>)userData;
                     parseResult.second.add(parsePackage(mContext, path, parseResult.first, mFactory));
                 } catch (Exception e) {
-                    Log.e(PackageParser.class.getName(), "Couldn't parse archive file - " + path, e);
+                    Log.e(PackageParser.class.getName(), "Couldn't parse a package archive file - " + path, e);
                 }
             }
 
             return SC_CONTINUE;
         }
 
-        private static boolean accept(String path, int type) {
+        private static boolean isArchiveFile(String path, int type) {
             if (type != Dirent.DT_DIR) {
                 final int index = FileUtils.findFileExtension(path);
                 return (index >= 0 && "apk".regionMatches(true, 0, path, index, 3));

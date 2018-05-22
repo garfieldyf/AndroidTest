@@ -157,7 +157,7 @@ public final class PackageUtils {
         }
 
         /**
-         * Initializes this object with the specified <em>packageInfo</em>.
+         * Initializes this object with the specified <em>res</em> and <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param res The <tt>Resources</tt> to load the application's label and icon.
          * @param packageInfo The <tt>PackageInfo</tt> to set.

@@ -134,7 +134,7 @@ public final class NetworkUtils {
                 final Constructor<NetworkInfo> ctor = NetworkInfo.class.getConstructor(int.class, int.class, String.class, String.class);
                 ctor.setAccessible(true);
                 sInstance = ctor.newInstance(ConnectivityManager.TYPE_DUMMY, ConnectivityManager.TYPE_DUMMY, "DUMMY", "");
-            } catch (Exception e) {
+            } catch (ReflectiveOperationException e) {
                 throw new Error(e);
             }
         }

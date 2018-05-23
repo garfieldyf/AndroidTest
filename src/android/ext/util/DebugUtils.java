@@ -34,7 +34,7 @@ public final class DebugUtils {
     /**
      * Print the method running time to logcat since call {@link #startMethodTracing()}.
      * @param tag Used to identify the source of a log message.
-     * @param prefix The prefix to print. It usually identifies the method name.
+     * @param prefix The prefix to print. It usually identifies the calling method name.
      * @see #startMethodTracing()
      * @see #stopMethodTracing(String, String, char)
      */
@@ -45,7 +45,7 @@ public final class DebugUtils {
     /**
      * Print the method running time to logcat since call {@link #startMethodTracing()}.
      * @param tag Used to identify the source of a log message.
-     * @param prefix The prefix to print. It usually identifies the method name.
+     * @param prefix The prefix to print. It usually identifies the calling method name.
      * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
      * or 'm' (milliseconds).
      * @see #startMethodTracing()
@@ -58,7 +58,7 @@ public final class DebugUtils {
     /**
      * Print the method running time to logcat since call {@link #startMethodTracing()}.
      * @param tag Used to identify the source of a log message.
-     * @param prefix The prefix to print. It usually identifies the method name.
+     * @param prefix The prefix to print. It usually identifies the calling method name.
      * @param nanoTime The method running time returned by {@link #stopMethodTracing()}
      * in nanoseconds.
      * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
@@ -130,6 +130,10 @@ public final class DebugUtils {
         if (checked) {
             throw new AssertionError(message);
         }
+    }
+
+    public static void __checkRange(int offset, int length, int arrayLength) {
+        ArrayUtils.checkRange(offset, length, arrayLength);
     }
 
     public static void __checkWarning(boolean checked, String tag, String message) {

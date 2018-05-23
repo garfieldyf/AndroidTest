@@ -162,7 +162,7 @@ public class GIFImage {
      * @see #createBitmapCanvas()
      */
     public boolean draw(Bitmap bitmapCanvas, int frameIndex) {
-        DebugUtils.__checkError(!bitmapCanvas.isMutable(), "Immutable bitmap passed to GIFImage draw");
+        DebugUtils.__checkError(!bitmapCanvas.isMutable(), "The bitmap canvas must be a mutable bitmap.");
         DebugUtils.__checkError(bitmapCanvas.getConfig() != Config.ARGB_8888, "The bitmap canvas pixel format must be ARGB_8888");
         return nativeDraw(bitmapCanvas, mNativeImage, frameIndex);
     }

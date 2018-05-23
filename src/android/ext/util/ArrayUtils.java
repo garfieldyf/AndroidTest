@@ -120,7 +120,7 @@ public final class ArrayUtils {
      * @see #indexOf(Object[], Object)
      */
     public static int indexOf(Object[] array, int start, int end, Object value) {
-        checkRange(start, end - start, array.length);
+        DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (; start < end; ++start) {
                 if (value.equals(array[start])) {
@@ -150,7 +150,7 @@ public final class ArrayUtils {
      * @see #indexOf(List, int, int, Filter)
      */
     public static <T> int indexOf(T[] array, int start, int end, Filter<? super T> filter) {
-        checkRange(start, end - start, array.length);
+        DebugUtils.__checkRange(start, end - start, array.length);
         for (; start < end; ++start) {
             if (filter.accept(array[start])) {
                 return start;
@@ -172,7 +172,7 @@ public final class ArrayUtils {
      * @see #indexOf(T[], int, int, Filter)
      */
     public static <T> int indexOf(List<T> list, int start, int end, Filter<? super T> filter) {
-        checkRange(start, end - start, list.size());
+        DebugUtils.__checkRange(start, end - start, list.size());
         if (list instanceof RandomAccess) {
             for (; start < end; ++start) {
                 if (filter.accept(list.get(start))) {
@@ -216,7 +216,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(Object[], Object)
      */
     public static int lastIndexOf(Object[] array, int start, int end, Object value) {
-        checkRange(start, end - start, array.length);
+        DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (--end; end >= start; --end) {
                 if (value.equals(array[end])) {
@@ -246,7 +246,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(List, int, int, Filter)
      */
     public static <T> int lastIndexOf(T[] array, int start, int end, Filter<? super T> filter) {
-        checkRange(start, end - start, array.length);
+        DebugUtils.__checkRange(start, end - start, array.length);
         for (--end; end >= start; --end) {
             if (filter.accept(array[end])) {
                 return end;
@@ -268,7 +268,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(T[], int, int, Filter)
      */
     public static <T> int lastIndexOf(List<T> list, int start, int end, Filter<? super T> filter) {
-        checkRange(start, end - start, list.size());
+        DebugUtils.__checkRange(start, end - start, list.size());
         if (list instanceof RandomAccess) {
             for (--end; end >= start; --end) {
                 if (filter.accept(list.get(end))) {

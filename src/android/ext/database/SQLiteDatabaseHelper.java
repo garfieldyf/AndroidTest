@@ -1,5 +1,6 @@
 package android.ext.database;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.ContentValues;
@@ -8,6 +9,7 @@ import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
 import android.net.Uri;
 import android.util.ArrayMap;
 
@@ -21,7 +23,7 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     /**
      * Constructor
-     * <P>Create a helper object to create, open, and/or manage a database. This method
+     * <p>Create a helper object to create, open, and/or manage a database. This method
      * always returns very quickly. The database is not actually created or opened until
      * one of {@link SQLiteOpenHelper#getWritableDatabase getWritableDatabase} or
      * {@link SQLiteOpenHelper#getReadableDatabase getReadableDatabase} is called.</p>
@@ -33,13 +35,21 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
      * {@link SQLiteOpenHelper#onUpgrade onUpgrade} will be used to upgrade the database.
      */
     public SQLiteDatabaseHelper(Context context, String name, CursorFactory factory, int version) {
-        super(context, name, factory, version);
+        super(context.getApplicationContext(), name, factory, version);
         mObservables = new ArrayMap<String, List<ContentObserver>>();
     }
 
     /**
+     * Returns the application <tt>Context</tt> associated with this object.
+     * @return The application <tt>Context</tt>.
+     */
+    public final Context getContext() {
+        return SQLiteContext.getContext(this);
+    }
+
+    /**
      * Dispatchs update on each observer with the specified <em>table</em>.
-     * @param table The table name to identify the notification.
+     * @param table The table to identify the notification.
      * @param selfChange Whether the observer is interested in notifications
      * for changes made self.
      * @see #dispatchChange(String, boolean, Uri)
@@ -50,13 +60,14 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     /**
      * Dispatchs update on each observer with the specified <em>table</em>.
-     * @param table The table name to identify the notification.
+     * @param table The table to identify the notification.
      * @param selfChange Whether the observer is interested in notifications
      * for changes made self.
      * @param uri The Uri of the changed content, or <tt>null</tt> if unknown.
      * @see #dispatchChange(String, boolean)
      */
     public void dispatchChange(String table, boolean selfChange, Uri uri) {
+        DebugUtils.__checkError(table == null, "table == null");
         synchronized (mObservables) {
             final List<ContentObserver> observers = mObservables.get(table);
             final int size = ArrayUtils.getSize(observers);
@@ -70,22 +81,23 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Adds an observer to the list with the specified <em>table</em>.
-     * The observer cannot be <tt>null</tt> and it must <b>not</b>
-     * already be registered.
-     * @param table The table name to register.
+     * Adds an observer to the list with the specified <em>table</em>. If the
+     * observer already registered then invoking this method has no effect.
+     * @param table The table to register.
      * @param observer The observer to register.
      * @see #unregisterObserver(String, ContentObserver)
      * @see #unregisterAllObservers(String)
      * @see #unregisterAllObservers()
      */
     public final void registerObserver(String table, ContentObserver observer) {
+        DebugUtils.__checkError(table == null || observer == null, "table == null || observer == null");
         synchronized (mObservables) {
             List<ContentObserver> observers = mObservables.get(table);
             if (observers == null) {
                 mObservables.put(table, observers = new ArrayList<ContentObserver>());
-                observers.add(observer);
-            } else if (!observers.contains(observer)) {
+            }
+
+            if (!observers.contains(observer)) {
                 observers.add(observer);
             }
         }
@@ -93,14 +105,15 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     /**
      * Removes a previously registered observer with the specified <em>table</em>.
-     * The observer must not be <tt>null</tt> and it must already have been registered.
-     * @param table The table name to unregister.
+     * If the observer already unregistered then invoking this method has no effect.
+     * @param table The table to unregister.
      * @param observer The observer to unregister.
      * @see #registerObserver(String, ContentObserver)
      * @see #unregisterAllObservers(String)
      * @see #unregisterAllObservers()
      */
     public final void unregisterObserver(String table, ContentObserver observer) {
+        DebugUtils.__checkError(table == null, "table == null");
         synchronized (mObservables) {
             final List<ContentObserver> observers = mObservables.get(table);
             if (observers != null) {
@@ -111,12 +124,13 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
 
     /**
      * Removes all registered observers with the specified <em>table</em>.
-     * @param table The table name to unregister.
+     * @param table The table to unregister.
      * @see #registerObserver(String, ContentObserver)
      * @see #unregisterObserver(String, ContentObserver)
      * @see #unregisterAllObservers()
      */
     public final void unregisterAllObservers(String table) {
+        DebugUtils.__checkError(table == null, "table == null");
         synchronized (mObservables) {
             final List<ContentObserver> observers = mObservables.remove(table);
             if (observers != null) {
@@ -225,5 +239,30 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public void close() {
         super.close();
         unregisterAllObservers();
+    }
+
+    /**
+     * Class <tt>SQLiteContext</tt> used to obtains
+     * the context from the <tt>SQLiteOpenHelper</tt>.
+     */
+    private static final class SQLiteContext {
+        private static final Field sField;
+
+        public static Context getContext(SQLiteOpenHelper db) {
+            try {
+                return (Context)sField.get(db);
+            } catch (ReflectiveOperationException e) {
+                throw new Error(e);
+            }
+        }
+
+        static {
+            try {
+                sField = SQLiteOpenHelper.class.getDeclaredField("mContext");
+                sField.setAccessible(true);
+            } catch (NoSuchFieldException e) {
+                throw new Error(e);
+            }
+        }
     }
 }

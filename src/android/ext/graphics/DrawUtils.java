@@ -20,6 +20,7 @@ import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableContainer;
 import android.util.StateSet;
 import android.view.Gravity;
 import android.view.View;
@@ -377,6 +378,10 @@ public final class DrawUtils {
     }
 
     private static void drawDrawable(Canvas canvas, Drawable drawable, int left, int top, int right, int bottom) {
+        if (drawable instanceof DrawableContainer) {
+            drawable = ((DrawableContainer)drawable).getCurrent();
+        }
+
         final Rect padding = RectPool.obtain();
         if (drawable.getPadding(padding)) {
             left   -= padding.left;

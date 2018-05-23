@@ -238,7 +238,7 @@ public final class PackageUtils {
          * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0)</tt>.
          * @param dirPath The path of directory, must be absolute file path.
          * @return A {@link List} of {@link PackageArchiveInfo}s.
-         * @see #parsePackages(String)
+         * @see #parsePackages(String, int, int)
          */
         public final List<T> parsePackages(String dirPath) {
             return parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0);
@@ -253,7 +253,7 @@ public final class PackageUtils {
          * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
          * of <tt>PackageManager.GET_XXX</tt> constants.
          * @return A {@link List} of {@link PackageArchiveInfo} or subclass objects.
-         * @see #parsePackages(String, int, int)
+         * @see #parsePackages(String)
          */
         public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags) {
             final Pair<Integer, List<T>> parseResult = new Pair<Integer, List<T>>(parseFlags, new ArrayList<T>());

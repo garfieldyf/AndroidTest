@@ -1,6 +1,5 @@
 package android.ext.database;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import android.content.ContentValues;
@@ -37,14 +36,6 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public SQLiteDatabaseHelper(Context context, String name, CursorFactory factory, int version) {
         super(context.getApplicationContext(), name, factory, version);
         mObservables = new ArrayMap<String, List<ContentObserver>>();
-    }
-
-    /**
-     * Returns the application <tt>Context</tt> associated with this object.
-     * @return The application <tt>Context</tt>.
-     */
-    public final Context getContext() {
-        return SQLiteContext.getContext(this);
     }
 
     /**
@@ -239,30 +230,5 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     public void close() {
         super.close();
         unregisterAllObservers();
-    }
-
-    /**
-     * Class <tt>SQLiteContext</tt> used to obtains
-     * the context from the <tt>SQLiteOpenHelper</tt>.
-     */
-    private static final class SQLiteContext {
-        private static final Field sField;
-
-        public static Context getContext(SQLiteOpenHelper db) {
-            try {
-                return (Context)sField.get(db);
-            } catch (ReflectiveOperationException e) {
-                throw new Error(e);
-            }
-        }
-
-        static {
-            try {
-                sField = SQLiteOpenHelper.class.getDeclaredField("mContext");
-                sField.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new Error(e);
-            }
-        }
     }
 }

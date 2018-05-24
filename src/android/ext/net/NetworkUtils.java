@@ -1,6 +1,5 @@
 package android.ext.net;
 
-import java.lang.reflect.Constructor;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -127,17 +126,7 @@ public final class NetworkUtils {
      * A dummy <tt>NetworkInfo</tt>.
      */
     private static final class DummyNetworkInfo {
-        public static final NetworkInfo sInstance;
-
-        static {
-            try {
-                final Constructor<NetworkInfo> ctor = NetworkInfo.class.getConstructor(int.class, int.class, String.class, String.class);
-                ctor.setAccessible(true);
-                sInstance = ctor.newInstance(ConnectivityManager.TYPE_DUMMY, ConnectivityManager.TYPE_DUMMY, "DUMMY", "");
-            } catch (ReflectiveOperationException e) {
-                throw new Error(e);
-            }
-        }
+        public static final NetworkInfo sInstance = new NetworkInfo(ConnectivityManager.TYPE_DUMMY, ConnectivityManager.TYPE_DUMMY, "DUMMY", "");
     }
 
     /**

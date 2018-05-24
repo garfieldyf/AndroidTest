@@ -10,7 +10,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,13 +102,7 @@ public final class ProcessUtils {
      * @param exec The default <tt>Executor</tt> to set.
      */
     public static void setDefaultExecutor(Executor exec) {
-        try {
-            final Field field = AsyncTask.class.getDeclaredField("sDefaultExecutor");
-            field.setAccessible(true);
-            field.set(null, exec);
-        } catch (Throwable e) {
-            // Ignored.
-        }
+        AsyncTask.setDefaultExecutor(exec);
     }
 
     /**

@@ -1,7 +1,5 @@
 package android.ext.util;
 
-import java.lang.reflect.Constructor;
-
 /**
  * Class StringUtils
  * @author Garfield
@@ -44,31 +42,6 @@ public final class StringUtils {
         }
 
         return (start == 0 && end == last ? s : s.subSequence(start, end + 1));
-    }
-
-    /**
-     * Equivalent to calling <tt>newString(chars, 0, chars.length)</tt>.
-     * @param chars The character array to create.
-     * @return A new <tt>String</tt>.
-     * @see #newString(char[], int, int)
-     */
-    public static String newString(char[] chars) {
-        return StringFactory.newString(chars, 0, chars.length);
-    }
-
-    /**
-     * Returns a new <tt>String</tt> from the contents of the specified
-     * <em>chars</em>. Unlike {@link String#String(char[], int, int)},
-     * this method do not copy the <em>chars</em> array.
-     * @param chars The character array to create.
-     * @param offset The start position in the <em>chars</em>.
-     * @param count The number of count in the <em>chars</em>.
-     * @return A new <tt>String</tt>.
-     * @see #newString(char[])
-     */
-    public static String newString(char[] chars, int offset, int count) {
-        ArrayUtils.checkRange(offset, count, chars.length);
-        return StringFactory.newString(chars, offset, count);
     }
 
     /**
@@ -209,30 +182,6 @@ public final class StringUtils {
 
     private static char toChar(int digit, char letter) {
         return (char)(digit < 10 ? digit + '0' : digit + letter - 10);
-    }
-
-    /**
-     * Class <tt>StringFactory</tt> used to create a new <tt>String</tt>.
-     */
-    private static final class StringFactory {
-        private static final Constructor<String> sInstance;
-
-        public static String newString(char[] chars, int offset, int count) {
-            try {
-                return sInstance.newInstance(offset, count, chars);
-            } catch (ReflectiveOperationException e) {
-                throw new Error(e);
-            }
-        }
-
-        static {
-            try {
-                sInstance = String.class.getDeclaredConstructor(int.class, int.class, char[].class);
-                sInstance.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                throw new Error(e);
-            }
-        }
     }
 
     /**

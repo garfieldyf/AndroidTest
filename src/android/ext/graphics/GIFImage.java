@@ -3,7 +3,6 @@ package android.ext.graphics;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Field;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.ext.util.ArrayUtils;
@@ -11,6 +10,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -61,7 +61,7 @@ public class GIFImage {
         long nativeImage = 0;
         try {
             if (is instanceof AssetInputStream) {
-                nativeImage = nativeDecodeAsset(Asset.sField.getLong(is));
+                nativeImage = nativeDecodeAsset(getNativeAsset((AssetInputStream)is));
             } else if (is instanceof FileInputStream) {
                 nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
             } else if (is != null) {
@@ -197,6 +197,10 @@ public class GIFImage {
         return nativeDecodeStream(is, tempStorage);
     }
 
+    private static long getNativeAsset(AssetInputStream is) {
+        return (Build.VERSION.SDK_INT > 20 ? is.getNativeAsset() : is.getAssetInt());
+    }
+
     private static native long nativeDecodeAsset(long asset);
     private static native long nativeDecodeFile(FileDescriptor fd);
     private static native long nativeDecodeArray(byte[] data, int offset, int length);
@@ -207,20 +211,4 @@ public class GIFImage {
     private static native int nativeGetFrameCount(long nativeImage);
     private static native int nativeGetFrameDelay(long nativeImage, int frameIndex);
     private static native boolean nativeDraw(Bitmap bitmapCanvas, long nativeImage, int frameIndex);
-
-    /**
-     * Class <tt>Asset</tt> used to obtains the native asset from the <tt>AssetInputStream</tt>.
-     */
-    private static final class Asset {
-        public static final Field sField;
-
-        static {
-            try {
-                sField = AssetInputStream.class.getDeclaredField("mAsset");
-                sField.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new Error(e);
-            }
-        }
-    }
 }

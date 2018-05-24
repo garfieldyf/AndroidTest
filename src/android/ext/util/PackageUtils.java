@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -28,11 +27,10 @@ public final class PackageUtils {
      * Equivalent to calling <tt>parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
      * @param sourceFile The path to the archive file, must be absolute file path.
-     * @return A {@link PackageArchiveInfo} object.
-     * @throws Exception if the package archive file cannot be parsed.
+     * @return A {@link PackageArchiveInfo} object if the parse succeeded, <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String, int, Factory)
      */
-    public static PackageArchiveInfo parsePackage(Context context, String sourceFile) throws Exception {
+    public static PackageArchiveInfo parsePackage(Context context, String sourceFile) {
         return parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY);
     }
 
@@ -40,31 +38,34 @@ public final class PackageUtils {
      * Parses a package archive file with the specified <em>sourceFile</em>.
      * @param context The <tt>Context</tt>.
      * @param sourceFile The path to the archive file, must be absolute file path.
-     * @param flags Additional option flags. May be <tt>0</tt> or any combination
-     * of <tt>PackageManager.GET_XXX</tt> constants.
-     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo}
-     * or subclass object.
-     * @return A {@link PackageArchiveInfo} or subclass object.
-     * @throws Exception if the package archive file cannot be parsed.
+     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
+     * <tt>PackageManager.GET_XXX</tt> constants.
+     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo} or
+     * subclass object.
+     * @return A {@link PackageArchiveInfo} or subclass object if the parse succeeded,
+     * <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String)
      */
-    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String sourceFile, int flags, Factory<T> factory) throws Exception {
+    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String sourceFile, int flags, Factory<T> factory) {
+        // Retrieve the package information from the package archive file.
         DebugUtils.__checkError(factory == null, "factory == null");
-        final Resources res = createResources(context, sourceFile);
-        try {
-            // Retrieve the package information from the package archive file.
-            final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(sourceFile, flags);
-            packageInfo.applicationInfo.sourceDir = sourceFile;
-
-            // Creates a PackageArchiveInfo or subclass object.
-            final T result = factory.newInstance();
-            result.initialize(context, res, packageInfo);
-            return result;
-        } finally {
-            // Close the underlying AssetManager for the res to avoid
-            // ProcessKiller kill my process after unmounting usb disk.
-            res.getAssets().close();
+        final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(sourceFile, flags);
+        if (packageInfo != null) {
+            final Resources res = createResources(context, sourceFile);
+            try {
+                // Creates a PackageArchiveInfo or subclass object.
+                packageInfo.applicationInfo.sourceDir = sourceFile;
+                final T result = factory.newInstance();
+                result.initialize(context, res, packageInfo);
+                return result;
+            } finally {
+                // Close the underlying AssetManager for the res to avoid
+                // ProcessKiller kill my process after unmounting usb disk.
+                res.getAssets().close();
+            }
         }
+
+        return null;
     }
 
     /**
@@ -110,9 +111,9 @@ public final class PackageUtils {
     /**
      * Create a new <tt>Resources</tt> object base on an existing <em>sourceFile</em>.
      */
-    private static Resources createResources(Context context, String sourceFile) throws Exception {
-        final AssetManager assets = AssetManager.class.newInstance();
-        sAddAssetPath.invoke(assets, sourceFile);
+    private static Resources createResources(Context context, String sourceFile) {
+        final AssetManager assets = new AssetManager();
+        assets.addAssetPath(sourceFile);
         return new Resources(assets, context.getResources().getDisplayMetrics(), null);
     }
 
@@ -267,7 +268,10 @@ public final class PackageUtils {
             if (isArchiveFile(path, type)) {
                 try {
                     final Pair<Integer, List<T>> parseResult = (Pair<Integer, List<T>>)userData;
-                    parseResult.second.add(parsePackage(mContext, path, parseResult.first, mFactory));
+                    final T result = parsePackage(mContext, path, parseResult.first, mFactory);
+                    if (result != null) {
+                        parseResult.second.add(result);
+                    }
                 } catch (Exception e) {
                     Log.e(PackageParser.class.getName(), "Couldn't parse a package archive file - " + path, e);
                 }
@@ -301,17 +305,6 @@ public final class PackageUtils {
         @Override
         public int compare(PackageArchiveInfo one, PackageArchiveInfo another) {
             return one.packageInfo.packageName.compareTo(another.packageInfo.packageName);
-        }
-    }
-
-    private static final Method sAddAssetPath;
-
-    static {
-        try {
-            sAddAssetPath = AssetManager.class.getDeclaredMethod("addAssetPath", String.class);
-            sAddAssetPath.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new Error(e);
         }
     }
 

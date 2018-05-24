@@ -1,6 +1,11 @@
 # This is a configuration file for ProGuard.
 # http://proguard.sourceforge.net/index.html#manual/usage.html
 
+# Don't warn the classes in the android-sdk-internal.jar.
+-dontwarn android.net.**
+-dontwarn android.os.**
+-dontwarn android.content.res.**
+
 # For native methods, including not being called methods.
 -keepclassmembers class * {
     native <methods>;

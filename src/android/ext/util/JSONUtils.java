@@ -5,11 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONArray;
@@ -56,55 +54,12 @@ public final class JSONUtils {
     }
 
     /**
-     * Returns an unmodifiable {@link List} of the objects in the specified <em>array</em>.
-     * @param array The <tt>JSONArray</tt>.
-     * @return An unmodifiable <tt>List</tt>.
-     * @see #asMap(JSONObject)
-     */
-    public static <T> List<T> asList(JSONArray array) {
-        DebugUtils.__checkError(array == null, "array == null");
-        return Collections.unmodifiableList(JSON.<T>asList(array));
-    }
-
-    /**
-     * Returns an unmodifiable {@link Map} of the objects in the specified <em>object</em>.
-     * @param object The <tt>JSONObject</tt>.
-     * @return An unmodifiable <tt>Map</tt>.
-     * @see #asList(JSONArray)
-     */
-    public static <T> Map<String, T> asMap(JSONObject object) {
-        DebugUtils.__checkError(object == null, "object == null");
-        return Collections.unmodifiableMap(JSON.<T>asMap(object));
-    }
-
-    /**
-     * Inserts the specified <em>value</em> into the <em>array</em> at the specified
-     * <em>index</em>. The <em>value</em> is inserted before the current value at the
-     * specified <em>index</em>.
-     * @param array The {@link JSONArray} to add to.
-     * @param index The index at which to insert.
-     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
-     * {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @return The <em>array</em>.
-     * @see #putOpt(JSONArray, int, Object)
-     * @see #putOpt(JSONObject, String, Object)
-     */
-    public static JSONArray addOpt(JSONArray array, int index, Object value) {
-        if (index >= 0 && index <= array.length()) {
-            JSON.asList(array).add(index, value);
-        }
-
-        return array;
-    }
-
-    /**
      * Equivalent to calling {@link JSONArray#put(int, Object)}.
      * @param array The <tt>JSONArray</tt> to add to.
      * @param index The index at which to put.
      * @param value A <tt>JSONObject, JSONArray, String, Boolean,
      * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>array</em>.
-     * @see #addOpt(JSONArray, int, Object)
      * @see #putOpt(JSONObject, String, Object)
      */
     public static JSONArray putOpt(JSONArray array, int index, Object value) {
@@ -122,7 +77,6 @@ public final class JSONUtils {
      * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
      * {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>object</em>.
-     * @see #addOpt(JSONArray, int, Object)
      * @see #putOpt(JSONArray, int, Object)
      */
     public static JSONObject putOpt(JSONObject object, String name, Object value) {
@@ -200,10 +154,10 @@ public final class JSONUtils {
             return writeMap(writer, (Map<String, ?>)object);
         } else if (object instanceof Collection) {
             return writeColl(writer, (Collection<?>)object);
-        } else if (object instanceof JSONObject) {
-            return writeMap(writer, JSON.asMap((JSONObject)object));
         } else if (object instanceof JSONArray) {
-            return writeColl(writer, JSON.asList((JSONArray)object));
+            return writeJSONArray(writer, (JSONArray)object);
+        } else if (object instanceof JSONObject) {
+            return writeJSONObject(writer, (JSONObject)object);
         } else {
             return writer.value(object.toString());
         }
@@ -312,9 +266,9 @@ public final class JSONUtils {
         }
     }
 
-    private static JsonWriter writeMap(JsonWriter writer, Map<String, ?> map) throws IOException {
+    private static JsonWriter writeMap(JsonWriter writer, Map<String, ?> values) throws IOException {
         writer.beginObject();
-        for (Entry<String, ?> entry : map.entrySet()) {
+        for (Entry<String, ?> entry : values.entrySet()) {
             writeObject(writer.name(entry.getKey()), entry.getValue());
         }
 
@@ -330,39 +284,24 @@ public final class JSONUtils {
         return writer.endArray();
     }
 
-    /**
-     * Class <tt>JSON</tt> used to obtain the internal container from JSON object.
-     */
-    private static final class JSON {
-        private static final Field sMapField;
-        private static final Field sListField;
-
-        public static <T> List<T> asList(JSONArray array) {
-            try {
-                return (List<T>)sListField.get(array);
-            } catch (Exception e) {
-                return Collections.emptyList();
-            }
+    private static JsonWriter writeJSONArray(JsonWriter writer, JSONArray values) throws IOException {
+        writer.beginArray();
+        for (int i = 0, length = values.length(); i < length; ++i) {
+            writeObject(writer, values.opt(i));
         }
 
-        public static <T> Map<String, T> asMap(JSONObject object) {
-            try {
-                return (Map<String, T>)sMapField.get(object);
-            } catch (Exception e) {
-                return Collections.emptyMap();
-            }
+        return writer.endArray();
+    }
+
+    private static JsonWriter writeJSONObject(JsonWriter writer, JSONObject values) throws IOException {
+        writer.beginObject();
+        final Iterator<String> names = values.keys();
+        while (names.hasNext()) {
+            final String name = names.next();
+            writeObject(writer.name(name), values.opt(name));
         }
 
-        static {
-            try {
-                sListField = JSONArray.class.getDeclaredField("values");
-                sListField.setAccessible(true);
-                sMapField = JSONObject.class.getDeclaredField("nameValuePairs");
-                sMapField.setAccessible(true);
-            } catch (NoSuchFieldException e) {
-                throw new Error(e);
-            }
-        }
+        return writer.endObject();
     }
 
     /**

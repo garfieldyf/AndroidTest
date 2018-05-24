@@ -62,13 +62,23 @@
             <pathelement location="${external.jar.dir}\recyclerview\release\recyclerview-v7.jar" />
         </path>
 
+        <path id="android.sdk.internal.jar.path">
+            <path path="${toString:project.target.class.path}" />
+            <pathelement location="${external.jar.dir}\internal\android-sdk-internal.jar" />
+        </path>
+
         <path id="project.all.jars.path">
             <path refid="barcode.jar.path" />
             <path refid="support.v4.jar.path" />
             <path refid="recyclerview.jar.path" />
         </path>
 
-        <echo message="jars=${toString:project.all.jars.path}" />
+        <path id="project.target.class.path">
+            <path refid="android.sdk.internal.jar.path" />
+        </path>
+
+        <echo message="library jars : ${toString:project.target.class.path}" />
+        <echo message="program jars : ${toString:project.all.jars.path}" />
     </target>
 
     <!-- debug output filename -->

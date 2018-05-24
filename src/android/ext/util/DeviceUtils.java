@@ -3,7 +3,6 @@ package android.ext.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -14,6 +13,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
@@ -27,6 +27,7 @@ import android.view.WindowManager;
  * @author Garfield
  * @version 1.5
  */
+@SuppressLint("NewApi")
 public final class DeviceUtils {
     /**
      * Returns the cpu maximum frequency on the devices.
@@ -75,25 +76,24 @@ public final class DeviceUtils {
         }
 
         float result = freq;
-        final char[] format = new char[] { '%', '.', '0', 'f', ' ', 'K', 'H', 'z' };
+        final StringBuilder format = new StringBuilder("%.0f KHz");
         if (result >= 1000) {
             result /= 1000;
-            format[5] = 'M';
+            format.setCharAt(5, 'M');
         }
 
         if (result >= 1000) {
             result /= 1000;
-            format[2] = '2';
-            format[5] = 'G';
+            format.setCharAt(2, '2');
+            format.setCharAt(5, 'G');
         }
 
-        return String.format(StringUtils.newString(format, 0, format.length), result);
+        return String.format(format.toString(), result);
     }
 
     /**
      * Returns an array of ABIs supported by this device.
      */
-    @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
     public static String[] getSupportedABIs() {
         if (Build.VERSION.SDK_INT > 20) {
@@ -276,14 +276,10 @@ public final class DeviceUtils {
 
     private static String dumpExternalStorageInfo(Context context, StatFs statFs, StringBuilder out) {
         try {
-            final Method method = StorageManager.class.getDeclaredMethod("getVolumeList", (Class<?>[])null);
-            method.setAccessible(true);
-            final Object[] volumes = (Object[])method.invoke((StorageManager)context.getSystemService(Context.STORAGE_SERVICE), (Object[])null);
-
+            final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
             for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
-                final Object volume  = volumes[i];
-                final Class<?> clazz = volume.getClass();
-                final String path = invoke(clazz, volume, "getPath", "");
+                final StorageVolume volume = volumes[i];
+                final String path = volume.getPath();
                 statFs.restat(path);
 
                 if (out.length() <= 0) {
@@ -292,10 +288,10 @@ public final class DeviceUtils {
                     out.append("\n  ");
                 }
 
-                out.append(getDescription(clazz, volume, context))
+                out.append(getDescription(context, volume))
                    .append(" [ path = ").append(path)
-                   .append(", primary = ").append(invoke(clazz, volume, "isPrimary", false))
-                   .append(", state = ").append(invoke(clazz, volume, "getState", "unknown"))
+                   .append(", primary = ").append(volume.isPrimary())
+                   .append(", state = ").append(getState(volume))
                    .append(", total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
                    .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
                    .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
@@ -308,26 +304,14 @@ public final class DeviceUtils {
         return out.toString();
     }
 
-    private static String getDescription(Class<?> clazz, Object object, Context context) {
-        try {
-            final Method method = clazz.getDeclaredMethod("getDescription", Context.class);
-            method.setAccessible(true);
-            final String description = (String)method.invoke(object, context);
-            return (description != null ? description : "unknown");
-        } catch (Exception e) {
-            return "unknown";
-        }
+    private static String getState(StorageVolume volume) {
+        final String state = volume.getState();
+        return (state != null ? state : "unknown");
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T invoke(Class<?> clazz, Object volume, String methodName, T defaultValue) {
-        try {
-            final Method method = clazz.getDeclaredMethod(methodName, (Class<?>[])null);
-            method.setAccessible(true);
-            return (T)method.invoke(volume, (Object[])null);
-        } catch (Exception e) {
-            return defaultValue;
-        }
+    private static String getDescription(Context context, StorageVolume volume) {
+        final String description = volume.getDescription(context);
+        return (description != null ? description : "unknown");
     }
 
     private static int readCpuFrequency(int coreIndex, String filename) {

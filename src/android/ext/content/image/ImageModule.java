@@ -91,22 +91,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
     }
 
     /**
-     * Returns the application <tt>Context</tt> associated with this object.
-     * @return The application <tt>Context</tt>.
-     */
-    public final Context getContext() {
-        return mContext;
-    }
-
-    /**
-     * Returns the {@link Executor} associated with this object.
-     * @return The <tt>Executor</tt>.
-     */
-    public final Executor getExecutor() {
-        return mExecutor;
-    }
-
-    /**
      * Returns the {@link FileCache} associated with this object.
      * @return The <tt>FileCache</tt> or <tt>null</tt>.
      */

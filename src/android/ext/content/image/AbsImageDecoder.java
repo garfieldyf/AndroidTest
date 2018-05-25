@@ -24,7 +24,7 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
     /**
      * The application <tt>Context</tt>.
      */
-    protected final Context mContext;
+    public final Context mContext;
 
     /**
      * The <tt>Options</tt> {@link Pool} to decode image.
@@ -39,14 +39,6 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
     public AbsImageDecoder(Context context, int maxPoolSize) {
         mContext = context.getApplicationContext();
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
-    }
-
-    /**
-     * Returns the application <tt>Context</tt> associated with this decoder.
-     * @return The application <tt>Context</tt>.
-     */
-    public final Context getContext() {
-        return mContext;
     }
 
     @Override

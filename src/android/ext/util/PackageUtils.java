@@ -221,8 +221,15 @@ public final class PackageUtils {
      * @param <T> A class that extends {@link PackageArchiveInfo} that will
      * be the parser result type.
      */
-    public static final class PackageParser<T extends PackageArchiveInfo> implements ScanCallback {
-        private final Context mContext;
+    public static class PackageParser<T extends PackageArchiveInfo> implements ScanCallback {
+        /**
+         * The application <tt>Context</tt>.
+         */
+        public final Context mContext;
+
+        /**
+         * The {@link Factory} to create the {@link PackageArchiveInfo} or subclass object.
+         */
         private final Factory<? extends T> mFactory;
 
         /**
@@ -280,7 +287,13 @@ public final class PackageUtils {
             return SC_CONTINUE;
         }
 
-        private static boolean isArchiveFile(String path, int type) {
+        /**
+         * Tests if the file is a package archive file.
+         * @param path The file path, passed earlier by {@link #onScanFile}.
+         * @param type The file type, passed earlier by {@link #onScanFile}.
+         * @return <tt>true</tt> if the file is a package archive file, <tt>false</tt> otherwise.
+         */
+        protected boolean isArchiveFile(String path, int type) {
             if (type != Dirent.DT_DIR) {
                 final int index = FileUtils.findFileExtension(path);
                 return (index >= 0 && "apk".regionMatches(true, 0, path, index, 3));

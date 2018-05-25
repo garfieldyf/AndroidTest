@@ -31,7 +31,7 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
     /**
      * The application <tt>Context</tt>.
      */
-    protected final Context mContext;
+    public final Context mContext;
 
     /**
      * Constructor
@@ -172,14 +172,6 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
         load(token, MESSAGE_BATCH, authority, operations);
-    }
-
-    /**
-     * Returns a {@link ContentResolver} instance for your application's package.
-     * @return The <tt>ContentResolver</tt>.
-     */
-    public final ContentResolver getContentResolver() {
-        return mContext.getContentResolver();
     }
 
     @Override

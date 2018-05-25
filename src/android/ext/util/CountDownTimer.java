@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import android.os.Handler;
 import android.os.SystemClock;
 
 /**
@@ -8,8 +9,8 @@ import android.os.SystemClock;
  * @version 1.0
  */
 public abstract class CountDownTimer implements Runnable {
-    private boolean mCancelled;
     private long mCountDownTime;
+    private final Handler mHandler;
     private final long mIntervalMillis;
     private final long mCountDownMillis;
 
@@ -18,10 +19,25 @@ public abstract class CountDownTimer implements Runnable {
      * @param countDownMillis The number of millis in the future from the call
      * to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
      * @param intervalMillis The interval millis to receive {@link #onTick(long)} callback.
+     * @see #CountDownTimer(long, long, Handler)
      */
     public CountDownTimer(long countDownMillis, long intervalMillis) {
+        this(countDownMillis, intervalMillis, null);
+    }
+
+    /**
+     * Constructor
+     * @param countDownMillis The number of millis in the future from the call
+     * to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
+     * @param intervalMillis The interval millis to receive {@link #onTick(long)} callback.
+     * @param handler The Handler to run {@link #onTick(long)} on, or <tt>null</tt> to run
+     * on UI thread.
+     * @see #CountDownTimer(long, long)
+     */
+    public CountDownTimer(long countDownMillis, long intervalMillis, Handler handler) {
         mIntervalMillis  = intervalMillis;
         mCountDownMillis = countDownMillis;
+        mHandler = (handler == null ? UIHandler.sInstance : handler);
     }
 
     /**
@@ -34,8 +50,7 @@ public abstract class CountDownTimer implements Runnable {
             mCountDownTime = SystemClock.elapsedRealtime() + mCountDownMillis;
         }
 
-        mCancelled = false;
-        UIHandler.sInstance.post(this);
+        mHandler.post(this);
         return this;
     }
 
@@ -44,22 +59,17 @@ public abstract class CountDownTimer implements Runnable {
      * @see #start()
      */
     public final void cancel() {
-        mCancelled = true;
-        UIHandler.sInstance.removeCallbacks(this);
+        mHandler.removeCallbacks(this);
     }
 
     @Override
     public void run() {
-        if (mCancelled) {
-            return;
-        }
-
         final long remainingMillis = mCountDownTime - SystemClock.elapsedRealtime();
         if (remainingMillis <= 0) {
             onFinish();
         } else if (mIntervalMillis <= 0 || remainingMillis < mIntervalMillis) {
             // No tick, just delay until done.
-            UIHandler.sInstance.postDelayed(this, remainingMillis);
+            mHandler.postDelayed(this, remainingMillis);
         } else {
             // Take into account user's onTick taking time to execute
             final long lastTickTime = SystemClock.elapsedRealtime();
@@ -72,7 +82,7 @@ public abstract class CountDownTimer implements Runnable {
                 delayMillis += mIntervalMillis;
             }
 
-            UIHandler.sInstance.postDelayed(this, delayMillis);
+            mHandler.postDelayed(this, delayMillis);
         }
     }
 

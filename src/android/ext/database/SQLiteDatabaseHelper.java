@@ -7,7 +7,6 @@ import android.content.Context;
 import android.database.ContentObserver;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.net.Uri;
 import android.util.ArrayMap;
@@ -61,8 +60,7 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
         DebugUtils.__checkError(table == null, "table == null");
         synchronized (mObservables) {
             final List<ContentObserver> observers = mObservables.get(table);
-            final int size = ArrayUtils.getSize(observers);
-            for (int i = 0; i < size; ++i) {
+            for (int i = 0, size = observers.size(); i < size; ++i) {
                 final ContentObserver observer = observers.get(i);
                 if (!selfChange || observer.deliverSelfNotifications()) {
                     observer.dispatchChange(selfChange, uri);

@@ -4,7 +4,7 @@
     <property name="out.dir" value="${basedir}/../libs" />
     <property name="obj.dir" value="${basedir}/../obj" />
     <property name="ndk.args" value="-B all=1" />
-    <!-- <property name="ndk.args" value="-B NDK_STL=1 gifimage=1 LOCAL_MODULE_NAME=gifimage PACKAGE_GRAPHICS=com/funshion/graphics/" /> -->
+    <!-- <property name="ndk.args" value="-B all=1 NDK_STL=1 /> -->
 
     <!-- target -debug-flags -->
     <target name="-debug-flags">

@@ -8,11 +8,6 @@
 
 #include "main.h"
 
-#ifdef __BUILD_ERRORS__
-#pragma message "Compiling " PACKAGE_UTILITIES "ErrnoException native methods."
-#include "errutils.h"
-#endif
-
 #ifdef __BUILD_GIFIMAGE__
 #pragma message "Compiling " PACKAGE_GRAPHICS "GIFImage native methods."
 #include "gifimage.h"
@@ -81,10 +76,6 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
 #ifdef __BUILD_PROCUTILS__
     verify(ProcessUtils::registerNativeMethods(env), JNI_OK);
-#endif
-
-#ifdef __BUILD_ERRORS__
-    verify(ErrnoException::registerNativeMethods(env), JNI_OK);
 #endif
 
 #ifdef __BUILD_MESSAGEDIGESTS__

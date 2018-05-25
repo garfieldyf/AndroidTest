@@ -697,26 +697,8 @@ public final class ErrnoException extends RuntimeException {
 
     /**
      * Throws this exception as an <tt>IOException</tt>.
-     * @see #throwAsIOException(int, String)
      */
-    public void throwAsIOException() throws IOException {
+    public final void throwAsIOException() throws IOException {
         throw new IOException(getMessage());
     }
-
-    /**
-     * Throws the specified <em>errno</em> and <em>message</em> as an <tt>IOException</tt>.
-     * @param errno The system <tt>errno</tt>.
-     * @param message The error message.
-     * @see #throwAsIOException()
-     */
-    public static void throwAsIOException(int errno, String message) throws IOException {
-        throw new IOException(new StringBuilder(message).append(" - ").append(toString(errno)).append('(').append(errno).append(')').toString());
-    }
-
-    /**
-     * Returns a string that describes the passed in the argument <em>errno</em>.
-     * @param errno The system <tt>errno</tt>.
-     * @return The error string of the system <tt>errno</tt>.
-     */
-    public static native String toString(int errno);
 }

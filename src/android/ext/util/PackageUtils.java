@@ -24,20 +24,20 @@ import android.util.Printer;
  */
 public final class PackageUtils {
     /**
-     * Equivalent to calling <tt>parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY)</tt>.
+     * Equivalent to calling <tt>parsePackage(context, archiveFile, 0, PackageArchiveInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
-     * @param sourceFile The path to the archive file, must be absolute file path.
+     * @param archiveFile The path to the archive file, must be absolute file path.
      * @return A {@link PackageArchiveInfo} object if the parse succeeded, <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String, int, Factory)
      */
-    public static PackageArchiveInfo parsePackage(Context context, String sourceFile) {
-        return parsePackage(context, sourceFile, 0, PackageArchiveInfo.FACTORY);
+    public static PackageArchiveInfo parsePackage(Context context, String archiveFile) {
+        return parsePackage(context, archiveFile, 0, PackageArchiveInfo.FACTORY);
     }
 
     /**
-     * Parses a package archive file with the specified <em>sourceFile</em>.
+     * Parses a package archive file with the specified <em>archiveFile</em>.
      * @param context The <tt>Context</tt>.
-     * @param sourceFile The path to the archive file, must be absolute file path.
+     * @param archiveFile The path to the archive file, must be absolute file path.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination of
      * <tt>PackageManager.GET_XXX</tt> constants.
      * @param factory The {@link Factory} to create the {@link PackageArchiveInfo} or
@@ -46,15 +46,15 @@ public final class PackageUtils {
      * <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String)
      */
-    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String sourceFile, int flags, Factory<T> factory) {
+    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String archiveFile, int flags, Factory<T> factory) {
         // Retrieve the package information from the package archive file.
         DebugUtils.__checkError(factory == null, "factory == null");
-        final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(sourceFile, flags);
+        final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(archiveFile, flags);
         if (packageInfo != null) {
-            final Resources res = createResources(context, sourceFile);
+            final Resources res = createResources(context, archiveFile);
             try {
                 // Creates a PackageArchiveInfo or subclass object.
-                packageInfo.applicationInfo.sourceDir = sourceFile;
+                packageInfo.applicationInfo.sourceDir = archiveFile;
                 final T result = factory.newInstance();
                 result.initialize(context, res, packageInfo);
                 return result;
@@ -205,7 +205,7 @@ public final class PackageUtils {
                 .append(" { package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", label = ").append(label)
-                .append(", sourceFile = ").append(packageInfo.applicationInfo.sourceDir);
+                .append(", archiveFile = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
         public static final Factory<PackageArchiveInfo> FACTORY = new Factory<PackageArchiveInfo>() {

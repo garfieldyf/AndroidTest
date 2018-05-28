@@ -163,14 +163,11 @@ public abstract class Loader implements Factory<Task> {
      * Stops all running tasks.
      */
     private void cancelAllTasks() {
-        final int size = mRunningTasks.size();
-        if (size > 0) {
-            for (int i = 0; i < size; ++i) {
-                mRunningTasks.valueAt(i).cancel(false);
-            }
-
-            mRunningTasks.clear();
+        for (int i = mRunningTasks.size() - 1; i >= 0; --i) {
+            mRunningTasks.valueAt(i).cancel(false);
         }
+
+        mRunningTasks.clear();
     }
 
     /**

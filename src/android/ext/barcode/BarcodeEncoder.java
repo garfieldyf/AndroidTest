@@ -382,8 +382,7 @@ public class BarcodeEncoder {
          * @see #margins(int, int, int, int)
          */
         public final BarcodeBuilder margins(Resources res, int id) {
-            leftMargin = topMargin = rightMargin = bottomMargin = res.getDimensionPixelOffset(id);
-            return this;
+            return margins(res.getDimensionPixelOffset(id));
         }
 
         /**

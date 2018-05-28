@@ -10,7 +10,7 @@
     <property name="java.target" value="1.7" />
     <property name="version.major" value="1" />
     <property name="version.minor" value="0" />
-    <property name="external.jar.dir" value="E:\Include\android" />
+    <property name="library.jars.dir" value="E:\Include\android" />
 
     <!-- app version code 10 -->
     <condition property="versionCode" value="${version.major}${version.minor}"
@@ -49,7 +49,7 @@
     <target name="-pre-compile">
         <path id="barcode.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${external.jar.dir}\zxing\release\zxing.jar" />
+            <pathelement location="${library.jars.dir}\zxing\release\zxing.jar" />
         </path>
 
         <path id="support.v4.jar.path">
@@ -59,12 +59,12 @@
 
         <path id="recyclerview.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${external.jar.dir}\recyclerview\release\recyclerview-v7.jar" />
+            <pathelement location="${library.jars.dir}\recyclerview\release\recyclerview-v7.jar" />
         </path>
 
         <path id="android.sdk.internal.jar.path">
             <path path="${toString:project.target.class.path}" />
-            <pathelement location="${external.jar.dir}\internal\android-sdk-internal.jar" />
+            <pathelement location="${library.jars.dir}\internal\android-sdk-internal.jar" />
         </path>
 
         <path id="project.all.jars.path">

@@ -175,38 +175,29 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
             return this;
         }
 
-        final Object result;
         switch ((Integer)params[0]) {
         case MESSAGE_QUERY:
         case MESSAGE_RAWQUERY:
-            result = execQuery(db, params);
-            break;
+            return execQuery(db, params);
 
         case MESSAGE_INSERT:
-            result = db.insert((String)params[1], (String)params[2], (ContentValues)params[3]);
-            break;
+            return db.insert((String)params[1], (String)params[2], (ContentValues)params[3]);
 
         case MESSAGE_UPDATE:
-            result = db.update((String)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
-            break;
+            return db.update((String)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
 
         case MESSAGE_DELETE:
-            result = db.delete((String)params[1], (String)params[2], (String[])params[3]);
-            break;
+            return db.delete((String)params[1], (String)params[2], (String[])params[3]);
 
         case MESSAGE_REPLACE:
-            result = db.replace((String)params[1], (String)params[2], (ContentValues)params[3]);
-            break;
+            return db.replace((String)params[1], (String)params[2], (ContentValues)params[3]);
 
         case MESSAGE_EXECUTE:
-            result = onExecute(db, token, (Object[])params[1]);
-            break;
+            return onExecute(db, token, (Object[])params[1]);
 
         default:
             throw new IllegalStateException("Unknown message: " + params[0]);
         }
-
-        return result;
     }
 
     @Override

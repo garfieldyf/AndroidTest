@@ -2,6 +2,7 @@ package android.ext.database;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import android.content.ContentProviderClient;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -177,42 +178,21 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
     @Override
     protected Object loadInBackground(Task<?, ?> task, Integer token, Object[] params) {
         final ContentResolver resolver = mContext.getContentResolver();
-        final Object result;
-        switch ((Integer)params[0]) {
-        case MESSAGE_CALL:
-            result = resolver.call((Uri)params[1], (String)params[2], (String)params[3], (Bundle)params[4]);
-            break;
-
-        case MESSAGE_BATCH:
-            result = applyBatch(resolver, params);
-            break;
-
-        case MESSAGE_QUERY:
-            result = execQuery(resolver, params);
-            break;
-
-        case MESSAGE_INSERT:
-            result = resolver.insert((Uri)params[1], (ContentValues)params[2]);
-            break;
-
-        case MESSAGE_UPDATE:
-            result = resolver.update((Uri)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
-            break;
-
-        case MESSAGE_DELETE:
-            result = resolver.delete((Uri)params[1], (String)params[2], (String[])params[3]);
-            break;
-
-        case MESSAGE_INSERTS:
-            result = resolver.bulkInsert((Uri)params[1], (ContentValues[])params[2]);
-            break;
-
-        case MESSAGE_EXECUTE:
-            result = onExecute(resolver, token, (Object[])params[1]);
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown message: " + params[0]);
+        Object result = null;
+        if ((Integer)params[0] == MESSAGE_EXECUTE) {
+            result = onExecute(resolver, token, params);
+        } else {
+            final Uri uri = (Uri)params[1];
+            final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(uri);
+            if (client != null) {
+                try {
+                    result = onExecute(client, uri, token, params);
+                } catch (Exception e) {
+                    throw new RuntimeException(new StringBuilder("Couldn't execute from - ").append(uri).toString(), e);
+                } finally {
+                    client.release();
+                }
+            }
         }
 
         return result;
@@ -357,28 +337,48 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
     protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
     }
 
-    private Cursor execQuery(ContentResolver resolver, Object[] params) {
+    @SuppressWarnings("unchecked")
+    private Object onExecute(ContentProviderClient client, Uri uri, int token, Object[] params) throws Exception {
+        switch ((Integer)params[0]) {
+        case MESSAGE_CALL:
+            return client.call((String)params[2], (String)params[3], (Bundle)params[4]);
+
+        case MESSAGE_BATCH:
+            return client.applyBatch((ArrayList<ContentProviderOperation>)params[2]);
+
+        case MESSAGE_QUERY:
+            return execQuery(client, uri, params);
+
+        case MESSAGE_INSERT:
+            return client.insert(uri, (ContentValues)params[2]);
+
+        case MESSAGE_UPDATE:
+            return client.update(uri, (ContentValues)params[2], (String)params[3], (String[])params[4]);
+
+        case MESSAGE_DELETE:
+            return client.delete(uri, (String)params[2], (String[])params[3]);
+
+        case MESSAGE_INSERTS:
+            return client.bulkInsert(uri, (ContentValues[])params[2]);
+
+        default:
+            throw new IllegalStateException("Unknown message: " + params[0]);
+        }
+    }
+
+    private Cursor execQuery(ContentProviderClient client, Uri uri, Object[] params) {
         Cursor cursor = null;
         try {
-            cursor = resolver.query((Uri)params[1], (String[])params[2], (String)params[3], (String[])params[4], (String)params[5]);
+            cursor = client.query(uri, (String[])params[2], (String)params[3], (String[])params[4], (String)params[5]);
             if (cursor != null) {
                 // Calling getCount() causes the cursor window to be filled, which
                 // will make the first access on the main thread a lot faster.
                 cursor.getCount();
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't query - ").append(params[2]).toString(), e);
+            Log.e(getClass().getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
         }
 
         return cursor;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static ContentProviderResult[] applyBatch(ContentResolver resolver, Object[] params) {
-        try {
-            return resolver.applyBatch((String)params[1], (ArrayList<ContentProviderOperation>)params[2]);
-        } catch (Exception e) {
-            throw new RuntimeException(new StringBuilder("Couldn't apply batch, authority - ").append(params[1]).toString(), e);
-        }
     }
 }

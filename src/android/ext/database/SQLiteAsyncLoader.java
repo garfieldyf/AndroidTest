@@ -175,10 +175,11 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
             return this;
         }
 
-        switch ((Integer)params[0]) {
+        final int message = (Integer)params[0];
+        switch (message) {
         case MESSAGE_QUERY:
         case MESSAGE_RAWQUERY:
-            return execQuery(db, params);
+            return execQuery(db, message, params);
 
         case MESSAGE_INSERT:
             return db.insert((String)params[1], (String)params[2], (ContentValues)params[3]);
@@ -196,7 +197,7 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
             return onExecute(db, token, (Object[])params[1]);
 
         default:
-            throw new IllegalStateException("Unknown message: " + params[0]);
+            throw new IllegalStateException("Unknown message: " + message);
         }
     }
 
@@ -322,10 +323,10 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
     protected void onDeleteComplete(int token, int rowsAffected) {
     }
 
-    private Cursor execQuery(SQLiteDatabase db, Object[] params) {
+    private Cursor execQuery(SQLiteDatabase db, int message, Object[] params) {
         Cursor cursor = null;
         try {
-            if ((Integer)params[0] == MESSAGE_RAWQUERY) {
+            if (message == MESSAGE_RAWQUERY) {
                 cursor = db.rawQuery((String)params[1], (String[])params[2]);
             } else {
                 cursor = db.query((String)params[1], (String[])params[2], (String)params[3], (String[])params[4], null, null, (String)params[5], (String)params[6]);

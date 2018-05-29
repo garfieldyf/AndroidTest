@@ -178,16 +178,19 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
     @Override
     protected Object loadInBackground(Task<?, ?> task, Integer token, Object[] params) {
         final ContentResolver resolver = mContext.getContentResolver();
+        final int message = (Integer)params[0];
+
         Object result = null;
-        if ((Integer)params[0] == MESSAGE_EXECUTE) {
+        if (message == MESSAGE_EXECUTE) {
             result = onExecute(resolver, token, params);
         } else {
-            final ContentProviderClient client = resolver.acquireUnstableContentProviderClient((Uri)params[1]);
+            final Uri uri = (Uri)params[1];
+            final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(uri);
             if (client != null) {
                 try {
-                    result = onExecute(client, token, params);
+                    result = onExecute(client, message, uri, params);
                 } catch (Exception e) {
-                    throw new RuntimeException(new StringBuilder("Couldn't execute from - ").append(params[1]).toString(), e);
+                    throw new RuntimeException(new StringBuilder("Couldn't execute from - ").append(uri).toString(), e);
                 } finally {
                     client.release();
                 }
@@ -337,8 +340,8 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
     }
 
     @SuppressWarnings("unchecked")
-    private Object onExecute(ContentProviderClient client, int token, Object[] params) throws Exception {
-        switch ((Integer)params[0]) {
+    private Object onExecute(ContentProviderClient client, int message, Uri uri, Object[] params) throws Exception {
+        switch (message) {
         case MESSAGE_CALL:
             return client.call((String)params[2], (String)params[3], (Bundle)params[4]);
 
@@ -346,22 +349,22 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
             return client.applyBatch((ArrayList<ContentProviderOperation>)params[2]);
 
         case MESSAGE_QUERY:
-            return execQuery(client, (Uri)params[1], params);
+            return execQuery(client, uri, params);
 
         case MESSAGE_INSERT:
-            return client.insert((Uri)params[1], (ContentValues)params[2]);
+            return client.insert(uri, (ContentValues)params[2]);
 
         case MESSAGE_UPDATE:
-            return client.update((Uri)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
+            return client.update(uri, (ContentValues)params[2], (String)params[3], (String[])params[4]);
 
         case MESSAGE_DELETE:
-            return client.delete((Uri)params[1], (String)params[2], (String[])params[3]);
+            return client.delete(uri, (String)params[2], (String[])params[3]);
 
         case MESSAGE_INSERTS:
-            return client.bulkInsert((Uri)params[1], (ContentValues[])params[2]);
+            return client.bulkInsert(uri, (ContentValues[])params[2]);
 
         default:
-            throw new IllegalStateException("Unknown message: " + params[0]);
+            throw new IllegalStateException("Unknown message: " + message);
         }
     }
 

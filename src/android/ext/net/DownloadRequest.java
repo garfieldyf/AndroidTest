@@ -1,5 +1,7 @@
 package android.ext.net;
 
+import static java.net.HttpURLConnection.HTTP_OK;
+import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,6 +142,28 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Range", "bytes=<em>value</em>")</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     * @see #range(int)
+     */
+    public final DownloadRequest range(String value) {
+        connection.setRequestProperty("Range", "bytes=" + value);
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("Range", "bytes=<em>offset</em>-")</tt>.
+     * @param offset The start byte of the range.
+     * @return This request.
+     * @see #range(String)
+     */
+    public final DownloadRequest range(int offset) {
+        connection.setRequestProperty("Range", "bytes=" + offset + "-");
+        return this;
+    }
+
+    /**
      * Equivalent to calling <tt>requestHeader("Content-Type", value)</tt>.
      * @param value The value of the field.
      * @return This request.
@@ -189,11 +213,10 @@ public class DownloadRequest {
     }
 
     /**
-     * Connects to the remote server with the arguments supplied to this
-     * request. <p>Note: This method will not download any resources.</p>
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array
-     * to use for post.
-     * @return The response code returned by the remote server.
+     * Connects to the remote server with the arguments supplied to this request. <p>Note: This method
+     * will not download any resources.</p>
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      */
     public final int connect(byte[] tempBuffer) throws IOException {
         try {
@@ -216,7 +239,7 @@ public class DownloadRequest {
      */
     public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
         try {
-            return (connectImpl(null) == HttpURLConnection.HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connectImpl(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -229,18 +252,27 @@ public class DownloadRequest {
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
      * none. If the download was cancelled before it completed normally then the file's contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
-     * @return The response code returned by the remote server.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download(Cancelable)
      * @see #download(OutputStream, Cancelable, byte[])
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(filename);
         try {
-            return download(os, cancelable, tempBuffer);
+            final int statusCode = connectImpl(tempBuffer);
+            switch (statusCode) {
+            case HTTP_OK:
+                downloadImpl(filename, cancelable, tempBuffer, false);
+                break;
+
+            case HTTP_PARTIAL:
+                downloadImpl(filename, cancelable, tempBuffer, true);
+                break;
+            }
+
+            return statusCode;
         } finally {
-            os.close();
+            disconnect();
         }
     }
 
@@ -250,7 +282,7 @@ public class DownloadRequest {
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
      * If the download was cancelled before it completed normally then the <em>out's</em> contents undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
-     * @return The response code returned by the remote server.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
@@ -258,7 +290,7 @@ public class DownloadRequest {
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
             final int statusCode = connectImpl(tempBuffer);
-            if (statusCode == HttpURLConnection.HTTP_OK) {
+            if (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL) {
                 downloadImpl(out, cancelable, tempBuffer);
             }
 
@@ -275,7 +307,7 @@ public class DownloadRequest {
         __checkHeaders(true);
         connection.connect();
         __checkHeaders(false);
-        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HttpURLConnection.HTTP_OK);
+        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HTTP_OK);
     }
 
     /**
@@ -309,6 +341,19 @@ public class DownloadRequest {
             out.flush();
         } finally {
             is.close();
+        }
+    }
+
+    /**
+     * Downloads the file from the remote server with the arguments supplied to this request.
+     */
+    /* package */ final void downloadImpl(String filename, Cancelable cancelable, byte[] tempBuffer, boolean append) throws IOException {
+        FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(filename, append);
+        try {
+            downloadImpl(os, cancelable, tempBuffer);
+        } finally {
+            os.close();
         }
     }
 

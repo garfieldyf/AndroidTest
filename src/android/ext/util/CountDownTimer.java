@@ -1,7 +1,7 @@
 package android.ext.util;
 
 import android.os.Handler;
-import android.os.SystemClock;
+import android.os.Looper;
 
 /**
  * Class CountDownTimer
@@ -9,34 +9,34 @@ import android.os.SystemClock;
  * @version 1.0
  */
 public abstract class CountDownTimer implements Runnable {
-    private long mCountDownTime;
+    private int mCountDown;
     private final Handler mHandler;
+    private final int mCountDownTime;
     private final long mIntervalMillis;
-    private final long mCountDownMillis;
 
     /**
      * Constructor
-     * @param countDownMillis The number of millis in the future from the call
-     * to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
-     * @param intervalMillis The interval millis to receive {@link #onTick(long)} callback.
-     * @see #CountDownTimer(long, long, Handler)
+     * @param countDownTime The number of times in the future from the call to {@link #start()}
+     * until the countdown is done and {@link #onFinish()} is called.
+     * @param intervalMillis The interval millis to receive {@link #onTick(int)} callback.
+     * @see #CountDownTimer(int, long, Handler)
      */
-    public CountDownTimer(long countDownMillis, long intervalMillis) {
-        this(countDownMillis, intervalMillis, null);
+    public CountDownTimer(int countDownTime, long intervalMillis) {
+        this(countDownTime, intervalMillis, null);
     }
 
     /**
      * Constructor
-     * @param countDownMillis The number of millis in the future from the call
-     * to {@link #start()} until the countdown is done and {@link #onFinish()} is called.
-     * @param intervalMillis The interval millis to receive {@link #onTick(long)} callback.
-     * @param handler The Handler to run {@link #onTick(long)} on, or <tt>null</tt> to run
-     * on UI thread.
-     * @see #CountDownTimer(long, long)
+     * @param countDownTime The number of times in the future from the call to {@link #start()} until
+     * the countdown is done and {@link #onFinish()} is called.
+     * @param intervalMillis The interval millis to receive {@link #onTick(int)} callback.
+     * @param handler The Handler to run {@link #onTick(int)} on, or <tt>null</tt> to run on UI thread.
+     * @see #CountDownTimer(int, long)
      */
-    public CountDownTimer(long countDownMillis, long intervalMillis, Handler handler) {
-        mIntervalMillis  = intervalMillis;
-        mCountDownMillis = countDownMillis;
+    public CountDownTimer(int countDownTime, long intervalMillis, Handler handler) {
+        DebugUtils.__checkError(countDownTime < 0 || intervalMillis < 0, "countDownTime < 0 || intervalMillis < 0");
+        mCountDownTime  = countDownTime;
+        mIntervalMillis = intervalMillis;
         mHandler = (handler == null ? UIHandler.sInstance : handler);
     }
 
@@ -46,11 +46,13 @@ public abstract class CountDownTimer implements Runnable {
      * @see #cancel()
      */
     public final CountDownTimer start() {
-        if (mCountDownMillis > 0) {
-            mCountDownTime = SystemClock.elapsedRealtime() + mCountDownMillis;
+        mCountDown = mCountDownTime;
+        if (Looper.myLooper() == mHandler.getLooper()) {
+            run();
+        } else {
+            mHandler.post(this);
         }
 
-        mHandler.post(this);
         return this;
     }
 
@@ -64,31 +66,17 @@ public abstract class CountDownTimer implements Runnable {
 
     @Override
     public void run() {
-        final long remainingMillis = mCountDownTime - SystemClock.elapsedRealtime();
-        if (remainingMillis <= 0) {
+        if (mCountDown == 0) {
             onFinish();
-        } else if (mIntervalMillis <= 0 || remainingMillis < mIntervalMillis) {
-            // No tick, just delay until done.
-            mHandler.postDelayed(this, remainingMillis);
-        } else {
-            // Take into account user's onTick taking time to execute
-            final long lastTickTime = SystemClock.elapsedRealtime();
-            onTick(remainingMillis);
-
-            // Special case: user's onTick took more than interval
-            // to complete, skip to next interval.
-            long delayMillis = lastTickTime + mIntervalMillis - SystemClock.elapsedRealtime();
-            while (delayMillis < 0) {
-                delayMillis += mIntervalMillis;
-            }
-
-            mHandler.postDelayed(this, delayMillis);
+        } else if (mCountDown > 0) {
+            onTick(mCountDown--);
+            mHandler.postDelayed(this, mIntervalMillis);
         }
     }
 
     /**
      * Runs on the UI thread when the time is up.
-     * @see #onTick(long)
+     * @see #onTick(int)
      */
     protected abstract void onFinish();
 
@@ -96,9 +84,9 @@ public abstract class CountDownTimer implements Runnable {
      * Runs on the UI thread to fired on regular interval. <p>The
      * default implementation do nothing. If you write your own
      * implementation, do not call <tt>super.onTick()</tt>.</p>
-     * @param remainingMillis The amount of time until finished.
+     * @param countDown The countdown until finished.
      * @see #onFinish()
      */
-    protected void onTick(long remainingMillis) {
+    protected void onTick(int countDown) {
     }
 }

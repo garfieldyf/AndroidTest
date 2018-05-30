@@ -19,14 +19,13 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
-import android.widget.ImageView;
 
 /**
  * Class ImageModule
  * @author Garfield
  * @version 2.0
  */
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Object, Object, Bitmap> {
+public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     protected final Context mContext;
     protected final Executor mExecutor;
     protected final FileCache mFileCache;
@@ -133,16 +132,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
-    }
-
-    @Override
-    public void bindValue(Object uri, Object[] params, Object target, Bitmap value, int state) {
-        final ImageView view = (ImageView)target;
-        if (value != null) {
-            view.setImageBitmap(value);
-        } else {
-            view.setImageDrawable(null);
-        }
     }
 
     /**
@@ -304,7 +293,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Binder<Obje
             } else if (mBinder instanceof Integer) {
                 binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
             } else {
-                binder = (Binder)mModule;
+                binder = ImageLoader.defaultBinder();
             }
 
             // Creates the image loader.

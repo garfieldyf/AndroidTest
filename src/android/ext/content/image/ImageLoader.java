@@ -19,10 +19,12 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Printer;
+import android.widget.ImageView;
 
 /**
  * Class <tt>ImageLoader</tt> allows to load the image from the URI
@@ -60,7 +62,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(sFactory, computeMaximumPoolSize(executor)));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(DefaultBinder.sInstance, computeMaximumPoolSize(executor)));
         ImageBinder.__checkBinder(getClass(), imageCache, binder);
     }
 
@@ -147,6 +149,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
+    }
+
+    /**
+     * Returns the default {@link Binder} associated with this class.
+     * The default binder has no default image, no drawable cache and
+     * can only bind the {@link Bitmap} to {@link ImageView}.
+     */
+    @SuppressWarnings("unchecked")
+    public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
+        return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
     }
 
     @Override
@@ -281,20 +293,32 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * The byte array factory.
-     */
-    private static final Factory<byte[]> sFactory = new Factory<byte[]>() {
-        @Override
-        public byte[] newInstance() {
-            return new byte[16384];
-        }
-    };
-
-    /**
      * Class <tt>DefaultParameters</tt> (The default parameters sample size = 1, config = RGB_565).
      */
     private static final class DefaultParameters {
         public static final Parameters sInstance = new Parameters(1, Config.RGB_565);
+    }
+
+    /**
+     * Class <tt>DefaultBinder</tt> used to bind the <tt>Bitmap</tt> to <tt>ImageView</tt>.
+     */
+    private static final class DefaultBinder implements Binder<Object, Object, Bitmap>, Factory<byte[]> {
+        public static final DefaultBinder sInstance = new DefaultBinder();
+
+        @Override
+        public byte[] newInstance() {
+            return new byte[16384];
+        }
+
+        @Override
+        public void bindValue(Object key, Object[] params, Object target, Bitmap value, int state) {
+            final ImageView view = (ImageView)target;
+            if (value != null) {
+                view.setImageBitmap(value);
+            } else {
+                view.setImageDrawable(null);
+            }
+        }
     }
 
     /**

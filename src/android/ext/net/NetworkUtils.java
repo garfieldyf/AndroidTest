@@ -46,13 +46,13 @@ public final class NetworkUtils {
      * Returns the mac address from the network interface.
      * @param ifname The network interface name. Pass {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
-     * @return The mac address or <tt>defaultAddress</tt>.
+     * @return The mac address or <tt>fallback</tt>.
      */
-    public static String getMacAddress(String ifname, String defaultAddress) {
+    public static String getMacAddress(String ifname, String fallback) {
         try {
             return DeviceUtils.readDeviceFile("/sys/class/net/" + ifname + "/address", 24);
         } catch (Exception e) {
-            return defaultAddress;
+            return fallback;
         }
     }
 

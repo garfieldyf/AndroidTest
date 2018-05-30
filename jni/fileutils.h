@@ -10,8 +10,11 @@
 #define __FILEUTILS_H__
 
 #ifdef __NDK_STLP__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <list>
 #include <string>
+#pragma GCC diagnostic pop
 #endif
 
 #include "fileutil.h"
@@ -114,7 +117,10 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     jint errnum = 0;
     do
     {
-        const std::string& dirPath = dirPaths.front();
+        // Retrieves the dirPath from the dirPaths front.
+        const std::string dirPath = dirPaths.front();
+        dirPaths.pop_front();
+
         __NS::Directory<> dir(filter);
         if ((errnum = dir.open(dirPath.c_str())) == 0)
         {
@@ -133,14 +139,11 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                 } else if (result == SC_BREAK) {
                     continue;
                 } else if (entry->d_type == DT_DIR && ::access(filePath, F_OK) == 0) {
-                    // If filePath is a directory adds it to dirPaths.
+                    // If filePath is a directory adds it to dirPaths back.
                     dirPaths.push_back(filePath);
                 }
             }
         }
-
-        // Removes the dirPath from the dirPaths.
-        dirPaths.pop_front();
     } while (errnum == 0 && dirPaths.size() > 0);
 
     return errnum;

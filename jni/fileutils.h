@@ -10,8 +10,11 @@
 #define __FILEUTILS_H__
 
 #ifdef __NDK_STLP__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <list>
 #include <string>
+#pragma GCC diagnostic pop
 #endif
 
 #include "fileutil.h"

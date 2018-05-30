@@ -30,14 +30,14 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
 
     /**
      * Constructor
-     * <P>Creates a new <tt>ThreadPool</tt> to execute the given task. At any point, at most
+     * <p>Creates a new <tt>ThreadPool</tt> to execute the given task. At any point, at most
      * <em>maxThreads</em> threads will be active processing tasks. If additional tasks are
      * submitted when all threads are active, they will wait in the queue until a thread is
-     * available.</P>
-     * <P>Calls to <em>execute</em> will reuse previously constructed threads if available.
+     * available.</p>
+     * <p>Calls to <em>execute</em> will reuse previously constructed threads if available.
      * If no existing thread is available, a new thread will be created and added to this pool.
      * Threads that have not been used for <em>60</em> seconds are terminated and removed from
-     * the cache.</P>
+     * the cache.</p>
      * @param coreThreads The number of threads to keep in this pool, even if they are idle.
      * @param maxThreads The maximum number of threads to allow in this pool.
      * @see #ThreadPool(int, int, long, TimeUnit)
@@ -49,8 +49,8 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
 
     /**
      * Constructor
-     * <P>Like as {@link #ThreadPool(int, int)}, but the threads will wait <em>keepAliveTime</em>
-     * for new tasks before terminating in this pool.</P>
+     * <p>Like as {@link #ThreadPool(int, int)}, but the threads will wait <em>keepAliveTime</em>
+     * for new tasks before terminating in this pool.</p>
      * @param coreThreads The number of threads to keep in this pool, even if they are idle.
      * @param maxThreads The maximum number of threads to allow in this pool.
      * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks before terminating.

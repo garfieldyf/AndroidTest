@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
+import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
@@ -288,7 +289,7 @@ public final class DeviceUtils {
                     out.append("\n  ");
                 }
 
-                out.append(getDescription(context, volume))
+                out.append(getUserLabel(context, volume))
                    .append(" [ path = ").append(path)
                    .append(", primary = ").append(volume.isPrimary())
                    .append(", state = ").append(getState(volume))
@@ -309,9 +310,16 @@ public final class DeviceUtils {
         return (state != null ? state : "unknown");
     }
 
-    private static String getDescription(Context context, StorageVolume volume) {
-        final String description = volume.getDescription(context);
-        return (description != null ? description : "unknown");
+    private static String getUserLabel(Context context, StorageVolume volume) {
+        String userLabel = volume.getUserLabel();
+        if (TextUtils.isEmpty(userLabel)) {
+            userLabel = volume.getDescription(context);
+            if (TextUtils.isEmpty(userLabel)) {
+                userLabel = "storage_" + volume.getStorageId();
+            }
+        }
+
+        return userLabel;
     }
 
     private static int readCpuFrequency(int coreIndex, String filename) {

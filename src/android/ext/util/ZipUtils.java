@@ -27,14 +27,17 @@ public final class ZipUtils {
      * Compresses the data from the {@link InputStream} to {@link OutputStream}.
      * @param is The <tt>InputStream</tt> to read data.
      * @param out The <tt>OutputStream</tt> to write the compressed data.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * then the <em>out's</em> contents undefined.
      * @throws IOException if an error occurs while compressing data.
      * @see #compress(byte[], int, int, OutputStream)
-     * @see #uncompress(InputStream, OutputStream)
+     * @see #uncompress(InputStream, OutputStream, Cancelable)
      */
-    public static void compress(InputStream is, OutputStream out) throws IOException {
+    public static void compress(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
         final GZIPOutputStream gzip = new GZIPOutputStream(out);
         try {
-            FileUtils.copyStream(is, gzip, null, null);
+            FileUtils.copyStream(is, gzip, cancelable, null);
             gzip.finish();
         } finally {
             gzip.close();
@@ -48,8 +51,8 @@ public final class ZipUtils {
      * @param count The number of bytes from <em>data</em> to compress.
      * @param out The <tt>OutputStream</tt> to write the compressed data.
      * @throws IOException if an error occurs while compressing data.
-     * @see #compress(InputStream, OutputStream)
-     * @see #uncompress(InputStream, OutputStream)
+     * @see #compress(InputStream, OutputStream, Cancelable)
+     * @see #uncompress(InputStream, OutputStream, Cancelable)
      */
     public static void compress(byte[] data, int offset, int count, OutputStream out) throws IOException {
         final GZIPOutputStream gzip = new GZIPOutputStream(out);
@@ -65,14 +68,17 @@ public final class ZipUtils {
      * Uncompresses the GZIP data from the {@link InputStream} to {@link OutputStream}.
      * @param is The <tt>InputStream</tt> to read data.
      * @param out The <tt>OutputStream</tt> to write the uncompressed data.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * then the <em>out's</em> contents undefined.
      * @throws IOException if an error occurs while compressing data.
      * @see #compress(byte[], int, int, OutputStream)
-     * @see #compress(InputStream, OutputStream)
+     * @see #compress(InputStream, OutputStream, Cancelable)
      */
-    public static void uncompress(InputStream is, OutputStream out) throws IOException {
+    public static void uncompress(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
         final GZIPInputStream gzip = new GZIPInputStream(is);
         try {
-            FileUtils.copyStream(gzip, out, null, null);
+            FileUtils.copyStream(gzip, out, cancelable, null);
         } finally {
             gzip.close();
         }
@@ -83,13 +89,16 @@ public final class ZipUtils {
      * @param zipFile The ZIP filename.
      * @param compressionLevel The compression level to be used for writing entry data.
      * See {@link ZipOutputStream#setLevel(int)}.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * then the <em>zipFile's</em> contents undefined.
      * @param files An array of filenames to compress, must be absolute file path.
      * @throws IOException if an error occurs while compressing <em>files</em> contents.
-     * @see #compress(String, int, List)
-     * @see #uncompress(String, String)
+     * @see #compress(String, int, List, Cancelable)
+     * @see #uncompress(String, String, Cancelable)
      */
-    public static void compress(String zipFile, int compressionLevel, String... files) throws IOException {
-        compress(zipFile, compressionLevel, Arrays.asList(files));
+    public static void compress(String zipFile, int compressionLevel, Cancelable cancelable, String... files) throws IOException {
+        compress(zipFile, compressionLevel, Arrays.asList(files), cancelable);
     }
 
     /**
@@ -98,11 +107,14 @@ public final class ZipUtils {
      * @param compressionLevel The compression level to be used for writing entry data.
      * See {@link ZipOutputStream#setLevel(int)}.
      * @param files A <tt>List</tt> of filenames to compress, must be absolute file path.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * then the <em>zipFile's</em> contents undefined.
      * @throws IOException if an error occurs while compressing <em>files</em> contents.
-     * @see #compress(String, int, String[])
-     * @see #uncompress(String, String)
+     * @see #compress(String, int, Cancelable, String[])
+     * @see #uncompress(String, String, Cancelable)
      */
-    public static void compress(String zipFile, int compressionLevel, List<String> files) throws IOException {
+    public static void compress(String zipFile, int compressionLevel, List<String> files, Cancelable cancelable) throws IOException {
         // Creates the necessary directories.
         DebugUtils.__checkError(ArrayUtils.getSize(files) == 0, "Invalid parameter - The files is null or 0-size");
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
@@ -116,7 +128,7 @@ public final class ZipUtils {
             final Dirent dirent = new Dirent();
             for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
                 dirent.setPath(files.get(i));
-                compress(os, dirent, dirent.getName());
+                compress(os, dirent, dirent.getName(), cancelable);
             }
         } finally {
             os.close();
@@ -124,15 +136,17 @@ public final class ZipUtils {
     }
 
     /**
-     * Uncompresses the ZIP file. <p>Note that this method creates the necessary
-     * directories.</p>
+     * Uncompresses the ZIP file. <p>Note that this method creates the necessary directories.</p>
      * @param zipFile The ZIP filename to uncompress.
      * @param outPath The uncompressed path, must be absolute path.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt>
+     * if none. If the operation was cancelled before it completed normally then the uncompressed files
+     * in <em>outPath</em> undefined.
      * @throws IOException if an error occurs while uncompressing ZIP file.
-     * @see #compress(String, int, List)
-     * @see #compress(String, int, String[])
+     * @see #compress(String, int, List, Cancelable)
+     * @see #compress(String, int, Cancelable, String[])
      */
-    public static void uncompress(String zipFile, String outPath) throws IOException {
+    public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
         final ZipFile file = new ZipFile(zipFile);
         try {
             // Creates the necessary directories.
@@ -149,7 +163,7 @@ public final class ZipUtils {
                 if (entry.isDirectory()) {
                     FileUtils.mkdirs(pathName, 0);
                 } else {
-                    uncompress(file, entry, pathName, crc);
+                    uncompress(file, entry, pathName, crc, cancelable);
                 }
             }
         } finally {
@@ -157,7 +171,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void compress(ZipOutputStream os, Dirent dirent, String name) throws IOException {
+    private static void compress(ZipOutputStream os, Dirent dirent, String name, Cancelable cancelable) throws IOException {
         if (dirent.isDirectory()) {
             // Adds the directory ZipEntry.
             name += '/';
@@ -167,7 +181,7 @@ public final class ZipUtils {
             final List<Dirent> dirents = dirent.listFiles();
             for (int i = 0, size = dirents.size(); i < size; ++i) {
                 final Dirent child = dirents.get(i);
-                compress(os, child, name + child.getName());
+                compress(os, child, name + child.getName(), cancelable);
             }
         } else {
             // Adds the file ZipEntry.
@@ -176,14 +190,14 @@ public final class ZipUtils {
             // Reads the file's contents to ZipOutputStream.
             final InputStream is = new FileInputStream(dirent.path);
             try {
-                FileUtils.copyStream(is, os, null, null);
+                FileUtils.copyStream(is, os, cancelable, null);
             } finally {
                 is.close();
             }
         }
     }
 
-    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, CRC32 crc) throws IOException {
+    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, CRC32 crc, Cancelable cancelable) throws IOException {
         InputStream is  = null;
         OutputStream os = null;
         try {
@@ -194,10 +208,10 @@ public final class ZipUtils {
             final long crcValue = entry.getCrc();
             if (crcValue <= 0) {
                 // Uncompress the ZIP entry.
-                FileUtils.copyStream(is, os, null, null);
+                FileUtils.copyStream(is, os, cancelable, null);
             } else {
                 // Uncompress the ZIP entry with check CRC32.
-                uncompress(is, os, entry, crc, crcValue);
+                uncompress(is, os, entry, crc, crcValue, cancelable);
             }
         } finally {
             FileUtils.close(is);
@@ -205,12 +219,13 @@ public final class ZipUtils {
         }
     }
 
-    private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue) throws IOException {
+    private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue, Cancelable cancelable) throws IOException {
         final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             // Uncompress the ZIP entry with check CRC32.
+            cancelable = DummyCancelable.obtain(cancelable);
             crc.reset();
-            for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0; ) {
+            for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
                 os.write(buffer, 0, readBytes);
                 crc.update(buffer, 0, readBytes);
             }

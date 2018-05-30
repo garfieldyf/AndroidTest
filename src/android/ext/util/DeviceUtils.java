@@ -166,13 +166,11 @@ public final class DeviceUtils {
 
         // Dumps cpu abis, version etc.
         infos.setLength(0);
-        final String wlanAddress = NetworkUtils.getMacAddress(NetworkUtils.WLAN);
-        final String ethAddress  = NetworkUtils.getMacAddress(NetworkUtils.ETHERNET);
         infos.append("  cpu abis = ").append(Arrays.toString(getSupportedABIs()))
              .append("\n  sdk = ").append(Build.VERSION.SDK_INT)
              .append("\n  version = ").append(Build.VERSION.RELEASE)
-             .append("\n  wlan = ").append(wlanAddress != null ? wlanAddress : "N/A")
-             .append("\n  eth  = ").append(ethAddress != null ? ethAddress : "N/A");
+             .append("\n  wlan = ").append(NetworkUtils.getMacAddress(NetworkUtils.WLAN, "N/A"))
+             .append("\n  eth  = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
         printer.println(infos.toString());
 
         // Dumps display infos.

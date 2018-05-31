@@ -78,7 +78,7 @@ public final class Pages {
 
         @Override
         public E getItem(int position) {
-            return (position >= 0 && position < mData.size() ? mData.get(position) : null);
+            return mData.get(position);
         }
 
         @Override

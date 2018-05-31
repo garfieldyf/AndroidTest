@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
-import java.util.concurrent.Executor;
 import java.util.regex.Pattern;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
@@ -27,7 +26,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.database.DatabaseUtils;
 import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Stat;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Debug.MemoryInfo;
 import android.os.Process;
@@ -94,15 +92,6 @@ public final class ProcessUtils {
     public static boolean checkSuperUser() {
         final Stat stat = new Stat();
         return (checkSuperUser("/system/bin/su", stat) || checkSuperUser("/system/xbin/su", stat));
-    }
-
-    /**
-     * Sets the {@link AsyncTask} default {@link Executor}. This
-     * method recommended call in the <tt>Application.onCreate()</tt>
-     * @param exec The default <tt>Executor</tt> to set.
-     */
-    public static void setDefaultExecutor(Executor exec) {
-        AsyncTask.setDefaultExecutor(exec);
     }
 
     /**

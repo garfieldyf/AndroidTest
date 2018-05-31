@@ -137,6 +137,17 @@ public abstract class ExpandableCursorAdapter extends BaseExpandableListAdapter 
     }
 
     @Override
+    public void notifyDataSetChanged() {
+        notifyDataSetChanged(true);
+    }
+
+    @Override
+    public void notifyDataSetInvalidated() {
+        closeChildrenCursorWrapper();
+        super.notifyDataSetInvalidated();
+    }
+
+    @Override
     public int getChildrenCount(int groupPosition) {
         return getChildrenCursorWrapper(groupPosition).getCount();
     }
@@ -280,15 +291,23 @@ public abstract class ExpandableCursorAdapter extends BaseExpandableListAdapter 
                 // Unregister the ContentObserver from old cursor.
                 oldCursor = mCursor;
                 unregisterContentObserver();
-
-                // Register the ContentObserver to new cursor.
                 mCursor = newCursor;
-                registerContentObserver();
 
-                // Notifies the attached observers that the underlying data has been
-                // changed and any View reflecting the data set should refresh itself.
-                mRowIDColumn = (mCursor != null ? mCursor.getColumnIndex(BaseColumns._ID) : -1);
-                notifyDataSetChanged(closeCursors);
+                if (mCursor != null) {
+                    // Register the ContentObserver to new cursor.
+                    if (mObserver != null) {
+                        mObserver.register(mCursor);
+                    }
+
+                    // Notifies the attached observers that the underlying data has been
+                    // changed and any View reflecting the data set should refresh itself.
+                    mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
+                    notifyDataSetChanged(closeCursors);
+                } else {
+                    // Notifies the attached observers that the underlying data is no longer valid.
+                    mRowIDColumn = -1;
+                    notifyDataSetInvalidated();
+                }
             }
 
             return oldCursor;

@@ -138,12 +138,17 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
     }
 
     @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
+    public void notifyDataSetInvalidated() {
+        notifyDataSetChanged();
     }
 
     @Override
     public CharSequence convertToString(T item) {
         return item.toString();
+    }
+
+    @Override
+    public void onContentChanged(boolean selfChange, Uri uri) {
     }
 
     @Override

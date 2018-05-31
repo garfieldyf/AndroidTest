@@ -3,6 +3,7 @@ package android.ext.widget;
 import java.util.Collections;
 import java.util.List;
 import android.content.Context;
+import android.ext.util.ArrayUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.CursorFilterClient;
 import android.ext.widget.Filters.DataSetObserver;
@@ -161,9 +162,13 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      */
     /* package */ final void changeData(List<T> newData, DataSetObserver observer) {
         if (mData != newData) {
-            mData = (newData != null ? newData : Collections.<T>emptyList());
             mFilter = null;
-            observer.notifyDataSetChanged();
+            mData = (newData != null ? newData : Collections.<T>emptyList());
+            if (ArrayUtils.getSize(mData) > 0) {
+                observer.notifyDataSetChanged();
+            } else {
+                observer.notifyDataSetInvalidated();
+            }
         }
     }
 

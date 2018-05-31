@@ -55,7 +55,11 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     public void setCount(int count) {
         if (mImpl.mItemCount != count) {
             mImpl.setItemCount(count);
-            notifyDataSetChanged();
+            if (count > 0) {
+                notifyDataSetChanged();
+            } else {
+                notifyDataSetInvalidated();
+            }
         }
     }
 

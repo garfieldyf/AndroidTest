@@ -218,15 +218,23 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
             // Unregister the ContentObserver from old cursor.
             oldCursor = mCursor;
             unregisterContentObserver();
-
-            // Register the ContentObserver to new cursor.
             mCursor = newCursor;
-            registerContentObserver();
 
-            // Notifies the attached observers that the underlying data has been
-            // changed and any View reflecting the data set should refresh itself.
-            mRowIDColumn = (mCursor != null ? mCursor.getColumnIndex(BaseColumns._ID) : -1);
-            observer.notifyDataSetChanged();
+            if (mCursor != null) {
+                // Register the ContentObserver to new cursor.
+                if (mObserver != null) {
+                    mObserver.register(mCursor);
+                }
+
+                // Notifies the attached observers that the underlying data has been
+                // changed and any View reflecting the data set should refresh itself.
+                mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
+                observer.notifyDataSetChanged();
+            } else {
+                // Notifies the attached observers that the underlying data is no longer valid.
+                mRowIDColumn = -1;
+                observer.notifyDataSetInvalidated();
+            }
         }
 
         return oldCursor;

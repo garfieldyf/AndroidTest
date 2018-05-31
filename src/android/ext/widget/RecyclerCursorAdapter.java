@@ -135,6 +135,11 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
     }
 
     @Override
+    public void notifyDataSetInvalidated() {
+        notifyDataSetChanged();
+    }
+
+    @Override
     public CharSequence convertToString(Cursor cursor) {
         return null;
     }

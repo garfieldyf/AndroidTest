@@ -158,6 +158,11 @@ public final class Filters {
          * Notifies any registered observers that the data set has changed.
          */
         void notifyDataSetChanged();
+
+        /**
+         * Notifies any registered observers that the underlying data is no longer valid.
+         */
+        void notifyDataSetInvalidated();
     }
 
     /**

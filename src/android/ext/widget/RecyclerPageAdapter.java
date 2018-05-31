@@ -17,12 +17,12 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 
 /**
- * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page. The <tt>RecyclerPageAdapter</tt> must be
- * subclassed to be used. The subclass will override at least one method {@link #loadPage(int, int, int, int)}.
+ * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page.
  * <h5>RecyclerPageAdapter's generic types</h5>
  * <p>The two types used by a page adapter are the following:</p>
  * <ol><li><tt>E</tt>, The item data type of the adapter.</li>
- * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will be used by the adapter.</li></ol>
+ * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will
+ * be used by the adapter.</li></ol>
  * @author Garfield
  * @version 3.0
  */

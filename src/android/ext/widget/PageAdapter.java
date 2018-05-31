@@ -16,8 +16,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 /**
- * Class <tt>PageAdapter</tt> allows to loading data by page. The <tt>PageAdapter</tt> must be subclassed
- * to be used. The subclass will override at least one method {@link #loadPage(int, int, int, int)}.
+ * Class <tt>PageAdapter</tt> allows to loading data by page.
  * @param E The item data type of the adapter.
  * @author Garfield
  * @version 3.0
@@ -69,13 +68,17 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     @Override
+    public long getItemId(int position) {
+        return -1;
+    }
+
+    @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final E item = getItem(position);
         if (view == null) {
-            view = newView(item, position, parent);
+            view = newView(position, parent);
         }
 
-        bindView(item, position, view);
+        bindView(getItem(position), position, view);
         return view;
     }
 
@@ -218,23 +221,22 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     /**
-     * Binds an existing {@link View} to hold the item data.
-     * @param item The item to bind view or <tt>null</tt>.
-     * @param position The position of the item.
-     * @param view Existing view, returned earlier by {@link #newView}.
-     * @see #newView(E, int, ViewGroup)
-     */
-    protected abstract void bindView(E item, int position, View view);
-
-    /**
      * Returns a new {@link View} to hold the item data.
-     * @param item The item to create a new view or <tt>null</tt>.
      * @param position The position of the item.
      * @param parent The parent to which the new view is attached to.
      * @return The newly created view.
      * @see #bindView(E, int, View)
      */
-    protected abstract View newView(E item, int position, ViewGroup parent);
+    protected abstract View newView(int position, ViewGroup parent);
+
+    /**
+     * Binds an existing {@link View} to hold the item data.
+     * @param item The item to bind view or <tt>null</tt>.
+     * @param position The position of the item.
+     * @param view Existing view, returned earlier by {@link #newView}.
+     * @see #newView(int, ViewGroup)
+     */
+    protected abstract void bindView(E item, int position, View view);
 
     /**
      * Returns the {@link Page} at the given position <em>page</em>. Subclasses

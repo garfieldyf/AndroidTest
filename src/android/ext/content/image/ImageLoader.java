@@ -67,23 +67,23 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Equivalent to calling <tt>loadImage(uri, 0, target, (Object[])null)</tt>.
+     * Equivalent to calling <tt>loadImage(uri, target, 0, getBinder())</tt>.
      * @param uri The uri to load.
      * @param target The <tt>Object</tt> to bind the image.
      * @see #loadImage(URI, Object, int)
-     * @see #loadImage(URI, int, Object, Object[])
+     * @see #loadImage(URI, Object, int, Binder)
      */
     public final void loadImage(URI uri, Object target) {
         load(uri, target, 0, mBinder, (Object[])null);
     }
 
     /**
-     * Equivalent to calling <tt>loadImage(uri, flags, target, (Object[])null)</tt>.
+     * Equivalent to calling <tt>loadImage(uri, target, flags, getBinder())</tt>.
      * @param uri The uri to load.
      * @param target The <tt>Object</tt> to bind the image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @see #loadImage(URI, Object)
-     * @see #loadImage(URI, int, Object, Object[])
+     * @see #loadImage(URI, Object, int, Binder)
      */
     public final void loadImage(URI uri, Object target, int flags) {
         load(uri, target, flags, mBinder, (Object[])null);
@@ -102,15 +102,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
      * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to load.
-     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @param target The <tt>Object</tt> to bind the image.
-     * @param params The parameters of the load task. If the task no parameters, you can pass <em>(Object[])null</em>
-     * instead of allocating an empty array.
+     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
+     * @param binder The {@link Binder} to bind the image to <em>target</em>.
      * @see #loadImage(URI, Object)
      * @see #loadImage(URI, Object, int)
      */
-    public final void loadImage(URI uri, int flags, Object target, Object... params) {
-        load(uri, target, flags, mBinder, params);
+    public final void loadImage(URI uri, Object target, int flags, Binder<URI, Object, Image> binder) {
+        load(uri, target, flags, binder, (Object[])null);
     }
 
     /**

@@ -81,12 +81,9 @@ public abstract class CountDownTimer implements Runnable {
     protected abstract void onFinish();
 
     /**
-     * Runs on the UI thread to fired on regular interval. <p>The
-     * default implementation do nothing. If you write your own
-     * implementation, do not call <tt>super.onTick()</tt>.</p>
+     * Runs on the UI thread to fired on regular interval.
      * @param countDown The countdown until finished.
      * @see #onFinish()
      */
-    protected void onTick(int countDown) {
-    }
+    protected abstract void onTick(int countDown);
 }

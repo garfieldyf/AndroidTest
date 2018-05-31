@@ -218,13 +218,14 @@ public final class Pages {
         public final PageLoader<E> mPageLoader;
         public final Cache<Integer, Page<E>> mPageCache;
 
-        public PageAdapterImpl(PageLoader<E> loader, Cache<Integer, Page<E>> pageCache, int pageSize, int firstPageSize) {
+        @SuppressWarnings("unchecked")
+        public PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<E>> pageCache, int pageSize, int firstPageSize) {
             DebugUtils.__checkError(pageSize <= 0 || firstPageSize <= 0, "pageSize <= 0 || firstPageSize <= 0");
-            mPageLoader = loader;
-            mPageSize   = pageSize;
-            mPageCache  = pageCache;
-            mPageStates = new BitSet();
             mFirstPageSize = firstPageSize;
+            mPageSize   = pageSize;
+            mPageLoader = loader;
+            mPageStates = new BitSet();
+            mPageCache  = (Cache<Integer, Page<E>>)pageCache;
         }
 
         public final void setItemCount(int count) {

@@ -43,7 +43,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param firstPageSize The item count of the first page (page index == 0).
      * @see #PageAdapter(int, int, int)
      */
-    public PageAdapter(Cache<Integer, Page<E>> pageCache, int pageSize, int firstPageSize) {
+    public PageAdapter(Cache<Integer, ? extends Page<E>> pageCache, int pageSize, int firstPageSize) {
         mImpl = new PageAdapterImpl<E>(this, pageCache, pageSize, firstPageSize);
     }
 

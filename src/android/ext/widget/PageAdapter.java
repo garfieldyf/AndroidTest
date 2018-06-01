@@ -1,16 +1,18 @@
 package android.ext.widget;
 
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Caches.Cache;
 import android.ext.util.DebugUtils;
 import android.ext.util.JSONUtils;
-import android.ext.widget.Pages.JSONPage;
+import android.ext.widget.Pages.JSONArrayPage;
 import android.ext.widget.Pages.ListPage;
 import android.ext.widget.Pages.Page;
 import android.ext.widget.Pages.PageAdapterImpl;
 import android.ext.widget.Pages.PageLoader;
+import android.util.Printer;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -141,6 +143,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
      * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
+     * @see #setPage(int, E[])
      * @see #setPage(int, List)
      * @see #setPage(int, JSONArray)
      */
@@ -151,9 +154,10 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new ListPage(data), null)</tt>.
+     * Equivalent to calling <tt>setPage(page, new ListPage(data))</tt>.
      * @param page The index of the page.
      * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, E[])
      * @see #setPage(int, Page)
      * @see #setPage(int, JSONArray)
      */
@@ -162,14 +166,28 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new JSONPage(data), null)</tt>.
+     * Equivalent to calling <tt>setPage(page, new JSONArrayPage(data))</tt>.
      * @param page The index of the page.
      * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, E[])
      * @see #setPage(int, Page)
      * @see #setPage(int, List)
      */
     public final void setPage(int page, JSONArray data) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null));
+        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONArrayPage<E>(data) : null));
+    }
+
+    /**
+     * Equivalent to calling <tt>setPage(page, new ListPage(Arrays.asList(data)))</tt>.
+     * @param page The index of the page.
+     * @param data An array of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, List)
+     * @see #setPage(int, Page)
+     * @see #setPage(int, JSONArray)
+     */
+    @SafeVarargs
+    public final void setPage(int page, E... data) {
+        setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null));
     }
 
     /**
@@ -179,15 +197,6 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      */
     public final int getPageSize(int page) {
         return (page > 0 ? mImpl.mPageSize : mImpl.mFirstPageSize);
-    }
-
-    /**
-     * Returns the {@link Page} {@link Cache} associated with this adapter.
-     * @return The page cache.
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Cache<Integer, Page<E>>> T getPageCache() {
-        return (T)mImpl.mPageCache;
     }
 
     /**
@@ -222,6 +231,10 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      */
     public final int getAdapterPosition(int page, int pagePosition) {
         return mImpl.getAdapterPosition(page, pagePosition);
+    }
+
+    public final void dump(Printer printer) {
+        mImpl.dump(printer, getClass().getSimpleName());
     }
 
     /**

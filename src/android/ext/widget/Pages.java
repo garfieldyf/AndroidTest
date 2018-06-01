@@ -1,12 +1,15 @@
 package android.ext.widget;
 
 import java.util.BitSet;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import android.ext.util.Caches.Cache;
 import android.ext.util.Caches.SimpleLruCache;
 import android.ext.util.DebugUtils;
 import android.util.ArrayMap;
+import android.util.Printer;
 import android.util.SparseArray;
 
 /**
@@ -33,6 +36,19 @@ public final class Pages {
      */
     public static <E> Cache<Integer, Page<E>> createPageCache(int maxPages) {
         return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new SparsePageCache<E>());
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description of the <em>page</em>.
+     */
+    public static String toString(Page<?> page, Object data) {
+        final int count = page.getCount();
+        final StringBuilder result = DebugUtils.toSimpleString(data, new StringBuilder(64)).append(" { count = ").append(count);
+        if (count > 0) {
+            result.append(", itemType = ").append(page.getItem(0).getClass().getName());
+        }
+
+        return result.append(" }").toString();
     }
 
     /**
@@ -83,31 +99,21 @@ public final class Pages {
 
         @Override
         public String toString() {
-            return toString(this, mData);
-        }
-
-        /* package */ static String toString(Page<?> page, Object data) {
-            final int count = page.getCount();
-            final StringBuilder result = DebugUtils.toSimpleString(data, new StringBuilder(64)).append(" { count = ").append(count);
-            if (count > 0) {
-                result.append(", itemType = ").append(page.getItem(0).getClass().getName());
-            }
-
-            return result.append(" }").toString();
+            return Pages.toString(this, mData);
         }
     }
 
     /**
-     * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
+     * Class <tt>JSONArrayPage</tt> is an implementation of a {@link Page}.
      */
-    public static class JSONPage<E> implements Page<E> {
+    public static class JSONArrayPage<E> implements Page<E> {
         protected final JSONArray mData;
 
         /**
          * Constructor
          * @param data A {@link JSONArray} of this page data.
          */
-        public JSONPage(JSONArray data) {
+        public JSONArrayPage(JSONArray data) {
             DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
             mData = data;
         }
@@ -125,7 +131,7 @@ public final class Pages {
 
         @Override
         public String toString() {
-            return ListPage.toString(this, mData);
+            return Pages.toString(this, mData);
         }
     }
 
@@ -160,6 +166,15 @@ public final class Pages {
         @Override
         public Page<E> put(Integer key, Page<E> page) {
             return mPages.put(key, page);
+        }
+
+        /* package */ final void dump(Printer printer, StringBuilder result) {
+            final Formatter formatter = new Formatter(result);
+            final int size = mPages.size();
+            dumpPageCache(printer, result, formatter, this, size);
+            for (int i = 0; i < size; ++i) {
+                dumpPage(printer, result, formatter, mPages.keyAt(i), mPages.valueAt(i));
+            }
         }
     }
 
@@ -196,6 +211,15 @@ public final class Pages {
         public Page<E> put(Integer key, Page<E> page) {
             mPages.append(key, page);
             return null;
+        }
+
+        /* package */ final void dump(Printer printer, StringBuilder result) {
+            final Formatter formatter = new Formatter(result);
+            final int size = mPages.size();
+            dumpPageCache(printer, result, formatter, this, size);
+            for (int i = 0; i < size; ++i) {
+                dumpPage(printer, result, formatter, mPages.keyAt(i), mPages.valueAt(i));
+            }
         }
     }
 
@@ -296,6 +320,34 @@ public final class Pages {
         public final int getAdapterPosition(int page, int pagePosition) {
             return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + pagePosition : pagePosition);
         }
+
+        public final void dump(Printer printer, String className) {
+            final StringBuilder result = new StringBuilder(128);
+            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
+            if (mPageCache instanceof ArrayPageCache) {
+                ((ArrayPageCache<E>)mPageCache).dump(printer, result);
+            } else if (mPageCache instanceof SparsePageCache) {
+                ((SparsePageCache<E>)mPageCache).dump(printer, result);
+            } else if (mPageCache instanceof SimpleLruCache) {
+                final SimpleLruCache<?, Page<E>> pageCache = (SimpleLruCache<?, Page<E>>)mPageCache;
+                final Formatter formatter = new Formatter(result);
+                dumpPageCache(printer, result, formatter, pageCache, pageCache.size());
+                for (Entry<?, Page<E>> entry : pageCache.entries().entrySet()) {
+                    dumpPage(printer, result, formatter, entry.getKey(), entry.getValue());
+                }
+            }
+        }
+    }
+
+    /* package */ static void dumpPageCache(Printer printer, StringBuilder result, Formatter formatter, Object pageCache, int size) {
+        result.setLength(0);
+        printer.println(DebugUtils.toString(pageCache, result.append("  PageCache [ ")).append(", size = ").append(size).append(" ]").toString());
+    }
+
+    /* package */ static void dumpPage(Printer printer, StringBuilder result, Formatter formatter, Object index, Page<?> page) {
+        result.setLength(0);
+        formatter.format("    Page %-3d ==> [ ", index);
+        printer.println(DebugUtils.toString(page, result).append(", count = ").append(page.getCount()).append(" ]").toString());
     }
 
     /**

@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import java.util.Arrays;
 import java.util.List;
 import org.json.JSONArray;
 import android.ext.util.ArrayUtils;
@@ -7,7 +8,7 @@ import android.ext.util.Caches.Cache;
 import android.ext.util.DebugUtils;
 import android.ext.util.JSONUtils;
 import android.ext.util.UIHandler;
-import android.ext.widget.Pages.JSONPage;
+import android.ext.widget.Pages.JSONArrayPage;
 import android.ext.widget.Pages.ListPage;
 import android.ext.widget.Pages.Page;
 import android.ext.widget.Pages.PageAdapterImpl;
@@ -15,6 +16,7 @@ import android.ext.widget.Pages.PageLoader;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.Printer;
 
 /**
  * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page.
@@ -151,10 +153,9 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param page The index of the page.
      * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
+     * @see #setPage(int, E[])
      * @see #setPage(int, List)
-     * @see #setPage(int, List, Object)
      * @see #setPage(int, JSONArray)
-     * @see #setPage(int, JSONArray, Object)
      */
     public void setPage(int page, Page<E> data, Object payload) {
         final int count = mImpl.setPage(page, data);
@@ -167,55 +168,37 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * Equivalent to calling <tt>setPage(page, new ListPage(data), null)</tt>.
      * @param page The index of the page.
      * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, E[])
+     * @see #setPage(int, JSONArray)
      * @see #setPage(int, Page, Object)
-     * @see #setPage(int, List, Object)
      */
     public final void setPage(int page, List<E> data) {
         setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null), null);
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new ListPage(data), payload)</tt>.
+     * Equivalent to calling <tt>setPage(page, new JSONArrayPage(data), null)</tt>.
      * @param page The index of the page.
-     * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
-     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
+     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, E[])
      * @see #setPage(int, List)
      * @see #setPage(int, Page, Object)
      */
-    public final void setPage(int page, List<E> data, Object payload) {
-        setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null), payload);
-    }
-
-    /**
-     * Equivalent to calling <tt>setPage(page, new JSONPage(data), null)</tt>.
-     * @param page The index of the page.
-     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
-     * @see #setPage(int, Page, Object)
-     * @see #setPage(int, JSONArray, Object)
-     */
     public final void setPage(int page, JSONArray data) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), null);
+        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONArrayPage<E>(data) : null), null);
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new JSONPage(data), payload)</tt>.
+     * Equivalent to calling <tt>setPage(page, new ListPage(Arrays.asList(data)), null)</tt>.
      * @param page The index of the page.
-     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
-     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
+     * @param data An array of the page data or <tt>null</tt> if load failed.
+     * @see #setPage(int, List)
      * @see #setPage(int, JSONArray)
      * @see #setPage(int, Page, Object)
      */
-    public final void setPage(int page, JSONArray data, Object payload) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), payload);
-    }
-
-    /**
-     * Returns the {@link Page} {@link Cache} associated with this adapter.
-     * @return The page cache.
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Cache<Integer, Page<E>>> T getPageCache() {
-        return (T)mImpl.mPageCache;
+    @SafeVarargs
+    public final void setPage(int page, E... data) {
+        setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null), null);
     }
 
     /**
@@ -250,6 +233,10 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      */
     public final int getAdapterPosition(int page, int pagePosition) {
         return mImpl.getAdapterPosition(page, pagePosition);
+    }
+
+    public final void dump(Printer printer) {
+        mImpl.dump(printer, getClass().getSimpleName());
     }
 
     @Override

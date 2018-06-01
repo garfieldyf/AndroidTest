@@ -51,7 +51,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param firstPageSize The item count of the first page (page index == 0).
      * @see #RecyclerPageAdapter(int, int, int)
      */
-    public RecyclerPageAdapter(Cache<Integer, ? extends Page<E>> pageCache, int pageSize, int firstPageSize) {
+    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
         mImpl = new PageAdapterImpl<E>(this, pageCache, pageSize, firstPageSize);
     }
 

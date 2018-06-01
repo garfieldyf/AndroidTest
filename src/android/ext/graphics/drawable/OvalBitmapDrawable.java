@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
@@ -33,9 +34,21 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     /**
      * Constructor
      * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
+     * @see #OvalBitmapDrawable(Resources, int)
      */
     public OvalBitmapDrawable(Bitmap bitmap) {
         super(new OvalBitmapState(bitmap));
+        invalidateSelf(true);
+    }
+
+    /**
+     * Constructor
+     * @param res The <tt>Resources</tt> containing the image data.
+     * @param id The resource id of the image data.
+     * @see #OvalBitmapDrawable(Bitmap)
+     */
+    public OvalBitmapDrawable(Resources res, int id) {
+        super(new OvalBitmapState(BitmapFactory.decodeResource(res, id)));
         invalidateSelf(true);
     }
 

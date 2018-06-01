@@ -41,13 +41,13 @@
 
     <!-- target debug -->
     <target name="debug" depends="clean, -debug-flags, -compile, -post-compile">
-        <echo level="info">Builds the module in debug mode.</echo>
+        <echo level="info">Builds the module in DEBUG mode.</echo>
         <echo level="info">Install: ${out.dir}</echo>
     </target>
 
     <!-- target release -->
     <target name="release" depends="clean, -release-flags, -compile, -post-compile">
-        <echo level="info">Builds the module in release mode.</echo>
+        <echo level="info">Builds the module in RELEASE mode.</echo>
         <echo level="info">Install: ${out.dir}</echo>
     </target>
 

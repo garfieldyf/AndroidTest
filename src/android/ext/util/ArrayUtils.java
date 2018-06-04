@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -9,7 +8,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.RandomAccess;
-import android.util.ArrayMap;
 
 /**
  * Class ArrayUtils
@@ -408,42 +406,6 @@ public final class ArrayUtils {
         final List<T> result = new ArrayList<T>(size);
         for (int i = 0; i < size; ++i) {
             result.add(array[i]);
-        }
-
-        return result;
-    }
-
-    /**
-     * Equivalent to calling <tt>toMap(Arrays.asList(keys), Arrays.asList(values))</tt>.
-     * @param keys The keys.
-     * @param values The values.
-     * @return The <tt>Map</tt> contains the <em>keys</em> and <em>values</em> elements.
-     * @see #toMap(Collection, Collection)
-     */
-    public static <K, V> Map<K, V> toMap(K[] keys, V... values) {
-        DebugUtils.__checkError(keys == null || values == null, "keys == null || values == null");
-        return toMap(Arrays.asList(keys), Arrays.asList(values));
-    }
-
-    /**
-     * Returns a {@link Map} from the specified <em>keys</em> and <em>values</em>.
-     * The <em>keys</em> size must be equals the <em>values</em> size.
-     * @param keys The keys.
-     * @param values The values.
-     * @return The <tt>Map</tt> contains the <em>keys</em> and <em>values</em> elements.
-     * @see #toMap(K[], V[])
-     */
-    public static <K, V> Map<K, V> toMap(Collection<? extends K> keys, Collection<? extends V> values) {
-        DebugUtils.__checkError(keys == null || values == null, "keys == null || values == null");
-        final int size = keys.size();
-        final Map<K, V> result = new ArrayMap<K, V>(size);
-        if (size > 0) {
-            DebugUtils.__checkError(size != values.size(), "keys.size() != values.size()");
-            final Iterator<? extends K> itor = keys.iterator();
-            final Iterator<? extends V> iter = values.iterator();
-            while (itor.hasNext() && iter.hasNext()) {
-                result.put(itor.next(), iter.next());
-            }
         }
 
         return result;

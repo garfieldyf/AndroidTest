@@ -127,23 +127,23 @@ public final class DownloadPostRequest extends DownloadRequest {
     /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
         __checkHeaders(true);
         if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
-            connectImpl("POST");
+            connectImpl();
             postData(data);
         } else if (data instanceof byte[]) {
-            connectImpl("POST");
+            connectImpl();
             postData((byte[])data, offset, count);
         } else if (data instanceof InputStream) {
-            connectImpl("POST");
+            connectImpl();
             postData((InputStream)data, tempBuffer);
         } else if (data instanceof String) {
             final byte[] data = ((String)this.data).getBytes();
-            connectImpl("POST");
+            connectImpl();
             postData(data, 0, data.length);
         } else if (data instanceof PostCallback) {
-            connectImpl("POST");
+            connectImpl();
             ((PostCallback)data).onPostData(connection, count, tempBuffer);
         } else {
-            connectImpl("GET");
+            connection.connect();
         }
 
         // Clears the data to avoid potential memory leaks.
@@ -155,8 +155,8 @@ public final class DownloadPostRequest extends DownloadRequest {
     /**
      * Connects to the remote HTTP server with the specified method.
      */
-    private void connectImpl(String method) throws IOException {
-        ((HttpURLConnection)connection).setRequestMethod(method);
+    private void connectImpl() throws IOException {
+        ((HttpURLConnection)connection).setRequestMethod("POST");
         connection.connect();
     }
 

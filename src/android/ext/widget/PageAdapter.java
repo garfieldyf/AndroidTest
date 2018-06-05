@@ -185,7 +185,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @see #setPage(int, Page)
      * @see #setPage(int, JSONArray)
      */
-    @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final void setPage(int page, E... data) {
         setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null));
     }

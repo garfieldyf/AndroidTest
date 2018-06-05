@@ -4,7 +4,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.ext.database.SQLiteDatabaseHelper;
 import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Handler;
@@ -97,33 +96,6 @@ public class CursorObserver extends ContentObserver {
     public void unregister(Context context) {
         if (mState.compareAndSet(STATE_REGISTERED, STATE_UNREGISTERED)) {
             context.getContentResolver().unregisterContentObserver(this);
-        }
-    }
-
-    /**
-     * Register this observer that is called when changes happen to the
-     * content of the <em>table</em>. If this observer already registered
-     * then invoking this method has no effect.
-     * @param db The {@link SQLiteDatabaseHelper} used to register.
-     * @param table The table will be register to.
-     * @see #unregister(SQLiteDatabaseHelper, String)
-     */
-    public void register(SQLiteDatabaseHelper db, String table) {
-        if (mState.compareAndSet(STATE_UNREGISTERED, STATE_REGISTERED)) {
-            db.registerObserver(table, this);
-        }
-    }
-
-    /**
-     * Unregister this observer that has previously been registered. If this
-     * observer already unregistered then invoking this method has no effect.
-     * @param db The {@link SQLiteDatabaseHelper} used to unregister.
-     * @param table The table will be unregister.
-     * @see #register(SQLiteDatabaseHelper, String)
-     */
-    public void unregister(SQLiteDatabaseHelper db, String table) {
-        if (mState.compareAndSet(STATE_REGISTERED, STATE_UNREGISTERED)) {
-            db.unregisterObserver(table, this);
         }
     }
 

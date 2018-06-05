@@ -196,7 +196,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see #setPage(int, JSONArray)
      * @see #setPage(int, Page, Object)
      */
-    @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final void setPage(int page, E... data) {
         setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null), null);
     }

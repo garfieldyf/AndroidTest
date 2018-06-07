@@ -1,13 +1,16 @@
 package android.ext.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.Pools.Factory;
@@ -23,6 +26,19 @@ import android.util.Printer;
  * @version 1.0
  */
 public final class PackageUtils {
+    /**
+     * Return a <tt>List</tt> of all packages that are installed on the device.
+     * @param pm The <tt>PackageManager</tt> to retrieve the packages.
+     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
+     * <tt>PackageManager.GET_XXX</tt> constants.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
+     * @return A <tt>List</tt> of {@link PackageInfo} objects.
+     */
+    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
+        final List<PackageInfo> result = pm.getInstalledPackages(flags);
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
+    }
+
     /**
      * Equivalent to calling <tt>parsePackage(context, archiveFile, 0, PackageArchiveInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
@@ -97,10 +113,27 @@ public final class PackageUtils {
         return new PackageParser<T>(context, factory).parsePackages(dirPath, scanFlags, parseFlags);
     }
 
-    public static void dump(Printer printer, Collection<? extends PackageArchiveInfo> infos) {
+    public static void dumpPackages(Context context, Printer printer, Collection<PackageInfo> infos) {
+        final PackageManager pm = context.getPackageManager();
         final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageArchiveInfo collection [ size = %d ] ", size);
+        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
+
+        for (PackageInfo info : infos) {
+            result.setLength(0);
+            result.append("  PackageInfo { package = ").append(info.packageName)
+                  .append(", version = ").append(info.versionName)
+                  .append(", label = ").append(info.applicationInfo.loadLabel(pm))
+                  .append(", source = ").append(info.applicationInfo.sourceDir)
+                  .append(" }");
+            printer.println(result.toString());
+        }
+    }
+
+    public static void dumpPackageArchives(Printer printer, Collection<? extends PackageArchiveInfo> infos) {
+        final StringBuilder result = new StringBuilder(256);
+        final int size = ArrayUtils.getSize(infos);
+        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageArchiveInfos [ size = %d ] ", size);
 
         for (PackageArchiveInfo info : infos) {
             result.setLength(0);
@@ -300,6 +333,36 @@ public final class PackageUtils {
             }
 
             return false;
+        }
+    }
+
+    /**
+     * Class <tt>PackageNameFilter</tt> filtering {@link PackageInfo} objects based on their package name.
+     */
+    public static final class PackageNameFilter implements Filter<PackageInfo> {
+        private final List<String> excludePackages;
+
+        /**
+         * Constructor
+         * @param excludePackages An array of package names to excluding.
+         * @see #PackageNameFilter(List)
+         */
+        public PackageNameFilter(String... excludePackages) {
+            this.excludePackages = Arrays.asList(excludePackages);
+        }
+
+        /**
+         * Constructor
+         * @param excludePackages A <tt>List</tt> of package names to excluding.
+         * @see #PackageNameFilter(String[])
+         */
+        public PackageNameFilter(List<String> excludePackages) {
+            this.excludePackages = excludePackages;
+        }
+
+        @Override
+        public boolean accept(PackageInfo packageInfo) {
+            return (!excludePackages.contains(packageInfo.packageName));
         }
     }
 

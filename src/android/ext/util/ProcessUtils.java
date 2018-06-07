@@ -126,7 +126,7 @@ public final class ProcessUtils {
     /**
      * Returns A <tt>List</tt> of application processes that are running on the device.
      * @param context The <tt>Context</tt>.
-     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the processes.
      * @param flags The flags. Pass 0 or {@link #GET_NATIVE_PROCESSES}.
      * @return A <tt>List</tt> of {@link RunningAppProcessInfo} records.
      */

@@ -47,8 +47,6 @@ public class DownloadRequest {
     @Keep
     public DownloadRequest(URL url) throws IOException {
         connection = url.openConnection();
-        connection.setReadTimeout(60000);
-        connection.setConnectTimeout(60000);
         redirects(true);
     }
 

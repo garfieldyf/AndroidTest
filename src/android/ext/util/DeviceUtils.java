@@ -97,11 +97,7 @@ public final class DeviceUtils {
      */
     @SuppressWarnings("deprecation")
     public static String[] getSupportedABIs() {
-        if (Build.VERSION.SDK_INT > 20) {
-            return Build.SUPPORTED_ABIS;
-        } else {
-            return new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
-        }
+        return (Build.VERSION.SDK_INT > 20 ? Build.SUPPORTED_ABIS : new String[] { Build.CPU_ABI, Build.CPU_ABI2 });
     }
 
     /**

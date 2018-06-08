@@ -22,7 +22,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     private final long mDelayMillis;
     private volatile boolean mCancelled;
 
-    private final Application mApplication;
+    public final Application mApplication;
     private final WeakReference<Activity> mActivity;
 
     /**
@@ -45,14 +45,6 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
         mActivity = new WeakReference<Activity>(activity);
         mDelayMillis = showDelayMillis;
         mApplication = activity.getApplication();
-    }
-
-    /**
-     * Returns the application associated with this task.
-     * @return The <tt>Application</tt>.
-     */
-    public final <T extends Application> T getApplication() {
-        return (T)mApplication;
     }
 
     /**

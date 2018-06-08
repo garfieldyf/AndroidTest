@@ -9,6 +9,7 @@ import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.util.Pair;
+import android.view.View;
 
 /**
  * Class UIHandler
@@ -35,6 +36,26 @@ public final class UIHandler extends Handler {
         } else {
             sInstance.post(action);
         }
+    }
+
+    /**
+     * Equivalent to calling <tt>requestFocus(view, View.FOCUS_DOWN)</tt>.
+     * @param view The <tt>View</tt>.
+     * @see #requestFocus(View, int)
+     */
+    public static void requestFocus(View view) {
+        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_REQUEST_FOCUS, View.FOCUS_DOWN, 0, view));
+    }
+
+    /**
+     * Like as {@link View#requestFocus()}. But if the <em>view</em> is currently
+     * computing a layout this method will be post the change using the <tt>UIHandler</tt>.
+     * @param view The <tt>View</tt>.
+     * @param direction One of <tt>View.FOCUS_XXX</tt> constants.
+     * @see #requestFocus(View)
+     */
+    public static void requestFocus(View view, int direction) {
+        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_REQUEST_FOCUS, direction, 0, view));
     }
 
     /**
@@ -233,6 +254,10 @@ public final class UIHandler extends Handler {
             break;
 
         // The RecyclerView.Adapter message handle.
+        case MESSAGE_REQUEST_FOCUS:
+            ((View)msg.obj).requestFocus(msg.arg1);
+            break;
+
         case MESSAGE_DATA_CHANGED:
             ((Adapter)msg.obj).notifyDataSetChanged();
             break;
@@ -275,6 +300,7 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_ITEM_REMOVED  = 0xFCFCFCFC;
     private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
     private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
+    private static final int MESSAGE_REQUEST_FOCUS = 0xF9F9F9F9;
 
     /**
      * This class cannot be instantiated.

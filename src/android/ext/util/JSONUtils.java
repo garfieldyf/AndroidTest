@@ -13,6 +13,7 @@ import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.ext.util.ArrayUtils.Filter;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
@@ -85,6 +86,72 @@ public final class JSONUtils {
         } catch (JSONException e) {
             return object;
         }
+    }
+
+    /**
+     * Equivalent to calling <tt>indexOf(array, 0, array.length(), filter)</tt>.
+     * @param array The <tt>JSONArray</tt> to search.
+     * @param filter The {@link Filter} using to search.
+     * @return The index of the first occurrence of the element, or <tt>-1</tt>
+     * if it was not found.
+     * @see #indexOf(JSONArray, int, int, Filter)
+     */
+    public static <T> int indexOf(JSONArray array, Filter<? super T> filter) {
+        return indexOf(array, 0, array.length(), filter);
+    }
+
+    /**
+     * Searches the specified {@link JSONArray} for the first occurrence of the element using the
+     * specified <tt>filter</tt>.
+     * @param array The <tt>JSONArray</tt> to search.
+     * @param start The inclusive start index in <em>array</em>.
+     * @param end The exclusive end index in <em>array</em>.
+     * @param filter The {@link Filter} using to search.
+     * @return The index of the first occurrence of the element, or <tt>-1</tt> if it was not found.
+     * @see #indexOf(JSONArray, Filter)
+     */
+    public static <T> int indexOf(JSONArray array, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkRange(start, end - start, array.length());
+        for (; start < end; ++start) {
+            if (filter.accept((T)array.opt(start))) {
+                return start;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Equivalent to calling <tt>lastIndexOf(array, 0, array.length(), filter)</tt>.
+     * @param array The <tt>JSONArray</tt> to search.
+     * @param filter The {@link Filter} using to search.
+     * @return The index of the last occurrence of the element, or <tt>-1</tt> if it
+     * was not found.
+     * @see #lastIndexOf(JSONArray, int, int, Filter)
+     */
+    public static <T> int lastIndexOf(JSONArray array, Filter<? super T> filter) {
+        return lastIndexOf(array, 0, array.length(), filter);
+    }
+
+    /**
+     * Searches the specified {@link JSONArray} for the last occurrence of the element using the
+     * specified <tt>filter</tt>.
+     * @param array The <tt>JSONArray</tt> to search.
+     * @param start The inclusive start index in <em>array</em>.
+     * @param end The exclusive end index in <em>array</em>.
+     * @param filter The {@link Filter} using to search.
+     * @return The index of the last occurrence of the element, or <tt>-1</tt> if it was not found.
+     * @see #lastIndexOf(JSONArray, Filter)
+     */
+    public static <T> int lastIndexOf(JSONArray array, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkRange(start, end - start, array.length());
+        for (--end; end >= start; --end) {
+            if (filter.accept((T)array.opt(end))) {
+                return end;
+            }
+        }
+
+        return -1;
     }
 
     /**

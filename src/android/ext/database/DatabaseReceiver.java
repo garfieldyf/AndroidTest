@@ -10,11 +10,11 @@ import android.text.TextUtils;
 import android.util.Log;
 
 /**
- * Class SQLiteReceiver
+ * Class DatabaseReceiver
  * @author Garfield
  * @version 1.0
  */
-public abstract class SQLiteReceiver extends BroadcastReceiver {
+public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**
      * Local Broadcast Action: The table content has changed. <p>May include the following extras:
      * <ul><li>{@link #EXTRA_STATEMENT} containing the integer SQL statement type, May be one of
@@ -71,7 +71,7 @@ public abstract class SQLiteReceiver extends BroadcastReceiver {
      * @param databaseName The database name, or <tt>null</tt> for an in-memory database.
      * @param tableName The table name.
      */
-    public SQLiteReceiver(String databaseName, String tableName) {
+    public DatabaseReceiver(String databaseName, String tableName) {
         this.scheme = buildScheme(databaseName, tableName);
     }
 
@@ -133,7 +133,7 @@ public abstract class SQLiteReceiver extends BroadcastReceiver {
         final Intent intent = new Intent(ACTION_CONTENT_CHANGED);
         intent.putExtra(EXTRA_RESULT, result);
         intent.putExtra(EXTRA_STATEMENT, statement);
-        intent.setData(Uri.parse(buildScheme(databaseName, tableName) + "://content"));
+        intent.setData(Uri.parse(buildScheme(databaseName, tableName) + "://contents"));
         return intent;
     }
 

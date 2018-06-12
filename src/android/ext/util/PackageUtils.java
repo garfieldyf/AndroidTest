@@ -1,8 +1,8 @@
 package android.ext.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
@@ -10,10 +10,12 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
+import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.Pools.Factory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Log;
@@ -32,22 +34,38 @@ public final class PackageUtils {
      * @param flags Additional option flags. May be <tt>0</tt> or any combination of
      * <tt>PackageManager.GET_XXX</tt> constants.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
-     * @return A <tt>List</tt> of {@link PackageInfo} objects.
+     * @return A <tt>List</tt> of {@link AppPackageInfo} objects.
+     * @see PackageNameFilter
      */
-    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
-        final List<PackageInfo> result = pm.getInstalledPackages(flags);
-        return (filter != null ? ArrayUtils.filter(result, filter) : result);
+    public static List<AppPackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
+        final List<PackageInfo> infos = pm.getInstalledPackages(flags);
+        final int size = infos.size();
+        final List<AppPackageInfo> result = new ArrayList<AppPackageInfo>(size);
+        if (filter != null) {
+            for (int i = 0; i < size; ++i) {
+                final PackageInfo info = infos.get(i);
+                if (filter.accept(info)) {
+                    result.add(new AppPackageInfo(pm, info));
+                }
+            }
+        } else {
+            for (int i = 0; i < size; ++i) {
+                result.add(new AppPackageInfo(pm, infos.get(i)));
+            }
+        }
+
+        return result;
     }
 
     /**
-     * Equivalent to calling <tt>parsePackage(context, archiveFile, 0, PackageArchiveInfo.FACTORY)</tt>.
+     * Equivalent to calling <tt>parsePackage(context, archiveFile, 0, AppPackageInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
      * @param archiveFile The path to the archive file, must be absolute file path.
-     * @return A {@link PackageArchiveInfo} object if the parse succeeded, <tt>null</tt> otherwise.
+     * @return A {@link AppPackageInfo} object if the parse succeeded, <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String, int, Factory)
      */
-    public static PackageArchiveInfo parsePackage(Context context, String archiveFile) {
-        return parsePackage(context, archiveFile, 0, PackageArchiveInfo.FACTORY);
+    public static AppPackageInfo parsePackage(Context context, String archiveFile) {
+        return parsePackage(context, archiveFile, 0, AppPackageInfo.FACTORY);
     }
 
     /**
@@ -56,20 +74,20 @@ public final class PackageUtils {
      * @param archiveFile The path to the archive file, must be absolute file path.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination of
      * <tt>PackageManager.GET_XXX</tt> constants.
-     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo} or
+     * @param factory The {@link Factory} to create the {@link AppPackageInfo} or
      * subclass object.
-     * @return A {@link PackageArchiveInfo} or subclass object if the parse succeeded,
+     * @return A {@link AppPackageInfo} or subclass object if the parse succeeded,
      * <tt>null</tt> otherwise.
      * @see #parsePackage(Context, String)
      */
-    public static <T extends PackageArchiveInfo> T parsePackage(Context context, String archiveFile, int flags, Factory<T> factory) {
+    public static <T extends AppPackageInfo> T parsePackage(Context context, String archiveFile, int flags, Factory<T> factory) {
         // Retrieve the package information from the package archive file.
         DebugUtils.__checkError(factory == null, "factory == null");
         final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(archiveFile, flags);
         if (packageInfo != null) {
             final Resources res = createResources(context, archiveFile);
             try {
-                // Creates a PackageArchiveInfo or subclass object.
+                // Creates a AppPackageInfo or subclass object.
                 packageInfo.applicationInfo.sourceDir = archiveFile;
                 final T result = factory.newInstance();
                 result.initialize(context, res, packageInfo);
@@ -85,14 +103,14 @@ public final class PackageUtils {
     }
 
     /**
-     * Equivalent to calling <tt>parsePackages(context, dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, PackageArchiveInfo.FACTORY)</tt>.
+     * Equivalent to calling <tt>parsePackages(context, dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, AppPackageInfo.FACTORY)</tt>.
      * @param context The <tt>Context</tt>.
      * @param dirPath The path of directory, must be absolute file path.
-     * @return A {@link List} of {@link PackageArchiveInfo}s.
+     * @return A {@link List} of {@link AppPackageInfo}s.
      * @see #parsePackages(Context, String, int, int, Factory)
      */
-    public final List<PackageArchiveInfo> parsePackages(Context context, String dirPath) {
-        return new PackageParser<PackageArchiveInfo>(context, PackageArchiveInfo.FACTORY).parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0);
+    public final List<AppPackageInfo> parsePackages(Context context, String dirPath) {
+        return new PackageParser<AppPackageInfo>(context, AppPackageInfo.FACTORY).parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0);
     }
 
     /**
@@ -104,38 +122,21 @@ public final class PackageUtils {
      * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
      * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
      * of <tt>PackageManager.GET_XXX</tt> constants.
-     * @param factory The {@link Factory} to create the {@link PackageArchiveInfo}
+     * @param factory The {@link Factory} to create the {@link AppPackageInfo}
      * or subclass object.
-     * @return A {@link List} of {@link PackageArchiveInfo} or subclass objects.
+     * @return A {@link List} of {@link AppPackageInfo} or subclass objects.
      * @see #parsePackages(Context, String)
      */
-    public final <T extends PackageArchiveInfo> List<T> parsePackages(Context context, String dirPath, int scanFlags, int parseFlags, Factory<? extends T> factory) {
+    public final <T extends AppPackageInfo> List<T> parsePackages(Context context, String dirPath, int scanFlags, int parseFlags, Factory<? extends T> factory) {
         return new PackageParser<T>(context, factory).parsePackages(dirPath, scanFlags, parseFlags);
     }
 
-    public static void dumpPackages(Context context, Printer printer, Collection<PackageInfo> infos) {
-        final PackageManager pm = context.getPackageManager();
+    public static void dump(Printer printer, Collection<? extends AppPackageInfo> infos) {
         final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
+        DebugUtils.dumpSummary(printer, result, 140, " Dumping AppPackageInfos [ size = %d ] ", size);
 
-        for (PackageInfo info : infos) {
-            result.setLength(0);
-            result.append("  PackageInfo { package = ").append(info.packageName)
-                  .append(", version = ").append(info.versionName)
-                  .append(", label = ").append(info.applicationInfo.loadLabel(pm))
-                  .append(", source = ").append(info.applicationInfo.sourceDir)
-                  .append(" }");
-            printer.println(result.toString());
-        }
-    }
-
-    public static void dumpPackageArchives(Printer printer, Collection<? extends PackageArchiveInfo> infos) {
-        final StringBuilder result = new StringBuilder(256);
-        final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageArchiveInfos [ size = %d ] ", size);
-
-        for (PackageArchiveInfo info : infos) {
+        for (AppPackageInfo info : infos) {
             result.setLength(0);
             printer.println(info.dump(result.append("  ")).append(" }").toString());
         }
@@ -151,10 +152,9 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>PackageArchiveInfo</tt> contains an application
-     * package information defined in a package archive file.
+     * Class <tt>AppPackageInfo</tt> contains an application's label, icon and {@link PackageInfo}.
      */
-    public static class PackageArchiveInfo implements Comparable<PackageArchiveInfo> {
+    public static class AppPackageInfo implements Comparable<AppPackageInfo> {
         /**
          * The {@link PackageInfo}, parse from the <tt>AndroidManifest.xml</tt>.
          */
@@ -172,14 +172,23 @@ public final class PackageUtils {
          */
         public CharSequence label;
 
-        @Override
-        public String toString() {
-            return packageInfo.packageName;
+        /**
+         * Constructor
+         * @see #AppPackageInfo(PackageManager, PackageInfo)
+         */
+        public AppPackageInfo() {
         }
 
-        @Override
-        public int compareTo(PackageArchiveInfo another) {
-            return label.toString().compareTo(another.label.toString());
+        /**
+         * Constructor
+         * @param pm The <tt>PackageManager</tt> to load the application's label and icon.
+         * @param packageInfo The <tt>PackageInfo</tt>.
+         * @see #AppPackageInfo()
+         */
+        public AppPackageInfo(PackageManager pm, PackageInfo packageInfo) {
+            this.packageInfo = packageInfo;
+            this.icon  = packageInfo.applicationInfo.loadIcon(pm);
+            this.label = packageInfo.applicationInfo.loadLabel(pm);
         }
 
         /**
@@ -188,6 +197,39 @@ public final class PackageUtils {
          */
         public final CharSequence getTrimmedLabel() {
             return StringUtils.trim(label);
+        }
+
+        /**
+         * Returns the rounded <tt>Drawable</tt> of the application's {@link icon}.
+         * @param cornerRadius The corner radius.
+         * @return A <tt>RoundedBitmapDrawable</tt> if the {@link icon} is a <tt>BitmapDrawable</tt>.
+         * Otherwise returns the {@link icon}.
+         * @see #getRoundedIcon(Resources, int)
+         */
+        public final Drawable getRoundedIcon(float cornerRadius) {
+            return (icon instanceof BitmapDrawable ? new RoundedBitmapDrawable(((BitmapDrawable)icon).getBitmap(), cornerRadius) : icon);
+        }
+
+        /**
+         * Equivalent to calling <tt>getRoundedIcon(res.getDimension(id))</tt>.
+         * @param res The {@link Resources}.
+         * @param id The resource id of the corner radius.
+         * @return A <tt>RoundedBitmapDrawable</tt> if the {@link icon} is a <tt>BitmapDrawable</tt>.
+         * Otherwise returns the {@link icon}.
+         * @see #getRoundedIcon(float)
+         */
+        public final Drawable getRoundedIcon(Resources res, int id) {
+            return (icon instanceof BitmapDrawable ? new RoundedBitmapDrawable(((BitmapDrawable)icon).getBitmap(), res.getDimension(id)) : icon);
+        }
+
+        @Override
+        public String toString() {
+            return packageInfo.packageName;
+        }
+
+        @Override
+        public int compareTo(AppPackageInfo another) {
+            return label.toString().compareTo(another.label.toString());
         }
 
         /**
@@ -238,37 +280,37 @@ public final class PackageUtils {
                 .append(" { package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", label = ").append(label)
-                .append(", archiveFile = ").append(packageInfo.applicationInfo.sourceDir);
+                .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
-        public static final Factory<PackageArchiveInfo> FACTORY = new Factory<PackageArchiveInfo>() {
+        public static final Factory<AppPackageInfo> FACTORY = new Factory<AppPackageInfo>() {
             @Override
-            public PackageArchiveInfo newInstance() {
-                return new PackageArchiveInfo();
+            public AppPackageInfo newInstance() {
+                return new AppPackageInfo();
             }
         };
     }
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
-     * @param <T> A class that extends {@link PackageArchiveInfo} that will
+     * @param <T> A class that extends {@link AppPackageInfo} that will
      * be the parser result type.
      */
-    public static class PackageParser<T extends PackageArchiveInfo> implements ScanCallback {
+    public static class PackageParser<T extends AppPackageInfo> implements ScanCallback {
         /**
          * The application <tt>Context</tt>.
          */
         public final Context mContext;
 
         /**
-         * The {@link Factory} to create the {@link PackageArchiveInfo} or subclass object.
+         * The {@link Factory} to create the {@link AppPackageInfo} or subclass object.
          */
         private final Factory<? extends T> mFactory;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
-         * @param factory The {@link Factory} to create the {@link PackageArchiveInfo} or subclass object.
+         * @param factory The {@link Factory} to create the {@link AppPackageInfo} or subclass object.
          */
         public PackageParser(Context context, Factory<? extends T> factory) {
             mFactory = factory;
@@ -278,7 +320,7 @@ public final class PackageUtils {
         /**
          * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0)</tt>.
          * @param dirPath The path of directory, must be absolute file path.
-         * @return A {@link List} of {@link PackageArchiveInfo}s.
+         * @return A {@link List} of {@link AppPackageInfo}s.
          * @see #parsePackages(String, int, int)
          */
         public final List<T> parsePackages(String dirPath) {
@@ -293,7 +335,7 @@ public final class PackageUtils {
          * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
          * @param parseFlags The parse flags. May be <tt>0</tt> or any combination
          * of <tt>PackageManager.GET_XXX</tt> constants.
-         * @return A {@link List} of {@link PackageArchiveInfo} or subclass objects.
+         * @return A {@link List} of {@link AppPackageInfo} or subclass objects.
          * @see #parsePackages(String)
          */
         public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags) {
@@ -340,36 +382,36 @@ public final class PackageUtils {
      * Class <tt>PackageNameFilter</tt> filtering {@link PackageInfo} objects based on their package name.
      */
     public static final class PackageNameFilter implements Filter<PackageInfo> {
-        private final List<String> excludePackages;
+        private final List<String> packages;
 
         /**
          * Constructor
-         * @param excludePackages An array of package names to excluding.
+         * @param excludingPackage The package name to excluding.
          * @see #PackageNameFilter(List)
          */
-        public PackageNameFilter(String... excludePackages) {
-            this.excludePackages = Arrays.asList(excludePackages);
+        public PackageNameFilter(String excludingPackage) {
+            this.packages = Collections.singletonList(excludingPackage);
         }
 
         /**
          * Constructor
-         * @param excludePackages A <tt>List</tt> of package names to excluding.
-         * @see #PackageNameFilter(String[])
+         * @param excludingPackages A <tt>List</tt> of package names to excluding.
+         * @see #PackageNameFilter(String)
          */
-        public PackageNameFilter(List<String> excludePackages) {
-            this.excludePackages = excludePackages;
+        public PackageNameFilter(List<String> excludingPackages) {
+            this.packages = excludingPackages;
         }
 
         @Override
         public boolean accept(PackageInfo packageInfo) {
-            return (!excludePackages.contains(packageInfo.packageName));
+            return (!packages.contains(packageInfo.packageName));
         }
     }
 
     /**
-     * Class <tt>PackageNameComparator</tt> compares the package name of the {@link PackageArchiveInfo}.
+     * Class <tt>PackageNameComparator</tt> compares the package name of the {@link AppPackageInfo}.
      */
-    public static final class PackageNameComparator implements Comparator<PackageArchiveInfo> {
+    public static final class PackageNameComparator implements Comparator<AppPackageInfo> {
         public static final PackageNameComparator sInstance = new PackageNameComparator();
 
         /**
@@ -379,7 +421,7 @@ public final class PackageUtils {
         }
 
         @Override
-        public int compare(PackageArchiveInfo one, PackageArchiveInfo another) {
+        public int compare(AppPackageInfo one, AppPackageInfo another) {
             return one.packageInfo.packageName.compareTo(another.packageInfo.packageName);
         }
     }

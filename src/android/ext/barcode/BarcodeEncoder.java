@@ -407,18 +407,18 @@ public class BarcodeEncoder {
                 height  = bottom  = bitMatrix.getHeight();
             }
 
-            final int[] bitPixels = new int[right - left];
+            final int[] rowPixels = new int[right - left];
             final Bitmap result = Bitmap.createBitmap(width, height, config);
             result.eraseColor(white);
 
             for (int y = top; y < bottom; ++y, ++offsetY) {
                 // Converts the bitMatrix current row bits to pixels.
                 for (int x = left, i = 0; x < right; ++x, ++i) {
-                    bitPixels[i] = (bitMatrix.get(x, y) ? black : white);
+                    rowPixels[i] = (bitMatrix.get(x, y) ? black : white);
                 }
 
-                // Sets the result current row pixels from [offsetX, offsetY] to bit width.
-                result.setPixels(bitPixels, 0, width, offsetX, offsetY, bitPixels.length, 1);
+                // Sets the result current row pixels from [offsetX, offsetY] to row width.
+                result.setPixels(rowPixels, 0, width, offsetX, offsetY, rowPixels.length, 1);
             }
 
             if (logo != null) {

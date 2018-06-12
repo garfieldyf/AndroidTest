@@ -35,6 +35,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     /**
      * Constructor
      * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
+     * @see #RoundedBitmapDrawable(Bitmap, float)
      * @see #RoundedBitmapDrawable(Resources, int)
      * @see #RoundedBitmapDrawable(Bitmap, float[])
      */
@@ -47,6 +48,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * @param res The <tt>Resources</tt> containing the image data.
      * @param id The resource id of the image data.
      * @see #RoundedBitmapDrawable(Bitmap)
+     * @see #RoundedBitmapDrawable(Bitmap, float)
      * @see #RoundedBitmapDrawable(Bitmap, float[])
      */
     public RoundedBitmapDrawable(Resources res, int id) {
@@ -56,10 +58,24 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     /**
      * Constructor
      * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
+     * @param cornerRadius The corner radius.
+     * @see #RoundedBitmapDrawable(Bitmap)
+     * @see #RoundedBitmapDrawable(Resources, int)
+     * @see #RoundedBitmapDrawable(Bitmap, float[])
+     */
+    public RoundedBitmapDrawable(Bitmap bitmap, float cornerRadius) {
+        super(new RoundedBitmapState(bitmap));
+        setCornerRadius(cornerRadius);
+    }
+
+    /**
+     * Constructor
+     * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
      * @param radii The corner radii, array of 8 values. Each corner receives two radius
      * values [X, Y]. The corners are ordered <tt>top-left</tt>, <tt>top-right</tt>,
      * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      * @see #RoundedBitmapDrawable(Bitmap)
+     * @see #RoundedBitmapDrawable(Bitmap, float)
      * @see #RoundedBitmapDrawable(Resources, int)
      */
     public RoundedBitmapDrawable(Bitmap bitmap, float[] radii) {

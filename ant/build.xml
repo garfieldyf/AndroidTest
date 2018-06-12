@@ -2,7 +2,7 @@
 <project name="module" basedir="." default="release">
     <!-- properties -->
     <property name="author" value="Garfield" />
-    <property name="version" value="1.0.5" />
+    <property name="version" value="1.0.6" />
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />

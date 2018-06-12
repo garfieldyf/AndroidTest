@@ -45,7 +45,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param target The <tt>Object</tt> to bind.
      * @param binder The {@link Binder} used to bind value to <em>target</em>.
      * @see #load(Key, Object, int, Binder, Params[])
-     * @see #loadSync(Key, int, Params[])
      */
     public final void load(Key key, Object target, Binder<Key, Params, Value> binder) {
         load(key, target, 0, binder, (Params[])null);
@@ -62,7 +61,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param params The parameters of the load task. If the task no parameters, you can pass
      * <em>(Params[])null</em> instead of allocating an empty array.
      * @see #load(Key, Object, Binder)
-     * @see #loadSync(Key, int, Params[])
      */
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
@@ -75,7 +73,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             }
 
             // Loads the value from the memory cache.
-            if (mCache != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
+            if (isCacheValid(flags)) {
                 final Value value = mCache.get(key);
                 if (value != null) {
                     bindValue(key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE, binder);
@@ -94,6 +92,44 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     }
 
     /**
+     * Equivalent to calling <tt>preload(key, 0, (Params[])null)</tt>.
+     * @param key The key to find value.
+     * @see #preload(Key, int, Params[])
+     */
+    public final void preload(Key key) {
+        preload(key, 0, (Params[])null);
+    }
+
+    /**
+     * Preloads the value into the internal cache with the specified <em>key</em>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param key The key to find value.
+     * @param flags Loading flags. May be <tt>0</tt> or any combination of
+     * <tt>FLAG_XXX</tt> constants.
+     * @param params The parameters of the load task. If the task no parameters,
+     * you can pass <em>(Params[])null</em> instead of allocating an empty array.
+     * @see #preload(Key)
+     */
+    public final void preload(Key key, int flags, Params... params) {
+        DebugUtils.__checkUIThread("preload");
+        DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0xFFFFFF]");
+        if (mState != SHUTDOWN && key != null && isCacheValid(flags) && mCache.get(key) == null && !isTaskRunning(key, key)) {
+            final LoadTask task = obtain(key, params, key, flags, AsyncLoader.<Key, Params, Value>emptyBinder());
+            mRunningTasks.put(key, task);
+            mExecutor.execute(task);
+        }
+    }
+
+    /**
+     * Equivalent to calling <tt>loadSync(key, 0, (Params[])null)</tt>.
+     * @param key The key to find value.
+     * @see #loadSync(Key, int, Params[])
+     */
+    public final Value loadSync(Key key) {
+        return loadSync(key, 0, (Params[])null);
+    }
+
+    /**
      * Loads the value synchronously. Call this method, Pass the {@link #loadInBackground}
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
@@ -102,8 +138,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param params The parameters to load. If no parameters, you can pass <em>(Params[])null</em>
      * instead of allocating an empty array.
      * @return The result, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #load(Key, Object, Binder)
-     * @see #load(Key, Object, int, Binder, Params[])
+     * @see #loadSync(Key)
      */
     public final Value loadSync(Key key, int flags, Params... params) {
         if (key == null || mState == SHUTDOWN) {
@@ -111,7 +146,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         }
 
         Value value;
-        if (mCache == null || (flags & FLAG_IGNORE_MEMORY_CACHE) != 0) {
+        if (!isCacheValid(flags)) {
             value = loadInBackground(null, key, params, flags);
         } else if ((value = mCache.get(key)) == null) {
             value = loadInBackground(null, key, params, flags);
@@ -160,11 +195,14 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     protected abstract Value loadInBackground(Task<?, ?> task, Key key, Params[] params, int flags);
 
     /**
+     * Tests if the {@link mCache} is valid.
+     */
+    /* package */ final boolean isCacheValid(int flags) {
+        return (mCache != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0);
+    }
+
+    /**
      * Tests the specified task is running.
-     * @param key The key to find task.
-     * @param target The target to find task.
-     * @return <tt>true</tt> if the task is running,
-     * <tt>false</tt> otherwise.
      */
     private boolean isTaskRunning(Key key, Object target) {
         final LoadTask task = (LoadTask)mRunningTasks.get(target);
@@ -216,7 +254,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
                 value = loadInBackground(this, key, params, flags);
-                if (mCache != null && value != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
+                if (value != null && isCacheValid(flags)) {
                     mCache.put(key, value);
                 }
             }

@@ -145,7 +145,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * @see #resolveIntent(String, String, int, long)
      */
     public static String buildScheme(String databaseName, String tableName) {
-        return new StringBuilder(32).append(TextUtils.isEmpty(databaseName) ? "[memory]" : databaseName).append('.').append(tableName).toString();
+        return new StringBuilder(32).append(TextUtils.isEmpty(databaseName) ? ":memory:" : databaseName).append('.').append(tableName).toString();
     }
 
     public static void dump(String tag, Intent intent) {

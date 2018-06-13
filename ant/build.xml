@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module" basedir="." default="release">
+<project name="module" basedir="." default="all">
     <!-- properties -->
     <property name="author" value="Garfield" />
     <property name="version" value="1.0.6" />
@@ -97,6 +97,7 @@
         <property name="java.debug" value="true" />
         <property name="class.dir" value="${basedir}/src" />
         <property name="file.out.dir" value="${out.dir}/debug" />
+        <echo level="info">Builds the ${ndk.module} module in DEBUG mode.</echo>
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
         <echo level="info">java.debug: ${java.debug}</echo>
         <echo level="info">class.dir: ${class.dir}</echo>
@@ -108,6 +109,7 @@
         <property name="java.debug" value="false" />
         <property name="class.dir" value="${basedir}/classes" />
         <property name="file.out.dir" value="${out.dir}/release" />
+        <echo level="info">Builds the ${ndk.module} module in RELEASE mode.</echo>
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
         <echo level="info">java.debug: ${java.debug}</echo>
         <echo level="info">class.dir: ${class.dir}</echo>
@@ -195,6 +197,12 @@
                 <exclude name="**/out/**" />
             </fileset>
         </delete>
+
+        <echo level="info">Install: ${file.out.dir}/${jar.file.name}</echo>
+        <echo level="info">Install: ${out.dir}/attrs_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/attrs_recyclerview.xml</echo>
+        <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
+        <echo level="info">Install: ${out.dir}/recyclerview-proguard.txt</echo>
     </target>
 
     <!-- target -clean -->
@@ -211,34 +219,18 @@
         </delete>
     </target>
 
-    <!-- target -echo -->
-    <target name="-echo">
-        <echo level="info">Builds the ${ndk.module} module in ${type} mode.</echo>
-        <echo level="info">Install: ${file.out.dir}/${jar.file.name}</echo>
-        <echo level="info">Install: ${out.dir}/attrs_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/attrs_recyclerview.xml</echo>
-        <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
-        <echo level="info">Install: ${out.dir}/recyclerview-proguard.txt</echo>
-    </target>
-
     <!-- target test -->
-    <target name="test" depends="-clean, -copy, -pre-compile-test, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile">
-        <antcall target="-echo" inheritAll="true">
-            <param name="type" value="TEST" />
-        </antcall>
-    </target>
+    <target name="test" depends="-clean, -copy, -pre-compile-test, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -pre-compile-debug, -compile-jar, -compile-so, -post-compile">
-        <antcall target="-echo" inheritAll="true">
-            <param name="type" value="DEBUG" />
-        </antcall>
-    </target>
+    <target name="debug" depends="-clean, -copy, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile">
-        <antcall target="-echo" inheritAll="true">
-            <param name="type" value="RELEASE" />
-        </antcall>
+    <target name="release" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile" />
+
+    <!-- target all -->
+    <target name="all">
+        <antcall target="debug" />
+        <antcall target="release" />
     </target>
 </project>

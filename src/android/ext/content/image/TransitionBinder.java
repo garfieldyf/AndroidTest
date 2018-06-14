@@ -20,7 +20,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     /**
      * The length of the transition in milliseconds.
      */
-    protected int mDuration;
+    public int duration;
 
     /**
      * Constructor
@@ -42,27 +42,17 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      */
     public TransitionBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage, int durationMillis) {
         super(imageCache, transformer, defaultImage);
-        mDuration = durationMillis;
-    }
-
-    /**
-     * Returns the length of the transition in milliseconds.
-     * @return The length of the transition.
-     */
-    public final int getDuration() {
-        return mDuration;
+        duration = durationMillis;
     }
 
     @Override
     public TransitionBinder<URI, Image> copy(Drawable defaultImage) {
-        return new TransitionBinder<URI, Image>(null, mTransformer, defaultImage, mDuration);
+        return new TransitionBinder<URI, Image>(null, mTransformer, defaultImage, duration);
     }
 
     @Override
     protected void inflateAttributes(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
-        mDuration = a.getInt(0 /* android.R.attr.duration */, 300);
-        a.recycle();
+        duration = obtainDuration(context, attrs);
     }
 
     @Override
@@ -76,7 +66,14 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
             final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { mDefaultImage, mTransformer.transform(uri, target, value) });
             view.setImageDrawable(drawable);
             drawable.setCrossFadeEnabled(true);
-            drawable.startTransition(mDuration);
+            drawable.startTransition(duration);
         }
+    }
+
+    private static int obtainDuration(Context context, AttributeSet attrs) {
+        final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
+        final int duration = a.getInt(0 /* android.R.attr.duration */, 300);
+        a.recycle();
+        return duration;
     }
 }

@@ -182,7 +182,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
     /* package */ final void dump(Context context, Printer printer) {
         if (mTransformer instanceof CacheTransformer) {
-            ((CacheTransformer)mTransformer).dump(context, printer);
+            Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
         }
     }
 
@@ -454,8 +454,8 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * Class <tt>CacheTransformer</tt> is an implementation of a {@link Transformer}.
      */
     private static final class CacheTransformer<URI, Image> extends Transformer<URI, Image> {
-        private final Cache<URI, Drawable> mImageCache;
-        private final Transformer<URI, Image> mTransformer;
+        public final Cache<URI, Drawable> mImageCache;
+        public final Transformer<URI, Image> mTransformer;
 
         /**
          * Constructor
@@ -475,10 +475,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             }
 
             return drawable;
-        }
-
-        /* package */ final void dump(Context context, Printer printer) {
-            Caches.dumpCache(mImageCache, context, printer);
         }
     }
 }

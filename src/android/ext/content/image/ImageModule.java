@@ -26,8 +26,12 @@ import android.util.Printer;
  * @version 2.0
  */
 public class ImageModule<URI, Image> implements ComponentCallbacks2 {
-    protected final Context mContext;
-    protected final Executor mExecutor;
+    /**
+     * The application <tt>Context</tt>.
+     */
+    public final Context mContext;
+    public final Executor mExecutor;
+
     protected final FileCache mFileCache;
     protected final Cache<URI, Image> mImageCache;
 

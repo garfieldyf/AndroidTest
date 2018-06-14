@@ -32,9 +32,9 @@ import android.util.JsonWriter;
  * @version 1.0
  */
 public final class DownloadPostRequest extends DownloadRequest {
-    private int offset;
-    private int count;
-    private Object data;
+    private int mOffset;
+    private int mCount;
+    private Object mData;
 
     /**
      * Constructor
@@ -83,8 +83,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      */
     public final DownloadPostRequest post(Object data) {
         DebugUtils.__checkError(data == null, "data == null");
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
-        this.data = data;
+        DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
+        mData = data;
         return this;
     }
 
@@ -100,9 +100,9 @@ public final class DownloadPostRequest extends DownloadRequest {
      */
     public final DownloadPostRequest post(PostCallback callback, int token) {
         DebugUtils.__checkError(callback == null, "callback == null");
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
-        this.count = token;
-        this.data  = callback;
+        DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
+        mCount = token;
+        mData  = callback;
         return this;
     }
 
@@ -118,55 +118,55 @@ public final class DownloadPostRequest extends DownloadRequest {
      */
     public final DownloadPostRequest post(byte[] data, int offset, int count) {
         DebugUtils.__checkRange(offset, count, data.length);
-        DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
-        this.data   = data;
-        this.count  = count;
-        this.offset = offset;
+        DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
+        mData   = data;
+        mCount  = count;
+        mOffset = offset;
         return this;
     }
 
     @Override
     /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
         __checkHeaders(true);
-        if (data instanceof JSONObject || data instanceof JSONArray || data instanceof Collection || data instanceof Map || data instanceof Object[]) {
+        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
             connectImpl();
-            postData(data);
-        } else if (data instanceof byte[]) {
+            postData(mData);
+        } else if (mData instanceof byte[]) {
             connectImpl();
-            postData((byte[])data, offset, count);
-        } else if (data instanceof InputStream) {
+            postData((byte[])mData, mOffset, mCount);
+        } else if (mData instanceof InputStream) {
             connectImpl();
-            postData((InputStream)data, tempBuffer);
-        } else if (data instanceof String) {
-            final byte[] data = ((String)this.data).getBytes();
+            postData((InputStream)mData, tempBuffer);
+        } else if (mData instanceof String) {
+            final byte[] data = ((String)mData).getBytes();
             connectImpl();
             postData(data, 0, data.length);
-        } else if (data instanceof PostCallback) {
+        } else if (mData instanceof PostCallback) {
             connectImpl();
-            ((PostCallback)data).onPostData(connection, count, tempBuffer);
+            ((PostCallback)mData).onPostData(mConnection, mCount, tempBuffer);
         } else {
-            connection.connect();
+            mConnection.connect();
         }
 
         // Clears the data to avoid potential memory leaks.
-        this.data = null;
+        mData = null;
         __checkHeaders(false);
-        return ((HttpURLConnection)connection).getResponseCode();
+        return ((HttpURLConnection)mConnection).getResponseCode();
     }
 
     /**
      * Connects to the remote HTTP server with the specified method.
      */
     private void connectImpl() throws IOException {
-        ((HttpURLConnection)connection).setRequestMethod("POST");
-        connection.connect();
+        ((HttpURLConnection)mConnection).setRequestMethod("POST");
+        mConnection.connect();
     }
 
     /**
      * Posts the <tt>InputStream</tt> contents to the remote HTTP server.
      */
     private void postData(InputStream is, byte[] tempBuffer) throws IOException {
-        final OutputStream os = connection.getOutputStream();
+        final OutputStream os = mConnection.getOutputStream();
         try {
             FileUtils.copyStream(is, os, null, tempBuffer);
         } finally {
@@ -178,7 +178,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the byte array to the remote HTTP server.
      */
     private void postData(byte[] data, int offset, int count) throws IOException {
-        final OutputStream os = connection.getOutputStream();
+        final OutputStream os = mConnection.getOutputStream();
         try {
             os.write(data, offset, count);
         } finally {
@@ -190,7 +190,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the data to the remote HTTP server.
      */
     private void postData(Object data) throws IOException {
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(connection.getOutputStream()));
+        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream()));
         try {
             JSONUtils.writeObject(writer, data);
         } finally {

@@ -17,7 +17,10 @@ public final class OutlineUtils {
      * Class <tt>RoundedRectBounds</tt> is an implementation of a {@link ViewOutlineProvider}.
      */
     public static final class RoundedRectBounds extends ViewOutlineProvider {
-        private final float mRadius;
+        /**
+         * The rounded rect corner radius.
+         */
+        public final float radius;
 
         /**
          * Constructor
@@ -25,7 +28,7 @@ public final class OutlineUtils {
          * @see #RoundedRectBounds(Resources, int)
          */
         public RoundedRectBounds(float radius) {
-            mRadius = radius;
+            this.radius = radius;
         }
 
         /**
@@ -35,12 +38,12 @@ public final class OutlineUtils {
          * @see #RoundedRectBounds(float)
          */
         public RoundedRectBounds(Resources res, int id) {
-            mRadius = res.getDimension(id);
+            this.radius = res.getDimension(id);
         }
 
         @Override
         public void getOutline(View view, Outline outline) {
-            outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), mRadius);
+            outline.setRoundRect(0, 0, view.getWidth(), view.getHeight(), radius);
         }
     }
 

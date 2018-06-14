@@ -36,7 +36,7 @@ import android.util.LogPrinter;
  */
 public class DownloadRequest {
     public boolean __checkHeaders = true;
-    /* package */ final URLConnection connection;
+    /* package */ final URLConnection mConnection;
 
     /**
      * Constructor
@@ -46,7 +46,7 @@ public class DownloadRequest {
      */
     @Keep
     public DownloadRequest(URL url) throws IOException {
-        connection = url.openConnection();
+        mConnection = url.openConnection();
         redirects(true);
     }
 
@@ -69,7 +69,7 @@ public class DownloadRequest {
      * @see URLConnection#setUseCaches(boolean)
      */
     public final DownloadRequest useCaches(boolean useCaches) {
-        connection.setUseCaches(useCaches);
+        mConnection.setUseCaches(useCaches);
         return this;
     }
 
@@ -81,8 +81,8 @@ public class DownloadRequest {
      * @see HttpURLConnection#setInstanceFollowRedirects(boolean)
      */
     public final DownloadRequest redirects(boolean redirects) {
-        if (connection instanceof HttpURLConnection) {
-            ((HttpURLConnection)connection).setInstanceFollowRedirects(redirects);
+        if (mConnection instanceof HttpURLConnection) {
+            ((HttpURLConnection)mConnection).setInstanceFollowRedirects(redirects);
         }
 
         return this;
@@ -96,7 +96,7 @@ public class DownloadRequest {
      * @see URLConnection#setReadTimeout(int)
      */
     public final DownloadRequest readTimeout(int timeoutMillis) {
-        connection.setReadTimeout(timeoutMillis);
+        mConnection.setReadTimeout(timeoutMillis);
         return this;
     }
 
@@ -107,7 +107,7 @@ public class DownloadRequest {
      * @see URLConnection#setConnectTimeout(int)
      */
     public final DownloadRequest connectTimeout(int timeoutMillis) {
-        connection.setConnectTimeout(timeoutMillis);
+        mConnection.setConnectTimeout(timeoutMillis);
         return this;
     }
 
@@ -117,7 +117,7 @@ public class DownloadRequest {
      * @return This request.
      */
     public final DownloadRequest accept(String value) {
-        connection.setRequestProperty("Accept", value);
+        mConnection.setRequestProperty("Accept", value);
         return this;
     }
 
@@ -127,7 +127,7 @@ public class DownloadRequest {
      * @return This request.
      */
     public final DownloadRequest userAgent(String value) {
-        connection.setRequestProperty("User-Agent", value);
+        mConnection.setRequestProperty("User-Agent", value);
         return this;
     }
 
@@ -137,7 +137,7 @@ public class DownloadRequest {
      * @return This request.
      */
     public final DownloadRequest connection(String value) {
-        connection.setRequestProperty("Connection", value);
+        mConnection.setRequestProperty("Connection", value);
         return this;
     }
 
@@ -148,7 +148,7 @@ public class DownloadRequest {
      * @see #range(int)
      */
     public final DownloadRequest range(String value) {
-        connection.setRequestProperty("Range", "bytes=" + value);
+        mConnection.setRequestProperty("Range", "bytes=" + value);
         return this;
     }
 
@@ -159,7 +159,7 @@ public class DownloadRequest {
      * @see #range(String)
      */
     public final DownloadRequest range(int offset) {
-        connection.setRequestProperty("Range", "bytes=" + offset + "-");
+        mConnection.setRequestProperty("Range", "bytes=" + offset + "-");
         return this;
     }
 
@@ -169,7 +169,7 @@ public class DownloadRequest {
      * @return This request.
      */
     public final DownloadRequest contentType(String value) {
-        connection.setRequestProperty("Content-Type", value);
+        mConnection.setRequestProperty("Content-Type", value);
         return this;
     }
 
@@ -179,7 +179,7 @@ public class DownloadRequest {
      * @return This request.
      */
     public final DownloadRequest contentEncoding(String value) {
-        connection.setRequestProperty("Content-Encoding", value);
+        mConnection.setRequestProperty("Content-Encoding", value);
         return this;
     }
 
@@ -192,7 +192,7 @@ public class DownloadRequest {
      * @see URLConnection#setRequestProperty(String, String)
      */
     public final DownloadRequest requestHeader(String field, String value) {
-        connection.setRequestProperty(field, value);
+        mConnection.setRequestProperty(field, value);
         return this;
     }
 
@@ -205,7 +205,7 @@ public class DownloadRequest {
     public final DownloadRequest requestHeaders(Map<String, String> headers) {
         if (ArrayUtils.getSize(headers) > 0) {
             for (Entry<String, String> header : headers.entrySet()) {
-                connection.setRequestProperty(header.getKey(), header.getValue());
+                mConnection.setRequestProperty(header.getKey(), header.getValue());
             }
         }
 
@@ -305,17 +305,17 @@ public class DownloadRequest {
      */
     /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
         __checkHeaders(true);
-        connection.connect();
+        mConnection.connect();
         __checkHeaders(false);
-        return (connection instanceof HttpURLConnection ? ((HttpURLConnection)connection).getResponseCode() : HTTP_OK);
+        return (mConnection instanceof HttpURLConnection ? ((HttpURLConnection)mConnection).getResponseCode() : HTTP_OK);
     }
 
     /**
      * Disconnects the connection and release any system resources it holds.
      */
     /* package */ final void disconnect() {
-        if (connection instanceof HttpURLConnection) {
-            ((HttpURLConnection)connection).disconnect();
+        if (mConnection instanceof HttpURLConnection) {
+            ((HttpURLConnection)mConnection).disconnect();
         }
     }
 
@@ -323,7 +323,7 @@ public class DownloadRequest {
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      */
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(connection.getInputStream()));
+        final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream()));
         try {
             return JSONUtils.newInstance(reader, cancelable);
         } finally {
@@ -335,7 +335,7 @@ public class DownloadRequest {
      * Downloads the resource from the remote server with the arguments supplied to this request.
      */
     /* package */ final void downloadImpl(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        final InputStream is = connection.getInputStream();
+        final InputStream is = mConnection.getInputStream();
         try {
             FileUtils.copyStream(is, out, cancelable, tempBuffer);
         } finally {
@@ -363,9 +363,9 @@ public class DownloadRequest {
         if (checkHeaders) {
             final LogPrinter printer = new LogPrinter(Log.DEBUG, getClass().getName());
             if (request) {
-                NetworkUtils.dumpRequestHeaders(connection, printer);
+                NetworkUtils.dumpRequestHeaders(mConnection, printer);
             } else {
-                NetworkUtils.dumpResponseHeaders(connection, printer);
+                NetworkUtils.dumpResponseHeaders(mConnection, printer);
             }
         }
     }

@@ -110,9 +110,9 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
         DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
         try {
             final int statusCode = mRequest.connectImpl(null);
-            return (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL ? onDownload(mRequest.connection, statusCode, params) : null);
+            return (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL ? onDownload(mRequest.mConnection, statusCode, params) : null);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't download from - " + mRequest.connection.getURL().toString(), e);
+            Log.e(getClass().getName(), "Couldn't download from - " + mRequest.mConnection.getURL().toString(), e);
             return null;
         } finally {
             mRequest.disconnect();
@@ -127,7 +127,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @see #download(OutputStream)
      */
     protected final ByteArrayBuffer download() throws IOException {
-        final InputStream is = mRequest.connection.getInputStream();
+        final InputStream is = mRequest.mConnection.getInputStream();
         try {
             final ByteArrayBuffer result = new ByteArrayBuffer();
             result.readFrom(is, this);

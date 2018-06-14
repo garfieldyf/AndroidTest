@@ -137,7 +137,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     @Override
     public void write(byte[] buffer, int offset, int count) {
-        ArrayUtils.checkRange(offset, count, buffer.length);
+        DebugUtils.__checkRange(offset, count, buffer.length);
         if (count > 0) {
             expandCapacity(count, true);
             System.arraycopy(buffer, offset, data, size, count);

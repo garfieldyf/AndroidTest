@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
@@ -68,6 +67,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(PostCallback, int)
      */
     public final DownloadPostRequest post(byte[] data) {
+        DebugUtils.__checkError(data == null, "data == null");
         return post(data, 0, data.length);
     }
 
@@ -82,6 +82,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
+        DebugUtils.__checkError(data == null, "data == null");
         DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         this.data = data;
         return this;
@@ -98,6 +99,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(byte[], int, int)
      */
     public final DownloadPostRequest post(PostCallback callback, int token) {
+        DebugUtils.__checkError(callback == null, "callback == null");
         DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         this.count = token;
         this.data  = callback;
@@ -115,8 +117,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @see #post(PostCallback, int)
      */
     public final DownloadPostRequest post(byte[] data, int offset, int count) {
+        DebugUtils.__checkRange(offset, count, data.length);
         DebugUtils.__checkWarning(this.data != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
-        ArrayUtils.checkRange(offset, count, data.length);
         this.data   = data;
         this.count  = count;
         this.offset = offset;

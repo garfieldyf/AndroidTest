@@ -6,7 +6,6 @@ libs
 /res
 /src/com
 /src/android/ext/reference
-/src/android/ext/temp
 /obj
 /.classpath
 /.gitignore

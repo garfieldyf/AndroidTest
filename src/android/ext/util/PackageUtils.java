@@ -222,6 +222,10 @@ public final class PackageUtils {
             return (icon instanceof BitmapDrawable ? new RoundedBitmapDrawable(((BitmapDrawable)icon).getBitmap(), res.getDimension(id)) : icon);
         }
 
+        public final void dump(Printer printer) {
+            printer.println(dump(new StringBuilder(256)).append(" }").toString());
+        }
+
         @Override
         public String toString() {
             return packageInfo.packageName;
@@ -244,43 +248,23 @@ public final class PackageUtils {
             this.label = loadLabel(context, res);
         }
 
-        /**
-         * Loads the application's icon with the arguments supplied to the {@link #packageInfo}.
-         * @param context The <tt>Context</tt>.
-         * @param res The <tt>Resources</tt> to load the icon.
-         * @return A <tt>Drawable</tt> containing the application's icon. If the application does
-         * not have an icon, the default icon is returned.
-         * @see #loadLabel(Context, Resources)
-         */
-        @SuppressWarnings("deprecation")
-        protected Drawable loadIcon(Context context, Resources res) {
-            final Drawable icon = res.getDrawable(packageInfo.applicationInfo.icon);
-            return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
-        }
-
-        /**
-         * Loads the application's label with the arguments supplied to the {@link #packageInfo}.
-         * @param context The <tt>Context</tt>.
-         * @param res The <tt>Resources</tt> to load the label.
-         * @return A <tt>CharSequence</tt> containing the application's label. If the application
-         * does not have a label, the package name is returned.
-         * @see #loadIcon(Context, Resources)
-         */
-        protected CharSequence loadLabel(Context context, Resources res) {
-            final CharSequence label = res.getText(packageInfo.applicationInfo.labelRes);
-            return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
-        }
-
-        public final void dump(Printer printer) {
-            printer.println(dump(new StringBuilder(256)).append(" }").toString());
-        }
-
         protected StringBuilder dump(StringBuilder out) {
             return out.append(getClass().getSimpleName())
                 .append(" { package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", label = ").append(label)
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
+        }
+
+        @SuppressWarnings("deprecation")
+        private Drawable loadIcon(Context context, Resources res) {
+            final Drawable icon = res.getDrawable(packageInfo.applicationInfo.icon);
+            return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
+        }
+
+        private CharSequence loadLabel(Context context, Resources res) {
+            final CharSequence label = res.getText(packageInfo.applicationInfo.labelRes);
+            return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
         }
 
         public static final Factory<AppPackageInfo> FACTORY = new Factory<AppPackageInfo>() {
@@ -293,8 +277,8 @@ public final class PackageUtils {
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
-     * @param <T> A class that extends {@link AppPackageInfo} that will
-     * be the parser result type.
+     * @param <T> A class that extends {@link AppPackageInfo} that will be
+     * the parser result type.
      */
     public static class PackageParser<T extends AppPackageInfo> implements ScanCallback {
         /**

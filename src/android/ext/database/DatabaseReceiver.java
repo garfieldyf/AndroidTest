@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -22,17 +21,17 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * <li>{@link #EXTRA_RESULT} containing the long value, May be the row ID of the inserted row
      * or the number of rows affected for update/delete.</ul>
      */
-    public static final String ACTION_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
+    public static final String ACTION_TABLE_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
 
     /**
      * The name of the extra used to define the result.
-     * @see #ACTION_CONTENT_CHANGED
+     * @see #ACTION_TABLE_CONTENT_CHANGED
      */
     public static final String EXTRA_RESULT = "result";
 
     /**
      * The name of the extra used to define the SQL statement type.
-     * @see #ACTION_CONTENT_CHANGED
+     * @see #ACTION_TABLE_CONTENT_CHANGED
      */
     public static final String EXTRA_STATEMENT = "statement";
 
@@ -62,90 +61,62 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static final int STATEMENT_REPLACE = 4;
 
     /**
-     * The scheme of the intent's data.
-     */
-    public final String scheme;
-
-    /**
-     * Constructor
-     * @param databaseName The database name, or <tt>null</tt> for an in-memory database.
-     * @param tableName The table name.
-     */
-    public DatabaseReceiver(String databaseName, String tableName) {
-        this.scheme = buildScheme(databaseName, tableName);
-    }
-
-    /**
      * Register this receiver for the local broadcasts.
      * @param context The <tt>Context</tt>.
+     * @param scheme The <tt>Intent</tt> data scheme to match.
+     * May be <em>databasename.tablename</em>
      * @see #unregister(Context)
      */
-    public final void register(Context context) {
+    public final void register(Context context, String scheme) {
         registerReceiver(context, scheme, this);
     }
 
     /**
      * Unregister this receiver.
      * @param context The <tt>Context</tt>.
-     * @see #register(Context)
+     * @see #register(Context, String)
      */
     public final void unregister(Context context) {
         LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
     }
 
     /**
-     * Register a receive for any local broadcasts that match the given <em>databaseName</em> and <em>tableName</em>.
+     * Register a receive for any local broadcasts that match the given <em>scheme</em>.
      * @param context The <tt>Context</tt>.
-     * @param databaseName The database name to be registered, or <tt>null</tt> for an in-memory database.
-     * @param tableName The table name to be registered.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
      * @param receiver The {@link BroadcastReceiver} to handle the broadcast.
-     * @see #buildScheme(String, String)
      * @see LocalBroadcastManager#unregisterReceiver(BroadcastReceiver)
      */
-    public static void registerReceiver(Context context, String databaseName, String tableName, BroadcastReceiver receiver) {
-        registerReceiver(context, buildScheme(databaseName, tableName), receiver);
+    public static void registerReceiver(Context context, String scheme, BroadcastReceiver receiver) {
+        final IntentFilter filter = new IntentFilter(ACTION_TABLE_CONTENT_CHANGED);
+        filter.addDataScheme(scheme);
+        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter);
     }
 
     /**
-     * Broadcasts the given the <em>databaseName</em> and <em>tableName</em> to all interested <tt>BroadcastReceiver</tt>s.
+     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceiver</tt>s.
      * @param context The <tt>Context</tt>.
-     * @param databaseName The database name to match, or <tt>null</tt> for an in-memory database.
-     * @param tableName The table name to be match.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param result The SQL statement perform the result.
-     * @see #buildScheme(String, String)
-     * @see #resolveIntent(String, String, int, long)
+     * @see #resolveIntent(String, int, long)
      * @see LocalBroadcastManager#sendBroadcast(Intent)
      */
-    public static void sendBroadcast(Context context, String databaseName, String tableName, int statement, long result) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(databaseName, tableName, statement, result));
+    public static void sendBroadcast(Context context, String scheme, int statement, long result) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**
      * Returns the {@link Intent} that should be used to send local broadcast.
-     * @param databaseName The database name, or <tt>null</tt> for an in-memory database.
-     * @param tableName The table name.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param result The SQL statement perform the result.
-     * @see #buildScheme(String, String)
      */
-    public static Intent resolveIntent(String databaseName, String tableName, int statement, long result) {
-        final Intent intent = new Intent(ACTION_CONTENT_CHANGED);
+    public static Intent resolveIntent(String scheme, int statement, long result) {
+        final Intent intent = new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(scheme + "://contents"));
         intent.putExtra(EXTRA_RESULT, result);
         intent.putExtra(EXTRA_STATEMENT, statement);
-        intent.setData(Uri.parse(buildScheme(databaseName, tableName) + "://contents"));
         return intent;
-    }
-
-    /**
-     * Returns the scheme of the intent's data with the given <em>databaseName</em> and <em>tableName</em>.
-     * @param databaseName The database name, or <tt>null</tt> for an in-memory database.
-     * @param tableName The table name.
-     * @return The scheme of the <tt>Intent</tt>.
-     * @see #resolveIntent(String, String, int, long)
-     */
-    public static String buildScheme(String databaseName, String tableName) {
-        return new StringBuilder(32).append(TextUtils.isEmpty(databaseName) ? ":memory:" : databaseName).append('.').append(tableName).toString();
     }
 
     public static void dump(String tag, Intent intent) {
@@ -174,11 +145,5 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
         default:
             return "UNKNOWN";
         }
-    }
-
-    private static void registerReceiver(Context context, String scheme, BroadcastReceiver receiver) {
-        final IntentFilter filter = new IntentFilter(ACTION_CONTENT_CHANGED);
-        filter.addDataScheme(scheme);
-        LocalBroadcastManager.getInstance(context).registerReceiver(receiver, filter);
     }
 }

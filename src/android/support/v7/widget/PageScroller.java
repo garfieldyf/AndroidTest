@@ -14,7 +14,6 @@ import android.view.View;
  */
 public class PageScroller {
     private static int[] PAGE_SCROLLER_ATTRS;
-    private boolean mAnimatable;
 
     /* package */ int mCurrentPage;
     /* package */ final int mPageSize;
@@ -29,8 +28,7 @@ public class PageScroller {
      * @see #PageScroller(Context, AttributeSet, LinearLayoutManager)
      */
     public PageScroller(LinearLayoutManager layoutManager, int pageSize) {
-        mAnimatable = true;
-        mPageSize   = pageSize;
+        mPageSize = pageSize;
         mLayoutManager = layoutManager;
     }
 
@@ -43,11 +41,9 @@ public class PageScroller {
      */
     public PageScroller(Context context, AttributeSet attrs, LinearLayoutManager layoutManager) {
         final TypedArray a = context.obtainStyledAttributes(attrs, PAGE_SCROLLER_ATTRS);
+        mLayoutManager = layoutManager;
         mPageSize = a.getDimensionPixelOffset(0 /* R.styleable.PageScroller_pageSize */, 0);
         a.recycle();
-
-        mAnimatable = true;
-        mLayoutManager = layoutManager;
     }
 
     /**
@@ -88,7 +84,7 @@ public class PageScroller {
                 dy = (mLayoutManager.mShouldReverseLayout ? -offset : offset);
             }
 
-            if (immediate || !mAnimatable || mLayoutManager.mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
+            if (immediate || mLayoutManager.mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
                 mLayoutManager.mRecyclerView.scrollBy(dx, dy);
             } else {
                 mLayoutManager.mRecyclerView.smoothScrollBy(dx, dy);
@@ -133,21 +129,19 @@ public class PageScroller {
      * @param countPerPage The item count of per-page to display.
      */
     public void requestItemFocus(int position, int countPerPage) {
-        if (position >= 0 && position < mLayoutManager.getItemCount()) {
+        if (position >= 0 && position < mLayoutManager.getItemCount() && mLayoutManager.mRecyclerView != null) {
             final View child = mLayoutManager.findViewByPosition(position);
-            if (child != null) {
-                mAnimatable = false;
-                child.requestFocus();
-            } else {
+            if (child == null) {
                 final int newPage = position / countPerPage;
                 mLayoutManager.scrollToPositionWithOffset(newPage * countPerPage, 0);
-                mLayoutManager.postOnAnimation(new RequestFocusAction(position));
 
                 // Dispatch the current page changed.
                 if (mCurrentPage != newPage) {
                     dispatchPageChanged(newPage, mCurrentPage);
                 }
             }
+
+            mLayoutManager.mRecyclerView.post(new RequestFocusAction(position));
         }
     }
 
@@ -194,7 +188,6 @@ public class PageScroller {
             handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage - 1 : mCurrentPage + 1, immediate);
         }
 
-        mAnimatable = true;
         return handled;
     }
 
@@ -237,7 +230,6 @@ public class PageScroller {
             handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage - 1 : mCurrentPage + 1, immediate);
         }
 
-        mAnimatable = true;
         return handled;
     }
 
@@ -325,12 +317,14 @@ public class PageScroller {
 
         @Override
         public void run() {
-            final View child = mLayoutManager.findViewByPosition(mPosition);
-            if (child != null) {
-                child.requestFocus();
-            } else if (mRetryCount < 3) {
-                ++mRetryCount;
-                mLayoutManager.postOnAnimation(this);
+            if (mLayoutManager.mRecyclerView != null) {
+                final View child = mLayoutManager.findViewByPosition(mPosition);
+                if (child != null) {
+                    child.requestFocus();
+                } else if (mRetryCount < 3) {
+                    ++mRetryCount;
+                    mLayoutManager.mRecyclerView.post(this);
+                }
             }
         }
     }

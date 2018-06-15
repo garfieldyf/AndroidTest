@@ -3,6 +3,7 @@ package android.support.v7.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
+import android.ext.util.UIHandler;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
@@ -129,7 +130,7 @@ public class PageScroller {
      * @param countPerPage The item count of per-page to display.
      */
     public void requestItemFocus(int position, int countPerPage) {
-        if (position >= 0 && position < mLayoutManager.getItemCount() && mLayoutManager.mRecyclerView != null) {
+        if (position >= 0 && position < mLayoutManager.getItemCount()) {
             final View child = mLayoutManager.findViewByPosition(position);
             if (child == null) {
                 final int newPage = position / countPerPage;
@@ -141,7 +142,7 @@ public class PageScroller {
                 }
             }
 
-            mLayoutManager.mRecyclerView.post(new RequestFocusAction(position));
+            UIHandler.sInstance.requestChildFocus(mLayoutManager, position);
         }
     }
 
@@ -301,31 +302,6 @@ public class PageScroller {
         mCurrentPage = newPage;
         if (mOnPageChangeListener != null) {
             mOnPageChangeListener.onPageChanged(mLayoutManager.mRecyclerView, newPage, oldPage);
-        }
-    }
-
-    /**
-     * Class <tt>RequestFocusAction</tt> is an implementation of a {@link Runnable}.
-     */
-    private final class RequestFocusAction implements Runnable {
-        private int mRetryCount;
-        private final int mPosition;
-
-        public RequestFocusAction(int position) {
-            mPosition = position;
-        }
-
-        @Override
-        public void run() {
-            if (mLayoutManager.mRecyclerView != null) {
-                final View child = mLayoutManager.findViewByPosition(mPosition);
-                if (child != null) {
-                    child.requestFocus();
-                } else if (mRetryCount < 3) {
-                    ++mRetryCount;
-                    mLayoutManager.mRecyclerView.post(this);
-                }
-            }
         }
     }
 

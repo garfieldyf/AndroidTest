@@ -8,6 +8,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.util.Pair;
 import android.view.View;
 
@@ -226,6 +227,13 @@ public final class UIHandler extends Handler {
         sendMessage(msg);
     }
 
+    /**
+     * Called on the <tt>PageScroller</tt> internal, do not call this method directly.
+     */
+    public final void requestChildFocus(LayoutManager layoutManager, int position) {
+        sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, 0, layoutManager));
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
@@ -253,9 +261,13 @@ public final class UIHandler extends Handler {
             ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
             break;
 
-        // The RecyclerView.Adapter message handle.
+        // The RecyclerView message handle.
         case MESSAGE_REQUEST_FOCUS:
             ((View)msg.obj).requestFocus(msg.arg1);
+            break;
+
+        case MESSAGE_CHILD_FOCUS:
+            handleRequestChildFocus(msg);
             break;
 
         case MESSAGE_DATA_CHANGED:
@@ -294,13 +306,26 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_COMPLETED     = 0xEEEEEEEE;
     private static final int MESSAGE_TASK_PROGRESS = 0xEFEFEFEF;
 
-    // The RecyclerView.Adapter message.
+    // The RecyclerView message.
+    private static final int MESSAGE_CHILD_FOCUS   = 0xF8F8F8F8;
     private static final int MESSAGE_ITEM_MOVED    = 0xFBFBFBFB;
     private static final int MESSAGE_DATA_CHANGED  = 0xFAFAFAFA;
     private static final int MESSAGE_ITEM_REMOVED  = 0xFCFCFCFC;
     private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
     private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
     private static final int MESSAGE_REQUEST_FOCUS = 0xF9F9F9F9;
+
+    /**
+     * Handle the recycler view's child view request focus.
+     */
+    private void handleRequestChildFocus(Message msg) {
+        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
+        if (child != null) {
+            child.requestFocus();
+        } else if (msg.arg2 < 3) {
+            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 + 1, msg.obj));
+        }
+    }
 
     /**
      * This class cannot be instantiated.

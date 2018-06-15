@@ -158,6 +158,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see #setPage(int, JSONArray)
      */
     public void setPage(int page, Page<E> data, Object payload) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int count = mImpl.setPage(page, data);
         if (count > 0) {
             UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getAdapterPosition(page, 0), count, payload);

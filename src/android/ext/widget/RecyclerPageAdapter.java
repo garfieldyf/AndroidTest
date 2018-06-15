@@ -202,6 +202,15 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Returns the item count of the specified index <em>page</em>.
+     * @param page The index of the page.
+     * @return The item count.
+     */
+    public final int getPageSize(int page) {
+        return (page > 0 ? mImpl.mPageSize : mImpl.mFirstPageSize);
+    }
+
+    /**
      * Returns the index of the page with the given the adapter position.
      * @param position The adapter position of the item.
      * @return The index of the page.

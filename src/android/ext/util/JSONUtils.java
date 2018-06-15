@@ -33,6 +33,14 @@ public final class JSONUtils {
     }
 
     /**
+     * Returns a <tt>0-length</tt>, immutable {@link JSONObject}.
+     * @return An empty {@link JSONObject}.
+     */
+    public static JSONObject emptyObject() {
+        return EmptyJSONObject.sInstance;
+    }
+
+    /**
      * Returns the number of values in the <em>array</em>,
      * handling <tt>null array</tt>.
      * @param array The <tt>JSONArray</tt>.
@@ -419,6 +427,68 @@ public final class JSONUtils {
 
         @Override
         public JSONArray put(int index, Object value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
+     */
+    private static final class EmptyJSONObject extends JSONObject {
+        public static final JSONObject sInstance = new EmptyJSONObject();
+
+        @Override
+        public int length() {
+            return 0;
+        }
+
+        @Override
+        public boolean has(String name) {
+            return false;
+        }
+
+        @Override
+        public boolean isNull(String name) {
+            return true;
+        }
+
+        @Override
+        public Object remove(String name) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject put(String name, int value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject put(String name, long value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject put(String name, Object value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject put(String name, double value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject put(String name, boolean value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject putOpt(String name, Object value) throws JSONException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public JSONObject accumulate(String name, Object value) throws JSONException {
             throw new UnsupportedOperationException();
         }
     }

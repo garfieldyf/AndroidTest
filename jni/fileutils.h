@@ -79,6 +79,11 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     return (path.empty() ? EINVAL : __NS::createDirectory(path.data, path.size));
 }
 
+__STATIC_INLINE__ bool isDirectory(struct dirent* entry, const char* path)
+{
+    return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
+}
+
 __STATIC_INLINE__ void buildUniqueFileName(char* path, size_t length, const stdutil::char_sequence& dirPath, const char* name)
 {
     assert(path);
@@ -138,7 +143,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                     break;
                 } else if (result == SC_BREAK) {
                     continue;
-                } else if (entry->d_type == DT_DIR && ::access(filePath, F_OK) == 0) {
+                } else if (isDirectory(entry, filePath) {
                     // If filePath is a directory adds it to dirPaths back.
                     dirPaths.push_back(filePath);
                 }
@@ -174,7 +179,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
             }
 
             // Scans the sub directory.
-            if (entry->d_type == DT_DIR && ::access(filePath, F_OK) == 0 && ((errnum = scanDescendentFiles(env, filePath, filter, callback, userData, result)) != 0 || result == SC_STOP)) {
+            if (isDirectory(entry, filePath) && ((errnum = scanDescendentFiles(env, filePath, filter, callback, userData, result)) != 0 || result == SC_STOP)) {
                 break;
             }
         }

@@ -223,7 +223,7 @@ public final class ZipUtils {
         final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             // Uncompress the ZIP entry with check CRC32.
-            cancelable = DummyCancelable.obtain(cancelable);
+            cancelable = DummyCancelable.wrap(cancelable);
             crc.reset();
             for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
                 os.write(buffer, 0, readBytes);

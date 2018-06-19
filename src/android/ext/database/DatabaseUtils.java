@@ -605,6 +605,8 @@ public final class DatabaseUtils {
                 field.set(result, cursor.getBlob(columnIndex));
             } else if (type == float.class) {
                 field.setFloat(result, cursor.getFloat(columnIndex));
+            } else if (type == short.class) {
+                field.setShort(result, cursor.getShort(columnIndex));
             } else if (type == double.class) {
                 field.setDouble(result, cursor.getDouble(columnIndex));
             } else if (type == boolean.class) {
@@ -628,6 +630,8 @@ public final class DatabaseUtils {
             result = createIntArray(cursor);
         } else if (componentType == long.class) {
             result = createLongArray(cursor);
+        } else if (componentType == short.class) {
+            result = createShortArray(cursor);
         } else if (componentType == float.class) {
             result = createFloatArray(cursor);
         } else if (componentType == double.class) {
@@ -654,6 +658,15 @@ public final class DatabaseUtils {
         final long[] result = new long[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getLong(0);
+        }
+
+        return result;
+    }
+
+    private static short[] createShortArray(Cursor cursor) {
+        final short[] result = new short[cursor.getCount()];
+        for (int i = 0; cursor.moveToNext(); ++i) {
+            result[i] = cursor.getShort(0);
         }
 
         return result;

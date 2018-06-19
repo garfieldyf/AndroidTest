@@ -22,7 +22,7 @@ public interface Cancelable {
 /* package */ final class DummyCancelable implements Cancelable {
     private static final Cancelable sInstance = new DummyCancelable();
 
-    public static Cancelable obtain(Cancelable cancelable) {
+    public static Cancelable wrap(Cancelable cancelable) {
         return (cancelable != null ? cancelable : sInstance);
     }
 

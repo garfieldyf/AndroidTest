@@ -175,10 +175,10 @@ public final class JSONUtils {
     public static <T> T newInstance(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
-            return (T)newArrayImpl(reader, DummyCancelable.obtain(cancelable));
+            return (T)newArrayImpl(reader, DummyCancelable.wrap(cancelable));
 
         case BEGIN_OBJECT:
-            return (T)newInstanceImpl(reader, DummyCancelable.obtain(cancelable));
+            return (T)newInstanceImpl(reader, DummyCancelable.wrap(cancelable));
 
         default:
             DebugUtils.__checkError(true, "Invalid json token - " + reader.peek());

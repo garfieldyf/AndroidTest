@@ -661,7 +661,7 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
     private static byte[] copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        cancelable = DummyCancelable.obtain(cancelable);
+        cancelable = DummyCancelable.wrap(cancelable);
         for (int readBytes; (readBytes = src.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
             dst.write(buffer, 0, readBytes);
         }

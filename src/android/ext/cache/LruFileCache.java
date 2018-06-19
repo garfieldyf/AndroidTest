@@ -61,7 +61,8 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     }
 
     /**
-     * Builds the cache file with the specified <em>key</em>.
+     * Builds the cache file with the specified <em>key</em>. <p>The method is called without
+     * synchronization: other threads may access the cache while this method is executing.</p>
      * @param key The key.
      * @return The absolute path of the cache file. Never <tt>null</tt>.
      */

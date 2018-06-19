@@ -13,7 +13,7 @@ import android.ext.util.DebugUtils;
  * <li><tt>Params</tt>, The load task's parameters type.</li>
  * <li><tt>Value</tt>, The value type of the load result.</li></ol>
  * @author Garfield
- * @version 4.0
+ * @version 4.5
  */
 @SuppressWarnings("unchecked")
 public abstract class AsyncLoader<Key, Params, Value> extends Loader {
@@ -102,6 +102,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
     /**
      * Preloads the value into the internal cache with the specified <em>key</em>.
+     * If the value is already cached, it is return immediately. If the parameter
+     * <em>flags</em> contains the {@link #FLAG_IGNORE_MEMORY_CACHE} then invoking
+     * this method has no effect. Otherwise loads the value on a background thread.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param key The key to find value.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of

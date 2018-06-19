@@ -1,7 +1,7 @@
 package android.ext.content;
 
 import java.util.concurrent.Executor;
-import android.ext.util.Caches.Cache;
+import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
 
 /**

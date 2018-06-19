@@ -1,8 +1,8 @@
 package android.ext.content.image;
 
 import android.content.Context;
+import android.ext.cache.BitmapPool;
 import android.ext.content.image.BitmapDecoder.Parameters;
-import android.ext.util.Caches.BitmapPool;
 import android.graphics.BitmapFactory.Options;
 
 /**

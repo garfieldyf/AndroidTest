@@ -2,7 +2,7 @@ package android.ext.content.image;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.util.Caches.Cache;
+import android.ext.cache.Cache;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;

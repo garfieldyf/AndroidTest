@@ -523,6 +523,15 @@ public final class ProcessUtils {
             DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()).name("crashes"), cursor).endObject();
         }
 
+        public final void dump() {
+            final Cursor cursor = query();
+            try {
+                android.database.DatabaseUtils.dumpCursor(cursor, System.out);
+            } finally {
+                cursor.close();
+            }
+        }
+
         @Override
         public void onCreate(SQLiteDatabase db) {
             db.execSQL("CREATE TABLE IF NOT EXISTS crashes (" +

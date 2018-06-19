@@ -3,6 +3,8 @@ package android.ext.net;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -90,7 +92,14 @@ public final class NetworkUtils {
      * @see #dumpResponseHeaders(URLConnection, Printer)
      */
     public static void dumpRequestHeaders(URLConnection conn, Printer printer) {
-        dumpHeaders(conn, printer, " %s Request Headers ", conn.getRequestProperties());
+        final Map<String, List<String>> requestHeaders = new HashMap<String, List<String>>(conn.getRequestProperties());
+        requestHeaders.put("Read-Timeout", Collections.singletonList(Integer.toString(conn.getReadTimeout())));
+        requestHeaders.put("Connect-Timeout", Collections.singletonList(Integer.toString(conn.getConnectTimeout())));
+        if (conn instanceof HttpURLConnection) {
+            requestHeaders.put("Redirects", Collections.singletonList(Boolean.toString(((HttpURLConnection)conn).getInstanceFollowRedirects())));
+        }
+
+        dumpHeaders(conn, printer, " %s Request Headers ", requestHeaders);
     }
 
     /**

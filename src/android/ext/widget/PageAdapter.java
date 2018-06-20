@@ -122,7 +122,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @see #peekPage(int)
      */
     public final Page<E> getPage(int page) {
-        return mImpl.getPage(page, mImpl.getAdapterPosition(page, 0));
+        return mImpl.getPage(page, mImpl.getPositionForPage(page, 0));
     }
 
     /**
@@ -200,37 +200,37 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     /**
-     * Returns the index of the page with the given the adapter position.
-     * @param position The adapter position of the item.
-     * @return The index of the page.
-     * @see #getPagePosition(int)
-     * @see #getAdapterPosition(int, int)
-     */
-    public final int getPageIndex(int position) {
-        return mImpl.getPageIndex(position);
-    }
-
-    /**
      * Returns the position of the item in the page with the given the adapter position.
      * @param position The adapter position of the item.
      * @return The position of the item in the page.
-     * @see #getPageIndex(int)
-     * @see #getAdapterPosition(int, int)
+     * @see #getPageForPosition(int)
+     * @see #getPositionForPage(int, int)
      */
     public final int getPagePosition(int position) {
         return mImpl.getPagePosition(position);
     }
 
     /**
-     * Returns the adapter position with the given <em>page</em> and <em>pagePosition</em>.
-     * @param page The index of the page.
-     * @param pagePosition The position of the item in the <em>page</em>.
-     * @return The adapter position of the item in this adapter.
-     * @see #getPageIndex(int)
+     * Returns the index of the page with the given the adapter position.
+     * @param position The adapter position of the item.
+     * @return The index of the page.
      * @see #getPagePosition(int)
+     * @see #getPositionForPage(int, int)
      */
-    public final int getAdapterPosition(int page, int pagePosition) {
-        return mImpl.getAdapterPosition(page, pagePosition);
+    public final int getPageForPosition(int position) {
+        return mImpl.getPageForPosition(position);
+    }
+
+    /**
+     * Returns the adapter position with the given <em>page</em> and <em>position</em>.
+     * @param page The index of the page.
+     * @param position The position of the item in the <em>page</em>.
+     * @return The adapter position of the item in this adapter.
+     * @see #getPagePosition(int)
+     * @see #getPageForPosition(int)
+     */
+    public final int getPositionForPage(int page, int position) {
+        return mImpl.getPositionForPage(page, position);
     }
 
     public final void dump(Printer printer) {

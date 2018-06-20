@@ -259,20 +259,20 @@ public final class Pages {
         }
 
         public final E getItem(int position) {
-            final Page<E> page = getPage(getPageIndex(position), position);
+            final Page<E> page = getPage(getPageForPosition(position), position);
             return (page != null ? page.getItem(getPagePosition(position)) : null);
         }
 
         public final E peekItem(int position) {
             DebugUtils.__checkUIThread("peekItem");
             DebugUtils.__checkError(position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
-            final Page<E> page = mPageCache.get(getPageIndex(position));
+            final Page<E> page = mPageCache.get(getPageForPosition(position));
             return (page != null ? page.getItem(getPagePosition(position)) : null);
         }
 
         public final int setPage(int page, Page<E> data) {
-            DebugUtils.__checkUIThread("setPage");
             // Clears the page loading state when the page is load complete.
+            DebugUtils.__checkUIThread("setPage");
             mPageStates.clear(page);
             final int count = getCount(data);
             if (count > 0) {
@@ -309,16 +309,16 @@ public final class Pages {
             return result;
         }
 
-        public final int getPageIndex(int position) {
-            return (position < mFirstPageSize ? 0 : (position - mFirstPageSize) / mPageSize + 1);
-        }
-
         public final int getPagePosition(int position) {
             return (position < mFirstPageSize ? position : (position - mFirstPageSize) % mPageSize);
         }
 
-        public final int getAdapterPosition(int page, int pagePosition) {
-            return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + pagePosition : pagePosition);
+        public final int getPageForPosition(int position) {
+            return (position < mFirstPageSize ? 0 : (position - mFirstPageSize) / mPageSize + 1);
+        }
+
+        public final int getPositionForPage(int page, int position) {
+            return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + position : position);
         }
 
         public final void dump(Printer printer, String className) {

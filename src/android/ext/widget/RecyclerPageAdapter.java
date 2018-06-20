@@ -17,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
+import android.view.View;
 
 /**
  * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page.
@@ -82,6 +83,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
     public E getItem(int position) {
@@ -89,10 +91,25 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(int)
+     * @see #getItem(ViewHolder)
+     */
+    public final E getItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
+    }
+
+    /**
      * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(int)
+     * @see #getItem(View)
      */
     public final E getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
@@ -105,6 +122,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * when the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(View)
      * @see #peekItem(ViewHolder)
      */
     public E peekItem(int position) {
@@ -112,10 +130,25 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Equivalent to calling <tt>peekItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(int)
+     * @see #peekItem(ViewHolder)
+     */
+    public final E peekItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != RecyclerView.NO_POSITION ? peekItem(position) : null);
+    }
+
+    /**
      * Equivalent to calling <tt>peekItem(viewHolder.getAdapterPosition())</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #peekItem(int)
+     * @see #peekItem(View)
      */
     public final E peekItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
@@ -131,7 +164,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see #peekPage(int)
      */
     public final Page<E> getPage(int page) {
-        return mImpl.getPage(page, mImpl.getAdapterPosition(page, 0));
+        return mImpl.getPage(page, mImpl.getPositionForPage(page, 0));
     }
 
     /**
@@ -161,7 +194,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int count = mImpl.setPage(page, data);
         if (count > 0) {
-            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getAdapterPosition(page, 0), count, payload);
+            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), count, payload);
         }
     }
 
@@ -212,37 +245,37 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
-     * Returns the index of the page with the given the adapter position.
-     * @param position The adapter position of the item.
-     * @return The index of the page.
-     * @see #getPagePosition(int)
-     * @see #getAdapterPosition(int, int)
-     */
-    public final int getPageIndex(int position) {
-        return mImpl.getPageIndex(position);
-    }
-
-    /**
      * Returns the position of the item in the page with the given the adapter position.
      * @param position The adapter position of the item.
      * @return The position of the item in the page.
-     * @see #getPageIndex(int)
-     * @see #getAdapterPosition(int, int)
+     * @see #getPageForPosition(int)
+     * @see #getPositionForPage(int, int)
      */
     public final int getPagePosition(int position) {
         return mImpl.getPagePosition(position);
     }
 
     /**
-     * Returns the adapter position with the given <em>page</em> and <em>pagePosition</em>.
-     * @param page The index of the page.
-     * @param pagePosition The position of the item in the <em>page</em>.
-     * @return The adapter position of the item in this adapter.
-     * @see #getPageIndex(int)
+     * Returns the index of the page with the given the adapter position.
+     * @param position The adapter position of the item.
+     * @return The index of the page.
      * @see #getPagePosition(int)
+     * @see #getPositionForPage(int, int)
      */
-    public final int getAdapterPosition(int page, int pagePosition) {
-        return mImpl.getAdapterPosition(page, pagePosition);
+    public final int getPageForPosition(int position) {
+        return mImpl.getPageForPosition(position);
+    }
+
+    /**
+     * Returns the adapter position with the given <em>page</em> and <em>position</em>.
+     * @param page The index of the page.
+     * @param position The position of the item in the <em>page</em>.
+     * @return The adapter position of the item in this adapter.
+     * @see #getPagePosition(int)
+     * @see #getPageForPosition(int)
+     */
+    public final int getPositionForPage(int page, int position) {
+        return mImpl.getPositionForPage(page, position);
     }
 
     public final void dump(Printer printer) {

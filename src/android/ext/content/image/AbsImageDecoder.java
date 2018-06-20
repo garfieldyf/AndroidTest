@@ -126,7 +126,7 @@ public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> impleme
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 opts.inBitmap = null;
-                Log.w(getClass().getName(), e.toString());
+                Log.w(getClass().getName(), e);
                 bitmap = decodeBitmap(uri, params, flags, opts);
             }
         }

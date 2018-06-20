@@ -19,7 +19,6 @@ import android.ext.util.Pools.Factory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
-import android.util.Log;
 import android.util.Printer;
 
 /**
@@ -56,7 +55,7 @@ public final class PackageUtils {
      */
     public static <T extends AppPackageInfo> List<T> getInstalledPackages(Context context, int flags, Factory<T> factory, Filter<PackageInfo> filter) {
         final List<PackageInfo> infos = context.getPackageManager().getInstalledPackages(flags);
-        final int size = infos.size();
+        final int size = ArrayUtils.getSize(infos);
         final List<T> result = new ArrayList<T>(size);
         if (filter != null) {
             for (int i = 0; i < size; ++i) {
@@ -257,13 +256,21 @@ public final class PackageUtils {
         }
 
         private CharSequence loadLabel(Resources res) {
-            final CharSequence label = res.getText(packageInfo.applicationInfo.labelRes);
+            CharSequence label = null;
+            if (packageInfo.applicationInfo.labelRes != 0) {
+                label = res.getText(packageInfo.applicationInfo.labelRes);
+            }
+
             return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
         }
 
         @SuppressWarnings("deprecation")
         private Drawable loadIcon(Context context, Resources res) {
-            final Drawable icon = res.getDrawable(packageInfo.applicationInfo.icon);
+            Drawable icon = null;
+            if (packageInfo.applicationInfo.icon != 0) {
+                icon = res.getDrawable(packageInfo.applicationInfo.icon);
+            }
+
             return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
         }
 
@@ -339,13 +346,9 @@ public final class PackageUtils {
         public int onScanFile(String path, int type, Object userData) {
             final ParseResult<T> parseResult = (ParseResult<T>)userData;
             if (isArchiveFile(path, type)) {
-                try {
-                    final T result = parsePackage(mContext, path, parseResult.parseFlags, mFactory);
-                    if (result != null) {
-                        parseResult.result.add(result);
-                    }
-                } catch (Exception e) {
-                    Log.e(PackageParser.class.getName(), "Couldn't parse a package archive file - " + path, e);
+                final T result = parsePackage(mContext, path, parseResult.parseFlags, mFactory);
+                if (result != null) {
+                    parseResult.result.add(result);
                 }
             }
 

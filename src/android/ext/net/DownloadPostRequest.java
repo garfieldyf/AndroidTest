@@ -148,7 +148,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             mConnection.connect();
         }
 
-        // Clears the data to avoid potential memory leaks.
+        // Clears the mData to avoid potential memory leaks.
         mData = null;
         __checkHeaders(false);
         return ((HttpURLConnection)mConnection).getResponseCode();

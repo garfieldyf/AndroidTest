@@ -101,17 +101,20 @@ public final class PackageUtils {
         DebugUtils.__checkError(factory == null, "factory == null");
         final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(archiveFile, flags);
         if (packageInfo != null) {
-            final Resources res = createResources(context, archiveFile);
+            final AssetManager assets = new AssetManager();
             try {
-                // Creates a AppPackageInfo or subclass object.
+                // Adds an additional archive file to the assets.
+                assets.addAssetPath(archiveFile);
                 packageInfo.applicationInfo.sourceDir = archiveFile;
+
+                // Creates a AppPackageInfo or subclass object.
                 final T result = factory.newInstance();
-                result.initialize(context, res, packageInfo);
+                result.initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
                 return result;
             } finally {
-                // Close the underlying AssetManager for the res to avoid
-                // ProcessKiller kill my process after unmounting usb disk.
-                res.getAssets().close();
+                // Close the assets to avoid ProcessKiller
+                // kill my process after unmounting usb disk.
+                assets.close();
             }
         }
 
@@ -129,15 +132,6 @@ public final class PackageUtils {
                 printer.println(info.dump(result.append("  ")).append(" }").toString());
             }
         }
-    }
-
-    /**
-     * Create a new <tt>Resources</tt> object base on an existing <em>sourceFile</em>.
-     */
-    private static Resources createResources(Context context, String sourceFile) {
-        final AssetManager assets = new AssetManager();
-        assets.addAssetPath(sourceFile);
-        return new Resources(assets, context.getResources().getDisplayMetrics(), null);
     }
 
     /**
@@ -223,12 +217,20 @@ public final class PackageUtils {
             return label.toString().compareTo(another.label.toString());
         }
 
+        @Override
+        public String toString() {
+            return new StringBuilder(64).append(getClass().getSimpleName())
+                .append('{').append(Integer.toHexString(hashCode())).append(' ')
+                .append(packageInfo != null ? packageInfo.packageName : "N/A")
+                .append('}').toString();
+        }
+
         /**
          * Initializes this object with the specified <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param packageInfo The <tt>PackageInfo</tt> to set.
          */
-        protected void initialize(Context context, PackageInfo packageInfo) {
+        public void initialize(Context context, PackageInfo packageInfo) {
             final PackageManager pm = context.getPackageManager();
             this.packageInfo = packageInfo;
             this.icon  = packageInfo.applicationInfo.loadIcon(pm);

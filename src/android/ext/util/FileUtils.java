@@ -570,14 +570,14 @@ public final class FileUtils {
 
     /**
      * Reads the "assets" directory file contents into a {@link ByteArrayBuffer}.
-     * @param assetManager The <tt>AssetManager</tt>.
+     * @param assets The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
      * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
      * @see #readAssetFile(AssetManager, String, OutputStream)
      */
-    public static ByteArrayBuffer readAssetFile(AssetManager assetManager, String filename) throws IOException {
-        final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
+    public static ByteArrayBuffer readAssetFile(AssetManager assets, String filename) throws IOException {
+        final InputStream is = assets.open(filename, AssetManager.ACCESS_STREAMING);
         try {
             return readStream(is);
         } finally {
@@ -587,14 +587,14 @@ public final class FileUtils {
 
     /**
      * Reads the "assets" directory file contents into the specified <em>out</em>.
-     * @param assetManager The <tt>AssetManager</tt>.
+     * @param assets The <tt>AssetManager</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @param out The <tt>OutputStream</tt> to write to.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readAssetFile(AssetManager, String)
      */
-    public static void readAssetFile(AssetManager assetManager, String filename, OutputStream out) throws IOException {
-        final InputStream is = assetManager.open(filename, AssetManager.ACCESS_STREAMING);
+    public static void readAssetFile(AssetManager assets, String filename, OutputStream out) throws IOException {
+        final InputStream is = assets.open(filename, AssetManager.ACCESS_STREAMING);
         try {
             copyStream(is, out, null, null);
         } finally {

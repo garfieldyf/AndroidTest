@@ -412,45 +412,45 @@ public final class ProcessUtils {
     /**
      * Class <tt>CrashDatabase</tt> store the application crash infos.
      */
-    public static class CrashDatabase extends SQLiteOpenHelper {
+    public static final class CrashDatabase extends SQLiteOpenHelper {
         /**
-         * The date column of the table.
+         * The crash date column of the table.
          * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
          */
         public static final int DATE = 0;
 
         /**
-         * The version code column index of the table.
+         * The application version code column index of the table.
          * <P>Type: INTEGER</P>
          */
         public static final int VERSION_CODE = 1;
 
         /**
-         * The version name column index of the table.
+         * The application version name column index of the table.
          * <P>Type: TEXT</P>
          */
         public static final int VERSION_NAME = 2;
 
         /**
-         * The process column index of the table.
+         * The process name column index of the table.
          * <P>Type: TEXT</P>
          */
         public static final int PROCESS = 3;
 
         /**
-         * The thread column index of the table.
+         * The thread name column index of the table.
          * <P>Type: TEXT</P>
          */
         public static final int THREAD = 4;
 
         /**
-         * The exception class column index of the table.
+         * The exception class name column index of the table.
          * <P>Type: TEXT</P>
          */
         public static final int CLASS = 5;
 
         /**
-         * The exception stack column index of the table.
+         * The exception stack trace column index of the table.
          * <P>Type: TEXT</P>
          */
         public static final int STACK = 6;
@@ -509,20 +509,6 @@ public final class ProcessUtils {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);
         }
 
-        /**
-         * Writes the specified crash infos into a {@link JsonWriter}.
-         * The position is restored after writing.
-         * @param context The <tt>Context</tt>.
-         * @param writer The {@link JsonWriter} to write to.
-         * @param cursor The {@link Cursor} from which to get the data.
-         * May be returned earlier by {@link #query}.
-         * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see DatabaseUtils#writeCursor(JsonWriter, Cursor)
-         */
-        public final void writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            DatabaseUtils.writeCursor(onWrite(context, writer.beginObject()).name("crashes"), cursor).endObject();
-        }
-
         public final void dump() {
             final Cursor cursor = query();
             try {
@@ -555,15 +541,31 @@ public final class ProcessUtils {
         }
 
         /**
-         * Callback method to be invoked when the {@link #writeTo} method invoking.
-         * <p>The default implementation writes the device infos (e.g. brand, mode,
-         * version, abis and package name) to the <em>writer</em>.</p>
+         * Writes the specified crash infos to the <em>writer</em>.
+         * The position is restored after writing.
          * @param context The <tt>Context</tt>.
-         * @param writer The {@link JsonWriter}.
+         * @param writer The {@link JsonWriter} to write to.
+         * @param cursor The {@link Cursor} from which to get the crash data.
+         * May be returned earlier by {@link CrashDatabase#query()}.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
+         * @see #writeDeviceInfo(Context, JsonWriter)
+         * @see DatabaseUtils#writeCursor(JsonWriter, Cursor)
          */
-        protected JsonWriter onWrite(Context context, JsonWriter writer) throws IOException {
+        public static JsonWriter writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
+            return DatabaseUtils.writeCursor(writeDeviceInfo(context, writer.beginObject()).name("crashes"), cursor).endObject();
+        }
+
+        /**
+         * Writes the device info (e.g. brand, mode, version, abis and package name)
+         * to the <em>writer</em>.
+         * @param context The <tt>Context</tt>.
+         * @param writer The {@link JsonWriter} to write to.
+         * @return The <em>writer</em>.
+         * @throws IOException if an error occurs while writing to the <em>writer</em>.
+         * @see #writeTo(Context, JsonWriter, Cursor)
+         */
+        public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
             return DeviceUtils.writeABIs(writer.name("brand").value(Build.BRAND)
                 .name("mode").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
@@ -613,9 +615,9 @@ public final class ProcessUtils {
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {
-                final StringWriter stack = new StringWriter(2048);
-                e.printStackTrace(new PrintWriter(stack));
-                DatabaseUtils.executeInsert(db.getWritableDatabase(), "INSERT INTO crashes VALUES(?,?,?,?,?,?,?)", System.currentTimeMillis(), pi.versionCode, pi.versionName, processName, thread.getName(), e.getClass().getName(), stack.toString());
+                final StringWriter stackTrace = new StringWriter(2048);
+                e.printStackTrace(new PrintWriter(stackTrace));
+                DatabaseUtils.executeInsert(db.getWritableDatabase(), "INSERT INTO crashes VALUES(?,?,?,?,?,?,?)", System.currentTimeMillis(), pi.versionCode, pi.versionName, processName, thread.getName(), e.getClass().getName(), stackTrace.toString());
             } finally {
                 db.close();
             }

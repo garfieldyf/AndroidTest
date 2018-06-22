@@ -481,7 +481,7 @@ public final class ProcessUtils {
         }
 
         /**
-         * Returns the crash infos from table which the date less the <em>date</em>.
+         * Returns the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The {@link Cursor}.
          * @see #query()
@@ -495,15 +495,15 @@ public final class ProcessUtils {
          * @return The number of rows to delete.
          * @see #delete(long)
          */
-        public final int delete() {
+        public final int deleteAll() {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes", (Object[])null);
         }
 
         /**
-         * Deletes the crash infos from table which the date less the <em>date</em>.
+         * Deletes the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The number of rows to delete.
-         * @see #delete()
+         * @see #deleteAll()
          */
         public final int delete(long date) {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);

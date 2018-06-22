@@ -37,7 +37,8 @@ public final class Pages {
      * @see RecyclerPageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPage(long combinedPosition) {
-        return (int)(combinedPosition >>> 32);
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
+        return (int)(combinedPosition >> 32);
     }
 
     /**
@@ -49,6 +50,7 @@ public final class Pages {
      * @see RecyclerPageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPosition(long combinedPosition) {
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
         return (int)combinedPosition;
     }
 
@@ -339,6 +341,7 @@ public final class Pages {
         }
 
         public final long getPageForPosition(int position) {
+            DebugUtils.__checkError(position < 0, "position < 0");
             if (position < mFirstPageSize) {
                 return (position & 0xFFFFFFFFL);
             } else {
@@ -348,6 +351,7 @@ public final class Pages {
         }
 
         public final int getPositionForPage(int page, int position) {
+            DebugUtils.__checkError(page < 0 || position < 0, "page < 0 || position < 0");
             return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + position : position);
         }
 

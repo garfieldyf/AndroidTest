@@ -126,8 +126,8 @@ public final class DebugUtils {
         }
     }
 
-    public static void __checkError(boolean checked, String message) {
-        if (checked) {
+    public static void __checkError(boolean reportError, String message) {
+        if (reportError) {
             throw new AssertionError(message);
         }
     }
@@ -136,8 +136,8 @@ public final class DebugUtils {
         ArrayUtils.checkRange(offset, length, arrayLength);
     }
 
-    public static void __checkWarning(boolean checked, String tag, String message) {
-        if (checked) {
+    public static void __checkWarning(boolean reportWarning, String tag, String message) {
+        if (reportWarning) {
             Log.e(tag, "WARNING: " + message);
         }
     }

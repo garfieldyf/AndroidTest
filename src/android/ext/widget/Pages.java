@@ -29,10 +29,36 @@ public final class Pages {
     }
 
     /**
-     * Returns a new {@link Page} {@link Cache} instance.
+     * Returns the index of the page with the given the <em>combinedPosition</em>.
+     * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
+     * @return The index of the page.
+     * @see #getOriginalPosition(long)
+     * @see PageAdapter#getPageForPosition(int)
+     * @see RecyclerPageAdapter#getPageForPosition(int)
+     */
+    public static int getOriginalPage(long combinedPosition) {
+        return (int)(combinedPosition >>> 32);
+    }
+
+    /**
+     * Returns the index of the item in the page with the given the <em>combinedPosition</em>.
+     * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
+     * @return The index of the item in the page.
+     * @see #getOriginalPage(long)
+     * @see PageAdapter#getPageForPosition(int)
+     * @see RecyclerPageAdapter#getPageForPosition(int)
+     */
+    public static int getOriginalPosition(long combinedPosition) {
+        return (int)combinedPosition;
+    }
+
+    /**
+     * Returns a new page cache instance.
      * @param maxPages The maximum number of pages to allow in the page cache. Pass
      * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
-     * @return A new page cache instance.
+     * @return A new {@link Page} {@link Cache} instance.
+     * @see SimpleLruCache
+     * @see SparsePageCache
      */
     public static <E> Cache<Integer, Page<E>> createPageCache(int maxPages) {
         return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new SparsePageCache<E>());
@@ -180,6 +206,7 @@ public final class Pages {
 
     /**
      * Class <tt>SparsePageCache</tt> is an implementation of a {@link Cache}.
+     * This page cache is the <b>unlimited-size</b> cache.
      */
     public static class SparsePageCache<E> implements Cache<Integer, Page<E>> {
         protected final SparseArray<Page<E>> mPages;
@@ -259,15 +286,17 @@ public final class Pages {
         }
 
         public final E getItem(int position) {
-            final Page<E> page = getPage(getPageForPosition(position), position);
-            return (page != null ? page.getItem(getPagePosition(position)) : null);
+            final long combinedPosition = getPageForPosition(position);
+            final Page<E> page = getPage(getOriginalPage(combinedPosition), position);
+            return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
         public final E peekItem(int position) {
             DebugUtils.__checkUIThread("peekItem");
             DebugUtils.__checkError(position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
-            final Page<E> page = mPageCache.get(getPageForPosition(position));
-            return (page != null ? page.getItem(getPagePosition(position)) : null);
+            final long combinedPosition = getPageForPosition(position);
+            final Page<E> page = mPageCache.get(getOriginalPage(combinedPosition));
+            return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
         public final int setPage(int page, Page<E> data) {
@@ -309,12 +338,13 @@ public final class Pages {
             return result;
         }
 
-        public final int getPagePosition(int position) {
-            return (position < mFirstPageSize ? position : (position - mFirstPageSize) % mPageSize);
-        }
-
-        public final int getPageForPosition(int position) {
-            return (position < mFirstPageSize ? 0 : (position - mFirstPageSize) / mPageSize + 1);
+        public final long getPageForPosition(int position) {
+            if (position < mFirstPageSize) {
+                return (position & 0xFFFFFFFFL);
+            } else {
+                final int delta = position - mFirstPageSize;
+                return (((long)(delta / mPageSize + 1) << 32) | ((delta % mPageSize) & 0xFFFFFFFFL));
+            }
         }
 
         public final int getPositionForPage(int page, int position) {

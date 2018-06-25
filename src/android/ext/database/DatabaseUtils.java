@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -259,20 +258,14 @@ public final class DatabaseUtils {
      * @see #query(SQLiteDatabase, Class, String, String[])
      */
     public static <T> T query(ContentResolver resolver, Class<?> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(uri);
-        if (client == null) {
-            return null;
-        }
-
         Cursor cursor = null;
         try {
-            cursor = client.query(uri, projection, selection, selectionArgs, sortOrder);
+            cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
             return (cursor != null ? DatabaseUtils.<T>newArrayImpl(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
             return null;
         } finally {
-            client.release();
             FileUtils.close(cursor);
         }
     }
@@ -722,15 +715,10 @@ public final class DatabaseUtils {
     }
 
     private static Object simpleQuery(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
-        final ContentProviderClient client = resolver.acquireUnstableContentProviderClient(uri);
-        if (client == null) {
-            return null;
-        }
-
         Object result = null;
         Cursor cursor = null;
         try {
-            cursor = client.query(uri, new String[] { column }, selection, selectionArgs, null);
+            cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null);
             if (cursor != null && cursor.moveToFirst()) {
                 switch (cursor.getType(0)) {
                 case Cursor.FIELD_TYPE_INTEGER:
@@ -749,7 +737,6 @@ public final class DatabaseUtils {
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query uri - ").append(uri).toString(), e);
         } finally {
-            client.release();
             FileUtils.close(cursor);
         }
 

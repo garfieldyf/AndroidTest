@@ -216,6 +216,7 @@ public class DownloadRequest {
      * Connects to the remote server with the arguments supplied to this request. <p>Note: This method
      * will not download any resources.</p>
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post.
+     * @throws IOException if an error occurs while connecting to the remote server.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      */
     public final int connect(byte[] tempBuffer) throws IOException {
@@ -224,6 +225,15 @@ public class DownloadRequest {
         } finally {
             disconnect();
         }
+    }
+
+    /**
+     * Returns the response code returned by the remote server.
+     * @return The response code, <tt>-1</tT> if no valid code.
+     * @throws IOException if there is an error during the retrieval.
+     */
+    public final int statusCode() throws IOException {
+        return (mConnection instanceof HttpURLConnection ? ((HttpURLConnection)mConnection).getResponseCode() : HTTP_OK);
     }
 
     /**

@@ -65,7 +65,7 @@ public class GIFImage {
             } else if (is instanceof FileInputStream) {
                 nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
             } else if (is != null) {
-                nativeImage = decodeStreamInternal(is, tempStorage);
+                nativeImage = nativeDecodeStream(is, tempStorage != null ? tempStorage : new byte[16384]);
             }
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), "Couldn't decode - " + is.getClass().getName(), e);
@@ -187,14 +187,6 @@ public class GIFImage {
 
     private GIFImage(long nativeImage) {
         mNativeImage = nativeImage;
-    }
-
-    private static long decodeStreamInternal(InputStream is, byte[] tempStorage) {
-        if (tempStorage == null) {
-            tempStorage = new byte[16384];
-        }
-
-        return nativeDecodeStream(is, tempStorage);
     }
 
     private static long getNativeAsset(AssetInputStream is) {

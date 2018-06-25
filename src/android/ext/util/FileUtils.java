@@ -13,7 +13,6 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.ext.util.Pools.Factory;
-import android.ext.util.Pools.SimplePool;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
@@ -510,7 +509,7 @@ public final class FileUtils {
         } else if (buffer != null) {
             copyStreamImpl(src, dst, cancelable, buffer);
         } else {
-            ByteArrayPool.sInstance.recycle(copyStreamImpl(src, dst, cancelable, ByteArrayPool.sInstance.obtain()));
+            copyStreamImpl(src, dst, cancelable, new byte[8192]);
         }
     }
 
@@ -660,13 +659,11 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
      */
-    private static byte[] copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
         cancelable = DummyCancelable.wrap(cancelable);
         for (int readBytes; (readBytes = src.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
             dst.write(buffer, 0, readBytes);
         }
-
-        return buffer;
     }
 
     /**
@@ -1581,18 +1578,6 @@ public final class FileUtils {
         @Override
         public int compare(Dirent one, Dirent another) {
             return one.compareToIgnoreCase(another);
-        }
-    }
-
-    /**
-     * Class <tt>ByteArrayPool</tt> used to obtain the byte array.
-     */
-    /* package */ static final class ByteArrayPool extends SimplePool<byte[]> {
-        public static final ByteArrayPool sInstance = new ByteArrayPool();
-
-        @Override
-        public byte[] newInstance() {
-            return new byte[8192];
         }
     }
 

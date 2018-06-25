@@ -14,7 +14,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import android.ext.util.FileUtils.ByteArrayPool;
 import android.ext.util.FileUtils.Dirent;
 
 /**
@@ -153,7 +152,8 @@ public final class ZipUtils {
             FileUtils.mkdirs(outPath, 0);
 
             // Enumerates the ZIP file entries.
-            final CRC32 crc = new CRC32();
+            final byte[] buf = new byte[8192];
+            final CRC32 crc  = new CRC32();
             final Enumeration<? extends ZipEntry> entries = file.entries();
             while (entries.hasMoreElements()) {
                 final ZipEntry entry  = entries.nextElement();
@@ -163,7 +163,7 @@ public final class ZipUtils {
                 if (entry.isDirectory()) {
                     FileUtils.mkdirs(pathName, 0);
                 } else {
-                    uncompress(file, entry, pathName, crc, cancelable);
+                    uncompress(file, entry, pathName, crc, buf, cancelable);
                 }
             }
         } finally {
@@ -197,7 +197,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, CRC32 crc, Cancelable cancelable) throws IOException {
+    private static void uncompress(ZipFile file, ZipEntry entry, String pathName, CRC32 crc, byte[] buffer, Cancelable cancelable) throws IOException {
         InputStream is  = null;
         OutputStream os = null;
         try {
@@ -208,10 +208,10 @@ public final class ZipUtils {
             final long crcValue = entry.getCrc();
             if (crcValue <= 0) {
                 // Uncompress the ZIP entry.
-                FileUtils.copyStream(is, os, cancelable, null);
+                FileUtils.copyStream(is, os, cancelable, buffer);
             } else {
                 // Uncompress the ZIP entry with check CRC32.
-                uncompress(is, os, entry, crc, crcValue, cancelable);
+                uncompress(is, os, entry, crc, crcValue, buffer, cancelable);
             }
         } finally {
             FileUtils.close(is);
@@ -219,24 +219,20 @@ public final class ZipUtils {
         }
     }
 
-    private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue, Cancelable cancelable) throws IOException {
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
-        try {
-            // Uncompress the ZIP entry with check CRC32.
-            cancelable = DummyCancelable.wrap(cancelable);
-            crc.reset();
-            for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
-                os.write(buffer, 0, readBytes);
-                crc.update(buffer, 0, readBytes);
-            }
+    private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue, byte[] buffer, Cancelable cancelable) throws IOException {
+        // Uncompress the ZIP entry with check CRC32.
+        cancelable = DummyCancelable.wrap(cancelable);
+        crc.reset();
 
-            // Checks the uncompressed content CRC32.
-            final long checksum = crc.getValue();
-            if (crcValue != checksum) {
-                throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(checksum).append(" ]").toString());
-            }
-        } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+        for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
+            os.write(buffer, 0, readBytes);
+            crc.update(buffer, 0, readBytes);
+        }
+
+        // Checks the uncompressed content CRC32.
+        final long checksum = crc.getValue();
+        if (crcValue != checksum) {
+            throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(checksum).append(" ]").toString());
         }
     }
 

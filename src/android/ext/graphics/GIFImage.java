@@ -2,6 +2,7 @@ package android.ext.graphics;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
@@ -34,11 +35,10 @@ public class GIFImage {
      * @see #decodeByteArray(byte[], int, int)
      */
     public static GIFImage decodeFile(String filename) {
-        FileInputStream is = null;
+        InputStream is = null;
         try {
             is = new FileInputStream(filename);
-            final long nativeImage = nativeDecodeFile(is.getFD());
-            return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
+            return decodeStreamInternal(is, null);
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), new StringBuilder("Couldn't decode file - ").append(filename).toString(), e);
             return null;
@@ -58,20 +58,12 @@ public class GIFImage {
      * @see #decodeByteArray(byte[], int, int)
      */
     public static GIFImage decodeStream(InputStream is, byte[] tempStorage) {
-        long nativeImage = 0;
         try {
-            if (is instanceof AssetInputStream) {
-                nativeImage = nativeDecodeAsset(getNativeAsset((AssetInputStream)is));
-            } else if (is instanceof FileInputStream) {
-                nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
-            } else if (is != null) {
-                nativeImage = nativeDecodeStream(is, tempStorage != null ? tempStorage : new byte[16384]);
-            }
+            return decodeStreamInternal(is, tempStorage);
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), "Couldn't decode - " + is.getClass().getName(), e);
+            return null;
         }
-
-        return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }
 
     /**
@@ -88,9 +80,9 @@ public class GIFImage {
         InputStream is = null;
         try {
             is = res.openRawResource(id);
-            return decodeStream(is, null);
+            return decodeStreamInternal(is, null);
         } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't found resource ID #0x" + Integer.toHexString(id), e);
+            Log.e(GIFImage.class.getName(), "Couldn't decode resource ID #0x" + Integer.toHexString(id), e);
             return null;
         } finally {
             FileUtils.close(is);
@@ -189,8 +181,18 @@ public class GIFImage {
         mNativeImage = nativeImage;
     }
 
-    private static long getNativeAsset(AssetInputStream is) {
-        return (Build.VERSION.SDK_INT > 20 ? is.getNativeAsset() : is.getAssetInt());
+    private static GIFImage decodeStreamInternal(InputStream is, byte[] tempStorage) throws IOException {
+        long nativeImage = 0;
+        if (is instanceof FileInputStream) {
+            nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
+        } else if (is instanceof AssetInputStream) {
+            final AssetInputStream asset = (AssetInputStream)is;
+            nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
+        } else if (is != null) {
+            nativeImage = nativeDecodeStream(is, tempStorage != null ? tempStorage : new byte[16384]);
+        }
+
+        return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }
 
     private static native long nativeDecodeAsset(long asset);

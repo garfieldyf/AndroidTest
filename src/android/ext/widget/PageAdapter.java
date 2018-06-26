@@ -197,6 +197,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @return The item count.
      */
     public final int getPageSize(int page) {
+        DebugUtils.__checkError(page < 0, "page < 0");
         return (page > 0 ? mImpl.mPageSize : mImpl.mFirstPageSize);
     }
 

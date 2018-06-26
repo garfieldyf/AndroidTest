@@ -242,6 +242,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @return The item count.
      */
     public final int getPageSize(int page) {
+        DebugUtils.__checkError(page < 0, "page < 0");
         return (page > 0 ? mImpl.mPageSize : mImpl.mFirstPageSize);
     }
 

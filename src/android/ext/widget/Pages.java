@@ -288,22 +288,25 @@ public final class Pages {
         }
 
         public final E getItem(int position) {
+            DebugUtils.__checkUIThread("getItem");
+            DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = getPage(getOriginalPage(combinedPosition), position);
+            final Page<E> page = getPage((int)(combinedPosition >> 32), position);
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
         public final E peekItem(int position) {
             DebugUtils.__checkUIThread("peekItem");
-            DebugUtils.__checkError(position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+            DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = mPageCache.get(getOriginalPage(combinedPosition));
+            final Page<E> page = mPageCache.get((int)(combinedPosition >> 32));
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
         public final int setPage(int page, Page<E> data) {
             // Clears the page loading state when the page is load complete.
             DebugUtils.__checkUIThread("setPage");
+            DebugUtils.__checkError(page < 0, "page < 0");
             mPageStates.clear(page);
             final int count = getCount(data);
             if (count > 0) {
@@ -315,7 +318,8 @@ public final class Pages {
 
         public final Page<E> getPage(int page, int position) {
             DebugUtils.__checkUIThread("getPage");
-            DebugUtils.__checkError(position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+            DebugUtils.__checkError(page < 0, "page < 0");
+            DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
                 // Computes the page offset and item count.

@@ -255,9 +255,13 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         if (visible) {
+            if (restart) {
+                mFrameIndex = 0;
+            }
+
             start();
         } else if (isRunning()) {
-            unscheduleSelf(mFrameIndex);
+            unscheduleSelf(restart ? 0 : mFrameIndex);
         }
 
         return super.setVisible(visible, restart);

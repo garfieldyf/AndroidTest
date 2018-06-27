@@ -13,6 +13,7 @@ import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.ext.util.StringUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Printer;
@@ -45,10 +46,10 @@ public final class NetworkUtils {
     }
 
     /**
-     * Returns the mac address from the network interface.
+     * Returns the MAC address from the network interface.
      * @param ifname The network interface name. Pass {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
-     * @return The mac address or <tt>fallback</tt>.
+     * @return The MAC address or <tt>fallback</tt>.
      */
     public static String getMacAddress(String ifname, String fallback) {
         try {
@@ -56,6 +57,37 @@ public final class NetworkUtils {
         } catch (Exception e) {
             return fallback;
         }
+    }
+
+    /**
+     * Returns the byte array MAC address from the <em>macAddress</em>.
+     * @param macAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>.
+     * @return The byte array MAC address.
+     * @see #toMacAddress(String, byte[])
+     */
+    public static byte[] toMacAddress(String macAddress) {
+        return toMacAddress(macAddress, new byte[6]);
+    }
+
+    /**
+     * Returns the byte array MAC address from the <em>macAddress</em>.
+     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>.
+     * @param outAddress The byte array to store the MAC address.
+     * @return The <em>outAddress</em>.
+     * @see #toMacAddress(String)
+     */
+    public static byte[] toMacAddress(String inAddress, byte[] outAddress) {
+        DebugUtils.__checkError(inAddress == null || inAddress.length() < 17, "inAddress == null || inAddress.length() < 17");
+        DebugUtils.__checkError(outAddress == null || outAddress.length < 6, "outAddress == null || outAddress.length < 6");
+        final int inLength  = StringUtils.getLength(inAddress);
+        final int outLength = ArrayUtils.getSize(outAddress);
+        for (int i = 0, j = 0, high, low; i < outLength && j < inLength; ++i, j += 3) {
+            high = Character.digit((int)inAddress.charAt(j), 16) << 4;
+            low  = Character.digit((int)inAddress.charAt(j + 1), 16);
+            outAddress[i] = (byte)(high + low);
+        }
+
+        return outAddress;
     }
 
     /**

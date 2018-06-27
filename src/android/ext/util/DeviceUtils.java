@@ -11,6 +11,7 @@ import android.content.Context;
 import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
+import android.os.Environment;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
@@ -198,11 +199,11 @@ public final class DeviceUtils {
 
         // Dumps the system storage infos.
         infos.setLength(0);
-        final StatFs statFs = new StatFs("/system");
+        final StatFs statFs = new StatFs(Environment.getRootDirectory().getPath());
         dumpInternalStorageInfo(context, statFs, infos, "  system ");
 
         // Dumps the data storage infos.
-        statFs.restat("/data");
+        statFs.restat(Environment.getDataDirectory().getPath());
         dumpInternalStorageInfo(context, statFs, infos, "\n  data ");
         printer.println(infos.toString());
 

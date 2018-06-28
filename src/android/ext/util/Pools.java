@@ -20,7 +20,6 @@ public final class Pools {
      * a new element when the pool is empty.
      * @return The newly created <tt>Pool</tt>.
      * @see #newPool(Factory, int)
-     * @see #newPool(Context, int, int)
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newSimplePool(Factory<T> factory) {
@@ -34,7 +33,6 @@ public final class Pools {
      * @param maxSize The maximum number of elements in the pool.
      * @return The newly created <tt>Pool</tt>.
      * @see #newSimplePool(Factory)
-     * @see #newPool(Context, int, int)
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
@@ -42,17 +40,26 @@ public final class Pools {
     }
 
     /**
-     * Creates a new <b>fixed-size</b> animator pool.
+     * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
+     * @param animation The initial property animation.
+     * @param maxSize The maximum number of animators in the pool.
+     * @return The newly created <tt>Pool</tt>.
+     * @see #newPool(Context, int, int)
+     */
+    public static Pool<Animator> newPool(Animator animation, int maxSize) {
+        return new AnimatorPool(animation, maxSize);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
      * @param context The <tt>Context</tt>.
      * @param resId The resource id of the property animation to load.
      * @param maxSize The maximum number of animators in the pool.
      * @return The newly created <tt>Pool</tt>.
-     * @see #newSimplePool(Factory)
-     * @see #newPool(Factory, int)
-     * @see #synchronizedPool(Pool)
+     * @see #newPool(Animator, int)
      */
     public static Pool<Animator> newPool(Context context, int resId, int maxSize) {
-        return new AnimatorPool(context, resId, maxSize);
+        return new AnimatorPool(AnimatorInflater.loadAnimator(context, resId), maxSize);
     }
 
     /**
@@ -62,7 +69,6 @@ public final class Pools {
      * @return A synchronized <tt>Pool</tt>.
      * @see #newSimplePool(Factory)
      * @see #newPool(Factory, int)
-     * @see #newPool(Context, int, int)
      */
     public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
         return new SynchronizedPool<T>(pool);
@@ -104,35 +110,19 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    /* package */ static class SimplePool<T> implements Pool<T>, Factory<T> {
+    /* package */ static class SimplePool<T> implements Pool<T> {
         private final Factory<T> factory;
         private final AtomicReference<T> referent;
 
         /**
          * Constructor
          * <p>Creates a new <b>one</b> size pool.</p>
-         * @see #SimplePool(Factory)
-         */
-        public SimplePool() {
-            this.factory  = this;
-            this.referent = new AtomicReference<T>();
-        }
-
-        /**
-         * Constructor
-         * <p>Creates a new <b>one</b> size pool.</p>
          * @param factory The {@link Factory} to create
          * a new element when this pool is empty.
-         * @see #SimplePool()
          */
         public SimplePool(Factory<T> factory) {
             this.factory  = factory;
             this.referent = new AtomicReference<T>();
-        }
-
-        @Override
-        public T newInstance() {
-            return null;
         }
 
         @Override
@@ -185,7 +175,7 @@ public final class Pools {
 
         @Override
         public T newInstance() {
-            return null;
+            throw new IllegalStateException("Must be implementation!");
         }
 
         @Override
@@ -247,13 +237,12 @@ public final class Pools {
 
         /**
          * Constructor
-         * @param context The <tt>Context</tt>.
-         * @param resId The resource id of the property animation to load.
+         * @param animation The initial property animation.
          * @param maxSize The maximum number of animators to allow in this pool.
          */
-        public AnimatorPool(Context context, int resId, int maxSize) {
+        public AnimatorPool(Animator animation, int maxSize) {
             super(maxSize);
-            this.animation = AnimatorInflater.loadAnimator(context, resId);
+            this.animation = animation;
         }
 
         @Override

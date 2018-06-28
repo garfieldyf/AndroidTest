@@ -84,6 +84,15 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     }
 
     /**
+     * Returns the response code returned by the remote server.
+     * @return The response code, <tt>-1</tT> if no valid code.
+     * @throws IOException if there is an error during the retrieval.
+     */
+    public final int getStatusCode() throws IOException {
+        return mRequest.statusCode();
+    }
+
+    /**
      * Returns a new download request with the specified <em>url</em>.
      * @param url The url to connect the remote server.
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.

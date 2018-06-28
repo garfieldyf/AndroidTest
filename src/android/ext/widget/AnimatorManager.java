@@ -22,6 +22,7 @@ public final class AnimatorManager {
      * @param outResId The exit resource id of the property animation to load.
      * @param maxSize The max size of the internal animation pool.
      * @see #AnimatorManager(Pool, Pool)
+     * @see #AnimatorManager(Animator, Animator, int)
      */
     public AnimatorManager(Context context, int inResId, int outResId, int maxSize) {
         mInAnimations  = Pools.newPool(context, inResId, maxSize);
@@ -30,9 +31,24 @@ public final class AnimatorManager {
 
     /**
      * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param inAnimation The initial enter property animation.
+     * @param outAnimation The initial exit property animation.
+     * @param maxSize The max size of the internal animation pool.
+     * @see #AnimatorManager(Pool, Pool)
+     * @see #AnimatorManager(Context, int, int, int)
+     */
+    public AnimatorManager(Animator inAnimation, Animator outAnimation, int maxSize) {
+        mInAnimations  = Pools.newPool(inAnimation, maxSize);
+        mOutAnimations = Pools.newPool(outAnimation, maxSize);
+    }
+
+    /**
+     * Constructor
      * @param inAnimations The enter animations.
      * @param outAnimations The exit animations.
      * @see #AnimatorManager(Context, int, int, int)
+     * @see #AnimatorManager(Animator, Animator, int)
      */
     public AnimatorManager(Pool<Animator> inAnimations, Pool<Animator> outAnimations) {
         mInAnimations  = inAnimations;

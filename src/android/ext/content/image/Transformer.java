@@ -25,7 +25,7 @@ import android.view.View;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class Transformer<URI, Image> {
-    private static final int[] TRANSFORMER_ATTRS = new int[] { android.R.attr.name };
+    private static final int[] TRANSFORMER_ATTRS = { android.R.attr.name };
 
     /**
      * Transforms the <tt>Image</tt> to a <tt>Drawable</tt>.

@@ -94,7 +94,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      */
     public ImageBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
         mDefaultImage = defaultImage;
-        mTransformer  = (imageCache != null ? new CacheTransformer<URI, Image>(imageCache, transformer) : transformer);
+        mTransformer  = (imageCache != null ? new CacheTransformer((Cache<Object, Drawable>)imageCache, transformer) : transformer);
     }
 
     /**
@@ -158,7 +158,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
                 transformer = new ImageTransformer(transformer, imageTransformer);
             }
 
-            return (Transformer<URI, Image>)(maxSize > 0 ? new CacheTransformer(new SimpleLruCache<Object, Drawable>(maxSize), transformer) : transformer);
+            return (maxSize > 0 ? new CacheTransformer(new SimpleLruCache<Object, Drawable>(maxSize), transformer) : transformer);
         } catch (Exception e) {
             throw new IllegalArgumentException(parser.getPositionDescription() + ": Couldn't inflate transformer from xml", e);
         }
@@ -215,7 +215,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
          * @param context The <tt>Context</tt>.
          * @param parser The XML parser from which to inflate the transformer.
          * @param attrs The base set of attribute values.
-         * @return The <tt>Transformer</tt>.
+         * @return The <tt>Transformer</tt> or <tt>null</tt>.
          */
         public static Transformer inflate(Context context, XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException, ReflectiveOperationException {
             // Moves to the start tag position.
@@ -428,6 +428,34 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
+     * Class <tt>CacheTransformer</tt> is an implementation of a {@link Transformer}.
+     */
+    private static final class CacheTransformer extends Transformer {
+        public final Transformer mTransformer;
+        public final Cache<Object, Drawable> mImageCache;
+
+        /**
+         * Constructor
+         * @param imageCache The {@link Cache} to store the drawables.
+         * @param transformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
+         */
+        public CacheTransformer(Cache<Object, Drawable> imageCache, Transformer transformer) {
+            mImageCache  = imageCache;
+            mTransformer = transformer;
+        }
+
+        @Override
+        public Drawable transform(Object uri, Object target, Object image) {
+            Drawable drawable = mImageCache.get(uri);
+            if (drawable == null) {
+                mImageCache.put(uri, drawable = mTransformer.transform(uri, target, image));
+            }
+
+            return drawable;
+        }
+    }
+
+    /**
      * Class <tt>ImageTransformer</tt> is an implementation of a {@link Transformer}.
      */
     private static final class ImageTransformer extends Transformer {
@@ -447,34 +475,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         @Override
         public Drawable transform(Object uri, Object target, Object image) {
             return (image instanceof Bitmap ? mBitmapTransformer.transform(uri, target, image) : mImageTransformer.transform(uri, target, image));
-        }
-    }
-
-    /**
-     * Class <tt>CacheTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    private static final class CacheTransformer<URI, Image> extends Transformer<URI, Image> {
-        public final Cache<URI, Drawable> mImageCache;
-        public final Transformer<URI, Image> mTransformer;
-
-        /**
-         * Constructor
-         * @param imageCache The {@link Cache} to store the drawables.
-         * @param transformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
-         */
-        public CacheTransformer(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer) {
-            mImageCache  = imageCache;
-            mTransformer = transformer;
-        }
-
-        @Override
-        public Drawable transform(URI uri, Object target, Image image) {
-            Drawable drawable = mImageCache.get(uri);
-            if (drawable == null) {
-                mImageCache.put(uri, drawable = mTransformer.transform(uri, target, image));
-            }
-
-            return drawable;
         }
     }
 }

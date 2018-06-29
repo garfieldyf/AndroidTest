@@ -89,6 +89,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @throws IOException if there is an error during the retrieval.
      */
     public final int getStatusCode() throws IOException {
+        DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
         return mRequest.statusCode();
     }
 
@@ -118,8 +119,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     protected Result doInBackground(Params... params) {
         DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
         try {
-            final int statusCode = mRequest.connectImpl(null);
-            return (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL ? onDownload(mRequest.mConnection, statusCode, params) : null);
+            return onDownload(mRequest.mConnection, mRequest.connectImpl(null), params);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't download from - " + mRequest.mConnection.getURL().toString(), e);
             return null;
@@ -132,8 +132,8 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * Downloads the resource from the remote server write to the {@link ByteArrayBuffer}.
      * @return The {@link ByteArrayBuffer} contains the resource.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(int, String)
-     * @see #download(OutputStream)
+     * @see #download(int, String, byte[])
+     * @see #download(OutputStream, byte[])
      */
     protected final ByteArrayBuffer download() throws IOException {
         final InputStream is = mRequest.mConnection.getInputStream();
@@ -149,12 +149,13 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     /**
      * Downloads the resource from the remote server write to the specified <em>out</em>.
      * @param out The {@link OutputStream} to write the resource.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download()
-     * @see #download(int, String)
+     * @see #download(int, String, byte[])
      */
-    protected final void download(OutputStream out) throws IOException {
-        mRequest.downloadImpl(out, this, null);
+    protected final void download(OutputStream out, byte[] tempBuffer) throws IOException {
+        mRequest.downloadImpl(out, this, tempBuffer);
     }
 
     /**
@@ -162,18 +163,19 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * <p>Note: This method will be create the necessary directories.</p>
      * @param statusCode The response code returned by the remote server.
      * @param filename The file name to write the resource, must be absolute file path.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download()
-     * @see #download(OutputStream)
+     * @see #download(OutputStream, byte[])
      */
-    protected final void download(int statusCode, String filename) throws IOException {
+    protected final void download(int statusCode, String filename, byte[] tempBuffer) throws IOException {
         switch (statusCode) {
         case HTTP_OK:
-            mRequest.downloadImpl(filename, this, null, false);
+            mRequest.downloadImpl(filename, this, tempBuffer, false);
             break;
 
         case HTTP_PARTIAL:
-            mRequest.downloadImpl(filename, this, null, true);
+            mRequest.downloadImpl(filename, this, tempBuffer, true);
             break;
         }
     }
@@ -187,11 +189,11 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
      * @see #download()
-     * @see #download(int, String)
-     * @see #download(OutputStream)
+     * @see #download(int, String, byte[])
+     * @see #download(OutputStream, byte[])
      */
     protected Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
-        return mRequest.downloadImpl(this);
+        return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
 
     /**

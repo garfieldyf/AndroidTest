@@ -4,7 +4,6 @@ import java.io.InputStream;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
-import android.ext.content.image.ImageLoader.ImageDecoder;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
@@ -20,7 +19,7 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AbsImageDecoder<Image> extends ImageDecoder<Image> implements Factory<Options> {
+public abstract class AbsImageDecoder<Image> extends ImageLoader.ImageDecoder<Image> implements Factory<Options> {
     /**
      * The application <tt>Context</tt>.
      */

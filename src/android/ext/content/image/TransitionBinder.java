@@ -52,7 +52,9 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
 
     @Override
     protected void inflateAttributes(Context context, AttributeSet attrs) {
-        duration = obtainDuration(context, attrs);
+        final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
+        duration = a.getInt(0 /* android.R.attr.duration */, 300);
+        a.recycle();
     }
 
     @Override
@@ -68,12 +70,5 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
             drawable.setCrossFadeEnabled(true);
             drawable.startTransition(duration);
         }
-    }
-
-    private static int obtainDuration(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
-        final int duration = a.getInt(0 /* android.R.attr.duration */, 300);
-        a.recycle();
-        return duration;
     }
 }

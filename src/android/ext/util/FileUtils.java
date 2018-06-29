@@ -498,7 +498,7 @@ public final class FileUtils {
      * @param dst The <tt>OutputStream</tt> to write.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * then the <em>dst's</em> contents undefined.
+     * then the <em>dst's</em> contents is undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>dst</em>.
      * @see #copyStream(InputStream, OutputStream, byte[])

@@ -316,7 +316,7 @@ public final class PackageUtils {
          * @param dirPath The path of directory, must be absolute file path.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
          * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo} or subclass objects,
-         * If the parse was cancelled before it completed normally then the returned value undefined.
+         * If the parse was cancelled before it completed normally then the returned value is undefined.
          * @see #parsePackages(String, int, int, Cancelable)
          */
         public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
@@ -335,7 +335,7 @@ public final class PackageUtils {
          * or <tt>null</tt> if none.
          * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo}
          * or subclass objects, If the parse was cancelled before it completed normally
-         * then the returned value undefined.
+         * then the returned value is undefined.
          * @see #parsePackages(String, Cancelable)
          */
         public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {

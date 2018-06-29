@@ -167,7 +167,7 @@ public final class JSONUtils {
      * @param reader The {@link JsonReader} to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
-     * cancelled before it completed normally then the returned value undefined.
+     * cancelled before it completed normally then the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
      * @see #newInstance(String, Cancelable)
@@ -191,7 +191,7 @@ public final class JSONUtils {
      * @param jsonFile The json file to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
-     * cancelled before it completed normally then the returned value undefined.
+     * cancelled before it completed normally then the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
      * @see #newInstance(JsonReader, Cancelable)

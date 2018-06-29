@@ -93,7 +93,7 @@ public abstract class Loader implements Factory<Task> {
     /**
      * Returns <tt>true</tt> if the <em>task</em> was cancelled
      * before it completed normally.
-     * @param task The {@link Task} to test.
+     * @param task null-ok; The {@link Task} to test.
      * @return <tt>true</tt> if the <em>task</em> was cancelled
      * or this loader has been shut down, <tt>false</tt> otherwise.
      * @see #cancelTask(Object, boolean)

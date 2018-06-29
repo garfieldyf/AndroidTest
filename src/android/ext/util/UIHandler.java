@@ -267,7 +267,7 @@ public final class UIHandler extends Handler {
             break;
 
         case MESSAGE_CHILD_FOCUS:
-            handleRequestChildFocus(msg);
+            handleChildFocus(msg);
             break;
 
         case MESSAGE_DATA_CHANGED:
@@ -296,6 +296,18 @@ public final class UIHandler extends Handler {
         }
     }
 
+    /**
+     * Handle the recycler view's child view request focus.
+     */
+    private void handleChildFocus(Message msg) {
+        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
+        if (child != null) {
+            child.requestFocus();
+        } else if (msg.arg2 < 3) {
+            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 + 1, msg.obj));
+        }
+    }
+
     // The ThreadPool and Loader.Task message.
     private static final int MESSAGE_EXECUTE       = 0xCFCFCFCF;
     private static final int MESSAGE_PROGRESS      = 0xDEDEDEDE;
@@ -314,18 +326,6 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
     private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
     private static final int MESSAGE_REQUEST_FOCUS = 0xF9F9F9F9;
-
-    /**
-     * Handle the recycler view's child view request focus.
-     */
-    private void handleRequestChildFocus(Message msg) {
-        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
-        if (child != null) {
-            child.requestFocus();
-        } else if (msg.arg2 < 3) {
-            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 + 1, msg.obj));
-        }
-    }
 
     /**
      * This class cannot be instantiated.

@@ -25,7 +25,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.database.DatabaseUtils;
 import android.ext.util.ArrayUtils.Filter;
-import android.ext.util.FileUtils.Stat;
 import android.os.Build;
 import android.os.Debug.MemoryInfo;
 import android.os.Process;
@@ -84,15 +83,6 @@ public final class ProcessUtils {
      * @see #getUserName(int)
      */
     public static native String getGroupName(int gid);
-
-    /**
-     * Checks the device is rooted.
-     * @return <tt>true</tt> if the device is rooted, <tt>false</tt> otherwise.
-     */
-    public static boolean checkSuperUser() {
-        final Stat stat = new Stat();
-        return (checkSuperUser("/system/bin/su", stat) || checkSuperUser("/system/xbin/su", stat));
-    }
 
     /**
      * Returns the current process name.
@@ -173,28 +163,6 @@ public final class ProcessUtils {
         new UncaughtHandler(context);
     }
 
-    /**
-     * Loads and links the dynamic libraries that is identified through the specified <tt>libraryPaths</tt>.
-     * @param loader The <tt>ClassLoader</tt>.
-     * @param libraryPaths The list of absolute path containing the native libraries to load.
-     * @throws Exception if an error occurs while loading library files.
-     * @see #loadLibrary(ClassLoader, String[])
-     */
-    public static void load(ClassLoader loader, String... libraryPaths) throws Exception {
-        load(loader, "load", libraryPaths);
-    }
-
-    /**
-     * Loads and links the dynamic libraries with the specified names.
-     * @param loader The <tt>ClassLoader</tt>.
-     * @param libraryNames The list of names containing the libraries to load.
-     * @throws Exception if an error occurs while loading libraries.
-     * @see #load(ClassLoader, String[])
-     */
-    public static void loadLibrary(ClassLoader loader, String... libraryNames) throws Exception {
-        load(loader, "loadLibrary", libraryNames);
-    }
-
     public static void dumpProcessInfos(Printer printer, List<RunningAppProcessInfo> infos) {
         final StringBuilder result = new StringBuilder(256);
         final Formatter formatter  = new Formatter(result);
@@ -208,26 +176,6 @@ public final class ProcessUtils {
         }
 
         formatter.close();
-    }
-
-    /**
-     * Loads and links are native libraries.
-     */
-    /* package */ static void load(ClassLoader loader, String methodName, String[] libs) throws Exception {
-        final Runtime runtime = Runtime.getRuntime();
-        final Method method = Runtime.class.getDeclaredMethod(methodName, String.class, ClassLoader.class);
-        method.setAccessible(true);
-
-        for (int i = 0; i < libs.length; ++i) {
-            method.invoke(runtime, libs[i], loader);
-        }
-    }
-
-    /**
-     * Checks the device is rooted.
-     */
-    private static boolean checkSuperUser(String path, Stat stat) {
-        return (FileUtils.stat(path, stat) == 0 && stat.uid == 0 && (stat.mode & (Stat.S_ISUID | Stat.S_IXOTH)) > 0);
     }
 
     /**
@@ -284,7 +232,7 @@ public final class ProcessUtils {
             mClassLoader = new DexClassLoader(dexPath, dexOutputDir, libraryPath, context.getClassLoader());
             if (ArrayUtils.getSize(libraryNames) > 0) {
                 try {
-                    load(mClassLoader, "loadLibrary", libraryNames);
+                    loadImpl(mClassLoader, "loadLibrary", libraryNames);
                 } catch (Exception e) {
                     throw new RuntimeException("Couldn't load libraries - " + Arrays.toString(libraryNames), e);
                 }
@@ -339,6 +287,41 @@ public final class ProcessUtils {
             } catch (Exception e) {
                 Log.e(ClassFactory.class.getName(), new StringBuilder("Couldn't create ").append(className).append(" instance").toString(), e);
                 return null;
+            }
+        }
+
+        /**
+         * Loads and links the dynamic libraries that is identified through the specified <tt>libraryPaths</tt>.
+         * @param loader The <tt>ClassLoader</tt>.
+         * @param libraryPaths The list of absolute path containing the native libraries to load.
+         * @throws Exception if an error occurs while loading library files.
+         * @see #loadLibrary(ClassLoader, String[])
+         */
+        public static void load(ClassLoader loader, String... libraryPaths) throws Exception {
+            loadImpl(loader, "load", libraryPaths);
+        }
+
+        /**
+         * Loads and links the dynamic libraries with the specified names.
+         * @param loader The <tt>ClassLoader</tt>.
+         * @param libraryNames The list of names containing the libraries to load.
+         * @throws Exception if an error occurs while loading libraries.
+         * @see #load(ClassLoader, String[])
+         */
+        public static void loadLibrary(ClassLoader loader, String... libraryNames) throws Exception {
+            loadImpl(loader, "loadLibrary", libraryNames);
+        }
+
+        /**
+         * Loads and links are native libraries.
+         */
+        private static void loadImpl(ClassLoader loader, String methodName, String[] libs) throws Exception {
+            final Runtime runtime = Runtime.getRuntime();
+            final Method method = Runtime.class.getDeclaredMethod(methodName, String.class, ClassLoader.class);
+            method.setAccessible(true);
+
+            for (int i = 0; i < libs.length; ++i) {
+                method.invoke(runtime, libs[i], loader);
             }
         }
     }

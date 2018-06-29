@@ -69,6 +69,15 @@ public final class ProcessUtils {
     public static native String myGroupName();
 
     /**
+     * Returns the current process name.
+     * @param context The <tt>Context</tt>.
+     * @return The current process name.
+     */
+    public static String myProcessName(Context context) {
+        return getProcessName(context, Process.myPid());
+    }
+
+    /**
      * Returns the user name assigned to a particular <em>uid</em>.
      * @param uid The user id.
      * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
@@ -85,21 +94,10 @@ public final class ProcessUtils {
     public static native String getGroupName(int gid);
 
     /**
-     * Returns the current process name.
-     * @param context The <tt>Context</tt>.
-     * @return The current process name.
-     * @see #getProcessName(Context, int)
-     */
-    public static String getProcessName(Context context) {
-        return getProcessName(context, Process.myPid());
-    }
-
-    /**
      * Returns the process name with the specified <em>pid</em>.
      * @param context The <tt>Context</tt>.
      * @param pid The id of the process.
      * @return The process name of the <em>pid</em> or <tt>null</tt>.
-     * @see #getProcessName(Context)
      */
     public static String getProcessName(Context context, int pid) {
         final List<RunningAppProcessInfo> infos = ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();

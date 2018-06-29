@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
@@ -29,6 +30,21 @@ import android.util.Printer;
  */
 public final class PackageUtils {
     /**
+     * Returns the {@link PackageInfo} object of the current application.
+     * @param context The <tt>Context</tt>.
+     * @param flags Additional option flags. May be <tt>0</tt> or any
+     * combination of <tt>PackageManager.GET_XXX</tt> constants.
+     * @return The {@link PackageInfo} object.
+     */
+    public static PackageInfo myPackageInfo(Context context, int flags) {
+        try {
+            return context.getPackageManager().getPackageInfo(context.getPackageName(), flags);
+        } catch (NameNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
      * Equivalent to calling <tt>getInstalledPackages(context, flags, AppPackageInfo.FACTORY, filter)</tt>.
      * @param context The <tt>Context</tt>.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination of
@@ -36,7 +52,7 @@ public final class PackageUtils {
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link AppPackageInfo} objects.
      * @see #getInstalledPackages(Context, int, Factory, Filter)
-     * @see NonSystemPackageFilter
+     * @see InstalledPackageFilter
      */
     public static List<AppPackageInfo> getInstalledPackages(Context context, int flags, Filter<PackageInfo> filter) {
         return getInstalledPackages(context, flags, AppPackageInfo.FACTORY, filter);
@@ -52,7 +68,7 @@ public final class PackageUtils {
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link AppPackageInfo} objects.
      * @see #getInstalledPackages(Context, int, Filter)
-     * @see NonSystemPackageFilter
+     * @see InstalledPackageFilter
      */
     public static <T extends AppPackageInfo> List<T> getInstalledPackages(Context context, int flags, Factory<T> factory, Filter<PackageInfo> filter) {
         final List<PackageInfo> infos = context.getPackageManager().getInstalledPackages(flags);
@@ -375,37 +391,38 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>NonSystemPackageFilter</tt> filtering the non system application {@link PackageInfo} objects.
+     * Class <tt>InstalledPackageFilter</tt> filtering the installed application
+     * {@link PackageInfo} objects (excluding the system and the updated system application).
      */
-    public static final class NonSystemPackageFilter implements Filter<PackageInfo> {
+    public static final class InstalledPackageFilter implements Filter<PackageInfo> {
         private final List<String> packages;
 
         /**
          * Constructor
-         * @see #NonSystemPackageFilter(List)
-         * @see #NonSystemPackageFilter(String)
+         * @see #InstalledPackageFilter(List)
+         * @see #InstalledPackageFilter(String)
          */
-        public NonSystemPackageFilter() {
+        public InstalledPackageFilter() {
             this.packages = Collections.<String>emptyList();
         }
 
         /**
          * Constructor
          * @param excludingPackage The package name to excluding.
-         * @see #NonSystemPackageFilter()
-         * @see #NonSystemPackageFilter(List)
+         * @see #InstalledPackageFilter()
+         * @see #InstalledPackageFilter(List)
          */
-        public NonSystemPackageFilter(String excludingPackage) {
+        public InstalledPackageFilter(String excludingPackage) {
             this.packages = (TextUtils.isEmpty(excludingPackage) ? Collections.<String>emptyList() : Collections.singletonList(excludingPackage));
         }
 
         /**
          * Constructor
          * @param excludingPackages A <tt>List</tt> of package names to excluding.
-         * @see #NonSystemPackageFilter()
-         * @see #NonSystemPackageFilter(String)
+         * @see #InstalledPackageFilter()
+         * @see #InstalledPackageFilter(String)
          */
-        public NonSystemPackageFilter(List<String> excludingPackages) {
+        public InstalledPackageFilter(List<String> excludingPackages) {
             this.packages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
         }
 

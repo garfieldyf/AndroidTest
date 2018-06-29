@@ -179,19 +179,8 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
      */
     @Override
     public void start() {
-        final int frameCount;
-        if (!isRunning() && (frameCount = mState.mImage.getFrameCount()) > 1) {
-            if ((mState.mFlags & (FLAG_ONESHOT | FLAG_FILLAFTER)) != 0 && mFrameIndex == frameCount - 1) {
-                mFrameIndex = 0;
-            }
-
-            mFlags |= FLAG_RUNNING;
-            invalidateSelf();
-
-            // Notify the callback that this animation was started.
-            if (mCallback != null) {
-                mCallback.onAnimationStart(this, mFrameIndex);
-            }
+        if (!isRunning()) {
+            startAnimation();
         }
     }
 
@@ -254,17 +243,20 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
+        final boolean changed = super.setVisible(visible, restart);
         if (visible) {
-            if (restart) {
-                mFrameIndex = 0;
-            }
+            if (restart || changed) {
+                if (restart) {
+                    mFrameIndex = 0;
+                }
 
-            start();
-        } else if (isRunning()) {
+                startAnimation();
+            }
+        } else {
             unscheduleSelf(restart ? 0 : mFrameIndex);
         }
 
-        return super.setVisible(visible, restart);
+        return changed;
     }
 
     @Override
@@ -321,6 +313,23 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
      */
     protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
         canvas.drawBitmap(frame, null, bounds, paint);
+    }
+
+    private void startAnimation() {
+        final int frameCount = mState.mImage.getFrameCount();
+        if (frameCount > 1) {
+            if ((mState.mFlags & (FLAG_ONESHOT | FLAG_FILLAFTER)) != 0 && mFrameIndex == frameCount - 1) {
+                mFrameIndex = 0;
+            }
+
+            mFlags |= FLAG_RUNNING;
+            invalidateSelf();
+
+            // Notify the callback that this animation was started.
+            if (mCallback != null) {
+                mCallback.onAnimationStart(this, mFrameIndex);
+            }
+        }
     }
 
     private void scheduleSelf(int delayMillis) {

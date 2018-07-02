@@ -1451,7 +1451,7 @@ public final class FileUtils {
          * @see #compareToIgnoreCase(Dirent)
          */
         public static Comparator<Dirent> caseInsensitiveOrder() {
-            return DirentComparator.sInstance;
+            return CaseInsensitiveComparator.sInstance;
         }
 
         public final void dump(Printer printer) {
@@ -1578,11 +1578,11 @@ public final class FileUtils {
     }
 
     /**
-     * Class <tt>DirentComparator</tt> compares {@link Dirent} ignoring
+     * Class <tt>CaseInsensitiveComparator</tt> compares {@link Dirent} ignoring
      * the {@link Dirent#path path} field case differences.
      */
-    private static final class DirentComparator implements Comparator<Dirent> {
-        public static final DirentComparator sInstance = new DirentComparator();
+    private static final class CaseInsensitiveComparator implements Comparator<Dirent> {
+        public static final CaseInsensitiveComparator sInstance = new CaseInsensitiveComparator();
 
         @Override
         public int compare(Dirent one, Dirent another) {

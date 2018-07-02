@@ -234,7 +234,7 @@ public final class JSONUtils {
         } else if (object instanceof JSONObject) {
             return writeJSONObject(writer, (JSONObject)object);
         } else {
-            return writer.value(object.toString());
+            throw new Error("Unsupported type - " + object.getClass().toString());
         }
     }
 

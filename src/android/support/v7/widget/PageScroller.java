@@ -43,8 +43,8 @@ public class PageScroller {
     public PageScroller(Context context, AttributeSet attrs, LinearLayoutManager layoutManager) {
         DebugUtils.__checkError(PAGE_SCROLLER_ATTRS == null, "The " + getClass().getName() + " did not call PageScroller.initAttrs()");
         final TypedArray a = context.obtainStyledAttributes(attrs, PAGE_SCROLLER_ATTRS);
-        mLayoutManager = layoutManager;
         mPageSize = a.getDimensionPixelOffset(0 /* R.styleable.PageScroller_pageSize */, 0);
+        mLayoutManager = layoutManager;
         a.recycle();
     }
 

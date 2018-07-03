@@ -133,7 +133,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     }
 
     /**
-     * Loads the value synchronously. Call this method, Pass the {@link #loadInBackground}
+     * Loads the value synchronously. Call this method, pass the {@link #loadInBackground}
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
      * @param key The key to find value.

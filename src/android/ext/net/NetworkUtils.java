@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -71,13 +72,14 @@ public final class NetworkUtils {
 
     /**
      * Returns the byte array MAC address from the <em>macAddress</em>.
-     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>.
+     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>
+     * or <tt>XX-XX-XX-XX-XX-XX</tt>.
      * @param outAddress The byte array to store the MAC address.
      * @return The <em>outAddress</em>.
      * @see #toMacAddress(String)
      */
     public static byte[] toMacAddress(String inAddress, byte[] outAddress) {
-        DebugUtils.__checkError(inAddress == null || inAddress.length() < 17, "inAddress == null || inAddress.length() < 17");
+        DebugUtils.__checkError(!Pattern.matches("([A-Fa-f0-9]{2}[-:]){5}[A-Fa-f0-9]{2}", inAddress), "Invalid MAC address: " + inAddress);
         DebugUtils.__checkError(outAddress == null || outAddress.length < 6, "outAddress == null || outAddress.length < 6");
         final int inLength  = StringUtils.getLength(inAddress);
         final int outLength = ArrayUtils.getSize(outAddress);

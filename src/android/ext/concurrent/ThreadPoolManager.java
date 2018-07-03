@@ -56,10 +56,11 @@ public class ThreadPoolManager extends ThreadPool {
 
     /**
      * Attempts to stop the {@link Task} with specified identifier from the internal queue.
-     * @param id The identifier of the task to cancel.
+     * @param id A unique identifier for the task to cancel.
      * @param mayInterruptIfRunning <tt>true</tt> if the specified <tt>Task</tt> should be
      * interrupted, <tt>false</tt> otherwise.
      * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
+     * @see Task#getId()
      * @see #cancelAll(boolean, boolean)
      */
     public boolean cancel(long id, boolean mayInterruptIfRunning) {
@@ -207,7 +208,7 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         /**
-         * Returns the identifier associated with this task.
+         * Returns a unique identifier associated with this task.
          * @return This task's identifier.
          */
         public abstract long getId();

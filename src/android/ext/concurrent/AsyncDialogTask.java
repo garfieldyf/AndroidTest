@@ -6,18 +6,21 @@ import android.app.Application;
 import android.app.Application.ActivityLifecycleCallbacks;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
 /**
- * Abstract class AsyncDialogTask
+ * Class <tt>AsyncDialogTask</tt> like as {@link AsyncTask}, But this task allows to show
+ * a {@link Dialog} on the UI thread when it perform a computation on a background thread.
  * @author Garfield
- * @version 1.0
+ * @version 2.0
  */
 @SuppressWarnings("unchecked")
-public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Runnable, ActivityLifecycleCallbacks {
+public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Runnable, OnCancelListener, ActivityLifecycleCallbacks {
     private Dialog mDialog;
     private final long mDelayMillis;
     private volatile boolean mCancelled;
@@ -83,6 +86,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
             final Activity activity = mActivity.get();
             if (activity != null && !activity.isDestroyed()) {
                 mDialog = onCreateDialog(activity);
+                mDialog.setOnCancelListener(this);
                 mDialog.show();
                 mApplication.registerActivityLifecycleCallbacks(this);
             }
@@ -137,6 +141,12 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     protected abstract Result doInBackground(Params[] params, Application application);
 
     @Override
+    public void onCancel(DialogInterface dialog) {
+        cancel(false);
+        dismissDialog();
+    }
+
+    @Override
     public void onActivityStarted(Activity activity) {
         if (mDialog != null && mActivity.get() == activity) {
             mDialog.show();
@@ -152,9 +162,8 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     public void onActivityDestroyed(Activity activity) {
-        if (mActivity.get() == activity) {
-            cancel(false);
-            dismissDialog();
+        if (mDialog != null && mActivity.get() == activity) {
+            onCancel(mDialog);
         }
     }
 

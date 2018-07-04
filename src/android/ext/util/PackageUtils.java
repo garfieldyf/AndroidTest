@@ -126,7 +126,7 @@ public final class PackageUtils {
 
                 // Creates a AppPackageInfo or subclass object.
                 final T result = factory.newInstance();
-                result.initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
+                result.setPackageInfo(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
                 return result;
             } finally {
                 // Close the assets to avoid ProcessKiller
@@ -156,7 +156,7 @@ public final class PackageUtils {
      */
     private static <T extends AppPackageInfo> T createPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
         final T result = factory.newInstance();
-        result.initialize(context, packageInfo);
+        result.setPackageInfo(context, packageInfo);
         return result;
     }
 
@@ -243,11 +243,11 @@ public final class PackageUtils {
         }
 
         /**
-         * Initializes this object with the specified <em>packageInfo</em>.
+         * Sets the {@link #packageInfo} to the specified <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param packageInfo The <tt>PackageInfo</tt> to set.
          */
-        public void initialize(Context context, PackageInfo packageInfo) {
+        public void setPackageInfo(Context context, PackageInfo packageInfo) {
             final PackageManager pm = context.getPackageManager();
             this.packageInfo = packageInfo;
             this.icon  = packageInfo.applicationInfo.loadIcon(pm);
@@ -255,12 +255,12 @@ public final class PackageUtils {
         }
 
         /**
-         * Initializes this object with the specified <em>res</em> and <em>packageInfo</em>.
+         * Sets the {@link #packageInfo} to the specified <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param res The <tt>Resources</tt> to load the application's label and icon.
          * @param packageInfo The <tt>PackageInfo</tt> to set.
          */
-        protected void initialize(Context context, Resources res, PackageInfo packageInfo) {
+        protected void setPackageInfo(Context context, Resources res, PackageInfo packageInfo) {
             this.packageInfo = packageInfo;
             this.label = loadLabel(res);
             this.icon  = loadIcon(context, res);

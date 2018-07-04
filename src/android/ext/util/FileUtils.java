@@ -681,8 +681,7 @@ public final class FileUtils {
     @Keep
     private static <T extends Dirent> void addDirent(List<? super T> dirents, String path, int type, Factory<T> factory) {
         final T dirent = factory.newInstance();
-        dirent.path = path;
-        dirent.type = type;
+        dirent.setPath(path, type);
         dirents.add(dirent);
     }
 
@@ -1156,12 +1155,21 @@ public final class FileUtils {
 
         /**
          * Constructor
+         * @see #Dirent(String)
+         * @see #Dirent(String, int)
+         * @see #Dirent(String, String, int)
+         */
+        public Dirent() {
+        }
+
+        /**
+         * Constructor
          * @param path The absolute file path. Never <tt>null</tt>.
+         * @see #Dirent()
          * @see #Dirent(String, int)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            DebugUtils.__checkError(path == null, "path == null");
             setPath(path);
         }
 
@@ -1169,13 +1177,12 @@ public final class FileUtils {
          * Constructor
          * @param path The absolute file path. Never <tt>null</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         * @see #Dirent()
          * @see #Dirent(String)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            DebugUtils.__checkError(path == null, "path == null");
-            this.path = path;
-            this.type = type;
+            setPath(path, type);
         }
 
         /**
@@ -1183,19 +1190,13 @@ public final class FileUtils {
          * @param dir The path of the directory.
          * @param name The file's name of this <tt>Dirent</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         * @see #Dirent()
          * @see #Dirent(String)
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
-            this.path = buildPath(dir, name);
-            this.type = type;
-        }
-
-        /**
-         * Used by derived class.
-         */
-        protected Dirent() {
+            setPath(buildPath(dir, name), type);
         }
 
         /**
@@ -1282,6 +1283,30 @@ public final class FileUtils {
          */
         public String getMimeType() {
             return (type != DT_DIR ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
+        }
+
+        /**
+         * Sets the {@link #path} to the specified <em>path</em>.
+         * @param path The absolute file path. Never <tt>null</tt>.
+         * @see #setPath(String, int)
+         */
+        public final void setPath(String path) {
+            DebugUtils.__checkError(path == null, "path == null");
+            this.path = path;
+            this.type = getType(path);
+            __checkDirentType(this);
+        }
+
+        /**
+         * Sets the {@link #path} to the specified <em>path</em>.
+         * @param path The absolute file path. Never <tt>null</tt>.
+         * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         * @see #setPath(String)
+         */
+        public void setPath(String path, int type) {
+            DebugUtils.__checkError(path == null, "path == null");
+            this.path = path;
+            this.type = type;
         }
 
         /**
@@ -1433,15 +1458,13 @@ public final class FileUtils {
         }
 
         /**
-         * Returns the file type of the specified <em>mode</em>.
-         * @param mode The file protection. May be any combination
-         * of <tt>Stat.S_IXXXX</tt> constants.
+         * Returns the file type of the specified <em>path</em>.
+         * @param path The absolute file path. Never <tt>null</tt>.
          * @return The file type. One of <tt>DT_XXX</tt> constants.
-         * @see Stat#mode
-         * @see FileUtils#getFileMode(String)
          */
-        public static int getType(int mode) {
-            return (mode & Stat.S_IFMT) >> 12;
+        public static int getType(String path) {
+            DebugUtils.__checkError(path == null, "path == null");
+            return (getFileMode(path) & Stat.S_IFMT) >> 12;
         }
 
         /**
@@ -1467,12 +1490,6 @@ public final class FileUtils {
                    .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
                    .append(", hidden = ").append(isHidden())
                    .append(" }").toString());
-        }
-
-        /* package */ final void setPath(String path) {
-            this.path = path;
-            this.type = getType(getFileMode(path));
-            __checkDirentType(this);
         }
 
         private static String toString(int type) {

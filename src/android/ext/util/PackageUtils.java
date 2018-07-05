@@ -74,16 +74,17 @@ public final class PackageUtils {
         final List<PackageInfo> infos = context.getPackageManager().getInstalledPackages(flags);
         final int size = ArrayUtils.getSize(infos);
         final List<T> result = new ArrayList<T>(size);
+        final PackageManager pm = context.getPackageManager();
         if (filter != null) {
             for (int i = 0; i < size; ++i) {
                 final PackageInfo info = infos.get(i);
                 if (filter.accept(info)) {
-                    result.add(createPackageInfo(context, info, factory));
+                    result.add(createPackageInfo(pm, info, factory));
                 }
             }
         } else {
             for (int i = 0; i < size; ++i) {
-                result.add(createPackageInfo(context, infos.get(i), factory));
+                result.add(createPackageInfo(pm, infos.get(i), factory));
             }
         }
 
@@ -126,7 +127,7 @@ public final class PackageUtils {
 
                 // Creates a AppPackageInfo or subclass object.
                 final T result = factory.newInstance();
-                result.setPackageInfo(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
+                result.initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
                 return result;
             } finally {
                 // Close the assets to avoid ProcessKiller
@@ -154,9 +155,9 @@ public final class PackageUtils {
     /**
      * Create a {@link AppPackageInfo} or subclass object with the specified <em>packageInfo</em>.
      */
-    private static <T extends AppPackageInfo> T createPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
+    private static <T extends AppPackageInfo> T createPackageInfo(PackageManager pm, PackageInfo packageInfo, Factory<T> factory) {
         final T result = factory.newInstance();
-        result.setPackageInfo(context, packageInfo);
+        result.setPackageInfo(pm, packageInfo);
         return result;
     }
 
@@ -244,23 +245,22 @@ public final class PackageUtils {
 
         /**
          * Sets the {@link #packageInfo} to the specified <em>packageInfo</em>.
-         * @param context The <tt>Context</tt>.
+         * @param pm The {@link PackageManager} to load the application's label and icon.
          * @param packageInfo The <tt>PackageInfo</tt> to set.
          */
-        public void setPackageInfo(Context context, PackageInfo packageInfo) {
-            final PackageManager pm = context.getPackageManager();
+        public void setPackageInfo(PackageManager pm, PackageInfo packageInfo) {
             this.packageInfo = packageInfo;
             this.icon  = packageInfo.applicationInfo.loadIcon(pm);
             this.label = packageInfo.applicationInfo.loadLabel(pm);
         }
 
         /**
-         * Sets the {@link #packageInfo} to the specified <em>packageInfo</em>.
+         * Initializes this object with the specified <em>res</em> and <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param res The <tt>Resources</tt> to load the application's label and icon.
          * @param packageInfo The <tt>PackageInfo</tt> to set.
          */
-        protected void setPackageInfo(Context context, Resources res, PackageInfo packageInfo) {
+        protected void initialize(Context context, Resources res, PackageInfo packageInfo) {
             this.packageInfo = packageInfo;
             this.label = loadLabel(res);
             this.icon  = loadIcon(context, res);

@@ -181,8 +181,7 @@ public final class JSONUtils {
             return (T)newInstanceImpl(reader, DummyCancelable.wrap(cancelable));
 
         default:
-            DebugUtils.__checkError(true, "Invalid json token - " + reader.peek());
-            return null;
+            throw new Error("Invalid json token - " + reader.peek());
         }
     }
 

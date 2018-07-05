@@ -2,7 +2,7 @@
 <project name="module" basedir="." default="all">
     <!-- properties -->
     <property name="author" value="Garfield" />
-    <property name="version" value="1.2.5" />
+    <property name="version" value="1.2.6" />
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
@@ -13,15 +13,16 @@
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
+    <property name="class.dir" value="${basedir}/src" />
 
     <property name="api.level" value="22" />
     <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
     <property name="library.jars.dir" value="E:\Include\android" />
     <property name="sdk.dir" value="D:\Google\android-sdk-windows" />
-    <property name="barcode.jar.path" value="${library.jars.dir}/zxing/release/zxing.jar" />
+    <property name="barcode.jar.path" value="${library.jars.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.internal.jar.path" value="${library.jars.dir}/internal/android-sdk-internal.jar" />
-    <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/release/recyclerview-v7.jar" />
+    <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
     <!-- target -copy -->
@@ -84,42 +85,30 @@
 
     <!-- target -pre-compile-test -->
     <target name="-pre-compile-test">
-        <property name="java.debug" value="true" />
-        <property name="class.dir" value="${basedir}/src" />
         <property name="file.out.dir" value="${out.dir}/debug" />
-        <echo level="info">java.debug: ${java.debug}</echo>
-        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -pre-compile-debug -->
     <target name="-pre-compile-debug">
         <property name="ndk.debug" value="1" />
-        <property name="java.debug" value="true" />
-        <property name="class.dir" value="${basedir}/src" />
         <property name="file.out.dir" value="${out.dir}/debug" />
         <echo level="info">Builds the ${ndk.module} module in DEBUG mode.</echo>
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
-        <echo level="info">java.debug: ${java.debug}</echo>
-        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -pre-compile-release -->
     <target name="-pre-compile-release">
         <property name="ndk.debug" value="0" />
-        <property name="java.debug" value="false" />
-        <property name="class.dir" value="${basedir}/classes" />
         <property name="file.out.dir" value="${out.dir}/release" />
         <echo level="info">Builds the ${ndk.module} module in RELEASE mode.</echo>
         <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
-        <echo level="info">java.debug: ${java.debug}</echo>
-        <echo level="info">class.dir: ${class.dir}</echo>
     </target>
 
     <!-- target -compile-jar -->
     <target name="-compile-jar">
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
-        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="${java.debug}" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
+        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
             classpath="${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}" />
 
         <!-- build jar file -->
@@ -188,8 +177,6 @@
     <target name="-post-compile">
         <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_widget.xml" />
         <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${ndk.module}-proguard.txt" />
-        <copy file="${library.jars.dir}/recyclerview/attrs_recyclerview.xml" tofile="${out.dir}/attrs_recyclerview.xml" />
-        <copy file="${library.jars.dir}/recyclerview/recyclerview-proguard.txt" tofile="${out.dir}/recyclerview-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
@@ -200,23 +187,13 @@
 
         <echo level="info">Install: ${file.out.dir}/${jar.file.name}</echo>
         <echo level="info">Install: ${out.dir}/attrs_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/attrs_recyclerview.xml</echo>
         <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
-        <echo level="info">Install: ${out.dir}/recyclerview-proguard.txt</echo>
     </target>
 
     <!-- target -clean -->
     <target name="-clean">
         <echo level="info">Deletes output files...</echo>
         <delete dir="${file.out.dir}"/>
-    </target>
-
-    <!-- target clean -->
-    <target name="clean">
-        <echo level="info">Deletes output files...</echo>
-        <delete includeemptydirs="true">
-            <fileset dir="${basedir}" includes="**/*" excludes="build.xml" />
-        </delete>
     </target>
 
     <!-- target test -->

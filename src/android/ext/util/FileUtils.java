@@ -681,7 +681,7 @@ public final class FileUtils {
     @Keep
     private static <T extends Dirent> void addDirent(List<? super T> dirents, String path, int type, Factory<T> factory) {
         final T dirent = factory.newInstance();
-        dirent.setPath(path, type);
+        dirent.initialize(path, type);
         dirents.add(dirent);
     }
 
@@ -1182,7 +1182,7 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            setPath(path, type);
+            initialize(path, type);
         }
 
         /**
@@ -1196,7 +1196,7 @@ public final class FileUtils {
          */
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
-            setPath(buildPath(dir, name), type);
+            initialize(buildPath(dir, name), type);
         }
 
         /**
@@ -1288,25 +1288,12 @@ public final class FileUtils {
         /**
          * Sets the {@link #path} to the specified <em>path</em>.
          * @param path The absolute file path. Never <tt>null</tt>.
-         * @see #setPath(String, int)
          */
-        public final void setPath(String path) {
+        public void setPath(String path) {
             DebugUtils.__checkError(path == null, "path == null");
             this.path = path;
             this.type = getType(path);
             __checkDirentType(this);
-        }
-
-        /**
-         * Sets the {@link #path} to the specified <em>path</em>.
-         * @param path The absolute file path. Never <tt>null</tt>.
-         * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
-         * @see #setPath(String)
-         */
-        public void setPath(String path, int type) {
-            DebugUtils.__checkError(path == null, "path == null");
-            this.path = path;
-            this.type = type;
         }
 
         /**
@@ -1490,6 +1477,17 @@ public final class FileUtils {
                    .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
                    .append(", hidden = ").append(isHidden())
                    .append(" }").toString());
+        }
+
+        /**
+         * Initializes this object with the specified <em>path</em> and <em>type</em>.
+         * @param path The absolute file path. Never <tt>null</tt>.
+         * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         */
+        protected void initialize(String path, int type) {
+            DebugUtils.__checkError(path == null, "path == null");
+            this.path = path;
+            this.type = type;
         }
 
         private static String toString(int type) {

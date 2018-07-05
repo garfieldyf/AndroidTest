@@ -9,11 +9,12 @@ import android.ext.content.AsyncTaskLoader;
 import android.util.Log;
 
 /**
- * Abstract class SQLiteAsyncLoader
+ * Class <tt>AsyncSQLiteHelper</tt> is a helper class to help make
+ * handling asynchronous {@link SQLiteDatabase} queries easier.
  * @author Garfield
  * @version 1.0
  */
-public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object, Object> {
+public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object, Object> {
     private static final int MESSAGE_QUERY    = 1;
     private static final int MESSAGE_INSERT   = 2;
     private static final int MESSAGE_UPDATE   = 3;
@@ -31,9 +32,9 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
      * Constructor
      * @param db The {@link SQLiteDatabase}.
      * @param executor The serial {@link Executor}.
-     * @see #SQLiteAsyncLoader(SQLiteDatabase, Executor, Object)
+     * @see #AsyncSQLiteHelper(SQLiteDatabase, Executor, Object)
      */
-    public SQLiteAsyncLoader(SQLiteDatabase db, Executor executor) {
+    public AsyncSQLiteHelper(SQLiteDatabase db, Executor executor) {
         super(executor);
         mDatabase = new WeakReference<SQLiteDatabase>(db);
     }
@@ -43,9 +44,9 @@ public abstract class SQLiteAsyncLoader extends AsyncTaskLoader<Integer, Object,
      * @param db The {@link SQLiteDatabase}.
      * @param executor The serial {@link Executor}.
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #SQLiteAsyncLoader(SQLiteDatabase, Executor)
+     * @see #AsyncSQLiteHelper(SQLiteDatabase, Executor)
      */
-    public SQLiteAsyncLoader(SQLiteDatabase db, Executor executor, Object owner) {
+    public AsyncSQLiteHelper(SQLiteDatabase db, Executor executor, Object owner) {
         super(executor, owner);
         mDatabase = new WeakReference<SQLiteDatabase>(db);
     }

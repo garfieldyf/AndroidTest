@@ -9,7 +9,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 /**
- * Class DatabaseReceiver
+ * Class <tt>DatabaseReceiver</tt> used to listen the specified table's content has changed.
  * @author Garfield
  * @version 1.0
  */

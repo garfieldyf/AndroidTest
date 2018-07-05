@@ -14,11 +14,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 /**
- * Abstract class ContentAsyncLoader
+ * Class <tt>AsyncContentHelper</tt> is a helper class to help make
+ * handling asynchronous {@link ContentResolver} queries easier.
  * @author Garfield
  * @version 1.0
  */
-public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object, Object> {
+public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object, Object> {
     private static final int MESSAGE_CALL    = 1;
     private static final int MESSAGE_BATCH   = 2;
     private static final int MESSAGE_QUERY   = 3;
@@ -37,9 +38,9 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The serial {@link Executor}.
-     * @see #ContentAsyncLoader(Context, Executor, Object)
+     * @see #AsyncContentHelper(Context, Executor, Object)
      */
-    public ContentAsyncLoader(Context context, Executor executor) {
+    public AsyncContentHelper(Context context, Executor executor) {
         super(executor);
         mContext = context.getApplicationContext();
     }
@@ -49,9 +50,9 @@ public abstract class ContentAsyncLoader extends AsyncTaskLoader<Integer, Object
      * @param context The <tt>Context</tt>.
      * @param executor The serial {@link Executor}.
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #ContentAsyncLoader(Context, Executor)
+     * @see #AsyncContentHelper(Context, Executor)
      */
-    public ContentAsyncLoader(Context context, Executor executor, Object owner) {
+    public AsyncContentHelper(Context context, Executor executor, Object owner) {
         super(executor, owner);
         mContext = context.getApplicationContext();
     }

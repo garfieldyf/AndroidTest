@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -18,6 +20,8 @@ import android.os.Parcelable;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
+import android.util.JsonReader;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.util.Printer;
 
@@ -926,9 +930,21 @@ public final class FileUtils {
 
         /**
          * Constructor
+         * @see #Stat(String)
          */
         @Keep
         public Stat() {
+        }
+
+        /**
+         * Constructor
+         * @param json The JSON-encoded string containing the data.
+         * @throws IOException if an error occurs while parsing the data.
+         * @see #Stat()
+         */
+        public Stat(String json) throws IOException {
+            DebugUtils.__checkError(json == null, "json == null");
+            readFrom(new JsonReader(new StringReader(json)));
         }
 
         /**
@@ -991,12 +1007,77 @@ public final class FileUtils {
         }
 
         /**
+         * Reads this object from the data stored in the specified <em>reader</em>.
+         * @param reader The {@link JsonReader} to read the data.
+         * @throws IOException if an error occurs while reading the data.
+         * @see #writeTo(JsonWriter)
+         */
+        public final void readFrom(JsonReader reader) throws IOException {
+            DebugUtils.__checkError(reader == null, "reader == null");
+            reader.beginObject();
+            while (reader.hasNext()) {
+                switch (reader.nextName()) {
+                case "mode":
+                    mode = reader.nextInt();
+                    break;
+
+                case "uid":
+                    uid = reader.nextInt();
+                    break;
+
+                case "gid":
+                    gid = reader.nextInt();
+                    break;
+
+                case "size":
+                    size = reader.nextLong();
+                    break;
+
+                case "mtime":
+                    mtime = reader.nextLong();
+                    break;
+
+                case "blocks":
+                    blocks = reader.nextLong();
+                    break;
+
+                case "blksize":
+                    blksize = reader.nextLong();
+                    break;
+
+                default:
+                    reader.skipValue();
+                    break;
+                }
+            }
+
+            reader.endObject();
+        }
+
+        /**
+         * Writes this object the data into a {@link JsonWriter}.
+         * @param writer The {@link JsonWriter}.
+         * @return The <em>writer</em>.
+         * @see #readFrom(JsonReader)
+         */
+        public final JsonWriter writeTo(JsonWriter writer) {
+            try {
+                DebugUtils.__checkError(writer == null, "writer == null");
+                return writer.beginObject().name("mode").value(mode).name("uid").value(uid)
+                    .name("gid").value(gid).name("size").value(size).name("mtime").value(mtime)
+                    .name("blocks").value(blocks).name("blksize").value(blksize).endObject();
+            } catch (IOException e) {
+                throw new Error(e);
+            }
+        }
+
+        /**
          * Reads this object from the data stored in the specified parcel. To
          * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
          * @param source The parcel to read the data.
          * @see #writeToParcel(Parcel, int)
          */
-        public void readFromParcel(Parcel source) {
+        public final void readFromParcel(Parcel source) {
             mode    = source.readInt();
             uid     = source.readInt();
             gid     = source.readInt();
@@ -1056,6 +1137,16 @@ public final class FileUtils {
                 .append(", blksize = ").append(blksize)
                 .append(", mtime = ").append(DateFormat.format("yyyy-MM-dd kk:mm:ss", mtime))
                 .append(" }").toString();
+        }
+
+        /**
+         * Encodes this object as a JSON string.
+         * @return A JSON string.
+         */
+        public final String toJSONString() {
+            final StringWriter out = new StringWriter(128);
+            writeTo(new JsonWriter(out));
+            return out.toString();
         }
 
         private static char toCharType(int type) {
@@ -1348,6 +1439,49 @@ public final class FileUtils {
         }
 
         /**
+         * Reads this object from the data stored in the specified <em>reader</em>.
+         * @param reader The {@link JsonReader} to read the data.
+         * @throws IOException if an error occurs while reading the data.
+         * @see #writeTo(JsonWriter)
+         */
+        public void readFrom(JsonReader reader) throws IOException {
+            DebugUtils.__checkError(reader == null, "reader == null");
+            reader.beginObject();
+            while (reader.hasNext()) {
+                switch (reader.nextName()) {
+                case "path":
+                    path = reader.nextString();
+                    break;
+
+                case "type":
+                    type = reader.nextInt();
+                    break;
+
+                default:
+                    reader.skipValue();
+                    break;
+                }
+            }
+
+            reader.endObject();
+        }
+
+        /**
+         * Writes this object the data into a {@link JsonWriter}.
+         * @param writer The {@link JsonWriter}.
+         * @return The <em>writer</em>.
+         * @see #readFrom(JsonReader)
+         */
+        public JsonWriter writeTo(JsonWriter writer) {
+            try {
+                DebugUtils.__checkError(writer == null, "writer == null");
+                return writer.beginObject().name("path").value(path).name("type").value(type).endObject();
+            } catch (IOException e) {
+                throw new Error(e);
+            }
+        }
+
+        /**
          * Reads this object from the data stored in the specified parcel. To
          * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
          * @param source The parcel to read the data.
@@ -1382,13 +1516,23 @@ public final class FileUtils {
         }
 
         @Override
+        public int hashCode() {
+            return 31 * type + path.hashCode();
+        }
+
+        @Override
         public String toString() {
             return path;
         }
 
-        @Override
-        public int hashCode() {
-            return 31 * type + path.hashCode();
+        /**
+         * Encodes this object as a JSON string.
+         * @return A JSON string.
+         */
+        public String toJSONString() {
+            final StringWriter out = new StringWriter(path.length() + 24);
+            writeTo(new JsonWriter(out));
+            return out.toString();
         }
 
         @Override

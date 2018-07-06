@@ -1,10 +1,10 @@
 package android.ext.graphics;
 
 import java.io.FileOutputStream;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.ext.graphics.DrawUtils.MatrixPool;
 import android.ext.graphics.DrawUtils.RectFPool;
+import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
@@ -23,6 +23,7 @@ import android.renderscript.Type;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
 
 /**
  * Class BitmapUtils
@@ -169,6 +170,23 @@ public final class BitmapUtils {
     }
 
     /**
+     * Creates a mutable inverted <tt>Bitmap</tt> from given the <em>view</em>.
+     * @param view The {@link View}'s contents to be drawn.
+     * @param alpha The alpha component [0..255] of the inverted bitmap.
+     * @param percent The percentage, expressed as a percentage of the
+     * <em>bitmap's</em> width or height.
+     * @param direction The direction. One of {@link Gravity#LFET},
+     * {@link Gravity#TOP}, {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
+     * @param paint May be <tt>null</tt>. The paint used to draw the bitmap.
+     * @return An inverted bitmap.
+     * @see #createInvertedBitmap(Bitmap, int, float, int, Paint)
+     */
+    public static Bitmap createInvertedBitmap(View view, int alpha, float percent, int direction, Paint paint) {
+        DebugUtils.__checkError(view == null, "view == null");
+        return createInvertedBitmap(view, view.getWidth(), view.getHeight(), alpha, percent, direction, paint);
+    }
+
+    /**
      * Creates a mutable inverted <tt>Bitmap</tt> from given the <em>bitmap</em>.
      * @param bitmap The bitmap to be created.
      * @param alpha The alpha component [0..255] of the inverted bitmap.
@@ -178,26 +196,11 @@ public final class BitmapUtils {
      * {@link Gravity#TOP}, {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
      * @param paint May be <tt>null</tt>. The paint used to draw the bitmap.
      * @return An inverted bitmap.
+     * @see #createInvertedBitmap(View, int, float, int, Paint)
      */
-    @SuppressLint("RtlHardcoded")
     public static Bitmap createInvertedBitmap(Bitmap bitmap, int alpha, float percent, int direction, Paint paint) {
-        int width = bitmap.getWidth(), height = bitmap.getHeight();
-        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
-            width  = (int)(width * percent + 0.5f);
-        } else {
-            height = (int)(height * percent + 0.5f);
-        }
-
-        if (paint == null) {
-            paint = new Paint(Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
-        }
-
-        final Bitmap result = Bitmap.createBitmap(width, height, Config.ARGB_8888);
-        final Canvas canvas = new Canvas(result);
-        DrawUtils.drawInvertedBitmap(canvas, bitmap, alpha, percent, direction, paint);
-        canvas.setBitmap(null);
-
-        return result;
+        DebugUtils.__checkError(bitmap == null, "bitmap == null");
+        return createInvertedBitmap(bitmap, bitmap.getWidth(), bitmap.getHeight(), alpha, percent, direction, paint);
     }
 
     /**
@@ -325,6 +328,27 @@ public final class BitmapUtils {
         RectFPool.recycle(dst);
 
         return bitmap;
+    }
+
+    private static Bitmap createInvertedBitmap(Object source, int width, int height, int alpha, float percent, int direction, Paint paint) {
+        DebugUtils.__checkError(width <= 0 || height <= 0, "width <= 0 || height <= 0");
+        final float origWidth = width, origHeight = height;
+        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
+            width  = (int)(width * percent + 0.5f);
+        } else {
+            height = (int)(height * percent + 0.5f);
+        }
+
+        if (paint == null) {
+            paint = new Paint(Paint.DITHER_FLAG | Paint.FILTER_BITMAP_FLAG);
+        }
+
+        final Bitmap result = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        final Canvas canvas = new Canvas(result);
+        DrawUtils.drawInvertedBitmap(canvas, source, origWidth, origHeight, alpha, percent, direction, paint);
+        canvas.setBitmap(null);
+
+        return result;
     }
 
     /**

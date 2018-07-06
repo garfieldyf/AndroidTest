@@ -1,6 +1,7 @@
 package android.ext.graphics.drawable;
 
 import android.ext.graphics.BitmapUtils;
+import android.ext.graphics.DrawUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -42,6 +43,26 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      */
     public InvertedBitmapDrawable(View view, int alpha, float percent, int direction) {
         super(new InvertedBitmapState(view, alpha, percent, direction));
+    }
+
+    /**
+     * Changes this drawable's content with the specified <em>view</em>.
+     * @param view The {@link View} to rebuild the content.
+     * @see #setBitmap(Bitmap)
+     */
+    public final void setView(View view) {
+        mState.setView(view);
+        invalidateSelf();
+    }
+
+    /**
+     * Changes this drawable's content with the specified <em>bitmap</em>.
+     * @param bitmap The {@link Bitmap} to rebuild the content.
+     * @see #setView(View)
+     */
+    public final void setBitmap(Bitmap bitmap) {
+        mState.setBitmap(bitmap);
+        invalidateSelf();
     }
 
     /**
@@ -108,6 +129,9 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * Class <tt>InvertedBitmapState</tt> is an implementation of a {@link ConstantState}.
      */
     /* package */ static final class InvertedBitmapState extends AbstractDrawable.BaseConstantState {
+        /* package */ final int mAlpha;
+        /* package */ final int mDirection;
+        /* package */ final float mPercent;
         /* package */ final Bitmap mBitmap;
 
         /**
@@ -121,7 +145,10 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
          * @see #InvertedBitmapState(View, int, float, int)
          */
         public InvertedBitmapState(Bitmap bitmap, int alpha, float percent, int direction) {
-            mBitmap = BitmapUtils.createInvertedBitmap(bitmap, alpha, percent, direction, mPaint);
+            mBitmap  = BitmapUtils.createInvertedBitmap(bitmap, alpha, percent, direction, mPaint);
+            mAlpha   = alpha;
+            mPercent = percent;
+            mDirection = direction;
         }
 
         /**
@@ -135,13 +162,24 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
          * @see #InvertedBitmapState(Bitmap, int, float, int)
          */
         public InvertedBitmapState(View view, int alpha, float percent, int direction) {
-            try {
-                view.setDrawingCacheEnabled(true);
-                mBitmap = BitmapUtils.createInvertedBitmap(view.getDrawingCache(true), alpha, percent, direction, mPaint);
-            } finally {
-                view.destroyDrawingCache();
-                view.setDrawingCacheEnabled(false);
-            }
+            mBitmap  = BitmapUtils.createInvertedBitmap(view, alpha, percent, direction, mPaint);
+            mAlpha   = alpha;
+            mPercent = percent;
+            mDirection = direction;
+        }
+
+        public final void setView(View view) {
+            final Canvas canvas = new Canvas(mBitmap);
+            mBitmap.eraseColor(0);
+            DrawUtils.drawInvertedBitmap(canvas, view, mAlpha, mPercent, mDirection, mPaint);
+            canvas.setBitmap(null);
+        }
+
+        public final void setBitmap(Bitmap bitmap) {
+            final Canvas canvas = new Canvas(mBitmap);
+            mBitmap.eraseColor(0);
+            DrawUtils.drawInvertedBitmap(canvas, bitmap, mAlpha, mPercent, mDirection, mPaint);
+            canvas.setBitmap(null);
         }
 
         @Override

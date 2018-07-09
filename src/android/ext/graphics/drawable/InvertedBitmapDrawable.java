@@ -51,7 +51,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #setBitmap(Bitmap)
      */
     public final void setView(View view) {
-        mState.setView(view);
+        mState.setSource(view);
         invalidateSelf();
     }
 
@@ -61,7 +61,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #setView(View)
      */
     public final void setBitmap(Bitmap bitmap) {
-        mState.setBitmap(bitmap);
+        mState.setSource(bitmap);
         invalidateSelf();
     }
 
@@ -168,23 +168,21 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
             mDirection = direction;
         }
 
-        public final void setView(View view) {
-            final Canvas canvas = new Canvas(mBitmap);
-            mBitmap.eraseColor(0);
-            DrawUtils.drawInvertedBitmap(canvas, view, mAlpha, mPercent, mDirection, mPaint);
-            canvas.setBitmap(null);
-        }
-
-        public final void setBitmap(Bitmap bitmap) {
-            final Canvas canvas = new Canvas(mBitmap);
-            mBitmap.eraseColor(0);
-            DrawUtils.drawInvertedBitmap(canvas, bitmap, mAlpha, mPercent, mDirection, mPaint);
-            canvas.setBitmap(null);
-        }
-
         @Override
         public Drawable newDrawable() {
             throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
+        }
+
+        public final void setSource(Object source) {
+            final Canvas canvas = new Canvas(mBitmap);
+            mBitmap.eraseColor(0);
+            if (source instanceof View) {
+                DrawUtils.drawInvertedBitmap(canvas, (View)source, mAlpha, mPercent, mDirection, mPaint);
+            } else {
+                DrawUtils.drawInvertedBitmap(canvas, (Bitmap)source, mAlpha, mPercent, mDirection, mPaint);
+            }
+
+            canvas.setBitmap(null);
         }
     }
 }

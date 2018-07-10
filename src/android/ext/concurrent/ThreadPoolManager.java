@@ -19,7 +19,7 @@ import android.util.Printer;
  * @version 2.0
  */
 public class ThreadPoolManager extends ThreadPool {
-    private final Queue<Task> mRunningTasks;
+    private final Queue<Runnable> mRunningTasks;
 
     /**
      * Constructor
@@ -51,7 +51,7 @@ public class ThreadPoolManager extends ThreadPool {
      */
     public ThreadPoolManager(int coreThreads, int maxThreads, long keepAliveTime, TimeUnit unit) {
         super(coreThreads, maxThreads, keepAliveTime, unit);
-        mRunningTasks = new ConcurrentLinkedQueue<Task>();
+        mRunningTasks = new ConcurrentLinkedQueue<Runnable>();
     }
 
     /**
@@ -64,26 +64,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @see #cancelAll(boolean, boolean)
      */
     public boolean cancel(long id, boolean mayInterruptIfRunning) {
-        // Cancel and remove from running task queue.
-        final Iterator<Task> itor = mRunningTasks.iterator();
-        while (itor.hasNext()) {
-            if (itor.next().cancel(id, mayInterruptIfRunning)) {
-                itor.remove();
-                return true;
-            }
-        }
-
-        // Cancel and remove from pending task queue.
-        final Iterator<Runnable> iter = mPendingTasks.iterator();
-        while (iter.hasNext()) {
-            final Runnable task = iter.next();
-            if (task instanceof Task && ((Task)task).cancel(id, false)) {
-                iter.remove();
-                return true;
-            }
-        }
-
-        return false;
+        return (cancel(mRunningTasks, id, mayInterruptIfRunning) || cancel(mPendingTasks, id, false));
     }
 
     /**
@@ -96,25 +77,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @see #cancel(long, boolean)
      */
     public boolean cancelAll(boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
-        // Cancel and remove from pending task queue.
-        boolean result = false;
-        final Iterator<Runnable> itor = mPendingTasks.iterator();
-        while (itor.hasNext()) {
-            final Runnable task = itor.next();
-            if (task instanceof Task) {
-                result |= ((Task)task).cancel(false, mayNotifyIfCancelled);
-                itor.remove();
-            }
-        }
-
-        // Cancel and remove from running task queue.
-        final Iterator<Task> iter = mRunningTasks.iterator();
-        while (iter.hasNext()) {
-            result |= iter.next().cancel(mayInterruptIfRunning, mayNotifyIfCancelled);
-            iter.remove();
-        }
-
-        return result;
+        return (cancelAll(mPendingTasks, false, mayNotifyIfCancelled) | cancelAll(mRunningTasks, mayInterruptIfRunning, mayNotifyIfCancelled));
     }
 
     public final void dump(Printer printer) {
@@ -124,20 +87,54 @@ public class ThreadPoolManager extends ThreadPool {
         dumpQueue(printer, result, mPendingTasks, className, " Dumping %s Pending Tasks [ size = %d ] ");
     }
 
+    /**
+     * Callback method to be invoked when the pool execute all tasks. This method
+     * is invoked on a background thread. <p>The default implementation do nothing.
+     * If you write your own implementation, do not call <tt>super.allTasksComplete()</tt>.</p>
+     */
+    protected void allTasksComplete() {
+    }
+
     @Override
     protected void beforeExecute(Thread thread, Runnable target) {
-        if (target instanceof Task) {
-            mRunningTasks.offer((Task)target);
-        }
+        mRunningTasks.offer(target);
     }
 
     @Override
     protected void afterExecute(Runnable target, Throwable throwable) {
-        if (target instanceof Task) {
-            mRunningTasks.remove(target);
+        mRunningTasks.remove(target);
+        if (mRunningTasks.isEmpty() && mPendingTasks.isEmpty()) {
+            allTasksComplete();
         }
 
         super.afterExecute(target, throwable);
+    }
+
+    private static boolean cancel(Queue<Runnable> queue, long id, boolean mayInterruptIfRunning) {
+        final Iterator<Runnable> iter = queue.iterator();
+        while (iter.hasNext()) {
+            final Runnable task = iter.next();
+            if (task instanceof Task && ((Task)task).cancel(id, mayInterruptIfRunning)) {
+                iter.remove();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static boolean cancelAll(Queue<Runnable> queue, boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
+        boolean result = false;
+        final Iterator<Runnable> itor = queue.iterator();
+        while (itor.hasNext()) {
+            final Runnable task = itor.next();
+            if (task instanceof Task) {
+                result |= ((Task)task).cancel(mayInterruptIfRunning, mayNotifyIfCancelled);
+                itor.remove();
+            }
+        }
+
+        return result;
     }
 
     private static void dumpQueue(Printer printer, StringBuilder result, Queue<?> queue, String className, String format) {

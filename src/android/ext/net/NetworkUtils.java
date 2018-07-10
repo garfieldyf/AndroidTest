@@ -62,7 +62,9 @@ public final class NetworkUtils {
 
     /**
      * Returns the byte array MAC address from the <em>macAddress</em>.
-     * @param macAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>.
+     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>,
+     * <tt>XX-XX-XX-XX-XX-XX</tt> or any separate components by white
+     * space character ('\s') in <em>inAddress</em>.
      * @return The byte array MAC address.
      * @see #toMacAddress(String, byte[])
      */
@@ -72,14 +74,15 @@ public final class NetworkUtils {
 
     /**
      * Returns the byte array MAC address from the <em>macAddress</em>.
-     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>
-     * or <tt>XX-XX-XX-XX-XX-XX</tt>.
+     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>,
+     * <tt>XX-XX-XX-XX-XX-XX</tt> or any separate components by white
+     * space character ('\s') in <em>inAddress</em>.
      * @param outAddress The byte array to store the MAC address.
      * @return The <em>outAddress</em>.
      * @see #toMacAddress(String)
      */
     public static byte[] toMacAddress(String inAddress, byte[] outAddress) {
-        DebugUtils.__checkError(!Pattern.matches("([A-Fa-f0-9]{2}[-:]){5}[A-Fa-f0-9]{2}", inAddress), "Invalid MAC address: " + inAddress);
+        DebugUtils.__checkError(!Pattern.matches("([A-Fa-f0-9]{2}[-:\\s]){5}[A-Fa-f0-9]{2}", inAddress), "Invalid MAC address: " + inAddress);
         DebugUtils.__checkError(outAddress == null || outAddress.length < 6, "outAddress == null || outAddress.length < 6");
         final int inLength  = StringUtils.getLength(inAddress);
         final int outLength = ArrayUtils.getSize(outAddress);

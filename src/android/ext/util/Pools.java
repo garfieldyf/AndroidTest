@@ -89,7 +89,8 @@ public final class Pools {
         T obtain();
 
         /**
-         * Recycles the specified <em>element</em> to this <tt>Pool</tt>.
+         * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
+         * calling this function you must not ever touch the <em>element</em> again.
          * @param element The element to recycle.
          */
         void recycle(T element);

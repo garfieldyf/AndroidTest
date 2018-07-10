@@ -83,10 +83,8 @@ public final class NetworkUtils {
         DebugUtils.__checkError(outAddress == null || outAddress.length < 6, "outAddress == null || outAddress.length < 6");
         final int inLength  = StringUtils.getLength(inAddress);
         final int outLength = ArrayUtils.getSize(outAddress);
-        for (int i = 0, j = 0, high, low; i < outLength && j < inLength; ++i, j += 3) {
-            high = Character.digit((int)inAddress.charAt(j), 16) << 4;
-            low  = Character.digit((int)inAddress.charAt(j + 1), 16);
-            outAddress[i] = (byte)(high + low);
+        for (int i = 0, j = 0; i < outLength && j < inLength; ++i, j += 3) {
+            outAddress[i] = (byte)((Character.digit((int)inAddress.charAt(j), 16) << 4) + Character.digit((int)inAddress.charAt(j + 1), 16));
         }
 
         return outAddress;

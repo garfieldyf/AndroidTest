@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import java.util.concurrent.Executor;
+import android.ext.concurrent.ThreadPoolManager;
 import android.ext.concurrent.ThreadPoolManager.Task;
 import android.ext.content.Loader;
 import android.os.Handler;
@@ -194,8 +195,15 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void completion(Task task) {
+    public final void complete(Task task) {
         sendMessage(Message.obtain(this, MESSAGE_COMPLETED, task));
+    }
+
+    /**
+     * Called on the {@link ThreadPoolManager} internal, do not call this method directly.
+     */
+    public final void complete(ThreadPoolManager executor) {
+        sendMessage(Message.obtain(this, MESSAGE_ALL_COMPLETED, executor));
     }
 
     /**
@@ -248,13 +256,17 @@ public final class UIHandler extends Handler {
             ((Loader.Task)msg.getCallback()).handleMessage(msg);
             break;
 
-        // The ThreadPoolManager.Task message handle.
+        // The ThreadPoolManager message handle.
         case MESSAGE_CANCELLED:
             ((Task)msg.obj).onCancelled();
             break;
 
         case MESSAGE_COMPLETED:
             ((Task)msg.obj).onCompletion();
+            break;
+
+        case MESSAGE_ALL_COMPLETED:
+            ((ThreadPoolManager)msg.obj).onAllTasksComplete();
             break;
 
         case MESSAGE_TASK_PROGRESS:
@@ -313,10 +325,11 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_PROGRESS      = 0xDEDEDEDE;
     public static final int MESSAGE_FINISHED       = 0xDFDFDFDF;
 
-    // The ThreadPoolManager.Task message.
-    private static final int MESSAGE_CANCELLED     = 0xEDEDEDED;
-    private static final int MESSAGE_COMPLETED     = 0xEEEEEEEE;
-    private static final int MESSAGE_TASK_PROGRESS = 0xEFEFEFEF;
+    // The ThreadPoolManager message.
+    private static final int MESSAGE_CANCELLED     = 0xECECECEC;
+    private static final int MESSAGE_COMPLETED     = 0xEDEDEDED;
+    private static final int MESSAGE_TASK_PROGRESS = 0xEEEEEEEE;
+    private static final int MESSAGE_ALL_COMPLETED = 0xEFEFEFEF;
 
     // The RecyclerView message.
     private static final int MESSAGE_CHILD_FOCUS   = 0xF8F8F8F8;

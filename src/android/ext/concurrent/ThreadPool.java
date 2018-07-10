@@ -73,7 +73,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     }
 
     /**
-     * Removes all tasks from the internal queue.
+     * Removes all pending tasks from the internal queue.
      * @see #remove(Runnable)
      */
     public void removeAll() {

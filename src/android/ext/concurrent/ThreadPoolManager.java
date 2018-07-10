@@ -80,19 +80,19 @@ public class ThreadPoolManager extends ThreadPool {
         return (cancelAll(mPendingTasks, false, mayNotifyIfCancelled) | cancelAll(mRunningTasks, mayInterruptIfRunning, mayNotifyIfCancelled));
     }
 
+    /**
+     * Called on the UI thread when this pool has completed all tasks.
+     * <p>The default implementation do nothing. If you write your own
+     * implementation, do not call <tt>super.onAllTasksComplete()</tt>.</p>
+     */
+    public void onAllTasksComplete() {
+    }
+
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(96);
         final String className = getClass().getSimpleName();
         dumpQueue(printer, result, mRunningTasks, className, " Dumping %s Running Tasks [ size = %d ] ");
         dumpQueue(printer, result, mPendingTasks, className, " Dumping %s Pending Tasks [ size = %d ] ");
-    }
-
-    /**
-     * Callback method to be invoked when the pool execute all tasks. This method
-     * is invoked on a background thread. <p>The default implementation do nothing.
-     * If you write your own implementation, do not call <tt>super.allTasksComplete()</tt>.</p>
-     */
-    protected void allTasksComplete() {
     }
 
     @Override
@@ -104,7 +104,7 @@ public class ThreadPoolManager extends ThreadPool {
     protected void afterExecute(Runnable target, Throwable throwable) {
         mRunningTasks.remove(target);
         if (mRunningTasks.isEmpty() && mPendingTasks.isEmpty()) {
-            allTasksComplete();
+            UIHandler.sInstance.complete(this);
         }
 
         super.afterExecute(target, throwable);
@@ -198,7 +198,7 @@ public class ThreadPoolManager extends ThreadPool {
                 } finally {
                     runner = null;
                     if (state.compareAndSet(RUNNING, COMPLETED)) {
-                        UIHandler.sInstance.completion(this);
+                        UIHandler.sInstance.complete(this);
                     }
                 }
             }

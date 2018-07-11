@@ -294,10 +294,11 @@ public final class DeviceUtils {
                     out.append("\n  ");
                 }
 
+                final String state = volume.getState();
                 out.append(getUserLabel(context, volume))
                    .append(" [ path = ").append(path)
                    .append(", primary = ").append(volume.isPrimary())
-                   .append(", state = ").append(getState(volume))
+                   .append(", state = ").append(state != null ? state : "unknown")
                    .append(", total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
                    .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
                    .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
@@ -308,11 +309,6 @@ public final class DeviceUtils {
         }
 
         return out.toString();
-    }
-
-    private static String getState(StorageVolume volume) {
-        final String state = volume.getState();
-        return (state != null ? state : "unknown");
     }
 
     private static String getUserLabel(Context context, StorageVolume volume) {

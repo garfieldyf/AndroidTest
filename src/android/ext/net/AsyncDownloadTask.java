@@ -132,7 +132,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * Downloads the resource from the remote server write to the {@link ByteArrayBuffer}.
      * @return The {@link ByteArrayBuffer} contains the resource.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(int, String, byte[])
+     * @see #download(String, int, byte[])
      * @see #download(OutputStream, byte[])
      */
     protected final ByteArrayBuffer download() throws IOException {
@@ -152,7 +152,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download()
-     * @see #download(int, String, byte[])
+     * @see #download(String, int, byte[])
      */
     protected final void download(OutputStream out, byte[] tempBuffer) throws IOException {
         mRequest.downloadImpl(out, this, tempBuffer);
@@ -161,14 +161,14 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     /**
      * Downloads the resource from the remote server write to the specified file.
      * <p>Note: This method will be create the necessary directories.</p>
-     * @param statusCode The response code returned by the remote server.
      * @param filename The file name to write the resource, must be absolute file path.
+     * @param statusCode The response code returned by the remote server.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download()
      * @see #download(OutputStream, byte[])
      */
-    protected final void download(int statusCode, String filename, byte[] tempBuffer) throws IOException {
+    protected final void download(String filename, int statusCode, byte[] tempBuffer) throws IOException {
         switch (statusCode) {
         case HTTP_OK:
             mRequest.downloadImpl(filename, this, tempBuffer, false);
@@ -189,7 +189,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
      * @see #download()
-     * @see #download(int, String, byte[])
+     * @see #download(String, int, byte[])
      * @see #download(OutputStream, byte[])
      */
     protected Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {

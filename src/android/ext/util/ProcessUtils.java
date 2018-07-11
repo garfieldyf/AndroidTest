@@ -453,45 +453,25 @@ public final class ProcessUtils {
         }
 
         /**
-         * Returns all crash infos from table.
-         * @return The {@link Cursor}.
-         * @see #query(long)
-         */
-        public final Cursor query() {
-            return getWritableDatabase().rawQuery("SELECT * FROM crashes", null);
-        }
-
-        /**
          * Returns the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The {@link Cursor}.
-         * @see #query()
          */
         public final Cursor query(long date) {
             return getWritableDatabase().rawQuery("SELECT * FROM crashes WHERE _date < " + date, null);
         }
 
         /**
-         * Deletes all crash infos from table.
-         * @return The number of rows to delete.
-         * @see #delete(long)
-         */
-        public final int deleteAll() {
-            return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes", (Object[])null);
-        }
-
-        /**
          * Deletes the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The number of rows to delete.
-         * @see #deleteAll()
          */
         public final int delete(long date) {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);
         }
 
         public final void dump() {
-            final Cursor cursor = query();
+            final Cursor cursor = query(System.currentTimeMillis());
             try {
                 android.database.DatabaseUtils.dumpCursor(cursor, System.out);
             } finally {

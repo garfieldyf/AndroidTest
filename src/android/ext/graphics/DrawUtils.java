@@ -236,37 +236,69 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws an inverted bitmap with given the <em>view</em> and <em>canvas</em>.
+     * Draws an inverted bitmap with given the <em>source</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
-     * @param view The {@link View}'s contents to be drawn.
+     * @param source The source's contents to be drawn, Pass {@link View} or {@link Bitmap} object.
+     * @param width The horizontal size of the <em>source</em>.
+     * @param height The vertical size of the <em>source</em>.
      * @param alpha The alpha component [0..255] to be drawn.
-     * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em>
-     * width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
-     * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
+     * @param percent The percentage, expressed as a percentage of the <em>source's</em> width or height.
+     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
+     * or {@link Gravity#BOTTOM}.
      * @param paint The paint used to draw, This parameter can <b>not</b> be <tt>null</tt>.
-     * @see #drawInvertedBitmap(Canvas, Bitmap, int, float, int, Paint)
      */
-    public static void drawInvertedBitmap(Canvas canvas, View view, int alpha, float percent, int direction, Paint paint) {
-        DebugUtils.__checkError(view == null, "view == null");
-        drawInvertedBitmap(canvas, view, view.getWidth(), view.getHeight(), alpha, percent, direction, paint);
-    }
+    public static void drawInvertedBitmap(Canvas canvas, Object source, float width, float height, int alpha, float percent, int direction, Paint paint) {
+        DebugUtils.__checkError(source == null, "source == null");
+        DebugUtils.__checkError(width <= 0 || height <= 0, "width <= 0 || height <= 0");
+        DebugUtils.__checkError(!(source instanceof Bitmap || source instanceof View), "Invalid source - " + source.getClass().getName());
 
-    /**
-     * Draws an inverted bitmap with given the <em>bitmap</em> and <em>canvas</em>.
-     * @param canvas The <tt>Canvas</tt>.
-     * @param bitmap The bitmap to be drawn.
-     * @param alpha The alpha component [0..255] to be drawn.
-     * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em>
-     * width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
-     * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
-     * @param paint The paint used to draw, This parameter can <b>not</b> be <tt>null</tt>.
-     * @see #drawInvertedBitmap(Canvas, View, int, float, int, Paint)
-     */
-    public static void drawInvertedBitmap(Canvas canvas, Bitmap bitmap, int alpha, float percent, int direction, Paint paint) {
-        DebugUtils.__checkError(bitmap == null, "bitmap == null");
-        drawInvertedBitmap(canvas, bitmap, bitmap.getWidth(), bitmap.getHeight(), alpha, percent, direction, paint);
+        float scale, dx = 0, dy = 0, startX = 0, stopX = 0, startY = 0, stopY = 0;
+        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
+            dx = width;
+            scale = -1.0f;
+            width = width * percent + 0.5f;
+            stopY = startY = height * 0.5f;
+            if (direction == Gravity.LEFT) {
+                dx = width;
+                startX = width;
+            } else {
+                stopX = width;
+            }
+        } else {
+            dy = height;
+            scale  = 1.0f;
+            height = height * percent + 0.5f;
+            startX = stopX = width * 0.5f;
+            if (direction == Gravity.TOP) {
+                dy = height;
+                startY = height;
+            } else {
+                stopY = height;
+            }
+        }
+
+        // Draws the inverted bitmap.
+        final int saveCount = canvas.save();
+        canvas.clipRect(0, 0, width, height);
+        canvas.translate(dx, dy);
+        canvas.scale(scale, -scale);
+
+        if (source instanceof View) {
+            ((View)source).draw(canvas);
+        } else {
+            canvas.drawBitmap((Bitmap)source, 0, 0, paint);
+        }
+
+        // Draws the rect use linear gradient filter the bitmap.
+        canvas.restoreToCount(saveCount);
+        final Shader shader = paint.getShader();
+        final Xfermode mode = paint.getXfermode();
+
+        paint.setShader(new LinearGradient(startX, startY, stopX, stopY, Color.argb(alpha, 255, 255, 255), Color.TRANSPARENT, TileMode.CLAMP));
+        paint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
+        canvas.drawRect(0, 0, width, height, paint);
+        paint.setShader(shader);
+        paint.setXfermode(mode);
     }
 
     /**
@@ -352,57 +384,6 @@ public final class DrawUtils {
         Gravity.apply(gravity, width, height, container, 0, 0, rect);
         outRect.set(rect);
         RectPool.recycle(rect);
-    }
-
-    /* package */ static void drawInvertedBitmap(Canvas canvas, Object source, float width, float height, int alpha, float percent, int direction, Paint paint) {
-        DebugUtils.__checkError(width <= 0 || height <= 0, "width <= 0 || height <= 0");
-        float scale, dx = 0, dy = 0, startX = 0, stopX = 0, startY = 0, stopY = 0;
-        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
-            dx = width;
-            scale = -1.0f;
-            width = width * percent + 0.5f;
-            stopY = startY = height * 0.5f;
-            if (direction == Gravity.LEFT) {
-                dx = width;
-                startX = width;
-            } else {
-                stopX = width;
-            }
-        } else {
-            dy = height;
-            scale  = 1.0f;
-            height = height * percent + 0.5f;
-            startX = stopX = width * 0.5f;
-            if (direction == Gravity.TOP) {
-                dy = height;
-                startY = height;
-            } else {
-                stopY = height;
-            }
-        }
-
-        // Draws the inverted bitmap.
-        final int saveCount = canvas.save();
-        canvas.clipRect(0, 0, width, height);
-        canvas.translate(dx, dy);
-        canvas.scale(scale, -scale);
-
-        if (source instanceof View) {
-            ((View)source).draw(canvas);
-        } else {
-            canvas.drawBitmap((Bitmap)source, 0, 0, paint);
-        }
-
-        // Draws the rect use linear gradient filter the bitmap.
-        canvas.restoreToCount(saveCount);
-        final Shader shader = paint.getShader();
-        final Xfermode mode = paint.getXfermode();
-
-        paint.setShader(new LinearGradient(startX, startY, stopX, stopY, Color.argb(alpha, 255, 255, 255), Color.TRANSPARENT, TileMode.CLAMP));
-        paint.setXfermode(new PorterDuffXfermode(Mode.DST_IN));
-        canvas.drawRect(0, 0, width, height, paint);
-        paint.setShader(shader);
-        paint.setXfermode(mode);
     }
 
     private static void drawDrawable(Canvas canvas, Drawable drawable, int left, int top, int right, int bottom) {

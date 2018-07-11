@@ -28,7 +28,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #InvertedBitmapDrawable(View, int, float, int)
      */
     public InvertedBitmapDrawable(Bitmap bitmap, int alpha, float percent, int direction) {
-        super(new InvertedBitmapState(bitmap, alpha, percent, direction));
+        super(new InvertedBitmapState(bitmap, bitmap.getWidth(), bitmap.getHeight(), alpha, percent, direction));
     }
 
     /**
@@ -42,7 +42,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #InvertedBitmapDrawable(Bitmap, int, float, int)
      */
     public InvertedBitmapDrawable(View view, int alpha, float percent, int direction) {
-        super(new InvertedBitmapState(view, alpha, percent, direction));
+        super(new InvertedBitmapState(view, view.getWidth(), view.getHeight(), alpha, percent, direction));
     }
 
     /**
@@ -51,7 +51,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #setBitmap(Bitmap)
      */
     public final void setView(View view) {
-        mState.setSource(view);
+        mState.setSource(view, view.getWidth(), view.getHeight());
         invalidateSelf();
     }
 
@@ -61,7 +61,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
      * @see #setView(View)
      */
     public final void setBitmap(Bitmap bitmap) {
-        mState.setSource(bitmap);
+        mState.setSource(bitmap, bitmap.getWidth(), bitmap.getHeight());
         invalidateSelf();
     }
 
@@ -136,53 +136,32 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
 
         /**
          * Constructor
-         * @param bitmap The original {@link Bitmap} to create the inverted bitmap.
+         * @param source The source's contents to create the inverted bitmap.
+         * @param width The horizontal size of the <em>source</em>.
+         * @param height The vertical size of the <em>source</em>.
          * @param alpha The alpha component [0..255] of the inverted bitmap.
-         * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em>
-         * width or height.
-         * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
-         * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
-         * @see #InvertedBitmapState(View, int, float, int)
+         * @param percent The percentage, expressed as a percentage of the
+         * <em>source's</em> width or height.
+         * @param direction The direction. One of {@link Gravity#LFET},
+         * {@link Gravity#TOP}, {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
          */
-        public InvertedBitmapState(Bitmap bitmap, int alpha, float percent, int direction) {
-            mBitmap  = BitmapUtils.createInvertedBitmap(bitmap, alpha, percent, direction, mPaint);
+        public InvertedBitmapState(Object source, int width, int height, int alpha, float percent, int direction) {
+            mBitmap  = BitmapUtils.createInvertedBitmap(source, width, height, alpha, percent, direction, mPaint);
             mAlpha   = alpha;
             mPercent = percent;
             mDirection = direction;
         }
 
-        /**
-         * Constructor
-         * @param view The {@link View} to create the inverted bitmap.
-         * @param alpha The alpha component [0..255] of the inverted bitmap.
-         * @param percent The percentage, expressed as a percentage of the <em>view's</em>
-         * width or height.
-         * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
-         * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
-         * @see #InvertedBitmapState(Bitmap, int, float, int)
-         */
-        public InvertedBitmapState(View view, int alpha, float percent, int direction) {
-            mBitmap  = BitmapUtils.createInvertedBitmap(view, alpha, percent, direction, mPaint);
-            mAlpha   = alpha;
-            mPercent = percent;
-            mDirection = direction;
+        public final void setSource(Object source, int width, int height) {
+            final Canvas canvas = new Canvas(mBitmap);
+            mBitmap.eraseColor(0);
+            DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);
+            canvas.setBitmap(null);
         }
 
         @Override
         public Drawable newDrawable() {
             throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
-        }
-
-        public final void setSource(Object source) {
-            final Canvas canvas = new Canvas(mBitmap);
-            mBitmap.eraseColor(0);
-            if (source instanceof View) {
-                DrawUtils.drawInvertedBitmap(canvas, (View)source, mAlpha, mPercent, mDirection, mPaint);
-            } else {
-                DrawUtils.drawInvertedBitmap(canvas, (Bitmap)source, mAlpha, mPercent, mDirection, mPaint);
-            }
-
-            canvas.setBitmap(null);
         }
     }
 }

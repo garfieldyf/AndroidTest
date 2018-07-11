@@ -11,11 +11,11 @@ import java.lang.annotation.Target;
  * <h3>Example</h3><pre>
  * public static final class User {
  *     {@code @CursorField("_id")}
- *     private String mId;
- * 
+ *     [ <em>access modifier</em> ] long mId;
+ *
  *     {@code @CursorField("name")}
- *     private String mName;
-
+ *     [ <em>access modifier</em> ] String mName;
+ *
  *     // No Cursor fields.
  *     private int mState;
  *     ...

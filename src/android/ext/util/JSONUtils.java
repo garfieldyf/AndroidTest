@@ -63,6 +63,74 @@ public final class JSONUtils {
     }
 
     /**
+     * Equivalent to calling {@link JSONObject#optJSONArray(String)},
+     * handling <tt>null object</tt>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A <tt>JSONArray</tt> or <tt>null</tt>.
+     */
+    public static JSONArray optJSONArray(JSONObject object, String name) {
+        return (object != null ? object.optJSONArray(name) : null);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONArray#optJSONObject(int)},
+     * handling <tt>null array</tt>.
+     * @param array The <tt>JSONArray</tt>.
+     * @param index The index of the <tt>JSONObject</tt>.
+     * @return A <tt>JSONObject</tt> or <tt>null</tt>.
+     * @see #optJSONObject(JSONObject, String)
+     */
+    public static JSONObject optJSONObject(JSONArray array, int index) {
+        return (array != null ? array.optJSONObject(index) : null);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optJSONObject(String)},
+     * handling <tt>null object</tt>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A <tt>JSONObject</tt> or <tt>null</tt>.
+     * @see #optJSONObject(JSONArray, int)
+     */
+    public static JSONObject optJSONObject(JSONObject object, String name) {
+        return (object != null ? object.optJSONObject(name) : null);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optInt(String, int)},
+     * handling <tt>null object</tt>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return An integer value or <em>fallback</em>.
+     */
+    public static int optInt(JSONObject object, String name, int fallback) {
+        return (object != null ? object.optInt(name, fallback) : fallback);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optLong(String, long)},
+     * handling <tt>null object</tt>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A long value or <em>fallback</em>.
+     */
+    public static long optLong(JSONObject object, String name, long fallback) {
+        return (object != null ? object.optLong(name, fallback) : fallback);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optString(String, String)},
+     * handling <tt>null object</tt>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A <tt>String</tt> value or <em>fallback</em>.
+     */
+    public static String optString(JSONObject object, String name, String fallback) {
+        return (object != null ? object.optString(name, fallback) : fallback);
+    }
+
+    /**
      * Equivalent to calling {@link JSONArray#put(int, Object)}.
      * @param array The <tt>JSONArray</tt> to add to.
      * @param index The index at which to put.

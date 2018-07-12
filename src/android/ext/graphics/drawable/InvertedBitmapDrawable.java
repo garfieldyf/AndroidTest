@@ -152,16 +152,16 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
             mDirection = direction;
         }
 
-        public final void setSource(Object source, int width, int height) {
+        @Override
+        public Drawable newDrawable() {
+            throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
+        }
+
+        /* package */ final void setSource(Object source, int width, int height) {
             final Canvas canvas = new Canvas(mBitmap);
             mBitmap.eraseColor(0);
             DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);
             canvas.setBitmap(null);
-        }
-
-        @Override
-        public Drawable newDrawable() {
-            throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
         }
     }
 }

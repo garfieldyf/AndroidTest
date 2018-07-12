@@ -263,16 +263,16 @@ public final class Pages {
      * Class <tt>PageAdapterImpl</tt> is an implementation of a page adapter.
      */
     /* package */ static final class PageAdapterImpl<E> {
-        public int mItemCount;
-        public final int mPageSize;
-        public final int mFirstPageSize;
+        /* package */ int mItemCount;
+        /* package */ final int mPageSize;
+        /* package */ final int mFirstPageSize;
 
-        public final BitSet mPageStates;
-        public final PageLoader<E> mPageLoader;
-        public final Cache<Integer, Page<E>> mPageCache;
+        /* package */ final BitSet mPageStates;
+        /* package */ final PageLoader<E> mPageLoader;
+        /* package */ final Cache<Integer, Page<E>> mPageCache;
 
         @SuppressWarnings("unchecked")
-        public PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
+        /* package */ PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
             DebugUtils.__checkError(pageSize <= 0 || firstPageSize <= 0, "pageSize <= 0 || firstPageSize <= 0");
             mPageCache  = (Cache<Integer, Page<E>>)pageCache;
             mPageSize   = pageSize;
@@ -281,13 +281,13 @@ public final class Pages {
             mFirstPageSize = firstPageSize;
         }
 
-        public final void setItemCount(int count) {
+        /* package */ final void setItemCount(int count) {
             mItemCount = count;
             mPageCache.clear();
             mPageStates.clear();
         }
 
-        public final E getItem(int position) {
+        /* package */ final E getItem(int position) {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
@@ -295,7 +295,7 @@ public final class Pages {
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
-        public final E peekItem(int position) {
+        /* package */ final E peekItem(int position) {
             DebugUtils.__checkUIThread("peekItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
@@ -303,7 +303,7 @@ public final class Pages {
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
-        public final int setPage(int page, Page<E> data) {
+        /* package */ final int setPage(int page, Page<E> data) {
             // Clears the page loading state when the page is load complete.
             DebugUtils.__checkUIThread("setPage");
             DebugUtils.__checkError(page < 0, "page < 0");
@@ -316,7 +316,7 @@ public final class Pages {
             return count;
         }
 
-        public final Page<E> getPage(int page, int position) {
+        /* package */ final Page<E> getPage(int page, int position) {
             DebugUtils.__checkUIThread("getPage");
             DebugUtils.__checkError(page < 0, "page < 0");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
@@ -344,7 +344,7 @@ public final class Pages {
             return result;
         }
 
-        public final long getPageForPosition(int position) {
+        /* package */ final long getPageForPosition(int position) {
             DebugUtils.__checkError(position < 0, "position < 0");
             if (position < mFirstPageSize) {
                 return (position & 0xFFFFFFFFL);
@@ -354,12 +354,12 @@ public final class Pages {
             }
         }
 
-        public final int getPositionForPage(int page, int position) {
+        /* package */ final int getPositionForPage(int page, int position) {
             DebugUtils.__checkError(page < 0 || position < 0, "page < 0 || position < 0");
             return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + position : position);
         }
 
-        public final void dump(Printer printer, String className) {
+        /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
             DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
             if (mPageCache instanceof ArrayPageCache) {

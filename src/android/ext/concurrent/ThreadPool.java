@@ -94,8 +94,8 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     }
 
     /**
-     * Creates a new serial {@link Executor}.
-     * @return The newly created serial <tt>Executor</tt>.
+     * Returns a new serial {@link Executor}.
+     * @return A newly serial <tt>Executor</tt>.
      * @see #getSerialExecutor()
      */
     public final Executor newSerialExecutor() {

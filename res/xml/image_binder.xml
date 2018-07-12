@@ -4,7 +4,7 @@
     tencent:defaultImage="@drawable/ic_placeholder" >
 
     <Transformer
-        android:name="@string/shape"
+        android:name="roundRect"
         android:bottomLeftRadius="30dp"
         android:bottomRightRadius="40dp"
         android:topLeftRadius="10dp"

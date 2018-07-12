@@ -127,14 +127,14 @@ public final class NetworkUtils {
      * @see #dumpResponseHeaders(URLConnection, Printer)
      */
     public static void dumpRequestHeaders(URLConnection conn, Printer printer) {
-        final Map<String, List<String>> requestHeaders = new HashMap<String, List<String>>(conn.getRequestProperties());
-        requestHeaders.put("Read-Timeout", Collections.singletonList(Integer.toString(conn.getReadTimeout())));
-        requestHeaders.put("Connect-Timeout", Collections.singletonList(Integer.toString(conn.getConnectTimeout())));
+        final Map<String, List<String>> headers = new HashMap<String, List<String>>(conn.getRequestProperties());
+        headers.put("Read-Timeout", Collections.singletonList(Integer.toString(conn.getReadTimeout())));
+        headers.put("Connect-Timeout", Collections.singletonList(Integer.toString(conn.getConnectTimeout())));
         if (conn instanceof HttpURLConnection) {
-            requestHeaders.put("Redirects", Collections.singletonList(Boolean.toString(((HttpURLConnection)conn).getInstanceFollowRedirects())));
+            headers.put("Redirects", Collections.singletonList(Boolean.toString(((HttpURLConnection)conn).getInstanceFollowRedirects())));
         }
 
-        dumpHeaders(conn, printer, " %s Request Headers ", requestHeaders);
+        dumpHeaders(conn, printer, " %s Request Headers ", headers);
     }
 
     /**

@@ -82,8 +82,8 @@ public class ThreadPoolManager extends ThreadPool {
 
     /**
      * Called on the UI thread when this pool has completed all tasks.
-     * <p>The default implementation do nothing. If you write your own
-     * implementation, do not call <tt>super.onAllTasksComplete()</tt>.</p>
+     * The default implementation do nothing. If you write your own
+     * implementation, do not call <tt>super.onAllTasksComplete()</tt>.
      */
     public void onAllTasksComplete() {
     }
@@ -111,11 +111,11 @@ public class ThreadPoolManager extends ThreadPool {
     }
 
     private static boolean cancel(Queue<Runnable> queue, long id, boolean mayInterruptIfRunning) {
-        final Iterator<Runnable> iter = queue.iterator();
-        while (iter.hasNext()) {
-            final Runnable task = iter.next();
+        final Iterator<Runnable> itor = queue.iterator();
+        while (itor.hasNext()) {
+            final Runnable task = itor.next();
             if (task instanceof Task && ((Task)task).cancel(id, mayInterruptIfRunning)) {
-                iter.remove();
+                itor.remove();
                 return true;
             }
         }
@@ -140,9 +140,9 @@ public class ThreadPoolManager extends ThreadPool {
     private static void dumpQueue(Printer printer, StringBuilder result, Queue<?> queue, String className, String format) {
         final List<Object> tasks = new ArrayList<Object>(queue);
         DebugUtils.dumpSummary(printer, result, 80, format, className, tasks.size());
-        for (int i = 0, size = tasks.size(); i < size; ++i) {
+        for (Object task : tasks) {
             result.setLength(0);
-            printer.println(result.append("  ").append(tasks.get(i)).toString());
+            printer.println(result.append("  ").append(task).toString());
         }
     }
 

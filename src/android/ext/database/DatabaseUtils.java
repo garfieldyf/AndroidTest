@@ -429,7 +429,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      */
     public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return newInstanceImpl(cursor, clazz, getDeclaredFields(clazz));
+        return newInstanceImpl(cursor, clazz, getCursorFields(clazz));
     }
 
     /**
@@ -465,6 +465,7 @@ public final class DatabaseUtils {
      */
     public static <T> List<T> newList(Cursor cursor, Class<T> componentType) {
         try {
+            DebugUtils.__checkError(componentType == null, "componentType == null");
             DebugUtils.__checkError(componentType.isPrimitive(), "Unsupported primitive type - " + componentType.toString());
             return Arrays.asList(DatabaseUtils.<T[]>newArray(cursor, componentType));
         } catch (ReflectiveOperationException e) {
@@ -566,9 +567,11 @@ public final class DatabaseUtils {
         return writer.endObject();
     }
 
-    private static List<Field> getDeclaredFields(Class<?> clazz) {
+    private static List<Field> getCursorFields(Class<?> clazz) {
+        DebugUtils.__checkError(clazz == null, "clazz == null");
+        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz.isPrimitive() || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final List<Field> result = new ArrayList<Field>();
-        for (; clazz != Object.class && clazz != null; clazz = clazz.getSuperclass()) {
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 if (field.getAnnotation(CursorField.class) != null) {
@@ -582,7 +585,6 @@ public final class DatabaseUtils {
     }
 
     private static <T> T newInstanceImpl(Cursor cursor, Class<? extends T> clazz, List<Field> fields) throws ReflectiveOperationException {
-        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final T result = clazz.newInstance();
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
@@ -705,7 +707,7 @@ public final class DatabaseUtils {
         final int count = cursor.getCount();
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
-            final List<Field> fields = getDeclaredFields(componentType);
+            final List<Field> fields = getCursorFields(componentType);
             for (int i = 0; cursor.moveToNext(); ++i) {
                 result[i] = newInstanceImpl(cursor, componentType, fields);
             }

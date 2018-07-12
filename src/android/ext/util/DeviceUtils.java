@@ -20,7 +20,6 @@ import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
-import android.util.Log;
 import android.util.Printer;
 import android.view.Display;
 import android.view.WindowManager;
@@ -151,19 +150,15 @@ public final class DeviceUtils {
         infos.setLength(0);
         infos.append("  model = ").append(Build.MANUFACTURER).append(" ").append(Build.MODEL)
              .append("\n  cpu info [ ").append("model = ").append(Build.HARDWARE)
-             .append(", core = ").append(cpuCore).append(" ]");
+             .append(", core = ").append(cpuCore)
+             .append(", abis = ").append(Arrays.toString(getSupportedABIs()))
+             .append(" ]");
         printer.println(infos.toString());
 
         // Dumps cpu infos.
         infos.setLength(0);
         for (int i = 0; i < cpuCore; ++i) {
-            if (i == 0) {
-                infos.append("  cpu");
-            } else {
-                infos.append("\n  cpu");
-            }
-
-            infos.append(i)
+            dumpWhiteSpace(infos, i).append("cpu").append(i)
                  .append(" [ curFrequency = ").append(formatCpuFreq(getCpuCurFreq(i)))
                  .append(", maxFrequency = ").append(formatCpuFreq(getCpuMaxFreq(i)))
                  .append(", minFrequency = ").append(formatCpuFreq(getCpuMinFreq(i)))
@@ -171,13 +166,12 @@ public final class DeviceUtils {
         }
         printer.println(infos.toString());
 
-        // Dumps cpu abis, version etc.
+        // Dumps sdk, version and mac infos.
         infos.setLength(0);
-        infos.append("  cpu abis = ").append(Arrays.toString(getSupportedABIs()))
-             .append("\n  sdk = ").append(Build.VERSION.SDK_INT)
+        infos.append("  sdk = ").append(Build.VERSION.SDK_INT)
              .append("\n  version = ").append(Build.VERSION.RELEASE)
              .append("\n  wlan = ").append(NetworkUtils.getMacAddress(NetworkUtils.WLAN, "N/A"))
-             .append("\n  eth  = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
+             .append("\n  ethernet = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
         printer.println(infos.toString());
 
         // Dumps display infos.
@@ -210,12 +204,11 @@ public final class DeviceUtils {
         // Dumps the system storage infos.
         infos.setLength(0);
         final StatFs statFs = new StatFs(Environment.getRootDirectory().getPath());
-        dumpInternalStorageInfo(context, statFs, infos, "  system ");
+        dumpStorageInfo(context, statFs, infos.append("  system ["));
 
         // Dumps the data storage infos.
         statFs.restat(Environment.getDataDirectory().getPath());
-        dumpInternalStorageInfo(context, statFs, infos, "\n  data ");
-        printer.println(infos.toString());
+        printer.println(dumpStorageInfo(context, statFs, infos.append("\n  data [")).toString());
 
         // Dumps the external storage infos.
         infos.setLength(0);
@@ -272,40 +265,34 @@ public final class DeviceUtils {
         return writer.name("abis").value(result.toString());
     }
 
-    private static void dumpInternalStorageInfo(Context context, StatFs statFs, StringBuilder out, String prefix) {
-        out.append(prefix)
-           .append("[ total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
-           .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
-           .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
-           .append(" ]");
+    private static StringBuilder dumpWhiteSpace(StringBuilder out, int index) {
+        if (index > 0) {
+            out.append('\n');
+        }
+
+        return out.append("  ");
+    }
+
+    private static StringBuilder dumpStorageInfo(Context context, StatFs statFs, StringBuilder out) {
+        return out.append(" total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
+                  .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
+                  .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
+                  .append(" ]");
     }
 
     private static String dumpExternalStorageInfo(Context context, StatFs statFs, StringBuilder out) {
-        try {
-            final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
-            for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
-                final StorageVolume volume = volumes[i];
-                final String path = volume.getPath();
-                statFs.restat(path);
+        final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
+        for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
+            final StorageVolume volume = volumes[i];
+            final String path  = volume.getPath();
+            final String state = volume.getState();
+            statFs.restat(path);
 
-                if (out.length() <= 0) {
-                    out.append("  ");
-                } else {
-                    out.append("\n  ");
-                }
-
-                final String state = volume.getState();
-                out.append(getUserLabel(context, volume))
-                   .append(" [ path = ").append(path)
-                   .append(", primary = ").append(volume.isPrimary())
-                   .append(", state = ").append(state != null ? state : "unknown")
-                   .append(", total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
-                   .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
-                   .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
-                   .append(" ]");
-            }
-        } catch (Exception e) {
-            Log.e(DeviceUtils.class.getName(), "Couldn't dump storage info.", e);
+            dumpStorageInfo(context, statFs, dumpWhiteSpace(out, i).append(getUserLabel(context, volume))
+                .append(" [ path = ").append(path)
+                .append(", primary = ").append(volume.isPrimary())
+                .append(", state = ").append(state != null ? state : "unknown")
+                .append(','));
         }
 
         return out.toString();

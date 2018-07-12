@@ -1,6 +1,5 @@
 package android.ext.barcode;
 
-import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
@@ -95,7 +94,7 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
      */
     public final void startDecode(int[] pixels, int width, int height, Executor executor, OnDecodeListener listener) {
-        new RGBDecodeTask(listener).executeOnExecutor(executor, pixels, width, height);
+        new DecodeTask(listener).executeOnExecutor(executor, new RGBLuminanceSource(width, height, pixels));
     }
 
     /**
@@ -111,7 +110,7 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
      */
     public final void startDecode(byte[] data, int width, int height, Rect clipBounds, Executor executor, OnDecodeListener listener) {
-        new YUVDecodeTask(listener).executeOnExecutor(executor, data, width, height, clipBounds.left, clipBounds.top, clipBounds.right, clipBounds.bottom);
+        new DecodeTask(listener).executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false));
     }
 
     /**
@@ -130,7 +129,7 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, Rect, Executor, OnDecodeListener)
      */
     public final void startDecode(byte[] data, int width, int height, int left, int top, int right, int bottom, Executor executor, OnDecodeListener listener) {
-        new YUVDecodeTask(listener).executeOnExecutor(executor, data, width, height, left, top, right, bottom);
+        new DecodeTask(listener).executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false));
     }
 
     /**
@@ -178,45 +177,26 @@ public class BarcodeDecoder {
     }
 
     /**
-     * Class <tt>YUVDecodeTask</tt> is an implementation of an {@link AsyncTask}.
+     * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private class YUVDecodeTask extends AsyncTask<Object, Object, Pair<LuminanceSource, Result>> {
-        private final WeakReference<OnDecodeListener> mListener;
+    private final class DecodeTask extends AsyncTask<LuminanceSource, Object, Pair<LuminanceSource, Result>> {
+        private OnDecodeListener mListener;
 
-        public YUVDecodeTask(OnDecodeListener listener) {
+        public DecodeTask(OnDecodeListener listener) {
             DebugUtils.__checkError(listener == null, "listener == null");
-            mListener = new WeakReference<OnDecodeListener>(listener);
+            mListener = listener;
         }
 
         @Override
-        protected Pair<LuminanceSource, Result> doInBackground(Object... params) {
-            final int left = (Integer)params[3];
-            final int top  = (Integer)params[4];
-            final LuminanceSource source = new PlanarYUVLuminanceSource((byte[])params[0], (Integer)params[1], (Integer)params[2], left, top, (Integer)params[5] - left, (Integer)params[6] - top, false);
+        protected Pair<LuminanceSource, Result> doInBackground(LuminanceSource... params) {
+            final LuminanceSource source = params[0];
             return new Pair<LuminanceSource, Result>(source, decode(source));
         }
 
         @Override
         protected void onPostExecute(Pair<LuminanceSource, Result> result) {
-            final OnDecodeListener listener = mListener.get();
-            if (listener != null) {
-                listener.onDecodeComplete(result.first, result.second);
-            }
-        }
-    }
-
-    /**
-     * Class <tt>RGBDecodeTask</tt> is an implementation of an {@link AsyncTask}.
-     */
-    private final class RGBDecodeTask extends YUVDecodeTask {
-        public RGBDecodeTask(OnDecodeListener listener) {
-            super(listener);
-        }
-
-        @Override
-        protected Pair<LuminanceSource, Result> doInBackground(Object... params) {
-            final LuminanceSource source = new RGBLuminanceSource((Integer)params[1], (Integer)params[2], (int[])params[0]);
-            return new Pair<LuminanceSource, Result>(source, decode(source));
+            mListener.onDecodeComplete(result.first, result.second);
+            mListener = null;   // Clears the listener to avoid potential memory leaks.
         }
     }
 

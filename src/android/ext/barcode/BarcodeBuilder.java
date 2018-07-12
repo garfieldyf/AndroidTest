@@ -61,6 +61,7 @@ public final class BarcodeBuilder {
      * Sets the "white" color will be draw the barcode image.
      * @param white The "white" color to set.
      * @return This builder.
+     * @see #white(Resources, int)
      */
     public final BarcodeBuilder white(int white) {
         this.white = white;
@@ -68,12 +69,37 @@ public final class BarcodeBuilder {
     }
 
     /**
+     * Sets the "white" color will be draw the barcode image.
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the color.
+     * @return This builder.
+     * @see #white(int)
+     */
+    public final BarcodeBuilder white(Resources res, int id) {
+        this.white = res.getColor(id);
+        return this;
+    }
+
+    /**
      * Sets the "black" color will be draw the barcode image.
      * @param black The "black" color to set.
      * @return This builder.
+     * @see #black(Resources, int)
      */
     public final BarcodeBuilder black(int black) {
         this.black = black;
+        return this;
+    }
+
+    /**
+     * Sets the "black" color will be draw the barcode image.
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the color.
+     * @return This builder.
+     * @see #black(int)
+     */
+    public final BarcodeBuilder black(Resources res, int id) {
+        this.black = res.getColor(id);
         return this;
     }
 
@@ -83,10 +109,28 @@ public final class BarcodeBuilder {
      * @param gravity The gravity used to position/stretch
      * the <em>logo</em> within its bounds.
      * @return This builder.
+     * @see #logo(Resources, int, int)
      * @see Gravity
      */
     public final BarcodeBuilder logo(Drawable logo, int gravity) {
         this.logo = logo;
+        this.gravity = gravity;
+        return this;
+    }
+
+    /**
+     * Sets the logo will be draw into the barcode image.
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the logo.
+     * @param gravity The gravity used to position/stretch
+     * the logo within its bounds.
+     * @return This builder.
+     * @see #logo(Drawable, int)
+     * @see Gravity
+     */
+    @SuppressWarnings("deprecation")
+    public final BarcodeBuilder logo(Resources res, int id, int gravity) {
+        this.logo = res.getDrawable(id);
         this.gravity = gravity;
         return this;
     }

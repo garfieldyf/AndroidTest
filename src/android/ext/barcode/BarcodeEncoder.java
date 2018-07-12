@@ -83,6 +83,13 @@ public class BarcodeEncoder {
      * @see #startEncode(String, BarcodeFormat, int, int, Map, Executor, OnEncodeListener)
      */
     public final void startEncode(String contents, BarcodeFormat format, int width, int height, Executor executor, OnEncodeListener listener) {
+        /*
+         * params[0] - contents
+         * params[1] - format
+         * params[2] - width
+         * params[3] - height
+         * params[4] - hints
+         */
         new EncodeTask(listener).executeOnExecutor(executor, contents, format, width, height, mHints);
     }
 
@@ -99,6 +106,13 @@ public class BarcodeEncoder {
      * @see #startEncode(String, BarcodeFormat, int, int, Executor, OnEncodeListener)
      */
     public final void startEncode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, Executor executor, OnEncodeListener listener) {
+        /*
+         * params[0] - contents
+         * params[1] - format
+         * params[2] - width
+         * params[3] - height
+         * params[4] - hints
+         */
         new EncodeTask(listener).executeOnExecutor(executor, contents, format, width, height, hints);
     }
 
@@ -137,6 +151,13 @@ public class BarcodeEncoder {
         @Override
         @SuppressWarnings("unchecked")
         protected Pair<BitMatrix, Bitmap> doInBackground(Object... params) {
+            /*
+             * params[0] - contents
+             * params[1] - format
+             * params[2] - width
+             * params[3] - height
+             * params[4] - hints
+             */
             final Map<EncodeHintType, ?> hints = (Map<EncodeHintType, ?>)params[4];
             final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (Integer)params[2], (Integer)params[3], hints);
             return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, hints) : null));

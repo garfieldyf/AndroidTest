@@ -164,7 +164,7 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
 
     @Override
     public long getItemId(int position) {
-        return mAdapter.getItemId(position);
+        return (hasStableIds() ? mAdapter.getItemId(position) : RecyclerView.NO_ID);
     }
 
     @Override

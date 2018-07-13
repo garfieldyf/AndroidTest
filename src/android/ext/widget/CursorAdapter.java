@@ -40,9 +40,8 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      * <tt>0</tt> or any combination of FLAG_XXX constants.
      */
     public CursorAdapter(Cursor cursor, int flags) {
-        mCursor = cursor;
         mObserver = ((flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
-        registerContentObserver();
+        swapCursor(cursor, this);
     }
 
     /**
@@ -185,9 +184,8 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      * @param observer The {@link CursorObserver}.
      */
     /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
-        mCursor = cursor;
         mObserver = observer;
-        registerContentObserver();
+        swapCursor(cursor, this);
     }
 
     /**

@@ -996,7 +996,7 @@ public final class FileUtils {
         }
 
         /**
-         * Formats the total size to be in the form of bytes, kilobytes, megabytes, etc.
+         * Formats the total size to be in the from of bytes, kilobytes, megabytes, etc.
          * @param context The <tt>Context</tt>.
          * @param resId May be <tt>0</tt>. The resource id for the format string.
          * @return A formatted string with the {@link #size}.
@@ -1063,9 +1063,15 @@ public final class FileUtils {
         public final JsonWriter writeTo(JsonWriter writer) {
             try {
                 DebugUtils.__checkError(writer == null, "writer == null");
-                return writer.beginObject().name("mode").value(mode).name("uid").value(uid)
-                    .name("gid").value(gid).name("size").value(size).name("mtime").value(mtime)
-                    .name("blocks").value(blocks).name("blksize").value(blksize).endObject();
+                return writer.beginObject()
+                    .name("mode").value(mode)
+                    .name("uid").value(uid)
+                    .name("gid").value(gid)
+                    .name("size").value(size)
+                    .name("mtime").value(mtime)
+                    .name("blocks").value(blocks)
+                    .name("blksize").value(blksize)
+                    .endObject();
             } catch (IOException e) {
                 throw new Error(e);
             }
@@ -1596,6 +1602,19 @@ public final class FileUtils {
         public static int getType(String path) {
             DebugUtils.__checkError(path == null, "path == null");
             return (getFileMode(path) & Stat.S_IFMT) >> 12;
+        }
+
+        /**
+         * Returns a {@link Dirent} from the JSON-encoded string.
+         * @param json The JSON-encoded string containing the data.
+         * @throws IOException if an error occurs while parsing the data.
+         * @return A <tt>Dirent</tt> object.
+         */
+        public static Dirent fromJSON(String json) throws IOException {
+            DebugUtils.__checkError(json == null, "json == null");
+            final Dirent dirent = new Dirent();
+            dirent.readFrom(new JsonReader(new StringReader(json)));
+            return dirent;
         }
 
         /**

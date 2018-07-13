@@ -61,10 +61,10 @@ public final class NetworkUtils {
     }
 
     /**
-     * Returns the byte array MAC address from the <em>macAddress</em>.
-     * @param inAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>,
+     * Equivalent to calling <tt>toMacAddress(macAddress, new byte[6])</tt>.
+     * @param macAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>,
      * <tt>XX-XX-XX-XX-XX-XX</tt> or any separate components by white
-     * space character ('\s') in <em>inAddress</em>.
+     * space character ('\s') in <em>macAddress</em>.
      * @return The byte array MAC address.
      * @see #toMacAddress(String, byte[])
      */

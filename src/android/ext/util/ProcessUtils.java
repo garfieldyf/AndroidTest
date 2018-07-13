@@ -351,7 +351,7 @@ public final class ProcessUtils {
      */
     public static final class RunningNativeProcessInfo extends RunningAppProcessInfo implements Cloneable, Filter<RunningAppProcessInfo> {
         /**
-         * The parent pid of this process; 0 if none
+         * The parent process id of this process; 0 if none
          */
         public int ppid;
 
@@ -468,15 +468,6 @@ public final class ProcessUtils {
          */
         public final int delete(long date) {
             return DatabaseUtils.executeUpdateDelete(getWritableDatabase(), "DELETE FROM crashes WHERE _date < " + date, (Object[])null);
-        }
-
-        public final void dump() {
-            final Cursor cursor = query(System.currentTimeMillis());
-            try {
-                android.database.DatabaseUtils.dumpCursor(cursor, System.out);
-            } finally {
-                cursor.close();
-            }
         }
 
         @Override

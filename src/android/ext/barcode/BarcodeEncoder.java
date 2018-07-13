@@ -66,7 +66,7 @@ public class BarcodeEncoder {
         try {
             return mWriter.encode(contents, format, width, height, hints);
         } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't encode '").append(contents).append("' to barcode image.").toString(), e);
+            Log.e(getClass().getName(), new StringBuilder("Couldn't encode '").append(contents).append("' to a barcode image.").toString(), e);
             return null;
         }
     }

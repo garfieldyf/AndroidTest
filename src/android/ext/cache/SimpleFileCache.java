@@ -21,9 +21,26 @@ public final class SimpleFileCache implements FileCache {
     /**
      * Constructor
      * @param cacheDir The absolute path of the cache directory.
+     * @see #SimpleFileCache(String, int)
      */
     public SimpleFileCache(String cacheDir) {
         mCacheDir = cacheDir;
+    }
+
+    /**
+     * Constructor
+     * @param cacheDir The absolute path of the cache directory.
+     * @param maxSize The maximum number of files to allow in the
+     * <em>cacheDir</em>. If the <em>cacheDir</em> subfile count
+     * greater than <em>maxSize</em>, this cache will be delete
+     * all subfiles in the <em>cacheDir</em>.
+     * @see #SimpleFileCache(String)
+     */
+    public SimpleFileCache(String cacheDir, int maxSize) {
+        mCacheDir = cacheDir;
+        if (FileUtils.getFileCount(cacheDir, 0) >= maxSize) {
+            FileUtils.deleteFiles(cacheDir, false);
+        }
     }
 
     @Override

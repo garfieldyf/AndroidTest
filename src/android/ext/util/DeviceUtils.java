@@ -176,8 +176,7 @@ public final class DeviceUtils {
 
         // Dumps display infos.
         infos.setLength(0);
-        infos.append("  display = ").append(Build.DISPLAY)
-             .append("\n  realWidth  = ").append(size.x)
+        infos.append("  realWidth  = ").append(size.x)
              .append("\n  realHeight = ").append(size.y)
              .append("\n  width  = ").append(dm.widthPixels)
              .append("\n  height = ").append(dm.heightPixels)

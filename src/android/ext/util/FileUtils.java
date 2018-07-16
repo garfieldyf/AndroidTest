@@ -1390,7 +1390,7 @@ public final class FileUtils {
             DebugUtils.__checkError(path == null, "path == null");
             this.path = path;
             this.type = getType(path);
-            __checkDirentType(this);
+            Dirent.__checkDirentType(this);
         }
 
         /**

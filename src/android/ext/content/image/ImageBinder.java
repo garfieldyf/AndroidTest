@@ -13,7 +13,6 @@ import android.ext.content.image.Transformer.ImageTransformer;
 import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Printer;
 import android.widget.ImageView;
 
@@ -177,15 +176,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     /* package */ final void dump(Context context, Printer printer) {
         if (mTransformer instanceof CacheTransformer) {
             Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
-        }
-    }
-
-    /* package */ static void __checkBinder(Class clazz, Cache imageCache, Binder binder) {
-        if (imageCache == null && binder instanceof ImageBinder) {
-            final Transformer transformer = ((ImageBinder)binder).mTransformer;
-            if (transformer instanceof CacheTransformer) {
-                Log.e(clazz.getName(), "WARNING", new IllegalArgumentException("The " + clazz.getSimpleName() + " has no memory cache, The internal binder should be no drawable cache!!!"));
-            }
         }
     }
 }

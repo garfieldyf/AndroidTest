@@ -11,7 +11,9 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.Transformer.CacheTransformer;
 import android.ext.net.DownloadRequest;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
@@ -62,8 +64,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(DefaultBinder.sInstance, computeMaximumPoolSize(executor)));
-        ImageBinder.__checkBinder(getClass(), imageCache, binder);
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
+        DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The internal binder should be no drawable cache!!!");
     }
 
     /**
@@ -203,9 +205,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * The <tt>Loader</tt> interface used to load image from the specified url.
+     * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private static interface Loader<Image> {
+    /* package */ static abstract class Loader<Image> implements Factory<byte[]> {
+        /**
+         * Returns a new byte array.
+         * @return A new byte array.
+         */
+        @Override
+        public byte[] newInstance() {
+            return new byte[16384];
+        }
+
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
@@ -215,13 +226,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
+        public abstract Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader implements Loader<Image> {
+    private final class URLLoader extends Loader<Image> {
         private final String mCacheDir;
 
         /**
@@ -246,7 +257,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader<Image> {
+    private final class FileCacheLoader extends Loader<Image> {
         private final FileCache mCache;
 
         /**
@@ -301,13 +312,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>DefaultBinder</tt> used to bind the <tt>Bitmap</tt> to <tt>ImageView</tt>.
      */
-    private static final class DefaultBinder implements Binder<Object, Object, Bitmap>, Factory<byte[]> {
+    private static final class DefaultBinder implements Binder<Object, Object, Bitmap> {
         public static final DefaultBinder sInstance = new DefaultBinder();
-
-        @Override
-        public byte[] newInstance() {
-            return new byte[16384];
-        }
 
         @Override
         public void bindValue(Object key, Object[] params, Object target, Bitmap value, int state) {

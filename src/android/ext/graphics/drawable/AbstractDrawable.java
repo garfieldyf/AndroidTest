@@ -25,6 +25,7 @@ import android.view.Gravity;
  */
 @SuppressLint({ "Override", "NewApi" })
 public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantState> extends Drawable {
+    /* ------------------ mState.mFlags ------------------ */
     /**
      * Indicates the drawable none mirrored.
      */
@@ -40,6 +41,7 @@ public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantSt
      */
     public static final int VERTICAL_MIRRORED = 0x80000000;
 
+    /* --------------------- mFlags --------------------- */
     /**
      * If set the drawable gravity has been changed.
      */

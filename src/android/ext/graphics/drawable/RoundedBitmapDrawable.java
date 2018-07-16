@@ -123,14 +123,12 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * @see #getCornerRadii()
      */
     public void setCornerRadii(float[] radii) {
-        if (mState.mRadii != radii) {
-            if (radiusEquals(radii, 0, +0.0f)) {
-                mState.mRadii = null;
-                invalidateSelf(false);
-            } else {
-                mState.mRadii = radii;
-                invalidateSelf(true);
-            }
+        if (radiusEquals(radii, 0, +0.0f)) {
+            mState.mRadii = null;
+            invalidateSelf(false);
+        } else {
+            mState.mRadii = radii;
+            invalidateSelf(true);
         }
     }
 

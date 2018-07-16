@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -138,7 +139,7 @@ public final class DatabaseUtils {
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The {@link InputStream} for a copy of the blob value, or <tt>null</tt>
      * if the value is <tt>null</tt> or could not be read for some reason.
-     * @throws SQLiteDoneException If the query returns <tt>0</tt> rows.
+     * @throws SQLiteDoneException if the query returns <tt>0</tt> rows.
      */
     @SuppressWarnings("resource")
     public static InputStream simpleQuery(SQLiteDatabase db, String sql, Object... bindArgs) {
@@ -279,7 +280,7 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can pass
      * <em>(Object[])null</em> instead of allocating an empty array.
      * @return The row ID of inserted, if this insert is successful. <tt>-1</tt> otherwise.
-     * @throws SQLException If the SQL string is invalid for some reason.
+     * @throws SQLException if the SQL string is invalid for some reason.
      * @see #executeUpdateDelete(SQLiteDatabase, String, Object[])
      */
     public static long executeInsert(SQLiteDatabase db, String sql, Object... bindArgs) {
@@ -301,7 +302,7 @@ public final class DatabaseUtils {
      * replaced by the values from <em>bindArgs</em>. If no arguments, you can pass
      * <em>(Object[])null</em> instead of allocating an empty array.
      * @return The number of rows affected by the SQL statement execution.
-     * @throws SQLException If the SQL string is invalid for some reason.
+     * @throws SQLException if the SQL string is invalid for some reason.
      * @see #executeInsert(SQLiteDatabase, String, Object[])
      */
     public static int executeUpdateDelete(SQLiteDatabase db, String sql, Object... bindArgs) {
@@ -535,7 +536,8 @@ public final class DatabaseUtils {
      * @see #writeCursor(JsonWriter, Cursor)
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
-    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String[] names) throws IOException {
+    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String... names) throws IOException {
+        DebugUtils.__checkError(columnIndexes == null || names == null, "columnIndexes == null || names == null");
         DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
@@ -565,6 +567,80 @@ public final class DatabaseUtils {
         }
 
         return writer.endObject();
+    }
+
+    /**
+     * Equivalent to calling <tt>toContentValues(cursor, cursor.getColumnNames())</tt>.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor
+     * must be move to the correct position.
+     * @return A <tt>ContentValues</tt> object.
+     * @see #toContentValues(Cursor, String[])
+     * @see #toContentValues(Cursor, int[], String[])
+     */
+    public static ContentValues toContentValues(Cursor cursor) {
+        return toContentValues(cursor, cursor.getColumnNames());
+    }
+
+    /**
+     * Returns a new {@link ContentValues} from the the specified <tt>Cursor</tt>.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor must
+     * be move to the correct position.
+     * @param columnNames The name of the columns which the values to put.
+     * @return A <tt>ContentValues</tt> object.
+     * @see #toContentValues(Cursor)
+     * @see #toContentValues(Cursor, int[], String[])
+     */
+    public static ContentValues toContentValues(Cursor cursor, String... columnNames) {
+        final int[] columnIndexes = new int[columnNames.length];
+        for (int i = 0; i < columnNames.length; ++i) {
+            columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
+        }
+
+        return toContentValues(cursor, columnIndexes, columnNames);
+    }
+
+    /**
+     * Returns a new {@link ContentValues} from the the specified <tt>Cursor</tt>.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor must
+     * be move to the correct position.
+     * @param columnIndexes The index of the columns which the values to put.
+     * @param names The name of the value to put. The <em>names</em> length must be
+     * equals the <em>columnIndexes</em> length.
+     * @return A <tt>ContentValues</tt> object.
+     * @see #toContentValues(Cursor)
+     * @see #toContentValues(Cursor, String[])
+     */
+    public static ContentValues toContentValues(Cursor cursor, int[] columnIndexes, String... names) {
+        DebugUtils.__checkError(columnIndexes == null || names == null, "columnIndexes == null || names == null");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
+        final ContentValues result = new ContentValues();
+        for (int i = 0; i < columnIndexes.length; ++i) {
+            final String name = names[i];
+            final int columnIndex = columnIndexes[i];
+            switch (cursor.getType(columnIndex)) {
+            case Cursor.FIELD_TYPE_NULL:
+                result.putNull(name);
+                break;
+
+            case Cursor.FIELD_TYPE_INTEGER:
+                result.put(name, cursor.getLong(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_FLOAT:
+                result.put(name, cursor.getDouble(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_STRING:
+                result.put(name, cursor.getString(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_BLOB:
+                result.put(name, cursor.getBlob(columnIndex));
+                break;
+            }
+        }
+
+        return result;
     }
 
     private static List<Field> getCursorFields(Class<?> clazz) {

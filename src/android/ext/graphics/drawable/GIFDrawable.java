@@ -31,9 +31,9 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         android.R.attr.fillAfter,
     };
 
-    private static final int FLAG_RUNNING   = 0x01;
-    private static final int FLAG_ONESHOT   = 0x02;
-    private static final int FLAG_FILLAFTER = 0x04;
+    private static final int FLAG_RUNNING   = 0x01;     // mFlags
+    private static final int FLAG_ONESHOT   = 0x01;     // mState.mFlags
+    private static final int FLAG_FILLAFTER = 0x02;     // mState.mFlags
 
     /**
      * The current frame index to draw.

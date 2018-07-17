@@ -346,45 +346,6 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns the number of rows in the specified table.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param table The name of the table to query.
-     * @return The number of rows in the table.
-     * @see #getRowCount(ContentResolver, Uri)
-     * @see #getRowCount(ContentResolver, Uri, String, String[])
-     */
-    public static int getRowCount(SQLiteDatabase db, String table) {
-        return simpleQueryLong(db, "SELECT COUNT(*) FROM " + table, (Object[])null).intValue();
-    }
-
-    /**
-     * Returns the number of rows with given the <em>uri</em>.
-     * @param resolver The <tt>ContentResolver</tt>.
-     * @param uri The URI, using the content:// scheme, for the content to retrieve.
-     * @return The number of rows.
-     * @see #getRowCount(SQLiteDatabase, String)
-     * @see #getRowCount(ContentResolver, Uri, String, String[])
-     */
-    public static int getRowCount(ContentResolver resolver, Uri uri) {
-        return ((Number)simpleQuery(resolver, uri, "COUNT(*)", null, null)).intValue();
-    }
-
-    /**
-     * Returns the number of rows with given the <em>uri</em>.
-     * @param resolver The <tt>ContentResolver</tt>.
-     * @param uri The URI, using the content:// scheme, for the content to retrieve.
-     * @param selection The SQL WHERE clause (excluding the WHERE itself).
-     * @param selectionArgs You may include ? in where clause in the query, which will be
-     * replaced by the values from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @return The number of rows.
-     * @see #getRowCount(ContentResolver, Uri)
-     * @see #getRowCount(SQLiteDatabase, String)
-     */
-    public static int getRowCount(ContentResolver resolver, Uri uri, String selection, String[] selectionArgs) {
-        return ((Number)simpleQuery(resolver, uri, "COUNT(*)", selection, selectionArgs)).intValue();
-    }
-
-    /**
      * Returns all table names in the specified database.
      * @param db The <tt>SQLiteDatabase</tt>.
      * @return A array of all table names if succeeded,
@@ -573,7 +534,7 @@ public final class DatabaseUtils {
      * Equivalent to calling <tt>toContentValues(cursor, cursor.getColumnNames())</tt>.
      * @param cursor The {@link Cursor} from which to get the data. The cursor
      * must be move to the correct position.
-     * @return A <tt>ContentValues</tt> object.
+     * @return A {@link ContentValues} object.
      * @see #toContentValues(Cursor, String[])
      * @see #toContentValues(Cursor, int[], String[])
      */
@@ -586,7 +547,7 @@ public final class DatabaseUtils {
      * @param cursor The {@link Cursor} from which to get the data. The cursor must
      * be move to the correct position.
      * @param columnNames The name of the columns which the values to put.
-     * @return A <tt>ContentValues</tt> object.
+     * @return A {@link ContentValues} object.
      * @see #toContentValues(Cursor)
      * @see #toContentValues(Cursor, int[], String[])
      */
@@ -606,7 +567,7 @@ public final class DatabaseUtils {
      * @param columnIndexes The index of the columns which the values to put.
      * @param names The name of the value to put. The <em>names</em> length must be
      * equals the <em>columnIndexes</em> length.
-     * @return A <tt>ContentValues</tt> object.
+     * @return A {@link ContentValues} object.
      * @see #toContentValues(Cursor)
      * @see #toContentValues(Cursor, String[])
      */
@@ -664,6 +625,7 @@ public final class DatabaseUtils {
         final T result = clazz.newInstance();
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
+            DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
             final int columnIndex = cursor.getColumnIndexOrThrow(field.getAnnotation(CursorField.class).value());
             final Class<?> type = field.getType();
             if (type == int.class) {

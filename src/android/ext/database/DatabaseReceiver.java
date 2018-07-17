@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
@@ -18,17 +19,10 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Local Broadcast Action: The table content has changed. <p>May include the following extras:
      * <ul><li>{@link #EXTRA_STATEMENT} containing the integer SQL statement type, May be one of
      * <tt>STATEMENT_XXX</tt> constants.
-     * <li>{@link #EXTRA_ROW_ID} containing the long value, May be the row ID or <tt>-1</tt>.
-     * <li>{@link #EXTRA_RESULT} containing the integer value, May be the number of rows affected
-     * for update/delete.</ul>
+     * <li>{@link #EXTRA_RESULT} containing the {@link Bundle} value by user-defined or <tt>null</tt>.
+     * </ul>
      */
     public static final String ACTION_TABLE_CONTENT_CHANGED = "C620F8F3-59EB-4EA7-887E-813EFC58295A";
-
-    /**
-     * The name of the extra used to define the row ID.
-     * @see #ACTION_TABLE_CONTENT_CHANGED
-     */
-    public static final String EXTRA_ROW_ID = "rowID";
 
     /**
      * The name of the extra used to define the result.
@@ -43,7 +37,17 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static final String EXTRA_STATEMENT = "statement";
 
     /**
-     * The type of the SQL statement UNKNOWN.
+     * The key of row ID of the result.
+     */
+    public static final String KEY_ROW_ID = "rowID";
+
+    /**
+     * The key of the number of rows affected of the result.
+     */
+    public static final String KEY_ROWS_AFFECTED = "rowsAffected";
+
+    /**
+     * The type of the SQL statement unknown.
      */
     public static final int STATEMENT_UNKNOWN = 0;
 
@@ -101,65 +105,66 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Equivalent to calling <tt>sendBroadcast(context, scheme, statement, rowID, 0)</tt>.
+     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param rowID The row ID of the inserted row.
-     * @see #sendBroadcast(Context, String, int, long, int)
+     * @see #sendBroadcast(Context, String, int, Bundle)
      */
     public static void sendBroadcast(Context context, String scheme, int statement, long rowID) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, rowID, 0));
+        final Bundle result = new Bundle();
+        result.putLong(KEY_ROW_ID, rowID);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**
-     * Equivalent to calling <tt>sendBroadcast(context, scheme, statement, -1, result)</tt>.
+     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
-     * @param result The SQL statement perform the result.
-     * @see #sendBroadcast(Context, String, int, long, int)
+     * @param rowsAffected the number of rows affected for update/delete.
+     * @see #sendBroadcast(Context, String, int, Bundle)
      */
-    public static void sendBroadcast(Context context, String scheme, int statement, int result) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, -1, result));
+    public static void sendBroadcast(Context context, String scheme, int statement, int rowsAffected) {
+        final Bundle result = new Bundle();
+        result.putInt(KEY_ROWS_AFFECTED, rowsAffected);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**
-     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceiver</tt>s.
+     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
-     * @param rowID The row ID of the inserted row or <tt>-1</tt>.
-     * @param result The SQL statement perform the result.
-     * @see #resolveIntent(String, int, long, int)
+     * @param result The SQL statement perform the result or <tt>null</tt>.
+     * @see #resolveIntent(String, int, Bundle)
      * @see LocalBroadcastManager#sendBroadcast(Intent)
      */
-    public static void sendBroadcast(Context context, String scheme, int statement, long rowID, int result) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, rowID, result));
+    public static void sendBroadcast(Context context, String scheme, int statement, Bundle result) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**
      * Returns the {@link Intent} that should be used to send local broadcast.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
-     * @param rowID The row ID of the inserted row or <tt>-1</tt>.
-     * @param result The SQL statement perform the result.
+     * @param result The SQL statement perform the result or <tt>null</tt>.
+     * @see #sendBroadcast(Context, String, int, Bundle)
      */
-    public static Intent resolveIntent(String scheme, int statement, long rowID, int result) {
+    public static Intent resolveIntent(String scheme, int statement, Bundle result) {
         final Intent intent = new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(scheme + "://contents"));
-        intent.putExtra(EXTRA_ROW_ID, rowID);
         intent.putExtra(EXTRA_RESULT, result);
         intent.putExtra(EXTRA_STATEMENT, statement);
         return intent;
     }
 
     public static void dump(String tag, Intent intent) {
-        Log.d(tag, new StringBuilder(144)
+        Log.d(tag, new StringBuilder()
            .append("Intent { action = ").append(intent.getAction())
            .append(", scheme = ").append(intent.getScheme())
            .append(", statement = ").append(toString(intent.getIntExtra(EXTRA_STATEMENT, STATEMENT_UNKNOWN)))
-           .append(", rowID = ").append(intent.getLongExtra(EXTRA_ROW_ID, -1))
-           .append(", result = ").append(intent.getIntExtra(EXTRA_RESULT, 0))
+           .append(", result = ").append(intent.getBundleExtra(EXTRA_RESULT))
            .append(" }").toString());
     }
 

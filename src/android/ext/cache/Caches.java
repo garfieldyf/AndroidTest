@@ -2,7 +2,6 @@ package android.ext.cache;
 
 import android.content.Context;
 import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 
@@ -24,14 +23,13 @@ public final class Caches {
     /**
      * Returns a new {@link FileCache} instance.
      * @param context The <tt>Context</tt>.
-     * @param cacheName A relative path within the cache directory, such as <tt>"file_cache"</tt>.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> will be
-     * returned the {@link SimpleFileCache} instance.
-     * @return A new <tt>FileCache</tt> instance.
+     * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
+     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> will
+     * be returned the {@link SimpleFileCache} instance.
+     * @return A new {@link FileCache} instance.
      */
-    public static FileCache createFileCache(Context context, String cacheName, int maxFileSize) {
-        final String cacheDir = FileUtils.getCacheDir(context, cacheName).getPath();
-        return (maxFileSize > 0 ? new LruFileCache(cacheDir, maxFileSize) : new SimpleFileCache(cacheDir));
+    public static FileCache createFileCache(Context context, String name, int maxFileSize) {
+        return (maxFileSize > 0 ? new LruFileCache(context, name, maxFileSize) : new SimpleFileCache(context, name));
     }
 
     /**

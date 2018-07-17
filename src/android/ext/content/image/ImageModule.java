@@ -16,7 +16,6 @@ import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 
@@ -142,7 +141,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * Creates a new {@link FileCache}.
      */
     private static FileCache createFileCache(Context context, int maxSize) {
-        return (maxSize > 0 ? new LruFileCache(FileUtils.getCacheDir(context, ".image_cache").getPath(), maxSize) : null);
+        return (maxSize > 0 ? new LruFileCache(context, ".image_cache", maxSize) : null);
     }
 
     /**

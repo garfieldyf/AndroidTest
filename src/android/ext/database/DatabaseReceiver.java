@@ -19,7 +19,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Local Broadcast Action: The table content has changed. <p>May include the following extras:
      * <ul><li>{@link #EXTRA_STATEMENT} containing the integer SQL statement type, May be one of
      * <tt>STATEMENT_XXX</tt> constants.
-     * <li>{@link #EXTRA_RESULT} containing the {@link Bundle} value by user-defined or <tt>null</tt>.
+     * <li>{@link #EXTRA_RESULT} containing the {@link Bundle} object by user-defined or <tt>null</tt>.
      * </ul>
      */
     public static final String ACTION_TABLE_CONTENT_CHANGED = "C620F8F3-59EB-4EA7-887E-813EFC58295A";
@@ -115,7 +115,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static void sendBroadcast(Context context, String scheme, int statement, long rowID) {
         final Bundle result = new Bundle();
         result.putLong(KEY_ROW_ID, rowID);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
+        sendBroadcast(context, scheme, statement, result);
     }
 
     /**
@@ -129,7 +129,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static void sendBroadcast(Context context, String scheme, int statement, int rowsAffected) {
         final Bundle result = new Bundle();
         result.putInt(KEY_ROWS_AFFECTED, rowsAffected);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
+        sendBroadcast(context, scheme, statement, result);
     }
 
     /**

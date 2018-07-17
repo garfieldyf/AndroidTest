@@ -24,10 +24,24 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
      * Constructor
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
+     * @see #LruFileCache(Context, String, int)
      */
     public LruFileCache(String cacheDir, int maxSize) {
         super(maxSize);
         mCacheDir = cacheDir;
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param name A relative path within the cache directory, such as
+     * <tt>"file_cache"</tt>.
+     * @param maxSize The maximum number of files to allow in this cache.
+     * @see #LruFileCache(String, int)
+     */
+    public LruFileCache(Context context, String name, int maxSize) {
+        super(maxSize);
+        mCacheDir = FileUtils.getCacheDir(context, name).getPath();
     }
 
     @Override

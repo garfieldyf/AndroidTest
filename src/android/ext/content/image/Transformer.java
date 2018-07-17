@@ -43,7 +43,7 @@ public abstract class Transformer<URI, Image> {
      * @param attrs The base set of attribute values.
      * @return The <tt>Transformer</tt> or <tt>null</tt>.
      */
-    public static Transformer inflate(Context context, XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException, ReflectiveOperationException {
+    public static <URI, Image> Transformer<URI, Image> inflate(Context context, XmlPullParser parser, AttributeSet attrs) throws XmlPullParserException, IOException, ReflectiveOperationException {
         // Moves to the start tag position.
         int type;
         while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {

@@ -2,7 +2,6 @@ package android.ext.util;
 
 import java.util.concurrent.Executor;
 import android.ext.concurrent.ThreadPoolManager;
-import android.ext.concurrent.ThreadPoolManager.Task;
 import android.ext.content.Loader;
 import android.os.Handler;
 import android.os.Looper;
@@ -38,26 +37,6 @@ public final class UIHandler extends Handler {
         } else {
             sInstance.post(action);
         }
-    }
-
-    /**
-     * Equivalent to calling <tt>requestFocus(view, View.FOCUS_DOWN)</tt>.
-     * @param view The <tt>View</tt>.
-     * @see #requestFocus(View, int)
-     */
-    public static void requestFocus(View view) {
-        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_REQUEST_FOCUS, View.FOCUS_DOWN, 0, view));
-    }
-
-    /**
-     * Like as {@link View#requestFocus()}. But if the <em>view</em> is currently
-     * computing a layout this method will be post the change using the <tt>UIHandler</tt>.
-     * @param view The <tt>View</tt>.
-     * @param direction One of <tt>View.FOCUS_XXX</tt> constants.
-     * @see #requestFocus(View)
-     */
-    public static void requestFocus(View view, int direction) {
-        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_REQUEST_FOCUS, direction, 0, view));
     }
 
     /**
@@ -186,34 +165,10 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     */
-    public final void cancel(Task task) {
-        sendMessage(Message.obtain(this, MESSAGE_CANCELLED, task));
-    }
-
-    /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     */
-    public final void complete(Task task) {
-        sendMessage(Message.obtain(this, MESSAGE_COMPLETED, task));
-    }
-
-    /**
      * Called on the {@link ThreadPoolManager} internal, do not call this method directly.
      */
     public final void complete(ThreadPoolManager executor) {
-        sendMessage(Message.obtain(this, MESSAGE_ALL_COMPLETED, executor));
-    }
-
-    /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     */
-    public final void setProgress(Task task, Object[] values) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_TASK_PROGRESS;
-        msg.obj  = values;
-        sendMessage(msg);
+        sendMessage(Message.obtain(this, MESSAGE_COMPLETED, executor));
     }
 
     /**
@@ -257,27 +212,11 @@ public final class UIHandler extends Handler {
             break;
 
         // The ThreadPoolManager message handle.
-        case MESSAGE_CANCELLED:
-            ((Task)msg.obj).onCancelled();
-            break;
-
         case MESSAGE_COMPLETED:
-            ((Task)msg.obj).onCompletion();
-            break;
-
-        case MESSAGE_ALL_COMPLETED:
             ((ThreadPoolManager)msg.obj).onAllTasksComplete();
             break;
 
-        case MESSAGE_TASK_PROGRESS:
-            ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
-            break;
-
         // The RecyclerView message handle.
-        case MESSAGE_REQUEST_FOCUS:
-            ((View)msg.obj).requestFocus(msg.arg1);
-            break;
-
         case MESSAGE_CHILD_FOCUS:
             handleChildFocus(msg);
             break;
@@ -312,6 +251,11 @@ public final class UIHandler extends Handler {
      * Handle the recycler view's child view request focus.
      */
     private void handleChildFocus(Message msg) {
+        /*
+         * msg.arg1 - position
+         * msg.arg2 - retryCount
+         * msg.obj  - LayoutManager
+         */
         final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
         if (child != null) {
             child.requestFocus();
@@ -326,19 +270,15 @@ public final class UIHandler extends Handler {
     public static final int MESSAGE_FINISHED       = 0xDFDFDFDF;
 
     // The ThreadPoolManager message.
-    private static final int MESSAGE_CANCELLED     = 0xECECECEC;
-    private static final int MESSAGE_COMPLETED     = 0xEDEDEDED;
-    private static final int MESSAGE_TASK_PROGRESS = 0xEEEEEEEE;
-    private static final int MESSAGE_ALL_COMPLETED = 0xEFEFEFEF;
+    private static final int MESSAGE_COMPLETED     = 0xEFEFEFEF;
 
     // The RecyclerView message.
-    private static final int MESSAGE_CHILD_FOCUS   = 0xF8F8F8F8;
+    private static final int MESSAGE_CHILD_FOCUS   = 0xF9F9F9F9;
     private static final int MESSAGE_ITEM_MOVED    = 0xFBFBFBFB;
     private static final int MESSAGE_DATA_CHANGED  = 0xFAFAFAFA;
     private static final int MESSAGE_ITEM_REMOVED  = 0xFCFCFCFC;
     private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
     private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
-    private static final int MESSAGE_REQUEST_FOCUS = 0xF9F9F9F9;
 
     /**
      * This class cannot be instantiated.

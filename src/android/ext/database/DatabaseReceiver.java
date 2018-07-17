@@ -18,10 +18,17 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Local Broadcast Action: The table content has changed. <p>May include the following extras:
      * <ul><li>{@link #EXTRA_STATEMENT} containing the integer SQL statement type, May be one of
      * <tt>STATEMENT_XXX</tt> constants.
-     * <li>{@link #EXTRA_RESULT} containing the long value, May be the row ID of the inserted row
-     * or the number of rows affected for update/delete.</ul>
+     * <li>{@link #EXTRA_ROW_ID} containing the long value, May be the row ID or <tt>-1</tt>.
+     * <li>{@link #EXTRA_RESULT} containing the integer value, May be the number of rows affected
+     * for update/delete.</ul>
      */
-    public static final String ACTION_TABLE_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
+    public static final String ACTION_TABLE_CONTENT_CHANGED = "C620F8F3-59EB-4EA7-887E-813EFC58295A";
+
+    /**
+     * The name of the extra used to define the row ID.
+     * @see #ACTION_TABLE_CONTENT_CHANGED
+     */
+    public static final String EXTRA_ROW_ID = "rowID";
 
     /**
      * The name of the extra used to define the result.
@@ -64,7 +71,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Register this receiver for the local broadcasts.
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match.
-     * May be <em>databasename.tablename</em>
+     * May be <em>[databasename.tablename]</em>
      * @see #unregister(Context)
      */
     public final void register(Context context, String scheme) {
@@ -83,7 +90,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**
      * Register a receive for any local broadcasts that match the given <em>scheme</em>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
      * @param receiver The {@link BroadcastReceiver} to handle the broadcast.
      * @see LocalBroadcastManager#unregisterReceiver(BroadcastReceiver)
      */
@@ -94,37 +101,65 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceiver</tt>s.
+     * Equivalent to calling <tt>sendBroadcast(context, scheme, statement, rowID, 0)</tt>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
+     * @param rowID The row ID of the inserted row.
+     * @see #sendBroadcast(Context, String, int, long, int)
+     */
+    public static void sendBroadcast(Context context, String scheme, int statement, long rowID) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, rowID, 0));
+    }
+
+    /**
+     * Equivalent to calling <tt>sendBroadcast(context, scheme, statement, -1, result)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param result The SQL statement perform the result.
-     * @see #resolveIntent(String, int, long)
+     * @see #sendBroadcast(Context, String, int, long, int)
+     */
+    public static void sendBroadcast(Context context, String scheme, int statement, int result) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, -1, result));
+    }
+
+    /**
+     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceiver</tt>s.
+     * @param context The <tt>Context</tt>.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
+     * @param rowID The row ID of the inserted row or <tt>-1</tt>.
+     * @param result The SQL statement perform the result.
+     * @see #resolveIntent(String, int, long, int)
      * @see LocalBroadcastManager#sendBroadcast(Intent)
      */
-    public static void sendBroadcast(Context context, String scheme, int statement, long result) {
-        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
+    public static void sendBroadcast(Context context, String scheme, int statement, long rowID, int result) {
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, rowID, result));
     }
 
     /**
      * Returns the {@link Intent} that should be used to send local broadcast.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>databasename.tablename</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
      * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
+     * @param rowID The row ID of the inserted row or <tt>-1</tt>.
      * @param result The SQL statement perform the result.
      */
-    public static Intent resolveIntent(String scheme, int statement, long result) {
+    public static Intent resolveIntent(String scheme, int statement, long rowID, int result) {
         final Intent intent = new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(scheme + "://contents"));
+        intent.putExtra(EXTRA_ROW_ID, rowID);
         intent.putExtra(EXTRA_RESULT, result);
         intent.putExtra(EXTRA_STATEMENT, statement);
         return intent;
     }
 
     public static void dump(String tag, Intent intent) {
-        Log.d(tag, new StringBuilder(128)
+        Log.d(tag, new StringBuilder(144)
            .append("Intent { action = ").append(intent.getAction())
            .append(", scheme = ").append(intent.getScheme())
            .append(", statement = ").append(toString(intent.getIntExtra(EXTRA_STATEMENT, STATEMENT_UNKNOWN)))
-           .append(", result = ").append(intent.getLongExtra(EXTRA_RESULT, -1))
+           .append(", rowID = ").append(intent.getLongExtra(EXTRA_ROW_ID, -1))
+           .append(", result = ").append(intent.getIntExtra(EXTRA_RESULT, 0))
            .append(" }").toString());
     }
 

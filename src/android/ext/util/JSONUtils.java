@@ -10,9 +10,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.content.ContentValues;
 import android.ext.util.ArrayUtils.Filter;
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -275,8 +277,8 @@ public final class JSONUtils {
     /**
      * Writes the specified <em>object</em> into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
-     * @param object May be a <tt>JSONObject, JSONArray, String, Boolean,
-     * Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>JSONObject, JSONArray, ContentValues, String,
+     * Boolean, Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeObject(String, Object)
@@ -290,16 +292,18 @@ public final class JSONUtils {
             return writer.value((Number)object);
         } else if (object instanceof Boolean) {
             return writer.value((boolean)object);
-        } else if (object instanceof Object[]) {
-            return writeColl(writer, Arrays.asList((Object[])object));
-        } else if (object instanceof Map) {
-            return writeMap(writer, (Map<String, ?>)object);
-        } else if (object instanceof Collection) {
-            return writeColl(writer, (Collection<?>)object);
         } else if (object instanceof JSONArray) {
-            return writeJSONArray(writer, (JSONArray)object);
+            return writeValues(writer, (JSONArray)object);
         } else if (object instanceof JSONObject) {
-            return writeJSONObject(writer, (JSONObject)object);
+            return writeValues(writer, (JSONObject)object);
+        } else if (object instanceof Collection) {
+            return writeValues(writer, (Collection<Object>)object);
+        } else if (object instanceof Object[]) {
+            return writeValues(writer, Arrays.asList((Object[])object));
+        } else if (object instanceof ContentValues) {
+            return writeValues(writer, ((ContentValues)object).valueSet());
+        } else if (object instanceof Map) {
+            return writeValues(writer, ((Map<String, Object>)object).entrySet());
         } else {
             throw new Error("Unsupported type - " + object.getClass().toString());
         }
@@ -308,8 +312,8 @@ public final class JSONUtils {
     /**
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
      * @param jsonFile The json file to write.
-     * @param object May be a <tt>JSONObject, JSONArray, String, Boolean,
-     * Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>JSONObject, JSONArray, ContentValues, String,
+     * Boolean, Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @throws IOException if an error occurs while writing to the file.
      * @see #writeObject(JsonWriter, Object)
      */
@@ -322,11 +326,54 @@ public final class JSONUtils {
         }
     }
 
+    private static JSONArray newArrayImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+        final JSONArray result = new JSONArray();
+        reader.beginArray();
+
+        while (reader.hasNext()) {
+            if (cancelable.isCancelled()) {
+                return result;
+            }
+
+            switch (reader.peek()) {
+            case STRING:
+                result.put(reader.nextString());
+                break;
+
+            case NUMBER:
+                result.put(readNumber(reader));
+                break;
+
+            case BOOLEAN:
+                result.put(reader.nextBoolean());
+                break;
+
+            case BEGIN_ARRAY:
+                result.put(newArrayImpl(reader, cancelable));
+                break;
+
+            case BEGIN_OBJECT:
+                result.put(newInstanceImpl(reader, cancelable));
+                break;
+
+            default:
+                reader.skipValue();
+            }
+        }
+
+        reader.endArray();
+        return result;
+    }
+
     private static JSONObject newInstanceImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONObject result = new JSONObject();
         reader.beginObject();
 
-        while (reader.hasNext() && !cancelable.isCancelled()) {
+        while (reader.hasNext()) {
+            if (cancelable.isCancelled()) {
+                return result;
+            }
+
             final String name = reader.nextName();
             switch (reader.peek()) {
             case STRING:
@@ -354,48 +401,7 @@ public final class JSONUtils {
             }
         }
 
-        if (!cancelable.isCancelled()) {
-            reader.endObject();
-        }
-
-        return result;
-    }
-
-    private static JSONArray newArrayImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
-        final JSONArray result = new JSONArray();
-        reader.beginArray();
-
-        while (reader.hasNext() && !cancelable.isCancelled()) {
-            switch (reader.peek()) {
-            case STRING:
-                result.put(reader.nextString());
-                break;
-
-            case NUMBER:
-                result.put(readNumber(reader));
-                break;
-
-            case BOOLEAN:
-                result.put(reader.nextBoolean());
-                break;
-
-            case BEGIN_ARRAY:
-                result.put(newArrayImpl(reader, cancelable));
-                break;
-
-            case BEGIN_OBJECT:
-                result.put(newInstanceImpl(reader, cancelable));
-                break;
-
-            default:
-                reader.skipValue();
-            }
-        }
-
-        if (!cancelable.isCancelled()) {
-            reader.endArray();
-        }
-
+        reader.endObject();
         return result;
     }
 
@@ -408,25 +414,7 @@ public final class JSONUtils {
         }
     }
 
-    private static JsonWriter writeMap(JsonWriter writer, Map<String, ?> values) throws IOException {
-        writer.beginObject();
-        for (Entry<String, ?> entry : values.entrySet()) {
-            writeObject(writer.name(entry.getKey()), entry.getValue());
-        }
-
-        return writer.endObject();
-    }
-
-    private static JsonWriter writeColl(JsonWriter writer, Collection<?> values) throws IOException {
-        writer.beginArray();
-        for (Object value : values) {
-            writeObject(writer, value);
-        }
-
-        return writer.endArray();
-    }
-
-    private static JsonWriter writeJSONArray(JsonWriter writer, JSONArray values) throws IOException {
+    private static JsonWriter writeValues(JsonWriter writer, JSONArray values) throws IOException {
         writer.beginArray();
         for (int i = 0, length = values.length(); i < length; ++i) {
             writeObject(writer, values.opt(i));
@@ -435,12 +423,30 @@ public final class JSONUtils {
         return writer.endArray();
     }
 
-    private static JsonWriter writeJSONObject(JsonWriter writer, JSONObject values) throws IOException {
+    private static JsonWriter writeValues(JsonWriter writer, JSONObject values) throws IOException {
         writer.beginObject();
         final Iterator<String> names = values.keys();
         while (names.hasNext()) {
             final String name = names.next();
             writeObject(writer.name(name), values.opt(name));
+        }
+
+        return writer.endObject();
+    }
+
+    private static JsonWriter writeValues(JsonWriter writer, Collection<Object> values) throws IOException {
+        writer.beginArray();
+        for (Object value : values) {
+            writeObject(writer, value);
+        }
+
+        return writer.endArray();
+    }
+
+    private static JsonWriter writeValues(JsonWriter writer, Set<Entry<String, Object>> values) throws IOException {
+        writer.beginObject();
+        for (Entry<String, Object> value : values) {
+            writeObject(writer.name(value.getKey()), value.getValue());
         }
 
         return writer.endObject();

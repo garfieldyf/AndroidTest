@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
+@SuppressWarnings("rawtypes")
 public final class DatabaseUtils {
     /**
      * Returns the numbers of rows in the <tt>Cursor</tt>,
@@ -229,7 +231,7 @@ public final class DatabaseUtils {
      * @return A new array, or <tt>null</tt>.
      * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
      */
-    public static <T> T query(SQLiteDatabase db, Class<?> componentType, String sql, String... selectionArgs) {
+    public static <T> T query(SQLiteDatabase db, Class componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
@@ -258,7 +260,7 @@ public final class DatabaseUtils {
      * @return A new array, or <tt>null</tt>.
      * @see #query(SQLiteDatabase, Class, String, String[])
      */
-    public static <T> T query(ContentResolver resolver, Class<?> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public static <T> T query(ContentResolver resolver, Class componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
@@ -346,41 +348,6 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns all table names in the specified database.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @return A array of all table names if succeeded,
-     * <tt>null</tt> otherwise.
-     * @see #getTableCount(SQLiteDatabase)
-     * @see #exists(SQLiteDatabase, String)
-     */
-    public static String[] getTables(SQLiteDatabase db) {
-        return query(db, String.class, "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name", (String[])null);
-    }
-
-    /**
-     * Returns the number of tables in the specified database.
-     * @param db The <tt>SQLiteDatabase</tt> to query.
-     * @return The number of tables.
-     * @see #getTables(SQLiteDatabase)
-     * @see #exists(SQLiteDatabase, String)
-     */
-    public static int getTableCount(SQLiteDatabase db) {
-        return simpleQueryLong(db, "SELECT COUNT(*) FROM sqlite_master WHERE type='table'", (Object[])null).intValue();
-    }
-
-    /**
-     * Returns a boolean indicating whether the specified table can be found in the database.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param tableName The table name to find.
-     * @return <tt>true</tt> if the table exists, <tt>false</tt> otherwise.
-     * @see #getTables(SQLiteDatabase)
-     * @see #getTableCount(SQLiteDatabase)
-     */
-    public static boolean exists(SQLiteDatabase db, String tableName) {
-        return (simpleQueryLong(db, "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=?", tableName) > 0);
-    }
-
-    /**
      * Returns a new instance with the specified <em>cursor</em> and <em>clazz</em>.
      * @param cursor The {@link Cursor} from which to get the data. The cursor must
      * be move to the correct position.
@@ -391,7 +358,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      */
     public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return newInstanceImpl(cursor, clazz, getCursorFields(clazz));
+        return newInstanceImpl(cursor, getConstructor(clazz), getCursorFields(clazz));
     }
 
     /**
@@ -405,7 +372,7 @@ public final class DatabaseUtils {
      * @see #newList(Cursor, Class)
      * @see #newInstance(Cursor, Class)
      */
-    public static <T> T newArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
+    public static <T> T newArray(Cursor cursor, Class componentType) throws ReflectiveOperationException {
         final int position = cursor.getPosition();
         try {
             cursor.moveToPosition(-1);
@@ -425,7 +392,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      * @see #newInstance(Cursor, Class)
      */
-    public static <T> List<T> newList(Cursor cursor, Class<T> componentType) {
+    public static <T> List<T> newList(Cursor cursor, Class<? extends T> componentType) {
         try {
             DebugUtils.__checkError(componentType == null, "componentType == null");
             DebugUtils.__checkError(componentType.isPrimitive(), "Unsupported primitive type - " + componentType.toString());
@@ -436,7 +403,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <tt>Cursor</tt> contents into a {@link JsonWriter}.
+     * Writes the specified <em>cursor</em> contents into a {@link JsonWriter}.
      * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
@@ -450,7 +417,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <tt>Cursor</tt> contents into a {@link JsonWriter}.
+     * Writes the specified <em>cursor</em> contents into a {@link JsonWriter}.
      * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
@@ -485,7 +452,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <tt>Cursor</tt> current row into a {@link JsonWriter}.
+     * Writes the specified <em>cursor</em> current row into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data. The cursor
      * must be move to the correct position.
@@ -498,7 +465,7 @@ public final class DatabaseUtils {
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String... names) throws IOException {
-        DebugUtils.__checkError(columnIndexes == null || names == null, "columnIndexes == null || names == null");
+        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
         DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
@@ -536,7 +503,7 @@ public final class DatabaseUtils {
      * must be move to the correct position.
      * @return A {@link ContentValues} object.
      * @see #toContentValues(Cursor, String[])
-     * @see #toContentValues(Cursor, int[], String[])
+     * @see #toContentValues(ContentValues, Cursor, int[], String[])
      */
     public static ContentValues toContentValues(Cursor cursor) {
         return toContentValues(cursor, cursor.getColumnNames());
@@ -549,62 +516,63 @@ public final class DatabaseUtils {
      * @param columnNames The name of the columns which the values to put.
      * @return A {@link ContentValues} object.
      * @see #toContentValues(Cursor)
-     * @see #toContentValues(Cursor, int[], String[])
+     * @see #toContentValues(ContentValues, Cursor, int[], String[])
      */
     public static ContentValues toContentValues(Cursor cursor, String... columnNames) {
+        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
         final int[] columnIndexes = new int[columnNames.length];
         for (int i = 0; i < columnNames.length; ++i) {
             columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
         }
 
-        return toContentValues(cursor, columnIndexes, columnNames);
+        return toContentValues(new ContentValues(), cursor, columnIndexes, columnNames);
     }
 
     /**
-     * Returns a new {@link ContentValues} from the the specified <tt>Cursor</tt>.
+     * Writes the specified <em>cursor</em> contents into a {@link ContentValues}.
+     * @param outValues The <tt>ContentValues</tt> to write to.
      * @param cursor The {@link Cursor} from which to get the data. The cursor must
      * be move to the correct position.
      * @param columnIndexes The index of the columns which the values to put.
      * @param names The name of the value to put. The <em>names</em> length must be
      * equals the <em>columnIndexes</em> length.
-     * @return A {@link ContentValues} object.
+     * @return The <em>outValues</em>.
      * @see #toContentValues(Cursor)
      * @see #toContentValues(Cursor, String[])
      */
-    public static ContentValues toContentValues(Cursor cursor, int[] columnIndexes, String... names) {
-        DebugUtils.__checkError(columnIndexes == null || names == null, "columnIndexes == null || names == null");
+    public static ContentValues toContentValues(ContentValues outValues, Cursor cursor, int[] columnIndexes, String... names) {
+        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
         DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
-        final ContentValues result = new ContentValues();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final String name = names[i];
             final int columnIndex = columnIndexes[i];
             switch (cursor.getType(columnIndex)) {
             case Cursor.FIELD_TYPE_NULL:
-                result.putNull(name);
+                outValues.putNull(name);
                 break;
 
             case Cursor.FIELD_TYPE_INTEGER:
-                result.put(name, cursor.getLong(columnIndex));
+                outValues.put(name, cursor.getLong(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_FLOAT:
-                result.put(name, cursor.getDouble(columnIndex));
+                outValues.put(name, cursor.getDouble(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_STRING:
-                result.put(name, cursor.getString(columnIndex));
+                outValues.put(name, cursor.getString(columnIndex));
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                result.put(name, cursor.getBlob(columnIndex));
+                outValues.put(name, cursor.getBlob(columnIndex));
                 break;
             }
         }
 
-        return result;
+        return outValues;
     }
 
-    private static List<Field> getCursorFields(Class<?> clazz) {
+    private static List<Field> getCursorFields(Class clazz) {
         DebugUtils.__checkError(clazz == null, "clazz == null");
         DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz.isPrimitive() || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final List<Field> result = new ArrayList<Field>();
@@ -621,13 +589,21 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static <T> T newInstanceImpl(Cursor cursor, Class<? extends T> clazz, List<Field> fields) throws ReflectiveOperationException {
-        final T result = clazz.newInstance();
+    @SuppressWarnings("unchecked")
+    private static Constructor getConstructor(Class clazz) throws NoSuchMethodException {
+        final Constructor constructor = clazz.getDeclaredConstructor((Class[])null);
+        constructor.setAccessible(true);
+        return constructor;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T newInstanceImpl(Cursor cursor, Constructor constructor, List<Field> fields) throws ReflectiveOperationException {
+        final T result = (T)constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
             DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
             final int columnIndex = cursor.getColumnIndexOrThrow(field.getAnnotation(CursorField.class).value());
-            final Class<?> type = field.getType();
+            final Class type = field.getType();
             if (type == int.class) {
                 field.setInt(result, cursor.getInt(columnIndex));
             } else if (type == long.class) {
@@ -653,7 +629,7 @@ public final class DatabaseUtils {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T newArrayImpl(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
+    private static <T> T newArrayImpl(Cursor cursor, Class componentType) throws ReflectiveOperationException {
         final Object result;
         if (componentType == String.class) {
             result = createStringArray(cursor);
@@ -741,13 +717,14 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Object[] createObjectArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
+    private static Object[] createObjectArray(Cursor cursor, Class componentType) throws ReflectiveOperationException {
         final int count = cursor.getCount();
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
             final List<Field> fields = getCursorFields(componentType);
+            final Constructor constructor = getConstructor(componentType);
             for (int i = 0; cursor.moveToNext(); ++i) {
-                result[i] = newInstanceImpl(cursor, componentType, fields);
+                result[i] = newInstanceImpl(cursor, constructor, fields);
             }
         }
 

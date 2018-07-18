@@ -171,7 +171,7 @@ public final class BitmapUtils {
 
     /**
      * Creates a mutable inverted <tt>Bitmap</tt> from given the <em>source</em>.
-     * @param source The source's contents to be drawn, Pass {@link View} or {@link Bitmap} object.
+     * @param source The source's contents to be drawn, Pass a {@link View} or {@link Bitmap} object.
      * @param width The horizontal size of the <em>source</em>.
      * @param height The vertical size of the <em>source</em>.
      * @param alpha The alpha component [0..255] of the inverted bitmap.

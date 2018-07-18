@@ -238,7 +238,7 @@ public final class DrawUtils {
     /**
      * Draws an inverted bitmap with given the <em>source</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
-     * @param source The source's contents to be drawn, Pass {@link View} or {@link Bitmap} object.
+     * @param source The source's contents to be drawn, Pass a {@link View} or {@link Bitmap} object.
      * @param width The horizontal size of the <em>source</em>.
      * @param height The vertical size of the <em>source</em>.
      * @param alpha The alpha component [0..255] to be drawn.

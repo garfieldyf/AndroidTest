@@ -22,7 +22,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * <li>{@link #EXTRA_RESULT} containing the {@link Bundle} object by user-defined or <tt>null</tt>.
      * </ul>
      */
-    public static final String ACTION_TABLE_CONTENT_CHANGED = "C620F8F3-59EB-4EA7-887E-813EFC58295A";
+    public static final String ACTION_TABLE_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
 
     /**
      * The name of the extra used to define the result.

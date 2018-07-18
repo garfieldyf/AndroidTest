@@ -115,7 +115,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static void sendBroadcast(Context context, String scheme, int statement, long rowID) {
         final Bundle result = new Bundle();
         result.putLong(KEY_ROW_ID, rowID);
-        sendBroadcast(context, scheme, statement, result);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**
@@ -129,7 +129,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static void sendBroadcast(Context context, String scheme, int statement, int rowsAffected) {
         final Bundle result = new Bundle();
         result.putInt(KEY_ROWS_AFFECTED, rowsAffected);
-        sendBroadcast(context, scheme, statement, result);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(resolveIntent(scheme, statement, result));
     }
 
     /**

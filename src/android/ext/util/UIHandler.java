@@ -2,7 +2,7 @@ package android.ext.util;
 
 import java.util.concurrent.Executor;
 import android.ext.concurrent.ThreadPoolManager;
-import android.ext.content.Loader;
+import android.ext.content.Loader.Task;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -15,7 +15,7 @@ import android.view.View;
 /**
  * Class UIHandler
  * @author Garfield
- * @version 1.0
+ * @version 1.5
  */
 @SuppressWarnings("rawtypes")
 public final class UIHandler extends Handler {
@@ -172,18 +172,18 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Called on the {@link Loader#Task} internal, do not call this method directly.
+     * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void finish(Loader.Task task) {
+    public final void finish(Task task) {
         final Message msg = Message.obtain(this, task);
         msg.what = MESSAGE_FINISHED;
         sendMessage(msg);
     }
 
     /**
-     * Called on the {@link Loader#Task} internal, do not call this method directly.
+     * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void setProgress(Loader.Task task, Object[] values) {
+    public final void setProgress(Task task, Object[] values) {
         final Message msg = Message.obtain(this, task);
         msg.what = MESSAGE_PROGRESS;
         msg.obj  = values;
@@ -201,22 +201,22 @@ public final class UIHandler extends Handler {
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
-        // The ThreadPool and Loader.Task message handle.
+        // Process the Loader.Task messages.
+        case MESSAGE_PROGRESS:
+        case MESSAGE_FINISHED:
+            ((Task)msg.getCallback()).handleMessage(msg);
+            break;
+
+        // Process the ThreadPool and ThreadPoolManager messages.
         case MESSAGE_EXECUTE:
             ((Executor)msg.obj).execute(msg.getCallback());
             break;
 
-        case MESSAGE_PROGRESS:
-        case MESSAGE_FINISHED:
-            ((Loader.Task)msg.getCallback()).handleMessage(msg);
-            break;
-
-        // The ThreadPoolManager message handle.
         case MESSAGE_COMPLETED:
             ((ThreadPoolManager)msg.obj).onAllTasksComplete();
             break;
 
-        // The RecyclerView message handle.
+        // Process the RecyclerView messages.
         case MESSAGE_CHILD_FOCUS:
             handleChildFocus(msg);
             break;
@@ -264,15 +264,15 @@ public final class UIHandler extends Handler {
         }
     }
 
-    // The ThreadPool and Loader.Task message.
-    private static final int MESSAGE_EXECUTE       = 0xCFCFCFCF;
-    private static final int MESSAGE_PROGRESS      = 0xDEDEDEDE;
-    public static final int MESSAGE_FINISHED       = 0xDFDFDFDF;
+    // The Loader.Task messages.
+    private static final int MESSAGE_PROGRESS      = 0xCECECECE;
+    public static final int MESSAGE_FINISHED       = 0xCFCFCFCF;
 
-    // The ThreadPoolManager message.
+    // The ThreadPool and ThreadPoolManager messages.
+    private static final int MESSAGE_EXECUTE       = 0xDFDFDFDF;
     private static final int MESSAGE_COMPLETED     = 0xEFEFEFEF;
 
-    // The RecyclerView message.
+    // The RecyclerView messages.
     private static final int MESSAGE_CHILD_FOCUS   = 0xF9F9F9F9;
     private static final int MESSAGE_ITEM_MOVED    = 0xFBFBFBFB;
     private static final int MESSAGE_DATA_CHANGED  = 0xFAFAFAFA;

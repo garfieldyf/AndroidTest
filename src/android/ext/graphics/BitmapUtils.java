@@ -19,7 +19,6 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
-import android.renderscript.Type;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
@@ -99,15 +98,13 @@ public final class BitmapUtils {
      */
     public static void blurBitmap(Context context, Bitmap bitmap, float radius) {
         final RenderScript rs = RenderScript.create(context);
-        final Element element = Element.U8_4(rs);
-        final ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(rs, element);
+        final ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
 
         try {
             blurBitmap(rs, blur, bitmap, radius);
         } finally {
             rs.destroy();
             blur.destroy();
-            element.destroy();
         }
     }
 
@@ -297,9 +294,8 @@ public final class BitmapUtils {
     }
 
     /* package */ static void blurBitmap(RenderScript rs, ScriptIntrinsicBlur blur, Bitmap bitmap, float radius) {
-        final Allocation input = Allocation.createFromBitmap(rs, bitmap);
-        final Type type = input.getType();
-        final Allocation output = Allocation.createTyped(rs, type);
+        final Allocation input  = Allocation.createFromBitmap(rs, bitmap);
+        final Allocation output = Allocation.createTyped(rs, input.getType());
 
         try {
             blur.setInput(input);
@@ -307,7 +303,7 @@ public final class BitmapUtils {
             blur.forEach(output);
             output.copyTo(bitmap);
         } finally {
-            type.destroy();
+            input.destroy();
             output.destroy();
         }
     }

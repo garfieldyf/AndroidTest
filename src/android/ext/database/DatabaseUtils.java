@@ -35,7 +35,6 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-@SuppressWarnings("rawtypes")
 public final class DatabaseUtils {
     /**
      * Returns the numbers of rows in the <tt>Cursor</tt>,
@@ -231,7 +230,7 @@ public final class DatabaseUtils {
      * @return A new array, or <tt>null</tt>.
      * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
      */
-    public static <T> T query(SQLiteDatabase db, Class componentType, String sql, String... selectionArgs) {
+    public static <T> T query(SQLiteDatabase db, Class<?> componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
@@ -260,7 +259,7 @@ public final class DatabaseUtils {
      * @return A new array, or <tt>null</tt>.
      * @see #query(SQLiteDatabase, Class, String, String[])
      */
-    public static <T> T query(ContentResolver resolver, Class componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public static <T> T query(ContentResolver resolver, Class<?> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
@@ -351,7 +350,7 @@ public final class DatabaseUtils {
      * Returns a new instance with the specified <em>cursor</em> and <em>clazz</em>.
      * @param cursor The {@link Cursor} from which to get the data. The cursor must
      * be move to the correct position.
-     * @param clazz The any can be deserialized <tt>Class</tt>. See {@link CursorField}.
+     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
      * @return A new instance.
      * @throws ReflectiveOperationException if the instance cannot be created.
      * @see #newList(Cursor, Class)
@@ -365,14 +364,14 @@ public final class DatabaseUtils {
      * Returns a new array with the specified <em>cursor</em> and <em>componentType</em>. Equivalent
      * to <tt>new componentType[cursor.getCount()]</tt>. The position is restored after creating.
      * @param cursor The {@link Cursor} from which to get the data.
-     * @param componentType The any can be deserialized <tt>Class</tt> of the array elements.
+     * @param componentType A <tt>Class</tt> can be deserialized of the array elements.
      * See {@link CursorField}.
      * @return A new array.
      * @throws ReflectiveOperationException if the array cannot be created.
      * @see #newList(Cursor, Class)
      * @see #newInstance(Cursor, Class)
      */
-    public static <T> T newArray(Cursor cursor, Class componentType) throws ReflectiveOperationException {
+    public static <T> T newArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         final int position = cursor.getPosition();
         try {
             cursor.moveToPosition(-1);
@@ -386,8 +385,7 @@ public final class DatabaseUtils {
      * Returns an immutable <tt>List</tt> with the specified <em>cursor</em> and <em>componentType</em>.
      * The position is restored after creating.
      * @param cursor The {@link Cursor} from which to get the data.
-     * @param componentType The any can be deserialized <tt>Class</tt> of the array elements.
-     * See {@link CursorField}.
+     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
      * @return An immutable <tt>List</tt>.
      * @see #newArray(Cursor, Class)
      * @see #newInstance(Cursor, Class)
@@ -403,7 +401,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <em>cursor</em> contents into a {@link JsonWriter}.
+     * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
      * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
@@ -417,7 +415,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <em>cursor</em> contents into a {@link JsonWriter}.
+     * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
      * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
@@ -529,7 +527,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <em>cursor</em> contents into a {@link ContentValues}.
+     * Writes the specified <em>cursor's</em> contents into a {@link ContentValues}.
      * @param outValues The <tt>ContentValues</tt> to write to.
      * @param cursor The {@link Cursor} from which to get the data. The cursor must
      * be move to the correct position.
@@ -572,7 +570,7 @@ public final class DatabaseUtils {
         return outValues;
     }
 
-    private static List<Field> getCursorFields(Class clazz) {
+    private static List<Field> getCursorFields(Class<?> clazz) {
         DebugUtils.__checkError(clazz == null, "clazz == null");
         DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz.isPrimitive() || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final List<Field> result = new ArrayList<Field>();
@@ -589,21 +587,20 @@ public final class DatabaseUtils {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private static Constructor getConstructor(Class clazz) throws NoSuchMethodException {
-        final Constructor constructor = clazz.getDeclaredConstructor((Class[])null);
+    private static Constructor<?> getConstructor(Class<?> clazz) throws NoSuchMethodException {
+        final Constructor<?> constructor = clazz.getDeclaredConstructor((Class[])null);
         constructor.setAccessible(true);
         return constructor;
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T newInstanceImpl(Cursor cursor, Constructor constructor, List<Field> fields) throws ReflectiveOperationException {
+    private static <T> T newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Field> fields) throws ReflectiveOperationException {
         final T result = (T)constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
             DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
             final int columnIndex = cursor.getColumnIndexOrThrow(field.getAnnotation(CursorField.class).value());
-            final Class type = field.getType();
+            final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(result, cursor.getInt(columnIndex));
             } else if (type == long.class) {
@@ -629,7 +626,7 @@ public final class DatabaseUtils {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> T newArrayImpl(Cursor cursor, Class componentType) throws ReflectiveOperationException {
+    private static <T> T newArrayImpl(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         final Object result;
         if (componentType == String.class) {
             result = createStringArray(cursor);
@@ -717,12 +714,12 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Object[] createObjectArray(Cursor cursor, Class componentType) throws ReflectiveOperationException {
+    private static Object[] createObjectArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         final int count = cursor.getCount();
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
             final List<Field> fields = getCursorFields(componentType);
-            final Constructor constructor = getConstructor(componentType);
+            final Constructor<?> constructor = getConstructor(componentType);
             for (int i = 0; cursor.moveToNext(); ++i) {
                 result[i] = newInstanceImpl(cursor, constructor, fields);
             }

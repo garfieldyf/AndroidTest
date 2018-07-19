@@ -511,7 +511,7 @@ public final class FileUtils {
         if (dst instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)dst).readFrom(src, cancelable);
         } else {
-            copyStreamImpl(src, dst, cancelable, (buffer != null ? buffer : new byte[8192]));
+            copyStreamImpl(src, dst, DummyCancelable.wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
         }
     }
 
@@ -659,10 +659,9 @@ public final class FileUtils {
     }
 
     /**
-     * Copies the specified <tt>InputStream's</tt> contents into <tt>OutputStream</tt>.
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        cancelable = DummyCancelable.wrap(cancelable);
         for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
             if ((readBytes = src.read(buffer, offset, buffer.length - offset)) <= 0) {
                 // Writes the last remaining bytes of the buffer.

@@ -177,17 +177,17 @@ public abstract class Loader implements Factory<Task> {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
-        /* package */ Result result;
-        /* package */ Params[] params;
+        /* package */ Result mResult;
+        /* package */ Params[] mParams;
 
-        private volatile Thread runner;
-        private final AtomicInteger state;
+        private volatile Thread mRunner;
+        private final AtomicInteger mState;
 
         /**
          * Constructor
          */
         /* package */ Task() {
-            state = new AtomicInteger(RUNNING);
+            mState = new AtomicInteger(RUNNING);
         }
 
         /**
@@ -195,7 +195,7 @@ public abstract class Loader implements Factory<Task> {
          * @param values The progress values to update.
          */
         public final void setProgress(Object... values) {
-            if (state.get() == RUNNING) {
+            if (mState.get() == RUNNING) {
                 UIHandler.sInstance.setProgress(this, values);
             }
         }
@@ -207,26 +207,26 @@ public abstract class Loader implements Factory<Task> {
          */
         public final void handleMessage(Message msg) {
             if (msg.what == UIHandler.MESSAGE_FINISHED) {
-                onPostExecute(params, result);
+                onPostExecute(mParams, mResult);
             } else {
-                onProgress(params, (Object[])msg.obj);
+                onProgress(mParams, (Object[])msg.obj);
             }
         }
 
         @Override
         public final boolean isCancelled() {
-            return (state.get() == CANCELLED);
+            return (mState.get() == CANCELLED);
         }
 
         @Override
         public final void run() {
-            if (state.get() == RUNNING) {
+            if (mState.get() == RUNNING) {
                 try {
-                    runner = Thread.currentThread();
-                    result = doInBackground(params);
+                    mRunner = Thread.currentThread();
+                    mResult = doInBackground(mParams);
                 } finally {
-                    runner = null;
-                    state.compareAndSet(RUNNING, COMPLETED);
+                    mRunner = null;
+                    mState.compareAndSet(RUNNING, COMPLETED);
                 }
             }
 
@@ -237,10 +237,10 @@ public abstract class Loader implements Factory<Task> {
          * Clears all fields for recycle.
          */
         /* package */ final void clearForRecycle() {
-            result = null;
-            params = null;
-            runner = null;
-            state.set(RUNNING);
+            mParams = null;
+            mResult = null;
+            mRunner = null;
+            mState.set(RUNNING);
         }
 
         /**
@@ -248,9 +248,9 @@ public abstract class Loader implements Factory<Task> {
          * if this task has already completed, or already been cancelled.
          */
         /* package */ final boolean cancel(boolean mayInterruptIfRunning) {
-            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
-            if (result && mayInterruptIfRunning && runner != null) {
-                runner.interrupt();
+            final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
+            if (result && mayInterruptIfRunning && mRunner != null) {
+                mRunner.interrupt();
             }
 
             return result;

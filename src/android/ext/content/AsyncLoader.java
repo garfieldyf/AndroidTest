@@ -210,7 +210,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     private boolean isTaskRunning(Key key, Object target) {
         final LoadTask task = (LoadTask)mRunningTasks.get(target);
         if (task != null && !task.isCancelled()) {
-            if (task.key.equals(key)) {
+            if (task.mKey.equals(key)) {
                 return true;
             } else {
                 task.cancel(false);
@@ -225,11 +225,11 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      */
     private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder<Key, Params, Value> binder) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
-        task.key = key;
-        task.flags  = flags;
-        task.params = params;
-        task.binder = binder;
-        task.target = target;
+        task.mKey = key;
+        task.mFlags  = flags;
+        task.mParams = params;
+        task.mBinder = binder;
+        task.mTarget = target;
         return task;
     }
 
@@ -246,19 +246,19 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
     /* package */ final class LoadTask extends Task<Params, Value> {
-        /* package */ Key key;
-        /* package */ int flags;
-        /* package */ Object target;
-        /* package */ Binder<Key, Params, Value> binder;
+        /* package */ Key mKey;
+        /* package */ int mFlags;
+        /* package */ Object mTarget;
+        /* package */ Binder<Key, Params, Value> mBinder;
 
         @Override
         /* package */ Value doInBackground(Params[] params) {
             waitResumeIfPaused();
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
-                value = loadInBackground(this, key, params, flags);
-                if (value != null && isCacheValid(flags)) {
-                    mCache.put(key, value);
+                value = loadInBackground(this, mKey, params, mFlags);
+                if (value != null && isCacheValid(mFlags)) {
+                    mCache.put(mKey, value);
                 }
             }
 
@@ -267,16 +267,16 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
         @Override
         /* package */ void onPostExecute(Params[] params, Value value) {
-            if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(target) == this) {
-                binder.bindValue(key, params, target, value, flags | Binder.STATE_LOAD_FROM_BACKGROUND);
+            if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
+                mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
-            this.clearForRecycle();
-            this.key = null;
-            this.binder = null;
-            this.target = null;
+            clearForRecycle();
+            mKey = null;
+            mTarget = null;
+            mBinder = null;
             mTaskPool.recycle(this);
         }
     }

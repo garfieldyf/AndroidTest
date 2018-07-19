@@ -55,7 +55,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         DebugUtils.__checkError(key == null, "key == null");
         if (mState != SHUTDOWN) {
             final LoadTask task = (LoadTask)mRunningTasks.get(key);
-            if (task == null || !rejectedRequest(key, params, task.params)) {
+            if (task == null || !rejectedRequest(key, params, task.mParams)) {
                 onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
                 mRunningTasks.put(key, newTask);
@@ -183,8 +183,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      */
     private LoadTask obtain(Key key, Params[] params) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
-        task.key = key;
-        task.params = params;
+        task.mKey = key;
+        task.mParams = params;
         return task;
     }
 
@@ -192,34 +192,34 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
     /* package */ final class LoadTask extends Task<Params, Result> {
-        /* package */ Key key;
+        /* package */ Key mKey;
 
         @Override
         /* package */ Result doInBackground(Params[] params) {
             waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, key, params) : null);
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, params) : null);
         }
 
         @Override
         /* package */ void onProgress(Params[] params, Object[] values) {
-            onProgressUpdate(key, params, values);
+            onProgressUpdate(mKey, params, values);
         }
 
         @Override
         /* package */ void onPostExecute(Params[] params, Result result) {
             if (mState != SHUTDOWN) {
                 if (isCancelled()) {
-                    onLoadCancelled(key, params, result);
+                    onLoadCancelled(mKey, params, result);
                 } else {
-                    onLoadComplete(key, params, result);
-                    mRunningTasks.remove(key);
+                    onLoadComplete(mKey, params, result);
+                    mRunningTasks.remove(mKey);
                 }
             }
 
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
-            this.clearForRecycle();
-            this.key = null;
+            clearForRecycle();
+            mKey = null;
             mTaskPool.recycle(this);
         }
     }

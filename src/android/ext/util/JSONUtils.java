@@ -311,6 +311,7 @@ public final class JSONUtils {
 
     /**
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
+     * <p>Note: This method will be create the necessary directories.</p>
      * @param jsonFile The json file to write.
      * @param object May be a <tt>JSONObject, JSONArray, ContentValues, String,
      * Boolean, Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
@@ -318,6 +319,7 @@ public final class JSONUtils {
      * @see #writeObject(JsonWriter, Object)
      */
     public static void writeObject(String jsonFile, Object object) throws IOException {
+        FileUtils.mkdirs(jsonFile, FileUtils.FLAG_IGNORE_FILENAME);
         final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile)));
         try {
             writeObject(writer, object);

@@ -11,6 +11,7 @@ import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
+import android.ext.util.ClassFactory;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -92,7 +93,7 @@ public abstract class Transformer<URI, Image> {
             return new RoundedBitmapTransformer(context, attrs);
 
         default:
-            return (Transformer)Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);
+            return (Transformer)ClassFactory.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
         }
     }
 

@@ -22,6 +22,7 @@ import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.ext.annotation.CursorField;
 import android.ext.util.ByteArrayBuffer;
+import android.ext.util.ClassFactory;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.net.Uri;
@@ -221,12 +222,11 @@ public final class DatabaseUtils {
     /**
      * Query the given SQL statement, returning a new array with the specified <em>componentType</em>.
      * @param db The <tt>SQLiteDatabase</tt>.
-     * @param componentType The any can be deserialized <tt>Class</tt> of the array elements. See
-     * {@link CursorField}.
+     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by
-     * the values from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments,
-     * you can pass <em>(String[])null</em> instead of allocating an empty array.
+     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values
+     * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
+     * <em>(String[])null</em> instead of allocating an empty array.
      * @return A new array, or <tt>null</tt>.
      * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
      */
@@ -246,14 +246,13 @@ public final class DatabaseUtils {
     /**
      * Query the given URI, returning a new array with the specified <em>componentType</em>.
      * @param resolver The <tt>ContentResolver</tt>.
-     * @param componentType The any can be deserialized <tt>Class</tt> of the array elements.
-     * See {@link CursorField}.
+     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
      * @param uri The URI, using the content:// scheme, for the content to retrieve.
      * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
      * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
      * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given table.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the
-     * values from <em>selectionArgs</em>. The values will be bound as Strings.
+     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values
+     * from <em>selectionArgs</em>. The values will be bound as Strings.
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @return A new array, or <tt>null</tt>.
@@ -357,7 +356,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      */
     public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return newInstanceImpl(cursor, getConstructor(clazz), getCursorFields(clazz));
+        return newInstanceImpl(cursor, ClassFactory.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
     }
 
     /**
@@ -587,12 +586,6 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Constructor<?> getConstructor(Class<?> clazz) throws NoSuchMethodException {
-        final Constructor<?> constructor = clazz.getDeclaredConstructor((Class[])null);
-        constructor.setAccessible(true);
-        return constructor;
-    }
-
     @SuppressWarnings("unchecked")
     private static <T> T newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Field> fields) throws ReflectiveOperationException {
         final T result = (T)constructor.newInstance((Object[])null);
@@ -719,7 +712,7 @@ public final class DatabaseUtils {
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
             final List<Field> fields = getCursorFields(componentType);
-            final Constructor<?> constructor = getConstructor(componentType);
+            final Constructor<?> constructor = ClassFactory.getConstructor(componentType, (Class[])null);
             for (int i = 0; cursor.moveToNext(); ++i) {
                 result[i] = newInstanceImpl(cursor, constructor, fields);
             }

@@ -10,7 +10,6 @@ import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
@@ -32,7 +31,6 @@ import android.text.format.DateFormat;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.util.Printer;
-import dalvik.system.DexClassLoader;
 
 /**
  * Class ProcessUtils
@@ -204,124 +202,6 @@ public final class ProcessUtils {
         }
 
         return results;
-    }
-
-    /**
-     * Class <tt>ClassFactory</tt>
-     */
-    public static final class ClassFactory {
-        private final DexClassLoader mClassLoader;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         * @param dexPath The list of jar/apk files containing classes and resources,
-         * delimited by {@link File#pathSeparator}, which defaults to ":" on Android.
-         * @param dexOutputDir The directory where optimized DEX files should be written.
-         * This should be a writable directory.
-         * @param libraryPath The list of directories containing native libraries, delimited
-         * by {@link File#pathSeparator}; may be <tt>null</tt>.
-         * @param libraryNames The list of names containing the native libraries to load.
-         * If no native libraries to load, you can pass <em>(String[])null</em> instead of
-         * allocating an empty array.
-         * @throws RuntimeException if an error occurs while loading libraries.
-         */
-        public ClassFactory(Context context, String dexPath, String dexOutputDir, String libraryPath, String... libraryNames) {
-            mClassLoader = new DexClassLoader(dexPath, dexOutputDir, libraryPath, context.getClassLoader());
-            if (ArrayUtils.getSize(libraryNames) > 0) {
-                try {
-                    loadImpl(mClassLoader, "loadLibrary", libraryNames);
-                } catch (Exception e) {
-                    throw new RuntimeException("Couldn't load libraries - " + Arrays.toString(libraryNames), e);
-                }
-            }
-        }
-
-        /**
-         * Loads the class with the specified <tt>className</tt>.
-         * @param className The name of the class to load.
-         * @return The <tt>Class</tt> object if succeeded, <tt>null</tt> otherwise.
-         */
-        public final Class<?> loadClass(String className) {
-            try {
-                return mClassLoader.loadClass(className);
-            } catch (Exception e) {
-                Log.e(ClassFactory.class.getName(), new StringBuilder("Couldn't load class - ").append(className).toString(), e);
-                return null;
-            }
-        }
-
-        /**
-         * Returns a new instance with the specified <em>className</em>.
-         * @param className The name of the class.
-         * @return A new instance if succeeded, <tt>null</tt> otherwise.
-         * @see #newInstance(String, Class[], Object[])
-         */
-        @SuppressWarnings("unchecked")
-        public final <T> T newInstance(String className) {
-            try {
-                return (T)mClassLoader.loadClass(className).newInstance();
-            } catch (Exception e) {
-                Log.e(ClassFactory.class.getName(), new StringBuilder("Couldn't create ").append(className).append(" instance").toString(), e);
-                return null;
-            }
-        }
-
-        /**
-         * Returns a new instance with the specified <em>className,
-         * parameterTypes</em> and <em>args</em>.
-         * @param className The name of the class.
-         * @param parameterTypes May be <tt>null</tt>. The parameter types of the
-         * requested constructor.
-         * @param args The arguments to the constructor. If no arguments, you can
-         * pass <em>(Object[])null</em> instead of allocating an empty array.
-         * @return A new instance if succeeded, <tt>null</tt> otherwise.
-         * @see #newInstance(String)
-         */
-        @SuppressWarnings("unchecked")
-        public final <T> T newInstance(String className, Class<?>[] parameterTypes, Object... args) {
-            try {
-                return (T)mClassLoader.loadClass(className).getConstructor(parameterTypes).newInstance(args);
-            } catch (Exception e) {
-                Log.e(ClassFactory.class.getName(), new StringBuilder("Couldn't create ").append(className).append(" instance").toString(), e);
-                return null;
-            }
-        }
-
-        /**
-         * Loads and links the dynamic libraries that is identified through the specified <tt>libraryPaths</tt>.
-         * @param loader The <tt>ClassLoader</tt>.
-         * @param libraryPaths The list of absolute path containing the native libraries to load.
-         * @throws Exception if an error occurs while loading library files.
-         * @see #loadLibrary(ClassLoader, String[])
-         */
-        public static void load(ClassLoader loader, String... libraryPaths) throws Exception {
-            loadImpl(loader, "load", libraryPaths);
-        }
-
-        /**
-         * Loads and links the dynamic libraries with the specified names.
-         * @param loader The <tt>ClassLoader</tt>.
-         * @param libraryNames The list of names containing the libraries to load.
-         * @throws Exception if an error occurs while loading libraries.
-         * @see #load(ClassLoader, String[])
-         */
-        public static void loadLibrary(ClassLoader loader, String... libraryNames) throws Exception {
-            loadImpl(loader, "loadLibrary", libraryNames);
-        }
-
-        /**
-         * Loads and links are native libraries.
-         */
-        private static void loadImpl(ClassLoader loader, String methodName, String[] libs) throws Exception {
-            final Runtime runtime = Runtime.getRuntime();
-            final Method method = Runtime.class.getDeclaredMethod(methodName, String.class, ClassLoader.class);
-            method.setAccessible(true);
-
-            for (int i = 0; i < libs.length; ++i) {
-                method.invoke(runtime, libs[i], loader);
-            }
-        }
     }
 
     /**

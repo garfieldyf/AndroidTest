@@ -14,6 +14,7 @@ import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.content.image.BitmapDecoder.SizeParameters;
 import android.ext.content.image.ImageBinder;
 import android.ext.content.image.TransitionBinder;
+import android.ext.util.ClassFactory;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -169,7 +170,7 @@ public final class XmlResources {
                 return new SizeParameters(context, attrs);
 
             default:
-                return (Parameters)Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);
+                return (Parameters)ClassFactory.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }
@@ -197,7 +198,7 @@ public final class XmlResources {
                 return new TransitionBinder(context, attrs);
 
             default:
-                return Class.forName(name).getConstructor(Context.class, AttributeSet.class).newInstance(context, attrs);
+                return ClassFactory.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }

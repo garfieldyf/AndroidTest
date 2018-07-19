@@ -15,6 +15,7 @@ import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.GIFImage;
+import android.ext.util.ClassFactory;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
@@ -310,7 +311,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
         private static Object newInstance(Class clazz, Class[] parameterTypes, Object... args) {
             try {
-                return clazz.getConstructor(parameterTypes).newInstance(args);
+                return ClassFactory.getConstructor(clazz, parameterTypes).newInstance(args);
             } catch (Throwable e) {
                 throw new IllegalArgumentException("Couldn't create " + clazz.getName() + " instance", e);
             }

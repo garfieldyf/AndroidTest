@@ -59,8 +59,9 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
         }
     }
 
-    /* package */ final void dump(Context context, Printer printer, Object reserved) {
-        dump(context, printer);
+    @Override
+    /* package */ void dump(Context context, Printer printer) {
+        super.dump(context, printer);
         if (mBitmapPool instanceof LinkedBitmapPool) {
             ((LinkedBitmapPool)mBitmapPool).dump(context, printer);
         }

@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import android.content.Context;
 import android.ext.util.DebugUtils;
+import android.util.Printer;
 
 /**
  * Like as {@link SimpleLruCache}, but this class is thread-safely.
@@ -53,7 +55,7 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     }
 
     @Override
-    public synchronized Map<K, V> entries() {
+    public synchronized Map<K, V> snapshot() {
         return new LinkedHashMap<K, V>(map);
     }
 
@@ -115,6 +117,11 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
             entryRemoved(evicted, key, value, null);
         }
+    }
+
+    @Override
+    /* package */ void dump(Context context, Printer printer) {
+        super.dump(context, printer, snapshot());
     }
 
     /* package */ synchronized final StringBuilder toString(int capacity) {

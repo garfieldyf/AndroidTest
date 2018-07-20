@@ -1,7 +1,9 @@
 package android.ext.cache;
 
+import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
@@ -75,6 +77,11 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
         return (value instanceof Bitmap ? mBitmapCache.put(key, (Bitmap)value) : mImageCache.put(key, (Image)value));
     }
 
+    @Override
+    public synchronized Map<K, Object> snapshot() {
+        return copyCache(mImageCache, copyCache(mBitmapCache, new ArrayMap<K, Object>()));
+    }
+
     /**
      * Returns the {@link BitmapPool} associated with this cache.
      * @return The <tt>BitmapPool</tt> or <tt>null</tt>.
@@ -86,5 +93,18 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
     /* package */ final void dump(Context context, Printer printer) {
         Caches.dumpCache(mBitmapCache, context, printer);
         Caches.dumpCache(mImageCache, context, printer);
+    }
+
+    /**
+     * Copies the specified {@link Cache} contents to the specified {@link Map}.
+     */
+    private static <K> Map<K, Object> copyCache(Cache<K, ?> cache, Map<K, Object> result) {
+        if (cache instanceof SimpleLruCache) {
+            result.putAll(((SimpleLruCache<K, ?>)cache).map);
+        } else {
+            result.putAll(cache.snapshot());
+        }
+
+        return result;
     }
 }

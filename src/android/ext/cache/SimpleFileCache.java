@@ -1,6 +1,8 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -78,6 +80,14 @@ public final class SimpleFileCache implements FileCache {
         DebugUtils.__checkError(key == null, "key == null");
         final String result = FileUtils.buildPath(mCacheDir, key);
         return (FileUtils.deleteFiles(result, false) == 0 ? result : null);
+    }
+
+    /**
+     * @return Always returns an empty (<tt>0-size</tt>), immutable {@link Map}.
+     */
+    @Override
+    public Map<String, String> snapshot() {
+        return Collections.emptyMap();
     }
 
     /* package */ final void dump(Context context, Printer printer) {

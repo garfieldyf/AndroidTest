@@ -3,7 +3,9 @@ package android.ext.widget;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.json.JSONArray;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
@@ -196,13 +198,9 @@ public final class Pages {
             return mPages.put(key, page);
         }
 
-        /* package */ final void dump(Printer printer, StringBuilder result) {
-            final Formatter formatter = new Formatter(result);
-            final int size = mPages.size();
-            dumpPageCache(printer, result, formatter, this, size);
-            for (int i = 0; i < size; ++i) {
-                dumpPage(printer, result, formatter, mPages.keyAt(i), mPages.valueAt(i));
-            }
+        @Override
+        public Map<Integer, Page<E>> snapshot() {
+            return new ArrayMap<Integer, Page<E>>(mPages);
         }
     }
 
@@ -242,13 +240,15 @@ public final class Pages {
             return null;
         }
 
-        /* package */ final void dump(Printer printer, StringBuilder result) {
-            final Formatter formatter = new Formatter(result);
+        @Override
+        public Map<Integer, Page<E>> snapshot() {
             final int size = mPages.size();
-            dumpPageCache(printer, result, formatter, this, size);
+            final Map<Integer, Page<E>> result = new ArrayMap<Integer, Page<E>>(size);
             for (int i = 0; i < size; ++i) {
-                dumpPage(printer, result, formatter, mPages.keyAt(i), mPages.valueAt(i));
+                result.put(mPages.keyAt(i), mPages.valueAt(i));
             }
+
+            return result;
         }
     }
 
@@ -359,33 +359,24 @@ public final class Pages {
             return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + position : position);
         }
 
+        @SuppressWarnings("resource")
         /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
+            final Formatter formatter  = new Formatter(result);
+            final Set<Entry<Integer, Page<E>>> entries = mPageCache.snapshot().entrySet();
+
             DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
-            if (mPageCache instanceof ArrayPageCache) {
-                ((ArrayPageCache<E>)mPageCache).dump(printer, result);
-            } else if (mPageCache instanceof SparsePageCache) {
-                ((SparsePageCache<E>)mPageCache).dump(printer, result);
-            } else if (mPageCache instanceof SimpleLruCache) {
-                final SimpleLruCache<?, Page<E>> pageCache = (SimpleLruCache<?, Page<E>>)mPageCache;
-                final Formatter formatter = new Formatter(result);
-                dumpPageCache(printer, result, formatter, pageCache, pageCache.size());
-                for (Entry<?, Page<E>> entry : pageCache.entries().entrySet()) {
-                    dumpPage(printer, result, formatter, entry.getKey(), entry.getValue());
-                }
+            result.setLength(0);
+            printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
+
+            for (Entry<Integer, Page<E>> entry : entries) {
+                final Page<E> page = entry.getValue();
+                result.setLength(0);
+
+                formatter.format("    Page %-3d ==> [ ", entry.getKey());
+                printer.println(DebugUtils.toString(page, result).append(", count = ").append(page.getCount()).append(" ]").toString());
             }
         }
-    }
-
-    /* package */ static void dumpPageCache(Printer printer, StringBuilder result, Formatter formatter, Object pageCache, int size) {
-        result.setLength(0);
-        printer.println(DebugUtils.toString(pageCache, result.append("  PageCache [ ")).append(", size = ").append(size).append(" ]").toString());
-    }
-
-    /* package */ static void dumpPage(Printer printer, StringBuilder result, Formatter formatter, Object index, Page<?> page) {
-        result.setLength(0);
-        formatter.format("    Page %-3d ==> [ ", index);
-        printer.println(DebugUtils.toString(page, result).append(", count = ").append(page.getCount()).append(" ]").toString());
     }
 
     /**

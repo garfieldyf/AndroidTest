@@ -1,5 +1,7 @@
 package android.ext.cache;
 
+import java.util.Collections;
+import java.util.Map;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -45,18 +47,12 @@ public final class Caches {
     }
 
     public static void dumpCache(Object cache, Context context, Printer printer) {
-        if (cache instanceof LruBitmapCache2) {
-            ((LruBitmapCache2<?>)cache).dump(context, printer, null);
-        } else if (cache instanceof LruBitmapCache) {
-            ((LruBitmapCache<?>)cache).dump(context, printer);
-        } else if (cache instanceof LruImageCache) {
-            ((LruImageCache<?, ?>)cache).dump(context, printer);
-        } else if (cache instanceof LruFileCache) {
-            ((LruFileCache)cache).dump(context, printer);
+        if (cache instanceof SimpleLruCache) {
+            ((SimpleLruCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof SimpleFileCache) {
             ((SimpleFileCache)cache).dump(context, printer);
-        } else if (cache instanceof SimpleLruCache) {
-            ((SimpleLruCache<?, ?>)cache).dump(printer, ((SimpleLruCache<?, ?>)cache).entries());
+        } else if (cache instanceof LruImageCache) {
+            ((LruImageCache<?, ?>)cache).dump(context, printer);
         }
     }
 
@@ -68,6 +64,11 @@ public final class Caches {
 
         @Override
         public void clear() {
+        }
+
+        @Override
+        public Map<Object, Object> snapshot() {
+            return Collections.emptyMap();
         }
 
         @Override

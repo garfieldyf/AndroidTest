@@ -1,10 +1,12 @@
 package android.ext.cache;
 
+import java.util.Map;
+
 /**
  * A <tt>Cache</tt> is a data structure consisting of a set
  * of keys and values in which each key is mapped to a value.
  * @author Garfield
- * @version 1.0
+ * @version 1.2
  */
 public interface Cache<K, V> {
     /**
@@ -39,4 +41,10 @@ public interface Cache<K, V> {
      * @see #get(K)
      */
     V put(K key, V value);
+
+    /**
+     * Returns a copy of the current contents of this cache.
+     * @return A copy of this cache.
+     */
+    Map<K, V> snapshot();
 }

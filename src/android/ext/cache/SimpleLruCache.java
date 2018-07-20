@@ -1,10 +1,10 @@
 package android.ext.cache;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
 
@@ -106,6 +106,11 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         return previous;
     }
 
+    @Override
+    public Map<K, V> snapshot() {
+        return new LinkedHashMap<K, V>(map);
+    }
+
     /**
      * Clears this cache, calling {@link #entryRemoved} on each removed entry.
      * @see #clear()
@@ -125,14 +130,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      */
     public void trimToSize(int maxSize) {
         trimToSize(maxSize, true);
-    }
-
-    /**
-     * Returns all entries of this cache.
-     * @return An unmodifiable {@link Map} of the entries.
-     */
-    public Map<K, V> entries() {
-        return Collections.unmodifiableMap(map);
     }
 
     @Override
@@ -185,7 +182,11 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         }
     }
 
-    /* package */ final void dump(Printer printer, Map<?, ?> map) {
+    /* package */ void dump(Context context, Printer printer) {
+        dump(context, printer, map);
+    }
+
+    /* package */ final void dump(Context context, Printer printer, Map<K, V> map) {
         final StringBuilder result = new StringBuilder(256);
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), map.size(), size(), maxSize());
         for (Entry<?, ?> entry : map.entrySet()) {

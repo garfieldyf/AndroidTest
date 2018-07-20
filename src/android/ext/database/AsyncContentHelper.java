@@ -69,6 +69,13 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onCallComplete(int, Bundle)
      */
     public final void startCall(int token, Uri uri, String method, String arg, Bundle extras) {
+        /*
+         * params[0] - MESSAGE_CALL
+         * params[1] - uri
+         * params[2] - method
+         * params[3] - arg
+         * params[4] - extras
+         */
         load(token, MESSAGE_CALL, uri, method, arg, extras);
     }
 
@@ -84,6 +91,10 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onExecuteComplete(int, Object)
      */
     public final void startExecute(int token, Object... params) {
+        /*
+         * params[0] - MESSAGE_EXECUTE
+         * params[1] - params
+         */
         load(token, MESSAGE_EXECUTE, params);
     }
 
@@ -102,6 +113,14 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onQueryComplete(int, Cursor)
      */
     public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        /*
+         * params[0] - MESSAGE_QUERY
+         * params[1] - uri
+         * params[2] - projection
+         * params[3] - selection
+         * params[4] - selectionArgs
+         * params[5] - sortOrder
+         */
         load(token, MESSAGE_QUERY, uri, projection, selection, selectionArgs, sortOrder);
     }
 
@@ -115,6 +134,11 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onInsertComplete(int, Uri)
      */
     public final void startInsert(int token, Uri uri, ContentValues values) {
+        /*
+         * params[0] - MESSAGE_INSERT
+         * params[1] - uri
+         * params[2] - values
+         */
         load(token, MESSAGE_INSERT, uri, values);
     }
 
@@ -131,6 +155,13 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onUpdateComplete(int, int)
      */
     public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+        /*
+         * params[0] - MESSAGE_UPDATE
+         * params[1] - uri
+         * params[2] - values
+         * params[3] - whereClause
+         * params[4] - whereArgs
+         */
         load(token, MESSAGE_UPDATE, uri, values, whereClause, whereArgs);
     }
 
@@ -146,6 +177,12 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onDeleteComplete(int, int)
      */
     public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
+        /*
+         * params[0] - MESSAGE_DELETE
+         * params[1] - uri
+         * params[2] - whereClause
+         * params[3] - whereArgs
+         */
         load(token, MESSAGE_DELETE, uri, whereClause, whereArgs);
     }
 
@@ -159,6 +196,11 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onBulkInsertComplete(int, int)
      */
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
+        /*
+         * params[0] - MESSAGE_INSERTS
+         * params[1] - uri
+         * params[2] - values
+         */
         load(token, MESSAGE_INSERTS, uri, values);
     }
 
@@ -172,14 +214,28 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
      * @see #onApplyBatchComplete(int, ContentProviderResult[])
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
+        /*
+         * params[0] - MESSAGE_BATCH
+         * params[1] - authority
+         * params[2] - operations
+         */
         load(token, MESSAGE_BATCH, authority, operations);
     }
 
     @Override
     protected Object loadInBackground(Task<?, ?> task, Integer token, Object[] params) {
         final ContentResolver resolver = mContext.getContentResolver();
+        /*
+         * params[0] - message
+         */
         switch ((Integer)params[0]) {
         case MESSAGE_CALL:
+            /*
+             * params[1] - uri
+             * params[2] - method
+             * params[3] - arg
+             * params[4] - extras
+             */
             return resolver.call((Uri)params[1], (String)params[2], (String)params[3], (Bundle)params[4]);
 
         case MESSAGE_BATCH:
@@ -189,18 +245,40 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
             return execQuery(resolver, params);
 
         case MESSAGE_INSERT:
+            /*
+             * params[1] - uri
+             * params[2] - values
+             */
             return resolver.insert((Uri)params[1], (ContentValues)params[2]);
 
         case MESSAGE_UPDATE:
+            /*
+             * params[1] - uri
+             * params[2] - values
+             * params[3] - whereClause
+             * params[4] - whereArgs
+             */
             return resolver.update((Uri)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
 
         case MESSAGE_DELETE:
+            /*
+             * params[1] - uri
+             * params[2] - whereClause
+             * params[3] - whereArgs
+             */
             return resolver.delete((Uri)params[1], (String)params[2], (String[])params[3]);
 
         case MESSAGE_INSERTS:
+            /*
+             * params[1] - uri
+             * params[2] - values
+             */
             return resolver.bulkInsert((Uri)params[1], (ContentValues[])params[2]);
 
         case MESSAGE_EXECUTE:
+            /*
+             * params[1] - params
+             */
             return onExecute(resolver, token, (Object[])params[1]);
 
         default:
@@ -350,6 +428,13 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
     private Cursor execQuery(ContentResolver resolver, Object[] params) {
         Cursor cursor = null;
         try {
+            /*
+             * params[1] - uri
+             * params[2] - projection
+             * params[3] - selection
+             * params[4] - selectionArgs
+             * params[5] - sortOrder
+             */
             cursor = resolver.query((Uri)params[1], (String[])params[2], (String)params[3], (String[])params[4], (String)params[5]);
             if (cursor != null) {
                 // Calling getCount() causes the cursor window to be filled, which
@@ -366,6 +451,10 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
     @SuppressWarnings("unchecked")
     private static ContentProviderResult[] applyBatch(ContentResolver resolver, Object[] params) {
         try {
+            /*
+             * params[1] - authority
+             * params[2] - operations
+             */
             return resolver.applyBatch((String)params[1], (ArrayList<ContentProviderOperation>)params[2]);
         } catch (Exception e) {
             throw new RuntimeException(new StringBuilder("Couldn't apply batch, authority - ").append(params[1]).toString(), e);

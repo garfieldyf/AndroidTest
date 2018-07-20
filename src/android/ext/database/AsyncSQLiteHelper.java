@@ -64,6 +64,10 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onExecuteComplete(int, Object)
      */
     public final void startExecute(int token, Object... params) {
+        /*
+         * params[0] - MESSAGE_EXECUTE
+         * params[1] - params
+         */
         load(token, MESSAGE_EXECUTE, params);
     }
 
@@ -78,6 +82,11 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onQueryComplete(int, Cursor)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
+        /*
+         * params[0] - MESSAGE_RAWQUERY
+         * params[1] - sql
+         * params[2] - selectionArgs
+         */
         load(token, MESSAGE_RAWQUERY, sql, selectionArgs);
     }
 
@@ -99,6 +108,15 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onQueryComplete(int, Cursor)
      */
     public final void startQuery(int token, String table, String[] columns, String selection, String[] selectionArgs, String orderBy, String limit) {
+        /*
+         * params[0] - MESSAGE_QUERY
+         * params[1] - table
+         * params[2] - columns
+         * params[3] - selection
+         * params[4] - selectionArgs
+         * params[5] - orderBy
+         * params[6] - limit
+         */
         load(token, MESSAGE_QUERY, table, columns, selection, selectionArgs, orderBy, limit);
     }
 
@@ -117,6 +135,12 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onInsertComplete(int, long)
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
+        /*
+         * params[0] - MESSAGE_INSERT
+         * params[1] - table
+         * params[2] - nullColumnHack
+         * params[3] - values
+         */
         load(token, MESSAGE_INSERT, table, nullColumnHack, values);
     }
 
@@ -134,6 +158,12 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onReplaceComplete(int, long)
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
+        /*
+         * params[0] - MESSAGE_REPLACE
+         * params[1] - table
+         * params[2] - nullColumnHack
+         * params[3] - values
+         */
         load(token, MESSAGE_REPLACE, table, nullColumnHack, values);
     }
 
@@ -150,6 +180,13 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onUpdateComplete(int, int)
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
+        /*
+         * params[0] - MESSAGE_UPDATE
+         * params[1] - table
+         * params[2] - values
+         * params[3] - whereClause
+         * params[4] - whereArgs
+         */
         load(token, MESSAGE_UPDATE, table, values, whereClause, whereArgs);
     }
 
@@ -165,6 +202,12 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
      * @see #onDeleteComplete(int, int)
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
+        /*
+         * params[0] - MESSAGE_DELETE
+         * params[1] - table
+         * params[2] - whereClause
+         * params[3] - whereArgs
+         */
         load(token, MESSAGE_DELETE, table, whereClause, whereArgs);
     }
 
@@ -176,6 +219,9 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
             return this;
         }
 
+        /*
+         * params[0] - message
+         */
         final int message = (Integer)params[0];
         switch (message) {
         case MESSAGE_QUERY:
@@ -183,18 +229,42 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
             return execQuery(db, message, params);
 
         case MESSAGE_INSERT:
+            /*
+             * params[1] - table
+             * params[2] - nullColumnHack
+             * params[3] - values
+             */
             return db.insert((String)params[1], (String)params[2], (ContentValues)params[3]);
 
         case MESSAGE_UPDATE:
+            /*
+             * params[1] - table
+             * params[2] - values
+             * params[3] - whereClause
+             * params[4] - whereArgs
+             */
             return db.update((String)params[1], (ContentValues)params[2], (String)params[3], (String[])params[4]);
 
         case MESSAGE_DELETE:
+            /*
+             * params[1] - table
+             * params[2] - whereClause
+             * params[3] - whereArgs
+             */
             return db.delete((String)params[1], (String)params[2], (String[])params[3]);
 
         case MESSAGE_REPLACE:
+            /*
+             * params[1] - table
+             * params[2] - nullColumnHack
+             * params[3] - values
+             */
             return db.replace((String)params[1], (String)params[2], (ContentValues)params[3]);
 
         case MESSAGE_EXECUTE:
+            /*
+             * params[1] - params
+             */
             return onExecute(db, token, (Object[])params[1]);
 
         default:
@@ -325,21 +395,29 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
     }
 
     private Cursor execQuery(SQLiteDatabase db, int message, Object[] params) {
-        Cursor cursor = null;
-        try {
-            if (message == MESSAGE_RAWQUERY) {
-                cursor = db.rawQuery((String)params[1], (String[])params[2]);
-            } else {
-                cursor = db.query((String)params[1], (String[])params[2], (String)params[3], (String[])params[4], null, null, (String)params[5], (String)params[6]);
-            }
+        final Cursor cursor;
+        if (message == MESSAGE_RAWQUERY) {
+            /*
+             * params[1] - sql
+             * params[2] - selectionArgs
+             */
+            cursor = db.rawQuery((String)params[1], (String[])params[2]);
+        } else {
+            /*
+             * params[1] - table
+             * params[2] - columns
+             * params[3] - selection
+             * params[4] - selectionArgs
+             * params[5] - orderBy
+             * params[6] - limit
+             */
+            cursor = db.query((String)params[1], (String[])params[2], (String)params[3], (String[])params[4], null, null, (String)params[5], (String)params[6]);
+        }
 
-            if (cursor != null) {
-                // Calling getCount() causes the cursor window to be filled, which
-                // will make the first access on the main thread a lot faster.
-                cursor.getCount();
-            }
-        } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't query - ").append(params[1]).toString(), e);
+        if (cursor != null) {
+            // Calling getCount() causes the cursor window to be filled, which
+            // will make the first access on the main thread a lot faster.
+            cursor.getCount();
         }
 
         return cursor;

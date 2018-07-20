@@ -271,6 +271,7 @@ public final class PackageUtils {
                 .append(" { package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", label = ").append(label)
+                .append(", flags = ").append(toString(packageInfo.applicationInfo.flags))
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
@@ -291,6 +292,16 @@ public final class PackageUtils {
             }
 
             return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
+        }
+
+        private static final String toString(int flags) {
+            if ((flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+                return "FLAG_UPDATED_SYSTEM_APP";
+            } else if ((flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                return "FLAG_SYSTEM";
+            } else {
+                return "FLAG_INSTALLED";
+            }
         }
 
         public static final Factory<AppPackageInfo> FACTORY = new Factory<AppPackageInfo>() {

@@ -228,7 +228,7 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
         /*
          * params[0] - message
          */
-        switch ((Integer)params[0]) {
+        switch ((int)params[0]) {
         case MESSAGE_CALL:
             /*
              * params[1] - uri
@@ -288,7 +288,7 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
 
     @Override
     protected void onLoadComplete(Integer token, Object[] params, Object result) {
-        switch ((Integer)params[0]) {
+        switch ((int)params[0]) {
         case MESSAGE_CALL:
             onCallComplete(token, (Bundle)result);
             break;
@@ -306,15 +306,15 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
             break;
 
         case MESSAGE_UPDATE:
-            onUpdateComplete(token, (Integer)result);
+            onUpdateComplete(token, (int)result);
             break;
 
         case MESSAGE_DELETE:
-            onDeleteComplete(token, (Integer)result);
+            onDeleteComplete(token, (int)result);
             break;
 
         case MESSAGE_INSERTS:
-            onBulkInsertComplete(token, (Integer)result);
+            onBulkInsertComplete(token, (int)result);
             break;
 
         case MESSAGE_EXECUTE:
@@ -332,7 +332,7 @@ public abstract class AsyncContentHelper extends AsyncTaskLoader<Integer, Object
 
     @Override
     protected boolean rejectedRequest(Integer token, Object[] params, Object[] prevParams) {
-        if ((Integer)params[0] == MESSAGE_QUERY) {
+        if ((int)params[0] == MESSAGE_QUERY) {
             cancelTask(token, false);
         }
 

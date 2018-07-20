@@ -222,7 +222,7 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
         /*
          * params[0] - message
          */
-        final int message = (Integer)params[0];
+        final int message = (int)params[0];
         switch (message) {
         case MESSAGE_QUERY:
         case MESSAGE_RAWQUERY:
@@ -278,26 +278,26 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
             return;
         }
 
-        switch ((Integer)params[0]) {
+        switch ((int)params[0]) {
         case MESSAGE_QUERY:
         case MESSAGE_RAWQUERY:
             onQueryComplete(token, (Cursor)result);
             break;
 
         case MESSAGE_INSERT:
-            onInsertComplete(token, (Long)result);
+            onInsertComplete(token, (long)result);
             break;
 
         case MESSAGE_UPDATE:
-            onUpdateComplete(token, (Integer)result);
+            onUpdateComplete(token, (int)result);
             break;
 
         case MESSAGE_DELETE:
-            onDeleteComplete(token, (Integer)result);
+            onDeleteComplete(token, (int)result);
             break;
 
         case MESSAGE_REPLACE:
-            onReplaceComplete(token, (Long)result);
+            onReplaceComplete(token, (long)result);
             break;
 
         case MESSAGE_EXECUTE:
@@ -315,7 +315,7 @@ public abstract class AsyncSQLiteHelper extends AsyncTaskLoader<Integer, Object,
 
     @Override
     protected boolean rejectedRequest(Integer token, Object[] params, Object[] prevParams) {
-        final int message = (Integer)params[0];
+        final int message = (int)params[0];
         if (message == MESSAGE_QUERY || message == MESSAGE_RAWQUERY) {
             cancelTask(token, false);
         }

@@ -159,7 +159,7 @@ public class BarcodeEncoder {
              * params[4] - hints
              */
             final Map<EncodeHintType, ?> hints = (Map<EncodeHintType, ?>)params[4];
-            final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (Integer)params[2], (Integer)params[3], hints);
+            final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (int)params[2], (int)params[3], hints);
             return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, hints) : null));
         }
 

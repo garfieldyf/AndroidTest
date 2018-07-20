@@ -130,17 +130,17 @@ public final class BitmapUtils {
     }
 
     /**
-     * Creates a mutable rotation <tt>Bitmap</tt> from given the <em>bitmap</em>.
+     * Equivalent to calling <tt>createRotateBitmap(bitmap, degrees, bitmap.getWidth() * 0.5f,
+     * bitmap.getHeight() * 0.5f, newConfig, paint)</tt>.
      * @param bitmap The source bitmap.
      * @param degrees The rotation degrees.
      * @param newConfig The bitmap config to create.
-     * @return The new rotated <tt>Bitmap</tt> or the source <tt>Bitmap</tt>
-     * if no rotating is required.
+     * @return The new rotated <tt>Bitmap</tt> or the source <tt>Bitmap</tt> if no rotating is required.
      * @param paint May be <tt>null</tt>. The paint used to draw the bitmap.
      * @see #createRotateBitmap(Bitmap, float, float, float, Config, Paint)
      */
     public static Bitmap createRotateBitmap(Bitmap bitmap, float degrees, Config newConfig, Paint paint) {
-        return createRotateBitmap(bitmap, degrees, (float)bitmap.getWidth() * 0.5f, (float)bitmap.getHeight() * 0.5f, newConfig, paint);
+        return createRotateBitmap(bitmap, degrees, bitmap.getWidth() * 0.5f, bitmap.getHeight() * 0.5f, newConfig, paint);
     }
 
     /**

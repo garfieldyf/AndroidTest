@@ -400,8 +400,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
-     * The position is restored after writing.
+     * Equivalent to calling <tt>writeCursor(writer, cursor, cursor.getColumnNames())</tt>.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @return The <em>writer</em>.

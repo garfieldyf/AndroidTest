@@ -125,16 +125,37 @@ public final class DrawUtils {
     }
 
     /**
-     * Draw the drawable with the specified the {@link View} states.
+     * Equivalent to calling <tt>drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec,
+     * 0, 0, view.getWidth(), view.getHeight())</tt>.
      * @param canvas The canvas to draw into.
      * @param drawable The drawable to be drawn.
      * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View} states. If
-     * the <em>drawable</em> is state full, this parameter will be ignored.
+     * @param stateSpec An array of required {@link View} states. If the <em>drawable</em> is state
+     * full, this parameter will be ignored.
+     * @see #drawDrawable(Canvas, Drawable, View, int[], int, int, int, int)
      * @see #drawDrawable(Canvas, Drawable, int[], int[], int, int, int, int)
      */
     public static void drawDrawable(Canvas canvas, Drawable drawable, View view, int[] stateSpec) {
         drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec, 0, 0, view.getWidth(), view.getHeight());
+    }
+
+    /**
+     * Equivalent to calling <tt>drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec,
+     * left, top, right, bottom)</tt>.
+     * @param canvas The canvas to draw into.
+     * @param drawable The drawable to be drawn.
+     * @param view The <tt>View</tt> obtains the current states.
+     * @param stateSpec An array of required {@link View} states. If the <em>drawable</em> is state
+     * full, this parameter will be ignored.
+     * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
+     * @param top The specified a bounding rectangle top coordinate for the <em>drawable</em>.
+     * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
+     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
+     * @see #drawDrawable(Canvas, Drawable, View, int[])
+     * @see #drawDrawable(Canvas, Drawable, int[], int[], int, int, int, int)
+     */
+    public static void drawDrawable(Canvas canvas, Drawable drawable, View view, int[] stateSpec, int left, int top, int right, int bottom) {
+        drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec, left, top, right, bottom);
     }
 
     /**
@@ -149,6 +170,7 @@ public final class DrawUtils {
      * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
      * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
      * @see #drawDrawable(Canvas, Drawable, View, int[])
+     * @see #drawDrawable(Canvas, Drawable, View, int[], int, int, int, int)
      */
     public static void drawDrawable(Canvas canvas, Drawable drawable, int[] stateSet, int[] stateSpec, int left, int top, int right, int bottom) {
         if (drawable.isStateful()) {
@@ -161,7 +183,7 @@ public final class DrawUtils {
 
     /**
      * Draws a mirrored drawable with given the <em>drawable</em> and <em>canvas</em>.
-     * The <em>drawable</em> must already have had {@link Drawable#setBounds} called.
+     * The <em>drawable</em> must has already called {@link Drawable#setBounds}.
      * @param canvas The <tt>Canvas</tt>.
      * @param drawable The drawable to be drawn.
      * @param horizontal Whether to draw a horizontal mirrored drawable.

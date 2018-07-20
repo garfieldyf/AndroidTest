@@ -6,13 +6,13 @@ import android.os.Looper;
 /**
  * Class CountDownTimer
  * @author Garfield
- * @version 1.0
+ * @version 1.5
  */
 public abstract class CountDownTimer implements Runnable {
-    private int mCountDown;
+    private int mCurCountDown;
+    private int mCountDownTime;
+    private long mIntervalMillis;
     private final Handler mHandler;
-    private final int mCountDownTime;
-    private final long mIntervalMillis;
 
     /**
      * Constructor
@@ -43,17 +43,33 @@ public abstract class CountDownTimer implements Runnable {
     /**
      * Start the countdown.
      * @return This <tt>CountDownTimer</tt>.
+     * @see #restart(int, long)
      * @see #cancel()
      */
     public final CountDownTimer start() {
-        mCountDown = mCountDownTime;
-        if (Looper.myLooper() == mHandler.getLooper()) {
-            run();
-        } else {
-            mHandler.post(this);
+        if (mCurCountDown <= 0) {
+            mCurCountDown = mCountDownTime;
+            if (Looper.myLooper() == mHandler.getLooper()) {
+                run();
+            } else {
+                mHandler.post(this);
+            }
         }
 
         return this;
+    }
+
+    /**
+     * Restart the countdown.
+     * @return This <tt>CountDownTimer</tt>.
+     * @see #start()
+     * @see #cancel()
+     */
+    public final CountDownTimer restart(int countDownTime, long intervalMillis) {
+        DebugUtils.__checkError(countDownTime < 0 || intervalMillis < 0, "countDownTime < 0 || intervalMillis < 0");
+        mCountDownTime  = countDownTime;
+        mIntervalMillis = intervalMillis;
+        return start();
     }
 
     /**
@@ -66,10 +82,10 @@ public abstract class CountDownTimer implements Runnable {
 
     @Override
     public void run() {
-        if (mCountDown == 0) {
+        if (mCurCountDown == 0) {
             onFinish();
-        } else if (mCountDown > 0) {
-            onTick(mCountDown--);
+        } else if (mCurCountDown > 0) {
+            onTick(mCurCountDown--);
             mHandler.postDelayed(this, mIntervalMillis);
         }
     }

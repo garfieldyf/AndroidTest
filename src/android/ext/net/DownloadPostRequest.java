@@ -72,8 +72,8 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be a {@link PostCallback} or an <tt>InputStream, JSONObject,
-     * JSONArray, String</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param data May be a {@link PostCallback} or an <tt>InputStream, String, JSONObject,
+     * JSONArray, ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[])
      * @see #post(byte[], int, int)

@@ -277,8 +277,8 @@ public final class JSONUtils {
     /**
      * Writes the specified <em>object</em> into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
-     * @param object May be a <tt>JSONObject, JSONArray, ContentValues, String,
-     * Boolean, Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>String, Boolean, Number, JSONObject, JSONArray,
+     * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeObject(String, Object)
@@ -296,10 +296,12 @@ public final class JSONUtils {
             return writeValues(writer, (JSONArray)object);
         } else if (object instanceof JSONObject) {
             return writeValues(writer, (JSONObject)object);
-        } else if (object instanceof Collection) {
-            return writeValues(writer, (Collection<Object>)object);
         } else if (object instanceof Object[]) {
             return writeValues(writer, Arrays.asList((Object[])object));
+        } else if (object instanceof Set) {
+            return writeValues(writer, (Set<Entry<String, Object>>)object);
+        } else if (object instanceof Collection) {
+            return writeValues(writer, (Collection<Object>)object);
         } else if (object instanceof ContentValues) {
             return writeValues(writer, ((ContentValues)object).valueSet());
         } else if (object instanceof Map) {
@@ -313,8 +315,8 @@ public final class JSONUtils {
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
      * <p>Note: This method will be create the necessary directories.</p>
      * @param jsonFile The json file to write.
-     * @param object May be a <tt>JSONObject, JSONArray, ContentValues, String,
-     * Boolean, Number</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>String, Boolean, Number, JSONObject, JSONArray,
+     * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @throws IOException if an error occurs while writing to the file.
      * @see #writeObject(JsonWriter, Object)
      */

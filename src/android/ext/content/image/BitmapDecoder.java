@@ -111,7 +111,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         public Parameters(Context context, AttributeSet attrs) {
             DebugUtils.__checkError(PARAMETERS_ATTRS == null, "The " + getClass().getName() + " did not call Parameters.initAttrs()");
             final TypedArray a = context.obtainStyledAttributes(attrs, PARAMETERS_ATTRS);
-            this.config = parseConfig(a.getInt(1 /* R.styleable.Parameters_config */, -1));
+            this.config = parseConfig(a.getInt(1 /* R.styleable.Parameters_config */, 2));
             this.value  = BitmapUtils.fixSampleSize(a.getInt(0 /* R.styleable.Parameters_sampleSize */, 1));
             a.recycle();
         }

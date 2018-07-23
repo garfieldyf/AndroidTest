@@ -28,6 +28,7 @@ import android.widget.ImageView;
  *     namespace:defaultImage="@drawable/ic_placeholder"
  *     namespace:maxCacheSize="128" &gt;
  *
+ * &lt;!-- Bitmap Transformer --&gt;
  * &lt;Transformer
  *     android:name="[ rectangle | roundRect | drawable | oval | gif | classFullName ]"
  *     android:topLeftRadius="10dp"
@@ -36,7 +37,7 @@ import android.widget.ImageView;
  *     android:bottomRightRadius="10dp"
  *     android:radius="20dp" /&gt;
  *
- * &lt;!-- Optional Transformer --&gt;
+ * &lt;!-- Image (Optional) Transformer --&gt;
  * &lt;Transformer
  *     android:name="<em>classFullName</em>"
  *     namespace:attributes1="value1"

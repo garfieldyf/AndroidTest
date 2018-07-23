@@ -78,7 +78,7 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
     }
 
     @Override
-    public synchronized Map<K, Object> snapshot() {
+    public Map<K, Object> snapshot() {
         return copyCache(mImageCache, copyCache(mBitmapCache, new ArrayMap<K, Object>()));
     }
 
@@ -100,7 +100,9 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
      */
     private static <K> Map<K, Object> copyCache(Cache<K, ?> cache, Map<K, Object> result) {
         if (cache instanceof SimpleLruCache) {
-            result.putAll(((SimpleLruCache<K, ?>)cache).map);
+            synchronized (cache) {
+                result.putAll(((SimpleLruCache<K, ?>)cache).map);
+            }
         } else {
             result.putAll(cache.snapshot());
         }

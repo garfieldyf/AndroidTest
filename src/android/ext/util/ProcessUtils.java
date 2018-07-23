@@ -427,7 +427,7 @@ public final class ProcessUtils {
                     pi.versionName = "";
                 }
 
-                String processName = getProcessName(mContext, Process.myPid());
+                String processName = myProcessName(mContext);
                 if (processName == null) {
                     processName = pi.applicationInfo.processName;
                 }

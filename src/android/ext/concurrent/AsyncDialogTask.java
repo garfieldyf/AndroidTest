@@ -163,7 +163,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     @Override
     public void onActivityDestroyed(Activity activity) {
         if (mDialog != null && mActivity.get() == activity) {
-            onCancel(mDialog);
+            mDialog.cancel();
         }
     }
 

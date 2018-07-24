@@ -74,8 +74,7 @@ public class ClassFactory {
     public void load(String... libraryNames) throws Exception {
         if (ArrayUtils.getSize(libraryNames) > 0) {
             final Runtime runtime = Runtime.getRuntime();
-            final Method method = Runtime.class.getDeclaredMethod("loadLibrary", String.class, ClassLoader.class);
-            method.setAccessible(true);
+            final Method method = getDeclaredMethod(Runtime.class, "loadLibrary", String.class, ClassLoader.class);
 
             for (String libraryName : libraryNames) {
                 method.invoke(runtime, libraryName, mClassLoader);
@@ -135,9 +134,9 @@ public class ClassFactory {
      * @see #getConstructor(String, Class[])
      */
     public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
-        final Constructor<?> constructor = clazz.getDeclaredConstructor(parameterTypes);
-        constructor.setAccessible(true);
-        return constructor;
+        final Constructor<?> result = clazz.getDeclaredConstructor(parameterTypes);
+        result.setAccessible(true);
+        return result;
     }
 
     /**
@@ -150,8 +149,22 @@ public class ClassFactory {
      * @see #getConstructor(Class, Class[])
      */
     public static Constructor<?> getConstructor(String className, Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException {
-        final Constructor<?> constructor = Class.forName(className).getDeclaredConstructor(parameterTypes);
-        constructor.setAccessible(true);
-        return constructor;
+        final Constructor<?> result = Class.forName(className).getDeclaredConstructor(parameterTypes);
+        result.setAccessible(true);
+        return result;
+    }
+
+    /**
+     * Returns a {@link Method} object with the specified <em>name</em> and <em>parameterTypes</em>.
+     * @param clazz The <tt>Class</tt> which is declared the method.
+     * @param name The requested method's name.
+     * @param parameterTypes The parameter types of the method or <em>(Class[])null</em> is equivalent
+     * to the empty array.
+     * @throws NoSuchMethodException if the requested method cannot be found.
+     */
+    public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
+        final Method result = clazz.getDeclaredMethod(name, parameterTypes);
+        result.setAccessible(true);
+        return result;
     }
 }

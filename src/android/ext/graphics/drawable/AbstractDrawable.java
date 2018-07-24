@@ -68,10 +68,18 @@ public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantSt
     };
 
     /**
+     * The {@link ConstantState} object.
+     */
+    protected T mState;
+
+    /**
      * The flags, can be user-defined (must be range of [0 - 0xFFFFFF]).
      */
     protected int mFlags;
-    protected T mState;
+
+    /**
+     * The drawing bounds to draw the content.
+     */
     private final RectF mBounds;
 
     /**

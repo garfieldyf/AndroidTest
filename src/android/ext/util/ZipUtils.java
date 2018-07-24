@@ -117,6 +117,7 @@ public final class ZipUtils {
         // Creates the necessary directories.
         DebugUtils.__checkError(ArrayUtils.getSize(files) == 0, "Invalid parameter - The files is null or 0-size");
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
+        cancelable = DummyCancelable.wrap(cancelable);
 
         // Creates the ZipOutputStream.
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
@@ -125,9 +126,10 @@ public final class ZipUtils {
         try {
             // Compresses the files.
             final Dirent dirent = new Dirent();
-            for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
+            final byte[] buffer = new byte[8192];
+            for (int i = 0, size = ArrayUtils.getSize(files); i < size && !cancelable.isCancelled(); ++i) {
                 dirent.setPath(files.get(i));
-                compress(os, dirent, dirent.getName(), cancelable);
+                compress(os, dirent, dirent.getName(), cancelable, buffer);
             }
         } finally {
             os.close();
@@ -149,13 +151,14 @@ public final class ZipUtils {
         final ZipFile file = new ZipFile(zipFile);
         try {
             // Creates the necessary directories.
+            cancelable = DummyCancelable.wrap(cancelable);
             FileUtils.mkdirs(outPath, 0);
 
             // Enumerates the ZIP file entries.
-            final byte[] buf = new byte[8192];
-            final CRC32 crc  = new CRC32();
+            final CRC32 crc = new CRC32();
+            final byte[] buffer = new byte[8192];
             final Enumeration<? extends ZipEntry> entries = file.entries();
-            while (entries.hasMoreElements()) {
+            while (entries.hasMoreElements() && !cancelable.isCancelled()) {
                 final ZipEntry entry  = entries.nextElement();
                 final String pathName = FileUtils.buildPath(outPath, entry.getName());
 
@@ -163,7 +166,7 @@ public final class ZipUtils {
                 if (entry.isDirectory()) {
                     FileUtils.mkdirs(pathName, 0);
                 } else {
-                    uncompress(file, entry, pathName, crc, buf, cancelable);
+                    uncompress(file, entry, pathName, crc, buffer, cancelable);
                 }
             }
         } finally {
@@ -171,7 +174,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void compress(ZipOutputStream os, Dirent dirent, String name, Cancelable cancelable) throws IOException {
+    private static void compress(ZipOutputStream os, Dirent dirent, String name, Cancelable cancelable, byte[] buffer) throws IOException {
         if (dirent.isDirectory()) {
             // Adds the directory ZipEntry.
             name += '/';
@@ -181,7 +184,7 @@ public final class ZipUtils {
             final List<Dirent> dirents = dirent.listFiles();
             for (int i = 0, size = dirents.size(); i < size; ++i) {
                 final Dirent child = dirents.get(i);
-                compress(os, child, name + child.getName(), cancelable);
+                compress(os, child, name + child.getName(), cancelable, buffer);
             }
         } else {
             // Adds the file ZipEntry.
@@ -190,7 +193,7 @@ public final class ZipUtils {
             // Reads the file's contents to ZipOutputStream.
             final InputStream is = new FileInputStream(dirent.path);
             try {
-                FileUtils.copyStream(is, os, cancelable, null);
+                FileUtils.copyStreamImpl(is, os, cancelable, buffer);
             } finally {
                 is.close();
             }
@@ -208,7 +211,7 @@ public final class ZipUtils {
             final long crcValue = entry.getCrc();
             if (crcValue <= 0) {
                 // Uncompress the ZIP entry.
-                FileUtils.copyStream(is, os, cancelable, buffer);
+                FileUtils.copyStreamImpl(is, os, cancelable, buffer);
             } else {
                 // Uncompress the ZIP entry with check CRC32.
                 uncompress(is, os, entry, crc, crcValue, buffer, cancelable);
@@ -221,9 +224,7 @@ public final class ZipUtils {
 
     private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue, byte[] buffer, Cancelable cancelable) throws IOException {
         // Uncompress the ZIP entry with check CRC32.
-        cancelable = DummyCancelable.wrap(cancelable);
         crc.reset();
-
         for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
             os.write(buffer, 0, readBytes);
             crc.update(buffer, 0, readBytes);

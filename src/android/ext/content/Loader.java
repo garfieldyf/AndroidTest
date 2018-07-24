@@ -50,7 +50,7 @@ public abstract class Loader implements Factory<Task> {
      * @see #isShutdown()
      */
     public synchronized void shutdown() {
-        cancelAllTasks();
+        cancelAll();
         mState = SHUTDOWN;
         notifyAll();
     }
@@ -162,7 +162,7 @@ public abstract class Loader implements Factory<Task> {
     /**
      * Stops all running tasks.
      */
-    private void cancelAllTasks() {
+    private void cancelAll() {
         for (int i = mRunningTasks.size() - 1; i >= 0; --i) {
             mRunningTasks.valueAt(i).cancel(false);
         }

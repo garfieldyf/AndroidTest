@@ -157,35 +157,35 @@ public class ThreadPoolManager extends ThreadPool {
         /**
          * The thread running this task.
          */
-        private volatile Thread runner;
+        private volatile Thread mRunner;
 
         /**
          * Possible state transitions:
          * <ul><li>RUNNING -> CANCELLED</li>
          * <li>RUNNING -> COMPLETED</li></ul>
          */
-        private final AtomicInteger state;
+        private final AtomicInteger mState;
 
         /**
          * Constructor
          */
         public Task() {
-            state = new AtomicInteger(RUNNING);
+            mState = new AtomicInteger(RUNNING);
         }
 
         @Override
         public final boolean isCancelled() {
-            return (state.get() == CANCELLED);
+            return (mState.get() == CANCELLED);
         }
 
         @Override
         public final void run() {
-            if (state.get() == RUNNING) {
+            if (mState.get() == RUNNING) {
                 try {
-                    onExecute(runner = Thread.currentThread());
+                    onExecute(mRunner = Thread.currentThread());
                 } finally {
-                    runner = null;
-                    if (state.compareAndSet(RUNNING, COMPLETED)) {
+                    mRunner = null;
+                    if (mState.compareAndSet(RUNNING, COMPLETED)) {
                         onCompletion();
                     }
                 }
@@ -233,10 +233,10 @@ public class ThreadPoolManager extends ThreadPool {
          * if this task has already completed, or already been cancelled.
          */
         /* package */ final boolean cancel(boolean interrupt, boolean notify) {
-            final boolean result = state.compareAndSet(RUNNING, CANCELLED);
+            final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
             if (result) {
-                if (interrupt && runner != null) {
-                    runner.interrupt();
+                if (interrupt && mRunner != null) {
+                    mRunner.interrupt();
                 }
 
                 // Notify the callback method.

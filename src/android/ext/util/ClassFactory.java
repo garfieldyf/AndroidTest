@@ -121,9 +121,9 @@ public class ClassFactory {
      * @return The path of the cached code directory.
      */
     public static String getCodeCacheDir(Context context, String name) {
-        final String codeCacheDir = FileUtils.buildPath(context.getCacheDir().getPath(), name);
-        FileUtils.mkdirs(codeCacheDir, 0);
-        return codeCacheDir;
+        final String result = FileUtils.buildPath(context.getCacheDir().getPath(), name);
+        FileUtils.mkdirs(result, 0);
+        return result;
     }
 
     /**

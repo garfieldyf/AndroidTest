@@ -640,6 +640,26 @@ public final class FileUtils {
     public static native String createUniqueFile(String filename, long length);
 
     /**
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     */
+    /* package */ static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
+        for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
+            if ((readBytes = src.read(buffer, offset, buffer.length - offset)) <= 0) {
+                // Writes the last remaining bytes of the buffer.
+                dst.write(buffer, 0, offset);
+                break;
+            }
+
+            offset += readBytes;
+            if (offset == buffer.length) {
+                // The buffer full, write to OutputStream and reset the offset.
+                offset = 0;
+                dst.write(buffer, 0, buffer.length);
+            }
+        }
+    }
+
+    /**
      * Concatenates the <em>dir</em> and the <em>name</em>.
      */
     private static StringBuilder join(String dir, String name) {
@@ -656,26 +676,6 @@ public final class FileUtils {
         }
 
         return path;
-    }
-
-    /**
-     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
-     */
-    private static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
-            if ((readBytes = src.read(buffer, offset, buffer.length - offset)) <= 0) {
-                // Writes the last remaining bytes of the buffer.
-                dst.write(buffer, 0, offset);
-                break;
-            }
-
-            offset += readBytes;
-            if (offset == buffer.length) {
-                // The buffer full, write to OutputStream and reset the offset.
-                offset = 0;
-                dst.write(buffer, 0, buffer.length);
-            }
-        }
     }
 
     /**

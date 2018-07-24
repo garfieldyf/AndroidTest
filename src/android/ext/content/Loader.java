@@ -3,6 +3,7 @@ package android.ext.content;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+import android.content.Context;
 import android.ext.content.Loader.Task;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
@@ -122,8 +123,8 @@ public abstract class Loader implements Factory<Task> {
         return (task != null && task.cancel(mayInterruptIfRunning));
     }
 
-    public final void dumpTasks(Printer printer) {
-        DebugUtils.__checkUIThread("dumpTasks");
+    public void dump(Context context, Printer printer) {
+        DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
         final int size = mRunningTasks.size();
         if (size > 0) {

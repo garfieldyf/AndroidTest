@@ -3,6 +3,7 @@ package android.ext.temp;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
 
 public final class IntArray {
     private int size;
@@ -39,7 +40,7 @@ public final class IntArray {
     }
 
     public final void addAll(int index, int[] values, int offset, int count) {
-        ArrayUtils.checkRange(offset, count, values.length);
+        DebugUtils.__checkRange(offset, count, values.length);
         if (index > size || index < 0) {
             // throwIndexOutOfBoundsException(index, size);
         }

@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
@@ -101,7 +100,7 @@ public class GIFImage {
      * @see #decodeResource(Resources, int)
      */
     public static GIFImage decodeByteArray(byte[] data, int offset, int length) {
-        ArrayUtils.checkRange(offset, length, data.length);
+        DebugUtils.__checkRange(offset, length, data.length);
         final long nativeImage = nativeDecodeArray(data, offset, length);
         return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }

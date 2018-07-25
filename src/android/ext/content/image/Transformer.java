@@ -12,6 +12,7 @@ import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.util.ClassFactory;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,10 +57,7 @@ public abstract class Transformer<URI, Image> {
             return null;
         }
 
-        if (!"Transformer".equals(parser.getName())) {
-            throw new XmlPullParserException(parser.getPositionDescription() + ": The tag name must be 'Transformer'");
-        }
-
+        DebugUtils.__checkError(!"Transformer".equals(parser.getName()), parser.getPositionDescription() + ": The tag name must be 'Transformer'");
         final TypedArray a = context.obtainStyledAttributes(attrs, TRANSFORMER_ATTRS);
         final String name  = a.getString(0 /* android.R.attr.name */);
         a.recycle();

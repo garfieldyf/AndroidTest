@@ -62,10 +62,7 @@ public final class MessageDigests {
      * @see #computeFile(String, byte[], int, Algorithm)
      */
     public static byte[] computeFile(String filename, Algorithm algorithm) {
-        if (StringUtils.getLength(filename) == 0) {
-            throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
-        }
-
+        DebugUtils.__checkError(StringUtils.getLength(filename) == 0, "Invalid parameter - The filename is null or 0-length");
         final byte[] result = new byte[algorithm.digestLength];
         return (computeFile(filename, result, 0, algorithm.ordinal()) != -1 ? result : null);
     }
@@ -82,11 +79,8 @@ public final class MessageDigests {
      * @see #computeFile(String, Algorithm)
      */
     public static int computeFile(String filename, byte[] result, int offset, Algorithm algorithm) {
-        if (StringUtils.getLength(filename) == 0) {
-            throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
-        }
-
-        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
+        DebugUtils.__checkError(StringUtils.getLength(filename) == 0, "Invalid parameter - The filename is null or 0-length");
+        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
         return computeFile(filename, result, offset, algorithm.ordinal());
     }
 
@@ -99,10 +93,7 @@ public final class MessageDigests {
      * @see #computeString(String, byte[], int, Algorithm)
      */
     public static byte[] computeString(String string, Algorithm algorithm) {
-        if (string == null) {
-            throw new NullPointerException("Invalid parameter - The string is null");
-        }
-
+        DebugUtils.__checkError(string == null, "Invalid parameter - The string is null");
         final byte[] result = new byte[algorithm.digestLength];
         computeString(string, result, 0, algorithm.ordinal());
         return result;
@@ -120,11 +111,8 @@ public final class MessageDigests {
      * @see #computeString(String, Algorithm)
      */
     public static int computeString(String string, byte[] result, int offset, Algorithm algorithm) {
-        if (string == null) {
-            throw new NullPointerException("Invalid parameter - The string is null");
-        }
-
-        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
+        DebugUtils.__checkError(string == null, "Invalid parameter - The string is null");
+        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
         return computeString(string, result, offset, algorithm.ordinal());
     }
 
@@ -154,7 +142,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, int offset, int count, Algorithm algorithm) {
-        ArrayUtils.checkRange(offset, count, data.length);
+        DebugUtils.__checkRange(offset, count, data.length);
         final byte[] result = new byte[algorithm.digestLength];
         computeByteArray(data, offset, count, result, 0, algorithm.ordinal());
         return result;
@@ -175,8 +163,8 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, Algorithm)
      */
     public static int computeByteArray(byte[] data, int dataOffset, int dataCount, byte[] result, int offset, Algorithm algorithm) {
-        ArrayUtils.checkRange(dataOffset, dataCount, data.length);
-        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
+        DebugUtils.__checkRange(dataOffset, dataCount, data.length);
+        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
         return computeByteArray(data, dataOffset, dataCount, result, offset, algorithm.ordinal());
     }
 

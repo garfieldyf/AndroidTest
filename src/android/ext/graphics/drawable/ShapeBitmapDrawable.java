@@ -7,6 +7,7 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.DrawUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -127,11 +128,8 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     @SuppressLint("NewApi")
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         final Drawable drawable = res.getDrawable(id, theme);
-        if (drawable instanceof BitmapDrawable) {
-            mState.setBitmap(((BitmapDrawable)drawable).getBitmap());
-        } else {
-            throw new XmlPullParserException(new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
-        }
+        DebugUtils.__checkError(!(drawable instanceof BitmapDrawable), new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
+        mState.setBitmap(((BitmapDrawable)drawable).getBitmap());
     }
 
     @Override

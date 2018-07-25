@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.ext.graphics.GIFImage;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -295,9 +296,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         }
 
         final GIFImage image = GIFImage.decodeResource(res, id);
-        if (image == null) {
-            throw new XmlPullParserException(new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
-        }
+        DebugUtils.__checkError(image == null, new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
 
         a.recycle();
         mState.setImage(image);

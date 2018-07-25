@@ -133,7 +133,9 @@ public final class DebugUtils {
     }
 
     public static void __checkRange(int offset, int length, int arrayLength) {
-        ArrayUtils.checkRange(offset, length, arrayLength);
+        if ((offset | length) < 0 || arrayLength - offset < length) {
+            throw new AssertionError(new StringBuilder(96).append("Index out of bounds - [ offset = ").append(offset).append(", length = ").append(length).append(", array length = ").append(arrayLength).append(" ]").toString());
+        }
     }
 
     public static void __checkWarning(boolean reportWarning, String tag, String message) {
@@ -165,10 +167,7 @@ public final class DebugUtils {
 
         public static long uptimeNanos() {
             final TraceLocal local = sTraceLocal.get();
-            if (local == null || local.thread != Thread.currentThread()) {
-                throw new IllegalStateException("Only the original thread that called startMethodTracing() can be call stopMethodTracing().");
-            }
-
+            DebugUtils.__checkError(local == null || local.thread != Thread.currentThread(), "Only the original thread that called startMethodTracing() can be call stopMethodTracing().");
             return System.nanoTime() - local.nanoTime;
         }
     }

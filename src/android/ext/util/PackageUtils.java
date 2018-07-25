@@ -363,8 +363,8 @@ public final class PackageUtils {
 
         @Override
         @SuppressWarnings("unchecked")
-        public int onScanFile(String path, int type, Object userData) {
-            final ParseResult<T> parseResult = (ParseResult<T>)userData;
+        public int onScanFile(String path, int type, Object cookie) {
+            final ParseResult<T> parseResult = (ParseResult<T>)cookie;
             if (isArchiveFile(path, type)) {
                 final T result = parsePackage(mContext, path, parseResult.parseFlags, mFactory);
                 if (result != null) {

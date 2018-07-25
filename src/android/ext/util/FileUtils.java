@@ -285,10 +285,10 @@ public final class FileUtils {
      * @param callback The {@link ScanCallback} used to scan.
      * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
      * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param userData An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
+     * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      */
-    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object userData);
+    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
 
     /**
      * Equivalent to calling <tt>listFiles(dirPath, flags, Dirent.FACTORY, new ArrayList())</tt>.
@@ -734,12 +734,12 @@ public final class FileUtils {
          * This callback is invoked on the {@link FileUtils#scanFiles} was called from.
          * @param path The absolute file path.
          * @param type The file type. May be one of <tt>Dirent.DT_XXX</tt> constants.
-         * @param userData An object, passed earlier by {@link FileUtils#scanFiles}.
+         * @param cookie An object, passed earlier by {@link FileUtils#scanFiles}.
          * @return One of {@link #SC_CONTINUE}, {@link #SC_STOP}, {@link #SC_BREAK}
          * or {@link #SC_BREAK_PARENT}.
          */
         @Keep
-        public int onScanFile(String path, int type, Object userData);
+        public int onScanFile(String path, int type, Object cookie);
     }
 
     /**
@@ -1436,11 +1436,11 @@ public final class FileUtils {
         }
 
         /**
-         * Equivalent to calling <tt>FileUtils.scanFiles(path, callback, flags, userData)</tt>.
+         * Equivalent to calling <tt>FileUtils.scanFiles(path, callback, flags, cookie)</tt>.
          * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */
-        public int scanFiles(ScanCallback callback, int flags, Object userData) {
-            return FileUtils.scanFiles(path, callback, flags, userData);
+        public int scanFiles(ScanCallback callback, int flags, Object cookie) {
+            return FileUtils.scanFiles(path, callback, flags, cookie);
         }
 
         /**

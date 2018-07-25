@@ -6,6 +6,7 @@ import android.ext.content.Loader.Task;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.LayoutManager;
@@ -46,7 +47,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyDataSetChanged(RecyclerView recyclerView) {
         final Adapter adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "adapter == null");
+        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_DATA_CHANGED, adapter));
         } else {
@@ -94,7 +95,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemMoved(RecyclerView recyclerView, int fromPosition, int toPosition) {
         final Adapter adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "adapter == null");
+        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_MOVED, fromPosition, toPosition, adapter));
         } else {
@@ -111,7 +112,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeRemoved(RecyclerView recyclerView, int positionStart, int itemCount) {
         final Adapter adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "adapter == null");
+        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_REMOVED, positionStart, itemCount, adapter));
         } else {
@@ -128,11 +129,29 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeInserted(RecyclerView recyclerView, int positionStart, int itemCount) {
         final Adapter adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "adapter == null");
+        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_INSERTED, positionStart, itemCount, adapter));
         } else {
             adapter.notifyItemRangeInserted(positionStart, itemCount);
+        }
+    }
+
+    /**
+     * Notify any registered observers that all visible child views have changed. If the <em>recyclerView</em>
+     * is currently computing a layout this method will be post the change using the <tt>UIHandler</tt>.
+     * @param recyclerView The {@link RecyclerView}.
+     * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
+     */
+    public static void notifyVisibleItemRangeChanged(RecyclerView recyclerView, Object payload) {
+        final LayoutManager manager = recyclerView.getLayoutManager();
+        if (manager instanceof LinearLayoutManager) {
+            final LinearLayoutManager layoutManager = (LinearLayoutManager)manager;
+            final int firstPos = layoutManager.findFirstVisibleItemPosition();
+            final int lastPos  = layoutManager.findLastVisibleItemPosition();
+            if (firstPos != RecyclerView.NO_POSITION && lastPos != RecyclerView.NO_POSITION) {
+                notifyItemRangeChanged(recyclerView, firstPos, lastPos - firstPos + 1, payload);
+            }
         }
     }
 
@@ -146,7 +165,7 @@ public final class UIHandler extends Handler {
      */
     public static void notifyItemRangeChanged(RecyclerView recyclerView, int positionStart, int itemCount, Object payload) {
         final Adapter adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "adapter == null");
+        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
             sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair<Adapter, Object>(adapter, payload)));
         } else {

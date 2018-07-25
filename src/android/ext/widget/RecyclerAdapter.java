@@ -1,9 +1,7 @@
 package android.ext.widget;
 
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -87,21 +85,6 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
      */
     public void onDestroy() {
         mFocusManager.onDetach();
-    }
-
-    /**
-     * Notify any registered observers that all visible views have changed.
-     */
-    public void notifyVisibleItemRangeChanged() {
-        final LayoutManager layoutManager = mFocusManager.mRootView.getLayoutManager();
-        if (layoutManager instanceof LinearLayoutManager) {
-            final LinearLayoutManager manager = (LinearLayoutManager)layoutManager;
-            final int firstPos = manager.findFirstVisibleItemPosition();
-            final int lastPos  = manager.findLastVisibleItemPosition();
-            if (firstPos != RecyclerView.NO_POSITION && lastPos != RecyclerView.NO_POSITION) {
-                notifyItemRangeChanged(firstPos, lastPos - firstPos + 1);
-            }
-        }
     }
 
     @Override

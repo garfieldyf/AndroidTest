@@ -62,13 +62,16 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
         final ImageView view = (ImageView)target;
         if (value == null) {
             view.setImageDrawable(mDefaultImage);
-        } else if ((state & STATE_LOAD_FROM_CACHE) != 0) {
-            view.setImageDrawable(mTransformer.transform(uri, target, value));
         } else {
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { mDefaultImage, mTransformer.transform(uri, target, value) });
-            view.setImageDrawable(drawable);
-            drawable.setCrossFadeEnabled(true);
-            drawable.startTransition(duration);
+            final Drawable image = mTransformer.transform(uri, target, value);
+            if ((state & STATE_LOAD_FROM_CACHE) != 0) {
+                view.setImageDrawable(image);
+            } else {
+                final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { mDefaultImage, image });
+                view.setImageDrawable(drawable);
+                drawable.setCrossFadeEnabled(true);
+                drawable.startTransition(duration);
+            }
         }
     }
 }

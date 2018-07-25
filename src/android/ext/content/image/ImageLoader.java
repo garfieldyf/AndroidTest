@@ -320,6 +320,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * Class <tt>DefaultBinder</tt> used to bind the <tt>Bitmap</tt> to <tt>ImageView</tt>.
+     * The <tt>DefaultBinder</tt> has no image cache and the default image.
      */
     private static final class DefaultBinder implements Binder<Object, Object, Bitmap> {
         public static final DefaultBinder sInstance = new DefaultBinder();

@@ -398,10 +398,11 @@ public final class ProcessUtils {
          * @see #writeTo(Context, JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
-            return DeviceUtils.writeABIs(writer.name("brand").value(Build.BRAND)
+            return JSONUtils.writeObject(writer.name("brand").value(Build.BRAND)
                 .name("mode").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
-                .name("version").value(Build.VERSION.RELEASE))
+                .name("version").value(Build.VERSION.RELEASE)
+                .name("abis"), DeviceUtils.getSupportedABIs())
                 .name("package").value(context.getPackageName());
         }
     }

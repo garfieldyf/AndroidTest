@@ -314,6 +314,10 @@ public final class BitmapUtils {
         matrix.mapRect(dst, src);
 
         final Bitmap bitmap = Bitmap.createBitmap((int)(dst.width() + 0.5f), (int)(dst.height() + 0.5), config);
+        bitmap.setHasAlpha(source.hasAlpha());
+        bitmap.setDensity(source.getDensity());
+        bitmap.setPremultiplied(source.isPremultiplied());
+
         final Canvas canvas = new Canvas(bitmap);
         canvas.translate(-dst.left, -dst.top);
         canvas.concat(matrix);

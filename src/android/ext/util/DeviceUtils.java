@@ -19,7 +19,6 @@ import android.os.storage.StorageVolume;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.DisplayMetrics;
-import android.util.JsonWriter;
 import android.util.Printer;
 import android.view.Display;
 import android.view.WindowManager;
@@ -27,7 +26,7 @@ import android.view.WindowManager;
 /**
  * Class DeviceUtils
  * @author Garfield
- * @version 1.6
+ * @version 2.0
  */
 @SuppressLint("NewApi")
 public final class DeviceUtils {
@@ -246,22 +245,6 @@ public final class DeviceUtils {
         default:
             return "DENSITY_" + densityDpi;
         }
-    }
-
-    /**
-     * Writes the supported ABIs into a {@link JsonWriter}.
-     */
-    /* package */ static JsonWriter writeABIs(JsonWriter writer) throws IOException {
-        final StringBuilder result = new StringBuilder(32);
-        final String[] abis = getSupportedABIs();
-        if (abis.length > 0) {
-            result.append(abis[0]);
-            for (int i = 1; i < abis.length; ++i) {
-                result.append(',').append(abis[i]);
-            }
-        }
-
-        return writer.name("abis").value(result.toString());
     }
 
     private static StringBuilder dumpWhiteSpace(StringBuilder out, int index) {

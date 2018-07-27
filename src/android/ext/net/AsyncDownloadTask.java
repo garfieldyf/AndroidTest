@@ -176,7 +176,8 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
 
     /**
      * Override this method to downloads the resource from the remote server on a background thread.
-     * <p>The default implementation returns a {@link JSONObject} or {@link JSONArray} object.</p>
+     * <p>The default implementation downloads the JSON data from the remote server and returns a
+     * {@link JSONObject} or {@link JSONArray} object.</p>
      * @param conn The {@link URLConnection} whose connecting the remote server.
      * @param statusCode The response code returned by the remote server.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.

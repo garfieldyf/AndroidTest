@@ -192,7 +192,7 @@ public final class PackageUtils {
 
         /**
          * Returns the oval <tt>Drawable</tt> of the application's {@link icon}.
-         * @return A {@link OvalBitmapDrawable} if the {@link icon} is a
+         * @return An {@link OvalBitmapDrawable} if the {@link icon} is a
          * <tt>BitmapDrawable</tt>. Otherwise returns the {@link icon}.
          * @see #getRoundedIcon(float)
          * @see #getRoundedIcon(Resources, int)

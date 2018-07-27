@@ -291,13 +291,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
             final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
 
             // Creates the binder.
-            final Binder binder;
+            Binder binder = null;
             if (mBinder instanceof Binder) {
                 binder = (Binder)mBinder;
             } else if (mBinder instanceof Integer) {
                 binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
-            } else {
-                binder = ImageLoader.defaultBinder();
             }
 
             // Creates the image loader.

@@ -63,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
-     * @param binder The {@link Binder} to bind the image to target.
+     * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
      */
     public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(executor, imageCache);
@@ -83,6 +83,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see #loadImage(URI, Object, int, Binder)
      */
     public final void loadImage(URI uri, Object target) {
+        DebugUtils.__checkError(mBinder == null, "The mBinder is null. Use loadImage(URI uri, Object target, int flags, Binder<URI, Object, Image> binder) instead.");
         load(uri, target, 0, mBinder, (Object[])null);
     }
 
@@ -95,6 +96,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see #loadImage(URI, Object, int, Binder)
      */
     public final void loadImage(URI uri, Object target, int flags) {
+        DebugUtils.__checkError(mBinder == null, "The mBinder is null. Use loadImage(URI uri, Object target, int flags, Binder<URI, Object, Image> binder) instead.");
         load(uri, target, flags, mBinder, (Object[])null);
     }
 
@@ -123,7 +125,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * Returns the {@link Binder} associated with this loader.
-     * @return The <tt>Binder</tt>.
+     * @return The <tt>Binder</tt> or <tt>null</tt>.
      */
     public final Binder<URI, Object, Image> getBinder() {
         return mBinder;

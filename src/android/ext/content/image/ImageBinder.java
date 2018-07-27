@@ -30,7 +30,7 @@ import android.widget.ImageView;
  *
  * &lt;!-- Bitmap Transformer --&gt;
  * &lt;Transformer
- *     android:name="[ rectangle | roundRect | drawable | oval | gif | classFullName ]"
+ *     android:name="[ rectangle | roundRect | drawable | oval | circle | gif | classFullName ]"
  *     android:topLeftRadius="10dp"
  *     android:topRightRadius="10dp"
  *     android:bottomLeftRadius="10dp"

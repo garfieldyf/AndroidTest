@@ -88,7 +88,7 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     /* package */ final void dump(Context context, Printer printer) {
         final String className = getClass().getSimpleName();
         final StringBuilder result = new StringBuilder(256);
-        final Collection<String> files = snapshot().values();
+        final Collection<String> files = entries().values();
 
         if (this instanceof LruFileCache2) {
             DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", className, files.size(), Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));

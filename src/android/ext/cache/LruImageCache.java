@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -78,8 +79,8 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
     }
 
     @Override
-    public Map<K, Object> snapshot() {
-        return copyCache(mImageCache, copyCache(mBitmapCache, new ArrayMap<K, Object>()));
+    public Map<K, Object> entries() {
+        return Collections.unmodifiableMap(copy(mImageCache, copy(mBitmapCache, new ArrayMap<K, Object>())));
     }
 
     /**
@@ -98,13 +99,13 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
     /**
      * Copies the specified {@link Cache} contents to the specified {@link Map}.
      */
-    private static <K> Map<K, Object> copyCache(Cache<K, ?> cache, Map<K, Object> result) {
-        if (cache instanceof SimpleLruCache) {
+    private static <K> Map<K, Object> copy(Cache<K, ?> cache, Map<K, Object> result) {
+        if (cache instanceof LruCache) {
             synchronized (cache) {
-                result.putAll(((SimpleLruCache<K, ?>)cache).map);
+                result.putAll(((LruCache<K, ?>)cache).map);
             }
         } else {
-            result.putAll(cache.snapshot());
+            result.putAll(cache.entries());
         }
 
         return result;

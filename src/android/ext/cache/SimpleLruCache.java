@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -107,8 +108,8 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Map<K, V> snapshot() {
-        return new LinkedHashMap<K, V>(map);
+    public Map<K, V> entries() {
+        return Collections.unmodifiableMap(map);
     }
 
     /**

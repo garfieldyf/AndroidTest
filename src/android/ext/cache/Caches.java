@@ -40,7 +40,7 @@ public final class Caches {
      * application maximum memory of the current device.
      * @param maxBitmapSize The maximum number of bitmaps in the bitmap pool to recycle the evicted
      * bitmap from the bitmap cache. Pass <tt>0</tt> that the bitmap cache has no bitmap pool.
-     * @return A new <tt>Bitmap</tt> {@link Cache} instance.
+     * @return A new <tt>Bitmap</tt> {@link Cache} instance or <tt>null</tt> if the <tt>scaleMemory <= 0.
      */
     public static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory, int maxBitmapSize) {
         return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxBitmapSize > 0 ? new LruBitmapCache2<K>(scaleMemory, new LinkedBitmapPool(maxBitmapSize)) : new LruBitmapCache<K>(scaleMemory)) : null);
@@ -67,7 +67,7 @@ public final class Caches {
         }
 
         @Override
-        public Map<Object, Object> snapshot() {
+        public Map<Object, Object> entries() {
             return Collections.emptyMap();
         }
 

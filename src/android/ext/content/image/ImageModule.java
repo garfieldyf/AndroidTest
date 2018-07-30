@@ -343,13 +343,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         }
 
         private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, int maxPoolSize, Class clazz) {
-            final BitmapPool bitmapPool;
+            BitmapPool bitmapPool = null;
             if (imageCache instanceof LruBitmapCache2) {
                 bitmapPool = ((LruBitmapCache2)imageCache).getBitmapPool();
             } else if (imageCache instanceof LruImageCache) {
                 bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
-            } else {
-                bitmapPool = null;
             }
 
             return (bitmapPool != null ? newInstance(clazz, new Class[] { Context.class, Parameters.class, int.class, BitmapPool.class }, context, parameters, maxPoolSize, bitmapPool) : newInstance(clazz, new Class[] { Context.class, Parameters.class, int.class }, context, parameters, maxPoolSize));

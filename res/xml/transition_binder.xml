@@ -5,8 +5,7 @@
     tencent:defaultImage="@drawable/ic_placeholder"
     tencent:maxCacheSize="64" >
 
-    <Transformer
-        android:name="com.tencent.test.CircleConverter"
+    <com.tencent.test.CircleConverter
         android:gravity="fill"
         tencent:autoMirrored="horizontal" />
 

@@ -4,6 +4,6 @@
     tencent:defaultImage="@drawable/ic_placeholder"
     tencent:maxCacheSize="64" >
 
-    <Transformer android:name="gif" />
+    <GIFTransformer />
 
 </ImageBinder>

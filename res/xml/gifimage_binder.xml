@@ -6,11 +6,9 @@
     tencent:direction="right"
     tencent:maxCacheSize="32" >
 
-    <Transformer
-        android:name="roundRect"
+    <RoundedRectTransformer
         android:radius="20dp" />
-    <Transformer
-        android:name="com.tencent.test.CircleConverter"
+    <com.tencent.test.CircleConverter
         android:gravity="center"
         tencent:autoMirrored="horizontal" />
 

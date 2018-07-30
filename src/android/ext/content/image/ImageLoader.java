@@ -11,7 +11,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.image.BitmapDecoder.Parameters;
-import android.ext.content.image.Transformer.CacheTransformer;
+import android.ext.content.image.ImageBinder.CacheTransformer;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;

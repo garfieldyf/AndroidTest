@@ -169,8 +169,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
         /**
          * Constructor
+         * @param The {@link ImageModule}.
          */
-        /* package */ Builder(ImageModule module) {
+        public Builder(ImageModule<URI, Image> module) {
             mModule = module;
         }
 

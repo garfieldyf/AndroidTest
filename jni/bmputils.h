@@ -62,7 +62,19 @@ JNIEXPORT_METHOD(jboolean) grayBitmap(JNIEnv* env, jclass /*clazz*/, jobject bit
     assert(env);
     AssertThrowErrnoException(env, bitmap == NULL, "bitmap == null", JNI_FALSE);
 
+#ifndef NDEBUG
+    return handleBitmap(env, bitmap, [](void* pixels, uint32_t width, uint32_t height)
+    {
+        const __NS::Color* colors = (const __NS::Color*)pixels;
+        const uint32_t size = ::__Min(width / 4, 30U);
+        for (uint32_t i = 0; i < size; ++i)
+            colors[i].dump();
+
+        ::Android_grayBitmap(pixels, width, height);
+    });
+#else
     return handleBitmap(env, bitmap, ::Android_grayBitmap);
+#endif  // NDEBUG
 }
 
 ///////////////////////////////////////////////////////////////////////////////

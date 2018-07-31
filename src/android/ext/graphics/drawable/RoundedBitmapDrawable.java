@@ -134,6 +134,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
         } else {
             final float radius = mState.mRadii[0];
             if (radiusEquals(mState.mRadii, 1, radius)) {
+                // Round rect all corner radii are equals, for efficiency, and to enable clipping.
                 outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
             } else {
                 outline.setConvexPath(mState.mPath);

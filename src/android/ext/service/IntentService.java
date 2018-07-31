@@ -21,7 +21,7 @@ public abstract class IntentService extends Service implements Callback {
     private static final int MESSAGE_INTENT = 1;
 
     private Handler mHandler;
-    public final long mKeepAliveTime;
+    protected final long mKeepAliveTime;
 
     /**
      * Constructor

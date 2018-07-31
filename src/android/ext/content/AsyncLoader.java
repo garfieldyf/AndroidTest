@@ -176,7 +176,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
     /**
      * Returns a type-safe empty {@link Binder} associated with this class.
-     * The empty <tt>Binder</tt> {@link Binder#bindValue binderValue}
+     * The empty <tt>Binder</tt> {@link Binder#bindValue bindValue}
      * implementation do nothing.
      * @return An empty <tt>Binder</tt>.
      */

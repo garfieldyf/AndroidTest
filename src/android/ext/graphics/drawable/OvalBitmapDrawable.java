@@ -52,12 +52,7 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     @Override
     @SuppressLint("NewApi")
     protected void getOutline(Outline outline, RectF bounds) {
-        final float width = bounds.width();
-        if (Float.compare(width, bounds.height()) != 0) {
-            outline.setConvexPath(mState.mPath);
-        } else {
-            outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, width * 0.5f);
-        }
+        outline.setOval((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
     }
 
     @Override

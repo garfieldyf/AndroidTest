@@ -94,6 +94,26 @@ public final class NetworkUtils {
     }
 
     /**
+     * Indicates whether the currently active network is connected.
+     * @param context The <tt>Context</tt>.
+     * @return <tt>true</tt> if network is connected, <tt>false</tt> otherwise.
+     * @see #isNetworkConnected(ConnectivityManager)
+     */
+    public static boolean isNetworkConnected(Context context) {
+        return getActiveNetworkInfo(context).isConnected();
+    }
+
+    /**
+     * Indicates whether the currently active network is connected.
+     * @param cm The {@link ConnectivityManager}.
+     * @return <tt>true</tt> if network is connected, <tt>false</tt> otherwise.
+     * @see #isNetworkConnected(Context)
+     */
+    public static boolean isNetworkConnected(ConnectivityManager cm) {
+        return getActiveNetworkInfo(cm).isConnected();
+    }
+
+    /**
      * Returns details about the currently active default data network.
      * @param context The <tt>Context</tt>.
      * @return A {@link NetworkInfo} object for the current default network

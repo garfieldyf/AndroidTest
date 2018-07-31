@@ -12,7 +12,7 @@ import android.graphics.BitmapFactory.Options;
  */
 public class CacheImageDecoder extends ImageDecoder {
     /**
-     * The {@link BitmapPool} to reuse the bitmap when the bitmap decode.
+     * The {@link BitmapPool} used to decode the bitmap.
      */
     protected final BitmapPool mBitmapPool;
 
@@ -21,7 +21,7 @@ public class CacheImageDecoder extends ImageDecoder {
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
-     * @param bitmapPool The {@link BitmapPool} to reuse the bitmap when the bitmap decode.
+     * @param bitmapPool The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
     public CacheImageDecoder(Context context, Parameters parameters, int maxPoolSize, BitmapPool bitmapPool) {
         super(context, parameters, maxPoolSize);

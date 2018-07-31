@@ -15,7 +15,7 @@ import android.ext.util.DebugUtils;
  * @author Garfield
  * @version 4.5
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Indicates the loader will be ignore the memory cache when
@@ -117,7 +117,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         DebugUtils.__checkUIThread("preload");
         DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0xFFFFFF]");
         if (mState != SHUTDOWN && key != null && isCacheValid(flags) && mCache.get(key) == null && !isTaskRunning(key, key)) {
-            final LoadTask task = obtain(key, params, key, flags, AsyncLoader.<Key, Params, Value>emptyBinder());
+            final LoadTask task = obtain(key, params, key, flags, EmptyBinder.sInstance);
             mRunningTasks.put(key, task);
             mExecutor.execute(task);
         }
@@ -223,7 +223,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Retrieves a new {@link Task} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
-    private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder<Key, Params, Value> binder) {
+    private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder binder) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
         task.mFlags  = flags;
@@ -236,7 +236,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Binds the specified <em>value</em> to the specified <em>target</em>.
      */
-    private void bindValue(Key key, Params[] params, Object target, Value value, int state, Binder<Key, Params, Value> binder) {
+    private void bindValue(Key key, Params[] params, Object target, Value value, int state, Binder binder) {
         // Cancel the task associated with the target.
         cancelTask(target, false);
         binder.bindValue(key, params, target, value, state);
@@ -249,7 +249,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         /* package */ Key mKey;
         /* package */ int mFlags;
         /* package */ Object mTarget;
-        /* package */ Binder<Key, Params, Value> mBinder;
+        /* package */ Binder mBinder;
 
         @Override
         /* package */ Value doInBackground(Params[] params) {

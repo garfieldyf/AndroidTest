@@ -120,7 +120,8 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
          * Returns a sample size for used to decode bitmap.
          * @param context The <tt>Context</tt>.
          * @param uri The uri, passed earlier by {@link ImageDecoder#decodeImage}.
-         * @param opts The {@link Options}, passed earlier by {@link ImageDecoder#decodeImage}.
+         * @param opts The {@link Options} to store the sample size, passed earlier
+         * by {@link ImageDecoder#decodeImage}.
          */
         public void computeSampleSize(Context context, Object uri, Options opts) {
             opts.inSampleSize = (int)value;

@@ -228,15 +228,6 @@ public class DownloadRequest {
     }
 
     /**
-     * Returns the response code returned by the remote server.
-     * @return The response code, <tt>-1</tT> if no valid code.
-     * @throws IOException if there is an error during the retrieval.
-     */
-    public final int statusCode() throws IOException {
-        return (mConnection instanceof HttpURLConnection ? ((HttpURLConnection)mConnection).getResponseCode() : HTTP_OK);
-    }
-
-    /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download was

@@ -35,7 +35,7 @@ import android.util.LogPrinter;
  * @version 1.0
  */
 public class DownloadRequest {
-    public boolean __checkHeaders = true;
+    public boolean __checkDumpHeaders = true;
     /* package */ final URLConnection mConnection;
 
     /**
@@ -305,9 +305,9 @@ public class DownloadRequest {
      * Connects to the remote server with the arguments supplied to this request.
      */
     /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
-        __checkHeaders(true);
+        __checkDumpHeaders(true);
         mConnection.connect();
-        __checkHeaders(false);
+        __checkDumpHeaders(false);
         return (mConnection instanceof HttpURLConnection ? ((HttpURLConnection)mConnection).getResponseCode() : HTTP_OK);
     }
 
@@ -357,11 +357,11 @@ public class DownloadRequest {
         }
     }
 
-    /* package */ final void __checkHeaders(boolean request) {
-        boolean checkHeaders = false;
-        checkHeaders = this.__checkHeaders;
+    /* package */ final void __checkDumpHeaders(boolean request) {
+        boolean dumpHeaders = false;
+        dumpHeaders = this.__checkDumpHeaders;
 
-        if (checkHeaders) {
+        if (dumpHeaders) {
             final LogPrinter printer = new LogPrinter(Log.DEBUG, getClass().getName());
             if (request) {
                 NetworkUtils.dumpRequestHeaders(mConnection, printer);

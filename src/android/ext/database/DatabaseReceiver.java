@@ -170,6 +170,9 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
 
     private static String toString(int statement) {
         switch (statement) {
+        case STATEMENT_UNKNOWN:
+            return "UNKNOWN";
+
         case STATEMENT_INSERT:
             return "INSERT";
 
@@ -183,7 +186,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
             return "REPLACE";
 
         default:
-            return "UNKNOWN";
+            return Integer.toString(statement);
         }
     }
 }

@@ -271,7 +271,7 @@ public final class PackageUtils {
                 .append(" { package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", label = ").append(label)
-                .append(", flags = ").append(Integer.toHexString(packageInfo.applicationInfo.flags))
+                .append(", flags = ").append(String.format("0x%08x", packageInfo.applicationInfo.flags))
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 

@@ -139,7 +139,20 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     }
 
     /**
-     * Creates a new {@link FileCache}.
+     * Loads a {@link Parameters} object.
+     */
+    /* package */ static Parameters loadParameters(Context context, Object parameters) {
+        if (parameters instanceof Parameters) {
+            return (Parameters)parameters;
+        } else if (parameters instanceof Integer) {
+            return XmlResources.loadParameters(context, (int)parameters);
+        } else {
+            return Parameters.defaultParameters();
+        }
+    }
+
+    /**
+     * Creates a new {@link FileCache} instance.
      */
     private static FileCache createFileCache(Context context, int maxSize) {
         return (maxSize > 0 ? new LruFileCache(context, ".image_cache", maxSize) : null);
@@ -321,15 +334,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
                 return mDecoder;
             }
 
-            final Parameters parameters;
-            if (mParameters instanceof Parameters) {
-                parameters = (Parameters)mParameters;
-            } else if (mParameters instanceof Integer) {
-                parameters = XmlResources.loadParameters(mModule.mContext, (int)mParameters);
-            } else {
-                parameters = ImageLoader.defaultParameters();
-            }
-
+            final Parameters parameters = loadParameters(mModule.mContext, mParameters);
             final int maxPoolSize = ImageLoader.computeMaximumPoolSize(mModule.mExecutor);
             if (mDecoder instanceof Class) {
                 return createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class)mDecoder);

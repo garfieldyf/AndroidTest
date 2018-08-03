@@ -301,7 +301,7 @@ public final class DeviceUtils {
     }
 
     private static boolean checkSuperUser(String path, Stat stat) {
-        return (FileUtils.stat(path, stat) == 0 && stat.uid == 0 && (stat.mode & (Stat.S_ISUID | Stat.S_IXOTH)) > 0);
+        return (FileUtils.stat(path, stat) == 0 && stat.uid == 0 && (stat.mode & (Stat.S_ISUID | Stat.S_IXOTH)) != 0);
     }
 
     /**

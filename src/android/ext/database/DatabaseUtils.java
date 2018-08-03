@@ -36,6 +36,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
+@SuppressWarnings("unchecked")
 public final class DatabaseUtils {
     /**
      * Returns the numbers of rows in the <tt>Cursor</tt>,
@@ -234,7 +235,7 @@ public final class DatabaseUtils {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? DatabaseUtils.<T>newArrayImpl(cursor, componentType) : null);
+            return (cursor != null ? (T)newArrayImpl(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query - ").append(sql).toString(), e);
             return null;
@@ -262,7 +263,7 @@ public final class DatabaseUtils {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-            return (cursor != null ? DatabaseUtils.<T>newArrayImpl(cursor, componentType) : null);
+            return (cursor != null ? (T)newArrayImpl(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
             return null;
@@ -356,7 +357,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      */
     public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return newInstanceImpl(cursor, ClassFactory.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
+        return (T)newInstanceImpl(cursor, ClassFactory.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
     }
 
     /**
@@ -374,7 +375,7 @@ public final class DatabaseUtils {
         final int position = cursor.getPosition();
         try {
             cursor.moveToPosition(-1);
-            return newArrayImpl(cursor, componentType);
+            return (T)newArrayImpl(cursor, componentType);
         } finally {
             cursor.moveToPosition(position);
         }
@@ -585,9 +586,8 @@ public final class DatabaseUtils {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Field> fields) throws ReflectiveOperationException {
-        final T result = (T)constructor.newInstance((Object[])null);
+    private static Object newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Field> fields) throws ReflectiveOperationException {
+        final Object result = constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
             DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
@@ -617,30 +617,26 @@ public final class DatabaseUtils {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> T newArrayImpl(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
-        final Object result;
+    private static Object newArrayImpl(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         if (componentType == String.class) {
-            result = createStringArray(cursor);
+            return createStringArray(cursor);
         } else if (!componentType.isPrimitive()) {
-            result = createObjectArray(cursor, componentType);
+            return createObjectArray(cursor, componentType);
         } else if (componentType == int.class) {
-            result = createIntArray(cursor);
+            return createIntArray(cursor);
         } else if (componentType == long.class) {
-            result = createLongArray(cursor);
+            return createLongArray(cursor);
         } else if (componentType == short.class) {
-            result = createShortArray(cursor);
+            return createShortArray(cursor);
         } else if (componentType == float.class) {
-            result = createFloatArray(cursor);
+            return createFloatArray(cursor);
         } else if (componentType == double.class) {
-            result = createDoubleArray(cursor);
+            return createDoubleArray(cursor);
         } else if (componentType == boolean.class) {
-            result = createBooleanArray(cursor);
+            return createBooleanArray(cursor);
         } else {
             throw new Error("Unsupported component type - " + componentType.toString());
         }
-
-        return (T)result;
     }
 
     private static int[] createIntArray(Cursor cursor) {

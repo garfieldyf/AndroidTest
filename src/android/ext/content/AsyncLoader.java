@@ -68,7 +68,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0xFFFFFF]");
         if (mState != SHUTDOWN) {
             if (key == null) {
-                bindValue(key, params, target, null, flags, binder);
+                bindValue(binder, key, params, target, null, flags);
                 return;
             }
 
@@ -76,12 +76,12 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             if (isCacheValid(flags)) {
                 final Value value = mCache.get(key);
                 if (value != null) {
-                    bindValue(key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE, binder);
+                    bindValue(binder, key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE);
                     return;
                 }
             }
 
-            // Loads the value from the background thread.
+            // Loads the value on a background thread.
             if (!isTaskRunning(key, target)) {
                 binder.bindValue(key, params, target, null, flags);
                 final LoadTask task = obtain(key, params, target, flags, binder);
@@ -236,7 +236,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Binds the specified <em>value</em> to the specified <em>target</em>.
      */
-    private void bindValue(Key key, Params[] params, Object target, Value value, int state, Binder binder) {
+    private void bindValue(Binder binder, Key key, Params[] params, Object target, Value value, int state) {
         // Cancel the task associated with the target.
         cancelTask(target, false);
         binder.bindValue(key, params, target, value, state);

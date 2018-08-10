@@ -72,7 +72,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader<Image>(context, this, fileCache) : new Loader<Image>(context, this));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
-        DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The internal binder should be no drawable cache!!!");
+        DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
     }
 
     /**

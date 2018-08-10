@@ -24,7 +24,7 @@ import android.util.Log;
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
  *     protected void onPostExecute(JSONObject result) {
  *         if (result != null) {
- *             Log.i("JSONDownloadTask", result.toString());
+ *             Log.i(TAG, result.toString());
  *         }
  *     }
  * }

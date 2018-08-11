@@ -257,7 +257,7 @@ public final class Pages {
      * A <tt>PageLoader</tt> used to load page data.
      */
     /* package */ static interface PageLoader<E> {
-        Page<E> loadPage(int position, int page, int offset, int itemCount);
+        Page<E> loadPage(int position, int page, int offset, int count);
     }
 
     /**
@@ -324,15 +324,15 @@ public final class Pages {
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
                 // Computes the page offset and item count.
-                int offset = 0, itemCount = mFirstPageSize;
+                int offset = 0, count = mFirstPageSize;
                 if (page > 0) {
-                    itemCount = mPageSize;
+                    count  = mPageSize;
                     offset = (page - 1) * mPageSize + mFirstPageSize;
                 }
 
                 // Marks the page loading state, if the page is not load.
                 mPageStates.set(page);
-                result = mPageLoader.loadPage(position, page, offset, itemCount);
+                result = mPageLoader.loadPage(position, page, offset, count);
                 if (getCount(result) > 0) {
                     // If the page is load successful.
                     // 1. Adds the page to page cache.

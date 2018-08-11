@@ -185,7 +185,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
-     * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, E[])
      * @see #setPage(int, List)
@@ -202,7 +202,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data), null)</tt>.
      * @param page The index of the page.
-     * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The {@link List} of the page data.
      * @see #setPage(int, E[])
      * @see #setPage(int, JSONArray)
      * @see #setPage(int, Page, Object)
@@ -214,7 +214,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     /**
      * Equivalent to calling <tt>setPage(page, new JSONArrayPage(data), null)</tt>.
      * @param page The index of the page.
-     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The {@link JSONArray} of the page data.
      * @see #setPage(int, E[])
      * @see #setPage(int, List)
      * @see #setPage(int, Page, Object)
@@ -226,7 +226,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(Arrays.asList(data)), null)</tt>.
      * @param page The index of the page.
-     * @param data An array of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. An array of the page data.
      * @see #setPage(int, List)
      * @see #setPage(int, JSONArray)
      * @see #setPage(int, Page, Object)
@@ -289,10 +289,10 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * {@link #setPage(int, Page, Object)}.<p>
      * @param position The adapter position of the item in this adapter.
      * @param page The index of the page whose data should be returned.
-     * @param offset The start index of the first item.
-     * @param itemCount The number of items in the <em>page</em>.
+     * @param offset The start position of the first item in the <em>page</em>.
+     * @param count The number of items in the <em>page</em>.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    public abstract Page<E> loadPage(int position, int page, int offset, int itemCount);
+    public abstract Page<E> loadPage(int position, int page, int offset, int count);
 }

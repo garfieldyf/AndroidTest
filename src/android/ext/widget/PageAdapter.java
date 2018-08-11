@@ -143,7 +143,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
-     * @param data The <tt>Page</tt> or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
      * @see #setPage(int, E[])
      * @see #setPage(int, List)
      * @see #setPage(int, JSONArray)
@@ -157,7 +157,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(data))</tt>.
      * @param page The index of the page.
-     * @param data The {@link List} of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The {@link List} of the page data.
      * @see #setPage(int, E[])
      * @see #setPage(int, Page)
      * @see #setPage(int, JSONArray)
@@ -169,7 +169,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     /**
      * Equivalent to calling <tt>setPage(page, new JSONArrayPage(data))</tt>.
      * @param page The index of the page.
-     * @param data The {@link JSONArray} of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. The {@link JSONArray} of the page data.
      * @see #setPage(int, E[])
      * @see #setPage(int, Page)
      * @see #setPage(int, List)
@@ -181,7 +181,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     /**
      * Equivalent to calling <tt>setPage(page, new ListPage(Arrays.asList(data)))</tt>.
      * @param page The index of the page.
-     * @param data An array of the page data or <tt>null</tt> if load failed.
+     * @param data May be <tt>null</tt>. An array of the page data.
      * @see #setPage(int, List)
      * @see #setPage(int, Page)
      * @see #setPage(int, JSONArray)
@@ -233,7 +233,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
 
     /**
      * Returns a new {@link View} to hold the item data.
-     * @param position The position of the item.
+     * @param position The adapter position of the item.
      * @param parent The parent to which the new view is attached to.
      * @return The newly created view.
      * @see #bindView(E, int, View)
@@ -243,7 +243,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     /**
      * Binds an existing {@link View} to hold the item data.
      * @param item The item to bind view or <tt>null</tt>.
-     * @param position The position of the item.
+     * @param position The adapter position of the item.
      * @param view Existing view, returned earlier by {@link #newView}.
      * @see #newView(int, ViewGroup)
      */
@@ -257,10 +257,10 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * {@link #setPage(int, Page)}.<p>
      * @param position The adapter position of the item in this adapter.
      * @param page The index of the page whose data should be returned.
-     * @param offset The start index of the first item.
-     * @param itemCount The number of items in the <em>page</em>.
+     * @param offset The start position of the first item in the <em>page</em>.
+     * @param count The number of items in the <em>page</em>.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page)
      */
-    public abstract Page<E> loadPage(int position, int page, int offset, int itemCount);
+    public abstract Page<E> loadPage(int position, int page, int offset, int count);
 }

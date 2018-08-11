@@ -44,7 +44,7 @@ import android.net.Uri;
  *     }
  * }
  *
- * new DownloadBitmapTask()
+ * new DownloadBitmapTask(context)
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
  * @author Garfield
@@ -109,7 +109,7 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
         final URI uri = params[0];
         if (matchScheme(uri)) {
-            newDownloadRequest(uri.toString(), DownloadRequest.class).readTimeout(60000).connectTimeout(60000);
+            createDownloadRequest(uri.toString());
             return super.doInBackground(params);
         } else {
             return createImageDecoder(ImageModule.loadParameters(mContext, mParameters)).decodeImage(uri, null, 0, null);
@@ -122,8 +122,8 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
             return null;
         }
 
-        final String cacheDir  = FileUtils.getCacheDir(mContext, ".async_image_cache").getPath();
-        final String imageFile = new StringBuilder(cacheDir.length() + 16).append(cacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
+        final String imageDir  = FileUtils.getCacheDir(mContext, ".async_image_cache").getPath();
+        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
         try {
             final byte[] tempBuffer = new byte[16384];
             download(imageFile, statusCode, tempBuffer);
@@ -134,14 +134,26 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
     }
 
     /**
-     * Returns a new {@link ImageDecoder} object. Subclasses should override this method to create the
-     * <tt>ImageDecoder</tt>. The default implementation returns a new {@link BitmapDecoder} object.
+     * Returns a new {@link ImageDecoder} object. Subclasses should override this method to create
+     * the image decoder. The default implementation returns a new {@link BitmapDecoder} object.
      * @param parameters The {@link Parameters} used to decode the image.
      * @return The <tt>ImageDecoder</tt> object.
      */
     @SuppressWarnings("unchecked")
     protected ImageDecoder<Image> createImageDecoder(Parameters parameters) {
         return (ImageDecoder<Image>)new BitmapDecoder(mContext, parameters, 1);
+    }
+
+    /**
+     * Returns a new {@link DownloadRequest} with the specified <em>url</em>. Subclasses should
+     * override this method to create the download request. The default implementation returns
+     * a new <tt>DownloadRequest</tt> object.
+     * @param url The url to connect the remote server.
+     * @return The <tt>DownloadRequest</tt> object.
+     * @see AsyncDownloadTask#newDownloadRequest(Object, Class)
+     */
+    protected DownloadRequest createDownloadRequest(String url) {
+        return newDownloadRequest(url, DownloadRequest.class).readTimeout(60000).connectTimeout(60000);
     }
 
     /**

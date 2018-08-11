@@ -75,8 +75,8 @@
 
     <!-- target -replace-release-call -->
     <target name="-replace-release-call">
-        <!-- replace call this.writeUncaughtException() to this.storeUncaughtException() method -->
-        <echo level="info">Replace this.writeUncaughtException() to this.storeUncaughtException() in the ProcessUtils.java</echo>
+        <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
+        <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
         <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
             <replacefilter token="this.writeUncaughtException" value="this.storeUncaughtException" />
         </replace>

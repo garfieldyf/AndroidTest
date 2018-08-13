@@ -10,6 +10,7 @@ import android.ext.cache.Caches;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
+import android.ext.content.XmlResources.XmlTransformerInflater;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
@@ -20,6 +21,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Printer;
+import android.util.Xml;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -38,6 +40,7 @@ import android.widget.ImageView;
  * &lt;!-- Bitmap Transformer --&gt;
  * &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
  *     class="classFullName"
+ *     android:src="@xml/transformer1"
  *     android:radius="20dp"
  *     android:topLeftRadius="10dp"
  *     android:topRightRadius="10dp"
@@ -49,6 +52,7 @@ import android.widget.ImageView;
  * &lt;!-- Image (Optional) Transformer --&gt;
  * &lt;[ GIFTransformer | DrawableTransformer | transformer ]
  *     class="classFullName"
+ *     android:src="@xml/transformer2"
  *     namespace:attributes3="value3"
  *     namespace:attributes4="value4"
  *     ... ... /&gt;
@@ -58,6 +62,10 @@ import android.widget.ImageView;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
+    private static final int[] TRANSFORMER_ATTRS = {
+        android.R.attr.src,
+    };
+
     private static int[] IMAGE_BINDER_ATTRS;
 
     /**
@@ -174,7 +182,21 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             // Empty loop
         }
 
-        return (type == XmlPullParser.START_TAG ? XmlResources.inflate(context, parser) : null);
+        if (type != XmlPullParser.START_TAG) {
+            return null;
+        }
+
+        if ("transformer".equals(parser.getName())) {
+            final TypedArray a = context.obtainStyledAttributes(Xml.asAttributeSet(parser), TRANSFORMER_ATTRS);
+            final int id = a.getResourceId(0 /* android.R.attr.src */, 0);
+            a.recycle();
+
+            if (id != 0) {
+                return XmlResources.loadTransformer(context, id);
+            }
+        }
+
+        return XmlTransformerInflater.inflateTransformer(context, parser);
     }
 
     /**

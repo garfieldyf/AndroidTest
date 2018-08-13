@@ -60,7 +60,14 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 {
     JNIEnv* env = NULL;
     verify(vm->GetEnv((void**)&env, JNI_VERSION_1_4), JNI_OK);
-    LOGD("sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu\n", sizeof(void*), sizeof(int), sizeof(long));
+
+#ifndef NDEBUG
+    const int num = 0x12345678;
+    const char* bigEndian = "Big Endian";
+    const char* littleEndian = "Little Endian";
+    const char* byteOrder = (*((const char*)&num) == 0x12 ? bigEndian : littleEndian);
+    LOGD("sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, byteOrder = %s\n", sizeof(void*), sizeof(int), sizeof(long), byteOrder);
+#endif  // NDEBUG
 
 #ifdef __BUILD_GIFIMAGE__
     verify(GIFImage::registerNativeMethods(env), JNI_OK);

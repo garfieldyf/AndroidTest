@@ -3,6 +3,6 @@
     xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
     tencent:defaultImage="@drawable/ic_placeholder" >
 
-    <com.tencent.test.CircleConverter />
+    <transformer class="com.tencent.test.CircleConverter" />
 
 </ImageBinder>

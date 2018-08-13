@@ -65,18 +65,6 @@ public final class XmlResources {
     }
 
     /**
-     * Inflates a new {@link Transformer} object from a xml resource.
-     * @param context The <tt>Context</tt>.
-     * @param parser The XML parser to parsing the XML data.
-     * @return The <tt>Transformer</tt> object.
-     * @throws XmlPullParserException if the XML data cannot be parsed.
-     * @throws ReflectiveOperationException if the constructor cannot be invoked.
-     */
-    public static <URI, Image> Transformer<URI, Image> inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-        return (Transformer<URI, Image>)XmlTransformerInflater.sInstance.inflate(context, parser);
-    }
-
-    /**
      * Loads an new object from a xml resource.
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the object to load.
@@ -229,8 +217,20 @@ public final class XmlResources {
     /**
      * Class <tt>XmlTransformerInflater</tt> is an implementation of a {@link XmlResourceInflater}.
      */
-    private static final class XmlTransformerInflater implements XmlResourceInflater<Object> {
-        public static final XmlTransformerInflater sInstance = new XmlTransformerInflater();
+    public static final class XmlTransformerInflater implements XmlResourceInflater<Object> {
+        /* package */ static final XmlTransformerInflater sInstance = new XmlTransformerInflater();
+
+        /**
+         * Inflates a new {@link Transformer} object from a xml resource.
+         * @param context The <tt>Context</tt>.
+         * @param parser The XML parser to parsing the XML data.
+         * @return The <tt>Transformer</tt> object.
+         * @throws XmlPullParserException if the XML data cannot be parsed.
+         * @throws ReflectiveOperationException if the constructor cannot be invoked.
+         */
+        public static <URI, Image> Transformer<URI, Image> inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+            return (Transformer<URI, Image>)sInstance.inflate(context, parser);
+        }
 
         @Override
         public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {

@@ -49,7 +49,8 @@ public final class MessageDigests {
 
         @Override
         public String toString() {
-            return new StringBuilder(10).append(name()).append('(').append(digestLength).append(')').toString();
+            final String name = name();
+            return new StringBuilder(name.length() + 4).append(name).append('(').append(digestLength).append(')').toString();
         }
     }
 

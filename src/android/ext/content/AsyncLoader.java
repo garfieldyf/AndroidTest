@@ -65,9 +65,10 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null, "target == null");
-        DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0xFFFFFF]");
+        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
         if (mState != SHUTDOWN) {
             if (key == null) {
+                DebugUtils.__checkWarning(true, getClass().getName(), "load() - key == null");
                 bindValue(binder, key, params, target, null, flags);
                 return;
             }
@@ -115,7 +116,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      */
     public final void preload(Key key, int flags, Params... params) {
         DebugUtils.__checkUIThread("preload");
-        DebugUtils.__checkError((flags & 0xFF000000) != 0, "The flags must be range of [0 - 0xFFFFFF]");
+        DebugUtils.__checkWarning(key == null, getClass().getName(), "preload() - key == null");
+        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
         if (mState != SHUTDOWN && key != null && isCacheValid(flags) && mCache.get(key) == null && !isTaskRunning(key, key)) {
             final LoadTask task = obtain(key, params, key, flags, EmptyBinder.sInstance);
             mRunningTasks.put(key, task);
@@ -144,6 +146,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #loadSync(Key)
      */
     public final Value loadSync(Key key, int flags, Params... params) {
+        DebugUtils.__checkWarning(key == null, getClass().getName(), "loadSync() - key == null");
+        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
         if (key == null || mState == SHUTDOWN) {
             return null;
         }

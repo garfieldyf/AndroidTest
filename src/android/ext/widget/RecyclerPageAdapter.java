@@ -8,7 +8,7 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.JSONUtils;
 import android.ext.util.UIHandler;
-import android.ext.widget.Pages.JSONArrayPage;
+import android.ext.widget.Pages.JSONPage;
 import android.ext.widget.Pages.ListPage;
 import android.ext.widget.Pages.Page;
 import android.ext.widget.Pages.PageAdapterImpl;
@@ -212,7 +212,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new JSONArrayPage(data), null)</tt>.
+     * Equivalent to calling <tt>setPage(page, new JSONPage(data), null)</tt>.
      * @param page The index of the page.
      * @param data May be <tt>null</tt>. The {@link JSONArray} of the page data.
      * @see #setPage(int, E[])
@@ -220,7 +220,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see #setPage(int, Page, Object)
      */
     public final void setPage(int page, JSONArray data) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONArrayPage<E>(data) : null), null);
+        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), null);
     }
 
     /**

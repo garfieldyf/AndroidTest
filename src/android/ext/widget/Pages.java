@@ -135,16 +135,16 @@ public final class Pages {
     }
 
     /**
-     * Class <tt>JSONArrayPage</tt> is an implementation of a {@link Page}.
+     * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
      */
-    public static class JSONArrayPage<E> implements Page<E> {
+    public static class JSONPage<E> implements Page<E> {
         protected final JSONArray mData;
 
         /**
          * Constructor
          * @param data A {@link JSONArray} of this page data.
          */
-        public JSONArrayPage(JSONArray data) {
+        public JSONPage(JSONArray data) {
             DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
             mData = data;
         }
@@ -292,7 +292,7 @@ public final class Pages {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = getPage((int)(combinedPosition >> 32), position);
+            final Page<E> page = getPage(getOriginalPage(combinedPosition), position);
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
@@ -300,7 +300,7 @@ public final class Pages {
             DebugUtils.__checkUIThread("peekItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = mPageCache.get((int)(combinedPosition >> 32));
+            final Page<E> page = mPageCache.get(getOriginalPage(combinedPosition));
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 

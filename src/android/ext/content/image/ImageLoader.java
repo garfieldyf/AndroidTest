@@ -217,8 +217,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Class <tt>Loader</tt> used to load image from the specified url.
      */
     private static class Loader<Image> implements Factory<byte[]> {
-        protected final String mCacheDir;
-        protected final ImageLoader<?, Image> mOwner;
+        /* package */ final String mCacheDir;
+        /* package */ final ImageLoader<?, Image> mOwner;
 
         /**
          * Constructor

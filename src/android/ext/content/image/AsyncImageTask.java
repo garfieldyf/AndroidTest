@@ -122,7 +122,7 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
             return null;
         }
 
-        final String imageDir  = FileUtils.getCacheDir(mContext, ".async_image_cache").getPath();
+        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
         final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
         try {
             final byte[] tempBuffer = new byte[16384];

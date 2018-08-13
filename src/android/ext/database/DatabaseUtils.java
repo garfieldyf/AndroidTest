@@ -235,7 +235,7 @@ public final class DatabaseUtils {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? (T)newArrayImpl(cursor, componentType) : null);
+            return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query - ").append(sql).toString(), e);
             return null;
@@ -263,7 +263,7 @@ public final class DatabaseUtils {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-            return (cursor != null ? (T)newArrayImpl(cursor, componentType) : null);
+            return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
             return null;
@@ -361,8 +361,8 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns a new array with the specified <em>cursor</em> and <em>componentType</em>. Equivalent
-     * to <tt>new componentType[cursor.getCount()]</tt>. The position is restored after creating.
+     * Returns a new array with the specified <em>cursor</em> and <em>componentType</em>.
+     * Equivalent to <tt>new componentType[cursor.getCount()]</tt>.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param componentType A <tt>Class</tt> can be deserialized of the array elements.
      * See {@link CursorField}.
@@ -372,18 +372,33 @@ public final class DatabaseUtils {
      * @see #newInstance(Cursor, Class)
      */
     public static <T> T newArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
-        final int position = cursor.getPosition();
-        try {
-            cursor.moveToPosition(-1);
-            return (T)newArrayImpl(cursor, componentType);
-        } finally {
-            cursor.moveToPosition(position);
+        final Object result;
+        cursor.moveToPosition(-1);
+        if (componentType == String.class) {
+            result = createStringArray(cursor);
+        } else if (!componentType.isPrimitive()) {
+            result = createObjectArray(cursor, componentType);
+        } else if (componentType == int.class) {
+            result = createIntArray(cursor);
+        } else if (componentType == long.class) {
+            result = createLongArray(cursor);
+        } else if (componentType == short.class) {
+            result = createShortArray(cursor);
+        } else if (componentType == float.class) {
+            result = createFloatArray(cursor);
+        } else if (componentType == double.class) {
+            result = createDoubleArray(cursor);
+        } else if (componentType == boolean.class) {
+            result = createBooleanArray(cursor);
+        } else {
+            throw new Error("Unsupported component type - " + componentType.toString());
         }
+
+        return (T)result;
     }
 
     /**
      * Returns an immutable <tt>List</tt> with the specified <em>cursor</em> and <em>componentType</em>.
-     * The position is restored after creating.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
      * @return An immutable <tt>List</tt>.
@@ -415,7 +430,6 @@ public final class DatabaseUtils {
 
     /**
      * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
-     * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param columnNames The name of the columns which the values to write.
@@ -434,14 +448,9 @@ public final class DatabaseUtils {
             }
 
             // Writes the cursor contents into writer.
-            final int position = cursor.getPosition();
-            try {
-                cursor.moveToPosition(-1);
-                while (cursor.moveToNext()) {
-                    writeCursorRow(writer, cursor, columnIndexes, columnNames);
-                }
-            } finally {
-                cursor.moveToPosition(position);
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                writeCursorRow(writer, cursor, columnIndexes, columnNames);
             }
         }
 
@@ -615,28 +624,6 @@ public final class DatabaseUtils {
         }
 
         return result;
-    }
-
-    private static Object newArrayImpl(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
-        if (componentType == String.class) {
-            return createStringArray(cursor);
-        } else if (!componentType.isPrimitive()) {
-            return createObjectArray(cursor, componentType);
-        } else if (componentType == int.class) {
-            return createIntArray(cursor);
-        } else if (componentType == long.class) {
-            return createLongArray(cursor);
-        } else if (componentType == short.class) {
-            return createShortArray(cursor);
-        } else if (componentType == float.class) {
-            return createFloatArray(cursor);
-        } else if (componentType == double.class) {
-            return createDoubleArray(cursor);
-        } else if (componentType == boolean.class) {
-            return createBooleanArray(cursor);
-        } else {
-            throw new Error("Unsupported component type - " + componentType.toString());
-        }
     }
 
     private static int[] createIntArray(Cursor cursor) {

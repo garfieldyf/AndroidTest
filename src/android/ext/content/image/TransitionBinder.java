@@ -46,7 +46,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     }
 
     @Override
-    public TransitionBinder<URI, Image> copy(Drawable defaultImage) {
+    public ImageBinder<URI, Image> copy(Drawable defaultImage) {
         return new TransitionBinder<URI, Image>(null, mTransformer, defaultImage, duration);
     }
 

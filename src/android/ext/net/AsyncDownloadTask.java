@@ -30,8 +30,7 @@ import android.util.Log;
  * }
  *
  * final JSONDownloadTask task = new JSONDownloadTask();
- * task.newDownloadRequest(url, DownloadPostRequest.class)
- *     .post(obj)
+ * task.newDownloadRequest(url, DownloadRequest.class)
  *     .readTimeout(60000)
  *     .connectTimeout(60000)
  *     .contentType("application/json")

@@ -3,18 +3,21 @@ package android.ext.content.image;
 import static android.ext.content.image.ImageLoader.SCHEME_FTP;
 import static android.ext.content.image.ImageLoader.SCHEME_HTTP;
 import static android.ext.content.image.ImageLoader.SCHEME_HTTPS;
-import java.net.HttpURLConnection;
-import java.net.URLConnection;
+import static java.net.HttpURLConnection.HTTP_OK;
+import java.io.IOException;
+import java.lang.ref.WeakReference;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
-import android.ext.content.image.ImageLoader.ImageDecoder;
-import android.ext.net.AsyncDownloadTask;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.net.Uri;
+import android.os.AsyncTask;
+import android.util.Log;
 
 /**
  * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI on a background thread
@@ -50,16 +53,22 @@ import android.net.Uri;
  * @author Garfield
  * @version 1.0
  */
-public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, Image> {
+@SuppressWarnings("unchecked")
+public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> implements Cancelable {
     /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
 
     /**
-     * The parameters to decode bitmap.
+     * The {@link Parameters} to decode bitmap.
      */
-    private Object mParameters;
+    protected Parameters mParameters;
+
+    /**
+     * The owner object.
+     */
+    private WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -67,6 +76,7 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
      * @see #AsyncImageTask(Context, Object)
      */
     public AsyncImageTask(Context context) {
+        DebugUtils.__checkMemoryLeaks(getClass());
         mContext = context.getApplicationContext();
     }
 
@@ -77,8 +87,30 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
      * @see #AsyncImageTask(Context)
      */
     public AsyncImageTask(Context context, Object owner) {
-        super(owner);
+        DebugUtils.__checkMemoryLeaks(getClass());
+        mOwner = new WeakReference<Object>(owner);
         mContext = context.getApplicationContext();
+    }
+
+    /**
+     * Returns the object that owns this task.
+     * @return The owner object or <tt>null</tt> if
+     * no owner set or the owner released by the GC.
+     * @see #setOwner(Object)
+     */
+    public final <T> T getOwner() {
+        return (mOwner != null ? (T)mOwner.get() : null);
+    }
+
+    /**
+     * Sets the object that owns this task.
+     * @param owner The owner object.
+     * @return This task.
+     * @see #getOwner()
+     */
+    public final AsyncImageTask<URI, Image> setOwner(Object owner) {
+        mOwner = new WeakReference<Object>(owner);
+        return this;
     }
 
     /**
@@ -88,7 +120,7 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
      * @see #setParameters(Parameters)
      */
     public final AsyncImageTask<URI, Image> setParameters(int id) {
-        mParameters = id;
+        mParameters = XmlResources.loadParameters(mContext, id);
         return this;
     }
 
@@ -104,56 +136,46 @@ public class AsyncImageTask<URI, Image> extends AsyncDownloadTask<URI, Object, I
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Image doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
+        final byte[] tempBuffer = new byte[16384];
         final URI uri = params[0];
-        if (matchScheme(uri)) {
-            createDownloadRequest(uri.toString());
-            return super.doInBackground(params);
-        } else {
-            return createImageDecoder(ImageModule.loadParameters(mContext, mParameters)).decodeImage(uri, null, 0, null);
-        }
-    }
-
-    @Override
-    protected Image onDownload(URLConnection conn, int statusCode, URI[] uris) throws Exception {
-        if (isCancelled() || statusCode != HttpURLConnection.HTTP_OK) {
-            return null;
+        if (!matchScheme(uri)) {
+            return decodeImage(uri, tempBuffer);
         }
 
-        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
-        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
+        final String imageFile = new StringBuilder(128).append(FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath()).append('/').append(Thread.currentThread().hashCode()).toString();
         try {
-            final byte[] tempBuffer = new byte[16384];
-            download(imageFile, statusCode, tempBuffer);
-            return (isCancelled() ? null : createImageDecoder(ImageModule.loadParameters(mContext, mParameters)).decodeImage(imageFile, null, 0, tempBuffer));
+            final int statusCode = createDownloadRequest(uri.toString()).download(imageFile, this, tempBuffer);
+            return (statusCode == HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
+        } catch (Exception e) {
+            Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
+            return null;
         } finally {
             FileUtils.deleteFiles(imageFile, false);
         }
     }
 
     /**
-     * Returns a new {@link ImageDecoder} object. Subclasses should override this method to create
-     * the image decoder. The default implementation returns a new {@link BitmapDecoder} object.
-     * @param parameters The {@link Parameters} used to decode the image.
-     * @return The <tt>ImageDecoder</tt> object.
+     * Returns a new download request with the specified <em>url</em>. Subclasses should
+     * override this method to create the download request. The default implementation
+     * returns a new {@link DownloadRequest} object.
+     * @param url The url to connect the remote server.
+     * @return The <tt>DownloadRequest</tt> object.
+     * @throws IOException if an error occurs while creating the download request.
      */
-    @SuppressWarnings("unchecked")
-    protected ImageDecoder<Image> createImageDecoder(Parameters parameters) {
-        return (ImageDecoder<Image>)new BitmapDecoder(mContext, parameters, 1);
+    protected DownloadRequest createDownloadRequest(String url) throws IOException {
+        return new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
     }
 
     /**
-     * Returns a new {@link DownloadRequest} with the specified <em>url</em>. Subclasses should
-     * override this method to create the download request. The default implementation returns
-     * a new <tt>DownloadRequest</tt> object.
-     * @param url The url to connect the remote server.
-     * @return The <tt>DownloadRequest</tt> object.
-     * @see AsyncDownloadTask#newDownloadRequest(Object, Class)
+     * Decodes an image from the specified <em>uri</em>.
+     * @param uri The uri to decode.
+     * @param tempBuffer May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
-    protected DownloadRequest createDownloadRequest(String url) {
-        return newDownloadRequest(url, DownloadRequest.class).readTimeout(60000).connectTimeout(60000);
+    protected Image decodeImage(Object uri, byte[] tempBuffer) {
+        return (Image)new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
     }
 
     /**

@@ -146,7 +146,7 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
 
         final String imageFile = new StringBuilder(128).append(FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath()).append('/').append(Thread.currentThread().hashCode()).toString();
         try {
-            final int statusCode = createDownloadRequest(uri.toString()).download(imageFile, this, tempBuffer);
+            final int statusCode = createDownloadRequest(uri).download(imageFile, this, tempBuffer);
             return (statusCode == HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
@@ -160,12 +160,12 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
      * Returns a new download request with the specified <em>url</em>. Subclasses should
      * override this method to create the download request. The default implementation
      * returns a new {@link DownloadRequest} object.
-     * @param url The url to connect the remote server.
+     * @param uri The uri to create.
      * @return The <tt>DownloadRequest</tt> object.
      * @throws IOException if an error occurs while creating the download request.
      */
-    protected DownloadRequest createDownloadRequest(String url) throws IOException {
-        return new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
+    protected DownloadRequest createDownloadRequest(URI uri) throws IOException {
+        return new DownloadRequest(uri.toString()).readTimeout(60000).connectTimeout(60000);
     }
 
     /**

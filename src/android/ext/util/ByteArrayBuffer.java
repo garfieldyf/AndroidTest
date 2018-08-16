@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import static android.ext.util.ArrayUtils.EMPTY_BYTE_ARRAY;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #ByteArrayBuffer(int)
      */
     public ByteArrayBuffer() {
-        data = ArrayUtils.EMPTY_BYTE_ARRAY;
+        data = EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -33,7 +34,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #ByteArrayBuffer()
      */
     public ByteArrayBuffer(int capacity) {
-        data = (capacity > 0 ? new byte[capacity + 1] : ArrayUtils.EMPTY_BYTE_ARRAY);
+        data = (capacity > 0 ? new byte[capacity + 1] : EMPTY_BYTE_ARRAY);
     }
 
     /**
@@ -61,7 +62,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     public final void clear() {
         size = 0;
-        data = ArrayUtils.EMPTY_BYTE_ARRAY;
+        data = EMPTY_BYTE_ARRAY;
     }
 
     /**
@@ -78,7 +79,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #array()
      */
     public final byte[] toByteArray() {
-        return (size > 0 ? copyOf(size) : ArrayUtils.EMPTY_BYTE_ARRAY);
+        return (size > 0 ? copyOf(size) : EMPTY_BYTE_ARRAY);
     }
 
     /**

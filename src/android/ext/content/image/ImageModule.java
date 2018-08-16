@@ -171,7 +171,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
          * Constructor
          * @param The {@link ImageModule}.
          */
-        public Builder(ImageModule<URI, Image> module) {
+        /* package */ Builder(ImageModule<URI, Image> module) {
             mModule = module;
         }
 
@@ -292,11 +292,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
             final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
 
             // Creates the binder.
-            Binder binder = null;
+            final Binder binder;
             if (mBinder instanceof Binder) {
                 binder = (Binder)mBinder;
             } else if (mBinder instanceof Integer) {
                 binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
+            } else {
+                binder = null;
             }
 
             // Creates the image loader.

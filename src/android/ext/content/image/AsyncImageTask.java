@@ -144,7 +144,8 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
             return decodeImage(uri, tempBuffer);
         }
 
-        final String imageFile = new StringBuilder(128).append(FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath()).append('/').append(Thread.currentThread().hashCode()).toString();
+        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
+        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
         try {
             final int statusCode = createDownloadRequest(uri.toString()).download(imageFile, this, tempBuffer);
             return (statusCode == HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);

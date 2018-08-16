@@ -112,6 +112,16 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Host", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest host(String value) {
+        mConnection.setRequestProperty("Host", value);
+        return this;
+    }
+
+    /**
      * Equivalent to calling <tt>requestHeader("Accept", value)</tt>.
      * @param value The value of the field.
      * @return This request.

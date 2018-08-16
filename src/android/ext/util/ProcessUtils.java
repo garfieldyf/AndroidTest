@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -423,7 +422,7 @@ public final class ProcessUtils {
         @Override
         public void uncaughtException(Thread thread, Throwable e) {
             try {
-                final PackageInfo pi = mContext.getPackageManager().getPackageInfo(mContext.getPackageName(), 0);
+                final PackageInfo pi = PackageUtils.myPackageInfo(mContext, 0);
                 if (pi.versionName == null) {
                     pi.versionName = "";
                 }
@@ -456,11 +455,14 @@ public final class ProcessUtils {
             }
         }
 
+        /**
+         * Writes the crash infos to "/storage/emulated/0/Android/data/packagename/files/crashes.log"
+         */
         private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             Formatter formatter = null;
             try {
                 // Creates the log file.
-                final PrintStream ps = new PrintStream(new FileOutputStream(new File(FileUtils.getFilesDir(mContext, null), "crashes.log"), true));
+                final PrintStream ps = new PrintStream(new FileOutputStream(FileUtils.getFilesDir(mContext, null).getPath() + "/crashes.log", true));
                 formatter = new Formatter(ps);
 
                 // Writes the uncaught exception to log file.

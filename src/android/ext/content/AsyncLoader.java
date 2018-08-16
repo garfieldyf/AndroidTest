@@ -33,10 +33,20 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache May be <tt>null</tt>. The {@link Cache} to store
      * the loaded values.
+     * @see #AsyncLoader(AsyncLoader)
      */
-    public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
+    protected AsyncLoader(Executor executor, Cache<Key, Value> cache) {
         super(executor);
         mCache = cache;
+    }
+
+    /**
+     * Copy constructor
+     * @see #AsyncLoader(Executor, Cache)
+     */
+    protected AsyncLoader(AsyncLoader<Key, Params, Value> loader) {
+        super(loader);
+        mCache = loader.mCache;
     }
 
     /**

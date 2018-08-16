@@ -64,6 +64,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
+     * @see #ImageLoader(ImageLoader, ImageDecoder, Binder)
      */
     public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(executor, imageCache);
@@ -73,6 +74,23 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mLoader  = (fileCache != null ? new FileCacheLoader<Image>(context, this, fileCache) : new Loader<Image>(context, this));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageLoader} from the specified <em>loader</em>. The returned loader will
+     * be share the internal cache (including memory cache, file cache etc.) with the <em>loader</em>.</p>
+     * @param loader The <tt>ImageLoader</tt> to copy.
+     * @param decoder The {@link ImageDecoder} to decode the image data.
+     * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
+     * @see #ImageLoader(Context, Executor, Cache, FileCache, ImageDecoder, Binder)
+     */
+    public ImageLoader(ImageLoader<URI, Image> loader, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
+        super(loader);
+        mLoader  = (loader.mLoader instanceof FileCacheLoader ? new FileCacheLoader<Image>(loader.mLoader, this) : new Loader<Image>(loader.mLoader, this));
+        mBinder  = binder;
+        mDecoder = decoder;
+        mBufferPool = loader.mBufferPool;
     }
 
     /**
@@ -231,6 +249,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         /**
+         * Copy constructor
+         * @param loader The <tt>Loader</tt>.
+         * @param owner The <tt>ImageLoader</tt>.
+         */
+        public Loader(Loader<Image> loader, ImageLoader<?, Image> owner) {
+            mOwner = owner;
+            mCacheDir = loader.mCacheDir;
+        }
+
+        /**
          * Returns a new byte array.
          * @return A new byte array.
          */
@@ -273,6 +301,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         public FileCacheLoader(Context context, ImageLoader<?, Image> owner, FileCache cache) {
             super(context, owner);
             mCache = cache;
+        }
+
+        /**
+         * Copy constructor
+         * @param loader The <tt>Loader</tt>.
+         * @param owner The <tt>ImageLoader</tt>.
+         */
+        public FileCacheLoader(Loader<Image> loader, ImageLoader<?, Image> owner) {
+            super(loader, owner);
+            mCache = ((FileCacheLoader<Image>)loader).mCache;
         }
 
         @Override

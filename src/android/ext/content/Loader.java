@@ -36,13 +36,24 @@ public abstract class Loader implements Factory<Task> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
+     * @see #Loader(Loader)
      */
-    public Loader(Executor executor) {
+    /* package */ Loader(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         final int maxSize = computeMaximumPoolSize(executor);
         mExecutor = executor;
-        mTaskPool = Pools.newPool(this, maxSize << 2);
+        mTaskPool = Pools.newPool(this, maxSize);
         mRunningTasks = new ArrayMap<Object, Task>(maxSize);
+    }
+
+    /**
+     * Copy constructor
+     * @see #Loader(Executor)
+     */
+    /* package */ Loader(Loader loader) {
+        mExecutor = loader.mExecutor;
+        mTaskPool = loader.mTaskPool;
+        mRunningTasks = new ArrayMap<Object, Task>(computeMaximumPoolSize(mExecutor));
     }
 
     /**
@@ -144,7 +155,7 @@ public abstract class Loader implements Factory<Task> {
      * @return The maximum pool size.
      */
     public static int computeMaximumPoolSize(Executor executor) {
-        return ArrayUtils.rangeOf((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 6), 6, 16);
+        return (ArrayUtils.rangeOf((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 4, 8) << 3);
     }
 
     /**

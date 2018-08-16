@@ -63,7 +63,7 @@ import android.widget.ImageView;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     private static final int[] TRANSFORMER_ATTRS = {
-        android.R.attr.src,
+        android.R.attr.src
     };
 
     private static int[] IMAGE_BINDER_ATTRS;
@@ -82,6 +82,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The base set of attribute values.
+     * @see #ImageBinder(ImageBinder, Drawable)
      * @see #ImageBinder(Cache, Transformer, Drawable)
      * @see #inflateAttributes(Context, AttributeSet)
      */
@@ -99,11 +100,26 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will be
+     * share the drawable cache with the <em>binder</em>.</p>
+     * @param binder The <tt>ImageBinder</tt> to copy.
+     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
+     * @see #ImageBinder(Context, AttributeSet)
+     * @see #ImageBinder(Cache, Transformer, Drawable)
+     */
+    public ImageBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
+        mDefaultImage = defaultImage;
+        mTransformer  = binder.mTransformer;
+    }
+
+    /**
      * Constructor
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the drawables.
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @see #ImageBinder(Context, AttributeSet)
+     * @see #ImageBinder(ImageBinder, Drawable)
      */
     public ImageBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
         mDefaultImage = defaultImage;
@@ -124,16 +140,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      */
     public final Transformer<URI, Image> getTransformer() {
         return mTransformer;
-    }
-
-    /**
-     * Returns a copy of this binder. The returned binder will be share the drawable cache
-     * with this binder.
-     * @param defaultImage May be <tt>null</tt>. The default image of the returned binder.
-     * @return A copy of this binder.
-     */
-    public ImageBinder<URI, Image> copy(Drawable defaultImage) {
-        return new ImageBinder<URI, Image>(null, mTransformer, defaultImage);
     }
 
     @Override

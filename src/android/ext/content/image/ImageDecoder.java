@@ -5,6 +5,7 @@ import android.content.Context;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
+import android.ext.util.UriUtils;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
 
@@ -68,7 +69,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
     protected Object decodeGIFImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        final InputStream is = openInputStream(mContext, uri);
+        final InputStream is = UriUtils.openInputStream(mContext, uri);
         try {
             return GIFImage.decodeStream(is, opts.inTempStorage);
         } finally {

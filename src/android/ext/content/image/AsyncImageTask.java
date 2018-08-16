@@ -1,8 +1,5 @@
 package android.ext.content.image;
 
-import static android.ext.content.image.ImageLoader.SCHEME_FTP;
-import static android.ext.content.image.ImageLoader.SCHEME_HTTP;
-import static android.ext.content.image.ImageLoader.SCHEME_HTTPS;
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -15,7 +12,7 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.net.Uri;
+import android.ext.util.UriUtils;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -26,9 +23,9 @@ import android.util.Log;
  * <p>The two types used by an image task are the following:</p>
  * <ol><li><tt>URI</tt>, The URI type of the task, accepts the following URI schemes:</li>
  * <ul><li>path (no scheme)</li>
- * <li>ftp ({@link #SCHEME_FTP})</li>
- * <li>http ({@link #SCHEME_HTTP})</li>
- * <li>https ({@link #SCHEME_HTTPS})</li>
+ * <li>ftp ({@link UriUtils#SCHEME_FTP SCHEME_FTP})</li>
+ * <li>http ({@link UriUtils#SCHEME_HTTP SCHEME_HTTP})</li>
+ * <li>https ({@link UriUtils#SCHEME_HTTPS SCHEME_HTTPS})</li>
  * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
  * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
  * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
@@ -158,6 +155,16 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
     }
 
     /**
+     * Matches the scheme of the specified <em>uri</em>. The default implementation
+     * match the "http", "https" and "ftp".
+     * @param uri The uri to match.
+     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
+     */
+    protected boolean matchScheme(URI uri) {
+        return UriUtils.matchScheme(uri);
+    }
+
+    /**
      * Returns a new download request with the specified <em>url</em>. Subclasses should
      * override this method to create the download request. The default implementation
      * returns a new {@link DownloadRequest} object.
@@ -177,16 +184,5 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
      */
     protected Image decodeImage(Object uri, byte[] tempBuffer) {
         return (Image)new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
-    }
-
-    /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation match
-     * the {@link #SCHEME_HTTP}, {@link #SCHEME_HTTPS} and {@link #SCHEME_FTP}.
-     * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
-     */
-    protected boolean matchScheme(URI uri) {
-        final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());
-        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5) || SCHEME_FTP.regionMatches(true, 0, scheme, 0, 3));
     }
 }

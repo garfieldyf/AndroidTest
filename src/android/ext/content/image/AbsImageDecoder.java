@@ -8,6 +8,7 @@ import android.ext.graphics.BitmapUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
@@ -19,7 +20,7 @@ import android.util.Printer;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AbsImageDecoder<Image> extends ImageLoader.ImageDecoder<Image> implements Factory<Options> {
+public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image>, Factory<Options> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -96,7 +97,7 @@ public abstract class AbsImageDecoder<Image> extends ImageLoader.ImageDecoder<Im
      * @see #decodeBitmap(Object, Object[], int, Options, BitmapPool)
      */
     protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        final InputStream is = openInputStream(mContext, uri);
+        final InputStream is = UriUtils.openInputStream(mContext, uri);
         try {
             return BitmapFactory.decodeStream(is, null, opts);
         } finally {

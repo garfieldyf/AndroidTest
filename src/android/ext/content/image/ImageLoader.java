@@ -1,9 +1,6 @@
 package android.ext.content.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.concurrent.Executor;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -21,9 +18,9 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
+import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.net.Uri;
 import android.util.Log;
 import android.util.Printer;
 import android.widget.ImageView;
@@ -45,10 +42,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * cache this flag will be ignore.
      */
     public static final int FLAG_IGNORE_FILE_CACHE = 0x00400000;
-
-    public static final String SCHEME_FTP   = "ftp";
-    public static final String SCHEME_HTTP  = "http";
-    public static final String SCHEME_HTTPS = "https";
 
     private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
@@ -124,9 +117,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h5>The default implementation accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
-     * <li>ftp ({@link #SCHEME_FTP})</li>
-     * <li>http ({@link #SCHEME_HTTP})</li>
-     * <li>https ({@link #SCHEME_HTTPS})</li>
+     * <li>ftp ({@link UriUtils#SCHEME_FTP SCHEME_FTP})</li>
+     * <li>http ({@link UriUtils#SCHEME_HTTP SCHEME_HTTP})</li>
+     * <li>https ({@link UriUtils#SCHEME_HTTPS SCHEME_HTTPS})</li>
      * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
      * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
      * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
@@ -200,6 +193,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
+     * Matches the scheme of the specified <em>uri</em>. The default implementation
+     * match the "http", "https" and "ftp".
+     * @param uri The uri to match.
+     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
+     */
+    protected boolean matchScheme(URI uri) {
+        return UriUtils.matchScheme(uri);
+    }
+
+    /**
      * Called on a background thread to load an image from the specified <em>url</em>.
      * @param task The current {@link Task} whose executing this method.
      * @param url The url to load.
@@ -218,17 +221,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
             return null;
         }
-    }
-
-    /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation match
-     * the {@link #SCHEME_HTTP}, {@link #SCHEME_HTTPS} and {@link #SCHEME_FTP}.
-     * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
-     */
-    protected boolean matchScheme(URI uri) {
-        final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());
-        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5) || SCHEME_FTP.regionMatches(true, 0, scheme, 0, 3));
     }
 
     /**
@@ -379,52 +371,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * The <tt>ImageDecoder</tt> class used to decode the image data.
      */
-    public static abstract class ImageDecoder<Image> {
-        /**
-         * Returns the scheme with the specified <em>uri</em>. Example: "http".
-         * @param uri The uri to parse.
-         * @return The scheme or <tt>null</tt> if the <em>uri</em> has no scheme.
-         */
-        public static String parseScheme(Object uri) {
-            String scheme = null;
-            if (uri instanceof Uri) {
-                scheme = ((Uri)uri).getScheme();
-            } else {
-                final String uriString = uri.toString();
-                final int index = uriString.indexOf(':');
-                if (index != -1) {
-                    scheme = uriString.substring(0, index);
-                }
-            }
-
-            return scheme;
-        }
-
-        /**
-         * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
-         * <h5>Accepts the following URI schemes:</h5>
-         * <ul><li>path (no scheme)</li>
-         * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
-         * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
-         * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
-         * @param context The <tt>Context</tt>.
-         * @param uri The uri to open.
-         * @return The <tt>InputStream</tt>.
-         * @throws FileNotFoundException if the <em>uri</em> could not be opened.
-         */
-        public static InputStream openInputStream(Context context, Object uri) throws FileNotFoundException {
-            if (uri instanceof Uri) {
-                return context.getContentResolver().openInputStream((Uri)uri);
-            } else {
-                final String uriString = uri.toString();
-                if (uriString.indexOf(':') == -1) {
-                    return new FileInputStream(uriString);
-                } else {
-                    return context.getContentResolver().openInputStream(Uri.parse(uriString));
-                }
-            }
-        }
-
+    public static interface ImageDecoder<Image> {
         /**
          * Decodes an image from the specified <em>uri</em>.
          * @param uri The uri to decode.
@@ -432,8 +379,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.
          * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-         * @see #openInputStream(Context, Object)
          */
-        public abstract Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);
+        Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);
     }
 }

@@ -2,7 +2,6 @@ package android.ext.content.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.util.concurrent.Executor;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
@@ -117,12 +116,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h5>The default implementation accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
-     * <li>ftp ({@link UriUtils#SCHEME_FTP SCHEME_FTP})</li>
-     * <li>http ({@link UriUtils#SCHEME_HTTP SCHEME_HTTP})</li>
-     * <li>https ({@link UriUtils#SCHEME_HTTPS SCHEME_HTTPS})</li>
-     * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
-     * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
-     * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
+     * <li>ftp ({@link #SCHEME_FTP})</li>
+     * <li>http ({@link #SCHEME_HTTP})</li>
+     * <li>https ({@link #SCHEME_HTTPS})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to load.
      * @param target The <tt>Object</tt> to bind the image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.

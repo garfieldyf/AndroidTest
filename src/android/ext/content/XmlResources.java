@@ -1,6 +1,5 @@
 package android.ext.content;
 
-import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -93,31 +92,6 @@ public final class XmlResources {
         } finally {
             parser.close();
         }
-    }
-
-    /**
-     * Equivalent to calling <tt>getResourceUri(context.getPackageName(), resource)</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param resource Type {@link Integer}, or {@link String} representation of the
-     * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return The uri string.
-     * @see #getResourceUri(String, Object)
-     */
-    public static String getResourceUri(Context context, Object resource) {
-        return getResourceUri(context.getPackageName(), resource);
-    }
-
-    /**
-     * Constructs a scheme is "android.resource" uri string.
-     * @param packageName The application's package name.
-     * @param resource Type {@link Integer}, or {@link String} representation of the
-     * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return The uri string.
-     * @see #getResourceUri(Context, Object)
-     */
-    public static String getResourceUri(String packageName, Object resource) {
-        final String res = resource.toString();
-        return new StringBuilder(SCHEME_ANDROID_RESOURCE.length() + packageName.length() + res.length() + 4).append(SCHEME_ANDROID_RESOURCE).append("://").append(packageName).append('/').append(res).toString();
     }
 
     /**

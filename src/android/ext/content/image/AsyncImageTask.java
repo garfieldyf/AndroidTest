@@ -3,7 +3,6 @@ package android.ext.content.image;
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
@@ -23,12 +22,12 @@ import android.util.Log;
  * <p>The two types used by an image task are the following:</p>
  * <ol><li><tt>URI</tt>, The URI type of the task, accepts the following URI schemes:</li>
  * <ul><li>path (no scheme)</li>
- * <li>ftp ({@link UriUtils#SCHEME_FTP SCHEME_FTP})</li>
- * <li>http ({@link UriUtils#SCHEME_HTTP SCHEME_HTTP})</li>
- * <li>https ({@link UriUtils#SCHEME_HTTPS SCHEME_HTTPS})</li>
- * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
- * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
- * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
+ * <li>ftp ({@link #SCHEME_FTP})</li>
+ * <li>http ({@link #SCHEME_HTTP})</li>
+ * <li>https ({@link #SCHEME_HTTPS})</li>
+ * <li>file ({@link #SCHEME_FILE})</li>
+ * <li>content ({@link #SCHEME_CONTENT})</li>
+ * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>

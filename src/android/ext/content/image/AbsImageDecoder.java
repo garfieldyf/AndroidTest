@@ -1,7 +1,6 @@
 package android.ext.content.image;
 
 import java.io.InputStream;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
@@ -52,9 +51,9 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * Decodes an image from the specified <em>uri</em>.
      * <h5>Accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
-     * <li>file ({@link ContentResolver#SCHEME_FILE SCHEME_FILE})</li>
-     * <li>content ({@link ContentResolver#SCHEME_CONTENT SCHEME_CONTENT})</li>
-     * <li>android.resource ({@link ContentResolver#SCHEME_ANDROID_RESOURCE SCHEME_ANDROID_RESOURCE})</li></ul>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to decode.
      * @param params The parameters, passed earlier by {@link ImageLoader#loadImage}.
      * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.

@@ -54,7 +54,7 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
 
     @Override
     protected void entryRemoved(boolean evicted, K key, Bitmap oldValue, Bitmap newValue) {
-        if (!evicted && oldValue != newValue) {
+        if (evicted || oldValue != newValue) {
             mBitmapPool.put(oldValue);
         }
     }

@@ -88,7 +88,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
             entryRemoved(false, key, previous, value);
         }
 
-        trimToSize(maxSize, false);
+        trimToSize(maxSize);
         return previous;
     }
 
@@ -118,7 +118,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @see #trimToSize(int)
      */
     public void evictAll() {
-        trimToSize(-1, true);
+        trimToSize(-1);
     }
 
     /**
@@ -130,7 +130,12 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @see #evictAll()
      */
     public void trimToSize(int maxSize) {
-        trimToSize(maxSize, true);
+        final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
+        while (itor.hasNext() && map.size() > maxSize) {
+            final Entry<K, V> toEvict = itor.next();
+            itor.remove();
+            entryRemoved(true, toEvict.getKey(), toEvict.getValue(), null);
+        }
     }
 
     @Override
@@ -168,19 +173,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      */
     /* package */ V putImpl(K key, V value) {
         return map.put(key, value);
-    }
-
-    /**
-     * Remove the eldest entries until the total of remaining entries
-     * is at or below the requested size.
-     */
-    /* package */ void trimToSize(int maxSize, boolean evicted) {
-        final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
-        while (itor.hasNext() && map.size() > maxSize) {
-            final Entry<K, V> toEvict = itor.next();
-            itor.remove();
-            entryRemoved(evicted, toEvict.getKey(), toEvict.getValue(), null);
-        }
     }
 
     /* package */ void dump(Context context, Printer printer) {

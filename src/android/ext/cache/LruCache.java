@@ -56,6 +56,28 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     }
 
     @Override
+    public void trimToSize(int maxSize) {
+        K key;
+        V value;
+        while (true) {
+            synchronized (this) {
+                if (size <= maxSize || map.isEmpty()) {
+                    break;
+                }
+
+                final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
+                final Entry<K, V> toEvict = itor.next();
+                key = toEvict.getKey();
+                value = toEvict.getValue();
+                itor.remove();
+                size -= sizeOf(key, value);
+            }
+
+            entryRemoved(true, key, value, null);
+        }
+    }
+
+    @Override
     public synchronized Map<K, V> entries() {
         return Collections.unmodifiableMap(new LinkedHashMap<K, V>(map));
     }
@@ -96,28 +118,6 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         }
 
         return previous;
-    }
-
-    @Override
-    /* package */ void trimToSize(int maxSize, boolean evicted) {
-        K key;
-        V value;
-        while (true) {
-            synchronized (this) {
-                if (size <= maxSize || map.isEmpty()) {
-                    break;
-                }
-
-                final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
-                final Entry<K, V> toEvict = itor.next();
-                key = toEvict.getKey();
-                value = toEvict.getValue();
-                itor.remove();
-                size -= sizeOf(key, value);
-            }
-
-            entryRemoved(evicted, key, value, null);
-        }
     }
 
     @Override

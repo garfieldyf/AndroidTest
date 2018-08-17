@@ -298,7 +298,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
             } else if (mBinder instanceof Integer) {
                 binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
             } else {
-                binder = null;
+                binder = ImageLoader.defaultBinder();
             }
 
             // Creates the image loader.

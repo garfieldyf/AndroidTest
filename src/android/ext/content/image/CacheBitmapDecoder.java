@@ -22,10 +22,40 @@ public class CacheBitmapDecoder extends BitmapDecoder {
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
      * @param bitmapPool The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
+     * @see #CacheBitmapDecoder(CacheBitmapDecoder, int)
+     * @see #CacheBitmapDecoder(CacheBitmapDecoder, Parameters)
      */
     public CacheBitmapDecoder(Context context, Parameters parameters, int maxPoolSize, BitmapPool bitmapPool) {
         super(context, parameters, maxPoolSize);
         mBitmapPool = bitmapPool;
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link CacheBitmapDecoder} from the specified <em>decoder</em>.
+     * The returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>CacheBitmapDecoder</tt> to copy.
+     * @param id The resource id of the {@link Parameters} to load.
+     * @see #CacheBitmapDecoder(CacheBitmapDecoder, Parameters)
+     * @see #CacheBitmapDecoder(Context, Parameters, int, BitmapPool)
+     */
+    public CacheBitmapDecoder(CacheBitmapDecoder decoder, int id) {
+        super(decoder, id);
+        mBitmapPool = decoder.mBitmapPool;
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link CacheBitmapDecoder} from the specified <em>decoder</em>.
+     * The returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>CacheBitmapDecoder</tt> to copy.
+     * @param parameters The {@link Parameters} to decode bitmap.
+     * @see #CacheBitmapDecoder(CacheBitmapDecoder, int)
+     * @see #CacheBitmapDecoder(Context, Parameters, int, BitmapPool)
+     */
+    public CacheBitmapDecoder(CacheBitmapDecoder decoder, Parameters parameters) {
+        super(decoder, parameters);
+        mBitmapPool = decoder.mBitmapPool;
     }
 
     @Override

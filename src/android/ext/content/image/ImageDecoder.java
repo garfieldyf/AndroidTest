@@ -2,6 +2,7 @@ package android.ext.content.image;
 
 import java.io.InputStream;
 import android.content.Context;
+import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
@@ -30,9 +31,39 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
+     * @see #ImageDecoder(ImageDecoder, int)
+     * @see #ImageDecoder(ImageDecoder, Parameters)
      */
     public ImageDecoder(Context context, Parameters parameters, int maxPoolSize) {
         super(context, maxPoolSize);
+        mParameters = parameters;
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageDecoder} from the specified <em>decoder</em>. The
+     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>ImageDecoder</tt> to copy.
+     * @param id The resource id of the {@link Parameters} to load.
+     * @see #ImageDecoder(ImageDecoder, Parameters)
+     * @see #ImageDecoder(Context, Parameters, int)
+     */
+    public ImageDecoder(ImageDecoder decoder, int id) {
+        super(decoder);
+        mParameters = XmlResources.loadParameters(mContext, id);
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageDecoder} from the specified <em>decoder</em>. The
+     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>ImageDecoder</tt> to copy.
+     * @param parameters The {@link Parameters} to decode bitmap.
+     * @see #ImageDecoder(ImageDecoder, int)
+     * @see #ImageDecoder(Context, Parameters, int)
+     */
+    public ImageDecoder(ImageDecoder decoder, Parameters parameters) {
+        super(decoder);
         mParameters = parameters;
     }
 

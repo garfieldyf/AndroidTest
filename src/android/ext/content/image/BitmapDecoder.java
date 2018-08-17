@@ -2,7 +2,7 @@ package android.ext.content.image;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.content.image.ImageLoader.ImageDecoder;
+import android.ext.content.XmlResources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -27,9 +27,39 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
+     * @see #BitmapDecoder(BitmapDecoder, int)
+     * @see #BitmapDecoder(BitmapDecoder, Parameters)
      */
     public BitmapDecoder(Context context, Parameters parameters, int maxPoolSize) {
         super(context, maxPoolSize);
+        mParameters = parameters;
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link BitmapDecoder} from the specified <em>decoder</em>. The
+     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>BitmapDecoder</tt> to copy.
+     * @param id The resource id of the {@link Parameters} to load.
+     * @see #BitmapDecoder(Context, Parameters, int)
+     * @see #BitmapDecoder(BitmapDecoder, Parameters)
+     */
+    public BitmapDecoder(BitmapDecoder decoder, int id) {
+        super(decoder);
+        mParameters = XmlResources.loadParameters(mContext, id);
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link BitmapDecoder} from the specified <em>decoder</em>. The
+     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
+     * @param decoder The <tt>BitmapDecoder</tt> to copy.
+     * @param parameters The {@link Parameters} to decode bitmap.
+     * @see #BitmapDecoder(BitmapDecoder, int)
+     * @see #BitmapDecoder(Context, Parameters, int)
+     */
+    public BitmapDecoder(BitmapDecoder decoder, Parameters parameters) {
+        super(decoder);
         mParameters = parameters;
     }
 
@@ -119,9 +149,9 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         /**
          * Returns a sample size for used to decode bitmap.
          * @param context The <tt>Context</tt>.
-         * @param uri The uri, passed earlier by {@link ImageDecoder#decodeImage}.
+         * @param uri The uri, passed earlier by <em>ImageDecoder.decodeImage</em>.
          * @param opts The {@link Options} to store the sample size, passed earlier
-         * by {@link ImageDecoder#decodeImage}.
+         * by <em>ImageDecoder.decodeImage</em>.
          */
         public void computeSampleSize(Context context, Object uri, Options opts) {
             opts.inSampleSize = (int)value;

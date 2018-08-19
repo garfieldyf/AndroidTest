@@ -41,7 +41,7 @@ public abstract class Loader implements Factory<Task> {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, 64);
-        mRunningTasks = new ArrayMap<Object, Task>(8);
+        mRunningTasks = new ArrayMap<Object, Task>();
     }
 
     /**
@@ -51,7 +51,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ Loader(Loader loader) {
         mExecutor = loader.mExecutor;
         mTaskPool = loader.mTaskPool;
-        mRunningTasks = new ArrayMap<Object, Task>(8);
+        mRunningTasks = new ArrayMap<Object, Task>();
     }
 
     /**

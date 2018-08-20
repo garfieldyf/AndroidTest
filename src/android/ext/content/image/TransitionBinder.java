@@ -26,7 +26,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #TransitionBinder(TransitionBinder, Drawable)
+     * @see #TransitionBinder(TransitionBinder, Drawable, int)
      * @see #TransitionBinder(Cache, Transformer, Drawable, int)
      */
     public TransitionBinder(Context context, AttributeSet attrs) {
@@ -39,12 +39,13 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * be share the drawable cache with the <em>binder</em>.</p>
      * @param binder The <tt>TransitionBinder</tt> to copy.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
+     * @param durationMillis The length of the transition in milliseconds.
      * @see #TransitionBinder(Context, AttributeSet)
      * @see #TransitionBinder(Cache, Transformer, Drawable, int)
      */
-    public TransitionBinder(TransitionBinder<URI, Image> binder, Drawable defaultImage) {
+    public TransitionBinder(TransitionBinder<URI, Image> binder, Drawable defaultImage, int durationMillis) {
         super(binder, defaultImage);
-        duration = binder.duration;
+        duration = durationMillis;
     }
 
     /**
@@ -54,7 +55,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @param durationMillis The length of the transition in milliseconds.
      * @see #TransitionBinder(Context, AttributeSet)
-     * @see #TransitionBinder(TransitionBinder, Drawable)
+     * @see #TransitionBinder(TransitionBinder, Drawable, int)
      */
     public TransitionBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage, int durationMillis) {
         super(imageCache, transformer, defaultImage);

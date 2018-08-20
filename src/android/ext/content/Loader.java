@@ -5,7 +5,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.ext.content.Loader.Task;
-import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -40,10 +39,9 @@ public abstract class Loader implements Factory<Task> {
      */
     /* package */ Loader(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
-        final int maxSize = computeMaximumPoolSize(executor);
         mExecutor = executor;
-        mTaskPool = Pools.newPool(this, maxSize);
-        mRunningTasks = new ArrayMap<Object, Task>(maxSize);
+        mTaskPool = Pools.newPool(this, 64);
+        mRunningTasks = new ArrayMap<Object, Task>();
     }
 
     /**
@@ -53,7 +51,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ Loader(Loader loader) {
         mExecutor = loader.mExecutor;
         mTaskPool = loader.mTaskPool;
-        mRunningTasks = new ArrayMap<Object, Task>(computeMaximumPoolSize(mExecutor));
+        mRunningTasks = new ArrayMap<Object, Task>();
     }
 
     /**
@@ -155,7 +153,7 @@ public abstract class Loader implements Factory<Task> {
      * @return The maximum pool size.
      */
     public static int computeMaximumPoolSize(Executor executor) {
-        return (ArrayUtils.rangeOf((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 4, 8) << 3);
+        return Math.min((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 14) + 2;
     }
 
     /**

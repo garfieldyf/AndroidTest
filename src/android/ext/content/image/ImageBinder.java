@@ -49,7 +49,7 @@ import android.widget.ImageView;
  *     namespace:attributes1="value1"
  *     namespace:attributes2="value2" /&gt;
  *
- * &lt;!-- Image (Optional) Transformer --&gt;
+ * &lt;!-- Image Transformer (Optional) --&gt;
  * &lt;[ GIFTransformer | DrawableTransformer | transformer ]
  *     class="classFullName"
  *     android:src="@xml/transformer2"

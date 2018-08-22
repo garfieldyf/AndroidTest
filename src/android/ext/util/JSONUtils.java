@@ -409,12 +409,20 @@ public final class JSONUtils {
         return result;
     }
 
-    private static Number readNumber(JsonReader reader) throws IOException {
+    private static Object readNumber(JsonReader reader) throws IOException {
         final String result = reader.nextString();
+        if (result.indexOf('.') == -1) {
+            try {
+                return Long.valueOf(result, 10);
+            } catch (NumberFormatException e) {
+                // This only happens for integral number greater than Long.MAX_VALUE.
+            }
+        }
+
         try {
-            return Long.valueOf(result, 10);
-        } catch (NumberFormatException e) {
             return Double.valueOf(result);
+        } catch (NumberFormatException e) {
+            return result;
         }
     }
 

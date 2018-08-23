@@ -3,6 +3,7 @@ package android.ext.util;
 import java.util.concurrent.Executor;
 import android.ext.concurrent.ThreadPoolManager;
 import android.ext.content.Loader.Task;
+import android.ext.database.DatabaseHandler;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -216,6 +217,13 @@ public final class UIHandler extends Handler {
         sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, 0, layoutManager));
     }
 
+    /**
+     * Called on the {@link DatabaseHandler} internal, do not call this method directly.
+     */
+    public final void dispatchMessage(DatabaseHandler handler, int message, int token, Object result) {
+        sendMessage(Message.obtain(this, MESSAGE_DISPATCH_MESSAGE, message, token, new Pair<DatabaseHandler, Object>(handler, result)));
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
@@ -261,6 +269,12 @@ public final class UIHandler extends Handler {
             params.first.notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
             break;
 
+        // Process the DatabaseHandler messages.
+        case MESSAGE_DISPATCH_MESSAGE:
+            final Pair<DatabaseHandler, Object> param = (Pair<DatabaseHandler, Object>)msg.obj;
+            param.first.dispatchMessage(msg.arg1, msg.arg2, param.second);
+            break;
+
         default:
             super.dispatchMessage(msg);
         }
@@ -284,20 +298,23 @@ public final class UIHandler extends Handler {
     }
 
     // The Loader.Task messages.
-    private static final int MESSAGE_PROGRESS      = 0xCECECECE;
-    public static final int MESSAGE_FINISHED       = 0xCFCFCFCF;
+    private static final int MESSAGE_PROGRESS      = 0xBEBEBEBE;
+    public static final int MESSAGE_FINISHED       = 0xBFBFBFBF;
 
     // The ThreadPool and ThreadPoolManager messages.
-    private static final int MESSAGE_EXECUTE       = 0xDFDFDFDF;
-    private static final int MESSAGE_COMPLETED     = 0xEFEFEFEF;
+    private static final int MESSAGE_EXECUTE       = 0xCFCFCFCF;
+    private static final int MESSAGE_COMPLETED     = 0xDFDFDFDF;
 
     // The RecyclerView messages.
-    private static final int MESSAGE_CHILD_FOCUS   = 0xF9F9F9F9;
-    private static final int MESSAGE_ITEM_MOVED    = 0xFBFBFBFB;
-    private static final int MESSAGE_DATA_CHANGED  = 0xFAFAFAFA;
-    private static final int MESSAGE_ITEM_REMOVED  = 0xFCFCFCFC;
-    private static final int MESSAGE_ITEM_CHANGED  = 0xFEFEFEFE;
-    private static final int MESSAGE_ITEM_INSERTED = 0xFDFDFDFD;
+    private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;
+    private static final int MESSAGE_ITEM_MOVED    = 0xECECECEC;
+    private static final int MESSAGE_DATA_CHANGED  = 0xEBEBEBEB;
+    private static final int MESSAGE_ITEM_REMOVED  = 0xEDEDEDED;
+    private static final int MESSAGE_ITEM_CHANGED  = 0xEFEFEFEF;
+    private static final int MESSAGE_ITEM_INSERTED = 0xEEEEEEEE;
+
+    // The DatabaseHandler messages.
+    private static final int MESSAGE_DISPATCH_MESSAGE = 0xFEFEFEFE;
 
     /**
      * This class cannot be instantiated.

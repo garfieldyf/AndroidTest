@@ -18,7 +18,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-public class GIFImage {
+public final class GIFImage {
     /**
      * The native GIF image handle.
      */
@@ -110,7 +110,7 @@ public class GIFImage {
      * @return The width in pixels.
      * @see #getHeight()
      */
-    public int getWidth() {
+    public final int getWidth() {
         return nativeGetWidth(mNativeImage);
     }
 
@@ -119,7 +119,7 @@ public class GIFImage {
      * @return The height in pixels.
      * @see #getWidth()
      */
-    public int getHeight() {
+    public final int getHeight() {
         return nativeGetHeight(mNativeImage);
     }
 
@@ -128,7 +128,7 @@ public class GIFImage {
      * @return The frame count, must be >= 1.
      * @see #getFrameDelay(int)
      */
-    public int getFrameCount() {
+    public final int getFrameCount() {
         return nativeGetFrameCount(mNativeImage);
     }
 
@@ -139,7 +139,7 @@ public class GIFImage {
      * @return The frame delay in milliseconds.
      * @see #getFrameCount()
      */
-    public int getFrameDelay(int frameIndex) {
+    public final int getFrameDelay(int frameIndex) {
         return nativeGetFrameDelay(mNativeImage, frameIndex);
     }
 
@@ -152,7 +152,7 @@ public class GIFImage {
      * @return <tt>true</tt> if the frame draw succeeded, <tt>false</tt> otherwise.
      * @see #createBitmapCanvas()
      */
-    public boolean draw(Bitmap bitmapCanvas, int frameIndex) {
+    public final boolean draw(Bitmap bitmapCanvas, int frameIndex) {
         DebugUtils.__checkError(!bitmapCanvas.isMutable(), "The bitmap canvas must be a mutable bitmap.");
         DebugUtils.__checkError(bitmapCanvas.getConfig() != Config.ARGB_8888, "The bitmap canvas pixel format must be ARGB_8888");
         return nativeDraw(bitmapCanvas, mNativeImage, frameIndex);

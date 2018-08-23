@@ -159,6 +159,15 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { table, whereClause, whereArgs }));
     }
 
+    /**
+     * Returns the {@link SQLiteDatabase} associated with this handler.
+     * @return The <tt>SQLiteDatabase</tt> object or <tt>null</tt> if
+     * the database released by the GC.
+     */
+    public final SQLiteDatabase getDatabase() {
+        return mDatabase.get();
+    }
+
     @Override
     public boolean handleMessage(Message msg) {
         final SQLiteDatabase db = mDatabase.get();

@@ -20,6 +20,7 @@ import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.Printer;
 import android.widget.ImageView;
@@ -145,6 +146,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public final ImageDecoder<Image> getImageDecoder() {
         return mDecoder;
+    }
+
+    /**
+     * Returns the default image associated with this loader.
+     * @return The {@link Drawable} of the default image or <tt>null</tt>.
+     */
+    public final Drawable getDefaultDrawable() {
+        return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).mDefaultImage : null);
     }
 
     @Override

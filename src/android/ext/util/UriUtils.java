@@ -13,10 +13,6 @@ import android.net.Uri;
  * @version 1.0
  */
 public final class UriUtils {
-    public static final String SCHEME_FTP   = "ftp";
-    public static final String SCHEME_HTTP  = "http";
-    public static final String SCHEME_HTTPS = "https";
-
     /**
      * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
      * <h5>Accepts the following URI schemes:</h5>
@@ -67,14 +63,14 @@ public final class UriUtils {
 
     /**
      * Matches the scheme of the specified <em>uri</em>. The default implementation
-     * match the {@link #SCHEME_HTTP}, {@link #SCHEME_HTTPS} and {@link #SCHEME_FTP}.
+     * match the "http", "https" and "ftp".
      * @param uri The uri to match.
      * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
      */
     public static boolean matchScheme(Object uri) {
         DebugUtils.__checkError(uri == null, "uri == null");
         final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());
-        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5) || SCHEME_FTP.regionMatches(true, 0, scheme, 0, 3));
+        return ("http".regionMatches(true, 0, scheme, 0, 4) || "https".regionMatches(true, 0, scheme, 0, 5) || "ftp".regionMatches(true, 0, scheme, 0, 3));
     }
 
     /**

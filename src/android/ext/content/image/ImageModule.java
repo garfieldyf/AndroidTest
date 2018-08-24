@@ -124,14 +124,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
     @Override
     public void onLowMemory() {
-        if (mImageCache != null) {
-            mImageCache.clear();
-        }
+        onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
     }
 
     @Override
     public void onTrimMemory(int level) {
-        onLowMemory();
+        if (mImageCache != null) {
+            mImageCache.clear();
+        }
     }
 
     @Override

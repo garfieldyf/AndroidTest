@@ -56,9 +56,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startCall(int token, Uri uri, String method, String arg, Bundle extras) {
         /*
-         * what - token
-         * arg1 - MESSAGE_CALL
-         * obj  - { uri, method, arg, extras }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_CALL
+         * msg.obj  - { uri, method, arg, extras }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_CALL, 0, new Object[] { uri, method, arg, extras }));
     }
@@ -77,9 +77,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         /*
-         * what - token
-         * arg1 - MESSAGE_QUERY
-         * obj  - { uri, projection, selection, selectionArgs, sortOrder }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_QUERY
+         * msg.obj  - { uri, projection, selection, selectionArgs, sortOrder }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { uri, projection, selection, selectionArgs, sortOrder }));
     }
@@ -93,9 +93,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startInsert(int token, Uri uri, ContentValues values) {
         /*
-         * what - token
-         * arg1 - MESSAGE_INSERT
-         * obj  - { uri, values }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_INSERT
+         * msg.obj  - { uri, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERT, 0, new Object[] { uri, values }));
     }
@@ -112,9 +112,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         /*
-         * what - token
-         * arg1 - MESSAGE_UPDATE
-         * obj  - { uri, values, whereClause, whereArgs }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_UPDATE
+         * msg.obj  - { uri, values, whereClause, whereArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { uri, values, whereClause, whereArgs }));
     }
@@ -130,9 +130,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
         /*
-         * what - token
-         * arg1 - MESSAGE_DELETE
-         * obj  - { uri, whereClause, whereArgs }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_DELETE
+         * msg.obj  - { uri, whereClause, whereArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { uri, whereClause, whereArgs }));
     }
@@ -147,9 +147,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
         /*
-         * what - token
-         * arg1 - MESSAGE_INSERTS
-         * obj  - { uri, values }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_INSERTS
+         * msg.obj  - { uri, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERTS, 0, new Object[] { uri, values }));
     }
@@ -163,9 +163,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
         /*
-         * what - token
-         * arg1 - MESSAGE_BATCH
-         * obj  - { authority, operations }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_BATCH
+         * msg.obj  - { authority, operations }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_BATCH, 0, new Object[] { authority, operations }));
     }
@@ -174,9 +174,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     public boolean handleMessage(Message msg) {
         final ContentResolver resolver = mContext.getContentResolver();
         /*
-         * what - token
-         * arg1 - message
-         * obj  - params
+         * msg.what - token
+         * msg.arg1 - message
+         * msg.obj  - params
          */
         final Object[] params = (Object[])msg.obj;
         final Object result;
@@ -222,7 +222,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             throw new IllegalStateException("Unknown message: " + msg.arg1);
         }
 
-        UIHandler.sInstance.dispatchMessage(this, msg.arg1, msg.what, result);
+        UIHandler.sInstance.sendMessage(this, msg.arg1, msg.what, result);
         return true;
     }
 

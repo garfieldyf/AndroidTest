@@ -50,9 +50,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
         /*
-         * what - token
-         * arg1 - MESSAGE_RAWQUERY
-         * obj  - { sql, selectionArgs }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_RAWQUERY
+         * msg.obj  - { sql, selectionArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_RAWQUERY, 0, new Object[] { sql, selectionArgs }));
     }
@@ -74,9 +74,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startQuery(int token, String table, String[] columns, String selection, String[] selectionArgs, String orderBy, String limit) {
         /*
-         * what - token
-         * arg1 - MESSAGE_QUERY
-         * obj  - { table, columns, selection, selectionArgs, orderBy, limit }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_QUERY
+         * msg.obj  - { table, columns, selection, selectionArgs, orderBy, limit }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { table, columns, selection, selectionArgs, orderBy, limit }));
     }
@@ -95,9 +95,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
         /*
-         * what - token
-         * arg1 - MESSAGE_INSERT
-         * obj  - { table, nullColumnHack, values }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_INSERT
+         * msg.obj  - { table, nullColumnHack, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERT, 0, new Object[] { table, nullColumnHack, values }));
     }
@@ -115,9 +115,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
         /*
-         * what - token
-         * arg1 - MESSAGE_REPLACE
-         * obj  - { table, nullColumnHack, values }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_REPLACE
+         * msg.obj  - { table, nullColumnHack, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_REPLACE, 0, new Object[] { table, nullColumnHack, values }));
     }
@@ -134,9 +134,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
         /*
-         * what - token
-         * arg1 - MESSAGE_UPDATE
-         * obj  - { table, values, whereClause, whereArgs }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_UPDATE
+         * msg.obj  - { table, values, whereClause, whereArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { table, values, whereClause, whereArgs }));
     }
@@ -152,20 +152,11 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
         /*
-         * what - token
-         * arg1 - MESSAGE_DELETE
-         * obj  - { table, whereClause, whereArgs }
+         * msg.what - token
+         * msg.arg1 - MESSAGE_DELETE
+         * msg.obj  - { table, whereClause, whereArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { table, whereClause, whereArgs }));
-    }
-
-    /**
-     * Returns the {@link SQLiteDatabase} associated with this handler.
-     * @return The <tt>SQLiteDatabase</tt> object or <tt>null</tt> if
-     * the database released by the GC.
-     */
-    public final SQLiteDatabase getDatabase() {
-        return mDatabase.get();
     }
 
     @Override
@@ -177,9 +168,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         }
 
         /*
-         * what - token
-         * arg1 - message
-         * obj  - params
+         * msg.what - token
+         * msg.arg1 - message
+         * msg.obj  - params
          */
         final Object[] params = (Object[])msg.obj;
         final Object result;
@@ -217,7 +208,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             throw new IllegalStateException("Unknown message: " + msg.arg1);
         }
 
-        UIHandler.sInstance.dispatchMessage(this, msg.arg1, msg.what, result);
+        UIHandler.sInstance.sendMessage(this, msg.arg1, msg.what, result);
         return true;
     }
 

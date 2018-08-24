@@ -220,7 +220,7 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      */
-    public final void dispatchMessage(DatabaseHandler handler, int message, int token, Object result) {
+    public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
         sendMessage(Message.obtain(this, MESSAGE_DISPATCH_MESSAGE, message, token, new Pair<DatabaseHandler, Object>(handler, result)));
     }
 
@@ -301,8 +301,10 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_PROGRESS      = 0xBEBEBEBE;
     public static final int MESSAGE_FINISHED       = 0xBFBFBFBF;
 
-    // The ThreadPool and ThreadPoolManager messages.
+    // The ThreadPool messages.
     private static final int MESSAGE_EXECUTE       = 0xCFCFCFCF;
+
+    // The ThreadPoolManager messages.
     private static final int MESSAGE_COMPLETED     = 0xDFDFDFDF;
 
     // The RecyclerView messages.

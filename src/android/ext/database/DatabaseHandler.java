@@ -80,9 +80,9 @@ public abstract class DatabaseHandler implements Callback {
      */
     public final void startExecute(int token, Object... params) {
         /*
-         * what - token
-         * arg1 - MESSAGE_EXECUTE
-         * obj  - params
+         * msg.what - token
+         * msg.arg1 - MESSAGE_EXECUTE
+         * msg.obj  - params
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_EXECUTE, 0, params));
     }

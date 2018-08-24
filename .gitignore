@@ -5,7 +5,6 @@
 libs
 /res
 /src/com
-/src/android/ext/reference
 /obj
 /.classpath
 /.gitignore
@@ -14,5 +13,4 @@ libs
 /AndroidManifest.xml
 /AuroraKS.keystore
 /lint.xml
-/project.properties
 /tmp

@@ -32,7 +32,7 @@ import android.view.View;
 public final class BitmapUtils {
     /**
      * Grays the given the <em>bitmap</em>.
-     * <pre>Algorithm : R = G = B = R * 0.30 + G + 0.59 + B * 0.11</pre>
+     * <pre>Algorithm : R = G = B = R * 0.299 + G * 0.587 + B * 0.114</pre>
      * @param bitmap The bitmap to gray, must be {@link Config#ARGB_8888} pixel format.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */

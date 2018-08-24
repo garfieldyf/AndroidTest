@@ -75,7 +75,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Register this receiver for the local broadcasts.
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match.
-     * May be <em>[databasename.tablename]</em>
+     * May be <tt>"databasename.tablename"</tt>.
      * @see #unregister(Context)
      */
     public final void register(Context context, String scheme) {
@@ -94,7 +94,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**
      * Register a receive for any local broadcasts that match the given <em>scheme</em>.
      * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match. May be <em>[databasename.tablename]</em>
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <tt>"databasename.tablename"</tt>
      * @param receiver The {@link BroadcastReceiver} to handle the broadcast.
      * @see LocalBroadcastManager#unregisterReceiver(BroadcastReceiver)
      */

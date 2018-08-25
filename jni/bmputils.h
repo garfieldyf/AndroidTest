@@ -18,6 +18,7 @@
 //
 // grayBitmap()
 // blurBitmap()
+// binaryBitmap()
 // spreadBitmap()
 // mosaicBitmap()
 // mirrorBitmap()
@@ -92,6 +93,19 @@ JNIEXPORT_METHOD(jboolean) blurBitmap(JNIEnv* env, jclass /*clazz*/, jobject bit
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     BitmapUtils
+// Method:    binaryBitmap
+// Signature: (Landroid/graphics/Bitmap;Z)Z
+
+JNIEXPORT_METHOD(jboolean) binaryBitmap(JNIEnv* env, jclass /*clazz*/, jobject bitmap, jboolean gray)
+{
+    assert(env);
+    AssertThrowErrnoException(env, bitmap == NULL, "bitmap == null", JNI_FALSE);
+
+    return handleBitmap(env, bitmap, [gray](void* pixels, uint32_t width, uint32_t height) { ::Android_binaryBitmap(pixels, width, height, gray); });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     BitmapUtils
 // Method:    spreadBitmap
 // Signature: (Landroid/graphics/Bitmap;I)Z
 
@@ -157,6 +171,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "spreadBitmap", "(Landroid/graphics/Bitmap;I)Z", (void*)spreadBitmap },
         { "mosaicBitmap", "(Landroid/graphics/Bitmap;I)Z", (void*)mosaicBitmap },
         { "mirrorBitmap", "(Landroid/graphics/Bitmap;Z)Z", (void*)mirrorBitmap },
+        { "binaryBitmap", "(Landroid/graphics/Bitmap;Z)Z", (void*)binaryBitmap },
         { "inverseBitmap", "(Landroid/graphics/Bitmap;)Z", (void*)inverseBitmap },
     };
 

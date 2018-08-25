@@ -33,7 +33,7 @@ public final class BitmapUtils {
     /**
      * Grays the given the <em>bitmap</em>.
      * <pre>Algorithm : R = G = B = R * 0.299 + G * 0.587 + B * 0.114</pre>
-     * @param bitmap The bitmap to gray, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to gray, must be {@link Config#ARGB_8888} pixel format.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static native boolean grayBitmap(Bitmap bitmap);
@@ -42,23 +42,31 @@ public final class BitmapUtils {
      * Inverses the given the <em>bitmap</em>.
      * <pre>Algorithm : R = 255 - R, G = 255 - G, B = 255 - B</pre>
      * <p>Note that this method only supports {@link PixelFormat#OPAQUE}.</p>
-     * @param bitmap The bitmap to inverse, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to inverse, must be {@link Config#ARGB_8888} pixel format.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static native boolean inverseBitmap(Bitmap bitmap);
 
     /**
      * Blurs the given the <em>bitmap</em>.
-     * @param bitmap The bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
      * @param radius The radius of the blur in pixels, must be > 1.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static native boolean blurBitmap(Bitmap bitmap, int radius);
 
     /**
+     * Binarized the given the <em>bitmap</em>.
+     * @param bitmap A mutable bitmap to binarized, must be {@link Config#ARGB_8888} pixel format.
+     * @param gray Whether the <em>bitmap</em> is greyscale bitmap.
+     * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
+     */
+    public static native boolean binaryBitmap(Bitmap bitmap, boolean gray);
+
+    /**
      * Spreads the given the <em>bitmap</em>.
      * <pre>Algorithm : RGB[i, j] = RGB[i + rand() % spreadSize, j + rand() % spreadSize]</pre>
-     * @param bitmap The bitmap to spread, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to spread, must be {@link Config#ARGB_8888} pixel format.
      * @param spreadSize The spread size in pixels, must be > 0.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
@@ -74,7 +82,7 @@ public final class BitmapUtils {
      *    RGB(i - 1, j - 1), RGB(i - 1, j), RGB(i - 1, j + 1) |
      *    RGB(i,     j - 1), RGB(i,     j), RGB(i,     j + 1) | = RGB
      *    RGB(i + 1, j - 1), RGB(i + 1, j), RGB(i + 1, j + 1) |</pre>
-     * @param bitmap The bitmap to mosaic, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to mosaic, must be {@link Config#ARGB_8888} pixel format.
      * @param mosaicSize The mosaic size in pixels, must be > 1.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
@@ -84,7 +92,7 @@ public final class BitmapUtils {
      * Mirrors the given the <em>bitmap</em>.<pre>
      * Horizontal : swap(RGB[i, j], RGB[width - 1 - i, height - 1 - j])
      * Vertical   : swap(RGB[i, j], RGB[width * (height - i - 1), j])</pre>
-     * @param bitmap The bitmap to mirror, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to mirror, must be {@link Config#ARGB_8888} pixel format.
      * @param horizontal Whether to mirror horizontal.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
@@ -93,7 +101,7 @@ public final class BitmapUtils {
     /**
      * Blurs the given the <em>bitmap</em>.
      * @param context The <tt>Context</tt>.
-     * @param bitmap The bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
+     * @param bitmap A mutable bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
      * @param radius The radius of the blur, Supported range 0 < radius <= 25.
      */
     public static void blurBitmap(Context context, Bitmap bitmap, float radius) {

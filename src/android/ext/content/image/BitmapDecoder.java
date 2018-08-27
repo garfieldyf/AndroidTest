@@ -25,10 +25,21 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param id The resource id of the {@link Parameters} to load.
+     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
+     * @see #BitmapDecoder(Context, Parameters, int)
+     */
+    public BitmapDecoder(Context context, int id, int maxPoolSize) {
+        super(context, maxPoolSize);
+        mParameters = XmlResources.loadParameters(mContext, id);
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
-     * @see #BitmapDecoder(BitmapDecoder, int)
-     * @see #BitmapDecoder(BitmapDecoder, Parameters)
+     * @see #BitmapDecoder(Context, int, int)
      */
     public BitmapDecoder(Context context, Parameters parameters, int maxPoolSize) {
         super(context, maxPoolSize);
@@ -41,7 +52,6 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
      * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param id The resource id of the {@link Parameters} to load.
-     * @see #BitmapDecoder(Context, Parameters, int)
      * @see #BitmapDecoder(BitmapDecoder, Parameters)
      */
     public BitmapDecoder(BitmapDecoder decoder, int id) {
@@ -56,7 +66,6 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @see #BitmapDecoder(BitmapDecoder, int)
-     * @see #BitmapDecoder(Context, Parameters, int)
      */
     public BitmapDecoder(BitmapDecoder decoder, Parameters parameters) {
         super(decoder);

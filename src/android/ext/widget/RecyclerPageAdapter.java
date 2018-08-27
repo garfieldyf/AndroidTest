@@ -289,10 +289,10 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * {@link #setPage(int, Page, Object)}.<p>
      * @param position The adapter position of the item in this adapter.
      * @param page The index of the page whose data should be returned.
-     * @param offset The start position of the first item in the <em>page</em>.
-     * @param count The number of items in the <em>page</em>.
+     * @param pageOffset The start position of the first item in the <em>page</em>.
+     * @param pageSize The number of items in the <em>page</em>.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    public abstract Page<E> loadPage(int position, int page, int offset, int count);
+    public abstract Page<E> loadPage(int position, int page, int pageOffset, int pageSize);
 }

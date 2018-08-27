@@ -1169,7 +1169,8 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            setPath(path);
+            initialize(path, getType(path));
+            Dirent.__checkDirentType(this);
         }
 
         /**

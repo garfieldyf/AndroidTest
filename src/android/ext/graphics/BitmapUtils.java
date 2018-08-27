@@ -58,7 +58,7 @@ public final class BitmapUtils {
     /**
      * Binarized the given the <em>bitmap</em>.
      * @param bitmap A mutable bitmap to binarized, must be {@link Config#ARGB_8888} pixel format.
-     * @param gray Whether the <em>bitmap</em> is greyscale bitmap.
+     * @param gray Whether the <em>bitmap</em> is grey-scale bitmap.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static native boolean binaryBitmap(Bitmap bitmap, boolean gray);

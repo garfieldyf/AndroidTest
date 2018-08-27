@@ -74,14 +74,14 @@ public final class UriUtils {
     }
 
     /**
-     * Constructs a scheme is "file" and path is "android_asset" uri string. The returned
-     * string such as <tt>"file:///android_asset/docs/home.html"</tt>.
+     * Constructs a scheme is "file" and authority is "android_asset" uri string. The
+     * returned string such as <tt>"file:///android_asset/docs/home.html"</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return The uri string.
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "filename == null");
-        return new StringBuilder("file:///android_asset/").append(filename).toString();
+        return ("file:///android_asset/" + filename);
     }
 
     /**
@@ -107,7 +107,7 @@ public final class UriUtils {
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null, "packageName == null");
         DebugUtils.__checkError(resource == null, "resource == null");
-        return new StringBuilder("android.resource://").append(packageName).append('/').append(resource).toString();
+        return ("android.resource://" + packageName + "/" + resource);
     }
 
     /**

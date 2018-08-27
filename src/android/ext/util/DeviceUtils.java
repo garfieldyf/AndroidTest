@@ -39,7 +39,11 @@ public final class DeviceUtils {
      * @see #getCpuMinFreq(int)
      */
     public static int getCpuMaxFreq(int coreIndex) {
-        return readCpuFrequency(coreIndex, "cpuinfo_max_freq");
+        try {
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_max_freq", 24));
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     /**
@@ -51,7 +55,11 @@ public final class DeviceUtils {
      * @see #getCpuMaxFreq(int)
      */
     public static int getCpuMinFreq(int coreIndex) {
-        return readCpuFrequency(coreIndex, "cpuinfo_min_freq");
+        try {
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_min_freq", 24));
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     /**
@@ -63,7 +71,11 @@ public final class DeviceUtils {
      * @see #getCpuMinFreq(int)
      */
     public static int getCpuCurFreq(int coreIndex) {
-        return readCpuFrequency(coreIndex, "scaling_cur_freq");
+        try {
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/scaling_cur_freq", 24));
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     /**
@@ -290,14 +302,6 @@ public final class DeviceUtils {
         }
 
         return userLabel;
-    }
-
-    private static int readCpuFrequency(int coreIndex, String filename) {
-        try {
-            return Integer.parseInt(readDeviceFile(new StringBuilder(64).append("/sys/devices/system/cpu/cpu").append(coreIndex).append("/cpufreq/").append(filename).toString(), 24));
-        } catch (Exception e) {
-            return -1;
-        }
     }
 
     private static boolean checkSuperUser(String path, Stat stat) {

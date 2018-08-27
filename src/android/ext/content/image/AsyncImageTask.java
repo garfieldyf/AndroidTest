@@ -1,8 +1,8 @@
 package android.ext.content.image;
 
-import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
@@ -32,25 +32,32 @@ import android.util.Log;
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * public final class DownloadBitmapTask extends AsyncImageTask&lt;String, Bitmap&gt; {
- *     public DownloadBitmapTask(Context context) {
- *         super(context);
+ *     public DownloadBitmapTask(Activity ownerActivity) {
+ *         super(ownerActivity, ownerActivity);
  *     }
  *
- *     protected void onPostExecute(Bitmap result) {
- *         if (result != null) {
- *             Log.i(TAG, result.toString());
+ *     protected void onPostExecute(Object[] results) {
+ *         final Activity activity = getOwner();
+ *         if (activity == null || activity.isDestroyed()) {
+ *              // The owner activity is destroyed or released by the gc.
+ *              return;
+ *         }
+ *
+ *         final Bitmap bitmap = results[0];
+ *         if (bitmap != null) {
+ *             Log.i(TAG, bitmap.toString());
  *         }
  *     }
  * }
  *
- * new DownloadBitmapTask(context)
+ * new DownloadBitmapTask(activity)
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
  * @author Garfield
  * @version 1.0
  */
 @SuppressWarnings("unchecked")
-public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> implements Cancelable {
+public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]> implements Cancelable {
     /**
      * The application <tt>Context</tt>.
      */
@@ -132,25 +139,15 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
     }
 
     @Override
-    protected Image doInBackground(URI... params) {
+    protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
         final byte[] tempBuffer = new byte[16384];
-        final URI uri = params[0];
-        if (!matchScheme(uri)) {
-            return decodeImage(uri, tempBuffer);
+        final Object[] results  = new Object[params.length];
+        for (int i = 0; i < params.length && !isCancelled(); ++i) {
+            results[i] = decodeImageInternal(params[i], tempBuffer);
         }
 
-        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
-        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
-        try {
-            final int statusCode = createDownloadRequest(uri).download(imageFile, this, tempBuffer);
-            return (statusCode == HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
-        } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
-            return null;
-        } finally {
-            FileUtils.deleteFiles(imageFile, false);
-        }
+        return results;
     }
 
     /**
@@ -176,12 +173,34 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Image> im
     }
 
     /**
-     * Decodes an image from the specified <em>uri</em>.
+     * Decodes an image from the specified <em>uri</em>. Subclasses should override this method
+     * to decode image. The default implementation returns a new {@link Bitmap} object.
      * @param uri The uri to decode.
      * @param tempBuffer May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
     protected Image decodeImage(Object uri, byte[] tempBuffer) {
         return (Image)new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
+    }
+
+    /**
+     * Decodes an image from the specified <em>uri</em>.
+     */
+    private Image decodeImageInternal(URI uri, byte[] tempBuffer) {
+        if (!matchScheme(uri)) {
+            return decodeImage(uri, tempBuffer);
+        }
+
+        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
+        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
+        try {
+            final int statusCode = createDownloadRequest(uri).download(imageFile, this, tempBuffer);
+            return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
+        } catch (Exception e) {
+            Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
+            return null;
+        } finally {
+            FileUtils.deleteFiles(imageFile, false);
+        }
     }
 }

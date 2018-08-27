@@ -22,14 +22,24 @@ import android.util.Log;
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
+ *     public JSONDownloadTask(Activity ownerActivity) {
+ *         super(ownerActivity);
+ *     }
+ * 
  *     protected void onPostExecute(JSONObject result) {
+ *         final Activity activity = getOwner();
+ *         if (activity == null || activity.isDestroyed()) {
+ *              // The owner activity is destroyed or released by the gc.
+ *              return;
+ *         }
+ *
  *         if (result != null) {
  *             Log.i(TAG, result.toString());
  *         }
  *     }
  * }
  *
- * final JSONDownloadTask task = new JSONDownloadTask();
+ * final JSONDownloadTask task = new JSONDownloadTask(activity);
  * task.newDownloadRequest(url, DownloadRequest.class)
  *     .readTimeout(60000)
  *     .connectTimeout(60000)

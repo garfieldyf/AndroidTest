@@ -28,6 +28,7 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(int[])
      * @see #getSize(long[])
+     * @see #getSize(Object[])
      */
     public static int getSize(byte[] array) {
         return (array != null ? array.length : 0);
@@ -40,6 +41,7 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(byte[])
      * @see #getSize(long[])
+     * @see #getSize(Object[])
      */
     public static int getSize(int[] array) {
         return (array != null ? array.length : 0);
@@ -52,6 +54,7 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(int[])
      * @see #getSize(byte[])
+     * @see #getSize(Object[])
      */
     public static int getSize(long[] array) {
         return (array != null ? array.length : 0);
@@ -62,8 +65,9 @@ public final class ArrayUtils {
      * handling <tt>null Array</tt>.
      * @param array The <tt>Array</tt>.
      * @return The number of elements.
-     * @see #getSize(Map)
-     * @see #getSize(Collection)
+     * @see #getSize(int[])
+     * @see #getSize(byte[])
+     * @see #getSize(long[])
      */
     public static int getSize(Object[] array) {
         return (array != null ? array.length : 0);
@@ -74,11 +78,23 @@ public final class ArrayUtils {
      * handling <tt>null Map</tt>.
      * @param map The <tt>Map</tt>.
      * @return The number of elements.
-     * @see #getSize(Object[])
      * @see #getSize(Collection)
+     * @see #getSize(ByteArrayBuffer)
      */
     public static int getSize(Map<?, ?> map) {
         return (map != null ? map.size() : 0);
+    }
+
+    /**
+     * Returns the number of bytes in the <em>buffer</em>,
+     * handling <tt>null ByteArrayBuffer</tt>.
+     * @param buffer The <tt>ByteArrayBuffer</tt>.
+     * @return The number of bytes.
+     * @see #getSize(Map)
+     * @see #getSize(Collection)
+     */
+    public static int getSize(ByteArrayBuffer buffer) {
+        return (buffer != null ? buffer.size() : 0);
     }
 
     /**
@@ -87,7 +103,7 @@ public final class ArrayUtils {
      * @param collection The <tt>Collection</tt>.
      * @return The number of elements.
      * @see #getSize(Map)
-     * @see #getSize(Object[])
+     * @see #getSize(ByteArrayBuffer)
      */
     public static int getSize(Collection<?> collection) {
         return (collection != null ? collection.size() : 0);

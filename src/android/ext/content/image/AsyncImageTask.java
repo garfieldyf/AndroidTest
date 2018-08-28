@@ -19,8 +19,8 @@ import android.util.Log;
  * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI on a background thread
  * and publish result on the UI thread.
  * <h5>AsyncImageTask's generic types</h5>
- * <p>The two types used by an image task are the following:</p>
- * <ol><li><tt>URI</tt>, The URI type of the task, accepts the following URI schemes:</li>
+ * <p>The one type used by an image task are the following:</p>
+ * <tt>URI</tt>, The URI type of the task, accepts the following URI schemes:
  * <ul><li>path (no scheme)</li>
  * <li>ftp ({@link #SCHEME_FTP})</li>
  * <li>http ({@link #SCHEME_HTTP})</li>
@@ -28,10 +28,9 @@ import android.util.Log;
  * <li>file ({@link #SCHEME_FILE})</li>
  * <li>content ({@link #SCHEME_CONTENT})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
- * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
- * public final class DownloadBitmapTask extends AsyncImageTask&lt;String, Bitmap&gt; {
+ * public final class DownloadBitmapTask extends AsyncImageTask&lt;String&gt; {
  *     public DownloadBitmapTask(Activity ownerActivity) {
  *         super(ownerActivity, ownerActivity);
  *     }
@@ -56,8 +55,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-@SuppressWarnings("unchecked")
-public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]> implements Cancelable {
+public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implements Cancelable {
     /**
      * The application <tt>Context</tt>.
      */
@@ -101,6 +99,7 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]>
      * no owner set or the owner released by the GC.
      * @see #setOwner(Object)
      */
+    @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         return (mOwner != null ? (T)mOwner.get() : null);
     }
@@ -111,7 +110,7 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]>
      * @return This task.
      * @see #getOwner()
      */
-    public final AsyncImageTask<URI, Image> setOwner(Object owner) {
+    public final AsyncImageTask<URI> setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
         return this;
     }
@@ -122,7 +121,7 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]>
      * @return This task.
      * @see #setParameters(Parameters)
      */
-    public final AsyncImageTask<URI, Image> setParameters(int id) {
+    public final AsyncImageTask<URI> setParameters(int id) {
         mParameters = XmlResources.loadParameters(mContext, id);
         return this;
     }
@@ -133,12 +132,13 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]>
      * @return This task.
      * @see #setParameters(int)
      */
-    public final AsyncImageTask<URI, Image> setParameters(Parameters parameters) {
+    public final AsyncImageTask<URI> setParameters(Parameters parameters) {
         mParameters = parameters;
         return this;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
         final byte[] tempBuffer = new byte[16384];
@@ -179,14 +179,14 @@ public class AsyncImageTask<URI, Image> extends AsyncTask<URI, Object, Object[]>
      * @param tempBuffer May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
-    protected Image decodeImage(Object uri, byte[] tempBuffer) {
-        return (Image)new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
+    protected Object decodeImage(Object uri, byte[] tempBuffer) {
+        return new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
     }
 
     /**
      * Decodes an image from the specified <em>uri</em>.
      */
-    private Image decodeImageInternal(URI uri, byte[] tempBuffer) {
+    private Object decodeImageInternal(URI uri, byte[] tempBuffer) {
         if (!matchScheme(uri)) {
             return decodeImage(uri, tempBuffer);
         }

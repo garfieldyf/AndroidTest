@@ -22,8 +22,8 @@ import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.ext.annotation.CursorField;
 import android.ext.util.ByteArrayBuffer;
-import android.ext.util.ClassFactory;
 import android.ext.util.DebugUtils;
+import android.ext.util.DynamicClassLoader;
 import android.ext.util.FileUtils;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
@@ -357,7 +357,7 @@ public final class DatabaseUtils {
      * @see #newArray(Cursor, Class)
      */
     public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return (T)newInstanceImpl(cursor, ClassFactory.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
+        return (T)newInstanceImpl(cursor, DynamicClassLoader.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
     }
 
     /**
@@ -694,7 +694,7 @@ public final class DatabaseUtils {
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
             final List<Field> fields = getCursorFields(componentType);
-            final Constructor<?> constructor = ClassFactory.getConstructor(componentType, (Class[])null);
+            final Constructor<?> constructor = DynamicClassLoader.getConstructor(componentType, (Class[])null);
             for (int i = 0; cursor.moveToNext(); ++i) {
                 result[i] = newInstanceImpl(cursor, constructor, fields);
             }

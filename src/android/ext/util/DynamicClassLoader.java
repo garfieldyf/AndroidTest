@@ -8,12 +8,12 @@ import android.content.Context;
 import dalvik.system.DexClassLoader;
 
 /**
- * Class <tt>ClassFactory</tt> used to loads the DEX files that containing classes and
- * resources. This can be used to create a new instance that is declared in the DEX files.
+ * Class <tt>DynamicClassLoader</tt> used to loads the DEX files that containing classes
+ * and resources. This can be used to execute code not installed as part of an application.
  * @author Garfield
  * @version 1.0
  */
-public class ClassFactory {
+public class DynamicClassLoader {
     private final ClassLoader mClassLoader;
 
     /**
@@ -24,10 +24,10 @@ public class ClassFactory {
      * @param dexOutputDir The directory where optimized DEX files should be written.
      * This should be a writable directory.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #ClassFactory(Context, String, String, String, String[])
+     * @see #DynamicClassLoader(Context, String, String, String, String[])
      * @see #getCodeCacheDir(Context, String)
      */
-    public ClassFactory(Context context, String dexPath, String dexOutputDir) {
+    public DynamicClassLoader(Context context, String dexPath, String dexOutputDir) {
         this(context, dexPath, dexOutputDir, null, (String[])null);
     }
 
@@ -44,10 +44,10 @@ public class ClassFactory {
      * If no native libraries to load, you can pass <em>(String[])null</em> instead of
      * allocating an empty array.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #ClassFactory(Context, String, String)
+     * @see #DynamicClassLoader(Context, String, String)
      * @see #getCodeCacheDir(Context, String)
      */
-    public ClassFactory(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
+    public DynamicClassLoader(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
         mClassLoader = new DexClassLoader(dexPath, dexOutputDir, librarySearchPath, context.getClassLoader());
         try {
             load(libraryNames);

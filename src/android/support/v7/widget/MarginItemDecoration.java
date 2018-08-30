@@ -36,8 +36,23 @@ public final class MarginItemDecoration extends ItemDecoration {
      * Constructor
      * @see #MarginItemDecoration(Resources, int)
      * @see #MarginItemDecoration(int, int, int, int)
+     * @see #MarginItemDecoration(MarginItemDecoration)
      */
     public MarginItemDecoration() {
+    }
+
+    /**
+     * Copy constructor
+     * @param from The decoration to copy.
+     * @see #MarginItemDecoration()
+     * @see #MarginItemDecoration(Resources, int)
+     * @see #MarginItemDecoration(int, int, int, int)
+     */
+    public MarginItemDecoration(MarginItemDecoration from) {
+        this.leftMargin   = from.leftMargin;
+        this.topMargin    = from.topMargin;
+        this.rightMargin  = from.rightMargin;
+        this.bottomMargin = from.bottomMargin;
     }
 
     /**
@@ -46,6 +61,7 @@ public final class MarginItemDecoration extends ItemDecoration {
      * @param id The resource id of the margin dimension.
      * @see #MarginItemDecoration()
      * @see #MarginItemDecoration(int, int, int, int)
+     * @see #MarginItemDecoration(MarginItemDecoration)
      */
     public MarginItemDecoration(Resources res, int id) {
         leftMargin = topMargin = rightMargin = bottomMargin = res.getDimensionPixelSize(id);
@@ -59,6 +75,7 @@ public final class MarginItemDecoration extends ItemDecoration {
      * @param bottomMargin The bottom margin in pixels of the children.
      * @see #MarginItemDecoration()
      * @see #MarginItemDecoration(Resources, int)
+     * @see #MarginItemDecoration(MarginItemDecoration)
      */
     public MarginItemDecoration(int leftMargin, int topMargin, int rightMargin, int bottomMargin) {
         this.leftMargin   = leftMargin;

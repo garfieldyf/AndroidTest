@@ -37,25 +37,25 @@ import android.widget.ImageView;
  *     namespace:defaultImage="@drawable/ic_placeholder"
  *     namespace:maxCacheSize="128" &gt;
  *
- * &lt;!-- Bitmap Transformer --&gt;
- * &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
- *     class="classFullName"
- *     android:src="@xml/transformer1"
- *     android:radius="20dp"
- *     android:topLeftRadius="10dp"
- *     android:topRightRadius="10dp"
- *     android:bottomLeftRadius="10dp"
- *     android:bottomRightRadius="10dp"
- *     namespace:attributes1="value1"
- *     namespace:attributes2="value2" /&gt;
+ *     &lt;!-- Bitmap Transformer --&gt;
+ *     &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
+ *         class="classFullName"
+ *         android:src="@xml/transformer1"
+ *         android:radius="20dp"
+ *         android:topLeftRadius="10dp"
+ *         android:topRightRadius="10dp"
+ *         android:bottomLeftRadius="10dp"
+ *         android:bottomRightRadius="10dp"
+ *         namespace:attributes1="value1"
+ *         namespace:attributes2="value2" /&gt;
  *
- * &lt;!-- Image Transformer (Optional) --&gt;
- * &lt;[ GIFTransformer | DrawableTransformer | transformer ]
- *     class="classFullName"
- *     android:src="@xml/transformer2"
- *     namespace:attributes3="value3"
- *     namespace:attributes4="value4"
- *     ... ... /&gt;
+ *     &lt;!-- Image Transformer (Optional) --&gt;
+ *     &lt;[ GIFTransformer | DrawableTransformer | transformer ]
+ *         class="classFullName"
+ *         android:src="@xml/transformer2"
+ *         namespace:attributes3="value3"
+ *         namespace:attributes4="value4"
+ *         ... ... /&gt;
  * &lt;/[ ImageBinder | TransitionBinder | binder ]&gt;</pre>
  * @author Garfield
  * @version 3.5

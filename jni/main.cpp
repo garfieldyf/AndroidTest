@@ -63,8 +63,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
 
 #ifndef NDEBUG
     const int num = 0x12345678;
-    const char* bigEndian = "Big Endian";
-    const char* littleEndian = "Little Endian";
+    const char* bigEndian = "BIG_ENDIAN";
+    const char* littleEndian = "LITTLE_ENDIAN";
     const char* byteOrder = (*((const char*)&num) == 0x12 ? bigEndian : littleEndian);
     LOGD("sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, byteOrder = %s\n", sizeof(void*), sizeof(int), sizeof(long), byteOrder);
 #endif  // NDEBUG

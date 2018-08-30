@@ -174,6 +174,16 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Keep-Alive", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest keepAlive(String value) {
+        mConnection.setRequestProperty("Keep-Alive", value);
+        return this;
+    }
+
+    /**
      * Equivalent to calling <tt>requestHeader("Content-Type", value)</tt>.
      * @param value The value of the field.
      * @return This request.

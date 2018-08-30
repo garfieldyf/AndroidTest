@@ -29,7 +29,7 @@ import android.util.Log;
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwner();
  *         if (activity == null || activity.isDestroyed()) {
- *              // The owner activity is destroyed or released by the gc.
+ *              // The owner activity has been destroyed or release by the GC.
  *              return;
  *         }
  *

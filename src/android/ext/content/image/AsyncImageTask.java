@@ -191,8 +191,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
             return decodeImage(uri, tempBuffer);
         }
 
-        final String imageDir  = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath();
-        final String imageFile = new StringBuilder(imageDir.length() + 16).append(imageDir).append('/').append(Thread.currentThread().hashCode()).toString();
+        final String imageFile = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath() + "/" + Thread.currentThread().hashCode();
         try {
             final int statusCode = createDownloadRequest(uri).download(imageFile, this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);

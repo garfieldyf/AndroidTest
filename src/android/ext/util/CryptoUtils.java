@@ -11,11 +11,11 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 
 /**
- * Class SecurityUtils
+ * Class CryptoUtils
  * @author Garfield
  * @version 1.0
  */
-public final class SecurityUtils {
+public final class CryptoUtils {
     /**
      * Uses the RSA encryption algorithm encrypts the specified byte array <em>data</em>.
      * @param publicKey The public key.
@@ -145,6 +145,6 @@ public final class SecurityUtils {
     /**
      * This utility class cannot be instantiated.
      */
-    private SecurityUtils() {
+    private CryptoUtils() {
     }
 }

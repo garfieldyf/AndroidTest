@@ -213,21 +213,21 @@ public final class FileUtils {
     public static String buildPath(String dir, String name) {
         final StringBuilder path = join(dir, name);
         boolean haveSlash = false;
-        int length = 0;
-        for (int i = 0, count = path.length(); i < count; ++i) {
+        int newLength = 0;
+        for (int i = 0, length = path.length(); i < length; ++i) {
             final char c = path.charAt(i);
             if (c == '/') {
                 if (!haveSlash) {
                     haveSlash = true;
-                    path.setCharAt(length++, '/');
+                    path.setCharAt(newLength++, '/');
                 }
             } else {
                 haveSlash = false;
-                path.setCharAt(length++, c);
+                path.setCharAt(newLength++, c);
             }
         }
 
-        return path.substring(0, haveSlash && length > 1 ? length - 1 : length);
+        return path.substring(0, haveSlash && newLength > 1 ? newLength - 1 : newLength);
     }
 
     /**

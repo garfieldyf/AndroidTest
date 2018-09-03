@@ -2,11 +2,10 @@ package android.ext.database;
 
 import java.lang.ref.WeakReference;
 import android.database.Cursor;
+import android.ext.concurrent.ThreadPool.MessageThread;
 import android.ext.util.DebugUtils;
 import android.os.Handler;
 import android.os.Handler.Callback;
-import android.os.HandlerThread;
-import android.os.Looper;
 import android.os.Message;
 
 /**
@@ -132,7 +131,7 @@ public abstract class DatabaseHandler implements Callback {
      * @return A new <tt>Handler</tt>.
      */
     protected Handler createHandler() {
-        return Factory.createHandler(this);
+        return MessageThread.createHandler(this);
     }
 
     /**
@@ -165,22 +164,5 @@ public abstract class DatabaseHandler implements Callback {
      * @param rowsAffected The number of rows affected.
      */
     protected void onDeleteComplete(int token, int rowsAffected) {
-    }
-
-    /**
-     * Class <tt>Factory</tt> used to create a new {@link Handler}.
-     */
-    private static final class Factory {
-        private static final Looper sLooper;
-
-        public static Handler createHandler(Callback callback) {
-            return new Handler(sLooper, callback);
-        }
-
-        static {
-            final HandlerThread thread = new HandlerThread("AsyncQuery-thread");
-            thread.start();
-            sLooper = thread.getLooper();
-        }
     }
 }

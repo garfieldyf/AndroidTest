@@ -11,6 +11,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.ext.util.ArrayUtils;
 import android.ext.util.UIHandler;
+import android.os.Handler;
+import android.os.Handler.Callback;
+import android.os.HandlerThread;
 import android.os.Process;
 
 /**
@@ -195,6 +198,31 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         @Override
         public Thread newThread(Runnable runnable) {
             return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet());
+        }
+    }
+
+    /**
+     * Class <tt>MessageThread</tt> is an implementation of a {@link HandlerThread}.
+     */
+    public static final class MessageThread extends HandlerThread {
+        private static final MessageThread sInstance;
+
+        /**
+         * Creates a new {@link Handler} associated with a background thread's message queue.
+         * @param callback The {@link Callback} in which to handle messages, or <tt>null</tt>.
+         * @return A new <tt>Handler</tt>.
+         */
+        public static Handler createHandler(Callback callback) {
+            return new Handler(sInstance.getLooper(), callback);
+        }
+
+        private MessageThread() {
+            super("Message-thread");
+        }
+
+        static {
+            sInstance = new MessageThread();
+            sInstance.start();
         }
     }
 }

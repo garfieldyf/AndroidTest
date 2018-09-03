@@ -35,7 +35,7 @@ public abstract class DatabaseHandler implements Callback {
      */
     /* package */ DatabaseHandler() {
         DebugUtils.__checkMemoryLeaks(getClass());
-        mHandler = Factory.createHandler(this);
+        mHandler = createHandler();
     }
 
     /**
@@ -45,7 +45,7 @@ public abstract class DatabaseHandler implements Callback {
      */
     /* package */ DatabaseHandler(Object owner) {
         DebugUtils.__checkMemoryLeaks(getClass());
-        mHandler = Factory.createHandler(this);
+        mHandler = createHandler();
         mOwner = new WeakReference<Object>(owner);
     }
 
@@ -125,6 +125,14 @@ public abstract class DatabaseHandler implements Callback {
         default:
             throw new IllegalStateException("Unknown message: " + message);
         }
+    }
+
+    /**
+     * Creates a new {@link Handler} to execute asynchronous query.
+     * @return A new <tt>Handler</tt>.
+     */
+    protected Handler createHandler() {
+        return Factory.createHandler(this);
     }
 
     /**

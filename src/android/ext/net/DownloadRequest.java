@@ -233,6 +233,28 @@ public class DownloadRequest {
     }
 
     /**
+     * Returns the specified response header value.
+     * @param field The header field name.
+     * @return The value of the header field, or
+     * <tt>null</tt> if no field has been found.
+     * @see #responseHeaderInt(String, int)
+     */
+    public final String responseHeader(String field) {
+        return mConnection.getHeaderField(field);
+    }
+
+    /**
+     * Returns the specified response header value as a number.
+     * @param field The header field name.
+     * @param defaultValue The default value if no field has been found.
+     * @return The value of the header field.
+     * @see #responseHeader(String)
+     */
+    public final int responseHeaderInt(String field, int defaultValue) {
+        return mConnection.getHeaderFieldInt(field, defaultValue);
+    }
+
+    /**
      * Connects to the remote server with the arguments supplied to this request. <p>Note: This method
      * will not download any resources.</p>
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post.

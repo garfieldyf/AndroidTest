@@ -78,7 +78,8 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @see #setOwner(Object)
      */
     public final <T> T getOwner() {
-        return (mOwner != null ? (T)mOwner.get() : null);
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        return (T)mOwner.get();
     }
 
     /**

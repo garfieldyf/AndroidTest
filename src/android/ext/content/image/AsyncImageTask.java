@@ -101,7 +101,8 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      */
     @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
-        return (mOwner != null ? (T)mOwner.get() : null);
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        return (T)mOwner.get();
     }
 
     /**

@@ -183,7 +183,7 @@ public final class ByteArrayBuffer extends OutputStream {
         // Expands this buffer capacity.
         DebugUtils.__checkError(is == null, "is == null");
         expandCapacity(is.available(), false);
-        cancelable = DummyCancelable.get(cancelable);
+        cancelable = CancelableWrapper.wrap(cancelable);
 
         // Reads the all bytes from the InputStream.
         int count, readBytes, expandCount = 256;

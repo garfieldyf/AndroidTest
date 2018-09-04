@@ -462,7 +462,7 @@ public final class PackageUtils {
         public ParseResult(int parseFlags, Cancelable cancelable) {
             this.result = new ArrayList<T>();
             this.parseFlags = parseFlags;
-            this.cancelable = DummyCancelable.get(cancelable);
+            this.cancelable = CancelableWrapper.wrap(cancelable);
         }
     }
 

@@ -585,7 +585,7 @@ public final class DatabaseUtils {
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
-                if (field.getAnnotation(CursorField.class) != null) {
+                if ((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) == 0 && field.getAnnotation(CursorField.class) != null) {
                     result.add(field);
                     field.setAccessible(true);
                 }

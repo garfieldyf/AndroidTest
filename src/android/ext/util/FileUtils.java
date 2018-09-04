@@ -507,7 +507,7 @@ public final class FileUtils {
         if (dst instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)dst).readFrom(src, cancelable);
         } else {
-            copyStreamImpl(src, dst, DummyCancelable.get(cancelable), (buffer != null ? buffer : new byte[8192]));
+            copyStreamImpl(src, dst, CancelableWrapper.wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
         }
     }
 

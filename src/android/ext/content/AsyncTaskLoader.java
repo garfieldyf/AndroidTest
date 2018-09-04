@@ -23,6 +23,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @see #AsyncTaskLoader(Executor, Object)
+     * @see #AsyncTaskLoader(AsyncTaskLoader)
      */
     public AsyncTaskLoader(Executor executor) {
         super(executor);
@@ -33,10 +34,21 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param owner The owner object. See {@link #setOwner(Object)}.
      * @see #AsyncTaskLoader(Executor)
+     * @see #AsyncTaskLoader(AsyncTaskLoader)
      */
     public AsyncTaskLoader(Executor executor, Object owner) {
         super(executor);
         mOwner = new WeakReference<Object>(owner);
+    }
+
+    /**
+     * Copy constructor
+     * @see #AsyncTaskLoader(Executor)
+     * @see #AsyncTaskLoader(Executor, Object)
+     */
+    public AsyncTaskLoader(AsyncTaskLoader<Key, Params, Result> loader) {
+        super(loader);
+        mOwner = loader.mOwner;
     }
 
     /**

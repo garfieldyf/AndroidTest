@@ -17,12 +17,12 @@ public interface Cancelable {
 }
 
 /**
- * A dummy <tt>Cancelable</tt>.
+ * A <tt>CancelableWrapper</tt>.
  */
-/* package */ final class DummyCancelable implements Cancelable {
-    private static final Cancelable sInstance = new DummyCancelable();
+/* package */ final class CancelableWrapper implements Cancelable {
+    private static final Cancelable sInstance = new CancelableWrapper();
 
-    public static Cancelable get(Cancelable cancelable) {
+    public static Cancelable wrap(Cancelable cancelable) {
         return (cancelable != null ? cancelable : sInstance);
     }
 

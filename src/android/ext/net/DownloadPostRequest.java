@@ -1,5 +1,7 @@
 package android.ext.net;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -73,7 +75,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be an <tt>InputStream, String, JSONObject, JSONArray,
+     * @param data May be an <tt>InputStream, String, File, JSONObject, JSONArray,
      * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[])
@@ -130,6 +132,9 @@ public final class DownloadPostRequest extends DownloadRequest {
         if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[] || mData instanceof ContentValues) {
             connectImpl();
             postData(mData);
+        } else if (mData instanceof File) {
+            connectImpl();
+            postData((File)mData, tempBuffer);
         } else if (mData instanceof byte[]) {
             connectImpl();
             postData((byte[])mData, (int)mParams[0], (int)mParams[1]);
@@ -159,6 +164,18 @@ public final class DownloadPostRequest extends DownloadRequest {
     private void connectImpl() throws IOException {
         ((HttpURLConnection)mConnection).setRequestMethod("POST");
         mConnection.connect();
+    }
+
+    /**
+     * Posts the <tt>File</tt> contents to the remote HTTP server.
+     */
+    private void postData(File file, byte[] tempBuffer) throws IOException {
+        final InputStream is = new FileInputStream(file);
+        try {
+            postData(is, tempBuffer);
+        } finally {
+            is.close();
+        }
     }
 
     /**

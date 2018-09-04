@@ -16,8 +16,7 @@ import com.google.zxing.common.BitMatrix;
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
  * final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
- *     .logo(logo)
- *     .gravity(Gravity.FILL)
+ *     .logo(logo, Gravity.FILL)
  *     .margins(30, 30, 30, 30)
  *     .build();</pre>
  * @author Garfield
@@ -224,21 +223,18 @@ public final class BarcodeBuilder {
 
     private void drawLogo(Canvas canvas, int width, int height) {
         final int size = (int)(width * 0.25f);
-        final int left = (width - size) / 2;
-        final int top  = (height - size) / 2;
+        final Rect bounds = new Rect();
+        final Rect container = new Rect(0, 0, width, height);
+        Gravity.apply(Gravity.CENTER, size, size, container, 0, 0, bounds);
 
         final int logoWidth  = logo.getIntrinsicWidth();
         final int logoHeight = logo.getIntrinsicHeight();
-        final Rect container = new Rect(left, top, left + size, top + size);
-
         if (logoWidth > 0 && logoHeight > 0) {
-            final Rect bounds = new Rect();
+            container.set(bounds);
             Gravity.apply(gravity, logoWidth, logoHeight, container, 0, 0, bounds);
-            logo.setBounds(bounds);
-        } else {
-            logo.setBounds(container);
         }
 
+        logo.setBounds(bounds);
         logo.draw(canvas);
     }
 }

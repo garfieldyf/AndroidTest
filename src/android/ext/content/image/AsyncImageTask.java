@@ -42,7 +42,7 @@ import android.util.Log;
  *              return;
  *         }
  *
- *         final Bitmap bitmap = results[0];
+ *         final Bitmap bitmap = (Bitmap)results[0];
  *         if (bitmap != null) {
  *             Log.i(TAG, bitmap.toString());
  *         }

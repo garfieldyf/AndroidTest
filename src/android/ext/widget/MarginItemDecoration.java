@@ -1,7 +1,8 @@
-package android.support.v7.widget;
+package android.ext.widget;
 
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.State;
 import android.view.View;

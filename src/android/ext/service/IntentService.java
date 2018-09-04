@@ -59,7 +59,7 @@ public abstract class IntentService extends Service implements Callback {
         switch (msg.what) {
         case MESSAGE_QUIT:
             // msg.arg1 -- startId
-            stopSelfResult(msg.arg1);
+            stopSelf(msg.arg1);
             break;
 
         case MESSAGE_INTENT:
@@ -86,7 +86,7 @@ public abstract class IntentService extends Service implements Callback {
      */
     protected void sendQuitMessage(int startId) {
         if (mKeepAliveTime <= 0) {
-            stopSelfResult(startId);
+            stopSelf(startId);
         } else if (!mHandler.hasMessages(MESSAGE_INTENT)) {
             mHandler.sendMessageDelayed(Message.obtain(mHandler, MESSAGE_QUIT, startId, 0), mKeepAliveTime);
         }

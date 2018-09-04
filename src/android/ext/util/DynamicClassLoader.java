@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import android.content.Context;
@@ -74,7 +73,7 @@ public class DynamicClassLoader {
     public void load(String... libraryNames) throws Exception {
         if (ArrayUtils.getSize(libraryNames) > 0) {
             final Runtime runtime = Runtime.getRuntime();
-            final Method method = getDeclaredMethod(Runtime.class, "loadLibrary", String.class, ClassLoader.class);
+            final Method method = ClassUtils.getDeclaredMethod(Runtime.class, "loadLibrary", String.class, ClassLoader.class);
 
             for (String libraryName : libraryNames) {
                 method.invoke(runtime, libraryName, mClassLoader);
@@ -122,49 +121,6 @@ public class DynamicClassLoader {
     public static String getCodeCacheDir(Context context, String name) {
         final String result = FileUtils.buildPath(context.getCacheDir().getPath(), name);
         FileUtils.mkdirs(result, 0);
-        return result;
-    }
-
-    /**
-     * Returns a {@link Constructor} object with the specified <em>clazz</em> and <em>parameterTypes</em>.
-     * @param clazz The <tt>Class</tt> which is declared the constructor.
-     * @param parameterTypes The parameter types of the constructor or <em>(Class[])null</em> is equivalent
-     * to the empty array.
-     * @throws NoSuchMethodException if the requested constructor cannot be found.
-     * @see #getConstructor(String, Class[])
-     */
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
-        final Constructor<?> result = clazz.getDeclaredConstructor(parameterTypes);
-        result.setAccessible(true);
-        return result;
-    }
-
-    /**
-     * Returns a {@link Constructor} object with the specified <em>className</em> and <em>parameterTypes</em>.
-     * @param className The name of the <tt>Class</tt> which is declared the constructor.
-     * @param parameterTypes The parameter types of the constructor or <em>(Class[])null</em> is equivalent
-     * to the empty array.
-     * @throws ClassNotFoundException if the requested class cannot be found.
-     * @throws NoSuchMethodException if the requested constructor cannot be found.
-     * @see #getConstructor(Class, Class[])
-     */
-    public static Constructor<?> getConstructor(String className, Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException {
-        final Constructor<?> result = Class.forName(className).getDeclaredConstructor(parameterTypes);
-        result.setAccessible(true);
-        return result;
-    }
-
-    /**
-     * Returns a {@link Method} object with the specified <em>name</em> and <em>parameterTypes</em>.
-     * @param clazz The <tt>Class</tt> which is declared the method.
-     * @param name The requested method's name.
-     * @param parameterTypes The parameter types of the method or <em>(Class[])null</em> is equivalent
-     * to the empty array.
-     * @throws NoSuchMethodException if the requested method cannot be found.
-     */
-    public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
-        final Method result = clazz.getDeclaredMethod(name, parameterTypes);
-        result.setAccessible(true);
         return result;
     }
 }

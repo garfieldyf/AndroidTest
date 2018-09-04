@@ -19,7 +19,7 @@ import android.ext.content.image.ImageBinder.OvalTransformer;
 import android.ext.content.image.ImageBinder.RoundedRectTransformer;
 import android.ext.content.image.ImageBinder.Transformer;
 import android.ext.content.image.TransitionBinder;
-import android.ext.util.DynamicClassLoader;
+import android.ext.util.ClassUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -156,7 +156,7 @@ public final class XmlResources {
                 return new SizeParameters(context, attrs);
 
             default:
-                return DynamicClassLoader.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
+                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }
@@ -183,7 +183,7 @@ public final class XmlResources {
                 return new TransitionBinder(context, attrs);
 
             default:
-                return DynamicClassLoader.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
+                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }
@@ -230,7 +230,7 @@ public final class XmlResources {
                 return new RoundedRectTransformer(context, Xml.asAttributeSet(parser));
 
             default:
-                return DynamicClassLoader.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, Xml.asAttributeSet(parser));
+                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, Xml.asAttributeSet(parser));
             }
         }
     }

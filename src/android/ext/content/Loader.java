@@ -142,7 +142,7 @@ public abstract class Loader implements Factory<Task> {
 
             for (int i = 0; i < size; ++i) {
                 result.setLength(0);
-                printer.println(result.append("  ").append(mRunningTasks.keyAt(i)).append(" ==> ").append(mRunningTasks.valueAt(i)).toString());
+                printer.println(DebugUtils.toSimpleString(mRunningTasks.keyAt(i), result.append("  ")).append(" ==> ").append(mRunningTasks.valueAt(i)).toString());
             }
         }
     }
@@ -153,7 +153,7 @@ public abstract class Loader implements Factory<Task> {
      * @return The maximum pool size.
      */
     public static int computeMaximumPoolSize(Executor executor) {
-        return Math.min((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 14) + 2;
+        return Math.min((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 8) * 3 / 2;
     }
 
     /**

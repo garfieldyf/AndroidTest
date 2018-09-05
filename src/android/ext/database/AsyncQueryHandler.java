@@ -64,27 +64,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
-     * @param token A token passed into {@link #onQueryComplete} to identify the query.
-     * @param uri The URI, using the content:// scheme, for the content to retrieve.
-     * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
-     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
-     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given URI.
-     * @param selectionArgs You may include ? in selection, which will be replaced by the values
-     * from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
-     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
-     */
-    public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_QUERY
-         * msg.obj  - { uri, projection, selection, selectionArgs, sortOrder }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { uri, projection, selection, selectionArgs, sortOrder }));
-    }
-
-    /**
      * This method begins an asynchronous insert. When the insert is done {@link #onInsertComplete} is called.
      * @param token A token passed into {@link #onInsertComplete} to identify the insert.
      * @param uri The URI to insert into.
@@ -98,43 +77,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
          * msg.obj  - { uri, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERT, 0, new Object[] { uri, values }));
-    }
-
-    /**
-     * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
-     * @param token A token passed into {@link #onUpdateComplete} to identify the update.
-     * @param uri The URI to modify.
-     * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
-     * translated to NULL.
-     * @param whereClause The WHERE clause to apply when updating. Passing <tt>null</tt> will update all rows.
-     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
-     * The values will be bound as Strings.
-     */
-    public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_UPDATE
-         * msg.obj  - { uri, values, whereClause, whereArgs }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { uri, values, whereClause, whereArgs }));
-    }
-
-    /**
-     * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
-     * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
-     * @param uri The URL of the row to delete.
-     * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
-     * delete all rows.
-     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
-     * The values will be bound as Strings.
-     */
-    public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_DELETE
-         * msg.obj  - { uri, whereClause, whereArgs }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { uri, whereClause, whereArgs }));
     }
 
     /**

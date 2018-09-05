@@ -1,9 +1,11 @@
 package android.ext.database;
 
 import java.lang.ref.WeakReference;
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.ext.concurrent.ThreadPool.MessageThread;
 import android.ext.util.DebugUtils;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
@@ -85,6 +87,67 @@ public abstract class DatabaseHandler implements Callback {
          * msg.obj  - params
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_EXECUTE, 0, params));
+    }
+
+    /**
+     * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
+     * @param token A token passed into {@link #onQueryComplete} to identify the query.
+     * @param uri The URI or table to query.
+     * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
+     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
+     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given URI.
+     * @param selectionArgs You may include ? in selection, which will be replaced by the values
+     * from <em>selectionArgs</em>. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
+     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
+     */
+    public final void startQuery(int token, Object uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        /*
+         * msg.what - token
+         * msg.arg1 - MESSAGE_QUERY
+         * msg.obj  - { uri, projection, selection, selectionArgs, sortOrder }
+         */
+        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
+        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { uri, projection, selection, selectionArgs, sortOrder }));
+    }
+
+    /**
+     * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
+     * @param token A token passed into {@link #onUpdateComplete} to identify the update.
+     * @param uri The URI or table to update in.
+     * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
+     * translated to NULL.
+     * @param whereClause The WHERE clause to apply when updating. Passing <tt>null</tt> will update all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startUpdate(int token, Object uri, ContentValues values, String whereClause, String[] whereArgs) {
+        /*
+         * msg.what - token
+         * msg.arg1 - MESSAGE_UPDATE
+         * msg.obj  - { uri, values, whereClause, whereArgs }
+         */
+        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
+        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { uri, values, whereClause, whereArgs }));
+    }
+
+    /**
+     * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
+     * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
+     * @param uri The URI or table of the row to delete.
+     * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
+     * delete all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startDelete(int token, Object uri, String whereClause, String[] whereArgs) {
+        /*
+         * msg.what - token
+         * msg.arg1 - MESSAGE_DELETE
+         * msg.obj  - { uri, whereClause, whereArgs }
+         */
+        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
+        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { uri, whereClause, whereArgs }));
     }
 
     /**

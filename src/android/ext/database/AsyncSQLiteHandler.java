@@ -46,7 +46,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
      * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the
      * values from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @see #startQuery(int, String, String[], String, String[], String, String)
+     * @see #startQuery(int, Object, String[], String, String[], String)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
         /*
@@ -55,30 +55,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
          * msg.obj  - { sql, selectionArgs }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_RAWQUERY, 0, new Object[] { sql, selectionArgs }));
-    }
-
-    /**
-     * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
-     * @param token A token passed into {@link #onQueryComplete} to identify the query.
-     * @param table The table name to compile the query against.
-     * @param columns A list of which columns to return. Passing <tt>null</tt> will return all columns.
-     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
-     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given table.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the
-     * values from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @param orderBy How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
-     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
-     * @param limit Limits the number of rows returned by the query, formatted as LIMIT clause (excluding the
-     * LIMIT itself). Passing <tt>null</tt> denotes no LIMIT clause.
-     * @see #startQuery(int, String, String[])
-     */
-    public final void startQuery(int token, String table, String[] columns, String selection, String[] selectionArgs, String orderBy, String limit) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_QUERY
-         * msg.obj  - { table, columns, selection, selectionArgs, orderBy, limit }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { table, columns, selection, selectionArgs, orderBy, limit }));
     }
 
     /**
@@ -120,43 +96,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
          * msg.obj  - { table, nullColumnHack, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_REPLACE, 0, new Object[] { table, nullColumnHack, values }));
-    }
-
-    /**
-     * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
-     * @param token A token passed into {@link #onUpdateComplete} to identify the update.
-     * @param table The table to update in.
-     * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
-     * translated to NULL.
-     * @param whereClause The WHERE clause to apply when updating. Passing <tt>null</tt> will update all rows.
-     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
-     * The values will be bound as Strings.
-     */
-    public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_UPDATE
-         * msg.obj  - { table, values, whereClause, whereArgs }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { table, values, whereClause, whereArgs }));
-    }
-
-    /**
-     * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
-     * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
-     * @param table The table to delete from.
-     * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
-     * delete all rows.
-     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
-     * The values will be bound as Strings.
-     */
-    public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_DELETE
-         * msg.obj  - { table, whereClause, whereArgs }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { table, whereClause, whereArgs }));
     }
 
     @Override
@@ -261,8 +200,8 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             // params - { sql, selectionArgs }
             cursor = db.rawQuery((String)params[0], (String[])params[1]);
         } else {
-            // params - { table, columns, selection, selectionArgs, orderBy, limit }
-            cursor = db.query((String)params[0], (String[])params[1], (String)params[2], (String[])params[3], null, null, (String)params[4], (String)params[5]);
+            // params - { table, columns, selection, selectionArgs, orderBy }
+            cursor = db.query((String)params[0], (String[])params[1], (String)params[2], (String[])params[3], null, null, (String)params[4]);
         }
 
         if (cursor != null) {

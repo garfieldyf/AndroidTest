@@ -14,7 +14,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AsyncSQLiteHandler extends DatabaseHandler {
+public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
     /**
      * The {@link SQLiteDatabase}.
      */
@@ -96,6 +96,15 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
          * msg.obj  - { table, nullColumnHack, values }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_REPLACE, 0, new Object[] { table, nullColumnHack, values }));
+    }
+
+    /**
+     * Returns the {@link SQLiteDatabase} associated with this object.
+     * @return The <tt>SQLiteDatabase</tt>, or <tt>null</tt> if the
+     * database was released by the GC.
+     */
+    public final SQLiteDatabase getDatabase() {
+        return mDatabase.get();
     }
 
     @Override

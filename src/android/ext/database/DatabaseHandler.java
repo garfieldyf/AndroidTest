@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.ext.concurrent.ThreadPool.MessageThread;
 import android.ext.util.DebugUtils;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Handler.Callback;
 import android.os.Message;
@@ -15,7 +14,7 @@ import android.os.Message;
  * @author Garfield
  * @version 1.0
  */
-public abstract class DatabaseHandler implements Callback {
+public abstract class DatabaseHandler<URI> implements Callback {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -101,13 +100,12 @@ public abstract class DatabaseHandler implements Callback {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      */
-    public final void startQuery(int token, Object uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public final void startQuery(int token, URI uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         /*
          * msg.what - token
          * msg.arg1 - MESSAGE_QUERY
          * msg.obj  - { uri, projection, selection, selectionArgs, sortOrder }
          */
-        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_QUERY, 0, new Object[] { uri, projection, selection, selectionArgs, sortOrder }));
     }
 
@@ -121,13 +119,12 @@ public abstract class DatabaseHandler implements Callback {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
-    public final void startUpdate(int token, Object uri, ContentValues values, String whereClause, String[] whereArgs) {
+    public final void startUpdate(int token, URI uri, ContentValues values, String whereClause, String[] whereArgs) {
         /*
          * msg.what - token
          * msg.arg1 - MESSAGE_UPDATE
          * msg.obj  - { uri, values, whereClause, whereArgs }
          */
-        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_UPDATE, 0, new Object[] { uri, values, whereClause, whereArgs }));
     }
 
@@ -140,14 +137,21 @@ public abstract class DatabaseHandler implements Callback {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
-    public final void startDelete(int token, Object uri, String whereClause, String[] whereArgs) {
+    public final void startDelete(int token, URI uri, String whereClause, String[] whereArgs) {
         /*
          * msg.what - token
          * msg.arg1 - MESSAGE_DELETE
          * msg.obj  - { uri, whereClause, whereArgs }
          */
-        DebugUtils.__checkError(!(uri instanceof Uri || uri instanceof String), "The uri must be a content Uri or table name");
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_DELETE, 0, new Object[] { uri, whereClause, whereArgs }));
+    }
+
+    /**
+     * Returns the {@link Handler} associated with a background thread's message queue.
+     * @return The <tt>Handler</tt>.
+     */
+    public final Handler getHandler() {
+        return mHandler;
     }
 
     /**

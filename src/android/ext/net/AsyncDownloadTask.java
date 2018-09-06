@@ -25,7 +25,7 @@ import android.util.Log;
  *     public JSONDownloadTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
- * 
+ *
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwner();
  *         if (activity == null || activity.isDestroyed()) {

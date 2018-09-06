@@ -19,7 +19,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AsyncQueryHandler extends DatabaseHandler {
+public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -110,6 +110,14 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
          * msg.obj  - { authority, operations }
          */
         mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_BATCH, 0, new Object[] { authority, operations }));
+    }
+
+    /**
+     * Returns the {@link ContentResolver} associated with this object.
+     * @return The <tt>ContentResolver</tt>.
+     */
+    public final ContentResolver getContentResolver() {
+        return mContext.getContentResolver();
     }
 
     @Override

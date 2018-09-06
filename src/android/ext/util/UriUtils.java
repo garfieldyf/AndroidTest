@@ -3,6 +3,7 @@ package android.ext.util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
@@ -13,6 +14,10 @@ import android.net.Uri;
  * @version 1.0
  */
 public final class UriUtils {
+    public static final String SCHEME_FTP   = "ftp";
+    public static final String SCHEME_HTTP  = "http";
+    public static final String SCHEME_HTTPS = "https";
+
     /**
      * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
      * <h5>Accepts the following URI schemes:</h5>
@@ -31,11 +36,11 @@ public final class UriUtils {
             return context.getContentResolver().openInputStream((Uri)uri);
         } else {
             final String uriString = uri.toString();
-            if (uriString.indexOf(':') == -1) {
+            if (uriString.indexOf(SCHEME_SEPARATOR) == -1) {
                 return new FileInputStream(uriString);
             } else {
-                final int index = uriString.indexOf("android_asset");
-                return (index == -1 ? context.getContentResolver().openInputStream(Uri.parse(uriString)) : context.getAssets().open(uriString.substring(index + 14), AssetManager.ACCESS_STREAMING));
+                final int index = uriString.indexOf(DIR_ANDROID_ASSET);
+                return (index == -1 ? context.getContentResolver().openInputStream(Uri.parse(uriString)) : context.getAssets().open(uriString.substring(index + 15), AssetManager.ACCESS_STREAMING));
             }
         }
     }
@@ -52,7 +57,7 @@ public final class UriUtils {
             scheme = ((Uri)uri).getScheme();
         } else {
             final String uriString = uri.toString();
-            final int index = uriString.indexOf(':');
+            final int index = uriString.indexOf(SCHEME_SEPARATOR);
             if (index != -1) {
                 scheme = uriString.substring(0, index);
             }
@@ -70,7 +75,7 @@ public final class UriUtils {
     public static boolean matchScheme(Object uri) {
         DebugUtils.__checkError(uri == null, "uri == null");
         final String scheme = (uri instanceof Uri ? ((Uri)uri).getScheme() : uri.toString());
-        return ("http".regionMatches(true, 0, scheme, 0, 4) || "https".regionMatches(true, 0, scheme, 0, 5) || "ftp".regionMatches(true, 0, scheme, 0, 3));
+        return (SCHEME_HTTP.regionMatches(true, 0, scheme, 0, 4) || SCHEME_HTTPS.regionMatches(true, 0, scheme, 0, 5) || SCHEME_FTP.regionMatches(true, 0, scheme, 0, 3));
     }
 
     /**
@@ -81,7 +86,7 @@ public final class UriUtils {
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "filename == null");
-        return ("file:///android_asset/" + filename);
+        return (ContentResolver.SCHEME_FILE + SCHEME_SEPARATOR + DIR_ANDROID_ASSET + filename);
     }
 
     /**
@@ -107,8 +112,11 @@ public final class UriUtils {
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null, "packageName == null");
         DebugUtils.__checkError(resource == null, "resource == null");
-        return ("android.resource://" + packageName + "/" + resource);
+        return (ContentResolver.SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
     }
+
+    private static final String SCHEME_SEPARATOR  = "://";
+    private static final String DIR_ANDROID_ASSET = "/android_asset/";
 
     /**
      * This utility class cannot be instantiated.

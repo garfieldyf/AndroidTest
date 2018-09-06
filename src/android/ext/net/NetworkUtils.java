@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -91,6 +92,48 @@ public final class NetworkUtils {
         }
 
         return outAddress;
+    }
+
+    /**
+     * Equivalent to calling <tt>formatMacAddress(new StringBuilder(17), macAddress, ':', lowerCase).toString()</tt>.
+     * @param macAddress The MAC address to format.
+     * @param lowerCase Whether to format a lower case hexadecimal characters, using "abcdef".
+     * @return A formatted MAC address.
+     * @see #formatMacAddress(Appendable, byte[], boolean)
+     * @see #formatMacAddress(Appendable, byte[], char, boolean)
+     */
+    public static String formatMacAddress(byte[] macAddress, boolean lowerCase) {
+        return formatMacAddress(new StringBuilder(17), macAddress, ':', lowerCase).toString();
+    }
+
+    /**
+     * Equivalent to calling <tt>formatAddress(out, macAddress, ':', lowerCase)</tt>.
+     * @param out The <tt>Appendable</tt> to append the MAC address.
+     * @param macAddress The MAC address to format.
+     * @param lowerCase Whether to format a lower case hexadecimal characters, using "abcdef".
+     * @return The <em>out</em>.
+     * @see #formatMacAddress(byte[], boolean)
+     * @see #formatMacAddress(Appendable, byte[], char, boolean)
+     */
+    public static Appendable formatMacAddress(Appendable out, byte[] macAddress, boolean lowerCase) {
+        return formatMacAddress(out, macAddress, ':', lowerCase);
+    }
+
+    /**
+     * Returns a formatted string with the specified <em>macAddress</em>.
+     * @param out The <tt>Appendable</tt> to append the MAC address.
+     * @param macAddress The MAC address to format.
+     * @param separator The MAC address component's separator to format. May be ':', '-', or other character.
+     * @param lowerCase Whether to format a lower case hexadecimal characters, using "abcdef".
+     * @return The <em>out</em>.
+     * @see #formatMacAddress(byte[], boolean)
+     * @see #formatMacAddress(Appendable, byte[], boolean)
+     */
+    @SuppressWarnings("resource")
+    public static Appendable formatMacAddress(Appendable out, byte[] macAddress, char separator, boolean lowerCase) {
+        DebugUtils.__checkError(macAddress == null || macAddress.length < 6, "macAddress == null || macAddress.length < 6");
+        new Formatter(out).format((lowerCase ? "%02x%c%02x%c%02x%c%02x%c%02x%c%02x" : "%02X%c%02X%c%02X%c%02X%c%02X%c%02X"), macAddress[0], separator, macAddress[1], separator, macAddress[2], separator, macAddress[3], separator, macAddress[4], separator, macAddress[5]);
+        return out;
     }
 
     /**

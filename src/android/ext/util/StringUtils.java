@@ -1,5 +1,7 @@
 package android.ext.util;
 
+import java.io.IOException;
+
 /**
  * Class StringUtils
  * @author Garfield
@@ -121,6 +123,7 @@ public final class StringUtils {
      * characters, using "abcdef".
      * @return The hexadecimal string.
      * @see #toHexString(byte[], int, int, boolean)
+     * @see #toHexString(Appendable, byte[], int, int, boolean)
      * @see #toHexString(StringBuilder, byte[], int, int, boolean)
      */
     public static String toHexString(byte[] data, boolean lowerCase) {
@@ -136,6 +139,7 @@ public final class StringUtils {
      * characters, using "abcdef".
      * @return The hexadecimal string.
      * @see #toHexString(byte[], boolean)
+     * @see #toHexString(Appendable, byte[], int, int, boolean)
      * @see #toHexString(StringBuilder, byte[], int, int, boolean)
      */
     public static String toHexString(byte[] data, int start, int end, boolean lowerCase) {
@@ -154,8 +158,30 @@ public final class StringUtils {
      * @return The <em>out</em>.
      * @see #toHexString(byte[], boolean)
      * @see #toHexString(byte[], int, int, boolean)
+     * @see #toHexString(Appendable, byte[], int, int, boolean)
      */
     public static StringBuilder toHexString(StringBuilder out, byte[] data, int start, int end, boolean lowerCase) {
+        try {
+            return (StringBuilder)toHexString((Appendable)out, data, start, end, lowerCase);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * Converts the specified byte array to a hexadecimal string.
+     * @param out The <tt>Appendable</tt> to append the converted hexadecimal string.
+     * @param data The array to convert.
+     * @param start The inclusive beginning index of the <em>data</em>.
+     * @param end The exclusive end index of the <em>data</em>.
+     * @param lowerCase Whether to convert a lower case hexadecimal characters, using "abcdef".
+     * @return The <em>out</em>.
+     * @throws IOException if an error occurs while appending the <em>data</em>.
+     * @see #toHexString(byte[], boolean)
+     * @see #toHexString(byte[], int, int, boolean)
+     * @see #toHexString(StringBuilder, byte[], int, int, boolean)
+     */
+    public static Appendable toHexString(Appendable out, byte[] data, int start, int end, boolean lowerCase) throws IOException {
         final char letter = (lowerCase ? 'a' : 'A');
         for (int digit; start < end; ++start) {
             digit = data[start];

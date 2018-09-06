@@ -240,7 +240,7 @@ public final class UIHandler extends Handler {
             break;
 
         case MESSAGE_COMPLETED:
-            ((ThreadPoolManager)msg.obj).onAllTasksComplete();
+            ((ThreadPoolManager)msg.obj).afterExecuteAll();
             break;
 
         // Process the RecyclerView messages.

@@ -82,9 +82,9 @@ public class ThreadPoolManager extends ThreadPool {
     /**
      * Called on the UI thread when this pool has completed all tasks.
      * The default implementation do nothing. If you write your own
-     * implementation, do not call <tt>super.onAllTasksComplete()</tt>.
+     * implementation, do not call <tt>super.afterExecuteAll()</tt>.
      */
-    public void onAllTasksComplete() {
+    public void afterExecuteAll() {
     }
 
     public final void dump(Printer printer) {

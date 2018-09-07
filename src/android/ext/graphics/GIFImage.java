@@ -57,6 +57,7 @@ public final class GIFImage {
      * @see #decodeByteArray(byte[], int, int)
      */
     public static GIFImage decodeStream(InputStream is, byte[] tempStorage) {
+        DebugUtils.__checkError(is == null, "is == null");
         try {
             return decodeStreamInternal(is, tempStorage);
         } catch (Exception e) {
@@ -181,13 +182,13 @@ public final class GIFImage {
     }
 
     private static GIFImage decodeStreamInternal(InputStream is, byte[] tempStorage) throws IOException {
-        long nativeImage = 0;
+        final long nativeImage;
         if (is instanceof FileInputStream) {
             nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
-        } else if (is instanceof AssetInputStream) {
+        } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
             final AssetInputStream asset = (AssetInputStream)is;
             nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
-        } else if (is != null) {
+        } else {
             nativeImage = nativeDecodeStream(is, tempStorage != null ? tempStorage : new byte[16384]);
         }
 

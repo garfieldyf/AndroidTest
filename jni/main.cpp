@@ -66,7 +66,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     const char* bigEndian = "BIG_ENDIAN";
     const char* littleEndian = "LITTLE_ENDIAN";
     const char* byteOrder = (*((const char*)&num) == 0x12 ? bigEndian : littleEndian);
-    LOGD("sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, byteOrder = %s\n", sizeof(void*), sizeof(int), sizeof(long), byteOrder);
+    LOGD("sdk = %d, sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, byteOrder = %s\n", ::__android_sdk_version(), sizeof(void*), sizeof(int), sizeof(long), byteOrder);
 #endif  // NDEBUG
 
 #ifdef __BUILD_GIFIMAGE__

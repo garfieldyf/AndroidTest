@@ -1,9 +1,10 @@
 package android.ext.util;
 
+import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
+import static android.content.ContentResolver.SCHEME_FILE;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.net.Uri;
@@ -33,14 +34,19 @@ public final class UriUtils {
     public static InputStream openInputStream(Context context, Object uri) throws IOException {
         DebugUtils.__checkError(uri == null, "uri == null");
         if (uri instanceof Uri) {
-            return context.getContentResolver().openInputStream((Uri)uri);
+            if (SCHEME_FILE.equalsIgnoreCase(((Uri)uri).getScheme())) {
+                return openFileInputStream(context, uri.toString());
+            } else {
+                return context.getContentResolver().openInputStream((Uri)uri);
+            }
         } else {
             final String uriString = uri.toString();
-            if (uriString.indexOf(SCHEME_SEPARATOR) == -1) {
+            if (FileUtils.isAbsolutePath(uriString)) {
                 return new FileInputStream(uriString);
+            } else if (SCHEME_FILE.regionMatches(true, 0, uriString, 0, 4)) {
+                return openFileInputStream(context, uriString);
             } else {
-                final int index = uriString.indexOf(DIR_ANDROID_ASSET);
-                return (index == -1 ? context.getContentResolver().openInputStream(Uri.parse(uriString)) : context.getAssets().open(uriString.substring(index + 15), AssetManager.ACCESS_STREAMING));
+                return context.getContentResolver().openInputStream(Uri.parse(uriString));
             }
         }
     }
@@ -52,18 +58,13 @@ public final class UriUtils {
      */
     public static String parseScheme(Object uri) {
         DebugUtils.__checkError(uri == null, "uri == null");
-        String scheme = null;
         if (uri instanceof Uri) {
-            scheme = ((Uri)uri).getScheme();
+            return ((Uri)uri).getScheme();
         } else {
             final String uriString = uri.toString();
             final int index = uriString.indexOf(SCHEME_SEPARATOR);
-            if (index != -1) {
-                scheme = uriString.substring(0, index);
-            }
+            return (index != -1 ? uriString.substring(0, index) : null);
         }
-
-        return scheme;
     }
 
     /**
@@ -79,14 +80,24 @@ public final class UriUtils {
     }
 
     /**
-     * Constructs a scheme is "file" and authority is "android_asset" uri string. The
-     * returned string such as <tt>"file:///android_asset/docs/home.html"</tt>.
+     * Constructs a scheme is "file" uri string.
+     * @param path The file path, must be absolute file path.
+     * @return The uri string.
+     */
+    public static String getFileUri(String path) {
+        DebugUtils.__checkError(path == null, "path == null");
+        return (SCHEME_FILE + SCHEME_SEPARATOR + path);
+    }
+
+    /**
+     * Constructs a scheme is "file" and authority is "android_asset" uri string.
+     * The returned string such as <tt>"file:///android_asset/docs/home.html"</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return The uri string.
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "filename == null");
-        return (ContentResolver.SCHEME_FILE + SCHEME_SEPARATOR + DIR_ANDROID_ASSET + filename);
+        return (SCHEME_FILE + SCHEME_SEPARATOR + DIR_ANDROID_ASSET + filename);
     }
 
     /**
@@ -112,7 +123,19 @@ public final class UriUtils {
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null, "packageName == null");
         DebugUtils.__checkError(resource == null, "resource == null");
-        return (ContentResolver.SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
+        return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
+    }
+
+    private static InputStream openFileInputStream(Context context, String uriString) throws IOException {
+        if (uriString.indexOf(DIR_ANDROID_ASSET) == -1) {
+            DebugUtils.__checkError(uriString.length() <= 7, "Invalid uri - " + uriString);
+            // substring skips the 'file://'
+            return new FileInputStream(uriString.substring(7));
+        } else {
+            DebugUtils.__checkError(uriString.length() <= 22, "Invalid uri - " + uriString);
+            // substring skips the 'file:///android_asset/'
+            return context.getAssets().open(uriString.substring(22), AssetManager.ACCESS_STREAMING);
+        }
     }
 
     private static final String SCHEME_SEPARATOR  = "://";

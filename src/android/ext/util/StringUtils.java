@@ -164,7 +164,7 @@ public final class StringUtils {
         try {
             return (StringBuilder)toHexString((Appendable)out, data, start, end, lowerCase);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new Error(e);
         }
     }
 

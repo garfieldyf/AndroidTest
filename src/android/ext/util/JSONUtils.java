@@ -436,8 +436,8 @@ public final class JSONUtils {
     }
 
     private static JsonWriter writeValues(JsonWriter writer, JSONObject values) throws IOException {
-        writer.beginObject();
         final Iterator<String> names = values.keys();
+        writer.beginObject();
         while (names.hasNext()) {
             final String name = names.next();
             writeObject(writer.name(name), values.opt(name));

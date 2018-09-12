@@ -39,7 +39,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Indicates the image loader will be ignore the file cache
      * when it will be load image. If the image loader has no file
-     * cache this flag will be ignore.
+     * cache or load not from net this flag will be ignore.
      */
     public static final int FLAG_IGNORE_FILE_CACHE = 0x00400000;
 

@@ -40,7 +40,7 @@ public final class UriUtils {
                 return new FileInputStream(uriString);
             } else {
                 final int index = uriString.indexOf(DIR_ANDROID_ASSET);
-                return (index == -1 ? context.getContentResolver().openInputStream(Uri.parse(uriString)) : context.getAssets().open(uriString.substring(index + DIR_ANDROID_ASSET.length()), AssetManager.ACCESS_STREAMING));
+                return (index == -1 ? context.getContentResolver().openInputStream(Uri.parse(uriString)) : context.getAssets().open(uriString.substring(index + 15), AssetManager.ACCESS_STREAMING));
             }
         }
     }

@@ -141,7 +141,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     /**
      * Creates a new {@link FileCache} instance.
      */
-    private static FileCache createFileCache(Context context, int maxSize) {
+    protected static FileCache createFileCache(Context context, int maxSize) {
         return (maxSize > 0 ? new LruFileCache(context, ".image_cache", maxSize) : null);
     }
 

@@ -214,6 +214,11 @@ public final class UIHandler extends Handler {
      * Called on the <tt>PageScroller</tt> internal, do not call this method directly.
      */
     public final void requestChildFocus(LayoutManager layoutManager, int position) {
+        /*
+         * msg.arg1 - position
+         * msg.arg2 - retryCount
+         * msg.obj  - LayoutManager
+         */
         sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, 0, layoutManager));
     }
 

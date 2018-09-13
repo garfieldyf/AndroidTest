@@ -127,14 +127,12 @@ public final class UriUtils {
     }
 
     private static InputStream openFileInputStream(Context context, String uriString) throws IOException {
-        if (uriString.indexOf(DIR_ANDROID_ASSET) == -1) {
-            DebugUtils.__checkError(uriString.length() <= 7, "Invalid uri - " + uriString);
-            // substring skips the 'file://'
-            return new FileInputStream(uriString.substring(7));
+        DebugUtils.__checkError(uriString.length() <= 7, "Invalid uri - " + uriString);
+        if (uriString.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
+            return new FileInputStream(uriString.substring(7 /* skip 'file://' */));
         } else {
             DebugUtils.__checkError(uriString.length() <= 22, "Invalid uri - " + uriString);
-            // substring skips the 'file:///android_asset/'
-            return context.getAssets().open(uriString.substring(22), AssetManager.ACCESS_STREAMING);
+            return context.getAssets().open(uriString.substring(22) /* skip 'file:///android_asset/' */, AssetManager.ACCESS_STREAMING);
         }
     }
 

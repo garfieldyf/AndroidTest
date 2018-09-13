@@ -24,7 +24,6 @@
 //
 // mkdirs()
 // scanFiles()
-// listFiles()
 // copyFile()
 // moveFile()
 // fileAccess()
@@ -235,33 +234,6 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
                 if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, path).str, (jint)entry->d_type, userData) != SC_CONTINUE)
                     break;
             }
-        }
-    }
-
-    return errnum;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
-// Method:    listFiles
-// Signature: (Ljava/lang/String;IL PACKAGE_UTILITIES Pools$Factory;Ljava/util/List;)I
-
-JNIEXPORT_METHOD(jint) listFiles(JNIEnv* env, jclass clazz, jstring dirPath, jint flags, jobject factory, jobject outDirents)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || factory == NULL || outDirents == NULL, "dirPath == null || dirPath.length() == 0 || factory == null || outDirents == null", EINVAL);
-
-    const JNI::jstring_t jdirPath(env, dirPath);
-    __NS::Directory<> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter);
-    jint errnum = dir.open(jdirPath);
-    if (errnum == 0)
-    {
-        char path[MAX_PATH];
-        const int length = ::snprintf(path, _countof(path), "%s/", jdirPath.str());
-        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-        {
-            ::strlcpy(path + length, entry->d_name, _countof(path) - length);
-            env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef(env, path).str, (jint)entry->d_type, factory);
         }
     }
 
@@ -522,9 +494,8 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
 
     // Initializes class FileUtils method IDs.
     const JNI::jclass_t clazz(env, PACKAGE_UTILITIES "FileUtils");
-    _setStatID   = clazz.getStaticMethodID("setStat", "(L" PACKAGE_UTILITIES "FileUtils$Stat;IIIJJJJ)V");
-    _addDirentID = clazz.getStaticMethodID("addDirent", "(Ljava/util/List;Ljava/lang/String;IL" PACKAGE_UTILITIES "Pools$Factory;)V");
-    assert(_setStatID != NULL && _addDirentID != NULL);
+    _setStatID = clazz.getStaticMethodID("setStat", "(L" PACKAGE_UTILITIES "FileUtils$Stat;IIIJJJJ)V");
+    assert(_setStatID != NULL);
 
     // Registers class FileUtils native methods.
     const JNINativeMethod methods[] =
@@ -541,7 +512,6 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
         { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)fileStatus },
-        { "listFiles", "(Ljava/lang/String;IL" PACKAGE_UTILITIES "Pools$Factory;Ljava/util/List;)I", (void*)listFiles },
         { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;ILjava/lang/Object;)I", (void*)scanFiles },
     };
 

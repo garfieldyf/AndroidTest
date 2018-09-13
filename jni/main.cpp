@@ -45,7 +45,6 @@ STDCEXPORT jfieldID _descriptorID;
 #ifdef __BUILD_FILEUTILS__
 // Class FileUtils method IDs.
 STDCEXPORT jmethodID _setStatID;
-STDCEXPORT jmethodID _addDirentID;
 
 // Class ScanCallback method IDs.
 STDCEXPORT jmethodID _onScanFileID;

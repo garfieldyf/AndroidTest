@@ -19,6 +19,7 @@ import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -275,7 +276,7 @@ public final class FileUtils {
     public static native int stat(String path, Stat outStat);
 
     /**
-     * Scans all the sub files and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
+     * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
      * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param callback The {@link ScanCallback} used to scan.
@@ -289,50 +290,49 @@ public final class FileUtils {
     /**
      * Equivalent to calling <tt>listFiles(dirPath, flags, Dirent.FACTORY, new ArrayList())</tt>.
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
-     * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
-     * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded,
-     * <tt>null</tt> otherwise.
-     * @see Dirent#FACTORY
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @return A <tt>List</tt> of <tt>Dirent</tt> objects if the operation succeeded, <tt>null</tt> otherwise.
      * @see #listFiles(String, int, Factory)
      * @see #listFiles(String, int, Factory, List)
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
-        final List<Dirent> dirents = new ArrayList<Dirent>();
-        return (listFiles(dirPath, flags, Dirent.FACTORY, dirents) == 0 ? dirents : null);
+        final Pair<Factory<Dirent>, List<Dirent>> result = new Pair<Factory<Dirent>, List<Dirent>>(Dirent.FACTORY, new ArrayList<Dirent>());
+        return (scanFiles(dirPath, DefaultScanCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
      * Equivalent to calling <tt>listFiles(dirPath, flags, factory, new ArrayList())</tt>.
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
-     * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded,
-     * <tt>null</tt> otherwise.
-     * @see Dirent#FACTORY
+     * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded, <tt>null</tt> otherwise.
      * @see #listFiles(String, int)
      * @see #listFiles(String, int, Factory, List)
      */
     public static <T extends Dirent> List<T> listFiles(String dirPath, int flags, Factory<T> factory) {
-        final List<T> dirents = new ArrayList<T>();
-        return (listFiles(dirPath, flags, factory, dirents) == 0 ? dirents : null);
+        final Pair<Factory<T>, List<T>> result = new Pair<Factory<T>, List<T>>(factory, new ArrayList<T>());
+        return (scanFiles(dirPath, DefaultScanCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
-     * Returns a <tt>List</tt> of {@link Dirent} or subclass objects with the sub files and
-     * directories in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing
-     * the current and parent directory are not returned as part of the list.</p>
+     * Returns a <tt>List</tt> of {@link Dirent} or subclass objects with the sub files and directories
+     * in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing the current and
+     * parent directory are not returned as part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The list flags. Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
      * @param outDirents A <tt>List</tt> to store the <tt>Dirent</tt> or subclass objects.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code.
-     * See {@link ErrnoException}.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      * @see Dirent#FACTORY
      * @see #listFiles(String, int)
      * @see #listFiles(String, int, Factory)
      */
-    public static native <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents);
+    public static <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents) {
+        return scanFiles(dirPath, DefaultScanCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
+    }
 
     /**
      * Returns the start index of the filename in the specified <em>path</em>.
@@ -679,16 +679,6 @@ public final class FileUtils {
         }
 
         return path;
-    }
-
-    /**
-     * Called by native code.
-     */
-    @Keep
-    private static <T extends Dirent> void addDirent(List<? super T> dirents, String path, int type, Factory<T> factory) {
-        final T dirent = factory.newInstance();
-        dirent.initialize(path, type);
-        dirents.add(dirent);
     }
 
     /**
@@ -1597,6 +1587,24 @@ public final class FileUtils {
      */
     private static final class RegexPattern {
         public static final Pattern sInstance = Pattern.compile("[\\w%+,./=_-]+");
+    }
+
+    /**
+     * Class <tt>DefaultScanCallback</tt> is an implementation of a {@link ScanCallback}.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private static final class DefaultScanCallback implements ScanCallback {
+        public static final ScanCallback sInstance = new DefaultScanCallback();
+
+        @Keep
+        @Override
+        public int onScanFile(String path, int type, Object cookie) {
+            final Pair<Factory, List> result = (Pair<Factory, List>)cookie;
+            final Dirent dirent = (Dirent)result.first.newInstance();
+            dirent.initialize(path, type);
+            result.second.add(dirent);
+            return SC_CONTINUE;
+        }
     }
 
     /**

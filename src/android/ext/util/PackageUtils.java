@@ -332,47 +332,62 @@ public final class PackageUtils {
          * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable)</tt>.
          * @param dirPath The path of directory, must be absolute file path.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo} or subclass objects,
          * If the parse was cancelled before it completed normally then the returned value is undefined.
+         * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo} or subclass objects, <tt>null</tt> otherwise.
          * @see #parsePackages(String, int, int, Cancelable)
+         * @see #parsePackages(String, int, int, Cancelable, List)
          */
         public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
-            return parsePackages(dirPath, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable);
+            final ParsedResult<T> parsedResult = new ParsedResult<T>(new ArrayList<T>(), 0, cancelable);
+            return (FileUtils.scanFiles(dirPath, this, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, parsedResult) == 0 ? parsedResult.result : null);
+        }
+
+        /**
+         * Equivalent to calling <tt>parsePackages(dirPath, scanFlags, parseFlags, cancelable, new ArrayList())</tt>.
+         * @param dirPath The path of directory, must be absolute file path.
+         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
+         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
+         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
+         * If the parse was cancelled before it completed normally then the returned value is undefined.
+         * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo} or subclass objects, <tt>null</tt> otherwise.
+         * @see #parsePackages(String, Cancelable)
+         * @see #parsePackages(String, int, int, Cancelable, List)
+         */
+        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
+            final ParsedResult<T> parsedResult = new ParsedResult<T>(new ArrayList<T>(), parseFlags, cancelable);
+            return (FileUtils.scanFiles(dirPath, this, scanFlags, parsedResult) == 0 ? parsedResult.result : null);
         }
 
         /**
          * Parses the package archive files in the specified <em>dirPath</em>.
          * @param dirPath The path of directory, must be absolute file path.
-         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of
-         * {@link FileUtils#FLAG_IGNORE_HIDDEN_FILE FLAG_IGNORE_HIDDEN_FILE},
-         * {@link FileUtils#FLAG_SCAN_FOR_DESCENDENTS FLAG_SCAN_FOR_DESCENDENTS}.
-         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of
-         * <tt>PackageManager.GET_XXX</tt> constants.
-         * @param cancelable A {@link Cancelable} can be check the parse is cancelled,
-         * or <tt>null</tt> if none.
-         * @return If the parse succeeded return a {@link List} of {@link AppPackageInfo}
-         * or subclass objects, If the parse was cancelled before it completed normally
-         * then the returned value is undefined.
+         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
+         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
+         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
+         * If the parse was cancelled before it completed normally then the <em>outResults's</em> contents are undefined.
+         * @param outResults A <tt>List</tt> to store the {@link AppPackageInfo} or subclass objects.
+         * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
          * @see #parsePackages(String, Cancelable)
+         * @see #parsePackages(String, int, int, Cancelable)
          */
-        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
-            final ParseResult<T> parseResult = new ParseResult<T>(parseFlags, cancelable);
-            FileUtils.scanFiles(dirPath, this, scanFlags, parseResult);
-            return parseResult.result;
+        public final int parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable, List<? super T> outResults) {
+            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult<T>(outResults, parseFlags, cancelable));
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object cookie) {
-            final ParseResult<T> parseResult = (ParseResult<T>)cookie;
+            final ParsedResult<T> parsedResult = (ParsedResult<T>)cookie;
             if (isArchiveFile(path, type)) {
-                final T result = parsePackage(mContext, path, parseResult.parseFlags, mFactory);
+                final T result = parsePackage(mContext, path, parsedResult.parseFlags, mFactory);
                 if (result != null) {
-                    parseResult.result.add(result);
+                    parsedResult.result.add(result);
                 }
             }
 
-            return (parseResult.cancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
+            return (parsedResult.cancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
         }
 
         /**
@@ -452,15 +467,16 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>ParseResult</tt> store the {@link PackageParser} parse the result.
+     * Class <tt>ParsedResult</tt> store the {@link PackageParser} parsed result.
      */
-    private static final class ParseResult<T> {
+    private static final class ParsedResult<T> {
         public final List<T> result;
         public final int parseFlags;
         public final Cancelable cancelable;
 
-        public ParseResult(int parseFlags, Cancelable cancelable) {
-            this.result = new ArrayList<T>();
+        @SuppressWarnings("unchecked")
+        public ParsedResult(List<? super T> result, int parseFlags, Cancelable cancelable) {
+            this.result = (List<T>)result;
             this.parseFlags = parseFlags;
             this.cancelable = CancelableWrapper.wrap(cancelable);
         }

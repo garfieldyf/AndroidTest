@@ -20,7 +20,6 @@ extern jfieldID _descriptorID;
 #ifdef __BUILD_FILEUTILS__
 // Class FileUtils method IDs.
 extern jmethodID _setStatID;
-extern jmethodID _addDirentID;
 
 // Class ScanCallback method IDs.
 extern jmethodID _onScanFileID;

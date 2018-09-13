@@ -5,7 +5,6 @@ import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.content.Context;
-import android.support.annotation.Keep;
 import android.util.Printer;
 
 /**
@@ -99,7 +98,6 @@ public final class Pools {
     /**
      * The <tt>Factory</tt> interface used to create a new object.
      */
-    @Keep
     public static interface Factory<T> {
         /**
          * Creates a new instance.

@@ -46,6 +46,7 @@ __STATIC_INLINE__ jboolean handleBitmap(JNIEnv* env, jobject jbitmap, THandler h
     {
         assert_log(info.width > 0 && info.height > 0, "The bitmap width and height must be > 0");
         assert_log(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888, "The bitmap pixel format must be ARGB_8888");
+        assert_log(env->CallBooleanMethod(jbitmap, JNI::jclass_t(env, jbitmap).getMethodID("isMutable", "()Z")), "The bitmap must be a mutable bitmap");
 
         handler(pixels, info.width, info.height);
     }

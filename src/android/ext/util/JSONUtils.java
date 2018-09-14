@@ -415,7 +415,7 @@ public final class JSONUtils {
             try {
                 return Long.valueOf(result, 10);
             } catch (NumberFormatException e) {
-                // This only happens for integral number greater than Long.MAX_VALUE.
+                // This only happens for the number greater than Long.MAX_VALUE.
             }
         }
 

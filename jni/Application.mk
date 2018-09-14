@@ -8,7 +8,7 @@ APP_PLATFORM := android-14
 APP_CPPFLAGS += -std=c++11
 
 ifeq ($(NDK_STL),1)
-APP_STL := stlport_static
+APP_STL := gnustl_static
 else
 APP_CPPFLAGS += -fno-rtti -fno-exceptions
 endif

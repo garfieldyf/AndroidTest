@@ -10,11 +10,8 @@
 #define __FILEUTILS_H__
 
 #ifdef __NDK_STLP__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <list>
 #include <string>
-#pragma GCC diagnostic pop
+#include <forward_list>
 #endif
 
 #include "fileutil.h"
@@ -116,14 +113,14 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     assert(filter);
     assert(callback);
 
-    std::list<std::string> dirPaths;
-    dirPaths.push_back(path);
+    std::forward_list<std::string> dirPaths;
+    dirPaths.push_front(path);
 
     jint errnum = 0;
     do
     {
         // Retrieves the dirPath from the dirPaths front.
-        const std::string dirPath = dirPaths.front();
+        std::string dirPath(static_cast<std::string&&>(dirPaths.front()));
         dirPaths.pop_front();
 
         __NS::Directory dir;
@@ -143,13 +140,13 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                     break;
                 } else if (result == SC_BREAK) {
                     continue;
-                } else if (isDirectory(entry, filePath) {
-                    // If filePath is a directory adds it to dirPaths back.
-                    dirPaths.push_back(filePath);
+                } else if (isDirectory(entry, filePath)) {
+                    // If filePath is a directory adds it to dirPaths front.
+                    dirPaths.push_front(filePath);
                 }
             }
         }
-    } while (errnum == 0 && dirPaths.size() > 0);
+    } while (errnum == 0 && !dirPaths.empty());
 
     return errnum;
 }

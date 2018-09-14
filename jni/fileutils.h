@@ -126,13 +126,13 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
         const std::string dirPath = dirPaths.front();
         dirPaths.pop_front();
 
-        __NS::Directory<> dir(filter);
+        __NS::Directory dir;
         if ((errnum = dir.open(dirPath.c_str())) == 0)
         {
             char filePath[MAX_PATH];
             const int length = ::snprintf(filePath, _countof(filePath), "%s/", dirPath.c_str());
 
-            for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
+            for (struct dirent* entry; (errnum = dir.read(entry, filter)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
                 result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, userData);
@@ -161,14 +161,14 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
     assert(dirPath);
     assert(callback);
 
-    __NS::Directory<> dir(filter);
+    __NS::Directory dir;
     jint errnum = dir.open(dirPath);
     if (errnum == 0)
     {
         char filePath[MAX_PATH];
         const int length = ::snprintf(filePath, _countof(filePath), "%s/", dirPath);
 
-        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
+        for (struct dirent* entry; (errnum = dir.read(entry, filter)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
             result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, userData);
@@ -222,13 +222,14 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     }
     else
     {
-        __NS::Directory<> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter);
+        __NS::Directory dir;
         if ((errnum = dir.open(jdirPath)) == 0)
         {
             char path[MAX_PATH];
             const int length = ::snprintf(path, _countof(path), "%s/", jdirPath.str());
+            int (*filter)(const struct dirent*) = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter);
 
-            for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
+            for (struct dirent* entry; (errnum = dir.read(entry, filter)) == 0 && entry != NULL; )
             {
                 ::strlcpy(path + length, entry->d_name, _countof(path) - length);
                 if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, path).str, (jint)entry->d_type, userData) != SC_CONTINUE)
@@ -265,13 +266,13 @@ JNIEXPORT_METHOD(jint) copyFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstr
             {
                 if (readBytes == -1)
                 {
-                    errnum = __android_check_error(errno, "Couldn't read '%s' file", jsrc.str());
+                    errnum = __verify(errno, "Couldn't read '%s' file", jsrc.str());
                     break;
                 }
 
                 if (dstFile.write(buffer, readBytes) == -1)
                 {
-                    errnum = __android_check_error(errno, "Couldn't write '%s' file", jdst.str());
+                    errnum = __verify(errno, "Couldn't write '%s' file", jdst.str());
                     break;
                 }
             }
@@ -303,7 +304,7 @@ JNIEXPORT_METHOD(jint) moveFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstr
     if (errnum == 0)
     {
         const JNI::jstring_t jsrc(env, src);
-        errnum = __android_check_error((::rename(jsrc, jdst) == 0 ? 0 : errno), "Couldn't move '%s' to '%s'", jsrc.str(), jdst.str());
+        errnum = __verify((::rename(jsrc, jdst) == 0 ? 0 : errno), "Couldn't move '%s' to '%s'", jsrc.str(), jdst.str());
     }
 
     return errnum;
@@ -365,10 +366,11 @@ JNIEXPORT_METHOD(jint) getFileCount(JNIEnv* env, jclass /*clazz*/, jstring dirPa
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0, "dirPath == null || dirPath.length() == 0", 0);
 
     jint size = 0;
-    __NS::Directory<> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter);
+    __NS::Directory dir;
     if (dir.open(JNI::jstring_t(env, dirPath)) == 0)
     {
-        for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
+        int (*filter)(const struct dirent*) = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilter : __NS::defaultFilter);
+        for (struct dirent* entry; dir.read(entry, filter) == 0 && entry != NULL; )
             ++size;
     }
 

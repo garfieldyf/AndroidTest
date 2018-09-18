@@ -1,5 +1,6 @@
 package android.ext.concurrent;
 
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
@@ -90,7 +91,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
      */
     public synchronized final Executor getSerialExecutor() {
         if (mSerialExecutor == null) {
-            mSerialExecutor = new SerialExecutor();
+            mSerialExecutor = new SerialExecutor(this);
         }
 
         return mSerialExecutor;
@@ -102,7 +103,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
      * @see #getSerialExecutor()
      */
     public final Executor newSerialExecutor() {
-        return new SerialExecutor();
+        return new SerialExecutor(this);
     }
 
     @Override
@@ -129,39 +130,51 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     /**
      * Class <tt>SerialExecutor</tt> is an implementation of an {@link Executor}.
      */
-    private final class SerialExecutor implements Executor, Runnable {
-        private static final int IDLE    = 0;
-        private static final int RUNNING = 1;
+    private static final class SerialExecutor implements Executor {
+        private Runnable mActive;
+        private final Executor mExecutor;
+        private final Queue<Runnable> mTasks;
 
-        private final AtomicInteger mState;
-        private final Queue<Runnable> mQueue;
-
-        public SerialExecutor() {
-            mState = new AtomicInteger(IDLE);
-            mQueue = new ConcurrentLinkedQueue<Runnable>();
+        public SerialExecutor(Executor executor) {
+            mExecutor = executor;
+            mTasks = new ArrayDeque<Runnable>();
         }
 
         @Override
-        public void execute(Runnable task) {
+        public synchronized void execute(Runnable task) {
             // Adds the new task to the task queue.
-            mQueue.offer(task);
+            mTasks.offer(new Task(task));
 
-            // If this executor is not running, run it.
-            if (mState.compareAndSet(IDLE, RUNNING)) {
-                ThreadPool.this.execute(this);
+            // If mActive is not running, run it.
+            if (mActive == null) {
+                scheduleNext();
             }
         }
 
-        @Override
-        public void run() {
-            try {
-                Runnable task;
-                while ((task = mQueue.poll()) != null) {
+        public synchronized void scheduleNext() {
+            if ((mActive = mTasks.poll()) != null) {
+                mExecutor.execute(mActive);
+            }
+        }
+
+        /**
+         * Class <tt>Task</tt> is an implementation of an {@link Runnable}.
+         */
+        private final class Task implements Runnable {
+            private final Runnable task;
+
+            public Task(Runnable task) {
+                this.task = task;
+            }
+
+            @Override
+            public void run() {
+                try {
                     task.run();
+                } finally {
+                    // Executes the next task.
+                    scheduleNext();
                 }
-            } finally {
-                // Reset the state to idle.
-                mState.set(IDLE);
             }
         }
     }

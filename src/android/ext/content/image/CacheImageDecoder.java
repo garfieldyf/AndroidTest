@@ -76,10 +76,11 @@ public class CacheImageDecoder extends ImageDecoder {
         } else {
             // Computes the sample size.
             opts.inPreferredConfig = mParameters.config;
-            mParameters.computeSampleSize(mContext, uri, opts);
+            mParameters.computeSampleSize(mContext, opts);
 
-            // Decodes the bitmap.
-            return decodeBitmap(uri, params, flags, opts, mBitmapPool);
+            // Retrieves the bitmap from bitmap pool to reuse it.
+            opts.inBitmap = mBitmapPool.get(mParameters.computeByteCount(mContext, opts));
+            return decodeInBitmap(uri, params, flags, opts);
         }
     }
 }

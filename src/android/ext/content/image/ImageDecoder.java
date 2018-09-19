@@ -91,7 +91,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
         } else {
             // Computes the sample size.
             opts.inPreferredConfig = mParameters.config;
-            mParameters.computeSampleSize(mContext, uri, opts);
+            mParameters.computeSampleSize(mContext, opts);
 
             // Decodes the bitmap.
             return decodeBitmap(uri, params, flags, opts);

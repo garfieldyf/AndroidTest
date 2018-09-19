@@ -72,10 +72,11 @@ public class CacheBitmapDecoder extends BitmapDecoder {
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         opts.inPreferredConfig = mParameters.config;
-        mParameters.computeSampleSize(mContext, uri, opts);
+        mParameters.computeSampleSize(mContext, opts);
 
-        // Decodes the bitmap pixels.
-        return decodeBitmap(uri, params, flags, opts, mBitmapPool);
+        // Retrieves the bitmap from bitmap pool to reuse it.
+        opts.inBitmap = mBitmapPool.get(mParameters.computeByteCount(mContext, opts));
+        return decodeInBitmap(uri, params, flags, opts);
     }
 
     @Override

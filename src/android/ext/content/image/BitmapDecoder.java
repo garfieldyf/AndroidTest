@@ -83,7 +83,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         opts.inPreferredConfig = mParameters.config;
-        mParameters.computeSampleSize(mContext, uri, opts);
+        mParameters.computeSampleSize(mContext, opts);
 
         // Decodes the bitmap pixels.
         return decodeBitmap(uri, params, flags, opts);
@@ -91,7 +91,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
     @Override
     protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        if (mParameters instanceof SizeParameters) {
+        if (mParameters.requestDecodeBounds()) {
             super.decodeImageBounds(uri, params, flags, opts);
         }
     }
@@ -100,7 +100,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * Class <tt>Parameters</tt> can be used to decode bitmap.
      * <h2>Usage</h2>
      * <p>Here is a xml resource example:</p><pre>
-     * &lt;[ Parameters | SizeParameters | parameters ]
+     * &lt;[ Parameters | SizeParameters | ScaleParameters | parameters ]
      *      xmlns:android="http://schemas.android.com/apk/res/android"
      *      xmlns:namespace="http://schemas.android.com/apk/res/<em>packageName</em>"
      *      class="classFullName"
@@ -156,13 +156,31 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         }
 
         /**
-         * Returns a sample size for used to decode bitmap.
+         * Enables to decode bitmap bounds when the decoder decoding bitmap.
+         * @return <tt>true</tt> if enable to decode bitmap bounds, <tt>false</tt> otherwise.
+         */
+        public boolean requestDecodeBounds() {
+            return false;
+        }
+
+        /**
+         * Computes the number of bytes that can be used to store the bitmap's
+         * pixels when decoding the bitmap.
          * @param context The <tt>Context</tt>.
-         * @param uri The uri, passed earlier by <em>ImageDecoder.decodeImage</em>.
-         * @param opts The {@link Options} to store the sample size, passed earlier
+         * @param opts The {@link Options} to compute byte count, passed earlier
          * by <em>ImageDecoder.decodeImage</em>.
          */
-        public void computeSampleSize(Context context, Object uri, Options opts) {
+        public int computeByteCount(Context context, Options opts) {
+            return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
+        }
+
+        /**
+         * Computes a sample size for used to decode bitmap.
+         * @param context The <tt>Context</tt>.
+         * @param opts The {@link Options} to store the sample
+         * size, passed earlier by <em>ImageDecoder.decodeImage</em>.
+         */
+        public void computeSampleSize(Context context, Options opts) {
             opts.inSampleSize = (int)value;
         }
 
@@ -267,7 +285,12 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         }
 
         @Override
-        public void computeSampleSize(Context context, Object uri, Options opts) {
+        public boolean requestDecodeBounds() {
+            return true;
+        }
+
+        @Override
+        public void computeSampleSize(Context context, Options opts) {
             opts.inSampleSize = BitmapUtils.computeSampleSize(opts.outWidth, opts.outHeight, (int)value, desiredHeight);
         }
 
@@ -278,6 +301,69 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
                 .append(", desiredWidth = ").append(value)
                 .append(", desiredHeight = ").append(desiredHeight)
                 .append(" }").toString();
+        }
+    }
+
+    /**
+     * Class <tt>ScaleParameters</tt> is an implementation of a {@link Parameters}.
+     */
+    public static class ScaleParameters extends SizeParameters {
+        private final int targetDensity;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         * @param attrs The attributes of the XML tag that is inflating the data.
+         * @see #ScaleParameters(Context, Config, int, int)
+         */
+        public ScaleParameters(Context context, AttributeSet attrs) {
+            super(context, attrs);
+            this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        }
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         * @param config The {@link Config} to decode.
+         * @param desiredWidth The desired width to decode.
+         * @param desiredHeight The desired height to decode.
+         * @see #ScaleParameters(Context, AttributeSet)
+         */
+        public ScaleParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
+            super(config, desiredWidth, desiredHeight);
+            this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        }
+
+        @Override
+        public int computeByteCount(Context context, Options opts) {
+            final int byteCount = BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
+            if (opts.outWidth <= (int)value || opts.outHeight <= desiredHeight) {
+                return (opts.outWidth * opts.outHeight * byteCount);
+            } else {
+                final float densityRatio = (float)opts.inTargetDensity / opts.inDensity;
+                return (int)(densityRatio * opts.outWidth + 0.5f) * (int)(densityRatio * opts.outHeight + 0.5f) * byteCount;
+            }
+        }
+
+        @Override
+        public void computeSampleSize(Context context, Options opts) {
+            /*
+             * Scale width and height.
+             *      scaleX = opts.outWidth  / desiredWidth;
+             *      scaleY = opts.outHeight / desiredHeight;
+             *      scale  = max(scaleX, scaleY);
+             *
+             * Scale width, expressed as a percentage of the bitmap's width.
+             *      scale = opts.outWidth / (opts.outWidth * 0.7f);     // scale 70%
+             */
+            opts.inSampleSize = 1;
+            if (opts.outWidth <= (int)value || opts.outHeight <= desiredHeight) {
+                opts.inDensity = opts.inTargetDensity = 0;
+            } else {
+                final float scale = Math.max((float)opts.outWidth / (int)value, (float)opts.outHeight / desiredHeight);
+                opts.inTargetDensity = targetDensity;
+                opts.inDensity = (int)(targetDensity * scale);
+            }
         }
     }
 

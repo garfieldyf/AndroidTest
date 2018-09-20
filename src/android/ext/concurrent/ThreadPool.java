@@ -20,11 +20,6 @@ import android.os.Process;
  */
 public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionHandler {
     /**
-     * The serial <tt>Executor</tt>.
-     */
-    private Executor mSerialExecutor;
-
-    /**
      * The pending task queue associated with this pool.
      */
     /* package */ final Queue<Runnable> mPendingTasks;
@@ -82,22 +77,8 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     }
 
     /**
-     * Returns the serial {@link Executor} associated with this pool.
-     * @return The serial <tt>Executor</tt>.
-     * @see #newSerialExecutor()
-     */
-    public synchronized final Executor getSerialExecutor() {
-        if (mSerialExecutor == null) {
-            mSerialExecutor = new SerialExecutor(this);
-        }
-
-        return mSerialExecutor;
-    }
-
-    /**
      * Returns a new serial {@link Executor}.
      * @return A newly serial <tt>Executor</tt>.
-     * @see #getSerialExecutor()
      */
     public final Executor newSerialExecutor() {
         return new SerialExecutor(this);

@@ -20,7 +20,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     /**
      * The length of the transition in milliseconds.
      */
-    public int duration;
+    private int mDuration;
 
     /**
      * Constructor
@@ -45,7 +45,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      */
     public TransitionBinder(TransitionBinder<URI, Image> binder, Drawable defaultImage, int durationMillis) {
         super(binder, defaultImage);
-        duration = durationMillis;
+        mDuration = durationMillis;
     }
 
     /**
@@ -59,13 +59,13 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      */
     public TransitionBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage, int durationMillis) {
         super(imageCache, transformer, defaultImage);
-        duration = durationMillis;
+        mDuration = durationMillis;
     }
 
     @Override
     protected void inflateAttributes(Context context, AttributeSet attrs) {
         final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
-        duration = a.getInt(0 /* android.R.attr.duration */, 300);
+        mDuration = a.getInt(0 /* android.R.attr.duration */, 300);
         a.recycle();
     }
 
@@ -82,7 +82,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
                 final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { mDefaultImage, image });
                 view.setImageDrawable(drawable);
                 drawable.setCrossFadeEnabled(true);
-                drawable.startTransition(duration);
+                drawable.startTransition(mDuration);
             }
         }
     }

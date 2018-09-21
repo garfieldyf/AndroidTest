@@ -80,7 +80,7 @@ public class CacheImageDecoder extends ImageDecoder {
 
             // Retrieves the bitmap from bitmap pool to reuse it.
             opts.inBitmap = mBitmapPool.get(mParameters.computeByteCount(mContext, opts));
-            return decodeInBitmap(uri, params, flags, opts);
+            return decodeBitmap(uri, params, flags, opts);
         }
     }
 }

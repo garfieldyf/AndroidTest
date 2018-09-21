@@ -4,6 +4,7 @@ import java.io.InputStream;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
 import android.ext.util.UriUtils;
@@ -94,7 +95,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
             mParameters.computeSampleSize(mContext, opts);
 
             // Decodes the bitmap.
-            return decodeBitmap(uri, params, flags, opts);
+            return BitmapUtils.decodeBitmap(mContext, uri, opts);
         }
     }
 

@@ -86,7 +86,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         mParameters.computeSampleSize(mContext, opts);
 
         // Decodes the bitmap pixels.
-        return decodeBitmap(uri, params, flags, opts);
+        return BitmapUtils.decodeBitmap(mContext, uri, opts);
     }
 
     @Override

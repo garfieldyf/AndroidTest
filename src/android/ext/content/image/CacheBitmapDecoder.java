@@ -2,6 +2,7 @@ package android.ext.content.image;
 
 import android.content.Context;
 import android.ext.cache.BitmapPool;
+import android.ext.graphics.BitmapUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 
@@ -76,13 +77,13 @@ public class CacheBitmapDecoder extends BitmapDecoder {
 
         // Retrieves the bitmap from bitmap pool to reuse it.
         opts.inBitmap = mBitmapPool.get(mParameters.computeByteCount(mContext, opts));
-        return decodeInBitmap(uri, params, flags, opts);
+        return decodeBitmap(uri, params, flags, opts);
     }
 
     @Override
     protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
         opts.inJustDecodeBounds = true;
-        decodeBitmap(uri, params, flags, opts);
+        BitmapUtils.decodeBitmap(mContext, uri, opts);
         opts.inJustDecodeBounds = false;
     }
 }

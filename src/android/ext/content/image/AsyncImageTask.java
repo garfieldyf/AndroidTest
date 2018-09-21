@@ -6,6 +6,7 @@ import java.net.HttpURLConnection;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.graphics.BitmapUtils;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
@@ -181,7 +182,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
     protected Object decodeImage(Object uri, byte[] tempBuffer) {
-        return new BitmapDecoder(mContext, mParameters != null ? mParameters : Parameters.defaultParameters(), 1).decodeImage(uri, null, 0, tempBuffer);
+        return BitmapUtils.decodeBitmap(mContext, uri, mParameters != null ? mParameters : Parameters.defaultParameters(), tempBuffer);
     }
 
     /**

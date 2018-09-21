@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -47,62 +48,65 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     private AnimationCallback mCallback;
 
     /**
-     * Decodes a GIF file into a GIF drawable. If the specified <em>filename</em> is null,
-     * or cannot be decoded into a GIF drawable, the function returns <tt>null</tt>.
-     * @param filename The file to be decoded, must be absolute file path.
-     * @return The {@link GIFDrawable}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeResource(Resources, int)
-     * @see #decodeByteArray(byte[], int, int)
-     */
-    public static GIFDrawable decodeFile(String filename) {
-        final GIFImage image = GIFImage.decodeFile(filename);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
-    /**
-     * Decodes an <tt>InputStream</tt> into a GIF drawable. If the specified <em>is</em> is
-     * null, or cannot be decoded into a GIF drawable, the function returns <tt>null</tt>.
-     * @param is The <tt>InputStream</tt> containing the GIF data.
-     * @param tempStorage May be <tt>null</tt>. The temp storage to use for decoding. Suggest 16K.
-     * @return The {@link GIFDrawable}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeResource(Resources, int)
-     * @see #decodeByteArray(byte[], int, int)
-     */
-    public static GIFDrawable decodeStream(InputStream is, byte[] tempStorage) {
-        final GIFImage image = GIFImage.decodeStream(is, tempStorage);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
-    /**
-     * Decodes a resource into a GIF drawable. If the specified <em>res</em> cannot be decoded
-     * into a GIF drawable, the function returns <tt>null</tt>.
+     * Decodes a {@link GIFDrawable} from the <tt>Resources</tt>.
      * @param res The resource containing the GIF data.
      * @param id The resource id to be decoded.
-     * @return The {@link GIFDrawable}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeByteArray(byte[], int, int)
+     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(byte[], int, int)
+     * @see #decode(InputStream, byte[])
+     * @see #decode(Context, Object, byte[])
      */
-    public static GIFDrawable decodeResource(Resources res, int id) {
-        final GIFImage image = GIFImage.decodeResource(res, id);
+    public static GIFDrawable decode(Resources res, int id) {
+        final GIFImage image = GIFImage.decode(res, id);
         return (image != null ? new GIFDrawable(image) : null);
     }
 
     /**
-     * Decodes a byte array into a GIF drawable. If the specified <em>data</em> cannot be
-     * decoded into a GIF drawable, the function returns <tt>null</tt>.
+     * Decodes a {@link GIFDrawable} from the <tt>InputStream</tt>.
+     * @param is The <tt>InputStream</tt> containing the GIF data.
+     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(byte[], int, int)
+     * @see #decode(Context, Object, byte[])
+     */
+    public static GIFDrawable decode(InputStream is, byte[] tempStorage) {
+        final GIFImage image = GIFImage.decode(is, tempStorage);
+        return (image != null ? new GIFDrawable(image) : null);
+    }
+
+    /**
+     * Decodes a {@link GIFDrawable} from the byte array.
      * @param data The byte array containing the GIF data.
      * @param offset The starting offset of the <em>data</em>.
      * @param length The number of bytes of the <em>data</em>, beginning at offset.
-     * @return The {@link GIFDrawable}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeResource(Resources, int)
+     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(InputStream, byte[])
+     * @see #decode(Context, Object, byte[])
      */
-    public static GIFDrawable decodeByteArray(byte[] data, int offset, int length) {
-        final GIFImage image = GIFImage.decodeByteArray(data, offset, length);
+    public static GIFDrawable decode(byte[] data, int offset, int length) {
+        final GIFImage image = GIFImage.decode(data, offset, length);
+        return (image != null ? new GIFDrawable(image) : null);
+    }
+
+    /**
+     * Decodes a {@link GIFDrawable} from the specified <em>uri</em>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(byte[], int, int)
+     * @see #decode(InputStream, byte[])
+     */
+    public static GIFDrawable decode(Context context, Object uri, byte[] tempStorage) {
+        final GIFImage image = GIFImage.decode(context, uri, tempStorage);
         return (image != null ? new GIFDrawable(image) : null);
     }
 
@@ -295,11 +299,9 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             mState.mFlags |= FLAG_FILLAFTER;
         }
 
-        final GIFImage image = GIFImage.decodeResource(res, id);
-        DebugUtils.__checkError(image == null, new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
-
+        mState.setImage(GIFImage.decode(res, id));
+        DebugUtils.__checkError(mState.mImage == null, new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
         a.recycle();
-        mState.setImage(image);
     }
 
     /**

@@ -1,15 +1,11 @@
 package android.ext.content.image;
 
-import java.io.InputStream;
 import android.content.Context;
-import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
-import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import android.util.Printer;
@@ -96,47 +92,25 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     }
 
     /**
-     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>. If the <tt>opts.inBitmap</tt> is not
+     * <tt>null</tt> this method will attempt to reuse the bitmap (decode in <tt>opts.inBitmap</tt>).
      * @param uri The uri to decode.
      * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeBitmap(Object, Object[], int, Options, BitmapPool)
      */
     protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        final InputStream is = UriUtils.openInputStream(mContext, uri);
-        try {
-            return BitmapFactory.decodeStream(is, null, opts);
-        } finally {
-            is.close();
-        }
-    }
-
-    /**
-     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
-     * @param uri The uri to decode.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode.
-     * @param bitmapPool The {@link BitmapPool} to reuse the bitmap to decode.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeBitmap(Object, Object[], int, Options)
-     */
-    protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts, BitmapPool bitmapPool) throws Exception {
-        // Retrieves the bitmap from bitmap pool to reuse it.
-        opts.inBitmap = bitmapPool.get((int)Math.ceil((double)opts.outWidth / opts.inSampleSize) * (int)Math.ceil((double)opts.outHeight / opts.inSampleSize) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig));
         Bitmap bitmap = null;
         try {
-            bitmap = decodeBitmap(uri, params, flags, opts);
+            bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 opts.inBitmap = null;
                 Log.w(getClass().getName(), e);
-                bitmap = decodeBitmap(uri, params, flags, opts);
+                bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
             }
         }
 
@@ -153,7 +127,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      */
     protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
         opts.inJustDecodeBounds = true;
-        decodeBitmap(uri, params, flags, opts);
+        BitmapUtils.decodeBitmap(mContext, uri, opts);
         opts.inJustDecodeBounds = false;
     }
 

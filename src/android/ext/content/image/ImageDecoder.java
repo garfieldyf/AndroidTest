@@ -1,12 +1,11 @@
 package android.ext.content.image;
 
-import java.io.InputStream;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
-import android.ext.util.UriUtils;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
 
@@ -87,33 +86,14 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
-            return decodeGIFImage(uri, params, flags, opts);
+            return GIFImage.decode(mContext, uri, opts.inTempStorage);
         } else {
             // Computes the sample size.
             opts.inPreferredConfig = mParameters.config;
-            mParameters.computeSampleSize(mContext, uri, opts);
+            mParameters.computeSampleSize(mContext, opts);
 
             // Decodes the bitmap.
-            return decodeBitmap(uri, params, flags, opts);
-        }
-    }
-
-    /**
-     * Decodes a gif image from the specified <em>uri</em>.
-     * @param uri The uri to decode.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts</em> <tt>inTempStorage</tt>
-     * and <tt>out...</tt> fields are set.
-     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     */
-    protected Object decodeGIFImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        final InputStream is = UriUtils.openInputStream(mContext, uri);
-        try {
-            return GIFImage.decodeStream(is, opts.inTempStorage);
-        } finally {
-            is.close();
+            return BitmapUtils.decodeBitmap(mContext, uri, opts);
         }
     }
 }

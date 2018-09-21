@@ -1,11 +1,11 @@
 package android.ext.database;
 
 import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.UIHandler;
-import android.os.Message;
 import android.util.Log;
 
 /**
@@ -14,30 +14,47 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
-    /**
-     * The {@link SQLiteDatabase}.
-     */
-    private final WeakReference<SQLiteDatabase> mDatabase;
+public abstract class AsyncSQLiteHandler extends DatabaseHandler {
+    /* package */ final WeakReference<SQLiteDatabase> mDatabase;
 
     /**
      * Constructor
+     * @param executor The serial <tt>Executor</tt>.
      * @param db The {@link SQLiteDatabase}.
-     * @see #AsyncSQLiteHandler(SQLiteDatabase, Object)
+     * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase, Object)
+     * @see ThreadPool#newSerialExecutor()
      */
-    public AsyncSQLiteHandler(SQLiteDatabase db) {
+    public AsyncSQLiteHandler(Executor executor, SQLiteDatabase db) {
+        super(executor);
         mDatabase = new WeakReference<SQLiteDatabase>(db);
     }
 
     /**
      * Constructor
+     * @param executor The serial <tt>Executor</tt>.
      * @param db The {@link SQLiteDatabase}.
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncSQLiteHandler(SQLiteDatabase)
+     * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase)
+     * @see ThreadPool#newSerialExecutor()
      */
-    public AsyncSQLiteHandler(SQLiteDatabase db, Object owner) {
-        super(owner);
+    public AsyncSQLiteHandler(Executor executor, SQLiteDatabase db, Object owner) {
+        super(executor, owner);
         mDatabase = new WeakReference<SQLiteDatabase>(db);
+    }
+
+    /**
+     * This method begins an asynchronous execute custom query. When the query is executing
+     * {@link #onExecute} is called on a background thread. After the query is done
+     * {@link #onExecuteComplete} is called.
+     * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
+     * to identify execute.
+     * @param params The parameters passed into <tt>onExecute</tt>. If no parameters, you
+     * can pass <em>(Object[])null</em> instead of allocating an empty array.
+     */
+    public final void startExecute(int token, Object... params) {
+        final SQLiteTask task = new SQLiteTask(token, MESSAGE_EXECUTE, null, null, null);
+        task.values = params;
+        mExecutor.execute(task);
     }
 
     /**
@@ -46,15 +63,30 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
      * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the
      * values from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @see #startQuery(int, Object, String[], String, String[], String)
+     * @see #startQuery(int, String, String[], String, String[], String)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_RAWQUERY
-         * msg.obj  - { sql, selectionArgs }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_RAWQUERY, 0, new Object[] { sql, selectionArgs }));
+        mExecutor.execute(new SQLiteTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs));
+    }
+
+    /**
+     * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
+     * @param token A token passed into {@link #onQueryComplete} to identify the query.
+     * @param table The table to query.
+     * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
+     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
+     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given URI.
+     * @param selectionArgs You may include ? in selection, which will be replaced by the values
+     * from <em>selectionArgs</em>. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
+     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
+     * @see #startQuery(int, String, String[])
+     */
+    public final void startQuery(int token, String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        final SQLiteTask task = new SQLiteTask(token, MESSAGE_QUERY, table, selection, selectionArgs);
+        task.values = projection;
+        task.sortOrder = sortOrder;
+        mExecutor.execute(task);
     }
 
     /**
@@ -70,12 +102,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
      * names and the values the column values.
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_INSERT
-         * msg.obj  - { table, nullColumnHack, values }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERT, 0, new Object[] { table, nullColumnHack, values }));
+        final SQLiteTask task = new SQLiteTask(token, MESSAGE_INSERT, table, nullColumnHack, null);
+        task.values = values;
+        mExecutor.execute(task);
     }
 
     /**
@@ -90,12 +119,38 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
      * translated to NULL.
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_REPLACE
-         * msg.obj  - { table, nullColumnHack, values }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_REPLACE, 0, new Object[] { table, nullColumnHack, values }));
+        final SQLiteTask task = new SQLiteTask(token, MESSAGE_REPLACE, table, nullColumnHack, null);
+        task.values = values;
+        mExecutor.execute(task);
+    }
+
+    /**
+     * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
+     * @param token A token passed into {@link #onUpdateComplete} to identify the update.
+     * @param table The table to update in.
+     * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
+     * translated to NULL.
+     * @param whereClause The WHERE clause to apply when updating. Passing <tt>null</tt> will update all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
+        final SQLiteTask task = new SQLiteTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs);
+        task.values = values;
+        mExecutor.execute(task);
+    }
+
+    /**
+     * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
+     * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
+     * @param table The table of the row to delete.
+     * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
+     * delete all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
+        mExecutor.execute(new SQLiteTask(token, MESSAGE_DELETE, table, whereClause, whereArgs));
     }
 
     /**
@@ -105,59 +160,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
      */
     public final SQLiteDatabase getDatabase() {
         return mDatabase.get();
-    }
-
-    @Override
-    public boolean handleMessage(Message msg) {
-        final SQLiteDatabase db = mDatabase.get();
-        if (db == null || !db.isOpen()) {
-            Log.w(getClass().getName(), "The SQLiteDatabase was closed or released by the GC.");
-            return true;
-        }
-
-        /*
-         * msg.what - token
-         * msg.arg1 - message
-         * msg.obj  - params
-         */
-        final Object[] params = (Object[])msg.obj;
-        final Object result;
-        switch (msg.arg1) {
-        case MESSAGE_QUERY:
-        case MESSAGE_RAWQUERY:
-            result = execQuery(db, msg.arg1, params);
-            break;
-
-        case MESSAGE_EXECUTE:
-            result = onExecute(db, msg.what, params);
-            break;
-
-        case MESSAGE_INSERT:
-            // params - { table, nullColumnHack, values }
-            result = db.insert((String)params[0], (String)params[1], (ContentValues)params[2]);
-            break;
-
-        case MESSAGE_REPLACE:
-            // params - { table, nullColumnHack, values }
-            result = db.replace((String)params[0], (String)params[1], (ContentValues)params[2]);
-            break;
-
-        case MESSAGE_DELETE:
-            // params - { table, whereClause, whereArgs }
-            result = db.delete((String)params[0], (String)params[1], (String[])params[2]);
-            break;
-
-        case MESSAGE_UPDATE:
-            // params - { table, values, whereClause, whereArgs }
-            result = db.update((String)params[0], (ContentValues)params[1], (String)params[2], (String[])params[3]);
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown message: " + msg.arg1);
-        }
-
-        UIHandler.sInstance.sendMessage(this, msg.arg1, msg.what, result);
-        return true;
     }
 
     @Override
@@ -203,22 +205,83 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler<String> {
     protected void onReplaceComplete(int token, long id) {
     }
 
-    private Cursor execQuery(SQLiteDatabase db, int message, Object[] params) {
-        final Cursor cursor;
-        if (message == MESSAGE_RAWQUERY) {
-            // params - { sql, selectionArgs }
-            cursor = db.rawQuery((String)params[0], (String[])params[1]);
-        } else {
-            // params - { table, columns, selection, selectionArgs, orderBy }
-            cursor = db.query((String)params[0], (String[])params[1], (String)params[2], (String[])params[3], null, null, (String)params[4]);
+    /**
+     * Class <tt>SQLiteTask</tt> is an implementation of a {@link Runnable}.
+     */
+    private final class SQLiteTask implements Runnable {
+        /* package */ final int token;
+        /* package */ final int message;
+        /* package */ final String table;
+        /* package */ Object values;
+        /* package */ String sortOrder;
+        /* package */ final String selection;
+        /* package */ final String[] selectionArgs;
+
+        public SQLiteTask(int token, int message, String table, String selection, String[] selectionArgs) {
+            this.token = token;
+            this.table = table;
+            this.message = message;
+            this.selection = selection;
+            this.selectionArgs = selectionArgs;
         }
 
-        if (cursor != null) {
-            // Calling getCount() causes the cursor window to be filled, which
-            // will make the first access on the main thread a lot faster.
-            cursor.getCount();
+        @Override
+        public void run() {
+            final SQLiteDatabase db = mDatabase.get();
+            if (db == null || !db.isOpen()) {
+                Log.w(getClass().getName(), "The SQLiteDatabase was closed or released by the GC.");
+                return;
+            }
+
+            final Object result;
+            switch (message) {
+            case MESSAGE_QUERY:
+            case MESSAGE_RAWQUERY:
+                result = execQuery(db);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = onExecute(db, token, (Object[])values);
+                break;
+
+            case MESSAGE_DELETE:
+                result = db.delete(table, selection, selectionArgs);
+                break;
+
+            case MESSAGE_INSERT:
+                result = db.insert(table, selection, (ContentValues)values);
+                break;
+
+            case MESSAGE_REPLACE:
+                result = db.replace(table, selection, (ContentValues)values);
+                break;
+
+            case MESSAGE_UPDATE:
+                result = db.update(table, (ContentValues)values, selection, selectionArgs);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown message: " + message);
+            }
+
+            UIHandler.sInstance.sendMessage(AsyncSQLiteHandler.this, message, token, result);
         }
 
-        return cursor;
+        private Cursor execQuery(SQLiteDatabase db) {
+            final Cursor cursor;
+            if (message == MESSAGE_RAWQUERY) {
+                cursor = db.rawQuery(selection, selectionArgs);
+            } else {
+                cursor = db.query(table, (String[])values, selection, selectionArgs, null, null, sortOrder);
+            }
+
+            if (cursor != null) {
+                // Calling getCount() causes the cursor window to be filled, which
+                // will make the first access on the main thread a lot faster.
+                cursor.getCount();
+            }
+
+            return cursor;
+        }
     }
 }

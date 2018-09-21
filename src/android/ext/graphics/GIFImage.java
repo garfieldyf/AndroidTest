@@ -2,12 +2,13 @@ package android.ext.graphics;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
+import android.content.Context;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Build;
@@ -25,62 +26,19 @@ public final class GIFImage {
     private final long mNativeImage;
 
     /**
-     * Decodes a GIF file into a GIF image. If the specified <em>filename</em> is null,
-     * or cannot be decoded into a GIF image, the function returns <tt>null</tt>.
-     * @param filename The file to be decoded, must be absolute file path.
-     * @return The decoded {@link GIFImage}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeResource(Resources, int)
-     * @see #decodeByteArray(byte[], int, int)
-     */
-    public static GIFImage decodeFile(String filename) {
-        InputStream is = null;
-        try {
-            is = new FileInputStream(filename);
-            return decodeStreamInternal(is, null);
-        } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), new StringBuilder("Couldn't decode file - ").append(filename).toString(), e);
-            return null;
-        } finally {
-            FileUtils.close(is);
-        }
-    }
-
-    /**
-     * Decodes an <tt>InputStream</tt> into a GIF image. If the specified <em>is</em> is null,
-     * or cannot be decoded into a GIF image, the function returns <tt>null</tt>.
-     * @param is The <tt>InputStream</tt> containing the GIF data.
-     * @param tempStorage May be <tt>null</tt>. The temp storage to use for decoding. Suggest 16K.
-     * @return The decoded {@link GIFImage}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeResource(Resources, int)
-     * @see #decodeByteArray(byte[], int, int)
-     */
-    public static GIFImage decodeStream(InputStream is, byte[] tempStorage) {
-        DebugUtils.__checkError(is == null, "is == null");
-        try {
-            return decodeStreamInternal(is, tempStorage);
-        } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't decode - " + is.getClass().getName(), e);
-            return null;
-        }
-    }
-
-    /**
-     * Decodes a resource into a GIF image. If the specified <em>res</em> cannot be decoded
-     * into a GIF image, the function returns <tt>null</tt>.
+     * Decodes a {@link GIFImage} from the <tt>Resources</tt>.
      * @param res The resource containing the GIF data.
      * @param id The resource id to be decoded.
-     * @return The decoded {@link GIFImage}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeByteArray(byte[], int, int)
+     * @return The <tt>GIFImage</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(byte[], int, int)
+     * @see #decode(InputStream, byte[])
+     * @see #decode(Context, Object, byte[])
      */
-    public static GIFImage decodeResource(Resources res, int id) {
+    public static GIFImage decode(Resources res, int id) {
         InputStream is = null;
         try {
             is = res.openRawResource(id);
-            return decodeStreamInternal(is, null);
+            return decodeStream(is, null);
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), "Couldn't decode resource ID #0x" + Integer.toHexString(id), e);
             return null;
@@ -90,20 +48,66 @@ public final class GIFImage {
     }
 
     /**
-     * Decodes a byte array into a GIF image. If the specified <em>data</em> cannot be
-     * decoded into a GIF image, the function returns <tt>null</tt>.
+     * Decodes a {@link GIFImage} from the <tt>InputStream</tt>.
+     * @param is The <tt>InputStream</tt> containing the GIF data.
+     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The <tt>GIFImage</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(byte[], int, int)
+     * @see #decode(Context, Object, byte[])
+     */
+    public static GIFImage decode(InputStream is, byte[] tempStorage) {
+        DebugUtils.__checkError(is == null, "is == null");
+        try {
+            return decodeStream(is, tempStorage);
+        } catch (Exception e) {
+            Log.e(GIFImage.class.getName(), "Couldn't decode from - " + is.getClass().getName(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Decodes a {@link GIFImage} from the byte array.
      * @param data The byte array containing the GIF data.
      * @param offset The starting offset of the <em>data</em>.
      * @param length The number of bytes of the <em>data</em>, beginning at offset.
-     * @return The decoded {@link GIFImage}, or <tt>null</tt> if it could not be decoded.
-     * @see #decodeFile(String)
-     * @see #decodeStream(InputStream, byte[])
-     * @see #decodeResource(Resources, int)
+     * @return The <tt>GIFImage</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(InputStream, byte[])
+     * @see #decode(Context, Object, byte[])
      */
-    public static GIFImage decodeByteArray(byte[] data, int offset, int length) {
+    public static GIFImage decode(byte[] data, int offset, int length) {
         DebugUtils.__checkRange(offset, length, data.length);
         final long nativeImage = nativeDecodeArray(data, offset, length);
         return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
+    }
+
+    /**
+     * Decodes a {@link GIFImage} from the specified <em>uri</em>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The <tt>GIFImage</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decode(Resources, int)
+     * @see #decode(byte[], int, int)
+     * @see #decode(InputStream, byte[])
+     */
+    public static GIFImage decode(Context context, Object uri, byte[] tempStorage) {
+        InputStream is = null;
+        try {
+            is = UriUtils.openInputStream(context, uri);
+            return decodeStream(is, tempStorage);
+        } catch (Exception e) {
+            Log.e(GIFImage.class.getName(), "Couldn't decode from - " + uri, e);
+            return null;
+        } finally {
+            FileUtils.close(is);
+        }
     }
 
     /**
@@ -169,6 +173,16 @@ public final class GIFImage {
     }
 
     @Override
+    public String toString() {
+        return new StringBuilder(96)
+            .append("GIFImage { nativePtr = 0x").append(Long.toHexString(mNativeImage))
+            .append(", width = ").append(nativeGetWidth(mNativeImage))
+            .append(", height = ").append(nativeGetHeight(mNativeImage))
+            .append(", frameCount = ").append(nativeGetFrameCount(mNativeImage))
+            .append(" }").toString();
+    }
+
+    @Override
     protected void finalize() throws Throwable {
         try {
             nativeDestroy(mNativeImage);
@@ -181,7 +195,7 @@ public final class GIFImage {
         mNativeImage = nativeImage;
     }
 
-    private static GIFImage decodeStreamInternal(InputStream is, byte[] tempStorage) throws IOException {
+    private static GIFImage decodeStream(InputStream is, byte[] tempStorage) throws Exception {
         final long nativeImage;
         if (is instanceof FileInputStream) {
             nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());

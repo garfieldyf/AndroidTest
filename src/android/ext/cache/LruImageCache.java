@@ -22,24 +22,9 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
      * memory of the current device. Pass <tt>0</tt> that this cache has no bitmap cache.
      * @param maxImageSize The maximum number of images in this cache. Pass <tt>0</tt> that this cache has no image cache.
      * @see #LruImageCache(Cache, Cache)
-     * @see #LruImageCache(float, int, int)
      */
     public LruImageCache(float scaleMemory, int maxImageSize) {
-        this(Caches.<K>createBitmapCache(scaleMemory, 0), (maxImageSize > 0 ? new LruCache<K, Image>(maxImageSize) : null));
-    }
-
-    /**
-     * Constructor
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum
-     * memory of the current device. Pass <tt>0</tt> that this cache has no bitmap cache.
-     * @param maxImageSize The maximum number of images in this cache. Pass <tt>0</tt> that this cache has no image cache.
-     * @param maxBitmapSize The maximum number of bitmaps in the bitmap pool to recycle the evicted bitmap from the bitmap
-     * cache. If the <em>scaleMemory <= 0</em> that this cache has no bitmap pool.
-     * @see #LruImageCache(float, int)
-     * @see #LruImageCache(Cache, Cache)
-     */
-    public LruImageCache(float scaleMemory, int maxImageSize, int maxBitmapSize) {
-        this(Caches.<K>createBitmapCache(scaleMemory, maxBitmapSize), (maxImageSize > 0 ? new LruCache<K, Image>(maxImageSize) : null));
+        this(Caches.<K>createBitmapCache(scaleMemory), (maxImageSize > 0 ? new LruCache<K, Image>(maxImageSize) : null));
     }
 
     /**
@@ -47,7 +32,6 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
      * @param bitmapCache May be <tt>null</tt>. The {@link Cache} to store the bitmaps.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the images.
      * @see #LruImageCache(float, int)
-     * @see #LruImageCache(float, int, int)
      */
     public LruImageCache(Cache<K, Bitmap> bitmapCache, Cache<K, Image> imageCache) {
         mImageCache  = (imageCache != null ? imageCache : Caches.<K, Image>emptyCache());

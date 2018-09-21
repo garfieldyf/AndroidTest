@@ -1,6 +1,7 @@
 package android.ext.database;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executor;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -10,7 +11,6 @@ import android.database.Cursor;
 import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
 
 /**
@@ -19,7 +19,7 @@ import android.util.Log;
  * @author Garfield
  * @version 1.0
  */
-public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
+public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * The application <tt>Context</tt>.
      */
@@ -28,21 +28,60 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @see #AsyncQueryHandler(Context, Object)
+     * @param executor The serial <tt>Executor</tt>.
+     * @see #AsyncQueryHandler(Context, Executor, Object)
+     * @see ThreadPool#newSerialExecutor()
      */
-    public AsyncQueryHandler(Context context) {
+    public AsyncQueryHandler(Context context, Executor executor) {
+        super(executor);
         mContext = context.getApplicationContext();
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param executor The serial <tt>Executor</tt>.
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncQueryHandler(Context)
+     * @see #AsyncQueryHandler(Context, Executor)
+     * @see ThreadPool#newSerialExecutor()
      */
-    public AsyncQueryHandler(Context context, Object owner) {
-        super(owner);
+    public AsyncQueryHandler(Context context, Executor executor, Object owner) {
+        super(executor, owner);
         mContext = context.getApplicationContext();
+    }
+
+    /**
+     * This method begins an asynchronous execute custom query. When the query is executing
+     * {@link #onExecute} is called on a background thread. After the query is done
+     * {@link #onExecuteComplete} is called.
+     * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
+     * to identify execute.
+     * @param params The parameters passed into <tt>onExecute</tt>. If no parameters, you
+     * can pass <em>(Object[])null</em> instead of allocating an empty array.
+     */
+    public final void startExecute(int token, Object... params) {
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_EXECUTE, null, null, null);
+        task.values = params;
+        mExecutor.execute(task);
+    }
+
+    /**
+     * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
+     * @param token A token passed into {@link #onQueryComplete} to identify the query.
+     * @param uri The URI to query, using the content:// scheme, for the content to retrieve.
+     * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
+     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
+     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given URI.
+     * @param selectionArgs You may include ? in selection, which will be replaced by the values
+     * from <em>selectionArgs</em>. The values will be bound as Strings.
+     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
+     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
+     */
+    public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_QUERY, uri, selection, selectionArgs);
+        task.values = projection;
+        task.sortOrder = sortOrder;
+        mExecutor.execute(task);
     }
 
     /**
@@ -55,12 +94,10 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
      * @param extras The provider-defined <tt>Bundle</tt> argument. May be <tt>null</tt>.
      */
     public final void startCall(int token, Uri uri, String method, String arg, Bundle extras) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_CALL
-         * msg.obj  - { uri, method, arg, extras }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_CALL, 0, new Object[] { uri, method, arg, extras }));
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_CALL, uri, method, null);
+        task.values = extras;
+        task.sortOrder = arg;
+        mExecutor.execute(task);
     }
 
     /**
@@ -71,12 +108,38 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
      * column names and the values the column values. Passing an empty ContentValues will create an empty row.
      */
     public final void startInsert(int token, Uri uri, ContentValues values) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_INSERT
-         * msg.obj  - { uri, values }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERT, 0, new Object[] { uri, values }));
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_INSERT, uri, null, null);
+        task.values = values;
+        mExecutor.execute(task);
+    }
+
+    /**
+     * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
+     * @param token A token passed into {@link #onUpdateComplete} to identify the update.
+     * @param uri The URI to update in.
+     * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
+     * translated to NULL.
+     * @param whereClause The WHERE clause to apply when updating. Passing <tt>null</tt> will update all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs);
+        task.values = values;
+        mExecutor.execute(task);
+    }
+
+    /**
+     * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
+     * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
+     * @param uri The URI of the row to delete.
+     * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
+     * delete all rows.
+     * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
+     * The values will be bound as Strings.
+     */
+    public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
+        mExecutor.execute(new AsyncQueryTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs));
     }
 
     /**
@@ -88,12 +151,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
      * keys should be the column names and the values the column values.
      */
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_INSERTS
-         * msg.obj  - { uri, values }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_INSERTS, 0, new Object[] { uri, values }));
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_INSERTS, uri, null, null);
+        task.values = values;
+        mExecutor.execute(task);
     }
 
     /**
@@ -104,12 +164,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
      * @param operations The operations to apply.
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
-        /*
-         * msg.what - token
-         * msg.arg1 - MESSAGE_BATCH
-         * msg.obj  - { authority, operations }
-         */
-        mHandler.sendMessage(Message.obtain(mHandler, token, MESSAGE_BATCH, 0, new Object[] { authority, operations }));
+        final AsyncQueryTask task = new AsyncQueryTask(token, MESSAGE_BATCH, null, authority, null);
+        task.values = operations;
+        mExecutor.execute(task);
     }
 
     /**
@@ -118,62 +175,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
      */
     public final ContentResolver getContentResolver() {
         return mContext.getContentResolver();
-    }
-
-    @Override
-    public boolean handleMessage(Message msg) {
-        final ContentResolver resolver = mContext.getContentResolver();
-        /*
-         * msg.what - token
-         * msg.arg1 - message
-         * msg.obj  - params
-         */
-        final Object[] params = (Object[])msg.obj;
-        final Object result;
-        switch (msg.arg1) {
-        case MESSAGE_CALL:
-            // params - { uri, method, arg, extras }
-            result = resolver.call((Uri)params[0], (String)params[1], (String)params[2], (Bundle)params[3]);
-            break;
-
-        case MESSAGE_BATCH:
-            result = applyBatch(resolver, params);
-            break;
-
-        case MESSAGE_QUERY:
-            result = execQuery(resolver, params);
-            break;
-
-        case MESSAGE_EXECUTE:
-            result = onExecute(resolver, msg.what, params);
-            break;
-
-        case MESSAGE_INSERT:
-            // params - { uri, values }
-            result = resolver.insert((Uri)params[0], (ContentValues)params[1]);
-            break;
-
-        case MESSAGE_INSERTS:
-            // params - { uri, values }
-            result = resolver.bulkInsert((Uri)params[0], (ContentValues[])params[1]);
-            break;
-
-        case MESSAGE_DELETE:
-            // params - { uri, whereClause, whereArgs }
-            result = resolver.delete((Uri)params[0], (String)params[1], (String[])params[2]);
-            break;
-
-        case MESSAGE_UPDATE:
-            // params - { uri, values, whereClause, whereArgs }
-            result = resolver.update((Uri)params[0], (ContentValues)params[1], (String)params[2], (String[])params[3]);
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown message: " + msg.arg1);
-        }
-
-        UIHandler.sInstance.sendMessage(this, msg.arg1, msg.what, result);
-        return true;
     }
 
     @Override
@@ -243,30 +244,93 @@ public abstract class AsyncQueryHandler extends DatabaseHandler<Uri> {
     protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
     }
 
-    private Cursor execQuery(ContentResolver resolver, Object[] params) {
-        Cursor cursor = null;
-        try {
-            // params - { uri, projection, selection, selectionArgs, sortOrder }
-            cursor = resolver.query((Uri)params[0], (String[])params[1], (String)params[2], (String[])params[3], (String)params[4]);
-            if (cursor != null) {
-                // Calling getCount() causes the cursor window to be filled, which
-                // will make the first access on the main thread a lot faster.
-                cursor.getCount();
-            }
-        } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't query from - ").append(params[0]).toString(), e);
+    /**
+     * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link Runnable}.
+     */
+    private final class AsyncQueryTask implements Runnable {
+        /* package */ final Uri uri;
+        /* package */ final int token;
+        /* package */ final int message;
+        /* package */ Object values;
+        /* package */ String sortOrder;
+        /* package */ final String selection;
+        /* package */ final String[] selectionArgs;
+
+        public AsyncQueryTask(int token, int message, Uri uri, String selection, String[] selectionArgs) {
+            this.uri = uri;
+            this.token = token;
+            this.message = message;
+            this.selection = selection;
+            this.selectionArgs = selectionArgs;
         }
 
-        return cursor;
-    }
+        @Override
+        public void run() {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final Object result;
+            switch (message) {
+            case MESSAGE_CALL:
+                result = resolver.call(uri, selection, sortOrder, (Bundle)values);
+                break;
 
-    @SuppressWarnings("unchecked")
-    private static ContentProviderResult[] applyBatch(ContentResolver resolver, Object[] params) {
-        try {
-            // params - { authority, operations }
-            return resolver.applyBatch((String)params[0], (ArrayList<ContentProviderOperation>)params[1]);
-        } catch (Exception e) {
-            throw new RuntimeException(new StringBuilder("Couldn't apply batch, authority - ").append(params[0]).toString(), e);
+            case MESSAGE_BATCH:
+                result = applyBatch(resolver);
+                break;
+
+            case MESSAGE_QUERY:
+                result = execQuery(resolver);
+                break;
+
+            case MESSAGE_INSERT:
+                result = resolver.insert(uri, (ContentValues)values);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = onExecute(resolver, token, (Object[])values);
+                break;
+
+            case MESSAGE_DELETE:
+                result = resolver.delete(uri, selection, selectionArgs);
+                break;
+
+            case MESSAGE_INSERTS:
+                result = resolver.bulkInsert(uri, (ContentValues[])values);
+                break;
+
+            case MESSAGE_UPDATE:
+                result = resolver.update(uri, (ContentValues)values, selection, selectionArgs);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown message: " + message);
+            }
+
+            UIHandler.sInstance.sendMessage(AsyncQueryHandler.this, message, token, result);
+        }
+
+        private Cursor execQuery(ContentResolver resolver) {
+            Cursor cursor = null;
+            try {
+                cursor = resolver.query(uri, (String[])values, selection, selectionArgs, sortOrder);
+                if (cursor != null) {
+                    // Calling getCount() causes the cursor window to be filled, which
+                    // will make the first access on the main thread a lot faster.
+                    cursor.getCount();
+                }
+            } catch (Exception e) {
+                Log.e(getClass().getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
+            }
+
+            return cursor;
+        }
+
+        @SuppressWarnings("unchecked")
+        private ContentProviderResult[] applyBatch(ContentResolver resolver) {
+            try {
+                return resolver.applyBatch(selection, (ArrayList<ContentProviderOperation>)values);
+            } catch (Exception e) {
+                throw new RuntimeException(new StringBuilder("Couldn't apply batch, authority - ").append(selection).toString(), e);
+            }
         }
     }
 }

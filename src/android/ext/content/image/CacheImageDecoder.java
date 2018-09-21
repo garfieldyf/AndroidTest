@@ -3,6 +3,7 @@ package android.ext.content.image;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.graphics.GIFImage;
 import android.graphics.BitmapFactory.Options;
 
 /**
@@ -72,14 +73,15 @@ public class CacheImageDecoder extends ImageDecoder {
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
-            return decodeGIFImage(uri, params, flags, opts);
+            return GIFImage.decode(mContext, uri, opts.inTempStorage);
         } else {
             // Computes the sample size.
             opts.inPreferredConfig = mParameters.config;
-            mParameters.computeSampleSize(mContext, uri, opts);
+            mParameters.computeSampleSize(mContext, opts);
 
-            // Decodes the bitmap.
-            return decodeBitmap(uri, params, flags, opts, mBitmapPool);
+            // Retrieves the bitmap from bitmap pool to reuse it.
+            opts.inBitmap = mBitmapPool.get(mParameters.computeByteCount(mContext, opts));
+            return decodeBitmap(uri, params, flags, opts);
         }
     }
 }

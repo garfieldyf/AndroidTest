@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import android.ext.util.DebugUtils;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.util.Pair;
@@ -162,6 +165,22 @@ public class BarcodeDecoder {
     }
 
     /**
+     * Returns a grey-scale luminance bitmap from the specified <em>source</em>.
+     * @param source The {@link LuminanceSource} to create.
+     * @return A grey-scale bitmap, or <tt>null</tt> if the <em>source</em> could't to create.
+     */
+    public static Bitmap createLuminanceBitmap(LuminanceSource source) {
+        if (source instanceof RGBLuminanceSource) {
+            return createRGBLuminanceBitmap((RGBLuminanceSource)source);
+        } else if (source instanceof PlanarYUVLuminanceSource) {
+            final PlanarYUVLuminanceSource yuvSource = (PlanarYUVLuminanceSource)source;
+            return Bitmap.createBitmap(yuvSource.renderThumbnail(), yuvSource.getThumbnailWidth(), yuvSource.getThumbnailHeight(), Config.ARGB_8888);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Decodes the barcode image using the <em>source</em> provided.
      * @param source The {@link LuminanceSource} to decode.
      * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
@@ -174,6 +193,26 @@ public class BarcodeDecoder {
         } finally {
             mReader.reset();
         }
+    }
+
+    /**
+     * Returns a grey-scale luminance bitmap from the specified <em>source</em>.
+     */
+    private static Bitmap createRGBLuminanceBitmap(RGBLuminanceSource source) {
+        final int width = source.getWidth(), height = source.getHeight();
+        final byte[] matrix = source.getMatrix();
+        final Bitmap result = Bitmap.createBitmap(width, height, Config.ARGB_8888);
+        final int[] rowPixels = new int[width];
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                final int gray = (matrix[y * width + x] & 0xff);
+                rowPixels[x] = Color.rgb(gray, gray, gray);
+            }
+
+            result.setPixels(rowPixels, 0, width, 0, y, width, 1);
+        }
+
+        return result;
     }
 
     /**

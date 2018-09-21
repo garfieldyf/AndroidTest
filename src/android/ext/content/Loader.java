@@ -35,22 +35,11 @@ public abstract class Loader implements Factory<Task> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #Loader(Loader)
      */
     /* package */ Loader(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, 64);
-        mRunningTasks = new ArrayMap<Object, Task>();
-    }
-
-    /**
-     * Copy constructor
-     * @see #Loader(Executor)
-     */
-    /* package */ Loader(Loader loader) {
-        mExecutor = loader.mExecutor;
-        mTaskPool = loader.mTaskPool;
         mRunningTasks = new ArrayMap<Object, Task>();
     }
 

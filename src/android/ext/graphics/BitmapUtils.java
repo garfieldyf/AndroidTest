@@ -1,15 +1,22 @@
 package android.ext.graphics;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import android.content.Context;
+import android.ext.content.XmlResources;
+import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.DrawUtils.MatrixPool;
 import android.ext.graphics.DrawUtils.RectFPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -113,6 +120,93 @@ public final class BitmapUtils {
         } finally {
             rs.destroy();
             blur.destroy();
+        }
+    }
+
+    /**
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param opts The {@link Options} to use for decoding.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @throws IOException if an error occurs while decode from <em>uri</em>.
+     */
+    public static Bitmap decodeBitmap(Context context, Object uri, Options opts) throws IOException {
+        final InputStream is = UriUtils.openInputStream(context, uri);
+        try {
+            return BitmapFactory.decodeStream(is, null, opts);
+        } finally {
+            is.close();
+        }
+    }
+
+    /**
+     * Equivalent to calling <tt>decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param id The xml resource id of the {@link Parameters}.
+     * @see #decodeBitmap(Context, int, int)
+     * @see #decodeBitmap(Context, Object, Parameters, byte[])
+     */
+    public static Bitmap decodeBitmap(Context context, Object uri, int id) {
+        return decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null);
+    }
+
+    /**
+     * Equivalent to calling <tt>decodeBitmap(context, UriUtils.getResourceUri(context, resId), id)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param resId The resource id of the image data.
+     * @param id The xml resource id of the {@link Parameters}.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @see #decodeBitmap(Context, Object, int)
+     * @see #decodeBitmap(Context, Object, Parameters, byte[])
+     */
+    public static Bitmap decodeBitmap(Context context, int resId, int id) {
+        return decodeBitmap(context, UriUtils.getResourceUri(context, resId), XmlResources.loadParameters(context, id), null);
+    }
+
+    /**
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param parameters The {@link Parameters} to use for decoding.
+     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @see #decodeBitmap(Context, int, int)
+     * @see #decodeBitmap(Context, Object, int)
+     */
+    public static Bitmap decodeBitmap(Context context, Object uri, Parameters parameters, byte[] tempStorage) {
+        DebugUtils.__checkError(uri == null || parameters == null, "uri == null || parameters == null");
+        try {
+            final Options opts = new Options();
+            opts.inTempStorage = tempStorage;
+
+            // Decodes the bitmap bounds, if need.
+            if (parameters.requestDecodeBounds()) {
+                opts.inJustDecodeBounds = true;
+                decodeBitmap(context, uri, opts);
+                opts.inJustDecodeBounds = false;
+            }
+
+            // Computes the sample size.
+            opts.inPreferredConfig = parameters.config;
+            parameters.computeSampleSize(context, opts);
+
+            // Decodes the bitmap pixels.
+            return decodeBitmap(context, uri, opts);
+        } catch (Exception e) {
+            Log.e(BitmapUtils.class.getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
+            return null;
         }
     }
 
@@ -251,13 +345,6 @@ public final class BitmapUtils {
     }
 
     /**
-     * Adjusts the specified <em>sampleSize</em> rounded down to the nearest power of 2.
-     */
-    public static int fixSampleSize(int sampleSize) {
-        return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
-    }
-
-    /**
      * Computes a sample size which makes the longer side at least
      * <em>desiredWidth</em> or <em>desiredHeight</em> long.
      * @param width The original width.
@@ -267,7 +354,8 @@ public final class BitmapUtils {
      * @return The sample size.
      */
     public static int computeSampleSize(int width, int height, int desiredWidth, int desiredHeight) {
-        return fixSampleSize(Math.max(width / desiredWidth, height / desiredHeight));
+        final int sampleSize = Math.max(width / desiredWidth, height / desiredHeight);
+        return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
     }
 
     public static void dumpBitmap(Context context, String tag, Bitmap bitmap) {

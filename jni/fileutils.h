@@ -11,6 +11,7 @@
 
 #ifdef __NDK_STLP__
 #include <string>
+#include <utility>
 #include <forward_list>
 #endif
 
@@ -115,7 +116,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     do
     {
         // Retrieves the dirPath from the dirPaths front.
-        std::string dirPath(static_cast<std::string&&>(dirPaths.front()));
+        std::string dirPath(std::move(dirPaths.front()));
         dirPaths.pop_front();
 
         __NS::Directory<> dir(filter);

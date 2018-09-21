@@ -1,5 +1,6 @@
 package android.ext.concurrent;
 
+import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
@@ -10,9 +11,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.ext.util.UIHandler;
-import android.os.Handler;
-import android.os.Handler.Callback;
-import android.os.HandlerThread;
 import android.os.Process;
 
 /**
@@ -21,11 +19,6 @@ import android.os.Process;
  * @version 2.0
  */
 public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionHandler {
-    /**
-     * The serial <tt>Executor</tt>.
-     */
-    private Executor mSerialExecutor;
-
     /**
      * The pending task queue associated with this pool.
      */
@@ -84,25 +77,11 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     }
 
     /**
-     * Returns the serial {@link Executor} associated with this pool.
-     * @return The serial <tt>Executor</tt>.
-     * @see #newSerialExecutor()
-     */
-    public synchronized final Executor getSerialExecutor() {
-        if (mSerialExecutor == null) {
-            mSerialExecutor = new SerialExecutor();
-        }
-
-        return mSerialExecutor;
-    }
-
-    /**
      * Returns a new serial {@link Executor}.
      * @return A newly serial <tt>Executor</tt>.
-     * @see #getSerialExecutor()
      */
     public final Executor newSerialExecutor() {
-        return new SerialExecutor();
+        return new SerialExecutor(this);
     }
 
     @Override
@@ -129,39 +108,51 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     /**
      * Class <tt>SerialExecutor</tt> is an implementation of an {@link Executor}.
      */
-    private final class SerialExecutor implements Executor, Runnable {
-        private static final int IDLE    = 0;
-        private static final int RUNNING = 1;
+    private static final class SerialExecutor implements Executor {
+        private Runnable mActive;
+        private final Executor mExecutor;
+        private final Queue<Runnable> mTasks;
 
-        private final AtomicInteger mState;
-        private final Queue<Runnable> mQueue;
-
-        public SerialExecutor() {
-            mState = new AtomicInteger(IDLE);
-            mQueue = new ConcurrentLinkedQueue<Runnable>();
+        public SerialExecutor(Executor executor) {
+            mExecutor = executor;
+            mTasks = new ArrayDeque<Runnable>();
         }
 
         @Override
-        public void execute(Runnable task) {
+        public synchronized void execute(Runnable task) {
             // Adds the new task to the task queue.
-            mQueue.offer(task);
+            mTasks.offer(new Task(task));
 
-            // If this executor is not running, run it.
-            if (mState.compareAndSet(IDLE, RUNNING)) {
-                ThreadPool.this.execute(this);
+            // If mActive is not running, run it.
+            if (mActive == null) {
+                scheduleNext();
             }
         }
 
-        @Override
-        public void run() {
-            try {
-                Runnable task;
-                while ((task = mQueue.poll()) != null) {
+        public synchronized void scheduleNext() {
+            if ((mActive = mTasks.poll()) != null) {
+                mExecutor.execute(mActive);
+            }
+        }
+
+        /**
+         * Class <tt>Task</tt> is an implementation of an {@link Runnable}.
+         */
+        private final class Task implements Runnable {
+            private final Runnable task;
+
+            public Task(Runnable task) {
+                this.task = task;
+            }
+
+            @Override
+            public void run() {
+                try {
                     task.run();
+                } finally {
+                    // Executes the next task.
+                    scheduleNext();
                 }
-            } finally {
-                // Reset the state to idle.
-                mState.set(IDLE);
             }
         }
     }
@@ -197,31 +188,6 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         @Override
         public Thread newThread(Runnable runnable) {
             return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet());
-        }
-    }
-
-    /**
-     * Class <tt>MessageThread</tt> is an implementation of a {@link HandlerThread}.
-     */
-    public static final class MessageThread extends HandlerThread {
-        private static final MessageThread sInstance;
-
-        /**
-         * Creates a new {@link Handler} associated with a background thread's message queue.
-         * @param callback The {@link Callback} in which to handle messages, or <tt>null</tt>.
-         * @return A new <tt>Handler</tt>.
-         */
-        public static Handler createHandler(Callback callback) {
-            return new Handler(sInstance.getLooper(), callback);
-        }
-
-        private MessageThread() {
-            super("Message-thread");
-        }
-
-        static {
-            sInstance = new MessageThread();
-            sInstance.start();
         }
     }
 }

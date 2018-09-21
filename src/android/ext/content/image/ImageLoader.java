@@ -43,7 +43,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public static final int FLAG_IGNORE_FILE_CACHE = 0x00400000;
 
-    private final Loader<Image> mLoader;
+    private final Loader mLoader;
     private final Pool<byte[]> mBufferPool;
 
     protected final ImageDecoder<Image> mDecoder;
@@ -57,33 +57,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      * @param binder The {@link Binder} to bind the image to target.
-     * @see #ImageLoader(ImageLoader, ImageDecoder, Binder)
      */
     public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(executor, imageCache);
 
         mDecoder = decoder;
         mBinder  = binder;
-        mLoader  = (fileCache != null ? new FileCacheLoader<Image>(context, this, fileCache) : new Loader<Image>(context, this));
+        mLoader  = (fileCache != null ? new FileCacheLoader(context, fileCache) : new Loader(context));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
-    }
-
-    /**
-     * Copy constructor
-     * <p>Creates a new {@link ImageLoader} from the specified <em>loader</em>. The returned loader will
-     * be share the internal cache (including memory cache, file cache etc.) with the <em>loader</em>.</p>
-     * @param loader The <tt>ImageLoader</tt> to copy.
-     * @param decoder May be <tt>null</tt>. The {@link ImageDecoder} to decode the image data.
-     * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
-     * @see #ImageLoader(Context, Executor, Cache, FileCache, ImageDecoder, Binder)
-     */
-    public ImageLoader(ImageLoader<URI, Image> loader, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
-        super(loader);
-        mLoader  = (loader.mLoader instanceof FileCacheLoader ? new FileCacheLoader<Image>(loader.mLoader, this) : new Loader<Image>(loader.mLoader, this));
-        mBinder  = (binder != null ? binder : loader.mBinder);
-        mDecoder = (decoder != null ? decoder : loader.mDecoder);
-        mBufferPool = loader.mBufferPool;
     }
 
     /**
@@ -232,28 +214,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private static class Loader<Image> implements Factory<byte[]> {
-        /* package */ final String mCacheDir;
-        /* package */ final ImageLoader<?, Image> mOwner;
+    private class Loader implements Factory<byte[]> {
+        private final String mCacheDir;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
-         * @param owner The <tt>ImageLoader</tt>.
          */
-        public Loader(Context context, ImageLoader<?, Image> owner) {
-            mOwner = owner;
+        public Loader(Context context) {
             mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache").getPath();
-        }
-
-        /**
-         * Copy constructor
-         * @param loader The <tt>Loader</tt>.
-         * @param owner The <tt>ImageLoader</tt>.
-         */
-        public Loader(Loader<Image> loader, ImageLoader<?, Image> owner) {
-            mOwner = owner;
-            mCacheDir = loader.mCacheDir;
         }
 
         /**
@@ -277,7 +246,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
             try {
-                return mOwner.loadImage(task, url, imageFile, params, flags, buffer);
+                return loadImage(task, url, imageFile, params, flags, buffer);
             } finally {
                 FileUtils.deleteFiles(imageFile, false);
             }
@@ -287,28 +256,17 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private static final class FileCacheLoader<Image> extends Loader<Image> {
+    private final class FileCacheLoader extends Loader {
         private final FileCache mCache;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
-         * @param owner The <tt>ImageLoader</tt>.
          * @param cache The {@link FileCache} to store the loaded image files.
          */
-        public FileCacheLoader(Context context, ImageLoader<?, Image> owner, FileCache cache) {
-            super(context, owner);
+        public FileCacheLoader(Context context, FileCache cache) {
+            super(context);
             mCache = cache;
-        }
-
-        /**
-         * Copy constructor
-         * @param loader The <tt>Loader</tt>.
-         * @param owner The <tt>ImageLoader</tt>.
-         */
-        public FileCacheLoader(Loader<Image> loader, ImageLoader<?, Image> owner) {
-            super(loader, owner);
-            mCache = ((FileCacheLoader<Image>)loader).mCache;
         }
 
         @Override
@@ -324,7 +282,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
             if (FileUtils.access(imageFile, FileUtils.F_OK) == 0) {
                 // Decodes the image file, If file cache hit.
-                if ((result = mOwner.mDecoder.decodeImage(imageFile, params, flags, buffer)) != null) {
+                if ((result = mDecoder.decodeImage(imageFile, params, flags, buffer)) != null) {
                     return result;
                 }
 
@@ -332,11 +290,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
                 mCache.remove(hashKey);
             }
 
-            if (!mOwner.isTaskCancelled(task)) {
+            if (!isTaskCancelled(task)) {
                 // Loads the image from url, If the image file is not exists or decode failed.
                 builder.setLength(0);
                 final String tempFile = builder.append(imageFile, 0, imageFile.lastIndexOf('/') + 1).append(Thread.currentThread().hashCode()).toString();
-                if ((result = mOwner.loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile, imageFile) == 0) {
+                if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile, imageFile) == 0) {
                     // Saves the image file to file cache, If load succeeded.
                     mCache.put(hashKey, imageFile);
                 } else {

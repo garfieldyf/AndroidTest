@@ -61,7 +61,7 @@ public final class GIFImage {
         try {
             return decodeStream(is, tempStorage);
         } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't decode - " + is.getClass().getName(), e);
+            Log.e(GIFImage.class.getName(), "Couldn't decode from - " + is.getClass().getName(), e);
             return null;
         }
     }
@@ -103,7 +103,7 @@ public final class GIFImage {
             is = UriUtils.openInputStream(context, uri);
             return decodeStream(is, tempStorage);
         } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't decode uri - " + uri, e);
+            Log.e(GIFImage.class.getName(), "Couldn't decode from - " + uri, e);
             return null;
         } finally {
             FileUtils.close(is);

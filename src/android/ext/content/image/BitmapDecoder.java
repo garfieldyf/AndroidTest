@@ -123,7 +123,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         /**
          * The Object by user-defined to decode.
          */
-        public Object value;
+        protected Object value;
 
         /**
          * The desired {@link Config} to decode.
@@ -137,7 +137,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
          * @see #Parameters(Context, AttributeSet)
          */
         public Parameters(Config config, int sampleSize) {
-            this.value  = BitmapUtils.fixSampleSize(sampleSize);
+            this.value  = fixSampleSize(sampleSize);
             this.config = (config != null ? config : Config.ARGB_8888);
         }
 
@@ -151,34 +151,33 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
             DebugUtils.__checkError(PARAMETERS_ATTRS == null, "The " + getClass().getName() + " did not call Parameters.initAttrs()");
             final TypedArray a = context.obtainStyledAttributes(attrs, PARAMETERS_ATTRS);
             this.config = parseConfig(a.getInt(1 /* R.styleable.Parameters_config */, 2));
-            this.value  = BitmapUtils.fixSampleSize(a.getInt(0 /* R.styleable.Parameters_sampleSize */, 1));
+            this.value  = fixSampleSize(a.getInt(0 /* R.styleable.Parameters_sampleSize */, 1));
             a.recycle();
         }
 
         /**
-         * Enables to decode bitmap bounds when the decoder decoding bitmap.
-         * @return <tt>true</tt> if enable to decode bitmap bounds, <tt>false</tt> otherwise.
+         * Enables to decode image bounds when decoding image.
+         * @return <tt>true</tt> if enable to decode image bounds,
+         * <tt>false</tt> otherwise.
          */
         public boolean requestDecodeBounds() {
             return false;
         }
 
         /**
-         * Computes the number of bytes that can be used to store the bitmap's
-         * pixels when decoding the bitmap.
+         * Computes the number of bytes that can be used to store the image's
+         * pixels when decoding the image.
          * @param context The <tt>Context</tt>.
-         * @param opts The {@link Options} to compute byte count, passed earlier
-         * by <em>ImageDecoder.decodeImage</em>.
+         * @param opts The {@link Options} to compute byte count.
          */
         public int computeByteCount(Context context, Options opts) {
             return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
         }
 
         /**
-         * Computes a sample size for used to decode bitmap.
+         * Computes a sample size for used to decode image.
          * @param context The <tt>Context</tt>.
-         * @param opts The {@link Options} to store the sample
-         * size, passed earlier by <em>ImageDecoder.decodeImage</em>.
+         * @param opts The {@link Options} to store the sample size.
          */
         public void computeSampleSize(Context context, Options opts) {
             opts.inSampleSize = (int)value;
@@ -236,6 +235,10 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
             default:
                 return Config.ARGB_8888;
             }
+        }
+
+        private static int fixSampleSize(int sampleSize) {
+            return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
         }
     }
 
@@ -308,7 +311,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * Class <tt>ScaleParameters</tt> is an implementation of a {@link Parameters}.
      */
     public static class ScaleParameters extends SizeParameters {
-        private final int targetDensity;
+        private final int mTargetDensity;
 
         /**
          * Constructor
@@ -318,7 +321,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
          */
         public ScaleParameters(Context context, AttributeSet attrs) {
             super(context, attrs);
-            this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+            mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
         }
 
         /**
@@ -331,17 +334,17 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
          */
         public ScaleParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
             super(config, desiredWidth, desiredHeight);
-            this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+            mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
         }
 
         @Override
         public int computeByteCount(Context context, Options opts) {
             final int byteCount = BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
-            if (opts.outWidth <= (int)value || opts.outHeight <= desiredHeight) {
+            if (opts.inTargetDensity == 0) {
                 return (opts.outWidth * opts.outHeight * byteCount);
             } else {
-                final float densityRatio = (float)opts.inTargetDensity / opts.inDensity;
-                return (int)(densityRatio * opts.outWidth + 0.5f) * (int)(densityRatio * opts.outHeight + 0.5f) * byteCount;
+                final float scale = (float)opts.inTargetDensity / opts.inDensity;
+                return (int)(scale * opts.outWidth + 0.5f) * (int)(scale * opts.outHeight + 0.5f) * byteCount;
             }
         }
 
@@ -352,18 +355,28 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
              *      scaleX = opts.outWidth  / desiredWidth;
              *      scaleY = opts.outHeight / desiredHeight;
              *      scale  = max(scaleX, scaleY);
-             *
-             * Scale width, expressed as a percentage of the bitmap's width.
-             *      scale = opts.outWidth / (opts.outWidth * 0.7f);     // scale 70%
              */
             opts.inSampleSize = 1;
             if (opts.outWidth <= (int)value || opts.outHeight <= desiredHeight) {
                 opts.inDensity = opts.inTargetDensity = 0;
             } else {
                 final float scale = Math.max((float)opts.outWidth / (int)value, (float)opts.outHeight / desiredHeight);
-                opts.inTargetDensity = targetDensity;
-                opts.inDensity = (int)(targetDensity * scale);
+                opts.inTargetDensity = mTargetDensity;
+                opts.inDensity = (int)(mTargetDensity * scale);
             }
+
+        /*
+            // Scale width, expressed as a percentage of the image's width.
+            // scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
+            opts.inSampleSize = 1;
+            if ((float)value <= 0 || (float)value >= 1.0f) {
+                opts.inDensity = opts.inTargetDensity = 0;
+            } else {
+                final float scale = opts.outWidth / (opts.outWidth * (float)value);
+                opts.inTargetDensity = mTargetDensity;
+                opts.inDensity = (int)(mTargetDensity * scale);
+            }
+         */
         }
     }
 

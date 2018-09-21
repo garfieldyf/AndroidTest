@@ -345,13 +345,6 @@ public final class BitmapUtils {
     }
 
     /**
-     * Adjusts the specified <em>sampleSize</em> rounded down to the nearest power of 2.
-     */
-    public static int fixSampleSize(int sampleSize) {
-        return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
-    }
-
-    /**
      * Computes a sample size which makes the longer side at least
      * <em>desiredWidth</em> or <em>desiredHeight</em> long.
      * @param width The original width.
@@ -361,7 +354,8 @@ public final class BitmapUtils {
      * @return The sample size.
      */
     public static int computeSampleSize(int width, int height, int desiredWidth, int desiredHeight) {
-        return fixSampleSize(Math.max(width / desiredWidth, height / desiredHeight));
+        final int sampleSize = Math.max(width / desiredWidth, height / desiredHeight);
+        return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
     }
 
     public static void dumpBitmap(Context context, String tag, Bitmap bitmap) {

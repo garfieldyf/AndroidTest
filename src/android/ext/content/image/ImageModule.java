@@ -58,25 +58,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * memory of the current device. Pass <tt>0</tt> that the module has no memory cache.
      * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
      * @return The {@link ImageModule}.
-     * @see #createBitmapModule(Context, Executor, float, int, int)
      */
     public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, Executor executor, float scaleMemory, int maxFileSize) {
-        return new ImageModule<URI, Bitmap>(context, executor, Caches.<URI>createBitmapCache(scaleMemory, 0), createFileCache(context, maxFileSize));
-    }
-
-    /**
-     * Creates a new {@link Bitmap} module.
-     * @param context The <tt>Context</tt>.
-     * @param executor The {@link Executor} to execute load task.
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum
-     * memory of the current device. Pass <tt>0</tt> that the module has no memory cache.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
-     * @param maxBitmapSize The maximum number of bitmaps in the bitmap pool.
-     * @return The {@link ImageModule}.
-     * @see #createBitmapModule(Context, Executor, float, int)
-     */
-    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, Executor executor, float scaleMemory, int maxFileSize, int maxBitmapSize) {
-        return new ImageModule<URI, Bitmap>(context, executor, Caches.<URI>createBitmapCache(scaleMemory, maxBitmapSize), createFileCache(context, maxFileSize));
+        return new ImageModule<URI, Bitmap>(context, executor, Caches.<URI>createBitmapCache(scaleMemory), createFileCache(context, maxFileSize));
     }
 
     /**
@@ -90,7 +74,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @return The {@link ImageModule}.
      */
     public static <URI> ImageModule<URI, Object> createImageModule(Context context, Executor executor, float scaleMemory, int maxImageSize, int maxFileSize) {
-        return new ImageModule<URI, Object>(context, executor, new LruImageCache<URI, GIFImage>(scaleMemory, maxImageSize, 0), createFileCache(context, maxFileSize));
+        return new ImageModule<URI, Object>(context, executor, new LruImageCache<URI, GIFImage>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
     }
 
     /**
@@ -149,7 +133,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * Class <tt>Builder</tt> to creates an {@link ImageLoader}.
      * <h2>Usage</h2>
      * <p>Here is an example:</p><pre>
-     * final ImageLoader&lt;String, Bitmap&gt; loader = mModule.createImageLoader()
+     * final ImageLoader&lt;String, Bitmap&gt; loader = module.createImageLoader()
      *     .setParameters(R.xml.decode_params)
      *     .setBinder(R.xml.image_binder)
      *     .create();</pre>

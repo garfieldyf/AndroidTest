@@ -23,6 +23,16 @@ public final class Caches {
     }
 
     /**
+     * Returns a new <tt>Bitmap</tt> {@link Cache} instance.
+     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this
+     * application maximum memory of the current device.
+     * @return A new <tt>Bitmap</tt> {@link Cache} instance or <tt>null</tt> if the <tt>scaleMemory <= 0.
+     */
+    public static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory) {
+        return (Float.compare(scaleMemory, +0.0f) > 0 ? new LruBitmapCache<K>(scaleMemory) : null);
+    }
+
+    /**
      * Returns a new {@link FileCache} instance.
      * @param context The <tt>Context</tt>.
      * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
@@ -32,18 +42,6 @@ public final class Caches {
      */
     public static FileCache createFileCache(Context context, String name, int maxFileSize) {
         return (maxFileSize > 0 ? new LruFileCache(context, name, maxFileSize) : new SimpleFileCache(context, name));
-    }
-
-    /**
-     * Returns a new <tt>Bitmap</tt> {@link Cache} instance.
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this
-     * application maximum memory of the current device.
-     * @param maxBitmapSize The maximum number of bitmaps in the bitmap pool to recycle the evicted
-     * bitmap from the bitmap cache. Pass <tt>0</tt> that the bitmap cache has no bitmap pool.
-     * @return A new <tt>Bitmap</tt> {@link Cache} instance or <tt>null</tt> if the <tt>scaleMemory <= 0.
-     */
-    public static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory, int maxBitmapSize) {
-        return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxBitmapSize > 0 ? new LruBitmapCache2<K>(scaleMemory, new LinkedBitmapPool(maxBitmapSize)) : new LruBitmapCache<K>(scaleMemory)) : null);
     }
 
     public static void dumpCache(Object cache, Context context, Printer printer) {

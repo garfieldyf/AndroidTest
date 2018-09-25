@@ -335,10 +335,6 @@ public final class JSONUtils {
         reader.beginArray();
 
         while (reader.hasNext()) {
-            if (cancelable.isCancelled()) {
-                return result;
-            }
-
             switch (reader.peek()) {
             case STRING:
                 result.put(reader.nextString());
@@ -363,6 +359,10 @@ public final class JSONUtils {
             default:
                 reader.skipValue();
             }
+
+            if (cancelable.isCancelled()) {
+                return result;
+            }
         }
 
         reader.endArray();
@@ -374,10 +374,6 @@ public final class JSONUtils {
         reader.beginObject();
 
         while (reader.hasNext()) {
-            if (cancelable.isCancelled()) {
-                return result;
-            }
-
             final String name = reader.nextName();
             switch (reader.peek()) {
             case STRING:
@@ -402,6 +398,10 @@ public final class JSONUtils {
 
             default:
                 reader.skipValue();
+            }
+
+            if (cancelable.isCancelled()) {
+                return result;
             }
         }
 

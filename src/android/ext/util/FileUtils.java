@@ -461,13 +461,6 @@ public final class FileUtils {
     public static native long getFileLength(String filename);
 
     /**
-     * Returns the file last modified time in milliseconds since January 1, 1970, midnight.
-     * @param filename The filename, must be absolute file path.
-     * @return The last modified time if the operation succeeded, <tt>0</tt> otherwise.
-     */
-    public static native long getLastModified(String filename);
-
-    /**
      * Returns the number of files in the specified <em>dirPath</em>.
      * @param dirPath The directory path, must be absolute file path.
      * @param flags Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.

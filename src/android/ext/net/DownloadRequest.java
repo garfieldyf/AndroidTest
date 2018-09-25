@@ -237,21 +237,9 @@ public class DownloadRequest {
      * @param field The header field name.
      * @return The value of the header field, or
      * <tt>null</tt> if no field has been found.
-     * @see #responseHeaderInt(String, int)
      */
     public final String responseHeader(String field) {
         return mConnection.getHeaderField(field);
-    }
-
-    /**
-     * Returns the specified response header value as a number.
-     * @param field The header field name.
-     * @param defaultValue The default value if no field has been found.
-     * @return The value of the header field.
-     * @see #responseHeader(String)
-     */
-    public final int responseHeaderInt(String field, int defaultValue) {
-        return mConnection.getHeaderFieldInt(field, defaultValue);
     }
 
     /**

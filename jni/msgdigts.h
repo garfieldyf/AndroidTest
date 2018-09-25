@@ -12,6 +12,7 @@
 #include "md.h"
 #include "stdutil.h"
 #include "fileutil.h"
+#include "strmutil.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // JNI native methods in this file:
@@ -62,7 +63,7 @@ __STATIC_INLINE__ jint computeFileImpl(const __NS::File& file, JNIEnv* env, jbyt
     assert(offset >= 0);
     assert(!file.isEmpty());
 
-    ssize_t readBytes = 0;
+    ssize_t readBytes;
     u_char buffer[8192];
     TMessageDigest digest;
 
@@ -96,14 +97,13 @@ __STATIC_INLINE__ jint computeByteArrayImpl(JNIEnv* env, jbyteArray data, jint d
     assert(dataOffset >= 0 && dataLength >= 0);
     assert(env->GetArrayLength(data) - dataOffset >= dataLength);
 
-    jbyte buffer[8192];
+    int32_t readBytes;
+    u_char buffer[8192];
     TMessageDigest digest;
-    for (jsize length = 0; dataLength > 0; dataOffset += length, dataLength -= length)
-    {
-    	length = ::__Min(dataLength, (jint)_countof(buffer));
-        env->GetByteArrayRegion(data, dataOffset, length, buffer);
-        digest.update((const u_char*)buffer, length);
-    }
+
+    __NS::ByteArrayInputStream is(env, data, dataLength, dataOffset);
+    while ((readBytes = is.read(buffer, _countof(buffer))) > 0)
+        digest.update(buffer, readBytes);
 
     return digestImpl(digest, env, result, offset);
 }

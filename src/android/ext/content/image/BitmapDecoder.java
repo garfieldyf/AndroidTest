@@ -344,7 +344,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
                 return (opts.outWidth * opts.outHeight * byteCount);
             } else {
                 final float scale = (float)opts.inTargetDensity / opts.inDensity;
-                return (int)(scale * opts.outWidth + 0.5f) * (int)(scale * opts.outHeight + 0.5f) * byteCount;
+                return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
             }
         }
 

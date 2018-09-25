@@ -476,18 +476,6 @@ public final class FileUtils {
     public static native int getFileCount(String dirPath, int flags);
 
     /**
-     * Reads the specified <tt>InputStream</tt> the contents into a {@link ByteArrayBuffer}.
-     * @param is The <tt>InputStream</tt> to read.
-     * @return A <tt>ByteArrayBuffer</tt> contains the contents.
-     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
-     */
-    public static ByteArrayBuffer readStream(InputStream is) throws IOException {
-        final ByteArrayBuffer result = new ByteArrayBuffer();
-        result.readFrom(is, null);
-        return result;
-    }
-
-    /**
      * Equivalent to calling <tt>copyStream(src, dst, null, buffer)</tt>.
      * @param src The <tt>InputStream</tt> to read.
      * @param dst The <tt>OutputStream</tt> to write.
@@ -539,6 +527,18 @@ public final class FileUtils {
      * an error code. See {@link ErrnoException}.
      */
     public static native int moveFile(String src, String dst);
+
+    /**
+     * Reads the specified <tt>InputStream</tt> the contents into a {@link ByteArrayBuffer}.
+     * @param is The <tt>InputStream</tt> to read.
+     * @return A <tt>ByteArrayBuffer</tt> contains the contents.
+     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
+     */
+    public static ByteArrayBuffer readStream(InputStream is) throws IOException {
+        final ByteArrayBuffer result = new ByteArrayBuffer();
+        result.readFrom(is, null);
+        return result;
+    }
 
     /**
      * Reads the specified file contents into a {@link ByteArrayBuffer}.

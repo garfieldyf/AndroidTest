@@ -324,14 +324,6 @@ public final class ProcessUtils {
         }
 
         /**
-         * Returns the number of the crash infos from table.
-         * @return The number of the crash infos.
-         */
-        public final int getCount() {
-            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(_date) FROM crashes", (Object[])null).intValue();
-        }
-
-        /**
          * Returns the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The {@link Cursor}.
@@ -373,11 +365,31 @@ public final class ProcessUtils {
 
         /**
          * Writes the specified crash infos to the <em>writer</em>.
-         * The position is restored after writing.
+         * <p>The crash infos such as the following:</p><pre>
+         * {
+         *   "brand": "BRAND",
+         *   "model": "MODEL",
+         *   "sdk": 19,
+         *   "version": "4.4.4",
+         *   "abis": [
+         *     "armeabi-v7a",
+         *     "armeabi"
+         *   ],
+         *   "package": "com.xxxx",
+         *   "crashes": [{
+         *     "_date": 1537852558991,
+         *     "vcode": 1,
+         *     "vname": "1.0",
+         *     "process": "com.xxxx",
+         *     "thread": "main",
+         *     "class": "java.lang.NullPointerException",
+         *     "stack": "java.lang.NullPointerException: This is test! ... ..."
+         *   }]
+         * }</pre>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.
          * @param cursor The {@link Cursor} from which to get the crash data.
-         * May be returned earlier by {@link CrashDatabase#query()}.
+         * May be returned earlier by {@link CrashDatabase#query(long)}.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          * @see #writeDeviceInfo(Context, JsonWriter)
@@ -398,7 +410,7 @@ public final class ProcessUtils {
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
             return JSONUtils.writeObject(writer.name("brand").value(Build.BRAND)
-                .name("mode").value(Build.MODEL)
+                .name("model").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
                 .name("abis"), DeviceUtils.getSupportedABIs())

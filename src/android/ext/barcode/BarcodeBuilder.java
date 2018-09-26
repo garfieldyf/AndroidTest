@@ -43,7 +43,7 @@ public final class BarcodeBuilder {
         this.bitMatrix = bitMatrix;
         this.white  = Color.WHITE;
         this.black  = Color.BLACK;
-        this.config = Config.RGB_565;
+        this.config = Config.ARGB_8888;
     }
 
     /**

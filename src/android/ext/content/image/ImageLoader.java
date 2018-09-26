@@ -36,14 +36,7 @@ import android.widget.ImageView;
  * @version 6.0
  */
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
-    /**
-     * Indicates the image loader will be ignore the file cache
-     * when it will be load image. If the image loader has no file
-     * cache or load not from net this flag will be ignore.
-     */
-    public static final int FLAG_IGNORE_FILE_CACHE = 0x00400000;
-
-    private final Loader mLoader;
+    private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
 
     protected final ImageDecoder<Image> mDecoder;
@@ -63,7 +56,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
         mDecoder = decoder;
         mBinder  = binder;
-        mLoader  = (fileCache != null ? new FileCacheLoader(context, fileCache) : new Loader(context));
+        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
     }
@@ -214,17 +207,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private class Loader implements Factory<byte[]> {
-        private final String mCacheDir;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         */
-        public Loader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, ".tmp_image_cache").getPath();
-        }
-
+    /* package */ static abstract class Loader<Image> implements Factory<byte[]> {
         /**
          * Returns a new byte array.
          * @return A new byte array.
@@ -243,6 +226,24 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
+        public abstract Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
+    }
+
+    /**
+     * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
+     */
+    private final class URLLoader extends Loader<Image> {
+        private final String mCacheDir;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         */
+        public URLLoader(Context context) {
+            mCacheDir = FileUtils.getCacheDir(context, ".tmp_image_cache").getPath();
+        }
+
+        @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
             try {
@@ -256,25 +257,19 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader extends Loader {
+    private final class FileCacheLoader extends Loader<Image> {
         private final FileCache mCache;
 
         /**
          * Constructor
-         * @param context The <tt>Context</tt>.
          * @param cache The {@link FileCache} to store the loaded image files.
          */
-        public FileCacheLoader(Context context, FileCache cache) {
-            super(context);
+        public FileCacheLoader(FileCache cache) {
             mCache = cache;
         }
 
         @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
-            if ((flags & FLAG_IGNORE_FILE_CACHE) != 0) {
-                return super.load(task, url, params, flags, buffer);
-            }
-
             final StringBuilder builder = StringUtils.toHexString(new StringBuilder(mCache.getCacheDir().length() + 16), buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1), true);
             final String hashKey = builder.toString();
             final String imageFile = mCache.get(hashKey);

@@ -171,7 +171,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
          * @param opts The {@link Options} to compute byte count.
          */
         public int computeByteCount(Context context, Options opts) {
-            return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
+            return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(config);
         }
 
         /**
@@ -339,7 +339,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
         @Override
         public int computeByteCount(Context context, Options opts) {
-            final int byteCount = BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
+            final int byteCount = BitmapUtils.getBytesPerPixel(config);
             if (opts.inTargetDensity == 0) {
                 return (opts.outWidth * opts.outHeight * byteCount);
             } else {

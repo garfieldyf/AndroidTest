@@ -1551,7 +1551,7 @@ public final class FileUtils {
 
         /**
          * The {@link Factory} to create a new {@link Dirent}.
-         * @see FileUtils#listFiles(String, int, Factory)
+         * @see FileUtils#listFiles
          */
         public static final Factory<Dirent> FACTORY = new Factory<Dirent>() {
             @Override

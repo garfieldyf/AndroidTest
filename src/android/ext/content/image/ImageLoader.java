@@ -240,7 +240,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param context The <tt>Context</tt>.
          */
         public URLLoader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, ".tmp_image_cache").getPath();
+            mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache").getPath();
         }
 
         @Override

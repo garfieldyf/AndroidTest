@@ -239,12 +239,12 @@ public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantSt
     public void draw(Canvas canvas) {
         computeDrawingBounds(mBounds);
         switch (getAutoMirrored()) {
-        case HORIZONTAL_MIRRORED:
-            draw(canvas, getBounds().width(), 0, -1.0f);
-            break;
-
         case VERTICAL_MIRRORED:
             draw(canvas, 0, getBounds().height(), 1.0f);
+            break;
+
+        case HORIZONTAL_MIRRORED:
+            draw(canvas, getBounds().width(), 0, -1.0f);
             break;
 
         default:

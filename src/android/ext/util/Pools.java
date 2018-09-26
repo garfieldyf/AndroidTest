@@ -109,7 +109,7 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    /* package */ static class SimplePool<T> implements Pool<T> {
+    private static class SimplePool<T> implements Pool<T> {
         private final Factory<T> factory;
         private final AtomicReference<T> referent;
 

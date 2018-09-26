@@ -274,7 +274,7 @@ public final class ProcessUtils {
      */
     public static final class CrashDatabase extends SQLiteOpenHelper {
         /**
-         * The crash date column of the table.
+         * The crash date column index of the table.
          * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
          */
         public static final int DATE = 0;
@@ -421,6 +421,7 @@ public final class ProcessUtils {
     /**
      * Class <tt>UncaughtHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
      */
+    @SuppressWarnings("unused")
     private static final class UncaughtHandler implements UncaughtExceptionHandler {
         private final Context mContext;
         private final UncaughtExceptionHandler mDefaultHandler;
@@ -455,7 +456,9 @@ public final class ProcessUtils {
             }
         }
 
-        @SuppressWarnings("unused")
+        /**
+         * Writes the crash infos to the "crash.crashes" table.
+         */
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {

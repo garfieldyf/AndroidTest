@@ -93,6 +93,9 @@
         <activity
             android:name="PrinterActivity"
             android:screenOrientation="landscape" />
+        <activity
+            android:name="PercentActivity"
+            android:screenOrientation="landscape" />
 
         <service
             android:name="CrashService"

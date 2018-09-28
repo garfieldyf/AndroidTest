@@ -6,20 +6,20 @@
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
-    <property name="barcode.package" value="com.google.zxing" />
     <property name="jar.file.name" value="${ndk.module}.jar" />
+    <property name="source.file.name" value="${ndk.module}-sources.jar" />
     <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" />
     <!-- <property name="ndk.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" /> -->
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
-    <property name="class.dir" value="${basedir}/src" />
+    <property name="class.dir" value="${basedir}/classes" />
 
     <property name="api.level" value="22" />
     <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
     <property name="library.jars.dir" value="E:\Include\android" />
     <property name="sdk.dir" value="D:\Google\android-sdk-windows" />
-    <property name="barcode.jar.path" value="${library.jars.dir}/zxing/zxing.jar" />
+    <property name="zxing.jar.path" value="${library.jars.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.internal.jar.path" value="${library.jars.dir}/internal/android-sdk-internal.jar" />
     <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
@@ -52,15 +52,15 @@
             <fileset dir="${basedir}/../aidl/android/ext" />
         </copy>
 
-        <!-- replace the package name -->
+        <!-- replace the package name (*.aidl) -->
         <replace dir="${out.dir}/aidl" includes="**/*.aidl" encoding="UTF-8">
             <replacefilter token="android.ext" value="${java.package}" />
         </replace>
 
+        <!-- replace the package name (*.java) -->
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
             <replacefilter token="@author Garfield" value="@author ${author}" />
             <replacefilter token="android.ext" value="${java.package}" />
-            <replacefilter token="com.google.zxing" value="${barcode.package}" />
         </replace>
     </target>
 
@@ -80,11 +80,6 @@
         <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
             <replacefilter token="this.writeUncaughtException" value="this.storeUncaughtException" />
         </replace>
-    </target>
-
-    <!-- target -pre-compile-test -->
-    <target name="-pre-compile-test">
-        <property name="file.out.dir" value="${out.dir}/debug" />
     </target>
 
     <!-- target -pre-compile-debug -->
@@ -108,10 +103,19 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}" />
+            classpath="${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}">
+            <manifest>
+                <attribute name="Built-By" value="${author}" />
+                <attribute name="Version" value="${version}" />
+                <attribute name="SDK-Version" value="${sdk.version}" />
+            </manifest>
+        </jar>
+
+        <!-- build source jar file -->
+        <jar destfile="${file.out.dir}/${source.file.name}" basedir="${src.dir}">
             <manifest>
                 <attribute name="Built-By" value="${author}" />
                 <attribute name="Version" value="${version}" />
@@ -151,7 +155,7 @@
             -include        "${basedir}/../proguard.txt"
             -injars         ${file.out.dir}/${jar.file.name}
             -outjars        "${file.out.dir}/${jar.file.name}"
-            -libraryjars    ${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${barcode.jar.path}
+            -libraryjars    ${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
             -dump           "${file.out.dir}/dump.txt"
             -printseeds     "${file.out.dir}/seeds.txt"
             -printusage     "${file.out.dir}/usage.txt"
@@ -196,7 +200,7 @@
     </target>
 
     <!-- target test -->
-    <target name="test" depends="-clean, -copy, -pre-compile-test, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
+    <target name="test" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
 
     <!-- target debug -->
     <target name="debug" depends="-clean, -copy, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />

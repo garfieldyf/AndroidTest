@@ -47,9 +47,9 @@
 
     <!-- include jars -->
     <target name="-pre-compile">
-        <path id="barcode.jar.path">
+        <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}\zxing\release\zxing.jar" />
+            <pathelement location="${library.jars.dir}\zxing\zxing.jar" />
         </path>
 
         <path id="support.v4.jar.path">
@@ -59,7 +59,7 @@
 
         <path id="recyclerview.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}\recyclerview\release\recyclerview-v7.jar" />
+            <pathelement location="${library.jars.dir}\recyclerview\recyclerview-v7.jar" />
         </path>
 
         <path id="android.sdk.internal.jar.path">
@@ -68,7 +68,7 @@
         </path>
 
         <path id="project.all.jars.path">
-            <path refid="barcode.jar.path" />
+            <path refid="zxing.jar.path" />
             <path refid="support.v4.jar.path" />
             <path refid="recyclerview.jar.path" />
         </path>

@@ -13,8 +13,6 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.ext.util.Pools.Factory;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
@@ -731,7 +729,7 @@ public final class FileUtils {
     /**
      * Class <tt>Stat</tt> is wrapper for linux structure <tt>stat</tt>.
      */
-    public static final class Stat implements Parcelable, Cloneable {
+    public static final class Stat implements Cloneable {
         /**
          * The permission of read, write and execute by all users.
          * Same as <em>S_IRWXU | S_IRWXG | S_IRWXO</em>.
@@ -979,41 +977,6 @@ public final class FileUtils {
             return (resId > 0 ? context.getString(resId, result) : result);
         }
 
-        /**
-         * Reads this object from the data stored in the specified parcel. To
-         * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
-         * @param source The parcel to read the data.
-         * @see #writeToParcel(Parcel, int)
-         */
-        public final void readFromParcel(Parcel source) {
-            mode    = source.readInt();
-            uid     = source.readInt();
-            gid     = source.readInt();
-            size    = source.readLong();
-            mtime   = source.readLong();
-            blocks  = source.readLong();
-            blksize = source.readLong();
-        }
-
-        /**
-         * @see #readFromParcel(Parcel)
-         */
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(mode);
-            dest.writeInt(uid);
-            dest.writeInt(gid);
-            dest.writeLong(size);
-            dest.writeLong(mtime);
-            dest.writeLong(blocks);
-            dest.writeLong(blksize);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
         @Override
         public Stat clone() {
             try {
@@ -1071,26 +1034,12 @@ public final class FileUtils {
                 return '-';
             }
         }
-
-        public static final Creator<Stat> CREATOR = new Creator<Stat>() {
-            @Override
-            public Stat createFromParcel(Parcel source) {
-                final Stat stat = new Stat();
-                stat.readFromParcel(source);
-                return stat;
-            }
-
-            @Override
-            public Stat[] newArray(int size) {
-                return new Stat[size];
-            }
-        };
     }
 
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Parcelable, Cloneable, Comparable<Dirent> {
+    public static class Dirent implements Cloneable, Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1337,31 +1286,6 @@ public final class FileUtils {
             return FileUtils.scanFiles(path, callback, flags, cookie);
         }
 
-        /**
-         * Reads this object from the data stored in the specified parcel. To
-         * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
-         * @param source The parcel to read the data.
-         * @see #writeToParcel(Parcel, int)
-         */
-        public void readFromParcel(Parcel source) {
-            type = source.readInt();
-            path = source.readString();
-        }
-
-        /**
-         * @see #readFromParcel(Parcel)
-         */
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(type);
-            dest.writeString(path);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
         @Override
         public Dirent clone() {
             try {
@@ -1557,20 +1481,6 @@ public final class FileUtils {
             @Override
             public Dirent newInstance() {
                 return new Dirent();
-            }
-        };
-
-        public static final Creator<Dirent> CREATOR = new Creator<Dirent>() {
-            @Override
-            public Dirent createFromParcel(Parcel source) {
-                final Dirent dirent = new Dirent();
-                dirent.readFromParcel(source);
-                return dirent;
-            }
-
-            @Override
-            public Dirent[] newArray(int size) {
-                return new Dirent[size];
             }
         };
     }

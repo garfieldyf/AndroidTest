@@ -47,17 +47,7 @@
             <fileset dir="${basedir}/../src/android/support/v7" />
         </copy>
 
-        <!-- copy the aidl files -->
-        <copy todir="${out.dir}/aidl/${ndk.package}" overwrite="true">
-            <fileset dir="${basedir}/../aidl/android/ext" />
-        </copy>
-
-        <!-- replace the package name (*.aidl) -->
-        <replace dir="${out.dir}/aidl" includes="**/*.aidl" encoding="UTF-8">
-            <replacefilter token="android.ext" value="${java.package}" />
-        </replace>
-
-        <!-- replace the package name (*.java) -->
+        <!-- replace the package name -->
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
             <replacefilter token="@author Garfield" value="@author ${author}" />
             <replacefilter token="android.ext" value="${java.package}" />

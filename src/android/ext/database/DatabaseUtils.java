@@ -599,8 +599,10 @@ public final class DatabaseUtils {
         final Object result = constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
+            final String name = field.getAnnotation(CursorField.class).value();
             DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
-            final int columnIndex = cursor.getColumnIndexOrThrow(field.getAnnotation(CursorField.class).value());
+            DebugUtils.__checkError(cursor.getColumnIndex(name) == -1, "The column '" + name + "' does not exist");
+            final int columnIndex = cursor.getColumnIndexOrThrow(name);
             final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(result, cursor.getInt(columnIndex));

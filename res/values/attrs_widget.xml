@@ -3,6 +3,7 @@
     <!-- AUTO-GENERATED FILE. DO NOT MODIFY. -->
 
     <!-- Attributes format -->
+    <attr name="percent" format="float" />
     <attr name="maskColor" format="reference|color" />
     <attr name="borderColor" format="reference|color" />
     <attr name="cornerColor" format="reference|color" />
@@ -47,6 +48,11 @@
     <declare-styleable name="Parameters">
         <attr name="config" />
         <attr name="sampleSize" />
+    </declare-styleable>
+
+    <!-- PercentParameters styleable -->
+    <declare-styleable name="PercentParameters">
+        <attr name="percent" />
     </declare-styleable>
 
     <!-- ImageBinder styleable -->

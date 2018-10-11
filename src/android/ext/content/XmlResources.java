@@ -10,6 +10,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.BitmapDecoder.PercentParameters;
 import android.ext.content.image.BitmapDecoder.ScaleParameters;
 import android.ext.content.image.BitmapDecoder.SizeParameters;
 import android.ext.content.image.ImageBinder;
@@ -158,6 +159,9 @@ public final class XmlResources {
 
             case "ScaleParameters":
                 return new ScaleParameters(context, attrs);
+
+            case "PercentParameters":
+                return new PercentParameters(context, attrs);
 
             default:
                 return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);

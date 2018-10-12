@@ -233,13 +233,13 @@ public final class UIHandler extends Handler {
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
-        // Process the Loader.Task messages.
+        // Dispatch the Loader.Task messages.
         case MESSAGE_PROGRESS:
         case MESSAGE_FINISHED:
             ((Task)msg.getCallback()).handleMessage(msg);
             break;
 
-        // Process the ThreadPool and ThreadPoolManager messages.
+        // Dispatch the ThreadPool and ThreadPoolManager messages.
         case MESSAGE_EXECUTE:
             ((Executor)msg.obj).execute(msg.getCallback());
             break;
@@ -248,7 +248,7 @@ public final class UIHandler extends Handler {
             ((ThreadPoolManager)msg.obj).afterExecuteAll();
             break;
 
-        // Process the RecyclerView messages.
+        // Dispatch the RecyclerView messages.
         case MESSAGE_CHILD_FOCUS:
             handleChildFocus(msg);
             break;
@@ -274,7 +274,7 @@ public final class UIHandler extends Handler {
             params.first.notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
             break;
 
-        // Process the DatabaseHandler messages.
+        // Dispatch the DatabaseHandler messages.
         case MESSAGE_DISPATCH_MESSAGE:
             final Pair<DatabaseHandler, Object> param = (Pair<DatabaseHandler, Object>)msg.obj;
             param.first.dispatchMessage(msg.arg1, msg.arg2, param.second);

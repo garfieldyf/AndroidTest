@@ -387,6 +387,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         public PercentParameters(Context context, AttributeSet attrs) {
             super(context, attrs);
 
+            DebugUtils.__checkError(PERCENT_PARAMETERS_ATTRS == null, "The " + getClass().getName() + " did not call PercentParameters.initAttrs()");
             final TypedArray a = context.obtainStyledAttributes(attrs, PERCENT_PARAMETERS_ATTRS);
             value = a.getFloat(0 /* R.styleable.PercentParameters_percent */, 0);
             mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;

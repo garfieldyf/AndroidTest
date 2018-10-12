@@ -21,6 +21,7 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.ext.annotation.CursorField;
+import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
@@ -324,11 +325,7 @@ public final class DatabaseUtils {
      * @param bindArgs The Object array to bind.
      */
     public static void bindArgs(SQLiteProgram prog, Object... bindArgs) {
-        if (bindArgs == null) {
-            return;
-        }
-
-        for (int i = 1; i <= bindArgs.length; ++i) {
+        for (int i = 1, size = ArrayUtils.getSize(bindArgs); i <= size; ++i) {
             final Object arg = bindArgs[i - 1];
             if (arg == null) {
                 prog.bindNull(i);

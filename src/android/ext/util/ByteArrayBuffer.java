@@ -83,15 +83,6 @@ public final class ByteArrayBuffer extends OutputStream {
     }
 
     /**
-     * Returns a {@link ByteBuffer} which is based on the
-     * contents of this buffer.
-     * @return A <tt>ByteBuffer</tt>.
-     */
-    public final ByteBuffer asByteBuffer() {
-        return ByteBuffer.wrap(data, 0, size);
-    }
-
-    /**
      * Returns an {@link InputStream} which is based on the
      * contents of this buffer.
      * @return An <tt>InputStream</tt>.

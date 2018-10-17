@@ -102,14 +102,14 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * <p>Here is a xml resource example:</p><pre>
      * &lt;[ Parameters | SizeParameters | ScaleParameters | parameters ]
      *      xmlns:android="http://schemas.android.com/apk/res/android"
-     *      xmlns:namespace="http://schemas.android.com/apk/res/<em>packageName</em>"
+     *      xmlns:app="http://schemas.android.com/apk/res-auto"
      *      class="classFullName"
      *      android:width="200dp"
      *      android:height="300dp"
-     *      namespace:config="[ argb_8888 | rgb_565 | alpha_8 ]"
-     *      namespace:sampleSize="2"
-     *      namespace:attributes1="value1"
-     *      namespace:attributes2="value2" /&gt;</pre>
+     *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+     *      app:sampleSize="2"
+     *      app:attributes1="value1"
+     *      app:attributes2="value2" /&gt;</pre>
      */
     public static class Parameters {
         private static final int ALPHA_8 = 0;

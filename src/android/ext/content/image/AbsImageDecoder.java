@@ -47,7 +47,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     }
 
     @Override
-    public final Options newInstance() {
+    public Options newInstance() {
         final Options opts = new Options();
         opts.inMutable = true;
         return opts;

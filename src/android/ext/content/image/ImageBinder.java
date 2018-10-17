@@ -31,11 +31,11 @@ import android.widget.ImageView;
  * <p>Here is a xml resource example:</p><pre>
  * &lt;[ ImageBinder | TransitionBinder | binder ]
  *     xmlns:android="http://schemas.android.com/apk/res/android"
- *     xmlns:namespace="http://schemas.android.com/apk/res/<em>packageName</em>"
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
  *     class="classFullName"
  *     android:duration="@android:integer/config_longAnimTime"
- *     namespace:defaultImage="@drawable/ic_placeholder"
- *     namespace:maxCacheSize="128" &gt;
+ *     app:defaultImage="@drawable/ic_placeholder"
+ *     app:maxCacheSize="128" &gt;
  *
  *     &lt;!-- Bitmap Transformer --&gt;
  *     &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
@@ -46,15 +46,15 @@ import android.widget.ImageView;
  *         android:topRightRadius="10dp"
  *         android:bottomLeftRadius="10dp"
  *         android:bottomRightRadius="10dp"
- *         namespace:attributes1="value1"
- *         namespace:attributes2="value2" /&gt;
+ *         app:attributes1="value1"
+ *         app:attributes2="value2" /&gt;
  *
  *     &lt;!-- Image Transformer (Optional) --&gt;
  *     &lt;[ GIFTransformer | DrawableTransformer | transformer ]
  *         class="classFullName"
  *         android:src="@xml/transformer2"
- *         namespace:attributes3="value3"
- *         namespace:attributes4="value4"
+ *         app:attributes3="value3"
+ *         app:attributes4="value4"
  *         ... ... /&gt;
  * &lt;/[ ImageBinder | TransitionBinder | binder ]&gt;</pre>
  * @author Garfield

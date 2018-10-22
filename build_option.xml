@@ -10,7 +10,7 @@
     <property name="java.target" value="1.7" />
     <property name="version.major" value="1" />
     <property name="version.minor" value="0" />
-    <property name="library.jars.dir" value="E:\Include\android" />
+    <property name="library.jars.dir" value="E:\Include\java" />
 
     <!-- app version code 10 -->
     <condition property="versionCode" value="${version.major}${version.minor}"
@@ -52,6 +52,11 @@
             <pathelement location="${library.jars.dir}\zxing\zxing.jar" />
         </path>
 
+        <path id="vasdolly.jar.path">
+            <path path="${toString:project.all.jars.path}" />
+            <pathelement location="${library.jars.dir}\vasdolly\vasdolly-channel.jar" />
+        </path>
+
         <path id="support.v4.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${sdk.dir}\extras\android\support\v7\appcompat\libs\android-support-v4.jar" />
@@ -69,6 +74,7 @@
 
         <path id="project.all.jars.path">
             <path refid="zxing.jar.path" />
+            <path refid="vasdolly.jar.path" />
             <path refid="support.v4.jar.path" />
             <path refid="recyclerview.jar.path" />
         </path>
@@ -122,5 +128,11 @@
         <delete includeEmptyDirs="true" verbose="${verbose}">
             <fileset dir="${out.absolute.dir}" excludes="${out.file.name} ${mapping.file.name}"/>
         </delete>
+
+        <!-- build channel apks -->
+        <property name="vasdolly.channel.jar.path" value="${library.jars.dir}\vasdolly\vasdolly.jar" />
+        <exec executable="cmd.exe">
+            <arg line="/C java -jar ${vasdolly.channel.jar.path} put -c ${basedir}/channels.txt ${out.final.file} ${out.absolute.dir} " />
+        </exec>
     </target>
 </project>

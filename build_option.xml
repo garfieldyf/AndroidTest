@@ -122,5 +122,11 @@
         <delete includeEmptyDirs="true" verbose="${verbose}">
             <fileset dir="${out.absolute.dir}" excludes="${out.file.name} ${mapping.file.name}"/>
         </delete>
+
+        <!-- build channel apks -->
+        <property name="vasdolly.jar.path" value="${library.jars.dir}\vasdolly\vasdolly.jar" />
+        <exec executable="cmd.exe">
+            <arg line="/C java -jar ${vasdolly.jar.path} put -c ${basedir}/channels.txt ${out.final.file} ${out.absolute.dir} " />
+        </exec>
     </target>
 </project>

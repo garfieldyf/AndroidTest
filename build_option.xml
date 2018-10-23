@@ -10,7 +10,7 @@
     <property name="java.target" value="1.7" />
     <property name="version.major" value="1" />
     <property name="version.minor" value="0" />
-    <property name="library.jars.dir" value="E:\Include\java" />
+    <property name="library.jars.dir" value="E:/Include/java" />
 
     <!-- app version code 10 -->
     <condition property="versionCode" value="${version.major}${version.minor}"
@@ -49,27 +49,27 @@
     <target name="-pre-compile">
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}\zxing\zxing.jar" />
+            <pathelement location="${library.jars.dir}/zxing/zxing.jar" />
         </path>
 
         <path id="vasdolly.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}\vasdolly\vasdolly-channel.jar" />
+            <pathelement location="${library.jars.dir}/vasdolly/vasdolly-channel.jar" />
         </path>
 
         <path id="support.v4.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${sdk.dir}\extras\android\support\v7\appcompat\libs\android-support-v4.jar" />
+            <pathelement location="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
         </path>
 
         <path id="recyclerview.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}\recyclerview\recyclerview-v7.jar" />
+            <pathelement location="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
         </path>
 
-        <path id="android.sdk.internal.jar.path">
+        <path id="android.internal.sdk.jar.path">
             <path path="${toString:project.target.class.path}" />
-            <pathelement location="${library.jars.dir}\internal\android-sdk-internal.jar" />
+            <pathelement location="${library.jars.dir}/android/android-sdk-internal.jar" />
         </path>
 
         <path id="project.all.jars.path">
@@ -80,7 +80,7 @@
         </path>
 
         <path id="project.target.class.path">
-            <path refid="android.sdk.internal.jar.path" />
+            <path refid="android.internal.sdk.jar.path" />
         </path>
 
         <echo message="library jars : ${toString:project.target.class.path}" />
@@ -90,7 +90,7 @@
     <!-- debug output filename -->
     <target name="-rename-debug-out-file">
         <!-- call native build -->
-        <ant antfile="${basedir}\jni\build.xml" target="debug" inheritAll="false" inheritRefs="false" />
+        <ant antfile="${basedir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
 
         <property name="out.file.name" value="${ant.project.name}_${build.no}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
@@ -101,7 +101,7 @@
     <!-- release output filename -->
     <target name="-rename-release-out-file">
         <!-- call native build -->
-        <ant antfile="${basedir}\jni\build.xml" target="release" inheritAll="false" inheritRefs="false" />
+        <ant antfile="${basedir}/jni/build.xml" target="release" inheritAll="false" inheritRefs="false" />
 
         <property name="out.file.name" value="${ant.project.name}_${build.no}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
@@ -130,9 +130,9 @@
         </delete>
 
         <!-- build channel apks -->
-        <property name="vasdolly.channel.jar.path" value="${library.jars.dir}\vasdolly\vasdolly.jar" />
+        <property name="vasdolly.channel.jar.path" value="${library.jars.dir}/vasdolly/vasdolly.jar" />
         <exec executable="cmd.exe">
-            <arg line="/C java -jar ${vasdolly.channel.jar.path} put -c ${basedir}/channels.txt ${out.final.file} ${out.absolute.dir} " />
+            <arg line="/C java -jar ${vasdolly.channel.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>
     </target>
 </project>

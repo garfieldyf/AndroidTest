@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="module" basedir="." default="all">
     <!-- properties -->
+    <property environment="env" />
     <property name="author" value="Garfield" />
     <property name="version" value="1.4.0" />
     <property name="ndk.module" value="funshion" />
@@ -16,12 +17,12 @@
     <property name="class.dir" value="${basedir}/classes" />
 
     <property name="api.level" value="22" />
+    <property name="sdk.dir" value="${env.ANDROID_HOME}" />
     <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
-    <property name="library.jars.dir" value="E:\Include\android" />
-    <property name="sdk.dir" value="D:\Google\android-sdk-windows" />
+    <property name="library.jars.dir" value="E:\Include\java" />
     <property name="zxing.jar.path" value="${library.jars.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
-    <property name="android.internal.jar.path" value="${library.jars.dir}/internal/android-sdk-internal.jar" />
+    <property name="android.internal.jar.path" value="${library.jars.dir}/android/android-sdk-internal.jar" />
     <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 

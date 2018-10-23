@@ -260,17 +260,19 @@ public class DownloadRequest {
     /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download was
      * cancelled before it completed normally then the returned value is undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
      * @throws JSONException if data can not be parsed.
      * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
+     * @see #download(DownloadCallback, byte[], Object[])
      * @see JSONUtils#newInstance(JsonReader, Cancelable)
      */
-    public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
+    public final <T> T download(Cancelable cancelable, byte[] tempBuffer) throws IOException, JSONException {
         try {
-            return (connectImpl(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connectImpl(tempBuffer) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -285,8 +287,9 @@ public class DownloadRequest {
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(Cancelable)
+     * @see #download(Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
+     * @see #download(DownloadCallback, byte[], Object[])
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
@@ -315,8 +318,9 @@ public class DownloadRequest {
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
-     * @see #download(Cancelable)
+     * @see #download(Cancelable, byte[])
      * @see #download(String, Cancelable, byte[])
+     * @see #download(DownloadCallback, byte[], Object[])
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
@@ -329,6 +333,29 @@ public class DownloadRequest {
         } finally {
             disconnect();
         }
+    }
+
+    /**
+     * Downloads the resource from the remote server with the arguments supplied to this request.
+     * @param callback The {@link DownloadCallback} to used to downloads.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
+     * @param params The parameters passed into {@link DownloadCallback#onDownload}. If no parameters,
+     * you can pass <em>(Object[])null</em> instead of allocating an empty array.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
+     * @throws IOException if an error occurs while downloading the resource.
+     * @see #download(Cancelable, byte[])
+     * @see #download(String, Cancelable, byte[])
+     * @see #download(OutputStream, Cancelable, byte[])
+     */
+    public final int download(DownloadCallback callback, byte[] tempBuffer, Object... params) throws IOException {
+        final int statusCode = connectImpl(tempBuffer);
+        try {
+            callback.onDownload(mConnection, statusCode, params, tempBuffer);
+        } finally {
+            disconnect();
+        }
+
+        return statusCode;
     }
 
     /**
@@ -399,5 +426,21 @@ public class DownloadRequest {
                 NetworkUtils.dumpResponseHeaders(mConnection, printer);
             }
         }
+    }
+
+    /**
+     * Callback interface used to download the data from the remote server.
+     */
+    public static interface DownloadCallback {
+        /**
+         * Called on a background thread to download the data from the remote server.
+         * @param conn The {@link URLConnection} whose connecting the remote server.
+         * @param statusCode The response code returned by the remote server.
+         * @param params The parameters, passed earlier by {@link DownloadRequest#download}.
+         * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for download,
+         * passed earlier by {@link DownloadRequest#download}.
+         * @throws IOException if an error occurs while downloading the data from the remote server.
+         */
+        void onDownload(URLConnection conn, int statusCode, Object[] params, byte[] tempBuffer) throws IOException;
     }
 }

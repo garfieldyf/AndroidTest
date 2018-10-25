@@ -26,6 +26,10 @@
     <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
+    <condition property="compile.barcode">
+        <istrue value="true"/>
+    </condition>
+
     <!-- target -copy -->
     <target name="-copy">
         <!-- copy the java files -->
@@ -53,6 +57,12 @@
             <replacefilter token="@author Garfield" value="@author ${author}" />
             <replacefilter token="android.ext" value="${java.package}" />
         </replace>
+    </target>
+
+    <!-- target -remove-barcode-if -->
+    <target name="-remove-barcode-if" unless="compile.barcode">
+        <echo level="info">Remove barcode source files...</echo>
+        <delete dir="${src.dir}/${ndk.package}/barcode"/>
     </target>
 
     <!-- target -delete-debug-call -->
@@ -191,13 +201,13 @@
     </target>
 
     <!-- target test -->
-    <target name="test" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
+    <target name="test" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
+    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile" />
+    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all -->
     <target name="all">

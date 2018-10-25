@@ -47,6 +47,12 @@
 
     <!-- include jars -->
     <target name="-pre-compile">
+        <!-- modify versionCode, versionName -->
+        <echo message="version code : ${version.code}" />
+        <echo message="version name : ${version.name}" />
+        <replaceregexp file="${manifest.abs.file}" match="android:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
+        <replaceregexp file="${manifest.abs.file}" match="android:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
+
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${library.jars.dir}/zxing/zxing.jar" />

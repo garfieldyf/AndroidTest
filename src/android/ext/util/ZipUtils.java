@@ -225,17 +225,20 @@ public final class ZipUtils {
     private static void uncompress(InputStream is, OutputStream os, ZipEntry entry, CRC32 crc, long crcValue, byte[] buffer, Cancelable cancelable) throws IOException {
         // Uncompress the ZIP entry with check CRC32.
         crc.reset();
-        for (int readBytes; (readBytes = is.read(buffer, 0, buffer.length)) > 0 && !cancelable.isCancelled(); ) {
+        int readBytes;
+        while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {
+            if (cancelable.isCancelled()) {
+                return;
+            }
+
             os.write(buffer, 0, readBytes);
             crc.update(buffer, 0, readBytes);
         }
 
-        if (!cancelable.isCancelled()) {
-            // Checks the uncompressed content CRC32.
-            final long checksum = crc.getValue();
-            if (crcValue != checksum) {
-                throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(checksum).append(" ]").toString());
-            }
+        // Checks the uncompressed content CRC32.
+        final long checksum = crc.getValue();
+        if (crcValue != checksum) {
+            throw new IOException(new StringBuilder("Checked the '").append(entry.getName()).append("' CRC32 failed [ Entry CRC32 = ").append(crcValue).append(", Computed CRC32 = ").append(checksum).append(" ]").toString());
         }
     }
 

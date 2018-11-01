@@ -1,10 +1,10 @@
 package android.ext.cache;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
@@ -108,8 +108,8 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Map<K, V> entries() {
-        return Collections.unmodifiableMap(map);
+    public Map<K, V> snapshot() {
+        return new LinkedHashMap<K, V>(map);
     }
 
     /**
@@ -176,13 +176,11 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     /* package */ void dump(Context context, Printer printer) {
-        dump(context, printer, map);
-    }
-
-    /* package */ final void dump(Context context, Printer printer, Map<K, V> map) {
         final StringBuilder result = new StringBuilder(256);
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), map.size(), size(), maxSize());
-        for (Entry<?, ?> entry : map.entrySet()) {
+        final Set<Entry<K, V>> entries = snapshot().entrySet();
+
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), entries.size(), size(), maxSize());
+        for (Entry<?, ?> entry : entries) {
             result.setLength(0);
             printer.println(result.append("  ").append(entry.getKey()).append(" ==> ").append(entry.getValue()).toString());
         }

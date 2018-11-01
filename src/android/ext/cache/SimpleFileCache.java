@@ -71,7 +71,7 @@ public final class SimpleFileCache implements FileCache {
      * @return Always returns an empty (<tt>0-size</tt>) {@link Map}.
      */
     @Override
-    public Map<String, String> entries() {
+    public Map<String, String> snapshot() {
         return Collections.emptyMap();
     }
 

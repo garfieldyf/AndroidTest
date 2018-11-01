@@ -43,8 +43,8 @@ public interface Cache<K, V> {
     V put(K key, V value);
 
     /**
-     * Returns an unmodifiable {@link Map} of the current contents of this cache.
-     * @return An unmodifiable <tt>Map</tt>.
+     * Returns a copy of the current contents of this cache.
+     * @return A copy of this cache.
      */
-    Map<K, V> entries();
+    Map<K, V> snapshot();
 }

@@ -1,7 +1,6 @@
 package android.ext.widget;
 
 import java.util.BitSet;
-import java.util.Collections;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
@@ -200,8 +199,8 @@ public final class Pages {
         }
 
         @Override
-        public Map<Integer, Page<E>> entries() {
-            return Collections.unmodifiableMap(mPages);
+        public Map<Integer, Page<E>> snapshot() {
+            return new ArrayMap<Integer, Page<E>>(mPages);
         }
     }
 
@@ -242,14 +241,14 @@ public final class Pages {
         }
 
         @Override
-        public Map<Integer, Page<E>> entries() {
+        public Map<Integer, Page<E>> snapshot() {
             final int size = mPages.size();
             final Map<Integer, Page<E>> result = new ArrayMap<Integer, Page<E>>(size);
             for (int i = 0; i < size; ++i) {
                 result.put(mPages.keyAt(i), mPages.valueAt(i));
             }
 
-            return Collections.unmodifiableMap(result);
+            return result;
         }
     }
 
@@ -364,7 +363,7 @@ public final class Pages {
         /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
             final Formatter formatter  = new Formatter(result);
-            final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
+            final Set<Entry<Integer, Page<E>>> entries = mPageCache.snapshot().entrySet();
 
             DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
             result.setLength(0);

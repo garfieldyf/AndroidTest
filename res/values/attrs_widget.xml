@@ -5,9 +5,9 @@
     <!-- Attributes format -->
     <attr name="percent" format="float" />
     <attr name="pageSize" format="dimension" />
-    <attr name="defaultImage" format="reference|color" />
     <attr name="sampleSize" format="integer" />
     <attr name="maxCacheSize" format="integer" />
+    <attr name="defaultImage" format="reference|color" />
     <attr name="config">
         <enum name="alpha_8" value="0" />
         <enum name="rgb_565" value="1" />

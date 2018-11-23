@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.net;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -7,7 +7,6 @@ import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.graphics.BitmapUtils;
-import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;

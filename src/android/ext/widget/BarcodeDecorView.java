@@ -383,7 +383,7 @@ public class BarcodeDecorView extends View {
             mScanningIndicator.setBounds(left, top + mScanningIndicatorOffset, right, top + mScanningIndicatorOffset + mScanningIndicatorHeight);
             mScanningIndicator.draw(canvas);
             mScanningIndicatorOffset = (mScanningIndicatorOffset + 5) % (bottom - top - mScanningIndicatorHeight);
-            postInvalidateOnAnimation(left, top, right, bottom);
+            postInvalidate(left, top, right, bottom);
         }
     }
 

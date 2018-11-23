@@ -259,14 +259,6 @@ public final class DeviceUtils {
         }
     }
 
-    private static StringBuilder dumpWhiteSpace(StringBuilder out, int index) {
-        if (index > 0) {
-            out.append('\n');
-        }
-
-        return out.append("  ");
-    }
-
     private static StringBuilder dumpStorageInfo(Context context, StatFs statFs, StringBuilder out) {
         return out.append(" total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
                   .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
@@ -290,6 +282,14 @@ public final class DeviceUtils {
         }
 
         return out.toString();
+    }
+
+    private static StringBuilder dumpWhiteSpace(StringBuilder out, int index) {
+        if (index > 0) {
+            out.append('\n');
+        }
+
+        return out.append("  ");
     }
 
     private static String getUserLabel(Context context, StorageVolume volume) {

@@ -215,14 +215,14 @@ public class BarcodeDecorView extends View {
      * is not a copy, you should not change the object returned by this method.
      * @param percent The percent, expressed as a percentage of this
      * <em>view's</em> width.
-     * @param offset The top offset of the scanning bounds in pixels.
+     * @param topOffset The top offset of the scanning bounds in pixels.
      * @return The barcode preview scanning bounds in pixels.
      * @see #getScanningBounds()
      * @see #computeScanningBounds(int, int, int)
      */
-    public final Rect computeScanningBounds(float percent, int offset) {
+    public final Rect computeScanningBounds(float percent, int topOffset) {
         final int width = (int)(getWidth() * percent);
-        return computeScanningBounds(width, width, offset);
+        return computeScanningBounds(width, width, topOffset);
     }
 
     /**
@@ -230,15 +230,15 @@ public class BarcodeDecorView extends View {
      * is not a copy, you should not change the object returned by this method.
      * @param width The width of the scanning bounds in pixels.
      * @param height The height of the scanning bounds in pixels.
-     * @param offset The top offset of the scanning bounds in pixels.
+     * @param topOffset The top offset of the scanning bounds in pixels.
      * @return The barcode preview scanning bounds in pixels.
      * @see #getScanningBounds()
      * @see #computeScanningBounds(float, int)
      */
-    public Rect computeScanningBounds(int width, int height, int offset) {
+    public Rect computeScanningBounds(int width, int height, int topOffset) {
         final int viewWidth = getWidth();
         final int left = (viewWidth - width) / 2;
-        final int top  = (getHeight() - height) / 2 + offset;
+        final int top  = (getHeight() - height) / 2 + topOffset;
         mScanningBounds.set(left, top, left + width, top + height);
         invalidate();
 

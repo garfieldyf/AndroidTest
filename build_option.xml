@@ -1,42 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="option" default="" basedir=".">
-    <!-- build date -->
-    <tstamp>
-        <format property="build.date" pattern="yyMMdd" />
-    </tstamp>
-
     <!-- compilation options -->
     <property name="java.source" value="1.7" />
     <property name="java.target" value="1.7" />
-    <property name="version.major" value="1" />
-    <property name="version.minor" value="0" />
     <property name="library.jars.dir" value="E:/Include/java" />
 
-    <!-- app version code 10 -->
-    <condition property="versionCode" value="${version.major}${version.minor}"
-        else="${env.MajorVersion}${env.MinorVersion}">
-        <os family="windows" />
-    </condition>
-
-    <!-- app version name 1.0 -->
-    <condition property="versionName" value="${version.major}.${version.minor}"
-        else="${env.MajorVersion}.${env.MinorVersion}">
-        <os family="windows" />
-    </condition>
-
-    <!-- build version 140321 -->
-    <condition property="build.version" value="${build.date}" else="${env.FixVersion}">
-        <os family="windows" />
-    </condition>
-
-    <!-- AndroidManifest versionCode 10140321, versionName 1.0.140321 -->
-    <property name="version.code" value="${versionCode}${build.version}" />
-    <property name="version.name" value="${versionName}.${build.version}" />
-
-    <!-- build no 1.0.140321.123 -->
-    <condition property="build.no" value="${version.name}" else="${version.name}.${env.BuildNo}">
-        <os family="windows" />
-    </condition>
+    <!-- version.code, version.name -->
+    <property name="version.code" value="1" />
+    <property name="version.name" value="1.0.0" />
 
     <!-- pre-build target -->
     <target name="-pre-build">
@@ -47,9 +18,9 @@
 
     <!-- include jars -->
     <target name="-pre-compile">
-        <!-- modify versionCode, versionName -->
-        <echo message="version code : ${version.code}" />
-        <echo message="version name : ${version.name}" />
+        <!-- modify AndroidManifest versionCode, versionName -->
+        <echo message="versionCode : ${version.code}" />
+        <echo message="versionName : ${version.name}" />
         <replaceregexp file="${manifest.abs.file}" match="android:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
         <replaceregexp file="${manifest.abs.file}" match="android:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
 
@@ -98,7 +69,7 @@
         <!-- call native build -->
         <ant antfile="${basedir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
 
-        <property name="out.file.name" value="${ant.project.name}_${build.no}_debug.apk" />
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
     </target>
 
@@ -109,7 +80,7 @@
         <!-- call native build -->
         <ant antfile="${basedir}/jni/build.xml" target="release" inheritAll="false" inheritRefs="false" />
 
-        <property name="out.file.name" value="${ant.project.name}_${build.no}_release.apk" />
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
     </target>
 
@@ -123,7 +94,7 @@
 
     <!-- post-build target -->
     <target name="-post-build">
-        <property name="mapping.file.name" value="${ant.project.name}_${build.no}_mapping.txt" />
+        <property name="mapping.file.name" value="${ant.project.name}_${version.name}_mapping.txt" />
 
         <!-- copy mapping file -->
         <echo level="info">Copy mapping file : ${mapping.file.name}</echo>

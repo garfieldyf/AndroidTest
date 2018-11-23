@@ -4,17 +4,8 @@
 
     <!-- Attributes format -->
     <attr name="percent" format="float" />
-    <attr name="maskColor" format="reference|color" />
-    <attr name="borderColor" format="reference|color" />
-    <attr name="cornerColor" format="reference|color" />
     <attr name="pageSize" format="dimension" />
-    <attr name="textOffset" format="dimension" />
-    <attr name="borderWidth" format="dimension" />
-    <attr name="cornerWidth" format="dimension" />
-    <attr name="cornerHeight" format="dimension" />
     <attr name="defaultImage" format="reference|color" />
-    <attr name="scanningIndicator" format="reference|color" />
-    <attr name="scanningIndicatorHeight" format="dimension" />
     <attr name="sampleSize" format="integer" />
     <attr name="maxCacheSize" format="integer" />
     <attr name="config">
@@ -27,22 +18,6 @@
         <enum name="horizontal" value="0x40000000" />
         <enum name="vertical" value="0x80000000" />
     </attr>
-
-    <!-- BarcodeDecorView styleable -->
-    <declare-styleable name="BarcodeDecorView">
-        <attr name="android:text" />
-        <attr name="android:textSize" />
-        <attr name="android:textColor" />
-        <attr name="textOffset" />
-        <attr name="maskColor" />
-        <attr name="borderColor" />
-        <attr name="cornerColor" />
-        <attr name="borderWidth" />
-        <attr name="cornerWidth" />
-        <attr name="cornerHeight" />
-        <attr name="scanningIndicator" />
-        <attr name="scanningIndicatorHeight" />
-    </declare-styleable>
 
     <!-- Parameters styleable -->
     <declare-styleable name="Parameters">

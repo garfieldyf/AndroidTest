@@ -105,7 +105,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     protected Result doInBackground(Params... params) {
-        final Result result = doInBackground(params, mApplication);
+        final Result result = doInBackground(mApplication, params);
         if (mDelayMillis > 0) {
             mCancelled = true;
             UIHandler.sInstance.removeCallbacks(this);
@@ -134,11 +134,11 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     /**
      * Performs a computation on a background thread. The specified parameters are
      * the parameters passed to {@link #execute(Params[])} by the caller of this task.
+     * @param context The application <tt>Context</tt>.
      * @param params The parameters of this task.
-     * @param application The <tt>Application</tt>.
      * @return A result, defined by the subclass of this task.
      */
-    protected abstract Result doInBackground(Params[] params, Application application);
+    protected abstract Result doInBackground(Context context, Params[] params);
 
     @Override
     public void onCancel(DialogInterface dialog) {

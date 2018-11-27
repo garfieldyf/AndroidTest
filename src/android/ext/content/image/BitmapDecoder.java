@@ -100,7 +100,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * Class <tt>Parameters</tt> can be used to decode bitmap.
      * <h2>Usage</h2>
      * <p>Here is a xml resource example:</p><pre>
-     * &lt;[ Parameters | SizeParameters | ScaleParameters | parameters ]
+     * &lt;[ Parameters | SizeParameters | ScaleParameters | PercentParameters | parameters ]
      *      xmlns:android="http://schemas.android.com/apk/res/android"
      *      xmlns:app="http://schemas.android.com/apk/res-auto"
      *      class="classFullName"
@@ -108,8 +108,9 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      *      android:height="300dp"
      *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
      *      app:sampleSize="2"
-     *      app:attributes1="value1"
-     *      app:attributes2="value2" /&gt;</pre>
+     *      app:percent="0.7"
+     *      app:attribute1="value1"
+     *      app:attribute2="value2" /&gt;</pre>
      */
     public static class Parameters {
         private static final int ALPHA_8 = 0;

@@ -46,15 +46,15 @@ import android.widget.ImageView;
  *         android:topRightRadius="10dp"
  *         android:bottomLeftRadius="10dp"
  *         android:bottomRightRadius="10dp"
- *         app:attributes1="value1"
- *         app:attributes2="value2" /&gt;
+ *         app:attribute1="value1"
+ *         app:attribute2="value2" /&gt;
  *
  *     &lt;!-- Image Transformer (Optional) --&gt;
  *     &lt;[ GIFTransformer | DrawableTransformer | transformer ]
  *         class="classFullName"
  *         android:src="@xml/transformer2"
- *         app:attributes3="value3"
- *         app:attributes4="value4"
+ *         app:attribute3="value3"
+ *         app:attribute4="value4"
  *         ... ... /&gt;
  * &lt;/[ ImageBinder | TransitionBinder | binder ]&gt;</pre>
  * @author Garfield
@@ -128,7 +128,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
     /**
      * Returns the default image associated with this binder.
-     * @return The <tt>Drawable</tt>.
+     * @return The <tt>Drawable</tt> or <tt>null</tt>.
      */
     public final Drawable getDefaultImage() {
         return mDefaultImage;

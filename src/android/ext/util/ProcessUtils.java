@@ -384,7 +384,7 @@ public final class ProcessUtils {
          *     "thread": "main",
          *     "class": "java.lang.NullPointerException",
          *     "stack": "java.lang.NullPointerException: This is test! ... ..."
-         *   }]
+         *   }, ... ]
          * }</pre>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.

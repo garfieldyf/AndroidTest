@@ -8,17 +8,13 @@ import java.util.List;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.ext.graphics.drawable.OvalBitmapDrawable;
-import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.Pools.Factory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.Printer;
@@ -26,7 +22,7 @@ import android.util.Printer;
 /**
  * Class PackageUtils
  * @author Garfield
- * @version 2.0
+ * @version 2.5
  */
 public final class PackageUtils {
     /**
@@ -74,17 +70,17 @@ public final class PackageUtils {
         final List<PackageInfo> infos = context.getPackageManager().getInstalledPackages(flags);
         final int size = ArrayUtils.getSize(infos);
         final List<T> result = new ArrayList<T>(size);
-        final PackageManager pm = context.getPackageManager();
+        final Resources res  = context.getResources();
         if (filter != null) {
             for (int i = 0; i < size; ++i) {
                 final PackageInfo info = infos.get(i);
                 if (filter.accept(info)) {
-                    result.add(createPackageInfo(pm, info, factory));
+                    result.add(newPackageInfo(context, res, info, factory));
                 }
             }
         } else {
             for (int i = 0; i < size; ++i) {
-                result.add(createPackageInfo(pm, infos.get(i), factory));
+                result.add(newPackageInfo(context, res, infos.get(i), factory));
             }
         }
 
@@ -125,10 +121,8 @@ public final class PackageUtils {
                 assets.addAssetPath(archiveFile);
                 packageInfo.applicationInfo.sourceDir = archiveFile;
 
-                // Creates a AppPackageInfo or subclass object.
-                final T result = factory.newInstance();
-                result.initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo);
-                return result;
+                // Creates an AppPackageInfo or subclass object.
+                return newPackageInfo(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), packageInfo, factory);
             } finally {
                 // Close the assets to avoid ProcessKiller
                 // kill my process after unmounting usb disk.
@@ -155,9 +149,9 @@ public final class PackageUtils {
     /**
      * Create a {@link AppPackageInfo} or subclass object with the specified <em>packageInfo</em>.
      */
-    private static <T extends AppPackageInfo> T createPackageInfo(PackageManager pm, PackageInfo packageInfo, Factory<T> factory) {
+    private static <T extends AppPackageInfo> T newPackageInfo(Context context, Resources res, PackageInfo packageInfo, Factory<T> factory) {
         final T result = factory.newInstance();
-        result.setPackageInfo(pm, packageInfo);
+        result.initialize(context, res, packageInfo);
         return result;
     }
 
@@ -182,50 +176,6 @@ public final class PackageUtils {
          */
         public CharSequence label;
 
-        /**
-         * Returns the application's label that removing the white
-         * spaces and control characters from the start and end.
-         */
-        public final CharSequence getTrimmedLabel() {
-            return StringUtils.trim(label);
-        }
-
-        /**
-         * Returns the oval <tt>Drawable</tt> of the application's {@link icon}.
-         * @return An {@link OvalBitmapDrawable} if the {@link icon} is a
-         * <tt>BitmapDrawable</tt>. Otherwise returns the {@link icon}.
-         * @see #getRoundedIcon(float)
-         * @see #getRoundedIcon(Resources, int)
-         */
-        public final Drawable getOvalIcon() {
-            return (icon instanceof OvalBitmapDrawable ? new OvalBitmapDrawable(((BitmapDrawable)icon).getBitmap()) : icon);
-        }
-
-        /**
-         * Returns the rounded <tt>Drawable</tt> of the application's {@link icon}.
-         * @param cornerRadius The corner radius.
-         * @return A {@link RoundedBitmapDrawable} if the {@link icon} is a
-         * <tt>BitmapDrawable</tt>. Otherwise returns the {@link icon}.
-         * @see #getRoundedIcon(Resources, int)
-         * @see #getOvalIcon()
-         */
-        public final Drawable getRoundedIcon(float cornerRadius) {
-            return (icon instanceof BitmapDrawable ? new RoundedBitmapDrawable(((BitmapDrawable)icon).getBitmap(), cornerRadius) : icon);
-        }
-
-        /**
-         * Equivalent to calling <tt>getRoundedIcon(res.getDimension(id))</tt>.
-         * @param res The {@link Resources}.
-         * @param id The resource id of the corner radius.
-         * @return A {@link RoundedBitmapDrawable} if the {@link icon} is a
-         * <tt>BitmapDrawable</tt>. Otherwise returns the {@link icon}.
-         * @see #getRoundedIcon(float)
-         * @see #getOvalIcon()
-         */
-        public final Drawable getRoundedIcon(Resources res, int id) {
-            return (icon instanceof BitmapDrawable ? new RoundedBitmapDrawable(((BitmapDrawable)icon).getBitmap(), res.getDimension(id)) : icon);
-        }
-
         public final void dump(Printer printer) {
             printer.println(dump(new StringBuilder(256)).append(" }").toString());
         }
@@ -244,17 +194,6 @@ public final class PackageUtils {
         }
 
         /**
-         * Sets the {@link #packageInfo} to the specified <em>packageInfo</em>.
-         * @param pm The {@link PackageManager} to load the application's label and icon.
-         * @param packageInfo The <tt>PackageInfo</tt> to set.
-         */
-        public void setPackageInfo(PackageManager pm, PackageInfo packageInfo) {
-            this.packageInfo = packageInfo;
-            this.icon  = packageInfo.applicationInfo.loadIcon(pm);
-            this.label = packageInfo.applicationInfo.loadLabel(pm);
-        }
-
-        /**
          * Initializes this object with the specified <em>res</em> and <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param res The <tt>Resources</tt> to load the application's label and icon.
@@ -262,8 +201,8 @@ public final class PackageUtils {
          */
         protected void initialize(Context context, Resources res, PackageInfo packageInfo) {
             this.packageInfo = packageInfo;
-            this.label = loadLabel(res);
             this.icon  = loadIcon(context, res);
+            this.label = StringUtils.trim(res.getText(packageInfo.applicationInfo.labelRes, packageInfo.packageName));
         }
 
         protected StringBuilder dump(StringBuilder out) {
@@ -273,15 +212,6 @@ public final class PackageUtils {
                 .append(", label = ").append(label)
                 .append(", flags = ").append(String.format("0x%08x", packageInfo.applicationInfo.flags))
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
-        }
-
-        private CharSequence loadLabel(Resources res) {
-            CharSequence label = null;
-            if (packageInfo.applicationInfo.labelRes != 0) {
-                label = res.getText(packageInfo.applicationInfo.labelRes);
-            }
-
-            return (TextUtils.isEmpty(label) ? packageInfo.packageName : label);
         }
 
         @SuppressWarnings("deprecation")

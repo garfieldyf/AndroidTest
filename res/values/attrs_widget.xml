@@ -3,16 +3,6 @@
     <!-- AUTO-GENERATED FILE. DO NOT MODIFY. -->
 
     <!-- Attributes format -->
-    <attr name="percent" format="float" />
-    <attr name="pageSize" format="dimension" />
-    <attr name="sampleSize" format="integer" />
-    <attr name="maxCacheSize" format="integer" />
-    <attr name="defaultImage" format="reference|color" />
-    <attr name="config">
-        <enum name="alpha_8" value="0" />
-        <enum name="rgb_565" value="1" />
-        <enum name="argb_8888" value="2" />
-    </attr>
     <attr name="autoMirrored">
         <enum name="none" value="0" />
         <enum name="horizontal" value="0x40000000" />
@@ -21,24 +11,28 @@
 
     <!-- Parameters styleable -->
     <declare-styleable name="Parameters">
-        <attr name="config" />
-        <attr name="sampleSize" />
+        <attr name="config">
+            <enum name="alpha_8" value="0" />
+            <enum name="rgb_565" value="1" />
+            <enum name="argb_8888" value="2" />
+        </attr>
+        <attr name="sampleSize" format="integer" />
     </declare-styleable>
 
     <!-- PercentParameters styleable -->
     <declare-styleable name="PercentParameters">
-        <attr name="percent" />
+        <attr name="percent" format="float" />
     </declare-styleable>
 
     <!-- ImageBinder styleable -->
     <declare-styleable name="ImageBinder">
-        <attr name="defaultImage" />
-        <attr name="maxCacheSize" />
+        <attr name="maxCacheSize" format="integer" />
+        <attr name="defaultImage" format="reference|color" />
     </declare-styleable>
 
     <!-- PageScroller styleable -->
     <declare-styleable name="PageScroller">
-        <attr name="pageSize" />
+        <attr name="pageSize" format="dimension" />
     </declare-styleable>
 
 </resources>

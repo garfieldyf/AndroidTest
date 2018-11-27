@@ -108,6 +108,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
+     * Returns the {@link FileCache} associated with this loader.
+     * @return The <tt>FileCache</tt> or <tt>null</tt>.
+     */
+    public final FileCache getFileCache() {
+        return mLoader.getFileCache();
+    }
+
+    /**
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
@@ -218,6 +226,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         /**
+         * Returns the {@link FileCache} associated with this loader.
+         * @return The <tt>FileCache</tt> or <tt>null</tt>.
+         */
+        public FileCache getFileCache() {
+            return null;
+        }
+
+        /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
@@ -266,6 +282,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          */
         public FileCacheLoader(FileCache cache) {
             mCache = cache;
+        }
+
+        @Override
+        public FileCache getFileCache() {
+            return mCache;
         }
 
         @Override

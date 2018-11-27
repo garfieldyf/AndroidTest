@@ -9,6 +9,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.FileUtils.Dirent;
 import android.text.format.Formatter;
+import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -57,13 +58,13 @@ public final class SimpleFileCache implements FileCache {
     @Override
     public String get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        return FileUtils.buildPath(mCacheDir, key);
+        return buildCacheFile(key);
     }
 
     @Override
     public String remove(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        final String result = FileUtils.buildPath(mCacheDir, key);
+        final String result = buildCacheFile(key);
         return (FileUtils.deleteFiles(result, false) == 0 ? result : null);
     }
 
@@ -75,16 +76,54 @@ public final class SimpleFileCache implements FileCache {
         return Collections.emptyMap();
     }
 
+    private String buildCacheFile(String key) {
+        return new StringBuilder(mCacheDir.length() + key.length() + 3).append(mCacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString();
+    }
+
     /* package */ final void dump(Context context, Printer printer) {
-        final StringBuilder result = new StringBuilder(136);
-        final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0);
+        dumpCachedFiles(context, printer, mCacheDir, new StringBuilder(130), getClass().getSimpleName());
+    }
+
+    /* package */ static void dumpCachedFiles(Context context, Printer printer, String cacheDir, StringBuilder result, String className) {
+        final List<Dirent> dirents = FileUtils.listFiles(cacheDir, 0);
+        final int size = ArrayUtils.getSize(dirents);
+        result.setLength(0);
+        if (size > 0) {
+            Collections.sort(dirents);
+        }
+
+        long fileCount = 0, fileBytes = 0;
+        for (int i = 0, index = 0; i < size; ++i) {
+            final Dirent dirent = dirents.get(i);
+            if (dirent.isDirectory()) {
+                ++index;
+                final Pair<Integer, Long> pair = getFileCount(dirent);
+                result.append("  ").append(dirent.getName()).append(" [ files = ").append(pair.first).append(", size = ").append(Formatter.formatFileSize(context, pair.second)).append(" ]");
+
+                fileCount += pair.first;
+                fileBytes += pair.second;
+            }
+
+            if ((index % 4) == 0) {
+                result.append('\n');
+            }
+        }
+
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", className, size, fileCount, Formatter.formatFileSize(context, fileBytes));
+        if (result.length() > 0) {
+            printer.println(result.toString());
+        }
+    }
+
+    private static Pair<Integer, Long> getFileCount(Dirent dirent) {
+        final List<Dirent> dirents = dirent.listFiles();
         final int size = ArrayUtils.getSize(dirents);
 
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping SimpleFileCache Storage Cache [ files = %d ] ", size);
+        long fileBytes = 0;
         for (int i = 0; i < size; ++i) {
-            final Dirent dirent = dirents.get(i);
-            result.setLength(0);
-            printer.println(result.append("  ").append(dirent.path).append(" [ length = ").append(Formatter.formatFileSize(context, dirent.length())).append(" ]").toString());
+            fileBytes += dirents.get(i).length();
         }
+
+        return new Pair<Integer, Long>(size, fileBytes);
     }
 }

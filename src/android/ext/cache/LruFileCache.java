@@ -1,15 +1,10 @@
 package android.ext.cache;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import android.content.Context;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.FileUtils.Dirent;
 import android.text.format.Formatter;
-import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -101,49 +96,6 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
             printer.println(result.append("  ").append(file).append(" [ size = ").append(Formatter.formatFileSize(context, FileUtils.getFileLength(file))).append(" ]").toString());
         }
 
-        dumpCachedFiles(context, printer, result, className);
-    }
-
-    private void dumpCachedFiles(Context context, Printer printer, StringBuilder result, String className) {
-        final List<Dirent> dirents = FileUtils.listFiles(mCacheDir, 0);
-        final int size = ArrayUtils.getSize(dirents);
-        result.setLength(0);
-        if (size > 0) {
-            Collections.sort(dirents);
-        }
-
-        long fileCount = 0, fileBytes = 0;
-        for (int i = 0, index = 0; i < size; ++i) {
-            final Dirent dirent = dirents.get(i);
-            if (dirent.isDirectory()) {
-                ++index;
-                final Pair<Integer, Long> pair = getFileCount(dirent);
-                result.append("  ").append(dirent.getName()).append(" [ files = ").append(pair.first).append(", size = ").append(Formatter.formatFileSize(context, pair.second)).append(" ]");
-
-                fileCount += pair.first;
-                fileBytes += pair.second;
-            }
-
-            if ((index % 4) == 0) {
-                result.append('\n');
-            }
-        }
-
-        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", className, size, fileCount, Formatter.formatFileSize(context, fileBytes));
-        if (result.length() > 0) {
-            printer.println(result.toString());
-        }
-    }
-
-    private static Pair<Integer, Long> getFileCount(Dirent dirent) {
-        final List<Dirent> dirents = dirent.listFiles();
-        final int size = ArrayUtils.getSize(dirents);
-
-        long fileBytes = 0;
-        for (int i = 0; i < size; ++i) {
-            fileBytes += dirents.get(i).length();
-        }
-
-        return new Pair<Integer, Long>(size, fileBytes);
+        SimpleFileCache.dumpCachedFiles(context, printer, mCacheDir, result, className);
     }
 }

@@ -19,7 +19,6 @@ import android.util.Log;
 /**
  * Class SyncMessenger
  * @author Garfield
- * @version 1.0
  */
 public class SyncMessenger implements ServiceConnection {
     private Messenger mService;

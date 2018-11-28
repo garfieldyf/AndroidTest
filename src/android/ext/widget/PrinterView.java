@@ -11,7 +11,6 @@ import android.widget.TextView;
 /**
  * Class PrinterView
  * @author Garfield
- * @version 1.0
  */
 public final class PrinterView extends TextView implements Printer {
     public PrinterView(Context context) {

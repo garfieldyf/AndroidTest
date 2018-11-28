@@ -14,7 +14,6 @@ import android.util.Printer;
 /**
  * Class ByteArrayBuffer
  * @author Garfield
- * @version 2.0
  */
 public final class ByteArrayBuffer extends OutputStream {
     private byte[] data;

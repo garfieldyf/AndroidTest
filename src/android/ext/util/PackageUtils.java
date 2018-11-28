@@ -22,7 +22,6 @@ import android.util.Printer;
 /**
  * Class PackageUtils
  * @author Garfield
- * @version 2.5
  */
 public final class PackageUtils {
     /**

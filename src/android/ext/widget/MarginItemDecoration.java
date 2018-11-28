@@ -10,7 +10,6 @@ import android.view.View;
 /**
  * Class MarginItemDecoration
  * @author Garfield
- * @version 1.0
  */
 public final class MarginItemDecoration extends ItemDecoration {
     /**

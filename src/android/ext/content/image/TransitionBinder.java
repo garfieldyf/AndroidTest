@@ -12,7 +12,6 @@ import android.widget.ImageView;
  * Class <tt>TransitionBinder</tt> allows to play transition
  * animation while the image first bind to the {@link ImageView}.
  * @author Garfield
- * @version 1.0
  */
 public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     private static final int[] TRANSITION_BINDER_ATTRS = { android.R.attr.duration };

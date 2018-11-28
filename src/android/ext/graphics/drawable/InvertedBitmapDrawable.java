@@ -14,7 +14,6 @@ import android.view.View;
 /**
  * Class InvertedBitmapDrawable
  * @author Garfield
- * @version 1.0
  */
 public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawable.InvertedBitmapState> {
     /**

@@ -13,7 +13,6 @@ import android.widget.BaseExpandableListAdapter;
 /**
  * Abstract class ExpandableCursorAdapter
  * @author Garfield
- * @version 2.0
  */
 public abstract class ExpandableCursorAdapter extends BaseExpandableListAdapter {
     /**

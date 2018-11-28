@@ -22,7 +22,6 @@ import android.util.JsonWriter;
 /**
  * Class JSONUtils
  * @author Garfield
- * @version 1.0
  */
 @SuppressWarnings("unchecked")
 public final class JSONUtils {

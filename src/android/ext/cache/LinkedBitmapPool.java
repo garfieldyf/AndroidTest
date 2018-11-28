@@ -15,7 +15,6 @@ import android.util.Printer;
 /**
  * Class <tt>LinkedBitmapPool</tt> is an implementation of a {@link BitmapPool}.
  * @author Garfield
- * @version 4.0
  */
 public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
     protected final int mMaxSize;

@@ -32,7 +32,6 @@ import android.util.LogPrinter;
  *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
- * @version 1.0
  */
 public class DownloadRequest {
     public boolean __checkDumpHeaders = true;

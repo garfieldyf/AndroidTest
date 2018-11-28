@@ -17,7 +17,6 @@ import android.util.SparseArray;
 /**
  * Class Pages
  * @author Garfield
- * @version 3.0
  */
 public final class Pages {
     /**

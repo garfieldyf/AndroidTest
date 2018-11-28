@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 /**
  * An interface for a pool that allows users to reuse {@link Bitmap} objects.
  * @author Garfield
- * @version 1.0
  */
 public interface BitmapPool {
     /**

@@ -11,7 +11,6 @@ import android.os.Handler;
 /**
  * Class <tt>CursorObserver</tt> is an implementation of a {@link ContentObserver}.
  * @author Garfield
- * @version 1.0
  */
 public class CursorObserver extends ContentObserver {
     private static final int STATE_REGISTERED   = 1;

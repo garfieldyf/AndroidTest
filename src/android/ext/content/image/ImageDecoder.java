@@ -12,7 +12,6 @@ import android.util.Printer;
 /**
  * Class ImageDecoder
  * @author Garfield
- * @version 1.0
  */
 public class ImageDecoder extends AbsImageDecoder<Object> {
     /**

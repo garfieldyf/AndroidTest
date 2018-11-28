@@ -16,7 +16,6 @@ import android.util.Printer;
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
  * This class is an <b>unlimited-size</b> cache.
  * @author Garfield
- * @version 1.0
  */
 public final class SimpleFileCache implements FileCache {
     private final String mCacheDir;

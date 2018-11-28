@@ -53,7 +53,6 @@ import android.util.Log;
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
  * @author Garfield
- * @version 1.0
  */
 public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implements Cancelable {
     /**

@@ -10,7 +10,6 @@ import android.view.View;
 /**
  * Class FocusableViewPager
  * @author Garfield
- * @version 1.0
  */
 public class FocusViewPager extends ViewPager {
     private int mLastKeyCode;

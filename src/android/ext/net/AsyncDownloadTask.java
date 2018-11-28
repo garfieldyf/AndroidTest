@@ -46,7 +46,6 @@ import android.util.Log;
  *     .contentType("application/json")
  * task.execute((Object[])null);</pre>
  * @author Garfield
- * @version 1.0
  */
 @SuppressWarnings("unchecked")
 public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {

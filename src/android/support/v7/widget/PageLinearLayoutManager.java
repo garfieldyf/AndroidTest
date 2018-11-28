@@ -9,7 +9,6 @@ import android.view.View;
 /**
  * Class PageLinearLayoutManager
  * @author Garfield
- * @version 1.0
  */
 public final class PageLinearLayoutManager extends LinearLayoutManager {
     private final PageScroller mScroller;

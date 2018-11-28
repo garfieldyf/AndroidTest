@@ -17,7 +17,6 @@ import android.util.Log;
  * Class <tt>AsyncQueryHandler</tt> is a helper class to help make
  * handling asynchronous {@link ContentResolver} queries easier.
  * @author Garfield
- * @version 1.0
  */
 public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**

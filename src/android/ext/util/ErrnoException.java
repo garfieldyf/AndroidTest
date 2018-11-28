@@ -5,7 +5,6 @@ import java.io.IOException;
 /**
  * Class <tt>ErrnoException</tt> is wrapper for system <tt>errno</tt>.
  * @author Garfield
- * @version 1.0
  */
 public final class ErrnoException extends RuntimeException {
     private static final long serialVersionUID = -6868038019772577506L;

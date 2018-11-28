@@ -8,7 +8,6 @@ import android.util.Printer;
 /**
  * Class DebugUtils
  * @author Garfield
- * @version 1.5
  */
 public final class DebugUtils {
     /**

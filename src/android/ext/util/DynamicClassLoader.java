@@ -10,7 +10,6 @@ import dalvik.system.DexClassLoader;
  * Class <tt>DynamicClassLoader</tt> used to loads the DEX files that containing classes
  * and resources. This can be used to execute code not installed as part of an application.
  * @author Garfield
- * @version 1.0
  */
 public class DynamicClassLoader {
     private final ClassLoader mClassLoader;

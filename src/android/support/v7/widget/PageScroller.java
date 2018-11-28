@@ -11,7 +11,6 @@ import android.view.View;
 /**
  * Class PageScroller
  * @author Garfield
- * @version 1.0
  */
 public class PageScroller {
     private static int[] PAGE_SCROLLER_ATTRS;

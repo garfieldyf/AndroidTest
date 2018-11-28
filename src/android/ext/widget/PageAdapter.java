@@ -21,7 +21,6 @@ import android.widget.BaseAdapter;
  * Class <tt>PageAdapter</tt> allows to loading data by page.
  * @param E The item data type of the adapter.
  * @author Garfield
- * @version 3.0
  */
 public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E> {
     private final PageAdapterImpl<E> mImpl;

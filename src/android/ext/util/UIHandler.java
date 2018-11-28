@@ -17,7 +17,6 @@ import android.view.View;
 /**
  * Class UIHandler
  * @author Garfield
- * @version 1.5
  */
 @SuppressWarnings("rawtypes")
 public final class UIHandler extends Handler {

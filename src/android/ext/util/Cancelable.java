@@ -3,7 +3,6 @@ package android.ext.util;
 /**
  * A <tt>Cancelable</tt> can be check the task is cancelled.
  * @author Garfield
- * @version 1.0
  */
 public interface Cancelable {
     /**

@@ -14,7 +14,6 @@ import android.util.ArrayMap;
 /**
  * Class SQLiteDatabaseHelper
  * @author Garfield
- * @version 2.0
  */
 public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
     private final ArrayMap<String, List<ContentObserver>> mObservables;

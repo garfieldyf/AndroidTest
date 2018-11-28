@@ -27,7 +27,6 @@ import android.view.View;
  * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will
  * be used by the adapter.</li></ol>
  * @author Garfield
- * @version 3.0
  */
 public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adapter<VH> implements PageLoader<E> {
     private RecyclerView mRecyclerView;

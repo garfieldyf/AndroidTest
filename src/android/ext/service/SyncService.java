@@ -12,7 +12,6 @@ import android.util.Log;
 /**
  * Abstract class SyncService
  * @author Garfield
- * @version 1.0
  */
 public abstract class SyncService extends Service {
     private Messenger mMessenger;

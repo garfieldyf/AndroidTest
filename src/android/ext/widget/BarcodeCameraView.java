@@ -25,7 +25,6 @@ import android.view.SurfaceView;
 /**
  * Class BarcodeCameraView
  * @author Garfield
- * @version 2.0
  */
 @SuppressWarnings("deprecation")
 public class BarcodeCameraView extends SurfaceView implements Callback, Runnable, AutoFocusCallback, Comparator<Size> {

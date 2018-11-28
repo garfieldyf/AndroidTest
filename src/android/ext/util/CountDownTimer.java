@@ -6,7 +6,6 @@ import android.os.Looper;
 /**
  * Class CountDownTimer
  * @author Garfield
- * @version 1.5
  */
 public abstract class CountDownTimer implements Runnable {
     private int mCurCountDown;

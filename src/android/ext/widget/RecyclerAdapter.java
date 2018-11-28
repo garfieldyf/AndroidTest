@@ -11,7 +11,6 @@ import android.view.ViewGroup;
 /**
  * Abstract class RecyclerAdapter
  * @author Garfield
- * @version 1.0
  */
 public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH> implements OnFocusChangeListener {
     /**

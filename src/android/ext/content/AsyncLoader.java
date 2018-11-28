@@ -13,7 +13,6 @@ import android.ext.util.DebugUtils;
  * <li><tt>Params</tt>, The load task's parameters type.</li>
  * <li><tt>Value</tt>, The value type of the load result.</li></ol>
  * @author Garfield
- * @version 4.5
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncLoader<Key, Params, Value> extends Loader {

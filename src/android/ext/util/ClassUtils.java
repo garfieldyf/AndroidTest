@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 /**
  * Class ClassUtils
  * @author Garfield
- * @version 1.0
  */
 public final class ClassUtils {
     /**

@@ -20,7 +20,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 /**
  * Class BarcodeEncoder
  * @author Garfield
- * @version 2.0
  */
 public class BarcodeEncoder {
     private Map<EncodeHintType, ?> mHints;

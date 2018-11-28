@@ -33,7 +33,6 @@ import android.widget.ImageView;
  * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * @author Garfield
- * @version 6.0
  */
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     private final Loader<Image> mLoader;

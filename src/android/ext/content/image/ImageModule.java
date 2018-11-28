@@ -23,7 +23,6 @@ import android.util.Printer;
 /**
  * Class ImageModule
  * @author Garfield
- * @version 2.0
  */
 public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     /**

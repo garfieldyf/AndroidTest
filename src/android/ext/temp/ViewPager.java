@@ -17,7 +17,6 @@ import com.tencent.test.R;
 /**
  * Class ViewPager
  * @author Garfield
- * @version 1.5
  */
 public class ViewPager extends ViewGroup implements OnGestureListener {
     private static final float MIN_VELOCITY = 600.0f;

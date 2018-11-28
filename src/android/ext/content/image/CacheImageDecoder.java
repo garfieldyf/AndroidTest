@@ -9,7 +9,6 @@ import android.graphics.BitmapFactory.Options;
 /**
  * Class CacheImageDecoder
  * @author Garfield
- * @version 1.0
  */
 public class CacheImageDecoder extends ImageDecoder {
     /**

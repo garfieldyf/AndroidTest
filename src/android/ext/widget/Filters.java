@@ -8,7 +8,6 @@ import android.widget.Filter;
 /**
  * Class Filters
  * @author Garfield
- * @version 1.0
  */
 @SuppressWarnings("unchecked")
 public final class Filters {

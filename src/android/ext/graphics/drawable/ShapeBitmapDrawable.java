@@ -25,7 +25,6 @@ import android.util.AttributeSet;
 /**
  * Abstract class ShapeBitmapDrawable
  * @author Garfield
- * @version 2.0
  */
 public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapState> extends AbstractDrawable<T> {
     private static final int FLAG_PATH = 0x01;  // mFlags

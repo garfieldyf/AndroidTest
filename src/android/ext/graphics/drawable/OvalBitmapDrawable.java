@@ -18,7 +18,6 @@ import android.util.AttributeSet;
 /**
  * Class OvalBitmapDrawable
  * @author Garfield
- * @version 1.0
  */
 public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.OvalBitmapState> {
     /**

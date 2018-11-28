@@ -14,7 +14,6 @@ import android.os.Process;
  * Like as {@link android.app.IntentService}, but the service will wait
  * <em>keepAliveTime</em> for a new <tt>Intent</tt> before terminating.
  * @author Garfield
- * @version 1.0
  */
 public abstract class IntentService extends Service implements Callback {
     private static final int MESSAGE_QUIT   = 0;

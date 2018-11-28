@@ -6,7 +6,6 @@ import java.util.TimeZone;
 /**
  * Class TimeUtils
  * @author Garfield
- * @version 1.0
  */
 public final class TimeUtils {
     /**

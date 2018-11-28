@@ -26,7 +26,6 @@ import com.google.zxing.common.HybridBinarizer;
 /**
  * Class BarcodeDecoder
  * @author Garfield
- * @version 2.0
  */
 public class BarcodeDecoder {
     private final MultiFormatReader mReader;

@@ -20,7 +20,6 @@ import com.google.zxing.common.BitMatrix;
  *     .margins(30, 30, 30, 30)
  *     .build();</pre>
  * @author Garfield
- * @version 2.0
  */
 public final class BarcodeBuilder {
     private Config config;

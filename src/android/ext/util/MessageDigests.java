@@ -3,7 +3,6 @@ package android.ext.util;
 /**
  * Class MessageDigests
  * @author Garfield
- * @version 2.0
  */
 public final class MessageDigests {
     /**

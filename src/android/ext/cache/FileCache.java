@@ -4,7 +4,6 @@ package android.ext.cache;
  * A <tt>FileCache</tt> is a data structure consisting of a set
  * of keys and files in which each key is mapped to a single file.
  * @author Garfield
- * @version 2.0
  */
 public interface FileCache extends Cache<String, String> {
     /**

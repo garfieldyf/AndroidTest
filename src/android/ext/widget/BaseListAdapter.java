@@ -19,7 +19,6 @@ import android.widget.Filterable;
 /**
  * Abstract class BaseListAdapter
  * @author Garfield
- * @version 2.0
  */
 public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterable, ListFilterClient<T>, CursorObserverClient, DataSetObserver {
     /* package */ List<T> mData;

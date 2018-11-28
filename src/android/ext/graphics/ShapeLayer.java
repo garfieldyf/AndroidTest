@@ -13,7 +13,6 @@ import android.view.View;
 /**
  * Abstract class ShapeLayer
  * @author Garfield
- * @version 1.0
  */
 public abstract class ShapeLayer {
     private final Path mPath;

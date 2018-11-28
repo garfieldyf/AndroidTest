@@ -34,7 +34,6 @@ import android.util.Printer;
 /**
  * Class ProcessUtils
  * @author Garfield
- * @version 3.0
  */
 public final class ProcessUtils {
     /**

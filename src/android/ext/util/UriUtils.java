@@ -12,7 +12,6 @@ import android.net.Uri;
 /**
  * Class UriUtils
  * @author Garfield
- * @version 1.0
  */
 public final class UriUtils {
     public static final String SCHEME_FTP   = "ftp";

@@ -58,7 +58,6 @@ import android.widget.ImageView;
  *         ... ... /&gt;
  * &lt;/[ ImageBinder | TransitionBinder | binder ]&gt;</pre>
  * @author Garfield
- * @version 3.5
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {

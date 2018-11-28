@@ -16,7 +16,6 @@ import android.widget.Filterable;
 /**
  * Abstract class ListRecyclerAdapter
  * @author Garfield
- * @version 1.0
  */
 public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends RecyclerAdapter<VH> implements Filterable, ListFilterClient<T>, CursorObserverClient, DataSetObserver {
     private final BaseListAdapter<T> mAdapter;

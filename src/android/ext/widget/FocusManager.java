@@ -9,7 +9,6 @@ import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 /**
  * Class FocusManager
  * @author Garfield
- * @version 1.0
  */
 public final class FocusManager<T extends ViewGroup> implements OnFocusChangeListener, OnGlobalFocusChangeListener {
     /**

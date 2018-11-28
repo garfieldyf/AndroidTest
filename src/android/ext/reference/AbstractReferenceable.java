@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Abstract class AbstractReferenceable
  * @author Garfield
- * @version 1.0
  */
 public abstract class AbstractReferenceable implements Referenceable {
     /**

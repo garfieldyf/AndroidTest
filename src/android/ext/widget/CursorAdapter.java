@@ -17,7 +17,6 @@ import android.widget.Filterable;
 /**
  * Abstract class CursorAdapter
  * @author Garfield
- * @version 3.0
  */
 public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorObserverClient, CursorFilterClient, DataSetObserver {
     /**

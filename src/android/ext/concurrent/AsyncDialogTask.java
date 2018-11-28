@@ -17,7 +17,6 @@ import android.os.Bundle;
  * Class <tt>AsyncDialogTask</tt> like as {@link AsyncTask}, But this task allows to show
  * a {@link Dialog} on the UI thread when it perform a computation on a background thread.
  * @author Garfield
- * @version 2.0
  */
 @SuppressWarnings("unchecked")
 public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Runnable, OnCancelListener, ActivityLifecycleCallbacks {

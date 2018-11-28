@@ -10,7 +10,6 @@ import android.util.Printer;
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
- * @version 4.0
  */
 public class LruFileCache extends LruCache<String, String> implements FileCache {
     protected final String mCacheDir;

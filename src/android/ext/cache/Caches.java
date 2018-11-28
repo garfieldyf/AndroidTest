@@ -10,7 +10,6 @@ import android.util.Printer;
 /**
  * Class Caches
  * @author Garfield
- * @version 1.0
  */
 public final class Caches {
     /**

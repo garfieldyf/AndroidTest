@@ -9,7 +9,6 @@ import android.widget.LinearLayout;
 /**
  * Class FocusLinearLayout
  * @author Garfield
- * @version 1.0
  */
 public class FocusLinearLayout extends LinearLayout {
     private final FrameDrawable mDrawable;

@@ -16,7 +16,6 @@ import android.util.Printer;
  * evicted and may become eligible for garbage collection. Unlike {@link LruCache}
  * this class is <b>not</b> thread-safely.
  * @author Garfield
- * @version 4.0
  */
 public class SimpleLruCache<K, V> implements Cache<K, V> {
     /* package */ final int maxSize;

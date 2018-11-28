@@ -9,7 +9,6 @@ import android.view.ViewOutlineProvider;
 /**
  * Class OutlineUtils
  * @author Garfield
- * @version 1.0
  */
 @SuppressLint("NewApi")
 public final class OutlineUtils {

@@ -17,7 +17,6 @@ import android.util.Log;
 /**
  * Class GIFImage
  * @author Garfield
- * @version 1.0
  */
 public final class GIFImage {
     /**

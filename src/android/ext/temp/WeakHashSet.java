@@ -10,7 +10,6 @@ import java.util.WeakHashMap;
 /**
  * Class WeakHashSet
  * @author Garfield
- * @version 1.0
  */
 public class WeakHashSet<E> extends AbstractSet<E> {
     private final Map<E, Object> map;

@@ -10,7 +10,6 @@ import android.graphics.drawable.BitmapDrawable;
 /**
  * Class ReferenceDrawable
  * @author Garfield
- * @version 1.0
  */
 public class ReferenceDrawable extends BitmapDrawable implements Referenceable {
     private final AtomicInteger mRefCount = new AtomicInteger();

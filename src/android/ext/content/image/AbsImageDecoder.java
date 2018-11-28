@@ -13,7 +13,6 @@ import android.util.Printer;
 /**
  * Abstract class AbsImageDecoder
  * @author Garfield
- * @version 1.0
  */
 public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image>, Factory<Options> {
     /**

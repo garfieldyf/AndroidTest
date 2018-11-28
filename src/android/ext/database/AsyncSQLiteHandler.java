@@ -12,7 +12,6 @@ import android.util.Log;
  * Class <tt>AsyncSQLiteHandler</tt> is a helper class to help make
  * handling asynchronous {@link SQLiteDatabase} queries easier.
  * @author Garfield
- * @version 1.0
  */
 public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /* package */ final WeakReference<SQLiteDatabase> mDatabase;

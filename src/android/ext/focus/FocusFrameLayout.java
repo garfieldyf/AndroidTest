@@ -9,7 +9,6 @@ import android.widget.FrameLayout;
 /**
  * Class FocusFrameLayout
  * @author Garfield
- * @version 1.0
  */
 public class FocusFrameLayout extends FrameLayout {
     private final FrameDrawable mDrawable;

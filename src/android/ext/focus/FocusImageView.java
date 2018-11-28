@@ -9,7 +9,6 @@ import android.widget.ImageView;
 /**
  * Class FocusImageView
  * @author Garfield
- * @version 1.0
  */
 public class FocusImageView extends ImageView {
     private final FrameDrawable mDrawable;

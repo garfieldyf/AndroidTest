@@ -8,7 +8,6 @@ import android.os.SystemClock;
 /**
  * Class SyncHandler
  * @author Garfield
- * @version 1.0
  */
 public class SyncHandler extends Handler {
     /**

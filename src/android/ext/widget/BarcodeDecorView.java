@@ -20,7 +20,6 @@ import android.view.View;
 /**
  * Class BarcodeDecorView
  * @author Garfield
- * @version 1.0
  */
 public class BarcodeDecorView extends View {
     private static int[] BARCODE_DECOR_VIEW_ATTRS;

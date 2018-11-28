@@ -9,7 +9,6 @@ import android.util.Printer;
 /**
  * Class <tt>LruImageCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
- * @version 1.0
  */
 public final class LruImageCache<K, Image> implements Cache<K, Object> {
     private final Cache<K, Image> mImageCache;

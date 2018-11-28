@@ -19,7 +19,6 @@ import android.util.AttributeSet;
 /**
  * Class RoundedBitmapDrawable
  * @author Garfield
- * @version 2.0
  */
 public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDrawable.RoundedBitmapState> {
     /**

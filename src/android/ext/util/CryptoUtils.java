@@ -13,7 +13,6 @@ import javax.crypto.spec.DESKeySpec;
 /**
  * Class CryptoUtils
  * @author Garfield
- * @version 1.0
  */
 public final class CryptoUtils {
     /**

@@ -12,7 +12,6 @@ import java.util.RandomAccess;
 /**
  * Class ArrayUtils
  * @author Garfield
- * @version 2.0
  */
 @SuppressWarnings("unchecked")
 public final class ArrayUtils {

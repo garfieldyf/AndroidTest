@@ -8,7 +8,6 @@ import android.widget.SectionIndexer;
 /**
  * Class ArraySectionIndexer
  * @author Garfield
- * @version 1.0
  */
 public class ArraySectionIndexer<T> implements SectionIndexer {
     /**

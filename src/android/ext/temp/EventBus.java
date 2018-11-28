@@ -24,7 +24,6 @@ import android.util.SparseArray;
 /**
  * Class EventBus
  * @author Garfield
- * @version 2.0
  */
 public final class EventBus {
     /**

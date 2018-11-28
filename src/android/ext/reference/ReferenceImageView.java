@@ -12,7 +12,6 @@ import android.widget.ImageView;
 /**
  * Class ReferenceImageView
  * @author Garfield
- * @version 1.0
  */
 public class ReferenceImageView extends ImageView {
     public ReferenceImageView(Context context) {

@@ -19,7 +19,6 @@ import android.ext.util.FileUtils.Dirent;
 /**
  * Class ZipUtils
  * @author Garfield
- * @version 1.5
  */
 public final class ZipUtils {
     /**

@@ -8,7 +8,6 @@ import android.widget.ScrollView;
 /**
  * Class PageScrollView
  * @author Garfield
- * @version 1.0
  */
 public class PageScrollView extends ScrollView {
     /**

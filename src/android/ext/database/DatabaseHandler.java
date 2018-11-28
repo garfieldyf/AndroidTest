@@ -8,7 +8,6 @@ import android.ext.util.DebugUtils;
 /**
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
- * @version 1.0
  */
 public abstract class DatabaseHandler {
     /* package */ static final int MESSAGE_CALL     = 1;

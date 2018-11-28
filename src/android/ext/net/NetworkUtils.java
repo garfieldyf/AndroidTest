@@ -23,7 +23,6 @@ import android.util.Printer;
 /**
  * Class NetworkUtils
  * @author Garfield
- * @version 1.0
  */
 public final class NetworkUtils {
     /**

@@ -15,7 +15,6 @@ import android.util.Printer;
 /**
  * Class ThreadPoolManager
  * @author Garfield
- * @version 2.5
  */
 public class ThreadPoolManager extends ThreadPool {
     private final Queue<Runnable> mRunningTasks;

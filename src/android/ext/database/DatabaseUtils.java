@@ -35,7 +35,6 @@ import android.util.Log;
 /**
  * Class DatabaseUtils
  * @author Garfield
- * @version 1.0
  */
 @SuppressWarnings("unchecked")
 public final class DatabaseUtils {

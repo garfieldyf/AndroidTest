@@ -3,7 +3,6 @@ package android.ext.reference;
 /**
  * Interface Referenceable
  * @author Garfield
- * @version 1.0
  */
 public interface Referenceable {
     /**

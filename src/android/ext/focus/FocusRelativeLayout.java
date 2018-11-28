@@ -9,7 +9,6 @@ import android.widget.RelativeLayout;
 /**
  * Class FocusRelativeLayout
  * @author Garfield
- * @version 1.0
  */
 public class FocusRelativeLayout extends RelativeLayout {
     private final FrameDrawable mDrawable;

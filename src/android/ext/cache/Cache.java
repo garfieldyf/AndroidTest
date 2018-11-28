@@ -6,7 +6,6 @@ import java.util.Map;
  * A <tt>Cache</tt> is a data structure consisting of a set
  * of keys and values in which each key is mapped to a value.
  * @author Garfield
- * @version 1.2
  */
 public interface Cache<K, V> {
     /**

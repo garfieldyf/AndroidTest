@@ -11,7 +11,6 @@ import android.ext.util.DebugUtils;
  * By default, this cache size is the number of entries. Overrides
  * {@link #sizeOf} to size this cache in different units.
  * @author Garfield
- * @version 4.0
  */
 public class LruCache<K, V> extends SimpleLruCache<K, V> {
     /**

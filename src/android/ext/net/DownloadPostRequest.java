@@ -32,7 +32,6 @@ import android.util.JsonWriter;
  *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
- * @version 1.0
  */
 public final class DownloadPostRequest extends DownloadRequest {
     private Object mData;

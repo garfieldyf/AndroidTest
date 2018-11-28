@@ -23,7 +23,6 @@ import android.util.Printer;
 /**
  * Class FileUtils
  * @author Garfield
- * @version 4.0
  */
 public final class FileUtils {
     /**

@@ -14,7 +14,6 @@ import android.widget.Filterable;
 /**
  * Abstract class ExpandableCursorTreeAdapter
  * @author Garfield
- * @version 2.0
  */
 public abstract class ExpandableCursorTreeAdapter extends ExpandableCursorAdapter implements Filterable, CursorFilterClient, CursorObserverClient {
     /**

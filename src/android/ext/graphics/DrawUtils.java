@@ -29,7 +29,6 @@ import android.view.View;
 /**
  * Class DrawUtils
  * @author Garfield
- * @version 2.0
  */
 public final class DrawUtils {
     /**

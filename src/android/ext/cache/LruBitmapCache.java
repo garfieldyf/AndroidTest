@@ -12,7 +12,6 @@ import android.util.Printer;
 /**
  * Class <tt>LruBitmapCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
- * @version 1.0
  */
 public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
     /**

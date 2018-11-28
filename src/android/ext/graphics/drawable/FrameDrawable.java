@@ -12,7 +12,6 @@ import android.view.View;
 /**
  * Class FrameDrawable
  * @author Garfield
- * @version 1.0
  */
 public class FrameDrawable {
     private static int[] FRAME_DRAWABLE_ATTRS;

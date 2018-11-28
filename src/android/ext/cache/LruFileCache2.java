@@ -7,7 +7,6 @@ import android.os.StatFs;
  * Like as {@link LruFileCache}, but the {@link #maxSize()}
  * is the maximum sum of the bytes of the files in this cache.
  * @author Garfield
- * @version 1.0
  */
 public class LruFileCache2 extends LruFileCache {
     /**

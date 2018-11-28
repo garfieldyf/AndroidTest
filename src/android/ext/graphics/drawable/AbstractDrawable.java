@@ -21,7 +21,6 @@ import android.view.Gravity;
 /**
  * Abstract class AbstractDrawable
  * @author Garfield
- * @version 1.0
  */
 @SuppressLint({ "Override", "NewApi" })
 public abstract class AbstractDrawable<T extends AbstractDrawable.BaseConstantState> extends Drawable {

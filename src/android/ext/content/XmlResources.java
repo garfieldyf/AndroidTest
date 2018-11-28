@@ -28,7 +28,6 @@ import android.util.Xml;
 /**
  * Class XmlResources
  * @author Garfield
- * @version 2.0
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public final class XmlResources {

@@ -26,7 +26,6 @@ import android.view.WindowManager;
 /**
  * Class DeviceUtils
  * @author Garfield
- * @version 2.0
  */
 @SuppressLint("NewApi")
 public final class DeviceUtils {

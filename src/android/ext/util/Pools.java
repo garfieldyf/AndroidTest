@@ -10,7 +10,6 @@ import android.util.Printer;
 /**
  * Class Pools
  * @author Garfield
- * @version 4.0
  */
 public final class Pools {
     /**

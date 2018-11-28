@@ -16,7 +16,6 @@ import android.os.Process;
 /**
  * Class ThreadPool
  * @author Garfield
- * @version 2.0
  */
 public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionHandler {
     /**

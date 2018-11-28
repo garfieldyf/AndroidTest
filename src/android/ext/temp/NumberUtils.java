@@ -3,7 +3,6 @@ package android.ext.temp;
 /**
  * Class NumberUtils
  * @author Garfield
- * @version 1.5
  */
 public final class NumberUtils {
     /**

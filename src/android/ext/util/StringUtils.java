@@ -5,7 +5,6 @@ import java.io.IOException;
 /**
  * Class StringUtils
  * @author Garfield
- * @version 1.0
  */
 public final class StringUtils {
     /**

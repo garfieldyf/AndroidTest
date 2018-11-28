@@ -12,7 +12,6 @@ import android.util.Log;
 /**
  * Class <tt>DatabaseReceiver</tt> used to listen the specified table's content has changed.
  * @author Garfield
- * @version 1.0
  */
 public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**

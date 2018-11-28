@@ -9,7 +9,6 @@ import android.ext.util.FileUtils;
 /**
  * Class PinyinUtils
  * @author Garfield
- * @version 1.0
  */
 public final class PinyinUtils {
     /**

@@ -18,7 +18,6 @@ import android.util.Printer;
 /**
  * An abstract class that performs asynchronous loading of data.
  * @author Garfield
- * @version 3.0
  */
 @SuppressWarnings("rawtypes")
 public abstract class Loader implements Factory<Task> {

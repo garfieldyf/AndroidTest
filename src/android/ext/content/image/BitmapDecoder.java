@@ -14,7 +14,6 @@ import android.util.Printer;
 /**
  * Class BitmapDecoder
  * @author Garfield
- * @version 1.0
  */
 public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     /**

@@ -16,7 +16,6 @@ import android.widget.Filterable;
 /**
  * Abstract class CursorRecyclerAdapter
  * @author Garfield
- * @version 1.0
  */
 public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends RecyclerAdapter<VH> implements Filterable, CursorObserverClient, CursorFilterClient, DataSetObserver {
     /**

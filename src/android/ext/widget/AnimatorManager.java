@@ -9,7 +9,6 @@ import android.util.Printer;
 /**
  * Class AnimatorManager
  * @author Garfield
- * @version 1.0
  */
 public final class AnimatorManager {
     private final Pool<Animator> mInAnimations;

@@ -25,7 +25,6 @@ import android.view.Gravity;
 /**
  * Class GIFDrawable
  * @author Garfield
- * @version 1.0
  */
 public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
     private static final int[] GIF_DRAWABLE_ATTRS = {

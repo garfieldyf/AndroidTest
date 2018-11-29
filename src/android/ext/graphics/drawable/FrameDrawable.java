@@ -73,10 +73,29 @@ public class FrameDrawable {
      * @param view The <tt>View</tt> obtains the current states.
      * @param stateSpec An array of required {@link View} states. If the
      * <em>drawable</em> is state full, this parameter will be ignored.
+     * @see #draw(Canvas, int[], int[], int, int, int, int)
      */
     public void draw(Canvas canvas, View view, int[] stateSpec) {
         if (mFrame != null) {
             DrawUtils.drawDrawable(canvas, mFrame, view.getDrawableState(), stateSpec, 0, 0, view.getWidth(), view.getHeight());
+        }
+    }
+
+    /**
+     * Draw this frame drawable with the specified the <tt>View</tt> states.
+     * @param canvas The canvas to draw into.
+     * @param stateSet An array of the <tt>View</tt> current states.
+     * @param stateSpec An array of required <tt>View</tt> states. If the <em>drawable</em> is
+     * state full, this parameter will be ignored.
+     * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
+     * @param top The specified a bounding rectangle top coordinate for the <em>drawable</em>.
+     * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
+     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
+     * @see #draw(Canvas, View, int[])
+     */
+    public void draw(Canvas canvas, int[] stateSet, int[] stateSpec, int left, int top, int right, int bottom) {
+        if (mFrame != null) {
+            DrawUtils.drawDrawable(canvas, mFrame, stateSet, stateSpec, left, top, right, bottom);
         }
     }
 

@@ -22,7 +22,7 @@ import android.os.Bundle;
 public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Runnable, OnCancelListener, ActivityLifecycleCallbacks {
     private Dialog mDialog;
     private final long mDelayMillis;
-    private volatile boolean mCancelled;
+    private volatile boolean mShowDialog;
 
     public final Application mApplication;
     private final WeakReference<Activity> mActivity;
@@ -45,6 +45,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     public AsyncDialogTask(Activity activity, long showDelayMillis) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mActivity = new WeakReference<Activity>(activity);
+        mShowDialog  = true;
         mDelayMillis = showDelayMillis;
         mApplication = activity.getApplication();
     }
@@ -81,7 +82,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     public void run() {
-        if (!mCancelled) {
+        if (mShowDialog) {
             final Activity activity = mActivity.get();
             if (activity != null && !activity.isDestroyed()) {
                 mDialog = onCreateDialog(activity);
@@ -94,7 +95,6 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     @Override
     protected void onPreExecute() {
-        mCancelled = false;
         if (mDelayMillis <= 0) {
             run();
         } else {
@@ -106,7 +106,7 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     protected Result doInBackground(Params... params) {
         final Result result = doInBackground(mApplication, params);
         if (mDelayMillis > 0) {
-            mCancelled = true;
+            mShowDialog = false;
             UIHandler.sInstance.removeCallbacks(this);
         }
 

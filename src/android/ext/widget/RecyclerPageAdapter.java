@@ -236,6 +236,15 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Returns the {@link RecyclerView} associated with this adapter.
+     * @return The {@link RecyclerView} object or <tt>null</tt> if
+     * this adapter not attached to the <tt>RecyclerView</tt>.
+     */
+    public final RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    /**
      * Returns the item count of the specified index <em>page</em>.
      * @param page The index of the page.
      * @return The item count.

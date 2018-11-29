@@ -80,9 +80,9 @@ public class PageScroller {
         if (canScroll) {
             int dx = 0, dy = 0, offset = (newPage - mCurrentPage) * mPageSize;
             if (mLayoutManager.mOrientation == LinearLayoutManager.HORIZONTAL) {
-                dx = (mLayoutManager.mShouldReverseLayout ? -offset : offset);
+                dx = offset;
             } else {
-                dy = (mLayoutManager.mShouldReverseLayout ? -offset : offset);
+                dy = offset;
             }
 
             if (immediate || mLayoutManager.mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
@@ -183,10 +183,10 @@ public class PageScroller {
         final int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(childLeft - parentLeft, offScreenRight));
         if (dx < 0) {
             // scroll to previous page.
-            handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage + 1 : mCurrentPage - 1, immediate);
+            handled = scrollToPage(mCurrentPage - 1, immediate);
         } else if (dx > 0) {
             // scroll to next page.
-            handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage - 1 : mCurrentPage + 1, immediate);
+            handled = scrollToPage(mCurrentPage + 1, immediate);
         }
 
         return handled;
@@ -225,10 +225,10 @@ public class PageScroller {
         final int dy = (offScreenTop != 0 ? offScreenTop : Math.min(childTop - parentTop, offScreenBottom));
         if (dy < 0) {
             // scroll to previous page.
-            handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage + 1 : mCurrentPage - 1, immediate);
+            handled = scrollToPage(mCurrentPage - 1, immediate);
         } else if (dy > 0) {
             // scroll to next page.
-            handled = scrollToPage(mLayoutManager.mShouldReverseLayout ? mCurrentPage - 1 : mCurrentPage + 1, immediate);
+            handled = scrollToPage(mCurrentPage + 1, immediate);
         }
 
         return handled;
@@ -288,9 +288,9 @@ public class PageScroller {
         if (newPage >= 0 && mCurrentPage != newPage && mLayoutManager.mRecyclerView != null) {
             final int direction = (mCurrentPage > newPage ? -1 : 1);
             if (mLayoutManager.mOrientation == LinearLayoutManager.HORIZONTAL) {
-                return mLayoutManager.mRecyclerView.canScrollHorizontally(mLayoutManager.mShouldReverseLayout ? -direction : direction);
+                return mLayoutManager.mRecyclerView.canScrollHorizontally(direction);
             } else {
-                return mLayoutManager.mRecyclerView.canScrollVertically(mLayoutManager.mShouldReverseLayout ? -direction : direction);
+                return mLayoutManager.mRecyclerView.canScrollVertically(direction);
             }
         }
 

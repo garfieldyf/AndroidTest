@@ -213,12 +213,7 @@ public final class UIHandler extends Handler {
      * Called on the <tt>PageScroller</tt> internal, do not call this method directly.
      */
     public final void requestChildFocus(LayoutManager layoutManager, int position) {
-        /*
-         * msg.arg1 - position
-         * msg.arg2 - retryCount
-         * msg.obj  - LayoutManager
-         */
-        sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, 0, layoutManager));
+        requestChildFocus(layoutManager, position, 2);
     }
 
     /**
@@ -249,7 +244,7 @@ public final class UIHandler extends Handler {
 
         // Dispatch the RecyclerView messages.
         case MESSAGE_CHILD_FOCUS:
-            handleChildFocus(msg);
+            requestChildFocus((LayoutManager)msg.obj, msg.arg1, msg.arg2);
             break;
 
         case MESSAGE_DATA_CHANGED:
@@ -287,17 +282,12 @@ public final class UIHandler extends Handler {
     /**
      * Handle the recycler view's child view request focus.
      */
-    private void handleChildFocus(Message msg) {
-        /*
-         * msg.arg1 - position
-         * msg.arg2 - retryCount
-         * msg.obj  - LayoutManager
-         */
-        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
+    private void requestChildFocus(LayoutManager layoutManager, int position, int retryCount) {
+        final View child = layoutManager.findViewByPosition(position);
         if (child != null) {
             child.requestFocus();
-        } else if (msg.arg2 < 3) {
-            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 + 1, msg.obj));
+        } else if (retryCount > 0) {
+            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, retryCount - 1, layoutManager));
         }
     }
 

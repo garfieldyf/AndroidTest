@@ -8,6 +8,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
@@ -124,12 +125,22 @@ public final class PackageUtils {
         public PackageInfo packageInfo;
 
         /**
-         * Retrieve the application's label and icon associated with this package info.
+         * Initializes this object with the specified <em>packageInfo</em>.
+         * @param context The <tt>Context</tt>.
+         * @param packageInfo The <tt>PackageInfo</tt> to set.
+         */
+        public void initialize(Context context, PackageInfo packageInfo) {
+            this.packageInfo = packageInfo;
+        }
+
+        /**
+         * Retrieve the application's label and icon associated with the package info.
          * The {@link #packageInfo} must be a package archive file's package info.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
          */
         public Pair<CharSequence, Drawable> loadArchiveInfo(Context context) {
+            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             final AssetManager assets = new AssetManager();
             try {
                 // Adds an additional archive file to the assets.
@@ -146,32 +157,26 @@ public final class PackageUtils {
         }
 
         public final void dump(Printer printer) {
+            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             printer.println(dumpImpl(new StringBuilder(256)));
         }
 
         @Override
         public int hashCode() {
+            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             return packageInfo.packageName.hashCode();
         }
 
         @Override
         public boolean equals(Object object) {
+            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             return (object instanceof AbsPackageInfo && ((AbsPackageInfo)object).packageInfo.packageName.equals(packageInfo.packageName));
-        }
-
-        /**
-         * Initializes this object with the specified <em>packageInfo</em>.
-         * @param context The <tt>Context</tt>.
-         * @param packageInfo The <tt>PackageInfo</tt> to set.
-         */
-        protected void initialize(Context context, PackageInfo packageInfo) {
-            this.packageInfo = packageInfo;
         }
 
         protected StringBuilder dump(StringBuilder out) {
             return out.append(" package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
-                .append(", flags = ").append(String.format("0x%08x", packageInfo.applicationInfo.flags))
+                .append(", system = ").append((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
@@ -199,10 +204,55 @@ public final class PackageUtils {
     }
 
     /**
+     * Class <tt>AppPackageInfo</tt> contains an application's label, icon and {@link PackageInfo}.
+     */
+    public static class AppPackageInfo extends AbsPackageInfo implements Comparable<AppPackageInfo> {
+        /**
+         * The application's icon, load from the &lt;application&gt
+         * tag's "icon" attribute;
+         */
+        public Drawable icon;
+
+        /**
+         * The application's label, load from the &lt;application&gt
+         * tag's "label" attribute;
+         */
+        public CharSequence label;
+
+        @Override
+        public void initialize(Context context, PackageInfo packageInfo) {
+            super.initialize(context, packageInfo);
+
+            final PackageManager pm = context.getPackageManager();
+            this.icon  = packageInfo.applicationInfo.loadIcon(pm);
+            this.label = packageInfo.applicationInfo.loadLabel(pm);
+        }
+
+        @Override
+        public int compareTo(AppPackageInfo another) {
+            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
+            return label.toString().compareTo(another.label.toString());
+        }
+
+        @Override
+        protected StringBuilder dump(StringBuilder out) {
+            return super.dump(out).append(", label = ").append(label).append(", icon = ").append(icon);
+        }
+
+        public static final Factory<AppPackageInfo> FACTORY = new Factory<AppPackageInfo>() {
+            @Override
+            public AppPackageInfo newInstance() {
+                return new AppPackageInfo();
+            }
+        };
+    }
+
+    /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
      * @param <T> A class that extends {@link AbsPackageInfo} that will be
      * the parser result type.
      */
+    @SuppressWarnings("unchecked")
     public static class PackageParser<T extends AbsPackageInfo> implements ScanCallback {
         /**
          * The application <tt>Context</tt>.
@@ -234,7 +284,7 @@ public final class PackageUtils {
          * @see #parsePackages(String, int, int, Cancelable, List)
          */
         public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
-            final ParsedResult<T> parsedResult = new ParsedResult<T>(new ArrayList<T>(), 0, cancelable);
+            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), 0, cancelable);
             return (FileUtils.scanFiles(dirPath, this, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, parsedResult) == 0 ? parsedResult.result : null);
         }
 
@@ -251,7 +301,7 @@ public final class PackageUtils {
          * @see #parsePackages(String, int, int, Cancelable, List)
          */
         public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
-            final ParsedResult<T> parsedResult = new ParsedResult<T>(new ArrayList<T>(), parseFlags, cancelable);
+            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), parseFlags, cancelable);
             return (FileUtils.scanFiles(dirPath, this, scanFlags, parsedResult) == 0 ? parsedResult.result : null);
         }
 
@@ -269,13 +319,12 @@ public final class PackageUtils {
          * @see #parsePackages(String, int, int, Cancelable)
          */
         public final int parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable, List<? super T> outResults) {
-            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult<T>(outResults, parseFlags, cancelable));
+            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult(outResults, parseFlags, cancelable));
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object cookie) {
-            final ParsedResult<T> parsedResult = (ParsedResult<T>)cookie;
+            final ParsedResult parsedResult = (ParsedResult)cookie;
             if (isArchiveFile(path, type)) {
                 final T result = parsePackage(mContext, path, parsedResult.parseFlags, mFactory);
                 if (result != null) {
@@ -365,14 +414,14 @@ public final class PackageUtils {
     /**
      * Class <tt>ParsedResult</tt> store the {@link PackageParser} parsed result.
      */
-    private static final class ParsedResult<T> {
-        public final List<T> result;
+    @SuppressWarnings("rawtypes")
+    private static final class ParsedResult {
+        public final List result;
         public final int parseFlags;
         public final Cancelable cancelable;
 
-        @SuppressWarnings("unchecked")
-        public ParsedResult(List<? super T> result, int parseFlags, Cancelable cancelable) {
-            this.result = (List<T>)result;
+        public ParsedResult(List result, int parseFlags, Cancelable cancelable) {
+            this.result = result;
             this.parseFlags = parseFlags;
             this.cancelable = CancelableWrapper.wrap(cancelable);
         }

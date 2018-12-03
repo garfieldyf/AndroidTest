@@ -1,15 +1,19 @@
-package android.ext.util;
+package android.ext.temp;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
+import java.util.regex.Pattern;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
@@ -18,18 +22,32 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.database.DatabaseUtils;
+import android.ext.util.ArrayUtils;
+import android.ext.util.ArrayUtils.Filter;
+import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
+import android.ext.util.FileUtils;
+import android.ext.util.JSONUtils;
+import android.ext.util.PackageUtils;
 import android.os.Build;
 import android.os.Debug.MemoryInfo;
 import android.os.Process;
 import android.text.format.DateFormat;
 import android.util.JsonWriter;
 import android.util.Log;
+import android.util.Printer;
 
 /**
  * Class ProcessUtils
  * @author Garfield
  */
 public final class ProcessUtils {
+    /**
+     * This flag use with {@link #getRunningAppProcesses(Context, Filter, int)}.
+     * If set the <tt>getRunningAppProcesses</tt> will retrieve the native processes.
+     */
+    public static final int GET_NATIVE_PROCESSES = 0x01;
+
     /**
      * Returns the current process group id.
      * @return The group id.
@@ -58,7 +76,7 @@ public final class ProcessUtils {
      * @return The current process name.
      */
     public static String myProcessName(Context context) {
-        return getRunningProcessInfo(context, Process.myPid()).processName;
+        return getProcessName(context, Process.myPid());
     }
 
     /**
@@ -78,21 +96,41 @@ public final class ProcessUtils {
     public static native String getGroupName(int gid);
 
     /**
-     * Returns the {@link RunningAppProcessInfo} with the specified <em>pid</em>.
+     * Returns the process name with the specified <em>pid</em>.
      * @param context The <tt>Context</tt>.
      * @param pid The id of the process.
-     * @return The <tt>RunningAppProcessInfo</tt> of the <em>pid</em> or <tt>null</tt>.
+     * @return The process name of the <em>pid</em> or <tt>null</tt>.
      */
-    public static RunningAppProcessInfo getRunningProcessInfo(Context context, int pid) {
+    public static String getProcessName(Context context, int pid) {
         final List<RunningAppProcessInfo> infos = ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
         for (int i = 0, size = ArrayUtils.getSize(infos); i < size; ++i) {
             final RunningAppProcessInfo info = infos.get(i);
             if (info.pid == pid) {
-                return info;
+                return info.processName;
             }
         }
 
         return null;
+    }
+
+    /**
+     * Returns A <tt>List</tt> of application processes that are running on the device.
+     * @param context The <tt>Context</tt>.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the processes.
+     * @param flags The flags. Pass 0 or {@link #GET_NATIVE_PROCESSES}.
+     * @return A <tt>List</tt> of {@link RunningAppProcessInfo} records.
+     */
+    public static List<RunningAppProcessInfo> getRunningAppProcesses(Context context, Filter<RunningAppProcessInfo> filter, int flags) {
+        List<RunningAppProcessInfo> results = ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
+        if (results == null) {
+            results = new ArrayList<RunningAppProcessInfo>();
+        }
+
+        if (filter != null) {
+            ArrayUtils.filter(results, filter);
+        }
+
+        return ((flags & GET_NATIVE_PROCESSES) != 0 ? getRunningNativeProcesses(results, filter) : results);
     }
 
     /**
@@ -123,6 +161,117 @@ public final class ProcessUtils {
      */
     public static void installUncaughtExceptionHandler(Context context) {
         new UncaughtHandler(context);
+    }
+
+    public static void dumpProcessInfos(Printer printer, List<RunningAppProcessInfo> infos) {
+        final StringBuilder result = new StringBuilder(256);
+        final Formatter formatter  = new Formatter(result);
+        final int size = ArrayUtils.getSize(infos);
+
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping Running Process Info [ size = %d ] ", size);
+        for (int i = 0; i < size; ++i) {
+            final RunningAppProcessInfo info = infos.get(i);
+            result.setLength(0);
+            printer.println(formatter.format("  %s@%x [ pid = %d, uid = %d, name = %s, packages = %s ]\n", info.getClass().getSimpleName(), info.hashCode(), info.pid, info.uid, info.processName, Arrays.toString(info.pkgList)).toString());
+        }
+
+        formatter.close();
+    }
+
+    /**
+     * Returns A <tt>List</tt> of the native processes that are running on the device.
+     */
+    private static List<RunningAppProcessInfo> getRunningNativeProcesses(List<RunningAppProcessInfo> results, Filter<RunningAppProcessInfo> filter) {
+        java.lang.Process process = null;
+        BufferedReader reader = null;
+
+        try {
+            process = Runtime.getRuntime().exec("ps");
+            reader  = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            final int size = results.size();
+            final Pattern pattern = Pattern.compile("\\s+");
+            final RunningNativeProcessInfo info = new RunningNativeProcessInfo();
+
+            // Reads the running processes info, skip the title.
+            for (String processInfo = reader.readLine(); (processInfo = reader.readLine()) != null; ) {
+                info.addTo(results, size, pattern.split(processInfo), filter);
+            }
+        } catch (Exception e) {
+            Log.e(ProcessUtils.class.getName(), "Couldn't get running processes info", e);
+        } finally {
+            FileUtils.close(reader);
+            if (process != null) {
+                process.destroy();
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * A class for filtering {@link RunningAppProcessInfo} objects based on their uid.
+     * (uid >= {@link Process#FIRST_APPLICATION_UID && uid <= {@link Process#LAST_APPLICATION_UID})
+     */
+    public static final class ProcessUidFilter implements Filter<RunningAppProcessInfo> {
+        /**
+         * A {@link Filter} to filters the {@link RunningAppProcessInfo} objects based on their uid.
+         */
+        public static final Filter<RunningAppProcessInfo> sInstance = new ProcessUidFilter();
+
+        /**
+         * This class cannot be instantiated.
+         */
+        private ProcessUidFilter() {
+        }
+
+        @Override
+        public boolean accept(RunningAppProcessInfo info) {
+            return (info.uid >= Process.FIRST_APPLICATION_UID && info.uid <= Process.LAST_APPLICATION_UID);
+        }
+    }
+
+    /**
+     * Information you can retrieve about a native running process.
+     */
+    public static final class RunningNativeProcessInfo extends RunningAppProcessInfo implements Cloneable, Filter<RunningAppProcessInfo> {
+        /**
+         * The parent process id of this process; 0 if none
+         */
+        public int ppid;
+
+        @Override
+        public boolean accept(RunningAppProcessInfo info) {
+            return (this.uid == info.uid && this.pid == info.pid);
+        }
+
+        @Override
+        protected RunningNativeProcessInfo clone() {
+            try {
+                return (RunningNativeProcessInfo)super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new Error(e);
+            }
+        }
+
+        /* package */ RunningNativeProcessInfo() {
+            this.importance = IMPORTANCE_BACKGROUND;
+        }
+
+        /* package */ final void addTo(List<RunningAppProcessInfo> results, int size, String[] processInfo, Filter<RunningAppProcessInfo> filter) {
+            if (ArrayUtils.getSize(processInfo) == 9 && !"ps".equals(processInfo[8])) {
+                // The processInfo such as:
+                // USER     PID   PPID  VSIZE  RSS     WCHAN    PC         NAME
+                // root      1     0     608   444    ffffffff 00000000 S /init
+                this.processName = processInfo[8];
+                this.uid  = Process.getUidForName(processInfo[0]);
+                this.pid  = Integer.parseInt(processInfo[1]);
+                this.ppid = Integer.parseInt(processInfo[2]);
+
+                if (ArrayUtils.indexOf(results, 0, size, this) == -1 && (filter == null || filter.accept(this))) {
+                    results.add(clone());
+                }
+            }
+        }
     }
 
     /**

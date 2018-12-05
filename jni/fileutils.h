@@ -29,6 +29,7 @@
 // getFileMode()
 // getFileCount()
 // getFileLength()
+// getLastModified()
 // deleteFiles()
 // createFile()
 // createUniqueFile()
@@ -383,6 +384,20 @@ JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring fil
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
+// Method:    getLastModified
+// Signature: (Ljava/lang/String;)J
+
+JNIEXPORT_METHOD(jlong) getLastModified(JNIEnv* env, jclass /*clazz*/, jstring filename)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, filename) == 0, "filename == null || filename.length() == 0", 0);
+
+    struct stat buf;
+    return (__NS::fileStatus(JNI::jstring_t(env, filename), buf) == 0 ? (jlong)buf.st_mtime * MILLISECONDS : 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
 // Method:    deleteFiles
 // Signature: (Ljava/lang/String;Z)I
 
@@ -485,6 +500,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
         { "getFileCount", "(Ljava/lang/String;I)I", (void*)getFileCount },
         { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
+        { "getLastModified", "(Ljava/lang/String;)J", (void*)getLastModified },
         { "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)copyFile },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

@@ -3,6 +3,7 @@ package android.ext.content;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import android.ext.util.DebugUtils;
+import android.ext.util.UIHandler;
 
 /**
  * Class <tt>AsyncTaskLoader</tt> allows to load the resource
@@ -103,6 +104,19 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
+     * This method can be invoked to publish progress values to update UI.
+     * @param key The key, pass to {@link #onProgressUpdate}.
+     * @param params The parameters, pass to {@link #onProgressUpdate}.
+     * @param values The progress values to update, pass to {@link #onProgressUpdate}.
+     * @see #onProgressUpdate(Key, Params[], Object[])
+     */
+    protected final void setProgress(Key key, Params[] params, Object... values) {
+        if (mState != SHUTDOWN) {
+            UIHandler.sInstance.setProgress(obtain(key, params), values);
+        }
+    }
+
+    /**
      * Called on the UI thread before {@link #loadInBackground}. <p>The default
      * implementation do nothing. If you write your own implementation, do not
      * call <tt>super.onStartLoading()</tt>.</p>
@@ -146,6 +160,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param values The progress values to update.
+     * @see #setProgress(Key, Params[], Object[])
+     * @see Task#setProgress(Object[])
      */
     protected void onProgressUpdate(Key key, Params[] params, Object[] values) {
     }

@@ -295,7 +295,7 @@ public final class FileUtils {
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
         final Pair<Factory<Dirent>, List<Dirent>> result = new Pair<Factory<Dirent>, List<Dirent>>(Dirent.FACTORY, new ArrayList<Dirent>());
-        return (scanFiles(dirPath, DefaultScanCallback.sInstance, flags, result) == 0 ? result.second : null);
+        return (scanFiles(dirPath, DefaultCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
@@ -310,7 +310,7 @@ public final class FileUtils {
      */
     public static <T extends Dirent> List<T> listFiles(String dirPath, int flags, Factory<T> factory) {
         final Pair<Factory<T>, List<T>> result = new Pair<Factory<T>, List<T>>(factory, new ArrayList<T>());
-        return (scanFiles(dirPath, DefaultScanCallback.sInstance, flags, result) == 0 ? result.second : null);
+        return (scanFiles(dirPath, DefaultCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
@@ -328,7 +328,7 @@ public final class FileUtils {
      * @see #listFiles(String, int, Factory)
      */
     public static <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents) {
-        return scanFiles(dirPath, DefaultScanCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
+        return scanFiles(dirPath, DefaultCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
     }
 
     /**
@@ -614,6 +614,17 @@ public final class FileUtils {
      * error code. See {@link ErrnoException}.
      */
     public static native int deleteFiles(String path, boolean deleteSelf);
+
+    /**
+     * Delete older files in a directory until only those younger than <em>minAge</em>.
+     * @param dirPath The directory path, must be absolute file path.
+     * @param minAge Always keep files younger than this age.
+     * @param flags The flags. May be <tt>0</tt> or any combination of
+     * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     */
+    public static void deleteOlderFiles(String dirPath, long minAge, int flags) {
+        FileUtils.scanFiles(dirPath, new DeleteCallback(minAge), flags, null);
+    }
 
     /**
      * Creates a file with the specified <em>filename</em>. If the file was
@@ -1503,8 +1514,8 @@ public final class FileUtils {
      * Class <tt>DefaultScanCallback</tt> is an implementation of a {@link ScanCallback}.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final class DefaultScanCallback implements ScanCallback {
-        public static final ScanCallback sInstance = new DefaultScanCallback();
+    private static final class DefaultCallback implements ScanCallback {
+        public static final ScanCallback sInstance = new DefaultCallback();
 
         @Keep
         @Override
@@ -1513,6 +1524,30 @@ public final class FileUtils {
             final Dirent dirent = (Dirent)result.first.newInstance();
             dirent.initialize(path, type);
             result.second.add(dirent);
+            return SC_CONTINUE;
+        }
+    }
+
+    /**
+     * Class <tt>DeleteCallback</tt> is an implementation of a {@link ScanCallback}.
+     */
+    private static final class DeleteCallback implements ScanCallback {
+        private final long minAge;
+
+        public DeleteCallback(long minAge) {
+            this.minAge = minAge;
+        }
+
+        @Keep
+        @Override
+        public int onScanFile(String path, int type, Object cookie) {
+            if (type == Dirent.DT_REG) {
+                final long age = System.currentTimeMillis() - FileUtils.getLastModified(path);
+                if (age > minAge) {
+                    FileUtils.deleteFiles(path, false);
+                }
+            }
+
             return SC_CONTINUE;
         }
     }

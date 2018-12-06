@@ -342,7 +342,7 @@ public final class PackageUtils {
          * @return <tt>true</tt> if the file is a package archive file, <tt>false</tt> otherwise.
          */
         protected boolean isArchiveFile(String path, int type) {
-            if (type != Dirent.DT_DIR) {
+            if (type == Dirent.DT_REG) {
                 final int index = FileUtils.findFileExtension(path);
                 return (index >= 0 && "apk".regionMatches(true, 0, path, index, 3));
             }

@@ -8,40 +8,22 @@ import android.view.KeyEvent;
 import android.view.View;
 
 /**
- * Class FocusableViewPager
+ * Class FocusViewPager
  * @author Garfield
  */
+@SuppressWarnings("deprecation")
 public class FocusViewPager extends ViewPager {
-    private int mLastKeyCode;
-    private View mFoucsedView;
+    /* package */ int mLastKeyCode;
+    /* package */ View mFoucsedView;
 
     public FocusViewPager(Context context) {
         super(context);
+        setOnPageChangeListener(mListener);
     }
 
     public FocusViewPager(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    /**
-     * Try to give focus in this view, starting from the focused view
-     * of the previous page. <p>Note: This method recommended call in
-     * the {@link OnPageChangeListener#onPageSelected(int)}.</p>
-     * @return Whether the child view actually took focus.
-     */
-    public boolean requestPageChildFocus() {
-        View nextFocus = null;
-        switch (mLastKeyCode) {
-        case KeyEvent.KEYCODE_DPAD_LEFT:
-            nextFocus = FocusFinder.getInstance().findNextFocus(this, mFoucsedView, FOCUS_LEFT);
-            break;
-
-        case KeyEvent.KEYCODE_DPAD_RIGHT:
-            nextFocus = FocusFinder.getInstance().findNextFocus(this, mFoucsedView, FOCUS_RIGHT);
-            break;
-        }
-
-        return (nextFocus != null && nextFocus.requestFocus());
+        setOnPageChangeListener(mListener);
     }
 
     @Override
@@ -53,4 +35,32 @@ public class FocusViewPager extends ViewPager {
 
         return super.executeKeyEvent(event);
     }
+
+    private final OnPageChangeListener mListener = new OnPageChangeListener() {
+        @Override
+        public void onPageSelected(int position) {
+            View nextFocus = null;
+            switch (mLastKeyCode) {
+            case KeyEvent.KEYCODE_DPAD_LEFT:
+                nextFocus = FocusFinder.getInstance().findNextFocus(FocusViewPager.this, mFoucsedView, FOCUS_LEFT);
+                break;
+
+            case KeyEvent.KEYCODE_DPAD_RIGHT:
+                nextFocus = FocusFinder.getInstance().findNextFocus(FocusViewPager.this, mFoucsedView, FOCUS_RIGHT);
+                break;
+            }
+
+            if (nextFocus != null) {
+                nextFocus.requestFocus();
+            }
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+        }
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+    };
 }

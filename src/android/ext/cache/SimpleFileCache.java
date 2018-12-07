@@ -33,7 +33,7 @@ public final class SimpleFileCache implements FileCache {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param name A relative path within the cache directory,
-     * such as <tt>"file_cache"</tt>.
+     * such as <tt>"simple_file_cache"</tt>.
      * @see #SimpleFileCache(String)
      */
     public SimpleFileCache(Context context, String name) {

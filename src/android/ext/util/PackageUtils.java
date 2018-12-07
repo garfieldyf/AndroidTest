@@ -42,7 +42,7 @@ public final class PackageUtils {
     }
 
     /**
-     * Return a <tt>List</tt> of all packages that are installed on the device.
+     * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param context The <tt>Context</tt>.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination
      * of <tt>PackageManager.GET_XXX</tt> constants.

@@ -618,12 +618,17 @@ public final class FileUtils {
     /**
      * Delete older files in a directory until only those younger than <em>minAge</em>.
      * @param dirPath The directory path, must be absolute file path.
-     * @param minAge Always keep files younger than this age.
+     * @param minAge Always keep files younger than this age, or <tt>-1</tt> delete all
+     * files in the <em>dirPath</em>.
      * @param flags The flags. May be <tt>0</tt> or any combination of
      * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      */
     public static void deleteOlderFiles(String dirPath, long minAge, int flags) {
-        FileUtils.scanFiles(dirPath, new DeleteCallback(minAge), flags, null);
+        if (minAge == -1) {
+            deleteFiles(dirPath, false);
+        } else {
+            scanFiles(dirPath, new DeleteCallback(minAge), flags, null);
+        }
     }
 
     /**
@@ -1542,9 +1547,9 @@ public final class FileUtils {
         @Override
         public int onScanFile(String path, int type, Object cookie) {
             if (type == Dirent.DT_REG) {
-                final long age = System.currentTimeMillis() - FileUtils.getLastModified(path);
+                final long age = System.currentTimeMillis() - getLastModified(path);
                 if (age > minAge) {
-                    FileUtils.deleteFiles(path, false);
+                    deleteFiles(path, false);
                 }
             }
 

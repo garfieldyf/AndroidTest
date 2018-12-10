@@ -112,7 +112,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     protected Result doInBackground(Params... params) {
         try {
             DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
-            return onDownload(mRequest.mConnection, mRequest.connectImpl(null), params);
+            return onDownload(mRequest.mConnection, mRequest.connect(null), params);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't download from - " + mRequest.mConnection.getURL().toString(), e);
             return null;

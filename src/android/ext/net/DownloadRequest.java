@@ -242,21 +242,6 @@ public class DownloadRequest {
     }
 
     /**
-     * Connects to the remote server with the arguments supplied to this request. <p>Note: This method
-     * will not download any resources.</p>
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post.
-     * @throws IOException if an error occurs while connecting to the remote server.
-     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
-     */
-    public final int connect(byte[] tempBuffer) throws IOException {
-        try {
-            return connectImpl(tempBuffer);
-        } finally {
-            disconnect();
-        }
-    }
-
-    /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
@@ -271,7 +256,7 @@ public class DownloadRequest {
      */
     public final <T> T download(Cancelable cancelable, byte[] tempBuffer) throws IOException, JSONException {
         try {
-            return (connectImpl(tempBuffer) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connect(tempBuffer) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -292,7 +277,7 @@ public class DownloadRequest {
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
-            final int statusCode = connectImpl(tempBuffer);
+            final int statusCode = connect(tempBuffer);
             switch (statusCode) {
             case HTTP_OK:
                 downloadImpl(filename, cancelable, tempBuffer, false);
@@ -323,7 +308,7 @@ public class DownloadRequest {
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
-            final int statusCode = connectImpl(tempBuffer);
+            final int statusCode = connect(tempBuffer);
             if (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL) {
                 downloadImpl(out, cancelable, tempBuffer);
             }
@@ -347,7 +332,7 @@ public class DownloadRequest {
      * @see #download(OutputStream, Cancelable, byte[])
      */
     public final int download(DownloadCallback callback, byte[] tempBuffer, Object... params) throws IOException {
-        final int statusCode = connectImpl(tempBuffer);
+        final int statusCode = connect(tempBuffer);
         try {
             callback.onDownload(mConnection, statusCode, params, tempBuffer);
         } finally {
@@ -360,7 +345,7 @@ public class DownloadRequest {
     /**
      * Connects to the remote server with the arguments supplied to this request.
      */
-    /* package */ int connectImpl(byte[] tempBuffer) throws IOException {
+    /* package */ int connect(byte[] tempBuffer) throws IOException {
         __checkDumpHeaders(true);
         mConnection.connect();
         __checkDumpHeaders(false);

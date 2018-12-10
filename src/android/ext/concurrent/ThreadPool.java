@@ -76,7 +76,8 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     }
 
     /**
-     * Returns a new serial {@link Executor}.
+     * Returns a new serial {@link Executor}. A serial <tt>Executor</tt>
+     * that executes tasks one at a time in serial order.
      * @return A newly serial <tt>Executor</tt>.
      */
     public final Executor newSerialExecutor() {

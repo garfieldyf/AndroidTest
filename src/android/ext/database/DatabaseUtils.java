@@ -527,7 +527,7 @@ public final class DatabaseUtils {
             columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
         }
 
-        return toContentValues(new ContentValues(), cursor, columnIndexes, columnNames);
+        return toContentValues(new ContentValues(columnNames.length), cursor, columnIndexes, columnNames);
     }
 
     /**

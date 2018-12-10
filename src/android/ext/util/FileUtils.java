@@ -622,13 +622,11 @@ public final class FileUtils {
      * files in the <em>dirPath</em>.
      * @param flags The flags. May be <tt>0</tt> or any combination of
      * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error
+     * code. See {@link ErrnoException}.
      */
-    public static void deleteOlderFiles(String dirPath, long minAge, int flags) {
-        if (minAge == -1) {
-            deleteFiles(dirPath, false);
-        } else {
-            scanFiles(dirPath, new DeleteCallback(minAge), flags, null);
-        }
+    public static int deleteOlderFiles(String dirPath, long minAge, int flags) {
+        return (minAge == -1 ? deleteFiles(dirPath, false) : scanFiles(dirPath, new DeleteCallback(minAge), flags, null));
     }
 
     /**

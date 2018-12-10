@@ -48,8 +48,8 @@ public abstract class Loader implements Factory<Task> {
      * @see #isShutdown()
      */
     public synchronized void shutdown() {
-        cancelAll();
         mState = SHUTDOWN;
+        cancelAll();
         notifyAll();
     }
 

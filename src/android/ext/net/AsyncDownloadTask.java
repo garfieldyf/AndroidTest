@@ -5,15 +5,16 @@ import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import android.app.Activity;
+import android.content.Context;
+import android.ext.concurrent.AsyncDialogTask;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
-import android.os.AsyncTask;
 import android.util.Log;
 
 /**
@@ -23,11 +24,15 @@ import android.util.Log;
  * <p>Here is an example:</p><pre>
  * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
  *     public JSONDownloadTask(Activity ownerActivity) {
- *         super(ownerActivity);
+ *         super(ownerActivity, 500);
+ *     }
+ *
+ *     protected Dialog onCreateDialog(Context context) {
+ *          // Returns a loading dialog instance.
  *     }
  *
  *     protected void onPostExecute(JSONObject result) {
- *         final Activity activity = getOwner();
+ *         final Activity activity = getActivity();
  *         if (activity == null || activity.isDestroyed()) {
  *              // The owner activity has been destroyed or release by the GC.
  *              return;
@@ -47,49 +52,26 @@ import android.util.Log;
  * task.execute((Object[])null);</pre>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
-public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncDialogTask<Params, Progress, Result> implements Cancelable {
     private DownloadRequest mRequest;
-    private WeakReference<Object> mOwner;
 
     /**
      * Constructor
-     * @see #AsyncDownloadTask(Object)
+     * @param activity The {@link Activity}.
+     * @see #AsyncDownloadTask(Activity, long)
      */
-    public AsyncDownloadTask() {
-        DebugUtils.__checkMemoryLeaks(getClass());
+    public AsyncDownloadTask(Activity activity) {
+        super(activity);
     }
 
     /**
      * Constructor
-     * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncDownloadTask()
+     * @param activity The {@link Activity}.
+     * @param showDelayMillis The delay in milliseconds until the dialog will be show.
+     * @see #AsyncDownloadTask(Activity)
      */
-    public AsyncDownloadTask(Object owner) {
-        DebugUtils.__checkMemoryLeaks(getClass());
-        mOwner = new WeakReference<Object>(owner);
-    }
-
-    /**
-     * Returns the object that owns this task.
-     * @return The owner object or <tt>null</tt> if
-     * no owner set or the owner released by the GC.
-     * @see #setOwner(Object)
-     */
-    public final <T> T getOwner() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        return (T)mOwner.get();
-    }
-
-    /**
-     * Sets the object that owns this task.
-     * @param owner The owner object.
-     * @return This task.
-     * @see #getOwner()
-     */
-    public final AsyncDownloadTask<Params, Progress, Result> setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
-        return this;
+    public AsyncDownloadTask(Activity activity, long showDelayMillis) {
+        super(activity, showDelayMillis);
     }
 
     /**
@@ -98,6 +80,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
      * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
      */
+    @SuppressWarnings("unchecked")
     public final <T extends DownloadRequest> T newDownloadRequest(Object url, Class<T> clazz) {
         try {
             DebugUtils.__checkError(!(url instanceof URL || url instanceof String), "Invalid class - " + url.getClass().getName());
@@ -109,7 +92,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
     }
 
     @Override
-    protected Result doInBackground(Params... params) {
+    protected Result doInBackground(Context context, Params[] params) {
         try {
             DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
             return onDownload(mRequest.mConnection, mRequest.connect(null), params);

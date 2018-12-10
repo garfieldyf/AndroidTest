@@ -61,12 +61,22 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     /**
      * Returns the {@link Dialog} associated with this task,
-     * returned earlier by {@link #onCreateDialog(Context)}.
+     * returned earlier by {@link #onCreateDialog(Activity)}.
      * @return The <tt>Dialog</tt>, or <tt>null</tt> if this
      * task was finished or cancelled.
      */
     protected final Dialog getDialog() {
         return mDialog;
+    }
+
+    /**
+     * Closes the owner activity associated with this task.
+     */
+    protected final void finishActivity() {
+        final Activity activity = mActivity.get();
+        if (activity != null && !activity.isDestroyed()) {
+            activity.finish();
+        }
     }
 
     /**
@@ -125,10 +135,10 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
 
     /**
      * Callback for creating {@link Dialog} to show when this task is running.
-     * @param context The <tt>Context</tt> to create.
+     * @param activity The <tt>Activity</tt> to create.
      * @return The dialog.
      */
-    protected abstract Dialog onCreateDialog(Context context);
+    protected abstract Dialog onCreateDialog(Activity activity);
 
     /**
      * Performs a computation on a background thread. The specified parameters are
@@ -162,7 +172,8 @@ public abstract class AsyncDialogTask<Params, Progress, Result> extends AsyncTas
     @Override
     public void onActivityDestroyed(Activity activity) {
         if (mDialog != null && mActivity.get() == activity) {
-            mDialog.cancel();
+            cancel(false);
+            dismissDialog();
         }
     }
 

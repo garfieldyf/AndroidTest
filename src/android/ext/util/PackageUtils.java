@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -39,6 +40,44 @@ public final class PackageUtils {
         } catch (NameNotFoundException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Equivalent to calling <tt>getInstalledPackages(context.getPackageManager(), flags, filter)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
+     * <tt>PackageManager.GET_XXX</tt> constants.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
+     * @return A <tt>List</tt> of {@link PackageInfo} objects.
+     * @see #getInstalledPackages(PackageManager, int, Filter)
+     * @see InstalledPackageFilter
+     */
+    public static List<PackageInfo> getInstalledPackages(Context context, int flags, Filter<PackageInfo> filter) {
+        return getInstalledPackages(context.getPackageManager(), flags, filter);
+    }
+
+    /**
+     * Returns a <tt>List</tt> of all packages that are installed on the device.
+     * @param pm The <tt>PackageManager</tt>.
+     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
+     * <tt>PackageManager.GET_XXX</tt> constants.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
+     * @return A <tt>List</tt> of {@link PackageInfo} objects.
+     * @see #getInstalledPackages(Context, int, Filter)
+     * @see InstalledPackageFilter
+     */
+    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
+        final List<PackageInfo> result = pm.getInstalledPackages(flags);
+        if (filter != null) {
+            final Iterator<PackageInfo> itor = result.iterator();
+            while (itor.hasNext()) {
+                if (!filter.accept(itor.next())) {
+                    itor.remove();
+                }
+            }
+        }
+
+        return result;
     }
 
     /**

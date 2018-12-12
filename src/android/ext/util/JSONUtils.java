@@ -64,6 +64,31 @@ public final class JSONUtils {
     }
 
     /**
+     * Compares the two JSON values, handling <tt>null</tt> values.
+     * @param a The first value.
+     * @param b The second value.
+     * @return <tt>true</tt> if both values are <tt>null</tt> or are
+     * equals, <tt>false</tt> otherwise.
+     */
+    public static boolean equals(Object a, Object b) {
+        if (a == b) {
+            return true;
+        }
+
+        if (a == null || a == JSONObject.NULL) {
+            return (b == null || b == JSONObject.NULL);
+        }
+
+        if (a instanceof JSONArray && b instanceof JSONArray) {
+            return equals((JSONArray)a, (JSONArray)b);
+        } else if (a instanceof JSONObject && b instanceof JSONObject) {
+            return equals((JSONObject)a, (JSONObject)b);
+        } else {
+            return a.equals(b);
+        }
+    }
+
+    /**
      * Equivalent to calling {@link JSONObject#optJSONArray(String)},
      * handling <tt>null object</tt>.
      * @param object The <tt>JSONObject</tt>.
@@ -329,6 +354,53 @@ public final class JSONUtils {
         }
     }
 
+    private static boolean equals(JSONArray a, JSONArray b) {
+        final int length = a.length();
+        if (length != b.length()) {
+            return false;
+        }
+
+        for (int i = 0; i < length; ++i) {
+            if (!equals(a.opt(i), b.opt(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean equals(JSONObject a, JSONObject b) {
+        if (a.length() != b.length()) {
+            return false;
+        }
+
+        final Iterator<String> names = a.keys();
+        while (names.hasNext()) {
+            final String name = names.next();
+            if (!b.has(name) || !equals(a.opt(name), b.opt(name))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static Number readNumber(JsonReader reader) throws IOException {
+        final String result = reader.nextString();
+        if (result.indexOf('.') == -1) {
+            try {
+                return Integer.valueOf(result, 10);
+            } catch (NumberFormatException e) {
+                try {
+                    return Long.valueOf(result, 10);
+                } catch (NumberFormatException ex) {
+                }
+            }
+        }
+
+        return Double.valueOf(result);
+    }
+
     private static JSONArray newArrayImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONArray result = new JSONArray();
         reader.beginArray();
@@ -406,23 +478,6 @@ public final class JSONUtils {
 
         reader.endObject();
         return result;
-    }
-
-    private static Object readNumber(JsonReader reader) throws IOException {
-        final String result = reader.nextString();
-        if (result.indexOf('.') == -1) {
-            try {
-                return Long.valueOf(result, 10);
-            } catch (NumberFormatException e) {
-                // This only happens for the number greater than Long.MAX_VALUE.
-            }
-        }
-
-        try {
-            return Double.valueOf(result);
-        } catch (NumberFormatException e) {
-            return result;
-        }
     }
 
     private static JsonWriter writeValues(JsonWriter writer, JSONArray values) throws IOException {

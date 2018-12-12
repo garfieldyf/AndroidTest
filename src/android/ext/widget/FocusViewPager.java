@@ -26,6 +26,23 @@ public class FocusViewPager extends ViewPager {
         setOnPageChangeListener(mListener);
     }
 
+    public final View getFoucsedView() {
+        return mFoucsedView;
+    }
+
+    public final int getFocusDirection() {
+        switch (mLastKeyCode) {
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+            return FOCUS_LEFT;
+
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+            return FOCUS_RIGHT;
+
+        default:
+            return 0;
+        }
+    }
+
     @Override
     public boolean executeKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
@@ -39,19 +56,12 @@ public class FocusViewPager extends ViewPager {
     private final OnPageChangeListener mListener = new OnPageChangeListener() {
         @Override
         public void onPageSelected(int position) {
-            View nextFocus = null;
-            switch (mLastKeyCode) {
-            case KeyEvent.KEYCODE_DPAD_LEFT:
-                nextFocus = FocusFinder.getInstance().findNextFocus(FocusViewPager.this, mFoucsedView, FOCUS_LEFT);
-                break;
-
-            case KeyEvent.KEYCODE_DPAD_RIGHT:
-                nextFocus = FocusFinder.getInstance().findNextFocus(FocusViewPager.this, mFoucsedView, FOCUS_RIGHT);
-                break;
-            }
-
-            if (nextFocus != null) {
-                nextFocus.requestFocus();
+            final int direction = getFocusDirection();
+            if (direction != 0) {
+                final View target = FocusFinder.getInstance().findNextFocus(FocusViewPager.this, mFoucsedView, direction);
+                if (target != null) {
+                    target.requestFocus();
+                }
             }
         }
 

@@ -83,7 +83,7 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
      * Called when this adapter is no longer used.
      */
     public void onDestroy() {
-        mFocusManager.onDetach();
+        mFocusManager.onDestroy();
     }
 
     @Override

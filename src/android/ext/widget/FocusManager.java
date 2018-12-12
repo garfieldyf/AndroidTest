@@ -77,7 +77,7 @@ public final class FocusManager<T extends ViewGroup> implements OnFocusChangeLis
      * <p>Note: This method recommended call in view <tt>onDetachedFromWindow()</tt>
      * or activity <tt>onDestroy()</tt>.</p>
      */
-    public void onDetach() {
+    public void onDestroy() {
         if ((mFlags & FLAG_VIEW_FOCUSABLE) != 0) {
             mRootView.getViewTreeObserver().removeOnGlobalFocusChangeListener(this);
         }

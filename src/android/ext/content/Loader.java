@@ -199,6 +199,22 @@ public abstract class Loader implements Factory<Task> {
         }
 
         /**
+         * Attempts to stop execution of this task. This attempt will fail if
+         * this task has already completed, or already been cancelled.
+         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing
+         * this task should be interrupted, <tt>false</tt> otherwise.
+         * @return <tt>true</tt> if this task has been cancelled, <tt>false</tt> otherwise.
+         */
+        public final boolean cancel(boolean mayInterruptIfRunning) {
+            final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
+            if (result && mayInterruptIfRunning && mRunner != null) {
+                mRunner.interrupt();
+            }
+
+            return result;
+        }
+
+        /**
          * Called on the UI thread when this task handle messages.
          * <p><b>Note: Do not call this method directly.</b></p>
          * @param msg A {@link Message} to handle.
@@ -239,19 +255,6 @@ public abstract class Loader implements Factory<Task> {
             mResult = null;
             mRunner = null;
             mState.set(RUNNING);
-        }
-
-        /**
-         * Attempts to stop execution of this task. This attempt will fail
-         * if this task has already completed, or already been cancelled.
-         */
-        /* package */ final boolean cancel(boolean mayInterruptIfRunning) {
-            final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
-            if (result && mayInterruptIfRunning && mRunner != null) {
-                mRunner.interrupt();
-            }
-
-            return result;
         }
 
         /**

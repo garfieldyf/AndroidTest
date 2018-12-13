@@ -40,22 +40,20 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
-     * Executes the load task on a background thread. If the <em>key</em> is mapped
-     * to the task is running and {@link #rejectedRequest} returns <tt>true</tt>
-     * then invoking this method has no effect. <p><b>Note: This method must be
-     * invoked on the UI thread.</b></p>
+     * Executes the load task on a background thread. If the <em>key</em> is
+     * mapped to the task is running then invoking this method has no effect.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param key The identifier of the load task.
      * @param params The parameters of the load task. If the task no parameters,
      * you can pass <em>(Params[])null</em> instead of allocating an empty array.
-     * @see #rejectedRequest(Key, Params[], Params[])
      * @see #loadSync(Key, Params[])
      */
     public final void load(Key key, Params... params) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(key == null, "key == null");
         if (mState != SHUTDOWN) {
-            final LoadTask task = (LoadTask)mRunningTasks.get(key);
-            if (task == null || !rejectedRequest(key, params, task.mParams)) {
+            final Task<?, ?> task = mRunningTasks.get(key);
+            if (task == null || task.isCancelled()) {
                 onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
                 mRunningTasks.put(key, newTask);
@@ -167,20 +165,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
-     * Called by this loader when the loader cannot accept a load request (maybe the
-     * <em>key</em> is mapped to the task is running). Subclasses should override this
-     * method to cancel the running task and return <tt>false</tt> to add a new task.
-     * @param key The key, passed earlier by {@link #load}.
-     * @param params The parameters, passed earlier by {@link #load}.
-     * @param oldParams The previous mapped load task's parameters.
-     * @return <tt>true</tt> the load request will be rejected, <tt>false</tt> otherwise.
-     * @see #load(Key, Params[])
-     */
-    protected boolean rejectedRequest(Key key, Params[] params, Params[] oldParams) {
-        return true;
-    }
-
-    /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
      * or <tt>null</tt> if the value load synchronously.
@@ -226,11 +210,16 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         @Override
         /* package */ void onPostExecute(Params[] params, Result result) {
             if (mState != SHUTDOWN) {
+                // Removes the finished task from running
+                // tasks, excluding the cancelled task.
+                if (mRunningTasks.get(mKey) == this) {
+                    mRunningTasks.remove(mKey);
+                }
+
                 if (isCancelled()) {
                     onLoadCancelled(mKey, params, result);
                 } else {
                     onLoadComplete(mKey, params, result);
-                    mRunningTasks.remove(mKey);
                 }
             }
 

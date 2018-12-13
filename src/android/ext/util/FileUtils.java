@@ -173,20 +173,9 @@ public final class FileUtils {
     }
 
     /**
-     * Tests if the <em>path</em> is linux root directory ('/').
-     * @param path The path to test.
-     * @return <tt>true</tt> if the path is root directory, <tt>false</tt> otherwise.
-     * @see #isAbsolutePath(String)
-     */
-    public static boolean isRootDir(String path) {
-        return (StringUtils.getLength(path) == 1 && path.charAt(0) == '/');
-    }
-
-    /**
      * Tests if the <em>path</em> is an absolute path.
      * @param path The path to test.
      * @return <tt>true</tt> if the path is an absolute path, <tt>false</tt> otherwise.
-     * @see #isRootDir(String)
      */
     public static boolean isAbsolutePath(String path) {
         return (StringUtils.getLength(path) > 0 && path.charAt(0) == '/');
@@ -464,14 +453,6 @@ public final class FileUtils {
      * @return The last modified time if the operation succeeded, <tt>0</tt> otherwise.
      */
     public static native long getLastModified(String filename);
-
-    /**
-     * Returns the number of files in the specified <em>dirPath</em>.
-     * @param dirPath The directory path, must be absolute file path.
-     * @param flags Pass 0 or {@link #FLAG_IGNORE_HIDDEN_FILE}.
-     * @return The number of files if the operation succeeded, <tt>0</tt> otherwise.
-     */
-    public static native int getFileCount(String dirPath, int flags);
 
     /**
      * Equivalent to calling <tt>copyStream(src, dst, null, buffer)</tt>.

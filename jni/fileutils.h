@@ -27,7 +27,6 @@
 // fileAccess()
 // fileStatus()
 // getFileMode()
-// getFileCount()
 // getFileLength()
 // getLastModified()
 // deleteFiles()
@@ -349,27 +348,6 @@ JNIEXPORT_METHOD(jint) getFileMode(JNIEnv* env, jclass /*clazz*/, jstring path)
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    getFileCount
-// Signature: (Ljava/lang/String;I)I
-
-JNIEXPORT_METHOD(jint) getFileCount(JNIEnv* env, jclass /*clazz*/, jstring dirPath, jint flags)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0, "dirPath == null || dirPath.length() == 0", 0);
-
-    jint size = 0;
-    __NS::Directory<> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter);
-    if (dir.open(JNI::jstring_t(env, dirPath)) == 0)
-    {
-        for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
-            ++size;
-    }
-
-    return size;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
 // Method:    getFileLength
 // Signature: (Ljava/lang/String;)J
 
@@ -498,7 +476,6 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "getFileMode", "(Ljava/lang/String;)I", (void*)getFileMode },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
-        { "getFileCount", "(Ljava/lang/String;I)I", (void*)getFileCount },
         { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "getLastModified", "(Ljava/lang/String;)J", (void*)getLastModified },
         { "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)copyFile },

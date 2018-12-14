@@ -56,7 +56,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, computeMaximumPoolSize(executor)));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, ImageModule.computeMaximumPoolSize(executor)));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
     }
 
@@ -202,7 +202,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) {
         try {
-            final DownloadRequest request = new DownloadRequest(url).readTimeout(60000).connectTimeout(60000);
+            final DownloadRequest request = new DownloadRequest(url).readTimeout(30000).connectTimeout(30000);
             request.__checkDumpHeaders = false;
             return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {

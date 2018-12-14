@@ -1,7 +1,6 @@
 package android.ext.content;
 
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.ext.content.Loader.Task;
@@ -38,7 +37,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ Loader(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
-        mTaskPool = Pools.newPool(this, 64);
+        mTaskPool = Pools.newPool(this, 48);
         mRunningTasks = new ArrayMap<Object, Task>();
     }
 
@@ -133,15 +132,6 @@ public abstract class Loader implements Factory<Task> {
                 printer.println(DebugUtils.toSimpleString(mRunningTasks.keyAt(i), result.append("  ")).append(" ==> ").append(mRunningTasks.valueAt(i)).toString());
             }
         }
-    }
-
-    /**
-     * Computes the maximum pool size of the loader internal pool.
-     * @param executor The <tt>Executor</tt> to compute.
-     * @return The maximum pool size.
-     */
-    public static int computeMaximumPoolSize(Executor executor) {
-        return Math.min((executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4), 8) * 3 / 2;
     }
 
     /**

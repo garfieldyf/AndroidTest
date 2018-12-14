@@ -39,7 +39,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int coreThreads, int maxThreads) {
-        this(coreThreads, maxThreads, 60, TimeUnit.SECONDS);
+        this(coreThreads, maxThreads, 60, TimeUnit.SECONDS, new PriorityThreadFactory());
     }
 
     /**
@@ -54,9 +54,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int coreThreads, int maxThreads, long keepAliveTime, TimeUnit unit) {
-        super(coreThreads, maxThreads, keepAliveTime, unit, new SynchronousQueue<Runnable>(), new PriorityThreadFactory());
-        setRejectedExecutionHandler(this);
-        mPendingTasks = new ConcurrentLinkedQueue<Runnable>();
+        this(coreThreads, maxThreads, keepAliveTime, unit, new PriorityThreadFactory());
     }
 
     /**
@@ -94,7 +92,15 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
      * @return The maximum number of threads.
      */
     public static int computeMaximumThreads() {
-        return Math.min(Runtime.getRuntime().availableProcessors() * 2 + 1, 8);
+        return Math.min(Runtime.getRuntime().availableProcessors() * 2 + 1, 6);
+    }
+
+    /**
+     * Creates a new <tt>ThreadPool</tt> to execute the given task.
+     * <p><b>Note: Do not call this method directly.</b></p>
+     */
+    public static ThreadPool createImageThreadPool(int coreThreads, int maxThreads) {
+        return new ThreadPool(coreThreads, maxThreads, 60, TimeUnit.SECONDS, new ImageThreadFactory());
     }
 
     @Override
@@ -103,6 +109,12 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         if (task != null) {
             UIHandler.sInstance.execute(this, task);
         }
+    }
+
+    private ThreadPool(int coreThreads, int maxThreads, long keepAliveTime, TimeUnit unit, ThreadFactory factory) {
+        super(coreThreads, maxThreads, keepAliveTime, unit, new SynchronousQueue<Runnable>(), factory);
+        setRejectedExecutionHandler(this);
+        mPendingTasks = new ConcurrentLinkedQueue<Runnable>();
     }
 
     /**
@@ -188,6 +200,22 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         @Override
         public Thread newThread(Runnable runnable) {
             return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet());
+        }
+    }
+
+    /**
+     * Class <tt>ImageThreadFactory</tt> is an implementation of a {@link ThreadFactory}.
+     */
+    private static final class ImageThreadFactory implements ThreadFactory {
+        private final AtomicInteger nameSuffix;
+
+        public ImageThreadFactory() {
+            this.nameSuffix = new AtomicInteger();
+        }
+
+        @Override
+        public Thread newThread(Runnable runnable) {
+            return new PriorityThread(runnable, "ImagePool-thread-" + nameSuffix.incrementAndGet());
         }
     }
 }

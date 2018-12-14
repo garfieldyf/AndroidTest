@@ -1,6 +1,7 @@
 package android.ext.content.image;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -11,6 +12,7 @@ import android.ext.cache.FileCache;
 import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
+import android.ext.concurrent.ThreadPool;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
 import android.ext.content.image.BitmapDecoder.Parameters;
@@ -29,21 +31,33 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
-    public final Executor mExecutor;
 
+    protected final Executor mExecutor;
     protected final FileCache mFileCache;
     protected final Cache<URI, Image> mImageCache;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
+     * @see #ImageModule(Context, int, Cache, FileCache)
      */
-    public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+    public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
+        this(context, Math.min(Runtime.getRuntime().availableProcessors() * 2, 3), imageCache, fileCache);
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param maxThreads The maximum number of threads to allow in the thread pool.
+     * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
+     * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
+     * @see #ImageModule(Context, Cache, FileCache)
+     */
+    public ImageModule(Context context, int maxThreads, Cache<URI, Image> imageCache, FileCache fileCache) {
+        mExecutor = ThreadPool.createImageThreadPool(1, maxThreads);
         mContext  = context.getApplicationContext();
-        mExecutor = executor;
         mFileCache  = fileCache;
         mImageCache = imageCache;
         mContext.registerComponentCallbacks(this);
@@ -52,28 +66,26 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     /**
      * Creates a new {@link Bitmap} module.
      * @param context The <tt>Context</tt>.
-     * @param executor The {@link Executor} to execute load task.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum
      * memory of the current device. Pass <tt>0</tt> that the module has no memory cache.
      * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
      * @return The {@link ImageModule}.
      */
-    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, Executor executor, float scaleMemory, int maxFileSize) {
-        return new ImageModule<URI, Bitmap>(context, executor, Caches.<URI>createBitmapCache(scaleMemory), createFileCache(context, maxFileSize));
+    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, float scaleMemory, int maxFileSize) {
+        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory), createFileCache(context, maxFileSize));
     }
 
     /**
      * Creates a new image module.
      * @param context The <tt>Context</tt>.
-     * @param executor The {@link Executor} to execute load task.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
      * of the current device. Pass <tt>0</tt> that the module has no bitmap cache.
      * @param maxImageSize The maximum number of images in the cache. Pass <tt>0</tt> that the module has no image cache.
      * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
      * @return The {@link ImageModule}.
      */
-    public static <URI> ImageModule<URI, Object> createImageModule(Context context, Executor executor, float scaleMemory, int maxImageSize, int maxFileSize) {
-        return new ImageModule<URI, Object>(context, executor, new LruImageCache<URI, GIFImage>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
+    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxImageSize, int maxFileSize) {
+        return new ImageModule<URI, Object>(context, new LruImageCache<URI, GIFImage>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
     }
 
     /**
@@ -126,6 +138,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      */
     protected static FileCache createFileCache(Context context, int maxSize) {
         return (maxSize > 0 ? new LruFileCache(context, ".image_cache", maxSize) : null);
+    }
+
+    /**
+     * Computes the maximum pool size of the image loader internal pool.
+     */
+    /* package */ static int computeMaximumPoolSize(Executor executor) {
+        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4);
+        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize + 1);
     }
 
     /**
@@ -315,7 +335,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
                 parameters = Parameters.defaultParameters();
             }
 
-            final int maxPoolSize = ImageLoader.computeMaximumPoolSize(mModule.mExecutor);
+            final int maxPoolSize = computeMaximumPoolSize(mModule.mExecutor);
             if (mDecoder instanceof Class) {
                 return createImageDecoder(mModule.mContext, imageCache, parameters, maxPoolSize, (Class)mDecoder);
             } else if (imageCache instanceof LruBitmapCache2) {

@@ -260,7 +260,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
         @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
-            final String imageFile = new StringBuilder(mCacheDir.length() + 16).append(mCacheDir).append('/').append(Thread.currentThread().hashCode()).toString();
+            final String imageFile = mCacheDir + "/" + Thread.currentThread().hashCode();
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
             } finally {
@@ -306,7 +306,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
             if (!isTaskCancelled(task)) {
                 // Loads the image from url, If the image file is not exists or decode failed.
-                final String tempFile = new StringBuilder(imageFile.length() - 30).append(imageFile, 0, imageFile.lastIndexOf('/') + 1).append(Thread.currentThread().hashCode()).toString();
+                final String tempFile = imageFile + "." + Thread.currentThread().hashCode();
                 if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile, imageFile) == 0) {
                     // Saves the image file to file cache, If load succeeded.
                     mCache.put(hashKey, imageFile);

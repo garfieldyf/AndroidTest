@@ -41,21 +41,21 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @param context The <tt>Context</tt>.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
-     * @see #ImageModule(Context, int, Cache, FileCache)
+     * @see #ImageModule(Context, Cache, FileCache, int)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, Math.min(Runtime.getRuntime().availableProcessors() * 2, 3), imageCache, fileCache);
+        this(context, imageCache, fileCache, Math.min(Runtime.getRuntime().availableProcessors() * 2, 3));
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param maxThreads The maximum number of threads to allow in the thread pool.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
+     * @param maxThreads The maximum number of threads to allow in the thread pool.
      * @see #ImageModule(Context, Cache, FileCache)
      */
-    public ImageModule(Context context, int maxThreads, Cache<URI, Image> imageCache, FileCache fileCache) {
+    public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache, int maxThreads) {
         mExecutor = ThreadPool.createImageThreadPool(1, maxThreads);
         mContext  = context.getApplicationContext();
         mFileCache  = fileCache;

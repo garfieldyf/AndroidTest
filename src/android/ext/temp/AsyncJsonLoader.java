@@ -155,12 +155,12 @@ public class AsyncJsonLoader<Result> extends AsyncTaskLoader<String, LoadParams,
     }
 
     private Result download(Task<?, ?> task, String uri, String cacheFile, LoadParams params) throws Exception {
-        final String tempFile = new StringBuilder(128).append(cacheFile, 0, cacheFile.lastIndexOf('/') + 1).append(Thread.currentThread().hashCode()).toString();
+        final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         Result result = null;
         try {
             final int statusCode = params.newDownloadRequest(parseUrl(uri, params)).download(tempFile, task, null);
             if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-                //result = loadFromUri(task, tempFile, params);
+                // result = loadFromUri(task, tempFile, params);
                 result = parseResult(task, cacheFile, tempFile, params);
                 if (result != null && !isTaskCancelled(task)) {
                     FileUtils.moveFile(tempFile, cacheFile);

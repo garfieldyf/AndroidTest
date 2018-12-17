@@ -42,10 +42,10 @@ import android.widget.ImageView;
  *         class="classFullName"
  *         android:src="@xml/transformer1"
  *         android:radius="20dp"
- *         android:topLeftRadius="10dp"
- *         android:topRightRadius="10dp"
- *         android:bottomLeftRadius="10dp"
- *         android:bottomRightRadius="10dp"
+ *         android:topLeftRadius="20dp"
+ *         android:topRightRadius="20dp"
+ *         android:bottomLeftRadius="20dp"
+ *         android:bottomRightRadius="20dp"
  *         app:attribute1="value1"
  *         app:attribute2="value2" /&gt;
  *

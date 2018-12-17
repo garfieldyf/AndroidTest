@@ -97,7 +97,9 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
 
     /**
      * Creates a new <tt>ThreadPool</tt> to execute the given task.
-     * <p><b>Note: Do not call this method directly.</b></p>
+     * @param coreThreads The number of threads to keep in this pool, even if they are idle.
+     * @param maxThreads The maximum number of threads to allow in this pool.
+     * @return The {@link ThreadPool} object.
      */
     public static ThreadPool createImageThreadPool(int coreThreads, int maxThreads) {
         return new ThreadPool(coreThreads, maxThreads, 60, TimeUnit.SECONDS, new ImageThreadFactory());

@@ -232,16 +232,6 @@ public class DownloadRequest {
     }
 
     /**
-     * Returns the specified response header value.
-     * @param field The header field name.
-     * @return The value of the header field, or
-     * <tt>null</tt> if no field has been found.
-     */
-    public final String responseHeader(String field) {
-        return mConnection.getHeaderField(field);
-    }
-
-    /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.

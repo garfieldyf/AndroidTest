@@ -144,7 +144,7 @@
 
         <!-- copy so file -->
         <copy todir="${file.out.dir}" overwrite="true">
-            <fileset dir="${basedir}/../libs" />
+            <fileset dir="${basedir}/../libs" includes="**/*.so" />
         </copy>
 
         <!-- delete obj, libs files -->

@@ -3,11 +3,9 @@
     <!-- env properties -->
     <property environment="env" />
 
-<!-- sdk dir properties
-    <condition property="sdk.dir" value="D:\Google\android-sdk-windows" else="${env.ANDROID_SDK_HOME}">
-        <os family="windows" />
-    </condition>
--->
+    <!-- version.code, version.name -->
+    <property name="version.code" value="1" />
+    <property name="version.name" value="1.0.0" />
 
     <!-- if sdk.dir was not set from one of the property file, then
          get it from the ANDROID_HOME env var.

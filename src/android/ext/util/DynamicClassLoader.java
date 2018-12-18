@@ -110,15 +110,15 @@ public class DynamicClassLoader {
     }
 
     /**
-     * Returns the absolute path to the application specific cache directory on
+     * Returns the absolute path to the application specific files directory on
      * the filesystem designed for storing cached code. <p>The result path such
-     * as <tt>"/data/data/packagename/cache/name"</tt></p>
+     * as <tt>"/data/data/packagename/files/name"</tt></p>
      * @param context The <tt>Context</tt>.
      * @param name The name of the directory to retrieve.
      * @return The path of the cached code directory.
      */
     public static String getCodeCacheDir(Context context, String name) {
-        final String result = FileUtils.buildPath(context.getCacheDir().getPath(), name);
+        final String result = FileUtils.buildPath(context.getFilesDir().getPath(), name);
         FileUtils.mkdirs(result, 0);
         return result;
     }

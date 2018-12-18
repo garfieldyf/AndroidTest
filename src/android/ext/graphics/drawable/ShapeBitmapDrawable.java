@@ -38,14 +38,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     /**
-     * Returns the {@link Path} used by this drawable to render.
-     * @return The {@link Path}.
-     */
-    public final Path getPath() {
-        return mState.mPath;
-    }
-
-    /**
      * Returns the {@link Bitmap} used by this drawable to render.
      * @return The {@link Bitmap}.
      */

@@ -5,16 +5,48 @@
     <property name="java.target" value="1.7" />
     <property name="library.jars.dir" value="E:/Include/java" />
 
-    <!-- version.code, version.name -->
-    <property name="version.code" value="1" />
-    <property name="version.name" value="1.0.0" />
-
     <!-- pre-build target -->
     <target name="-pre-build">
         <!-- clean bin and gen dir -->
         <delete dir="${out.absolute.dir}" verbose="${verbose}" />
         <delete dir="${gen.absolute.dir}" verbose="${verbose}" />
     </target>
+
+    <!-- debug output filename -->
+    <target name="-rename-debug-out-file">
+        <!-- call native build
+        <ant antfile="${basedir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
+        -->
+
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
+        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
+        <property name="funshion.jar.file" value="${basedir}/lib/debug/funshion.jar" />
+
+        <!-- copy debug so files -->
+        <copy todir="${jar.libs.dir}" overwrite="true">
+            <fileset dir="${basedir}/lib/debug" excludes="**/*.jar" />
+        </copy>
+    </target>
+
+    <target name="-set-debug-files" depends="-rename-debug-out-file, android_rules.-set-debug-files" />
+
+    <!-- release output filename -->
+    <target name="-rename-release-out-file">
+        <!-- call native build
+        <ant antfile="${basedir}/jni/build.xml" target="release" inheritAll="false" inheritRefs="false" />
+        -->
+
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
+        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
+        <property name="funshion.jar.file" value="${basedir}/lib/release/funshion.jar" />
+
+        <!-- copy release so files -->
+        <copy todir="${jar.libs.dir}" overwrite="true">
+            <fileset dir="${basedir}/lib/release" excludes="**/*.jar" />
+        </copy>
+    </target>
+
+    <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
 
     <!-- include jars -->
     <target name="-pre-compile">
@@ -27,6 +59,11 @@
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${library.jars.dir}/zxing/zxing.jar" />
+        </path>
+
+        <path id="funshion.jar.path">
+            <path path="${toString:project.all.jars.path}" />
+            <pathelement location="${funshion.jar.file}" />
         </path>
 
         <path id="vasdolly.jar.path">
@@ -65,48 +102,6 @@
         <echo message="program jars : ${toString:project.all.jars.path}" />
     </target>
 
-    <!-- debug output filename -->
-    <target name="-rename-debug-out-file">
-        <!-- call native build
-        <ant antfile="${basedir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
-        -->
-
-        <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
-        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
-
-        <!-- copy debug so files -->
-        <copy todir="${jar.libs.dir}" overwrite="true">
-            <fileset dir="${basedir}/lib/debug" excludes="**/*.jar" />
-        </copy>
-
-        <path id="funshion.jar.path">
-            <pathelement location="${basedir}/lib/debug/funshion.jar" />
-        </path>
-    </target>
-
-    <target name="-set-debug-files" depends="-rename-debug-out-file, android_rules.-set-debug-files" />
-
-    <!-- release output filename -->
-    <target name="-rename-release-out-file">
-        <!-- call native build
-        <ant antfile="${basedir}/jni/build.xml" target="release" inheritAll="false" inheritRefs="false" />
-        -->
-
-        <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
-        <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
-
-        <!-- copy release so files -->
-        <copy todir="${jar.libs.dir}" overwrite="true">
-            <fileset dir="${basedir}/lib/release" excludes="**/*.jar" />
-        </copy>
-
-        <path id="funshion.jar.path">
-            <pathelement location="${basedir}/lib/release/funshion.jar" />
-        </path>
-    </target>
-
-    <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
-
     <!-- properties for signing -->
     <property name="key.store" value="${basedir}/AuroraKS.keystore" />
     <property name="key.alias" value="aurora" />
@@ -127,10 +122,17 @@
             <fileset dir="${out.absolute.dir}" excludes="${out.file.name} ${mapping.file.name}" />
         </delete>
 
-        <!-- build channel apks -->
+        <!-- build channel apk files -->
         <property name="vasdolly.channel.jar.path" value="${library.jars.dir}/vasdolly/vasdolly.jar" />
         <exec executable="cmd.exe">
             <arg line="/C java -jar ${vasdolly.channel.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>
+
+        <!-- copy the build apk files -->
+        <property name="out.final.dir" value="${basedir}/out/${version.name}" />
+        <mkdir dir="${out.final.dir}" />
+        <copy todir="${out.final.dir}" overwrite="true">
+            <fileset dir="${out.absolute.dir}" />
+        </copy>
     </target>
 </project>

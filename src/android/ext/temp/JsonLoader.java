@@ -1,32 +1,21 @@
 package android.ext.temp;
 
-import java.util.concurrent.Executor;
+import java.io.File;
+import java.io.IOException;
 import org.json.JSONObject;
 import android.app.Activity;
-import android.content.Context;
+import android.ext.net.DownloadRequest;
+import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
-import android.net.Uri;
+import com.tencent.test.MainApplication;
 
-public class JsonLoader extends AsyncJsonLoader<JSONObject> {
-    public JsonLoader(Context context, Executor executor, Object owner) {
-        super(context, executor, owner);
+public class JsonLoader extends AsyncJsonLoader<Object, JSONObject> {
+    public JsonLoader(Object owner) {
+        super(MainApplication.sInstance.getExecutor(), owner);
     }
 
     @Override
-    protected String parseUrl(String uri, LoadParams params) {
-        return Uri.parse(uri).buildUpon()
-            .appendQueryParameter("mode", "mode")
-            .appendQueryParameter("mac", "mac")
-            .toString();
-    }
-
-    @Override
-    protected boolean validateResult(LoadParams params, JSONObject result) {
-        return (JSONUtils.optInt(result, "retCode", 0) == 200);
-    }
-
-    @Override
-    protected void onProgressUpdate(String key, LoadParams[] params, Object[] values) {
+    protected void onProgressUpdate(Object key, LoadParams<Object, JSONObject>[] params, Object[] values) {
         final Activity activity = getOwner();
         if (activity == null || activity.isDestroyed()) {
             return;
@@ -43,7 +32,7 @@ public class JsonLoader extends AsyncJsonLoader<JSONObject> {
     }
 
     @Override
-    protected void onLoadComplete(String key, LoadParams[] params, JSONObject result) {
+    protected void onLoadComplete(Object key, LoadParams<Object, JSONObject>[] params, JSONObject result) {
         final Activity activity = getOwner();
         if (activity == null || activity.isDestroyed()) {
             return;
@@ -55,11 +44,30 @@ public class JsonLoader extends AsyncJsonLoader<JSONObject> {
         if (result != null) {
             // Update UI
             // ... ...
-        } else if (!params[0].hitCache()) {
+        } else if (!params[0].isHitCache()) {
+            // Load failed and cache not hit.
             // Show error UI.
             // ... ...
+        } else {
+            // Hit cache, do nothing.
+        }
+    }
+
+    public static final class JsonParams extends LoadParams<Object, JSONObject> {
+        @Override
+        public String getCacheFile(Object key) {
+            // return new File(MainApplication.sInstance.getFilesDir(), ".json_files/" + key.toString()).getPath();
+            return new File(FileUtils.getCacheDir(MainApplication.sInstance, ".json_files"), key.toString()).getPath();
         }
 
-        // Hit cache, do nothing.
+        @Override
+        public boolean validateResult(Object key, JSONObject result) {
+            return (JSONUtils.optInt(result, "retCode", 0) == 200);
+        }
+
+        @Override
+        public DownloadRequest newDownloadRequest(Object key) throws IOException {
+            return new DownloadRequest(key.toString()).connectTimeout(10000).readTimeout(10000);
+        }
     }
 }

@@ -34,8 +34,6 @@ public final class Pages {
      * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
      * @return The index of the page.
      * @see #getOriginalPosition(long)
-     * @see PageAdapter#getPageForPosition(int)
-     * @see RecyclerPageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPage(long combinedPosition) {
         DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
@@ -47,8 +45,6 @@ public final class Pages {
      * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
      * @return The index of the item in the page.
      * @see #getOriginalPage(long)
-     * @see PageAdapter#getPageForPosition(int)
-     * @see RecyclerPageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPosition(long combinedPosition) {
         DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");

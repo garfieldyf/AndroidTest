@@ -125,7 +125,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
     private static final class SerialExecutor implements Executor {
         private Runnable mActive;
         private final Executor mExecutor;
-        private final Queue<Runnable> mTasks;
+        private final ArrayDeque<Runnable> mTasks;
 
         public SerialExecutor(Executor executor) {
             mExecutor = executor;
@@ -135,7 +135,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         @Override
         public synchronized void execute(Runnable task) {
             // Adds the new task to the task queue.
-            mTasks.offer(new Task(task));
+            mTasks.addLast(new Task(task));
 
             // If mActive is not running, run it.
             if (mActive == null) {
@@ -144,7 +144,7 @@ public class ThreadPool extends ThreadPoolExecutor implements RejectedExecutionH
         }
 
         public synchronized void scheduleNext() {
-            if ((mActive = mTasks.poll()) != null) {
+            if ((mActive = mTasks.pollFirst()) != null) {
                 mExecutor.execute(mActive);
             }
         }

@@ -79,7 +79,7 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     }
 
     @Override
-    /* package */ final void dump(Context context, Printer printer) {
+    /* package */ void dump(Context context, Printer printer) {
         final String className = getClass().getSimpleName();
         final StringBuilder result = new StringBuilder(256);
         final Collection<String> files = snapshot().values();

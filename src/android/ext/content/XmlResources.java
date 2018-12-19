@@ -9,6 +9,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.content.image.BackgroundBinder;
 import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.content.image.BitmapDecoder.PercentParameters;
 import android.ext.content.image.BitmapDecoder.ScaleParameters;
@@ -188,6 +189,9 @@ public final class XmlResources {
 
             case "TransitionBinder":
                 return new TransitionBinder(context, attrs);
+
+            case "BackgroundBinder":
+                return new BackgroundBinder(context, attrs);
 
             default:
                 return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);

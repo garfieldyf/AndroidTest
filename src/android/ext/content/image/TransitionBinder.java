@@ -25,7 +25,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #TransitionBinder(TransitionBinder, Drawable, int)
+     * @see #TransitionBinder(ImageBinder, Drawable, int)
      * @see #TransitionBinder(Cache, Transformer, Drawable, int)
      */
     public TransitionBinder(Context context, AttributeSet attrs) {
@@ -36,13 +36,13 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * Copy constructor
      * <p>Creates a new {@link TransitionBinder} from the specified <em>binder</em>. The returned binder will
      * be share the drawable cache with the <em>binder</em>.</p>
-     * @param binder The <tt>TransitionBinder</tt> to copy.
+     * @param binder The <tt>ImageBinder</tt> to copy.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @param durationMillis The length of the transition in milliseconds.
      * @see #TransitionBinder(Context, AttributeSet)
      * @see #TransitionBinder(Cache, Transformer, Drawable, int)
      */
-    public TransitionBinder(TransitionBinder<URI, Image> binder, Drawable defaultImage, int durationMillis) {
+    public TransitionBinder(ImageBinder<URI, Image> binder, Drawable defaultImage, int durationMillis) {
         super(binder, defaultImage);
         mDuration = durationMillis;
     }
@@ -54,11 +54,19 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @param durationMillis The length of the transition in milliseconds.
      * @see #TransitionBinder(Context, AttributeSet)
-     * @see #TransitionBinder(TransitionBinder, Drawable, int)
+     * @see #TransitionBinder(ImageBinder, Drawable, int)
      */
     public TransitionBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage, int durationMillis) {
         super(imageCache, transformer, defaultImage);
         mDuration = durationMillis;
+    }
+
+    /**
+     * Returns the length of the transition in milliseconds.
+     * @return The length of the transition in milliseconds.
+     */
+    public final int getDuration() {
+        return mDuration;
     }
 
     @Override

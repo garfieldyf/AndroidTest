@@ -49,7 +49,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         Result result = null;
         try {
             final LoadParams params = args[0];
-            final String cacheFile = params.getCacheFile(key);
+            final String cacheFile  = params.getCacheFile(key);
             if (TextUtils.isEmpty(cacheFile)) {
                 result = params.newDownloadRequest(key).download(task, null);
             } else {
@@ -88,7 +88,6 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         try {
             final int statusCode = params.newDownloadRequest(key).download(tempFile, task, null);
             if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-                // result = loadFromFile(task, key, params, tempFile);
                 result = parseResult(task, key, params, cacheFile, tempFile);
                 if (result != null && !isTaskCancelled(task)) {
                     FileUtils.moveFile(tempFile, cacheFile);
@@ -102,20 +101,15 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     }
 
     private Result parseResult(Task task, Key key, LoadParams params, String cacheFile, String tempFile) throws Exception {
-        if (!params.mHitCache) {
-            return loadFromFile(task, key, params, tempFile);
+        if (params.mHitCache) {
+            final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
+            final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
+            if (Arrays.equals(digest1, digest2)) {
+                return null;
+            }
         }
 
-        Result result = null;
-        final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
-        final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
-        if (Arrays.equals(digest1, digest2)) {
-            task.cancel(false);
-        } else {
-            result = loadFromFile(task, key, params, tempFile);
-        }
-
-        return result;
+        return loadFromFile(task, key, params, tempFile);
     }
 
     /**

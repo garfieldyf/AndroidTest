@@ -101,7 +101,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     /**
      * Copy constructor
      * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will be
-     * share the drawable cache with the <em>binder</em>.</p>
+     * share the drawable cache and transformer with the <em>binder</em>.</p>
      * @param binder The <tt>ImageBinder</tt> to copy.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @see #ImageBinder(Context, AttributeSet)

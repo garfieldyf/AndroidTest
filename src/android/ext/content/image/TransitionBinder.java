@@ -35,7 +35,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     /**
      * Copy constructor
      * <p>Creates a new {@link TransitionBinder} from the specified <em>binder</em>. The returned binder will
-     * be share the drawable cache with the <em>binder</em>.</p>
+     * be share the drawable cache and transformer with the <em>binder</em>.</p>
      * @param binder The <tt>ImageBinder</tt> to copy.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @param durationMillis The length of the transition in milliseconds.

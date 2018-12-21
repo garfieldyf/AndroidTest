@@ -17,11 +17,21 @@ public final class Pools {
      * @param factory The {@link Factory} to create
      * a new element when the pool is empty.
      * @return The newly created <tt>Pool</tt>.
-     * @see #newPool(Factory, int)
-     * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newSimplePool(Factory<T> factory) {
         return new SimplePool<T>(factory);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> byte array {@link Pool}.
+     * @param maxSize The maximum number of byte arrays to allow in the pool.
+     * @param bufferSize The maximum number of bytes in the each byte array.
+     * Suggest 8K, 16K, etc.
+     * @return The newly byte array <tt>Pool</tt>.
+     * @see #synchronizedPool(Pool)
+     */
+    public static Pool<byte[]> newPool(int maxSize, int bufferSize) {
+        return new ByteArrayPool(maxSize, bufferSize);
     }
 
     /**
@@ -30,7 +40,6 @@ public final class Pools {
      * when the pool is empty.
      * @param maxSize The maximum number of elements in the pool.
      * @return The newly created <tt>Pool</tt>.
-     * @see #newSimplePool(Factory)
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
@@ -41,7 +50,7 @@ public final class Pools {
      * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
      * @param animation The initial property animation.
      * @param maxSize The maximum number of animators in the pool.
-     * @return The newly created <tt>Pool</tt>.
+     * @return The newly animator <tt>Pool</tt>.
      * @see #newPool(Context, int, int)
      */
     public static Pool<Animator> newPool(Animator animation, int maxSize) {
@@ -53,7 +62,7 @@ public final class Pools {
      * @param context The <tt>Context</tt>.
      * @param resId The resource id of the property animation to load.
      * @param maxSize The maximum number of animators in the pool.
-     * @return The newly created <tt>Pool</tt>.
+     * @return The newly animator <tt>Pool</tt>.
      * @see #newPool(Animator, int)
      */
     public static Pool<Animator> newPool(Context context, int resId, int maxSize) {
@@ -65,8 +74,6 @@ public final class Pools {
      * all access to the pool.
      * @param pool The <tt>Pool</tt> to wrap in a synchronized pool.
      * @return A synchronized <tt>Pool</tt>.
-     * @see #newSimplePool(Factory)
-     * @see #newPool(Factory, int)
      */
     public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
         return new SynchronizedPool<T>(pool);
@@ -202,28 +209,53 @@ public final class Pools {
             return toString(getClass().getSimpleName());
         }
 
-        public final String toString(String className) {
-            return toString(new StringBuilder(96).append(className)
-                .append(" [ size = ").append(size)
-                .append(", maxSize = ").append(elements.length))
-                .append(" ]").toString();
-        }
-
         public final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(96);
             DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
             for (int i = 0; i < size; ++i) {
                 result.setLength(0);
-                printer.println(result.append("  ").append(elements[i]).toString());
+                printer.println(dump(result, elements[i]));
             }
         }
 
-        private StringBuilder toString(StringBuilder result) {
+        /* package */ final String toString(String className) {
+            final StringBuilder result = new StringBuilder(96).append(className).append(" [ size = ").append(size).append(", maxSize = ").append(elements.length);
             if (size > 0) {
                 result.append(", elementType = ").append(elements[0].getClass().getSimpleName());
             }
 
-            return result;
+            return result.append(" ]").toString();
+        }
+
+        /* package */ String dump(StringBuilder result, Object element) {
+            return result.append("  ").append(element).toString();
+        }
+    }
+
+    /**
+     * Class <tt>ByteArrayPool</tt> is an implementation of a {@link Pool}.
+     */
+    private static final class ByteArrayPool extends ArrayPool<byte[]> {
+        private final int bufferSize;
+
+        /**
+         * Constructor
+         * @param maxSize The maximum number of byte arrays to allow in this pool.
+         * @param bufferSize The maximum number of bytes in the each byte array.
+         */
+        public ByteArrayPool(int maxSize, int bufferSize) {
+            super(maxSize);
+            this.bufferSize = bufferSize;
+        }
+
+        @Override
+        public byte[] newInstance() {
+            return new byte[bufferSize];
+        }
+
+        @Override
+        /* package */ String dump(StringBuilder result, Object element) {
+            return result.append("  ").append(element).append(", length = ").append(((byte[])element).length).toString();
         }
     }
 
@@ -274,13 +306,9 @@ public final class Pools {
         public void onAnimationRepeat(Animator animation) {
         }
 
-        public final void dump(Printer printer) {
-            final StringBuilder result = new StringBuilder(96);
-            DebugUtils.dumpSummary(printer, result, 80, " Dumping AnimatorPool [ size = %d, maxSize = %d ] ", size, elements.length);
-            for (int i = 0; i < size; ++i) {
-                result.setLength(0);
-                printer.println(DebugUtils.toString(elements[i], result.append("  ")).toString());
-            }
+        @Override
+        /* package */ String dump(StringBuilder result, Object element) {
+            return DebugUtils.toString(element, result.append("  ")).toString();
         }
     }
 
@@ -322,12 +350,10 @@ public final class Pools {
     }
 
     public static void dumpPool(Pool<?> pool, Printer printer) {
-        if (pool instanceof AnimatorPool) {
-            ((AnimatorPool)pool).dump(printer);
-        } else if (pool instanceof ArrayPool) {
-            ((ArrayPool<?>)pool).dump(printer, "ArrayPool");
-        } else if (pool instanceof SynchronizedPool) {
+        if (pool instanceof SynchronizedPool) {
             ((SynchronizedPool<?>)pool).dump(printer);
+        } else if (pool instanceof ArrayPool) {
+            ((ArrayPool<?>)pool).dump(printer, pool.getClass().getSimpleName());
         }
     }
 

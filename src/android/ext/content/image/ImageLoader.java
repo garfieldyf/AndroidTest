@@ -14,7 +14,6 @@ import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.Pools;
-import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
@@ -56,7 +55,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(mLoader, ImageModule.computeMaximumPoolSize(executor)));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(ImageModule.computeMaximumPoolSize(executor), 16384));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
     }
 
@@ -104,14 +103,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public final void loadImage(URI uri, Object target, int flags, Binder<URI, Object, Image> binder) {
         load(uri, target, flags, binder, (Object[])null);
-    }
-
-    /**
-     * Returns the {@link FileCache} associated with this loader.
-     * @return The <tt>FileCache</tt> or <tt>null</tt>.
-     */
-    public final FileCache getFileCache() {
-        return mLoader.getFileCache();
     }
 
     /**
@@ -212,26 +203,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Class <tt>Loader</tt> used to load image from the specified url.
+     * Interface <tt>Loader</tt> used to load image from the specified url.
      */
-    /* package */ static abstract class Loader<Image> implements Factory<byte[]> {
-        /**
-         * Returns a new byte array.
-         * @return A new byte array.
-         */
-        @Override
-        public byte[] newInstance() {
-            return new byte[16384];
-        }
-
-        /**
-         * Returns the {@link FileCache} associated with this loader.
-         * @return The <tt>FileCache</tt> or <tt>null</tt>.
-         */
-        public FileCache getFileCache() {
-            return null;
-        }
-
+    public static interface Loader<Image> {
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
@@ -241,13 +215,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        public abstract Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
+        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader extends Loader<Image> {
+    private final class URLLoader implements Loader<Image> {
         private final String mCacheDir;
 
         /**
@@ -272,7 +246,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader extends Loader<Image> {
+    private final class FileCacheLoader implements Loader<Image> {
         private final FileCache mCache;
 
         /**
@@ -281,11 +255,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          */
         public FileCacheLoader(FileCache cache) {
             mCache = cache;
-        }
-
-        @Override
-        public FileCache getFileCache() {
-            return mCache;
         }
 
         @Override

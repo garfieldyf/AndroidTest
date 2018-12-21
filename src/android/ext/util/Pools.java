@@ -115,7 +115,7 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static class SimplePool<T> implements Pool<T> {
+    private static final class SimplePool<T> implements Pool<T> {
         private final Factory<T> factory;
         private final AtomicReference<T> referent;
 

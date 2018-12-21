@@ -487,7 +487,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Class <tt>RectPool</tt>.
+     * Class <tt>RectPool</tt> is an one-size {@link Rect} pool.
      */
     public static final class RectPool implements Factory<Rect> {
         private static final RectPool sInstance = new RectPool();
@@ -508,7 +508,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Class <tt>RectFPool</tt>.
+     * Class <tt>RectFPool</tt> is an one-size {@link RectF} pool.
      */
     public static final class RectFPool implements Factory<RectF> {
         private static final RectFPool sInstance = new RectFPool();
@@ -529,7 +529,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Class <tt>MatrixPool</tt>.
+     * Class <tt>MatrixPool</tt> is an one-size {@link Matrix} pool.
      */
     public static final class MatrixPool implements Factory<Matrix> {
         private static final MatrixPool sInstance = new MatrixPool();
@@ -550,7 +550,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Class <tt>FontMetricsPool</tt>.
+     * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
     public static final class FontMetricsPool implements Factory<FontMetrics> {
         private static final FontMetricsPool sInstance = new FontMetricsPool();

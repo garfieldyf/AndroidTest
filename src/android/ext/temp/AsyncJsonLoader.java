@@ -24,7 +24,7 @@ import android.util.Log;
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, Result> {
+public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key>, Result> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -44,8 +44,20 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         super(executor, owner);
     }
 
+    /**
+     * Tests if the <em>result</em> is valid. Subclasses should override this method to
+     * validate the <em>result</em>.
+     * @param key The key, passed earlier by {@link #load}.
+     * @param params The {@link LoadParams}, passed earlier by {@link #load}.
+     * @param result The JSON value. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
+     * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
+     */
+    protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
+        return true;
+    }
+
     @Override
-    protected Result loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] args) {
+    protected Result loadInBackground(Task<?, ?> task, Key key, LoadParams<Key>[] args) {
         Result result = null;
         try {
             final LoadParams params = args[0];
@@ -59,7 +71,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
                 }
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't load JSON - key = ").append(key).append('\n').append(e).toString());
+            Log.e(getClass().getName(), "Couldn't load JSON value - key = " + key + "\n" + e);
         }
 
         return result;
@@ -68,54 +80,41 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     private void loadFromCache(Task task, Key key, LoadParams params, String cacheFile) {
         Result result = null;
         try {
-            result = loadFromFile(task, key, params, cacheFile);
+            result = JSONUtils.newInstance(cacheFile, task);
         } catch (Exception e) {
-            // Ignored.
+            Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
         }
 
         params.mHitCache = (result != null);
         task.setProgress(result);
     }
 
-    private Result loadFromFile(Task task, Key key, LoadParams params, String jsonFile) throws Exception {
-        final Result result = JSONUtils.newInstance(jsonFile, task);
-        return (params.validateResult(key, result) ? result : null);
-    }
-
     private Result download(Task task, Key key, LoadParams params, String cacheFile) throws Exception {
-        final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        Result result = null;
-        try {
-            final int statusCode = params.newDownloadRequest(key).download(tempFile, task, null);
-            if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-                result = parseResult(task, key, params, cacheFile, tempFile);
-                if (result != null && !isTaskCancelled(task)) {
-                    FileUtils.moveFile(tempFile, cacheFile);
+        final String tempFile = cacheFile + ".tmp";
+        final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
+        if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
+            if (params.mHitCache) {
+                final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
+                final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
+                if (Arrays.equals(digest1, digest2)) {
+                    return null;
                 }
             }
-        } finally {
-            FileUtils.deleteFiles(tempFile, false);
-        }
 
-        return result;
-    }
-
-    private Result parseResult(Task task, Key key, LoadParams params, String cacheFile, String tempFile) throws Exception {
-        if (params.mHitCache) {
-            final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
-            final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
-            if (Arrays.equals(digest1, digest2)) {
-                return null;
+            final Result result = JSONUtils.newInstance(tempFile, task);
+            if (!isTaskCancelled(task) && validateResult(key, params, result)) {
+                FileUtils.moveFile(tempFile, cacheFile);
+                return result;
             }
         }
 
-        return loadFromFile(task, key, params, tempFile);
+        return null;
     }
 
     /**
      * Class <tt>LoadParams</tt> used to {@link AsyncJsonLoader} to load JSON value.
      */
-    public static abstract class LoadParams<Key, Result> {
+    public static abstract class LoadParams<Key> {
         /* package */ volatile boolean mHitCache;
 
         /**
@@ -133,17 +132,6 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
          */
         public String getCacheFile(Key key) {
             return null;
-        }
-
-        /**
-         * Tests if the <em>result</em> is valid. Subclasses should override this method to
-         * validate the <em>result</em>. The default implementation returns <tt>true</tt>.
-         * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
-         * @param result The JSON value. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
-         * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
-         */
-        public boolean validateResult(Key key, Result result) {
-            return true;
         }
 
         /**

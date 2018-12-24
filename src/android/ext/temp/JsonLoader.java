@@ -18,7 +18,21 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     @Override
-    protected void onProgressUpdate(String url, LoadParams<String, JSONObject>[] params, Object[] values) {
+    protected void onStartLoading(String url, LoadParams<String>[] params) {
+        if (params[0] instanceof JsonParams) {
+            // Show loading UI
+            // ... ...
+            Log.i("abc", "Show loading UI.");
+        }
+    }
+
+    @Override
+    protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
+        return (JSONUtils.optInt(result, "retCode", 0) == 200);
+    }
+
+    @Override
+    protected void onProgressUpdate(String url, LoadParams<String>[] params, Object[] values) {
         final Activity activity = getOwner();
         if (activity == null || activity.isDestroyed()) {
             return;
@@ -37,7 +51,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     @Override
-    protected void onLoadComplete(String url, LoadParams<String, JSONObject>[] params, JSONObject result) {
+    protected void onLoadComplete(String url, LoadParams<String>[] params, JSONObject result) {
         final Activity activity = getOwner();
         if (activity == null || activity.isDestroyed()) {
             return;
@@ -58,10 +72,17 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
     }
 
-    public static class CacheLoadParams extends LoadParams<String, JSONObject> {
+    public static class JsonParams extends LoadParams<String> {
+        @Override
+        public DownloadRequest newDownloadRequest(String url) throws IOException {
+            return new DownloadRequest(url).connectTimeout(20000).readTimeout(20000);
+        }
+    }
+
+    public static class CacheJsonParams extends LoadParams<String> {
         public final Context mContext;
 
-        public CacheLoadParams(Context context) {
+        public CacheJsonParams(Context context) {
             mContext = context.getApplicationContext();
         }
 
@@ -69,11 +90,6 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         public String getCacheFile(String url) {
             final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
             return StringUtils.toHexString(new StringBuilder(mContext.getFilesDir().getPath()).append("/.json_files/"), digest, 0, digest.length, true).toString();
-        }
-
-        @Override
-        public boolean validateResult(String url, JSONObject result) {
-            return (JSONUtils.optInt(result, "retCode", 0) == 200);
         }
 
         @Override

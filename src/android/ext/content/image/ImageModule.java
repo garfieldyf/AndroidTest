@@ -89,6 +89,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     }
 
     /**
+     * Returns a {@link Builder} to creates an {@link ImageLoader}.
+     * @return The <tt>Builder</tt>.
+     */
+    public Builder<URI, Image> createImageLoader() {
+        return new Builder<URI, Image>(this);
+    }
+
+    /**
      * Returns the {@link Executor} associated with this object.
      * @return The <tt>Executor</tt>.
      */
@@ -110,14 +118,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      */
     public final Cache<URI, Image> getImageCache() {
         return mImageCache;
-    }
-
-    /**
-     * Returns a {@link Builder} to creates an {@link ImageLoader}.
-     * @return The <tt>Builder</tt>.
-     */
-    public final Builder<URI, Image> createImageLoader() {
-        return new Builder<URI, Image>(this);
     }
 
     public final void dump(Printer printer) {

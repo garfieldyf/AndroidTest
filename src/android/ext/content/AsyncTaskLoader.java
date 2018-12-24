@@ -202,7 +202,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
 
         @Override
         /* package */ void onProgress(Params[] params, Object[] values) {
-            if (mState != SHUTDOWN && !isCancelled()) {
+            if (mState != SHUTDOWN) {
                 onProgressUpdate(mKey, params, values);
             }
         }

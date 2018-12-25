@@ -121,7 +121,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #peekPage(int)
      */
-    public final Page<E> getPage(int page) {
+    public Page<E> getPage(int page) {
         return mImpl.getPage(page, mImpl.getPositionForPage(page, 0));
     }
 
@@ -133,7 +133,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #getPage(int)
      */
-    public final Page<E> peekPage(int page) {
+    public Page<E> peekPage(int page) {
         DebugUtils.__checkUIThread("peekPage");
         return mImpl.mPageCache.get(page);
     }

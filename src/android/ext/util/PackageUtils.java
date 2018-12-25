@@ -317,7 +317,7 @@ public final class PackageUtils {
          * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable)</tt>.
          * @param dirPath The path of directory, must be absolute file path.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally then the returned value is undefined.
+         * If the parse was cancelled before it completed normally the returned value is undefined.
          * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects., <tt>null</tt> otherwise.
          * @see #parsePackages(String, int, int, Cancelable)
          * @see #parsePackages(String, int, int, Cancelable, List)
@@ -334,7 +334,7 @@ public final class PackageUtils {
          * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
          * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally then the returned value is undefined.
+         * If the parse was cancelled before it completed normally the returned value is undefined.
          * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects., <tt>null</tt> otherwise.
          * @see #parsePackages(String, Cancelable)
          * @see #parsePackages(String, int, int, Cancelable, List)
@@ -351,7 +351,7 @@ public final class PackageUtils {
          * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
          * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally then the <em>outResults's</em> contents are undefined.
+         * If the parse was cancelled before it completed normally the <em>outResults's</em> contents are undefined.
          * @param outResults A <tt>List</tt> to store the {@link AbsPackageInfo} subclass objects.
          * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
          * @see #parsePackages(String, Cancelable)

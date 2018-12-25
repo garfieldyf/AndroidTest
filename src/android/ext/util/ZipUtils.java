@@ -27,7 +27,7 @@ public final class ZipUtils {
      * @param out The <tt>OutputStream</tt> to write the compressed data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * then the <em>out's</em> contents is undefined.
+     * the <em>out's</em> contents is undefined.
      * @throws IOException if an error occurs while compressing data.
      * @see #compress(byte[], int, int, OutputStream)
      * @see #uncompress(InputStream, OutputStream, Cancelable)
@@ -68,7 +68,7 @@ public final class ZipUtils {
      * @param out The <tt>OutputStream</tt> to write the uncompressed data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * then the <em>out's</em> contents is undefined.
+     * the <em>out's</em> contents is undefined.
      * @throws IOException if an error occurs while compressing data.
      * @see #compress(byte[], int, int, OutputStream)
      * @see #compress(InputStream, OutputStream, Cancelable)
@@ -89,7 +89,7 @@ public final class ZipUtils {
      * See {@link ZipOutputStream#setLevel(int)}.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * then the <em>zipFile's</em> contents is undefined.
+     * the <em>zipFile's</em> contents is undefined.
      * @param files An array of filenames to compress, must be absolute file path.
      * @throws IOException if an error occurs while compressing <em>files</em> contents.
      * @see #compress(String, int, List, Cancelable)
@@ -107,7 +107,7 @@ public final class ZipUtils {
      * @param files A <tt>List</tt> of filenames to compress, must be absolute file path.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * then the <em>zipFile's</em> contents is undefined.
+     * the <em>zipFile's</em> contents is undefined.
      * @throws IOException if an error occurs while compressing <em>files</em> contents.
      * @see #compress(String, int, Cancelable, String[])
      * @see #uncompress(String, String, Cancelable)
@@ -140,8 +140,8 @@ public final class ZipUtils {
      * @param zipFile The ZIP filename to uncompress.
      * @param outPath The uncompressed path, must be absolute path.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt>
-     * if none. If the operation was cancelled before it completed normally then the uncompressed files
-     * in <em>outPath</em> is undefined.
+     * if none. If the operation was cancelled before it completed normally the uncompressed files in
+     * <em>outPath</em> is undefined.
      * @throws IOException if an error occurs while uncompressing ZIP file.
      * @see #compress(String, int, List, Cancelable)
      * @see #compress(String, int, Cancelable, String[])

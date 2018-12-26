@@ -68,7 +68,7 @@
 
         <path id="vasdolly.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}/vasdolly/vasdolly-channel.jar" />
+            <pathelement location="${library.jars.dir}/vasdolly/vasdolly.jar" />
         </path>
 
         <path id="support.v4.jar.path">
@@ -123,9 +123,9 @@
         </delete>
 
         <!-- build channel apk files -->
-        <property name="vasdolly.channel.jar.path" value="${library.jars.dir}/vasdolly/vasdolly.jar" />
+        <property name="vasdolly.cmd.jar.path" value="${library.jars.dir}/vasdolly/vasdolly-cmd.jar" />
         <exec executable="cmd.exe">
-            <arg line="/C java -jar ${vasdolly.channel.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
+            <arg line="/C java -jar ${vasdolly.cmd.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>
 
         <!-- copy the build apk files -->

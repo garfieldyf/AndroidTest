@@ -116,7 +116,7 @@ public final class ZipUtils {
         // Creates the necessary directories.
         DebugUtils.__checkError(ArrayUtils.getSize(files) == 0, "Invalid parameter - The files is null or 0-size");
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
-        cancelable = CancelableWrapper.wrap(cancelable);
+        cancelable = FileUtils.wrap(cancelable);
 
         // Creates the ZipOutputStream.
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
@@ -150,7 +150,7 @@ public final class ZipUtils {
         final ZipFile file = new ZipFile(zipFile);
         try {
             // Creates the necessary directories.
-            cancelable = CancelableWrapper.wrap(cancelable);
+            cancelable = FileUtils.wrap(cancelable);
             FileUtils.mkdirs(outPath, 0);
 
             // Enumerates the ZIP file entries.

@@ -14,19 +14,3 @@ public interface Cancelable {
      */
     boolean isCancelled();
 }
-
-/**
- * A <tt>CancelableWrapper</tt>.
- */
-/* package */ final class CancelableWrapper implements Cancelable {
-    private static final Cancelable sInstance = new CancelableWrapper();
-
-    public static Cancelable wrap(Cancelable cancelable) {
-        return (cancelable != null ? cancelable : sInstance);
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return false;
-    }
-}

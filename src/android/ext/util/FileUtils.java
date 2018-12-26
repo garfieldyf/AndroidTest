@@ -481,7 +481,7 @@ public final class FileUtils {
         if (dst instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)dst).readFrom(src, cancelable);
         } else {
-            copyStreamImpl(src, dst, CancelableWrapper.wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
+            copyStreamImpl(src, dst, wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
         }
     }
 
@@ -634,6 +634,13 @@ public final class FileUtils {
      * @see #createFile(String, long)
      */
     public static native String createUniqueFile(String filename, long length);
+
+    /**
+     * Wrap the specified <tt>Cancelable</tt>, handling <tt>null cancelable</tt>.
+     */
+    /* package */ static Cancelable wrap(Cancelable cancelable) {
+        return (cancelable != null ? cancelable : CancelableImpl.sInstance);
+    }
 
     /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
@@ -1492,6 +1499,18 @@ public final class FileUtils {
      */
     private static final class RegexPattern {
         public static final Pattern sInstance = Pattern.compile("[\\w%+,./=_-]+");
+    }
+
+    /**
+     * Class <tt>CancelableImpl</tt> is an implementation of a {@link Cancelable}.
+     */
+    private static final class CancelableImpl implements Cancelable {
+        public static final Cancelable sInstance = new CancelableImpl();
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
     }
 
     /**

@@ -462,7 +462,7 @@ public final class PackageUtils {
         public ParsedResult(List result, int parseFlags, Cancelable cancelable) {
             this.result = result;
             this.parseFlags = parseFlags;
-            this.cancelable = CancelableWrapper.wrap(cancelable);
+            this.cancelable = FileUtils.wrap(cancelable);
         }
     }
 

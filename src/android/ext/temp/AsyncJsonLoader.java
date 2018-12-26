@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
+import android.content.Context;
 import android.ext.content.AsyncTaskLoader;
 import android.ext.net.DownloadRequest;
 import android.ext.temp.AsyncJsonLoader.LoadParams;
@@ -11,6 +12,7 @@ import android.ext.util.FileUtils;
 import android.ext.util.JSONUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
+import android.ext.util.StringUtils;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -141,5 +143,34 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
          * @throws IOException if an error occurs while opening the connection.
          */
         public abstract DownloadRequest newDownloadRequest(Key key) throws IOException;
+    }
+
+    /**
+     * Class <tt>CacheLoadParams</tt> is an implementation of a {@link LoadParams}.
+     */
+    public static class CacheLoadParams extends LoadParams<String> {
+        /**
+         * The application <tt>Context</tt>.
+         */
+        public final Context mContext;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         */
+        public CacheLoadParams(Context context) {
+            mContext = context.getApplicationContext();
+        }
+
+        @Override
+        public String getCacheFile(String url) {
+            final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
+            return StringUtils.toHexString(new StringBuilder(mContext.getCacheDir().getPath()).append("/.json_files/"), digest, 0, digest.length, true).toString();
+        }
+
+        @Override
+        public DownloadRequest newDownloadRequest(String url) throws IOException {
+            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+        }
     }
 }

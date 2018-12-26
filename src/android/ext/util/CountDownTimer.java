@@ -8,10 +8,10 @@ import android.os.Looper;
  * @author Garfield
  */
 public abstract class CountDownTimer implements Runnable {
-    private int mCurCountDown;
-    private int mCountDownTime;
-    private long mIntervalMillis;
+    private int mCountDown;
     private final Handler mHandler;
+    private final int mCountDownTime;
+    private final long mIntervalMillis;
 
     /**
      * Constructor
@@ -42,12 +42,11 @@ public abstract class CountDownTimer implements Runnable {
     /**
      * Start the countdown.
      * @return This <tt>CountDownTimer</tt>.
-     * @see #restart(int, long)
      * @see #cancel()
      */
     public final CountDownTimer start() {
-        if (mCurCountDown <= 0) {
-            mCurCountDown = mCountDownTime;
+        if (mCountDown <= 0) {
+            mCountDown = mCountDownTime;
             if (Looper.myLooper() == mHandler.getLooper()) {
                 run();
             } else {
@@ -56,19 +55,6 @@ public abstract class CountDownTimer implements Runnable {
         }
 
         return this;
-    }
-
-    /**
-     * Restart the countdown.
-     * @return This <tt>CountDownTimer</tt>.
-     * @see #start()
-     * @see #cancel()
-     */
-    public final CountDownTimer restart(int countDownTime, long intervalMillis) {
-        DebugUtils.__checkError(countDownTime < 0 || intervalMillis < 0, "countDownTime < 0 || intervalMillis < 0");
-        mCountDownTime  = countDownTime;
-        mIntervalMillis = intervalMillis;
-        return start();
     }
 
     /**
@@ -81,10 +67,10 @@ public abstract class CountDownTimer implements Runnable {
 
     @Override
     public void run() {
-        if (mCurCountDown == 0) {
+        if (mCountDown == 0) {
             onFinish();
-        } else if (mCurCountDown > 0) {
-            onTick(mCurCountDown--);
+        } else if (mCountDown > 0) {
+            onTick(mCountDown--);
             mHandler.postDelayed(this, mIntervalMillis);
         }
     }

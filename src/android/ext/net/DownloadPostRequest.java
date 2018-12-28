@@ -60,30 +60,15 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Equivalent to calling <tt>post(data, 0, data.length)</tt>.
-     * @param data The byte array to post.
-     * @return This request.
-     * @see #post(Object)
-     * @see #post(byte[], int, int)
-     * @see #post(PostCallback, Object[])
-     */
-    public final DownloadPostRequest post(byte[] data) {
-        DebugUtils.__checkError(data == null, "data == null");
-        return post(data, 0, data.length);
-    }
-
-    /**
      * Sets the <em>data</em> to post to the remote HTTP server.
      * @param data May be an <tt>InputStream, String, File, JSONObject, JSONArray,
      * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
-     * @see #post(byte[])
      * @see #post(byte[], int, int)
      * @see #post(PostCallback, Object[])
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
-        DebugUtils.__checkError(data == null, "data == null");
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         mData = data;
         return this;
@@ -96,11 +81,9 @@ public final class DownloadPostRequest extends DownloadRequest {
      * If no parameters, you can pass <em>(Object[])null</em> instead of allocating
      * an empty array.
      * @see #post(Object)
-     * @see #post(byte[])
      * @see #post(byte[], int, int)
      */
     public final DownloadPostRequest post(PostCallback callback, Object... params) {
-        DebugUtils.__checkError(callback == null, "callback == null");
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         mParams = params;
         mData = callback;
@@ -113,7 +96,6 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @param offset The start position in <em>data</em> from where to get bytes.
      * @param count The number of bytes from <em>data</em> to write to.
      * @return This request.
-     * @see #post(byte[])
      * @see #post(Object)
      * @see #post(PostCallback, Object[])
      */

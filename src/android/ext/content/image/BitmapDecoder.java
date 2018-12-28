@@ -109,7 +109,8 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      *      app:sampleSize="2"
      *      app:percent="0.7"
      *      app:attribute1="value1"
-     *      app:attribute2="value2" /&gt;</pre>
+     *      app:attribute2="value2"
+     *      ... ... /&gt;</pre>
      */
     public static class Parameters {
         private static final int ALPHA_8 = 0;
@@ -448,7 +449,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sample size = 1, config = ARGB_8888).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = ARGB_8888).
      */
     private static final class DefaultParameters {
         public static final Parameters sInstance = new Parameters(1, Config.ARGB_8888);

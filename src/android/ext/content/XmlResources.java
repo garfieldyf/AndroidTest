@@ -14,6 +14,7 @@ import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.content.image.BitmapDecoder.PercentParameters;
 import android.ext.content.image.BitmapDecoder.ScaleParameters;
 import android.ext.content.image.BitmapDecoder.SizeParameters;
+import android.ext.content.image.DrawableBinder;
 import android.ext.content.image.ImageBinder;
 import android.ext.content.image.ImageBinder.BitmapTransformer;
 import android.ext.content.image.ImageBinder.DrawableTransformer;
@@ -186,6 +187,9 @@ public final class XmlResources {
             switch (name) {
             case "ImageBinder":
                 return new ImageBinder(context, attrs);
+
+            case "DrawableBinder":
+                return new DrawableBinder(context, attrs);
 
             case "TransitionBinder":
                 return new TransitionBinder(context, attrs);

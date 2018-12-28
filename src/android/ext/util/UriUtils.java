@@ -125,13 +125,13 @@ public final class UriUtils {
         return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
     }
 
-    private static InputStream openFileInputStream(Context context, String uriString) throws IOException {
-        DebugUtils.__checkError(uriString.length() <= 7, "Invalid uri - " + uriString);
-        if (uriString.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
-            return new FileInputStream(uriString.substring(7 /* skip 'file://' */));
+    private static InputStream openFileInputStream(Context context, String uri) throws IOException {
+        DebugUtils.__checkError(uri.length() <= 7, "Invalid uri - " + uri);
+        if (uri.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
+            return new FileInputStream(uri.substring(7 /* skip 'file://' */));
         } else {
-            DebugUtils.__checkError(uriString.length() <= 22, "Invalid uri - " + uriString);
-            return context.getAssets().open(uriString.substring(22) /* skip 'file:///android_asset/' */, AssetManager.ACCESS_STREAMING);
+            DebugUtils.__checkError(uri.length() <= 22, "Invalid uri - " + uri);
+            return context.getAssets().open(uri.substring(22) /* skip 'file:///android_asset/' */, AssetManager.ACCESS_STREAMING);
         }
     }
 

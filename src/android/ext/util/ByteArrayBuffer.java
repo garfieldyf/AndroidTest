@@ -219,7 +219,7 @@ public final class ByteArrayBuffer extends OutputStream {
 
     public final void dump(Context context, Printer printer) {
         printer.println(new StringBuilder(128)
-               .append(" ByteArrayBuffer [ size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
+               .append("ByteArrayBuffer [ size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
                .append(", capacity = ").append(data.length).append('(').append(Formatter.formatFileSize(context, data.length)).append(')')
                .append(", remaining = ").append(data.length - size).append('(').append(Formatter.formatFileSize(context, data.length - size)).append(')')
                .append(" ]").toString());

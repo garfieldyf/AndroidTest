@@ -290,7 +290,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sample size = 1, config = RGB_565).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565).
      */
     private static final class DefaultParameters {
         public static final Parameters sInstance = new Parameters(1, Config.RGB_565);

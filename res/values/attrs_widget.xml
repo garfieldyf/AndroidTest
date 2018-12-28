@@ -30,6 +30,11 @@
         <attr name="defaultImage" format="reference|color" />
     </declare-styleable>
 
+    <!-- DrawableBinder styleable -->
+    <declare-styleable name="DrawableBinder">
+        <attr name="defaultImage" />
+    </declare-styleable>
+
     <!-- PageScroller styleable -->
     <declare-styleable name="PageScroller">
         <attr name="pageSize" format="dimension" />

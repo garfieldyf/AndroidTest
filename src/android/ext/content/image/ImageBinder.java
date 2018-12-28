@@ -47,14 +47,15 @@ import android.widget.ImageView;
  *         android:bottomLeftRadius="20dp"
  *         android:bottomRightRadius="20dp"
  *         app:attribute1="value1"
- *         app:attribute2="value2" /&gt;
+ *         app:attribute2="value2"
+ *         ... ... /&gt;
  *
  *     &lt;!-- Image Transformer (Optional) --&gt;
  *     &lt;[ GIFTransformer | DrawableTransformer | transformer ]
  *         class="classFullName"
  *         android:src="@xml/transformer2"
- *         app:attribute3="value3"
- *         app:attribute4="value4"
+ *         app:attribute1="value1"
+ *         app:attribute2="value2"
  *         ... ... /&gt;
  * &lt;/[ ImageBinder | TransitionBinder | BackgroundBinder | binder ]&gt;</pre>
  * @author Garfield

@@ -7,10 +7,13 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.ext.util.ArrayUtils.Filter;
@@ -111,6 +114,51 @@ public final class PackageUtils {
     }
 
     /**
+     * Retrieve all displayed in the top-level launcher activities that can be performed.
+     * @param context The <tt>Context</tt>.
+     * @param flags Additional option flags. See <tt>queryIntentActivities</tt>.
+     * @param factory The {@link Factory} to create the {@link AbsResolveInfo} subclass object.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
+     * @return A <tt>List</tt> of {@link AbsResolveInfo} subclass objects.
+     * @see PackageManager#queryIntentActivities(Intent, int)
+     */
+    public static <T extends AbsResolveInfo> List<T> queryLauncherActivities(Context context, int flags, Factory<T> factory, Filter<ResolveInfo> filter) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        return queryIntentActivities(context, intent, flags, factory, filter);
+    }
+
+    /**
+     * Retrieve all activities that can be performed for the given intent.
+     * @param context The <tt>Context</tt>.
+     * @param intent The desired intent as per resolveActivity().
+     * @param flags Additional option flags. See <tt>queryIntentActivities</tt>.
+     * @param factory The {@link Factory} to create the {@link AbsResolveInfo} subclass object.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
+     * @return A <tt>List</tt> of {@link AbsResolveInfo} subclass objects.
+     * @see PackageManager#queryIntentActivities(Intent, int)
+     */
+    public static <T extends AbsResolveInfo> List<T> queryIntentActivities(Context context, Intent intent, int flags, Factory<T> factory, Filter<ResolveInfo> filter) {
+        final List<ResolveInfo> infos = context.getPackageManager().queryIntentActivities(intent, flags);
+        final int size = ArrayUtils.getSize(infos);
+        final List<T> result = new ArrayList<T>(size);
+        if (filter != null) {
+            for (int i = 0; i < size; ++i) {
+                final ResolveInfo info = infos.get(i);
+                if (filter.accept(info)) {
+                    result.add(newResolveInfo(context, info, factory));
+                }
+            }
+        } else {
+            for (int i = 0; i < size; ++i) {
+                result.add(newResolveInfo(context, infos.get(i), factory));
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Parses a package archive file with the specified <em>archiveFile</em>.
      * @param context The <tt>Context</tt>.
      * @param archiveFile The path to the archive file, must be absolute file path.
@@ -132,7 +180,7 @@ public final class PackageUtils {
         return null;
     }
 
-    public static void dump(Printer printer, Collection<? extends AbsPackageInfo> infos) {
+    public static void dumpPackageInfos(Printer printer, Collection<? extends AbsPackageInfo> infos) {
         final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
         DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
@@ -145,12 +193,34 @@ public final class PackageUtils {
         }
     }
 
+    public static void dumpResolveInfos(Printer printer, Collection<? extends AbsResolveInfo> infos) {
+        final StringBuilder result = new StringBuilder(256);
+        final int size = ArrayUtils.getSize(infos);
+        DebugUtils.dumpSummary(printer, result, 140, " Dumping ResolveInfos [ size = %d ] ", size);
+
+        if (size > 0) {
+            for (AbsResolveInfo info : infos) {
+                result.setLength(0);
+                printer.println(info.dumpImpl(result.append("  ")));
+            }
+        }
+    }
+
     /**
      * Create a {@link AbsPackageInfo} subclass object with the specified <em>packageInfo</em>.
      */
     private static <T extends AbsPackageInfo> T newPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
         final T result = factory.newInstance();
         result.initialize(context, packageInfo);
+        return result;
+    }
+
+    /**
+     * Create a {@link AbsResolveInfo} subclass object with the specified <em>resolveInfo</em>.
+     */
+    private static <T extends AbsResolveInfo> T newResolveInfo(Context context, ResolveInfo resolveInfo, Factory<T> factory) {
+        final T result = factory.newInstance();
+        result.initialize(context, resolveInfo);
         return result;
     }
 
@@ -198,18 +268,6 @@ public final class PackageUtils {
         public final void dump(Printer printer) {
             DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             printer.println(dumpImpl(new StringBuilder(256)));
-        }
-
-        @Override
-        public int hashCode() {
-            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
-            return packageInfo.packageName.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object object) {
-            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
-            return (object instanceof AbsPackageInfo && ((AbsPackageInfo)object).packageInfo.packageName.equals(packageInfo.packageName));
         }
 
         protected StringBuilder dump(StringBuilder out) {
@@ -282,6 +340,101 @@ public final class PackageUtils {
             @Override
             public AppPackageInfo newInstance() {
                 return new AppPackageInfo();
+            }
+        };
+    }
+
+    /**
+     * Class <tt>AbsResolveInfo</tt> contains a component's {@link ResolveInfo}.
+     */
+    public static abstract class AbsResolveInfo {
+        /**
+         * The {@link ResolveInfo} that is returned from resolving an intent.
+         */
+        public ResolveInfo resolveInfo;
+
+        /**
+         * Initializes this object with the specified <em>resolveInfo</em>.
+         * @param context The <tt>Context</tt>.
+         * @param resolveInfo The <tt>ResolveInfo</tt> to set.
+         */
+        public void initialize(Context context, ResolveInfo resolveInfo) {
+            this.resolveInfo = resolveInfo;
+        }
+
+        /**
+         * Returns a {@link ComponentInfo} of this object.
+         * @return The <tt>ComponentInfo</tt>.
+         */
+        public ComponentInfo getComponentInfo() {
+            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            if (resolveInfo.activityInfo != null) {
+                return resolveInfo.activityInfo;
+            } else if (resolveInfo.serviceInfo != null) {
+                return resolveInfo.serviceInfo;
+            } else if (resolveInfo.providerInfo != null) {
+                return resolveInfo.providerInfo;
+            } else {
+                throw new IllegalStateException("Missing ComponentInfo!");
+            }
+        }
+
+        public final void dump(Printer printer) {
+            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            printer.println(dumpImpl(new StringBuilder(196)));
+        }
+
+        protected StringBuilder dump(StringBuilder out) {
+            final ComponentInfo ci = getComponentInfo();
+            return out.append(" name = ").append(ci.name)
+                .append(", packageName = ").append(ci.packageName)
+                .append(", process = ").append(ci.processName)
+                .append(", system = ").append((ci.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        }
+
+        /* package */ final String dumpImpl(StringBuilder out) {
+            return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
+        }
+    }
+
+    /**
+     * Class <tt>AppResolveInfo</tt> contains a component's label, icon and {@link ResolveInfo}.
+     */
+    public static class AppResolveInfo extends AbsResolveInfo implements Comparable<AppResolveInfo> {
+        /**
+         * The component's icon.
+         */
+        public Drawable icon;
+
+        /**
+         * The component's label.
+         */
+        public CharSequence label;
+
+        @Override
+        public void initialize(Context context, ResolveInfo resolveInfo) {
+            super.initialize(context, resolveInfo);
+
+            final PackageManager pm = context.getPackageManager();
+            this.icon  = resolveInfo.loadIcon(pm);
+            this.label = StringUtils.trim(resolveInfo.loadLabel(pm));
+        }
+
+        @Override
+        public int compareTo(AppResolveInfo another) {
+            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            return label.toString().compareTo(another.label.toString());
+        }
+
+        @Override
+        protected StringBuilder dump(StringBuilder out) {
+            return super.dump(out).append(", label = ").append(label).append(", icon = ").append(icon);
+        }
+
+        public static final Factory<AppResolveInfo> FACTORY = new Factory<AppResolveInfo>() {
+            @Override
+            public AppResolveInfo newInstance() {
+                return new AppResolveInfo();
             }
         };
     }

@@ -98,12 +98,12 @@ public final class PackageUtils {
             for (int i = 0; i < size; ++i) {
                 final PackageInfo info = infos.get(i);
                 if (filter.accept(info)) {
-                    result.add(createPackageInfo(context, info, factory));
+                    result.add(newPackageInfo(context, info, factory));
                 }
             }
         } else {
             for (int i = 0; i < size; ++i) {
-                result.add(createPackageInfo(context, infos.get(i), factory));
+                result.add(newPackageInfo(context, infos.get(i), factory));
             }
         }
 
@@ -126,7 +126,7 @@ public final class PackageUtils {
         final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(archiveFile, flags);
         if (packageInfo != null) {
             packageInfo.applicationInfo.sourceDir = archiveFile;
-            return createPackageInfo(context, packageInfo, factory);
+            return newPackageInfo(context, packageInfo, factory);
         }
 
         return null;
@@ -148,7 +148,7 @@ public final class PackageUtils {
     /**
      * Create a {@link AbsPackageInfo} subclass object with the specified <em>packageInfo</em>.
      */
-    private static <T extends AbsPackageInfo> T createPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
+    private static <T extends AbsPackageInfo> T newPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
         final T result = factory.newInstance();
         result.initialize(context, packageInfo);
         return result;

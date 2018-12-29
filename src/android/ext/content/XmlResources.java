@@ -211,14 +211,15 @@ public final class XmlResources {
 
         /**
          * Inflates a new {@link Transformer} object from a xml resource.
+         * <p><b>Note: Do not call this method directly.</b></p>
          * @param context The <tt>Context</tt>.
          * @param parser The XML parser to parsing the XML data.
          * @return The <tt>Transformer</tt> object.
          * @throws XmlPullParserException if the XML data cannot be parsed.
          * @throws ReflectiveOperationException if the constructor cannot be invoked.
          */
-        public static <URI, Image> Transformer<URI, Image> inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-            return (Transformer<URI, Image>)sInstance.inflate(context, parser);
+        public static Transformer inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+            return (Transformer)sInstance.inflate(context, parser);
         }
 
         @Override

@@ -3,7 +3,7 @@
     <!-- compilation options -->
     <property name="java.source" value="1.7" />
     <property name="java.target" value="1.7" />
-    <property name="library.jars.dir" value="E:/Include/java" />
+    <property name="libs.jar.dir" value="E:/Include/java" />
 
     <!-- pre-build target -->
     <target name="-pre-build">
@@ -14,10 +14,6 @@
 
     <!-- debug output filename -->
     <target name="-rename-debug-out-file">
-        <!-- call native build
-        <ant antfile="${basedir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
-        -->
-
         <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.jar.file" value="${basedir}/lib/debug/funshion.jar" />
@@ -32,10 +28,6 @@
 
     <!-- release output filename -->
     <target name="-rename-release-out-file">
-        <!-- call native build
-        <ant antfile="${basedir}/jni/build.xml" target="release" inheritAll="false" inheritRefs="false" />
-        -->
-
         <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.jar.file" value="${basedir}/lib/release/funshion.jar" />
@@ -58,7 +50,7 @@
 
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}/zxing/zxing.jar" />
+            <pathelement location="${libs.jar.dir}/zxing/zxing.jar" />
         </path>
 
         <path id="funshion.jar.path">
@@ -68,7 +60,7 @@
 
         <path id="vasdolly.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}/vasdolly/vasdolly.jar" />
+            <pathelement location="${libs.jar.dir}/vasdolly/vasdolly.jar" />
         </path>
 
         <path id="support.v4.jar.path">
@@ -78,12 +70,12 @@
 
         <path id="recyclerview.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
+            <pathelement location="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
         </path>
 
         <path id="android.internal.sdk.jar.path">
             <path path="${toString:project.target.class.path}" />
-            <pathelement location="${library.jars.dir}/android/android-sdk-internal.jar" />
+            <pathelement location="${libs.jar.dir}/android/android-sdk-internal.jar" />
         </path>
 
         <path id="project.all.jars.path">
@@ -123,7 +115,7 @@
         </delete>
 
         <!-- build channel apk files -->
-        <property name="vasdolly.cmd.jar.path" value="${library.jars.dir}/vasdolly/vasdolly-cmd.jar" />
+        <property name="vasdolly.cmd.jar.path" value="${libs.jar.dir}/vasdolly/vasdolly-cmd.jar" />
         <exec executable="cmd.exe">
             <arg line="/C java -jar ${vasdolly.cmd.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>

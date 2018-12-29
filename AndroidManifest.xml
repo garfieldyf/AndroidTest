@@ -98,6 +98,9 @@
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />
 
+        <activity
+            android:name="PackageActivity" />
+
         <service
             android:name="CrashService"
             android:process=":crash" />

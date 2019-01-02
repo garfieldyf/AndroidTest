@@ -36,7 +36,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 //            Log.i("abc", "Show loading UI.");
 //        } else {
 //            try {
-//                FileUtils.copyAssetFile(MainApplication.sInstance.getAssets(), "json_files/main.json", cacheFile);
+//                FileUtils.copyFile(MainApplication.sInstance, UriUtils.getAssetUri("main.json"), cacheFile);
 //            } catch (IOException e) {
 //                Log.e("abc", "Couldn't copy json file.");
 //            }

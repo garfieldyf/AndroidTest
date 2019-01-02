@@ -3,8 +3,7 @@
 # AUTO-GENERATED FILE. DO NOT MODIFY.
 
 # Don't warn the classes in the android-sdk-internal.jar.
--dontwarn android.net.**
--dontwarn android.os.**
+-dontwarn android.os.storage.**
 -dontwarn android.content.res.**
 
 # For native methods, including not being called methods.

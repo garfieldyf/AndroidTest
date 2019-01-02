@@ -142,7 +142,8 @@ public final class NetworkUtils {
      * @see #isNetworkConnected(ConnectivityManager)
      */
     public static boolean isNetworkConnected(Context context) {
-        return getActiveNetworkInfo(context).isConnected();
+        final NetworkInfo info = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return (info != null && info.isConnected());
     }
 
     /**
@@ -152,33 +153,19 @@ public final class NetworkUtils {
      * @see #isNetworkConnected(Context)
      */
     public static boolean isNetworkConnected(ConnectivityManager cm) {
-        return getActiveNetworkInfo(cm).isConnected();
+        final NetworkInfo info = cm.getActiveNetworkInfo();
+        return (info != null && info.isConnected());
     }
 
     /**
      * Returns details about the currently active default data network.
      * @param context The <tt>Context</tt>.
      * @return A {@link NetworkInfo} object for the current default network
-     * or a dummy <tt>NetworkInfo</tt> object if no network is active.
-     * @see #getActiveNetworkInfo(ConnectivityManager)
+     * or <tt>null</tt> if no network is active.
      * @see ConnectivityManager#getActiveNetworkInfo()
      */
     public static NetworkInfo getActiveNetworkInfo(Context context) {
-        final NetworkInfo info = ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-        return (info != null ? info : DummyNetworkInfo.sInstance);
-    }
-
-    /**
-     * Returns details about the currently active default data network.
-     * @param cm The {@link ConnectivityManager}.
-     * @return A {@link NetworkInfo} object for the current default network
-     * or a dummy <tt>NetworkInfo</tt> object if no network is active.
-     * @see #getActiveNetworkInfo(Context)
-     * @see ConnectivityManager#getActiveNetworkInfo()
-     */
-    public static NetworkInfo getActiveNetworkInfo(ConnectivityManager cm) {
-        final NetworkInfo info = cm.getActiveNetworkInfo();
-        return (info != null ? info : DummyNetworkInfo.sInstance);
+        return ((ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
     }
 
     /**
@@ -226,13 +213,6 @@ public final class NetworkUtils {
                 printer.println(result.toString());
             }
         }
-    }
-
-    /**
-     * A dummy <tt>NetworkInfo</tt>.
-     */
-    private static final class DummyNetworkInfo {
-        public static final NetworkInfo sInstance = new NetworkInfo(ConnectivityManager.TYPE_DUMMY, ConnectivityManager.TYPE_DUMMY, "DUMMY", "");
     }
 
     /**

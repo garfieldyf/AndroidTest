@@ -21,15 +21,14 @@
 // JNI native methods in this file:
 //
 // mkdirs()
-// scanFiles()
-// copyFile()
 // moveFile()
+// scanFiles()
+// deleteFiles()
 // fileAccess()
 // fileStatus()
 // getFileMode()
 // getFileLength()
 // getLastModified()
-// deleteFiles()
 // createFile()
 // createUniqueFile()
 
@@ -197,6 +196,28 @@ JNIEXPORT_METHOD(jint) mkdirs(JNIEnv* env, jclass /*clazz*/, jstring path, jint 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
+// Method:    moveFile
+// Signature: (Ljava/lang/String;Ljava/lang/String;)I
+
+JNIEXPORT_METHOD(jint) moveFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstring dst)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, src) == 0 || JNI::getLength(env, dst) == 0, "src == null || src.length() == 0 || dst == null || dst.length() == 0", EINVAL);
+
+    // Create the destination file directory.
+    const JNI::jstring_t jdst(env, dst);
+    jint errnum = createDirectory(jdst);
+    if (errnum == 0)
+    {
+        const JNI::jstring_t jsrc(env, src);
+        errnum = __verify((::rename(jsrc, jdst) == 0 ? 0 : errno), "Couldn't move '%s' to '%s'", jsrc.str(), jdst.str());
+    }
+
+    return errnum;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
 // Method:    scanFiles
 // Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$ScanCallback;ILjava/lang/Object;)I
 
@@ -234,71 +255,17 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    copyFile
-// Signature: (Ljava/lang/String;Ljava/lang/String;)I
+// Method:    deleteFiles
+// Signature: (Ljava/lang/String;Z)I
 
-JNIEXPORT_METHOD(jint) copyFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstring dst)
+JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, jboolean deleteSelf)
 {
     assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, src) == 0 || JNI::getLength(env, dst) == 0, "src == null || src.length() == 0 || dst == null || dst.length() == 0", EINVAL);
+    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", EINVAL);
 
-    // Create the destination file directory.
-    const JNI::jstring_t jdst(env, dst);
-    jint errnum = createDirectory(jdst);
-    if (errnum == 0)
-    {
-        __NS::File srcFile, dstFile;
-        const JNI::jstring_t jsrc(env, src);
-        if ((errnum = srcFile.open(jsrc, O_RDONLY)) == 0 && (errnum = dstFile.open(jdst)) == 0)
-        {
-            // Copy the source file to destination file.
-            char buffer[8192];
-            for (ssize_t readBytes = 0; (readBytes = srcFile.read(buffer, sizeof(buffer))) != 0; )
-            {
-                if (readBytes == -1)
-                {
-                    errnum = __verify(errno, "Couldn't read '%s' file", jsrc.str());
-                    break;
-                }
-
-                if (dstFile.write(buffer, readBytes) == -1)
-                {
-                    errnum = __verify(errno, "Couldn't write '%s' file", jdst.str());
-                    break;
-                }
-            }
-
-            // Checks the destination file exists.
-            if (errnum == 0)
-                errnum = __NS::fileAccess(jdst, F_OK);
-            else
-                ::remove(jdst);     // Deletes file, if copy failure.
-        }
-    }
-
-    return errnum;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
-// Method:    moveFile
-// Signature: (Ljava/lang/String;Ljava/lang/String;)I
-
-JNIEXPORT_METHOD(jint) moveFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstring dst)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, src) == 0 || JNI::getLength(env, dst) == 0, "src == null || src.length() == 0 || dst == null || dst.length() == 0", EINVAL);
-
-    // Create the destination file directory.
-    const JNI::jstring_t jdst(env, dst);
-    jint errnum = createDirectory(jdst);
-    if (errnum == 0)
-    {
-        const JNI::jstring_t jsrc(env, src);
-        errnum = __verify((::rename(jsrc, jdst) == 0 ? 0 : errno), "Couldn't move '%s' to '%s'", jsrc.str(), jdst.str());
-    }
-
-    return errnum;
+    struct stat buf;
+    const JNI::jstring_t jpath(env, path);
+    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -372,21 +339,6 @@ JNIEXPORT_METHOD(jlong) getLastModified(JNIEnv* env, jclass /*clazz*/, jstring f
 
     struct stat buf;
     return (__NS::fileStatus(JNI::jstring_t(env, filename), buf) == 0 ? (jlong)buf.st_mtime * MILLISECONDS : 0);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
-// Method:    deleteFiles
-// Signature: (Ljava/lang/String;Z)I
-
-JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, jboolean deleteSelf)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", EINVAL);
-
-    struct stat buf;
-    const JNI::jstring_t jpath(env, path);
-    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -478,7 +430,6 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
         { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "getLastModified", "(Ljava/lang/String;)J", (void*)getLastModified },
-        { "copyFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)copyFile },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
         { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)fileStatus },

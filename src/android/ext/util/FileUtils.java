@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,7 +11,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.ext.util.Pools.Factory;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
@@ -456,67 +454,6 @@ public final class FileUtils {
     public static native long getLastModified(String filename);
 
     /**
-     * Equivalent to calling <tt>copyStream(src, dst, null, buffer)</tt>.
-     * @param src The <tt>InputStream</tt> to read.
-     * @param dst The <tt>OutputStream</tt> to write.
-     * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @throws IOException if an error occurs while writing to <em>dst</em>.
-     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
-     */
-    public static void copyStream(InputStream src, OutputStream dst, byte[] buffer) throws IOException {
-        copyStream(src, dst, null, buffer);
-    }
-
-    /**
-     * Copies the specified <tt>InputStream</tt> the contents into <tt>OutputStream</tt>.
-     * @param src The <tt>InputStream</tt> to read.
-     * @param dst The <tt>OutputStream</tt> to write.
-     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
-     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
-     * the <em>dst's</em> contents is undefined.
-     * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
-     * @throws IOException if an error occurs while writing to <em>dst</em>.
-     * @see #copyStream(InputStream, OutputStream, byte[])
-     */
-    public static void copyStream(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
-        if (dst instanceof ByteArrayBuffer) {
-            ((ByteArrayBuffer)dst).readFrom(src, cancelable);
-        } else {
-            copyStreamImpl(src, dst, wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
-        }
-    }
-
-    /**
-     * Copies "assets" directory file contents to the specified <em>dst</em> file.
-     * If the <em>dst</em> file already exists, it can be overrided to.
-     * <p>Note: This method will be create the necessary directories.</p>
-     * @param assets The <tt>AssetManager</tt>.
-     * @param src A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-     * @param dst The destination file to write, must be absolute file path.
-     * @throws IOException if an error occurs while writing to <em>dst</em>.
-     */
-    public static void copyAssetFile(AssetManager assets, String src, String dst) throws IOException {
-        FileUtils.mkdirs(dst, FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(dst);
-        try {
-            readAssetFile(assets, src, os);
-        } finally {
-            os.close();
-        }
-    }
-
-    /**
-     * Copies the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
-     * file already exists, it can be overrided to. <p>Note: This method will
-     * be create the necessary directories.</p>
-     * @param src The source file to read, must be absolute file path.
-     * @param dst The destination file to write, must be absolute file path.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
-     * an error code. See {@link ErrnoException}.
-     */
-    public static native int copyFile(String src, String dst);
-
-    /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the specified file
      * <em>dst</em> already exists, it can be overrided to. <p>Note: This method
      * will be create the necessary directories.</p>
@@ -528,78 +465,139 @@ public final class FileUtils {
     public static native int moveFile(String src, String dst);
 
     /**
-     * Reads the specified <tt>InputStream</tt> the contents into a {@link ByteArrayBuffer}.
-     * @param is The <tt>InputStream</tt> to read.
-     * @return A <tt>ByteArrayBuffer</tt> contains the contents.
-     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
+     * Copies the specified file contents to the specified <em>outFile</em>.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to read.
+     * @param outFile The destination file to write, must be absolute file path.
+     * @throws IOException if an error occurs while writing to <em>outFile</em>.
      */
-    public static ByteArrayBuffer readStream(InputStream is) throws IOException {
-        final ByteArrayBuffer result = new ByteArrayBuffer();
-        result.readFrom(is, null);
-        return result;
+    public static void copyFile(Context context, Object uri, String outFile) throws IOException {
+        FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(outFile);
+        try {
+            readFile(context, uri, os, null, null);
+        } finally {
+            os.close();
+        }
+    }
+
+    /**
+     * Copies the specified <tt>InputStream</tt> the contents to <tt>outFile</tt>.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param is The <tt>InputStream</tt> to read.
+     * @param outFile The destination file to write, must be absolute file path.
+     * @throws IOException if an error occurs while writing to <em>outFile</em>.
+     * @see #copyStream(InputStream, OutputStream)
+     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
+     */
+    public static void copyStream(InputStream is, String outFile) throws IOException {
+        FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(outFile);
+        try {
+            copyStream(is, os, null, null);
+        } finally {
+            os.close();
+        }
+    }
+
+    /**
+     * Equivalent to calling <tt>copyStream(is, out, null, null)</tt>.
+     * @param is The <tt>InputStream</tt> to read.
+     * @param out The <tt>OutputStream</tt> to write.
+     * @throws IOException if an error occurs while writing to <em>out</em>.
+     * @see #copyStream(InputStream, String)
+     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
+     */
+    public static void copyStream(InputStream is, OutputStream out) throws IOException {
+        copyStream(is, out, null, null);
+    }
+
+    /**
+     * Copies the specified <tt>InputStream</tt> the contents into <tt>OutputStream</tt>.
+     * @param is The <tt>InputStream</tt> to read.
+     * @param out The <tt>OutputStream</tt> to write.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * the <em>out's</em> contents is undefined.
+     * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
+     * @throws IOException if an error occurs while writing to <em>out</em>.
+     * @see #copyStream(InputStream, String)
+     * @see #copyStream(InputStream, OutputStream)
+     */
+    public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+        if (out instanceof ByteArrayBuffer) {
+            ((ByteArrayBuffer)out).readFrom(is, cancelable);
+        } else {
+            copyStreamImpl(is, out, wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
+        }
     }
 
     /**
      * Reads the specified file contents into a {@link ByteArrayBuffer}.
-     * @param filename The file to read, must be absolute file path.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to read.
      * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
      * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
-     * @see #readFile(String, OutputStream)
+     * @see #readFile(Context, Object, OutputStream)
+     * @see #readFile(Context, Object, OutputStream, Cancelable, byte[])
      */
-    public static ByteArrayBuffer readFile(String filename) throws IOException {
-        final InputStream is = new FileInputStream(filename);
-        try {
-            return readStream(is);
-        } finally {
-            is.close();
-        }
+    public static ByteArrayBuffer readFile(Context context, Object uri) throws IOException {
+        final ByteArrayBuffer result = new ByteArrayBuffer();
+        readFile(context, uri, result, null, null);
+        return result;
+    }
+
+    /**
+     * Equivalent to calling <tt>readFile(context, uri, out, null, null)</tt>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to read.
+     * @param out The <tt>OutputStream</tt> to write to.
+     * @throws IOException if an error occurs while writing to <em>out</em>.
+     * @see #readFile(Context, Object)
+     * @see #readFile(Context, Object, OutputStream, Cancelable, byte[])
+     */
+    public static void readFile(Context context, Object uri, OutputStream out) throws IOException {
+        readFile(context, uri, out, null, null);
     }
 
     /**
      * Reads the specified file contents into the specified <em>out</em>.
-     * @param filename The file to read, must be absolute file path.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to read.
      * @param out The <tt>OutputStream</tt> to write to.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * the <em>out's</em> contents is undefined.
+     * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #readFile(String)
+     * @see #readFile(Context, Object)
+     * @see #readFile(Context, Object, OutputStream)
      */
-    public static void readFile(String filename, OutputStream out) throws IOException {
-        final InputStream is = new FileInputStream(filename);
+    public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+        final InputStream is = UriUtils.openInputStream(context, uri);
         try {
-            copyStream(is, out, null, null);
-        } finally {
-            is.close();
-        }
-    }
-
-    /**
-     * Reads the "assets" directory file contents into a {@link ByteArrayBuffer}.
-     * @param assets The <tt>AssetManager</tt>.
-     * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-     * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
-     * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
-     * @see #readAssetFile(AssetManager, String, OutputStream)
-     */
-    public static ByteArrayBuffer readAssetFile(AssetManager assets, String filename) throws IOException {
-        final InputStream is = assets.open(filename, AssetManager.ACCESS_STREAMING);
-        try {
-            return readStream(is);
-        } finally {
-            is.close();
-        }
-    }
-
-    /**
-     * Reads the "assets" directory file contents into the specified <em>out</em>.
-     * @param assets The <tt>AssetManager</tt>.
-     * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-     * @param out The <tt>OutputStream</tt> to write to.
-     * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #readAssetFile(AssetManager, String)
-     */
-    public static void readAssetFile(AssetManager assets, String filename, OutputStream out) throws IOException {
-        final InputStream is = assets.open(filename, AssetManager.ACCESS_STREAMING);
-        try {
-            copyStream(is, out, null, null);
+            copyStream(is, out, cancelable, buffer);
         } finally {
             is.close();
         }
@@ -665,11 +663,11 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
-    /* package */ static void copyStreamImpl(InputStream src, OutputStream dst, Cancelable cancelable, byte[] buffer) throws IOException {
+    /* package */ static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
-            if ((readBytes = src.read(buffer, offset, buffer.length - offset)) <= 0) {
+            if ((readBytes = is.read(buffer, offset, buffer.length - offset)) <= 0) {
                 // Writes the last remaining bytes of the buffer.
-                dst.write(buffer, 0, offset);
+                out.write(buffer, 0, offset);
                 break;
             }
 
@@ -677,7 +675,7 @@ public final class FileUtils {
             if (offset == buffer.length) {
                 // The buffer full, write to OutputStream and reset the offset.
                 offset = 0;
-                dst.write(buffer, 0, buffer.length);
+                out.write(buffer, 0, buffer.length);
             }
         }
     }

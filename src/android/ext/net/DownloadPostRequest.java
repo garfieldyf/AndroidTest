@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import android.content.ContentValues;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.support.annotation.Keep;
 import android.util.JsonWriter;
 
@@ -66,7 +66,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @return This request.
      * @see #post(byte[], int, int)
      * @see #post(PostCallback, Object[])
-     * @see JSONUtils#writeObject(JsonWriter, Object)
+     * @see JsonUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
@@ -189,7 +189,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     private void postData(Object data) throws IOException {
         final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream()));
         try {
-            JSONUtils.writeObject(writer, data);
+            JsonUtils.writeObject(writer, data);
         } finally {
             writer.close();
         }

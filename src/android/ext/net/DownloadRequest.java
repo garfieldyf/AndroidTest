@@ -16,7 +16,7 @@ import org.json.JSONException;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.support.annotation.Keep;
 import android.util.JsonReader;
 import android.util.Log;
@@ -242,7 +242,7 @@ public class DownloadRequest {
      * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
      * @see #download(DownloadCallback, byte[], Object[])
-     * @see JSONUtils#newInstance(JsonReader, Cancelable)
+     * @see JsonUtils#newInstance(JsonReader, Cancelable)
      */
     public final <T> T download(Cancelable cancelable, byte[] tempBuffer) throws IOException, JSONException {
         try {
@@ -357,7 +357,7 @@ public class DownloadRequest {
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream()));
         try {
-            return JSONUtils.newInstance(reader, cancelable);
+            return JsonUtils.newInstance(reader, cancelable);
         } finally {
             reader.close();
         }

@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import android.ext.cache.Cache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.ext.widget.Pages.JSONPage;
 import android.ext.widget.Pages.ListPage;
 import android.ext.widget.Pages.Page;
@@ -174,7 +174,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @see #setPage(int, List)
      */
     public final void setPage(int page, JSONArray data) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null));
+        setPage(page, (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null));
     }
 
     /**

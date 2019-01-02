@@ -13,7 +13,7 @@ import android.ext.net.DownloadPostRequest.PostCallback;
 import android.ext.net.DownloadRequest;
 import android.ext.net.NetworkUtils;
 import android.ext.util.ArrayUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.ext.util.PackageUtils;
 import android.ext.util.PackageUtils.InstalledPackageFilter;
 import android.net.Uri;
@@ -38,7 +38,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
-        return (JSONUtils.optInt(result, "retCode", 0) == 200);
+        return (JsonUtils.optInt(result, "retCode", 0) == 200);
     }
 
     @Override

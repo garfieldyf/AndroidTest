@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import android.ext.cache.Cache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.ext.util.UIHandler;
 import android.ext.widget.Pages.JSONPage;
 import android.ext.widget.Pages.ListPage;
@@ -219,7 +219,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see #setPage(int, Page, Object)
      */
     public final void setPage(int page, JSONArray data) {
-        setPage(page, (JSONUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), null);
+        setPage(page, (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null), null);
     }
 
     /**

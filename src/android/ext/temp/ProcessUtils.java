@@ -27,7 +27,7 @@ import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.ext.util.PackageUtils;
 import android.os.Build;
 import android.os.Debug.MemoryInfo;
@@ -414,7 +414,7 @@ public final class ProcessUtils {
          * @see #writeTo(Context, JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
-            return JSONUtils.writeObject(writer.name("brand").value(Build.BRAND)
+            return JsonUtils.writeObject(writer.name("brand").value(Build.BRAND)
                 .name("model").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)

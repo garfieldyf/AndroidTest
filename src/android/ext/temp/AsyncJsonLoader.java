@@ -9,7 +9,7 @@ import android.ext.content.AsyncTaskLoader;
 import android.ext.net.DownloadRequest;
 import android.ext.temp.AsyncJsonLoader.LoadParams;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
+import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
@@ -82,7 +82,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     private void loadFromCache(Task task, Key key, LoadParams params, String cacheFile) {
         Result result = null;
         try {
-            result = JSONUtils.newInstance(cacheFile, task);
+            result = JsonUtils.newInstance(cacheFile, task);
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
         }
@@ -103,7 +103,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
                 }
             }
 
-            final Result result = JSONUtils.newInstance(tempFile, task);
+            final Result result = JsonUtils.newInstance(tempFile, task);
             if (!isTaskCancelled(task) && validateResult(key, params, result)) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

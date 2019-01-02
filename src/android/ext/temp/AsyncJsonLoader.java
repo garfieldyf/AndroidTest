@@ -67,7 +67,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
             if (TextUtils.isEmpty(cacheFile)) {
                 result = params.newDownloadRequest(key).download(task, null);
             } else {
-                loadFromCache(task, key, params, cacheFile);
+                loadFromCache(task, params, cacheFile);
                 if (!isTaskCancelled(task)) {
                     result = download(task, key, params, cacheFile);
                 }
@@ -79,10 +79,10 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         return result;
     }
 
-    private void loadFromCache(Task task, Key key, LoadParams params, String cacheFile) {
+    private void loadFromCache(Task task, LoadParams params, String cacheFile) {
         Result result = null;
         try {
-            result = JsonUtils.newInstance(cacheFile, task);
+            result = JsonUtils.newInstance(null, cacheFile, task);
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
         }
@@ -103,7 +103,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
                 }
             }
 
-            final Result result = JsonUtils.newInstance(tempFile, task);
+            final Result result = JsonUtils.newInstance(null, tempFile, task);
             if (!isTaskCancelled(task) && validateResult(key, params, result)) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -165,7 +165,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         @Override
         public String getCacheFile(String url) {
             final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
-            return StringUtils.toHexString(new StringBuilder(mContext.getCacheDir().getPath()).append("/.json_files/"), digest, 0, digest.length, true).toString();
+            return StringUtils.toHexString(new StringBuilder(mContext.getFilesDir().getPath()).append("/.json_files/"), digest, 0, digest.length, true).toString();
         }
 
         @Override

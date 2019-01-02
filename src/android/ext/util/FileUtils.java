@@ -2,6 +2,7 @@ package android.ext.util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -482,6 +483,25 @@ public final class FileUtils {
             ((ByteArrayBuffer)dst).readFrom(src, cancelable);
         } else {
             copyStreamImpl(src, dst, wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
+        }
+    }
+
+    /**
+     * Copies "assets" directory file contents to the specified <em>dst</em> file.
+     * If the <em>dst</em> file already exists, it can be overrided to.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param assets The <tt>AssetManager</tt>.
+     * @param src A relative path within the assets, such as <tt>"docs/home.html"</tt>.
+     * @param dst The destination file to write, must be absolute file path.
+     * @throws IOException if an error occurs while writing to <em>dst</em>.
+     */
+    public static void copyAssetFile(AssetManager assets, String src, String dst) throws IOException {
+        FileUtils.mkdirs(dst, FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(dst);
+        try {
+            readAssetFile(assets, src, os);
+        } finally {
+            os.close();
         }
     }
 

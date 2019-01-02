@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import android.content.ContentValues;
+import android.content.Context;
 import android.ext.util.ArrayUtils.Filter;
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -264,7 +264,7 @@ public final class JsonUtils {
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
-     * @see #newInstance(String, Cancelable)
+     * @see #newInstance(Context, Object, Cancelable)
      */
     public static <T> T newInstance(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         switch (reader.peek()) {
@@ -280,8 +280,14 @@ public final class JsonUtils {
     }
 
     /**
-     * Returns a new instance parsed from the specified <em>jsonFile</em>.
-     * @param jsonFile The json file to read the data.
+     * Returns a new instance parsed from the specified <em>uri</em>.
+     * <h5>Accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
@@ -289,8 +295,8 @@ public final class JsonUtils {
      * @throws JSONException if data can not be parsed.
      * @see #newInstance(JsonReader, Cancelable)
      */
-    public static <T> T newInstance(String jsonFile, Cancelable cancelable) throws IOException, JSONException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(jsonFile)));
+    public static <T> T newInstance(Context context, Object uri, Cancelable cancelable) throws IOException, JSONException {
+        final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri)));
         try {
             return newInstance(reader, cancelable);
         } finally {

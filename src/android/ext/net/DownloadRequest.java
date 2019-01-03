@@ -17,7 +17,6 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
-import android.support.annotation.Keep;
 import android.util.JsonReader;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -29,7 +28,6 @@ import android.util.LogPrinter;
  * final JSONObject result = new DownloadRequest(url)
  *     .readTimeout(60000)
  *     .connectTimeout(60000)
- *     .contentType("application/json")
  *     .download(null);</pre>
  * @author Garfield
  */
@@ -43,7 +41,6 @@ public class DownloadRequest {
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadRequest(String)
      */
-    @Keep
     public DownloadRequest(URL url) throws IOException {
         mConnection = url.openConnection();
         redirects(true);
@@ -55,7 +52,6 @@ public class DownloadRequest {
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadRequest(URL)
      */
-    @Keep
     public DownloadRequest(String url) throws IOException {
         this(new URL(url));
     }

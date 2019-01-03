@@ -91,7 +91,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     public static class JsonParams extends LoadParams<String> {
         @Override
-        public DownloadRequest newDownloadRequest(String url) throws IOException {
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(20000).readTimeout(20000);
         }
     }
@@ -102,7 +102,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
 
         @Override
-        public DownloadRequest newDownloadRequest(String url) throws IOException {
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadPostRequest(Uri.parse(url).buildUpon()
                 .appendQueryParameter("model", Build.MODEL)
                 .appendQueryParameter("channel", "2055")

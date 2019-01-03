@@ -1,6 +1,5 @@
 package android.ext.temp;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
@@ -140,9 +139,9 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
          * Returns a new download request with the specified <em>key</em>.
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The instance of {@link DownloadRequest}.
-         * @throws IOException if an error occurs while opening the connection.
+         * @throws Exception if an error occurs while opening the connection.
          */
-        public abstract DownloadRequest newDownloadRequest(Key key) throws IOException;
+        public abstract DownloadRequest newDownloadRequest(Key key) throws Exception;
     }
 
     /**
@@ -169,7 +168,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         }
 
         @Override
-        public DownloadRequest newDownloadRequest(String url) throws IOException {
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
         }
     }

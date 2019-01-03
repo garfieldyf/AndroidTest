@@ -154,6 +154,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
             mFlags |= FLAG_PATH;
             mState.mPaint.setShader(mState.mShader);
         } else {
+            mFlags &= ~FLAG_PATH;
             mState.mPaint.setShader(null);
         }
 

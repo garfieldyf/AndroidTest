@@ -17,7 +17,6 @@ import android.content.ContentValues;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
-import android.support.annotation.Keep;
 import android.util.JsonWriter;
 
 /**
@@ -43,7 +42,6 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(String)
      */
-    @Keep
     public DownloadPostRequest(URL url) throws IOException {
         super(url);
     }
@@ -54,7 +52,6 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(URL)
      */
-    @Keep
     public DownloadPostRequest(String url) throws IOException {
         super(new URL(url));
     }

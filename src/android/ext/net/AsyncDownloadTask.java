@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
-import java.net.URL;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -21,9 +20,13 @@ import android.util.Log;
  * background thread and publish results on the UI thread.
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
- * public final class JSONDownloadTask extends AsyncDownloadTask&lt;Object, Object, JSONObject&gt; {
+ * public final class JSONDownloadTask extends AsyncDownloadTask&lt;String, Object, JSONObject&gt; {
  *     public JSONDownloadTask(Activity ownerActivity) {
  *         super(ownerActivity);
+ *     }
+ *
+ *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
+ *         return new DownloadRequest(params[0]).readTimeout(60000).connectTimeout(60000);
  *     }
  *
  *     protected void onPostExecute(JSONObject result) {
@@ -39,16 +42,10 @@ import android.util.Log;
  *     }
  * }
  *
- * final JSONDownloadTask task = new JSONDownloadTask(activity);
- * task.newDownloadRequest(url, DownloadRequest.class)
- *     .readTimeout(60000)
- *     .connectTimeout(60000)
- *     .contentType("application/json")
- * task.execute((Object[])null);</pre>
+ * new JSONDownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
-public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
     private DownloadRequest mRequest;
     private WeakReference<Object> mOwner;
 
@@ -76,6 +73,7 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
      * no owner set or the owner released by the GC.
      * @see #setOwner(Object)
      */
+    @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
@@ -92,32 +90,19 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
         return this;
     }
 
-    /**
-     * Returns a new download request with the specified <em>url</em>.
-     * @param url The url to connect the remote server, Pass a {@link URL} or {@link String} object.
-     * @param clazz May be a {@link DownloadRequest} or {@link DownloadPostRequest} <tt>Class</tt>.
-     * @return The instance of {@link DownloadRequest} or {@link DownloadPostRequest}.
-     */
-    public final <T extends DownloadRequest> T newDownloadRequest(Object url, Class<T> clazz) {
-        try {
-            DebugUtils.__checkError(!(url instanceof URL || url instanceof String), "Invalid class - " + url.getClass().getName());
-            DebugUtils.__checkError(mRequest != null, "The DownloadRequest is already exists. Only one DownloadRequest may be created per " + getClass().getName());
-            return (T)(mRequest = clazz.getConstructor(url.getClass()).newInstance(url));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
+    @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
         try {
-            DebugUtils.__checkError(mRequest == null, "The " + getClass().getName() + " did not call newDownloadRequest()");
+            mRequest = newDownloadRequest(params);
             return onDownload(mRequest.mConnection, mRequest.connect(null), params);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't download from - " + mRequest.mConnection.getURL().toString(), e);
+            Log.e(getClass().getName(), Log.getStackTraceString(e));
             return null;
         } finally {
-            mRequest.disconnect();
+            if (mRequest != null) {
+                mRequest.disconnect();
+            }
         }
     }
 
@@ -172,6 +157,14 @@ public class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Param
             break;
         }
     }
+
+    /**
+     * Returns a new download request with the specified <em>params</em>.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @return The instance of {@link DownloadRequest}.
+     * @throws Exception if an error occurs while opening the connection.
+     */
+    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
     /**
      * Override this method to downloads the resource from the remote server on a background thread.

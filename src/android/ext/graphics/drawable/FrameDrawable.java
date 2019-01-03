@@ -71,8 +71,8 @@ public class FrameDrawable {
      * Draw this frame drawable with the specified the {@link View} states.
      * @param canvas The canvas to draw into.
      * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View} states. If the
-     * <em>drawable</em> is state full, this parameter will be ignored.
+     * @param stateSpec An array of required {@link View} states. If this
+     * frame drawable is state full, this parameter will be ignored.
      * @see #draw(Canvas, int[], int[], int, int, int, int)
      */
     public void draw(Canvas canvas, View view, int[] stateSpec) {
@@ -85,12 +85,12 @@ public class FrameDrawable {
      * Draw this frame drawable with the specified the <tt>View</tt> states.
      * @param canvas The canvas to draw into.
      * @param stateSet An array of the <tt>View</tt> current states.
-     * @param stateSpec An array of required <tt>View</tt> states. If the <em>drawable</em> is
+     * @param stateSpec An array of required <tt>View</tt> states. If this frame drawable is
      * state full, this parameter will be ignored.
-     * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
-     * @param top The specified a bounding rectangle top coordinate for the <em>drawable</em>.
-     * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
-     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
+     * @param left The specified a bounding rectangle left coordinate for this frame drawable.
+     * @param top The specified a bounding rectangle top coordinate for this frame drawable.
+     * @param right The specified a bounding rectangle right coordinate for this frame drawable.
+     * @param bottom The specified a bounding rectangle bottom coordinate for this frame drawable.
      * @see #draw(Canvas, View, int[])
      */
     public void draw(Canvas canvas, int[] stateSet, int[] stateSpec, int left, int top, int right, int bottom) {

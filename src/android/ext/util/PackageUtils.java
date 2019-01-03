@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
@@ -56,7 +55,8 @@ public final class PackageUtils {
      * @see InstalledPackageFilter
      */
     public static List<PackageInfo> getInstalledPackages(Context context, int flags, Filter<PackageInfo> filter) {
-        return getInstalledPackages(context.getPackageManager(), flags, filter);
+        final List<PackageInfo> result = context.getPackageManager().getInstalledPackages(flags);
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -71,16 +71,7 @@ public final class PackageUtils {
      */
     public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
         final List<PackageInfo> result = pm.getInstalledPackages(flags);
-        if (filter != null) {
-            final Iterator<PackageInfo> itor = result.iterator();
-            while (itor.hasNext()) {
-                if (!filter.accept(itor.next())) {
-                    itor.remove();
-                }
-            }
-        }
-
-        return result;
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**

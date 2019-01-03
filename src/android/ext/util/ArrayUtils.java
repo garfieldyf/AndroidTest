@@ -354,7 +354,7 @@ public final class ArrayUtils {
             }
         }
 
-        // Inserts the value into the list between next and previous.
+        // Inserts the value into the list between previous and next.
         itor.add(value);
     }
 
@@ -379,7 +379,7 @@ public final class ArrayUtils {
             }
         }
 
-        // Inserts the value into the list between next and previous.
+        // Inserts the value into the list between previous and next.
         itor.add(value);
     }
 

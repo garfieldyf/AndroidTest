@@ -1,6 +1,6 @@
 package android.ext.util;
 
-import java.io.IOException;
+import java.util.Formatter;
 
 /**
  * Class StringUtils
@@ -118,15 +118,12 @@ public final class StringUtils {
     /**
      * Converts the specified byte array to a hexadecimal string.
      * @param data The array to convert.
-     * @param lowerCase Whether to convert a lower case hexadecimal
-     * characters, using "abcdef".
      * @return The hexadecimal string.
-     * @see #toHexString(byte[], int, int, boolean)
-     * @see #toHexString(Appendable, byte[], int, int, boolean)
-     * @see #toHexString(StringBuilder, byte[], int, int, boolean)
+     * @see #toHexString(byte[], int, int)
+     * @see #toHexString(Appendable, byte[], int, int)
      */
-    public static String toHexString(byte[] data, boolean lowerCase) {
-        return toHexString(new StringBuilder(data.length << 1), data, 0, data.length, lowerCase).toString();
+    public static String toHexString(byte[] data) {
+        return toHexString(new StringBuilder(data.length << 1), data, 0, data.length).toString();
     }
 
     /**
@@ -134,37 +131,12 @@ public final class StringUtils {
      * @param data The array to convert.
      * @param start The inclusive beginning index of the <em>data</em>.
      * @param end The exclusive end index of the <em>data</em>.
-     * @param lowerCase Whether to convert a lower case hexadecimal
-     * characters, using "abcdef".
      * @return The hexadecimal string.
-     * @see #toHexString(byte[], boolean)
-     * @see #toHexString(Appendable, byte[], int, int, boolean)
-     * @see #toHexString(StringBuilder, byte[], int, int, boolean)
+     * @see #toHexString(byte[])
+     * @see #toHexString(Appendable, byte[], int, int)
      */
-    public static String toHexString(byte[] data, int start, int end, boolean lowerCase) {
-        return toHexString(new StringBuilder((end - start) << 1), data, start, end, lowerCase).toString();
-    }
-
-    /**
-     * Converts the specified byte array to a hexadecimal string.
-     * @param out The <tt>StringBuilder</tt> to append the converted
-     * hexadecimal string.
-     * @param data The array to convert.
-     * @param start The inclusive beginning index of the <em>data</em>.
-     * @param end The exclusive end index of the <em>data</em>.
-     * @param lowerCase Whether to convert a lower case hexadecimal
-     * characters, using "abcdef".
-     * @return The <em>out</em>.
-     * @see #toHexString(byte[], boolean)
-     * @see #toHexString(byte[], int, int, boolean)
-     * @see #toHexString(Appendable, byte[], int, int, boolean)
-     */
-    public static StringBuilder toHexString(StringBuilder out, byte[] data, int start, int end, boolean lowerCase) {
-        try {
-            return (StringBuilder)toHexString((Appendable)out, data, start, end, lowerCase);
-        } catch (IOException e) {
-            throw new Error(e);
-        }
+    public static String toHexString(byte[] data, int start, int end) {
+        return toHexString(new StringBuilder((end - start) << 1), data, start, end).toString();
     }
 
     /**
@@ -173,18 +145,15 @@ public final class StringUtils {
      * @param data The array to convert.
      * @param start The inclusive beginning index of the <em>data</em>.
      * @param end The exclusive end index of the <em>data</em>.
-     * @param lowerCase Whether to convert a lower case hexadecimal characters, using "abcdef".
      * @return The <em>out</em>.
-     * @throws IOException if an error occurs while appending the <em>data</em>.
-     * @see #toHexString(byte[], boolean)
-     * @see #toHexString(byte[], int, int, boolean)
-     * @see #toHexString(StringBuilder, byte[], int, int, boolean)
+     * @see #toHexString(byte[])
+     * @see #toHexString(byte[], int, int)
      */
-    public static Appendable toHexString(Appendable out, byte[] data, int start, int end, boolean lowerCase) throws IOException {
-        final char letter = (lowerCase ? 'a' : 'A');
-        for (int digit; start < end; ++start) {
-            digit = data[start];
-            out.append(toChar((digit >> 4) & 0xf, letter)).append(toChar(digit & 0xf, letter));
+    @SuppressWarnings("resource")
+    public static Appendable toHexString(Appendable out, byte[] data, int start, int end) {
+        final Formatter formatter = new Formatter(out);
+        for (; start < end; ++start) {
+            formatter.format("%02x", data[start]);
         }
 
         return out;
@@ -203,10 +172,6 @@ public final class StringUtils {
         }
 
         return true;
-    }
-
-    private static char toChar(int digit, char letter) {
-        return (char)(digit < 10 ? digit + '0' : digit + letter - 10);
     }
 
     /**

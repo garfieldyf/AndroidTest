@@ -125,7 +125,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Returns the default image associated with this loader.
      * @return The {@link Drawable} of the default image or <tt>null</tt>.
      */
-    public final Drawable getDefaultDrawable() {
+    public final Drawable getDefaultImage() {
         return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).mDefaultImage : null);
     }
 
@@ -259,7 +259,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
         @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
-            final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1), true);
+            final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final String imageFile = mCache.get(hashKey);
             Image result = null;
 

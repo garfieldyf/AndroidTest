@@ -164,7 +164,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         @Override
         public String getCacheFile(String url) {
             final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
-            return StringUtils.toHexString(new StringBuilder(mContext.getFilesDir().getPath()).append("/.json_files/"), digest, 0, digest.length, true).toString();
+            return StringUtils.toHexString(new StringBuilder(mContext.getFilesDir().getPath()).append("/.json_files/"), digest, 0, digest.length).toString();
         }
 
         @Override

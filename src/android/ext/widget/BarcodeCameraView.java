@@ -43,29 +43,23 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     private int mMaxZoom;
     private String mFlashMode;
 
-    private final Rect mClipBounds;
-    private final Point mPreviewSize;
+    private Rect mClipBounds;
+    private Point mPreviewSize;
     private OnBarcodeCameraListener mListener;
 
     public BarcodeCameraView(Context context) {
-        this(context, null, 0);
+        super(context);
+        initView();
     }
 
     public BarcodeCameraView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
+        initView();
     }
 
     public BarcodeCameraView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-
-        mMaxZoom = INVALID_ZOOM;
-        mClipBounds  = new Rect();
-        mPreviewSize = new Point();
-        setKeepScreenOn(true);
-
-        final SurfaceHolder holder = getHolder();
-        holder.addCallback(this);
-        holder.setFormat(ImageFormat.NV21);
+        initView();
     }
 
     /**
@@ -261,6 +255,17 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     @Override
     public int compare(Size one, Size another) {
         return (another.width * another.height - one.width * one.height);
+    }
+
+    private void initView() {
+        mMaxZoom = INVALID_ZOOM;
+        mClipBounds  = new Rect();
+        mPreviewSize = new Point();
+        setKeepScreenOn(true);
+
+        final SurfaceHolder holder = getHolder();
+        holder.addCallback(this);
+        holder.setFormat(ImageFormat.NV21);
     }
 
     private boolean setCameraParameters() {

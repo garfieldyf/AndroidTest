@@ -14,11 +14,11 @@ import android.widget.TextView;
  */
 public final class PrinterView extends TextView implements Printer {
     public PrinterView(Context context) {
-        this(context, null, 0);
+        super(context);
     }
 
     public PrinterView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
     }
 
     public PrinterView(Context context, AttributeSet attrs, int defStyleAttr) {

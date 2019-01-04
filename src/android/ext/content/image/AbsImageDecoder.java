@@ -47,9 +47,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
 
     @Override
     public Options newInstance() {
-        final Options opts = new Options();
-        opts.inMutable = true;
-        return opts;
+        return new Options();
     }
 
     /**
@@ -80,14 +78,26 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             Log.e(getClass().getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
             return null;
         } finally {
-            opts.inBitmap = null;
-            opts.inJustDecodeBounds = false;
-            mOptionsPool.recycle(opts);
+            recycleOptions(opts);
         }
     }
 
     public void dump(Printer printer) {
         Pools.dumpPool(mOptionsPool, printer);
+    }
+
+    /**
+     * Recycles the specified <em>opts</em> to the internal pool.
+     * @param opts The {@link Options} to recycle.
+     */
+    protected void recycleOptions(Options opts) {
+        opts.inDensity = 0;
+        opts.inBitmap  = null;
+        opts.inSampleSize = 0;
+        opts.inTargetDensity = 0;
+        opts.inScreenDensity = 0;
+        opts.inJustDecodeBounds = false;
+        mOptionsPool.recycle(opts);
     }
 
     /**

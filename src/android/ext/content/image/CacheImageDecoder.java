@@ -2,7 +2,7 @@ package android.ext.content.image;
 
 import android.content.Context;
 import android.ext.cache.BitmapPool;
-import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.params.Parameters;
 import android.ext.graphics.GIFImage;
 import android.graphics.BitmapFactory.Options;
 

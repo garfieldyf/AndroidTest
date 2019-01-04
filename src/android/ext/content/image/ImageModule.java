@@ -15,7 +15,7 @@ import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
-import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.params.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;

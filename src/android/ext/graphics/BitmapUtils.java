@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
 import android.ext.content.XmlResources;
-import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.params.Parameters;
 import android.ext.graphics.DrawUtils.MatrixPool;
 import android.ext.graphics.DrawUtils.RectFPool;
 import android.ext.util.DebugUtils;

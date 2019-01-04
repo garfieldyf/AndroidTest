@@ -241,7 +241,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
                 mCamera.stopPreview();
                 mCamera.release();
             } catch (Exception e) {
-                Log.e(getClass().getName(), e.getMessage(), e);
+                Log.e(getClass().getName(), Log.getStackTraceString(e));
             } finally {
                 mCamera = null;
             }

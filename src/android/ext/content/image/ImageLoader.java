@@ -6,8 +6,8 @@ import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
-import android.ext.content.image.BitmapDecoder.Parameters;
 import android.ext.content.image.ImageBinder.CacheTransformer;
+import android.ext.content.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -293,7 +293,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new Parameters(1, Config.RGB_565);
+        public static final Parameters sInstance = new Parameters(Config.RGB_565, 1);
     }
 
     /**

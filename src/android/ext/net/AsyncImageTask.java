@@ -5,7 +5,7 @@ import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import android.content.Context;
 import android.ext.content.XmlResources;
-import android.ext.content.image.BitmapDecoder.Parameters;
+import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;

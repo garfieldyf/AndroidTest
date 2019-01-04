@@ -22,7 +22,6 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.util.Xml;
-import android.view.View;
 import android.widget.ImageView;
 
 /**
@@ -166,7 +165,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             // Inflates the bitmap transformer from XML parser.
             Transformer transformer = inflate(context, parser);
             if (transformer == null) {
-                transformer = BitmapTransformer.getInstance();
+                transformer = BitmapTransformer.getInstance(context);
             }
 
             // Inflates the image transformer from XML parser.
@@ -244,25 +243,33 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * Class <tt>BitmapTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class BitmapTransformer implements Transformer<Object, Bitmap> {
-        private static final BitmapTransformer sInstance = new BitmapTransformer();
+        private static BitmapTransformer sInstance;
+        private final Context mContext;
 
         /**
-         * This class cannot be instantiated.
+         * Constructor
+         * @param context The <tt>Context</tt>.
          */
-        private BitmapTransformer() {
+        private BitmapTransformer(Context context) {
+            mContext = context.getApplicationContext();
         }
 
         /**
          * Returns a type-safe {@link Transformer} to transforms a <tt>Bitmap</tt> to a {@link BitmapDrawable}.
+         * @param context The <tt>Context</tt>.
          * @return The <tt>Transformer</tt>.
          */
-        public static <URI> Transformer<URI, Bitmap> getInstance() {
+        public static synchronized <URI> Transformer<URI, Bitmap> getInstance(Context context) {
+            if (sInstance == null) {
+                sInstance = new BitmapTransformer(context);
+            }
+
             return (Transformer<URI, Bitmap>)sInstance;
         }
 
         @Override
         public Drawable transform(Object uri, Object target, Bitmap bitmap) {
-            return new BitmapDrawable(((View)target).getResources(), bitmap);
+            return new BitmapDrawable(mContext.getResources(), bitmap);
         }
     }
 
@@ -273,7 +280,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         private static final OvalTransformer sInstance = new OvalTransformer();
 
         /**
-         * This class cannot be instantiated.
+         * Constructor
          */
         private OvalTransformer() {
         }
@@ -351,7 +358,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         private static final GIFTransformer sInstance = new GIFTransformer();
 
         /**
-         * This class cannot be instantiated.
+         * Constructor
          */
         private GIFTransformer() {
         }
@@ -377,7 +384,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         private static final DrawableTransformer sInstance = new DrawableTransformer();
 
         /**
-         * This class cannot be instantiated.
+         * Constructor
          */
         private DrawableTransformer() {
         }

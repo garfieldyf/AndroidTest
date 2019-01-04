@@ -227,7 +227,7 @@ public final class XmlResources {
 
             switch (name) {
             case "BitmapTransformer":
-                return BitmapTransformer.getInstance();
+                return BitmapTransformer.getInstance(context);
 
             case "GIFTransformer":
                 return GIFTransformer.getInstance();

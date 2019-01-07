@@ -3,6 +3,7 @@ package android.ext.util;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import android.content.Context;
 
 /**
  * Class ClassUtils
@@ -67,6 +68,20 @@ public final class ClassUtils {
         final Method result = clazz.getDeclaredMethod(name, parameterTypes);
         result.setAccessible(true);
         return result;
+    }
+
+    /**
+     * Retrieves the R.styleable.<em>name</em> attribute value. Like as <tt>R.styleable.Parameters</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param name The name of styleable to retrieve.
+     * @return The value of the attribute field.
+     */
+    public static Object getAttributeValue(Context context, String name) {
+        try {
+            return Class.forName(context.getPackageName() + ".R$styleable").getField(name).get(null);
+        } catch (Throwable e) {
+            throw new Error(e);
+        }
     }
 
     /**

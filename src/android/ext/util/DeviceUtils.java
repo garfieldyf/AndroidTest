@@ -271,7 +271,12 @@ public final class DeviceUtils {
             final StorageVolume volume = volumes[i];
             final String path  = volume.getPath();
             final String state = volume.getState();
-            statFs.restat(path);
+
+            try {
+                statFs.restat(path);
+            } catch (Throwable e) {
+                continue;
+            }
 
             dumpStorageInfo(context, statFs, dumpWhiteSpace(out, i).append(getUserLabel(context, volume))
                 .append(" [ path = ").append(path)

@@ -132,6 +132,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
+            DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.

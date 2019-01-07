@@ -3,7 +3,6 @@ package android.ext.content.image;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
-import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
@@ -78,18 +77,16 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
     @Override
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
+        // Decodes the image bounds.
+        if (mParameters.requestDecodeBounds()) {
+            decodeImageBounds(uri, flags, opts);
+        }
+
         // Computes the sample size.
         opts.inPreferredConfig = mParameters.config;
         mParameters.computeSampleSize(mContext, opts);
 
-        // Decodes the bitmap pixels.
-        return BitmapUtils.decodeBitmap(mContext, uri, opts);
-    }
-
-    @Override
-    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        if (mParameters.requestDecodeBounds()) {
-            super.decodeImageBounds(uri, params, flags, opts);
-        }
+        // Decodes the image pixels.
+        return decodeBitmap(uri, params, flags, opts);
     }
 }

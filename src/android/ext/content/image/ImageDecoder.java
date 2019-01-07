@@ -3,9 +3,9 @@ package android.ext.content.image;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
-import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
 
@@ -81,8 +81,24 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
         printer.println("  " + mParameters.toString());
     }
 
+    /**
+     * Retrieves the bitmap from the internal bitmap cache to decode the bitmap.
+     * @param uri The uri to decode.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
+     * @param opts The {@link Options} used to decode. The <em>opts's</em>
+     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
+     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
+     */
+    protected Bitmap getCachedBitmap(Object uri, Object[] params, int flags, Options opts) {
+        return null;
+    }
+
     @Override
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
+        // Decodes the image bounds.
+        decodeImageBounds(uri, flags, opts);
+
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
             return GIFImage.decode(mContext, uri, opts.inTempStorage);
@@ -91,8 +107,9 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
             opts.inPreferredConfig = mParameters.config;
             mParameters.computeSampleSize(mContext, opts);
 
-            // Decodes the bitmap.
-            return BitmapUtils.decodeBitmap(mContext, uri, opts);
+            // Retrieves the bitmap from bitmap pool to reuse it.
+            opts.inBitmap = getCachedBitmap(uri, params, flags, opts);
+            return decodeBitmap(uri, params, flags, opts);
         }
     }
 }

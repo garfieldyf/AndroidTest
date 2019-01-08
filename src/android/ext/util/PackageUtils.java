@@ -56,7 +56,7 @@ public final class PackageUtils {
      */
     public static List<PackageInfo> getInstalledPackages(Context context, int flags, Filter<PackageInfo> filter) {
         final List<PackageInfo> result = context.getPackageManager().getInstalledPackages(flags);
-        return (filter != null ? ArrayUtils.filter(result, filter) : result);
+        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -71,7 +71,7 @@ public final class PackageUtils {
      */
     public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
         final List<PackageInfo> result = pm.getInstalledPackages(flags);
-        return (filter != null ? ArrayUtils.filter(result, filter) : result);
+        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -368,6 +368,15 @@ public final class PackageUtils {
             } else {
                 throw new IllegalStateException("Missing ComponentInfo!");
             }
+        }
+
+        /**
+         * Returns a package name of this object.
+         * @return The package name.
+         */
+        public final String getPackageName() {
+            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            return (resolveInfo.resolvePackageName != null ? resolveInfo.resolvePackageName : getComponentInfo().packageName);
         }
 
         public final void dump(Printer printer) {

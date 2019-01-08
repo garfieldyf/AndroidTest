@@ -1,5 +1,6 @@
 package android.ext.content.image;
 
+import static android.graphics.Bitmap.Config.ARGB_8888;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
@@ -101,6 +102,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
         opts.inJustDecodeBounds = false;
+        opts.inPreferredConfig  = ARGB_8888;
         opts.inPreferQualityOverSpeed = false;
         mOptionsPool.recycle(opts);
     }

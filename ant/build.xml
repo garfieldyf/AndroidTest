@@ -19,11 +19,11 @@
     <property name="api.level" value="22" />
     <property name="sdk.dir" value="${env.ANDROID_HOME}" />
     <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
-    <property name="library.jars.dir" value="E:\Include\java" />
-    <property name="zxing.jar.path" value="${library.jars.dir}/zxing/zxing.jar" />
+    <property name="libs.jar.dir" value="E:\Include\java" />
+    <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
-    <property name="android.internal.jar.path" value="${library.jars.dir}/android/android-sdk-internal.jar" />
-    <property name="recyclerview.v7.jar.path" value="${library.jars.dir}/recyclerview/recyclerview-v7.jar" />
+    <property name="android.internal.jar.path" value="${libs.jar.dir}/android/android-sdk-internal.jar" />
+    <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
     <condition property="compile.barcode">

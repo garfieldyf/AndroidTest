@@ -19,9 +19,9 @@
         <attr name="sampleSize" format="integer" />
     </declare-styleable>
 
-    <!-- PercentParameters styleable -->
-    <declare-styleable name="PercentParameters">
-        <attr name="percent" format="float" />
+    <!-- ScaleParameters styleable -->
+    <declare-styleable name="ScaleParameters">
+        <attr name="scale" format="float" />
     </declare-styleable>
 
     <!-- ImageBinder styleable -->

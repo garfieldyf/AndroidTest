@@ -326,12 +326,12 @@ public class BarcodeDecorView extends View {
         canvas.drawRect(0, bottom, width, height, mPaint);
         canvas.drawRect(right, top, width, bottom, mPaint);
 
-        // Draw the barcode border.
+        // Draw the scanning border.
         mPaint.setStyle(Style.STROKE);
         mPaint.setColor(mBorderColor);
         canvas.drawRect(left, top, right, bottom, mPaint);
 
-        // Draw the barcode corner.
+        // Draw the scanning corner.
         mPaint.setStyle(Style.FILL);
         mPaint.setColor(mCornerColor);
         canvas.drawRect(left, top, left + mCornerWidth, top + mCornerHeight, mPaint);

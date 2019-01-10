@@ -2,7 +2,6 @@ package android.ext.content.image.params;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -32,10 +31,15 @@ public class SizeParameters extends Parameters {
     public final int desiredHeight;
 
     /**
+     * The screen density.
+     */
+    private final int targetDensity;
+
+    /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #SizeParameters(Config, int, int)
+     * @see #SizeParameters(Context, Config, int, int)
      */
     public SizeParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -43,6 +47,7 @@ public class SizeParameters extends Parameters {
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
         this.value = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
         this.desiredHeight = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
+        this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
         a.recycle();
 
         DebugUtils.__checkError((int)value <= 0, "The tag requires a valid 'width' attribute");
@@ -51,15 +56,18 @@ public class SizeParameters extends Parameters {
 
     /**
      * Constructor
+     * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
      * @param desiredWidth The desired width to decode.
      * @param desiredHeight The desired height to decode.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Config config, int desiredWidth, int desiredHeight) {
+    public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
         super(desiredWidth, config);
-        this.desiredHeight = desiredHeight;
+
         DebugUtils.__checkError(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
+        this.desiredHeight = desiredHeight;
+        this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
     @Override
@@ -68,8 +76,27 @@ public class SizeParameters extends Parameters {
     }
 
     @Override
+    public int computeByteCount(Context context, Options opts) {
+        return computeByteCountImpl(context, opts);
+    }
+
+    @Override
     public void computeSampleSize(Context context, Options opts) {
-        opts.inSampleSize = BitmapUtils.computeSampleSize(opts.outWidth, opts.outHeight, (int)value, desiredHeight);
+        /*
+         * Scale width and height.
+         *      scaleX = opts.outWidth  / desiredWidth;
+         *      scaleY = opts.outHeight / desiredHeight;
+         *      scale  = max(scaleX, scaleY);
+         */
+        final int desiredWidth = (int)value;
+        opts.inSampleSize = 1;
+        if (opts.outWidth <= desiredWidth || opts.outHeight <= desiredHeight) {
+            opts.inDensity = opts.inTargetDensity = 0;
+        } else {
+            final float scale = Math.max((float)opts.outWidth / desiredWidth, (float)opts.outHeight / desiredHeight);
+            opts.inTargetDensity = targetDensity;
+            opts.inDensity = (int)(targetDensity * scale);
+        }
     }
 
     @Override

@@ -1,6 +1,8 @@
 package android.ext.content.image.params;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.ext.util.ClassUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -10,38 +12,44 @@ import android.util.AttributeSet;
  * <h2>Usage</h2>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;ScaleParameters
- *      xmlns:android="http://schemas.android.com/apk/res/android"
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      android:width="200dp"
- *      android:height="300dp"
- *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]" /&gt;</pre>
+ *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+ *      app:scale="0.7" /&gt;</pre>
  * @author Garfield
  */
-public class ScaleParameters extends SizeParameters {
+public class ScaleParameters extends Parameters {
     private final int mTargetDensity;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #ScaleParameters(Context, Config, int, int)
+     * @see #ScaleParameters(Context, Config, float)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "ScaleParameters"));
+        value = a.getFloat(0 /* R.styleable.ScaleParameters_scale */, 0);
         mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        a.recycle();
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
-     * @param desiredWidth The desired width to decode.
-     * @param desiredHeight The desired height to decode.
+     * @param scale The scale amount of the image's size to decode.
      * @see #ScaleParameters(Context, AttributeSet)
      */
-    public ScaleParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
-        super(config, desiredWidth, desiredHeight);
+    public ScaleParameters(Context context, Config config, float scale) {
+        super(scale, config);
         mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
+    }
+
+    @Override
+    public boolean requestDecodeBounds() {
+        return true;
     }
 
     @Override
@@ -52,18 +60,24 @@ public class ScaleParameters extends SizeParameters {
     @Override
     public void computeSampleSize(Context context, Options opts) {
         /*
-         * Scale width and height.
-         *      scaleX = opts.outWidth  / desiredWidth;
-         *      scaleY = opts.outHeight / desiredHeight;
-         *      scale  = max(scaleX, scaleY);
+         * Scale width, expressed as a percentage of the image's width.
+         *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
+        final float scale = (float)value;
         opts.inSampleSize = 1;
-        if (opts.outWidth <= (int)value || opts.outHeight <= desiredHeight) {
+        if (scale <= 0 || scale >= 1.0f) {
             opts.inDensity = opts.inTargetDensity = 0;
         } else {
-            final float scale = Math.max((float)opts.outWidth / (int)value, (float)opts.outHeight / desiredHeight);
             opts.inTargetDensity = mTargetDensity;
-            opts.inDensity = (int)(mTargetDensity * scale);
+            opts.inDensity = (int)(mTargetDensity * (opts.outWidth / (opts.outWidth * scale)));
         }
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder(128).append(getClass().getSimpleName())
+            .append(" { config = ").append(config.name())
+            .append(", scale = ").append(value)
+            .append(" }").toString();
     }
 }

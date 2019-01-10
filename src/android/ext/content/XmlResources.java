@@ -19,7 +19,6 @@ import android.ext.content.image.ImageBinder.RoundedRectTransformer;
 import android.ext.content.image.ImageBinder.Transformer;
 import android.ext.content.image.TransitionBinder;
 import android.ext.content.image.params.Parameters;
-import android.ext.content.image.params.PercentParameters;
 import android.ext.content.image.params.ScaleParameters;
 import android.ext.content.image.params.SizeParameters;
 import android.ext.util.ClassUtils;
@@ -159,9 +158,6 @@ public final class XmlResources {
 
             case "ScaleParameters":
                 return new ScaleParameters(context, attrs);
-
-            case "PercentParameters":
-                return new PercentParameters(context, attrs);
 
             default:
                 return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);

@@ -144,7 +144,7 @@ public final class DeviceUtils {
 
     public static void dumpSystemInfo(Context context, Printer printer) {
         final WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display = wm.getDefaultDisplay();
+        final Display display  = wm.getDefaultDisplay();
 
         final DisplayMetrics dm = new DisplayMetrics();
         display.getMetrics(dm);

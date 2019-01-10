@@ -1,6 +1,7 @@
 package android.ext.net;
 
 import java.net.HttpURLConnection;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import java.util.regex.Pattern;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.DeviceUtils;
 import android.ext.util.StringUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -50,14 +50,28 @@ public final class NetworkUtils {
      * Returns the MAC address from the network interface.
      * @param ifname The network interface name. Pass {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
+     * @return The MAC address or <tt>null</tt> if it has no address.
+     * @see #getMacAddress(String, String)
+     */
+    public static byte[] getMacAddress(String ifname) {
+        try {
+            final NetworkInterface network = NetworkInterface.getByName(ifname);
+            return (network != null ? network.getHardwareAddress() : null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Returns the MAC address from the network interface.
+     * @param ifname The network interface name. Pass {@link #WLAN},
+     * {@link #ETHERNET} or other interface name.
      * @return The MAC address or <tt>fallback</tt>.
+     * @see #getMacAddress(String)
      */
     public static String getMacAddress(String ifname, String fallback) {
-        try {
-            return DeviceUtils.readDeviceFile("/sys/class/net/" + ifname + "/address", 24);
-        } catch (Exception e) {
-            return fallback;
-        }
+        final byte[] macAddress = getMacAddress(ifname);
+        return (macAddress != null ? formatMacAddress(macAddress) : fallback);
     }
 
     /**

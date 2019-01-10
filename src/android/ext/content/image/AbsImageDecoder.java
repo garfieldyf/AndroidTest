@@ -150,7 +150,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
 
     /**
      * Decodes an image from the specified <em>uri</em>.
-     * @param uri The uri to decode.
+     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode.

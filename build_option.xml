@@ -115,9 +115,9 @@
         </delete>
 
         <!-- build channel apk files -->
-        <property name="vasdolly.cmd.jar.path" value="${libs.jar.dir}/vasdolly/vasdolly-cmd.jar" />
+        <property name="vasdolly.jar.path" value="${libs.jar.dir}/vasdolly/libs/vasdolly.jar" />
         <exec executable="cmd.exe">
-            <arg line="/C java -jar ${vasdolly.cmd.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
+            <arg line="/C java -jar ${vasdolly.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>
 
         <!-- copy the build apk files -->

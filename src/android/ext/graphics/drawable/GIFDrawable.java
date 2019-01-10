@@ -20,7 +20,6 @@ import android.graphics.drawable.Drawable;
 import android.os.SystemClock;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
-import android.view.Gravity;
 
 /**
  * Class GIFDrawable
@@ -29,12 +28,10 @@ import android.view.Gravity;
 public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
     private static final int[] GIF_DRAWABLE_ATTRS = {
         android.R.attr.oneshot,
-        android.R.attr.fillAfter,
     };
 
-    private static final int FLAG_RUNNING   = 0x01;     // mFlags
-    private static final int FLAG_ONESHOT   = 0x01;     // mState.mFlags
-    private static final int FLAG_FILLAFTER = 0x02;     // mState.mFlags
+    private static final int FLAG_RUNNING = 0x01;   // mFlags
+    private static final int FLAG_ONESHOT = 0x01;   // mState.mFlags
 
     /**
      * The current frame index to draw.
@@ -151,58 +148,31 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
      * @see #isOneShot()
      */
     public void setOneShot(boolean oneShot) {
-        mState.setFlags(oneShot, FLAG_ONESHOT);
-    }
-
-    /**
-     * Tests the animation will persist when it is finished.
-     * @return <tt>true</tt> the animation will persist when
-     * it is finished, <tt>false</tt> otherwise.
-     * @see #setFillAfter(boolean)
-     */
-    public boolean isFillAfter() {
-        return ((mState.mFlags & FLAG_FILLAFTER) != 0);
-    }
-
-    /**
-     * Sets whether the animation performed will persist when it is finished.
-     * @param fillAfter <tt>true</tt> if the animation should persist after it ends.
-     * @see #isFillAfter()
-     */
-    public void setFillAfter(boolean fillAfter) {
-        mState.setFlags(fillAfter, FLAG_FILLAFTER);
+        if (oneShot) {
+            mState.mFlags |= FLAG_ONESHOT;
+        } else {
+            mState.mFlags &= ~FLAG_ONESHOT;
+        }
     }
 
     public final void setAnimationCallback(AnimationCallback callback) {
         mCallback = callback;
     }
 
-    /**
-     * @see #stop()
-     * @see #pause()
-     */
     @Override
     public void start() {
-        if (!isRunning()) {
-            startAnimation();
+        if (!isRunning() && mState.mImage.getFrameCount() > 1) {
+            mFlags |= FLAG_RUNNING;
+            mFrameIndex = 0;
+            invalidateSelf();
+
+            // Dispatch the animation was started.
+            if (mCallback != null) {
+                mCallback.onAnimationStart(this);
+            }
         }
     }
 
-    /**
-     * Temporarily stops the drawable's animation.
-     * @see #start()
-     * @see #stop()
-     */
-    public void pause() {
-        if (isRunning()) {
-            unscheduleSelf(mFrameIndex);
-        }
-    }
-
-    /**
-     * @see #start()
-     * @see #pause()
-     */
     @Override
     public void stop() {
         if (isRunning()) {
@@ -217,6 +187,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
     @Override
     public void run() {
+        mFrameIndex = (mFrameIndex + 1) % mState.mImage.getFrameCount();
         invalidateSelf();
     }
 
@@ -242,25 +213,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
     @Override
     public int getOpacity() {
-        return (mState.mGravity != Gravity.FILL || mState.mPaint.getAlpha() < 255 ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE);
-    }
-
-    @Override
-    public boolean setVisible(boolean visible, boolean restart) {
-        final boolean changed = super.setVisible(visible, restart);
-        if (visible) {
-            if (restart || changed) {
-                if (restart) {
-                    mFrameIndex = 0;
-                }
-
-                startAnimation();
-            }
-        } else {
-            unscheduleSelf(restart ? 0 : mFrameIndex);
-        }
-
-        return changed;
+        return PixelFormat.TRANSLUCENT;
     }
 
     @Override
@@ -272,15 +225,13 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
         if (mState.mImage.draw(mState.mCanvas, mFrameIndex)) {
             // Draws the GIF image current frame.
-            drawFrame(canvas, mFrameIndex, mState.mCanvas, bounds, paint);
+            canvas.drawBitmap(mState.mCanvas, null, bounds, paint);
 
             // Schedules the GIF image next frame.
             if (isRunning()) {
-                final int frameCount = mState.mImage.getFrameCount();
-                if (isOneShot() && mFrameIndex == frameCount - 1) {
-                    unscheduleSelf(isFillAfter() ? mFrameIndex : 0);
+                if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
+                    unscheduleSelf(mFrameIndex);
                 } else {
-                    mFrameIndex = (mFrameIndex + 1) % frameCount;
                     scheduleSelf(mState.mImage.getFrameDelay(mFrameIndex));
                 }
             }
@@ -294,42 +245,9 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             mState.mFlags |= FLAG_ONESHOT;
         }
 
-        if (a.getBoolean(1 /* android.R.attr.fillAfter */, false)) {
-            mState.mFlags |= FLAG_FILLAFTER;
-        }
-
         mState.setImage(GIFImage.decode(res, id));
         DebugUtils.__checkError(mState.mImage == null, new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
         a.recycle();
-    }
-
-    /**
-     * Draws the current frame of this GIF drawable in the <em>bounds</em>.
-     * @param canvas The canvas to draw into.
-     * @param frameIndex The current frame index.
-     * @param frame The current frame to be drawn.
-     * @param bounds The frame bounds of this drawable.
-     * @param paint The paint used to draw the frame of this drawable.
-     */
-    protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
-        canvas.drawBitmap(frame, null, bounds, paint);
-    }
-
-    private void startAnimation() {
-        final int frameCount = mState.mImage.getFrameCount();
-        if (frameCount > 1) {
-            if ((mState.mFlags & (FLAG_ONESHOT | FLAG_FILLAFTER)) != 0 && mFrameIndex == frameCount - 1) {
-                mFrameIndex = 0;
-            }
-
-            mFlags |= FLAG_RUNNING;
-            invalidateSelf();
-
-            // Notify the callback that this animation was started.
-            if (mCallback != null) {
-                mCallback.onAnimationStart(this, mFrameIndex);
-            }
-        }
     }
 
     private void scheduleSelf(int delayMillis) {
@@ -350,7 +268,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             callback.unscheduleDrawable(this, this);
         }
 
-        // Notify the callback that this animation was ended.
+        // Dispatch the animation was ended.
         if (mCallback != null) {
             mCallback.onAnimationEnd(this, endFrame);
         }
@@ -412,14 +330,6 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
                 mCanvas = image.createBitmapCanvas();
             }
         }
-
-        /* package */ final void setFlags(boolean set, int flags) {
-            if (set) {
-                mFlags |= flags;
-            } else {
-                mFlags &= ~flags;
-            }
-        }
     }
 
     /**
@@ -429,9 +339,8 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         /**
          * Called when the animation starts.
          * @param drawable The {@link GIFDrawable} started the animation.
-         * @param frameIndex The start frame index.
          */
-        void onAnimationStart(GIFDrawable drawable, int frameIndex);
+        void onAnimationStart(GIFDrawable drawable);
 
         /**
          * Called when the animation ends.

@@ -323,6 +323,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         final Point screenSize = new Point();
         getDisplay().getRealSize(screenSize);
         Collections.sort(supportedSizes, this);
+        BarcodeCameraView.__checkDumpSize(supportedSizes, screenSize);
 
         final int minWidth  = screenSize.y / 3;
         final int minHeight = screenSize.x / 3;
@@ -349,6 +350,21 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         }
 
         return (previewSize != null ? previewSize : params.getPreviewSize());
+    }
+
+    private static void __checkDumpSize(List<Size> sizes, Point screenSize) {
+        final StringBuilder result = new StringBuilder("screenSize = { ").append(screenSize.y).append('x').append(screenSize.x).append(" }\npreviewSizes = { ");
+        final int length = ArrayUtils.getSize(sizes);
+        if (length > 0) {
+            Size size = sizes.get(0);
+            result.append(size.width).append('x').append(size.height);
+            for (int i = 1; i < length; ++i) {
+                size = sizes.get(i);
+                result.append(", ").append(size.width).append('x').append(size.height);
+            }
+        }
+
+        Log.d("BarcodeCameraView", result.append(" }").toString());
     }
 
     /**

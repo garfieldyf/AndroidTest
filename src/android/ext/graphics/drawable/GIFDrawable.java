@@ -132,6 +132,14 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     }
 
     /**
+     * Returns this drawable frame count.
+     * @return The frame count, must be >= 1.
+     */
+    public final int getFrameCount() {
+        return mState.mImage.getFrameCount();
+    }
+
+    /**
      * Tests the animation should play once or repeat.
      * @return <tt>true</tt> if the animation will play
      * once, <tt>false</tt> otherwise.
@@ -164,7 +172,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         if (!isRunning() && mState.mImage.getFrameCount() > 1) {
             mFlags |= FLAG_RUNNING;
             mFrameIndex = 0;
-            invalidateSelf();
+            scheduleSelf();
 
             // Dispatch the animation was started.
             if (mCallback != null) {
@@ -229,10 +237,10 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
             // Schedules the GIF image next frame.
             if (isRunning()) {
-                if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
-                    unscheduleSelf(mFrameIndex);
+                if (!isOneShot() || mFrameIndex != mState.mImage.getFrameCount() - 1) {
+                    scheduleSelf();
                 } else {
-                    scheduleSelf(mState.mImage.getFrameDelay(mFrameIndex));
+                    unscheduleSelf(mFrameIndex);
                 }
             }
         }
@@ -250,16 +258,16 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         a.recycle();
     }
 
-    private void scheduleSelf(int delayMillis) {
+    private void scheduleSelf() {
         final Callback callback = getCallback();
         if (callback != null) {
             callback.unscheduleDrawable(this, this);
-            callback.scheduleDrawable(this, this, SystemClock.uptimeMillis() + delayMillis);
+            callback.scheduleDrawable(this, this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
         }
     }
 
-    private void unscheduleSelf(int endFrame) {
-        mFrameIndex = endFrame;
+    private void unscheduleSelf(int frameIndex) {
+        mFrameIndex = frameIndex;
         mFlags &= ~FLAG_RUNNING;
 
         final Callback callback = getCallback();
@@ -270,7 +278,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
         // Dispatch the animation was ended.
         if (mCallback != null) {
-            mCallback.onAnimationEnd(this, endFrame);
+            mCallback.onAnimationEnd(this, frameIndex);
         }
     }
 

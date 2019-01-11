@@ -414,7 +414,13 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
         @Override
         public Drawable transform(Object uri, Object target, Object image) {
-            return (image instanceof Bitmap ? mBitmapTransformer.transform(uri, target, image) : mImageTransformer.transform(uri, target, image));
+            if (image instanceof Drawable) {
+                return (Drawable)image;
+            } else if (image instanceof Bitmap) {
+                return mBitmapTransformer.transform(uri, target, image);
+            } else {
+                return mImageTransformer.transform(uri, target, image);
+            }
         }
     }
 

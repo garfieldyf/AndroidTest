@@ -32,9 +32,21 @@ public class BarcodeDecoder {
 
     /**
      * Constructor
+     * @see #BarcodeDecoder(Map)
      */
     public BarcodeDecoder() {
         mReader = new MultiFormatReader();
+    }
+
+    /**
+     * Constructor
+     * @param hints The set of hints to use for subsequent calls to <em>decode</em>.
+     * @see #BarcodeDecoder()
+     * @see Builder
+     */
+    public BarcodeDecoder(Map<DecodeHintType, ?> hints) {
+        mReader = new MultiFormatReader();
+        mReader.setHints(hints);
     }
 
     /**

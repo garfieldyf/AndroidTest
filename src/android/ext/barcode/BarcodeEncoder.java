@@ -27,8 +27,20 @@ public class BarcodeEncoder {
 
     /**
      * Constructor
+     * @see #BarcodeEncoder(Map)
      */
     public BarcodeEncoder() {
+        mWriter = new MultiFormatWriter();
+    }
+
+    /**
+     * Constructor
+     * @param hints The additional parameters to supply to this encoder.
+     * @see #BarcodeEncoder()
+     * @see Builder
+     */
+    public BarcodeEncoder(Map<EncodeHintType, ?> hints) {
+        mHints  = hints;
         mWriter = new MultiFormatWriter();
     }
 

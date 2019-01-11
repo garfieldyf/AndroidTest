@@ -44,7 +44,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @see #ImageModule(Context, Cache, FileCache, int)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, imageCache, fileCache, Math.min(Runtime.getRuntime().availableProcessors() * 2, 3));
+        this(context, imageCache, fileCache, Math.min(Runtime.getRuntime().availableProcessors() * 2 + 1, 4));
     }
 
     /**

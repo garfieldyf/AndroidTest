@@ -10,7 +10,6 @@ import android.ext.cache.Caches;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
-import android.ext.content.XmlResources.XmlTransformerInflater;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
@@ -198,7 +197,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             }
         }
 
-        return XmlTransformerInflater.inflateTransformer(context, parser);
+        return XmlResources.inflateTransformer(context, parser);
     }
 
     /* package */ final void dump(Context context, Printer printer) {

@@ -104,8 +104,16 @@ public final class DebugUtils {
         printer.println(result.toString());
     }
 
+    public static String toString(Object object) {
+        return toString(object, new StringBuilder(48)).toString();
+    }
+
     public static StringBuilder toString(Object object, StringBuilder result) {
         return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+    }
+
+    public static String toSimpleString(Object object) {
+        return toSimpleString(object, new StringBuilder(32)).toString();
     }
 
     public static StringBuilder toSimpleString(Object object, StringBuilder result) {

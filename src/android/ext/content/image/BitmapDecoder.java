@@ -98,6 +98,6 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * @return The <tt>Parameters</tt> to decode.
      */
     /* package */ final Parameters getParameters(Object[] params, int flags) {
-        return ((flags & ImageLoader.FLAG_EXTERNAL_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
+        return ((flags & ImageLoader.FLAG_CUSTOM_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
     }
 }

@@ -38,11 +38,11 @@ import android.widget.ImageView;
  */
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
-     * If set the image loader will be ignore the internal {@link Parameters} to
-     * decode image and used the external {@link Parameters} to decode the image.
+     * If set the image decoder will be use the custom {@link Parameters}
+     * to decode the image and ignore the internal decode <tt>Parameters</tt>.
      * @see LoadRequest#setParameters(Parameters)
      */
-    public static final int FLAG_EXTERNAL_PARAMETERS = 0x00400000;
+    public static final int FLAG_CUSTOM_PARAMETERS = 0x00400000;
 
     private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
@@ -363,12 +363,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         /**
-         * Sets the external {@link Parameters} to decode image.
+         * Sets the custom {@link Parameters} to decode image.
          * @param parameters The <tt>Parameters</tt> to decode.
          * @return This <em>request</em>.
          */
         public final LoadRequest<URI, Image> setParameters(Parameters parameters) {
-            mFlags |= FLAG_EXTERNAL_PARAMETERS;
+            mFlags |= FLAG_CUSTOM_PARAMETERS;
             mParams = new Object[] { parameters };
             return this;
         }

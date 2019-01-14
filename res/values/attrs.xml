@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Attributes format -->
+    <attr name="aspect" format="string" />
+    <attr name="defaultPage" format="integer" />
+    <attr name="extent" format="float|dimension" />
+    <attr name="reflectedAlpha" format="integer" />
+    <attr name="computeSpacing" format="boolean" />
+    <attr name="expandedView" format="reference" />
+    <attr name="direction">
+        <enum name="left" value="1" />
+        <enum name="top" value="16" />
+        <enum name="right" value="2" />
+        <enum name="bottom" value="32" />
+    </attr>
+    <attr name="buttonTextColor" format="reference|color" />
+    <attr name="buttonTextSize" format="dimension" />
+    <attr name="buttonTextBackground" format="reference|color" />
+
+    <!-- ViewPager styleable -->
+    <declare-styleable name="ViewPager">
+        <attr name="extent" />
+        <attr name="defaultPage" />
+        <attr name="computeSpacing" />
+    </declare-styleable>
+
+    <!-- MultiExpandableView styleable -->
+    <declare-styleable name="MultiExpandableView">
+        <attr name="android:orientation" />
+        <attr name="expandedView" />
+    </declare-styleable>
+
+    <!-- LockPatternView styleable -->
+    <declare-styleable name="LockPatternView">
+
+        <!-- Aspect to use when drawing LockPatternView. Choices are "square"(default), "lock_width" or "lock_height" -->
+        <attr name="aspect" />
+    </declare-styleable>
+    <declare-styleable name="CircleConverter">
+        <attr name="autoMirrored" />
+        <attr name="android:gravity" />
+    </declare-styleable>
+    <declare-styleable name="MyImageBinder">
+        <attr name="android:src" />
+        <attr name="direction" />
+    </declare-styleable>
+
+    <!-- BarcodeDecorView styleable -->
+    <declare-styleable name="BarcodeDecorView">
+        <attr name="android:text" />
+        <attr name="android:textSize" />
+        <attr name="android:textColor" />
+	    <attr name="textOffset" format="dimension" />
+	    <attr name="borderWidth" format="dimension" />
+	    <attr name="cornerWidth" format="dimension" />
+	    <attr name="cornerHeight" format="dimension" />
+	    <attr name="maskColor" format="reference|color" />
+	    <attr name="borderColor" format="reference|color" />
+	    <attr name="cornerColor" format="reference|color" />
+	    <attr name="scanningIndicator" format="reference|color" />
+	    <attr name="scanningIndicatorHeight" format="dimension" />
+    </declare-styleable>
+
+    <!-- FrameDrawable styleable -->
+    <declare-styleable name="FrameDrawable">
+        <attr name="frame" format="reference|color" />
+    </declare-styleable>
+</resources>

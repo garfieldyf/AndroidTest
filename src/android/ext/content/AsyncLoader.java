@@ -64,6 +64,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null, "target == null");
+        DebugUtils.__checkError(binder == null, "binder == null");
         DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
         if (mState != SHUTDOWN) {
             if (key == null) {

@@ -172,7 +172,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         if (!isRunning() && mState.mImage.getFrameCount() > 1) {
             mFlags |= FLAG_RUNNING;
             mFrameIndex = 0;
-            scheduleSelf();
+            invalidateSelf();
 
             // Dispatch the animation was started.
             if (mCallback != null) {

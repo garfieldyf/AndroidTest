@@ -69,7 +69,7 @@ public class CacheImageDecoder extends ImageDecoder {
     }
 
     @Override
-    protected Bitmap getCachedBitmap(Object uri, Parameters parameters, Options opts) {
+    /* package */ Bitmap getCachedBitmap(Parameters parameters, Options opts) {
         return mBitmapPool.get(parameters.computeByteCount(mContext, opts));
     }
 }

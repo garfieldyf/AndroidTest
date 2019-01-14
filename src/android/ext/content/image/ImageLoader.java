@@ -33,12 +33,17 @@ import android.widget.ImageView;
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>
- * mImageLoader.load(imageView)
- *    .setURI(uri)
- *    .submit();</pre>
+ * mImageLoader.load(uri).into(imageView);</pre>
  * @author Garfield
  */
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
+    /**
+     * If set the image loader will be ignore the internal {@link Parameters} to
+     * decode image and used the external {@link Parameters} to decode the image.
+     * @see LoadRequest#setParameters(Parameters)
+     */
+    public static final int FLAG_EXTERNAL_PARAMETERS = 0x00400000;
+
     private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
     private final LoadRequest<URI, Image> mRequest;
@@ -67,16 +72,24 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Loads the image from the specified uri, bind it to the <em>target</em>. If the
-     * image is already cached, it is bind immediately. Otherwise loads the image on a
-     * background thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param target The <tt>Object</tt> to bind the image.
-     * @return The <tt>LoadRequest</tt>.
+     * Loads the image from the specified <em>uri</em>, bind it to the target. If the image
+     * is already cached, it is bind immediately. Otherwise loads the image on a background
+     * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * <h5>The default implementation accepts the following URI schemes:</h5>
+     * <ul><li>path (no scheme)</li>
+     * <li>ftp ({@link #SCHEME_FTP})</li>
+     * <li>http ({@link #SCHEME_HTTP})</li>
+     * <li>https ({@link #SCHEME_HTTPS})</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param uri The uri to load.
+     * @return The {@link LoadRequest}.
      * @see LoadRequest
      */
-    public final LoadRequest<URI, Image> load(Object target) {
-        mRequest.target = target;
-        mRequest.binder = mBinder;
+    public final LoadRequest<URI, Image> load(URI uri) {
+        mRequest.mUri = uri;
+        mRequest.mBinder = mBinder;
         return mRequest;
     }
 
@@ -161,8 +174,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param task The current {@link Task} whose executing this method.
      * @param url The url to load.
      * @param imageFile The image file to store the image data.
-     * @param params The parameters, passed earlier by {@link #loadImage}.
-     * @param flags Loading flags, passed earlier by {@link #loadImage}.
+     * @param params The parameters, passed earlier by {@link #load}.
+     * @param flags Loading flags, passed earlier by {@link #load}.
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
@@ -293,89 +306,81 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
      */
     public static final class LoadRequest<URI, Image> {
-        /* package */ URI uri;
-        /* package */ int flags;
-        /* package */ Object target;
-        /* package */ Object[] params;
-        /* package */ Binder<URI, Object, Image> binder;
+        /* package */ URI mUri;
+        /* package */ int mFlags;
+        /* package */ Object[] mParams;
+        /* package */ Binder<URI, Object, Image> mBinder;
         /* package */ final ImageLoader<URI, Image> mLoader;
 
         /**
          * Constructor
+         * @param loader The {@link ImageLoader}.
          */
         /* package */ LoadRequest(ImageLoader<URI, Image> loader) {
             mLoader = loader;
         }
 
         /**
-         * Sets the URI to load image.
-         * <h5>The default implementation accepts the following URI schemes:</h5>
-         * <ul><li>path (no scheme)</li>
-         * <li>ftp ({@link #SCHEME_FTP})</li>
-         * <li>http ({@link #SCHEME_HTTP})</li>
-         * <li>https ({@link #SCHEME_HTTPS})</li>
-         * <li>file ({@link #SCHEME_FILE})</li>
-         * <li>content ({@link #SCHEME_CONTENT})</li>
-         * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
-         * @param uri The uri to load.
-         * @return This <em>request</em>.
+         * Loads the image with the arguments supplied to this request.
+         * @param target The <tt>Object</tt> to bind.
          */
-        public final LoadRequest<URI, Image> setURI(URI uri) {
-            this.uri = uri;
-            return this;
+        public final void into(Object target) {
+            mLoader.load(mUri, target, mFlags, mBinder, mParams);
+            mFlags  = 0;
+            mParams = null;
         }
 
         /**
          * Adds the loading flags to load image.
-         * @param flags Loading flags. May be <tt>0</tt> or
-         * any combination of <tt>FLAG_XXX</tt> constants.
+         * @param flags Loading flags. May be any combination of
+         * <tt>FLAG_XXX</tt> constants.
          * @return This <em>request</em>.
          */
         public final LoadRequest<URI, Image> addFlags(int flags) {
-            this.flags |= flags;
+            mFlags |= flags;
             return this;
         }
 
         /**
-         * Sets the image loader will be ignore the memory cache when it will be
-         * load image. Equivalent to calling <tt>addFlags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
+         * Equivalent to calling <tt>addFlags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
          * @return This <em>request</em>.
          * @see #addFlags(int)
+         * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE FLAG_IGNORE_MEMORY_CACHE
          */
-        public final LoadRequest<URI, Image> skipMemory() {
-            this.flags |= FLAG_IGNORE_MEMORY_CACHE;
+        public final LoadRequest<URI, Image> skipMemoryCache() {
+            mFlags |= FLAG_IGNORE_MEMORY_CACHE;
             return this;
         }
 
         /**
          * Sets the parameters to load image.
-         * @param params The parameters.
+         * @param params The parameters of the load task.
          * @return This <em>request</em>.
          */
         public final LoadRequest<URI, Image> setParams(Object... params) {
-            this.params = params;
+            mParams = params;
+            return this;
+        }
+
+        /**
+         * Sets the external {@link Parameters} to decode image.
+         * @param parameters The <tt>Parameters</tt> to decode.
+         * @return This <em>request</em>.
+         */
+        public final LoadRequest<URI, Image> setParameters(Parameters parameters) {
+            mFlags |= FLAG_EXTERNAL_PARAMETERS;
+            mParams = new Object[] { parameters };
             return this;
         }
 
         /**
          * Sets the {@link Binder} to bind the image to target.
-         * @param binder The {@link Binder} to bind.
+         * @param binder The <tt>Binder</tt> to bind.
          * @return This <em>request</em>.
          */
         public final LoadRequest<URI, Image> setBinder(Binder<URI, Object, Image> binder) {
-            this.binder = binder;
+            mBinder = binder;
             return this;
-        }
-
-        /**
-         * Submits the load request with the arguments supplied to this request.
-         */
-        public final void submit() {
-            mLoader.load(uri, target, flags, binder, params);
-            this.uri = null;
-            this.flags  = 0;
-            this.binder = null;
-            this.params = null;
         }
     }
 
@@ -385,9 +390,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public static interface ImageDecoder<Image> {
         /**
          * Decodes an image from the specified <em>uri</em>.
-         * @param uri The uri to decode.
-         * @param params The parameters, passed earlier by {@link ImageLoader#loadImage}.
-         * @param flags The flags, passed earlier by {@link ImageLoader#loadImage}.
+         * @param uri The uri to decode, passed earlier by {@link ImageLoader#load}.
+         * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+         * @param flags The flags, passed earlier by {@link ImageLoader#load}.
          * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
          */

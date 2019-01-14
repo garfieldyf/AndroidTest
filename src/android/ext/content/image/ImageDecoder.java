@@ -81,30 +81,6 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
         printer.println("  " + mParameters.toString());
     }
 
-    /**
-     * Returns the {@link Parameters} to decode bitmap. Subclasses should
-     * override this method to returns the parameters.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @return The <tt>Parameters</tt> to decode.
-     */
-    protected Parameters getParameters(Object uri, Object[] params, int flags) {
-        return mParameters;
-    }
-
-    /**
-     * Retrieves the bitmap from the internal bitmap cache to decode the bitmap.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts's</em>
-     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
-     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
-     */
-    protected Bitmap getCachedBitmap(Object uri, Parameters parameters, Options opts) {
-        return null;
-    }
-
     @Override
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Decodes the image bounds.
@@ -115,13 +91,34 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
             return GIFImage.decode(mContext, uri, opts.inTempStorage);
         } else {
             // Computes the sample size.
-            final Parameters parameters = getParameters(uri, params, flags);
+            final Parameters parameters = getParameters(params, flags);
             opts.inPreferredConfig = parameters.config;
             parameters.computeSampleSize(mContext, opts);
 
             // Retrieves the bitmap from bitmap pool to reuse it.
-            opts.inBitmap = getCachedBitmap(uri, parameters, opts);
+            opts.inBitmap = getCachedBitmap(parameters, opts);
             return decodeBitmap(uri, params, flags, opts);
         }
+    }
+
+    /**
+     * Retrieves the bitmap from the internal bitmap cache to reuse.
+     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
+     * @param opts The {@link Options} used to decode. The <em>opts's</em>
+     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
+     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
+     */
+    /* package */ Bitmap getCachedBitmap(Parameters parameters, Options opts) {
+        return null;
+    }
+
+    /**
+     * Returns the {@link Parameters} to decode bitmap.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
+     * @return The <tt>Parameters</tt> to decode.
+     */
+    /* package */ final Parameters getParameters(Object[] params, int flags) {
+        return ((flags & ImageLoader.FLAG_EXTERNAL_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
     }
 }

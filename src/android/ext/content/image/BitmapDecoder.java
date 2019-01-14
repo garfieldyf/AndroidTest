@@ -75,22 +75,10 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         printer.println("  " + mParameters.toString());
     }
 
-    /**
-     * Returns the {@link Parameters} to decode bitmap. Subclasses should
-     * override this method to returns the parameters.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @return The <tt>Parameters</tt> to decode.
-     */
-    protected Parameters getParameters(Object uri, Object[] params, int flags) {
-        return mParameters;
-    }
-
     @Override
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Decodes the image bounds.
-        final Parameters parameters = getParameters(uri, params, flags);
+        final Parameters parameters = getParameters(params, flags);
         if (parameters.requestDecodeBounds()) {
             decodeImageBounds(uri, flags, opts);
         }
@@ -101,5 +89,15 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
         // Decodes the image pixels.
         return decodeBitmap(uri, params, flags, opts);
+    }
+
+    /**
+     * Returns the {@link Parameters} to decode bitmap.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
+     * @return The <tt>Parameters</tt> to decode.
+     */
+    /* package */ final Parameters getParameters(Object[] params, int flags) {
+        return ((flags & ImageLoader.FLAG_EXTERNAL_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
     }
 }

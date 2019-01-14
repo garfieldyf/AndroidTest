@@ -94,12 +94,8 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         final String tempFile = cacheFile + ".tmp";
         final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-            if (params.mHitCache) {
-                final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
-                final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
-                if (Arrays.equals(digest1, digest2)) {
-                    return null;
-                }
+            if (params.mHitCache && compareFile(cacheFile, tempFile)) {
+                return null;
             }
 
             final Result result = JsonUtils.newInstance(null, tempFile, task);
@@ -110,6 +106,17 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         }
 
         return null;
+    }
+
+    private static boolean compareFile(String cacheFile, String tempFile) {
+        boolean result = false;
+        if (FileUtils.getFileLength(cacheFile) == FileUtils.getFileLength(tempFile)) {
+            final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
+            final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
+            result = Arrays.equals(digest1, digest2);
+        }
+
+        return result;
     }
 
     /**

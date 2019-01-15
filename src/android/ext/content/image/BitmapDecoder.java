@@ -68,6 +68,14 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
         mParameters = parameters;
     }
 
+    /**
+     * Returns the {@link Parameters} associated with this decoder.
+     * @return The <tt>Parameters</tt>.
+     */
+    public final Parameters getParameters() {
+        return mParameters;
+    }
+
     @Override
     public void dump(Printer printer) {
         super.dump(printer);

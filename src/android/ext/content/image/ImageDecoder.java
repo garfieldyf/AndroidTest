@@ -74,6 +74,14 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
         mParameters = parameters;
     }
 
+    /**
+     * Returns the {@link Parameters} associated with this decoder.
+     * @return The <tt>Parameters</tt>.
+     */
+    public final Parameters getParameters() {
+        return mParameters;
+    }
+
     @Override
     public void dump(Printer printer) {
         super.dump(printer);
@@ -118,7 +126,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @return The <tt>Parameters</tt> to decode.
      */
-    /* package */ final Parameters getParameters(Object[] params, int flags) {
+    private Parameters getParameters(Object[] params, int flags) {
         return ((flags & ImageLoader.FLAG_CUSTOM_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
     }
 }

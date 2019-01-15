@@ -169,7 +169,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      * @throws IOException if an error occurs while creating the download request.
      */
     protected DownloadRequest createDownloadRequest(URI uri) throws IOException {
-        return new DownloadRequest(uri.toString()).readTimeout(30000).connectTimeout(30000);
+        return new DownloadRequest(uri.toString()).connectTimeout(30000).readTimeout(30000);
     }
 
     /**

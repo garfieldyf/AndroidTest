@@ -91,7 +91,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         a.recycle();
 
         final Transformer transformer = inflateTransformer(context, (XmlPullParser)attrs);
-        mTransformer = (maxSize > 0 ? new CacheTransformer(new SimpleLruCache<Object, Drawable>(maxSize), transformer) : transformer);
+        mTransformer = (maxSize > 0 ? new CacheTransformer(new SimpleLruCache(maxSize), transformer) : transformer);
     }
 
     /**
@@ -118,7 +118,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      */
     public ImageBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
         mDefaultImage = defaultImage;
-        mTransformer  = (imageCache != null ? new CacheTransformer((Cache<Object, Drawable>)imageCache, transformer) : transformer);
+        mTransformer  = (imageCache != null ? new CacheTransformer(imageCache, transformer) : transformer);
     }
 
     /**
@@ -435,7 +435,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
          * @param imageCache The {@link Cache} to store the drawables.
          * @param transformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
          */
-        public CacheTransformer(Cache<Object, Drawable> imageCache, Transformer transformer) {
+        public CacheTransformer(Cache imageCache, Transformer transformer) {
             mImageCache  = imageCache;
             mTransformer = transformer;
         }

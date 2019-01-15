@@ -85,7 +85,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to load.
      * @return The {@link LoadRequest}.
-     * @see LoadRequest
      */
     public final LoadRequest<URI, Image> load(URI uri) {
         mRequest.mUri = uri;
@@ -181,7 +180,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) {
         try {
-            final DownloadRequest request = new DownloadRequest(url).readTimeout(30000).connectTimeout(30000);
+            final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
             return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {

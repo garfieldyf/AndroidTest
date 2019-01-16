@@ -53,7 +53,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         if (mState != SHUTDOWN) {
             final Task<?, ?> task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
-                onStartLoading(key, params);
+                startLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
                 mRunningTasks.put(key, newTask);
                 mExecutor.execute(newTask);
@@ -161,6 +161,13 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #onLoadComplete(Key, Params[], Result)
      */
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
+
+    /**
+     * Dispatches {@link #onStartLoading(Key, Params[])}.
+     */
+    /* package */ void startLoading(Key key, Params[] params) {
+        onStartLoading(key, params);
+    }
 
     /**
      * Retrieves a new {@link Task} from the task pool.

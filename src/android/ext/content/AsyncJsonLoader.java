@@ -1,12 +1,11 @@
-package android.ext.temp;
+package android.ext.content;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import java.util.concurrent.Executor;
 import android.content.Context;
-import android.ext.content.AsyncTaskLoader;
+import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.net.DownloadRequest;
-import android.ext.temp.AsyncJsonLoader.LoadParams;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
@@ -14,6 +13,7 @@ import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 /**
  * Class <tt>AsyncJsonLoader</tt> allows to load the JSON value on a background thread and publish
@@ -22,10 +22,58 @@ import android.util.Log;
  * <p>The two types used by a JSON loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
+ * <h2>Usage</h2>
+ * <p>Here is an example:</p><pre>
+ * public final class JsonLoader extends AsyncJsonLoader&lt;String, JSONObject&gt; {
+ *     public JsonLoader(Executor executor, Activity ownerActivity) {
+ *         super(executor, ownerActivity);
+ *     }
+ *
+ *     // The LoadParams has no cache file.
+ *     protected void onStartLoading(String url, LoadParams&lt;String&gt;[] params) {
+ *         // Show loading UI.
+ *     }
+ *
+ *     // The LoadParams has cache file.
+ *     protected void onProgressUpdate(String url, LoadParams&lt;String&gt;[] params, Object[] values) {
+ *         final Activity activity = getOwner();
+ *         if (activity == null || activity.isDestroyed()) {
+ *             return;
+ *         }
+ *
+ *         final JSONObject result = (JSONObject)values[0];
+ *         if (result == null) {
+ *             // Show loading UI.
+ *         } else {
+ *             // Loading cache file succeeded, update UI.
+ *         }
+ *     }
+ *
+ *     protected void onLoadComplete(String key, LoadParams&lt;String&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
+ *         final Activity activity = getOwner();
+ *         if (activity == null || activity.isDestroyed()) {
+ *             return;
+ *         }
+ *
+ *         // Hide loading UI, if need.
+ *         if (result.first != null) {
+ *             // Loading succeeded, update UI.
+ *         } else if (!result.second) {
+ *             // Loading failed and file cache not hit, show error UI.
+ *         }
+ *     }
+ *
+ *     protected boolean validateResult(String url, LoadParams&lt;String&gt; params, JSONObject result) {
+ *         return (result != null && result.optInt("retCode") == 200);
+ *     }
+ * }
+ *
+ * final JsonLoader&lt;String, JSONObject&gt mLoader = new JsonLoader&lt;String, JSONObject&gt(executor, activity);
+ * mLoader.load(url, new CacheLoadParams(context));</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key>, Result> {
+public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key>, Pair<Result, Boolean>> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -58,27 +106,38 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     }
 
     @Override
-    protected Result loadInBackground(Task<?, ?> task, Key key, LoadParams<Key>[] args) {
+    protected Pair<Result, Boolean> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key>[] loadParams) {
+        boolean hitCache = false;
         Result result = null;
         try {
-            final LoadParams params = args[0];
+            final LoadParams params = loadParams[0];
             final String cacheFile  = params.getCacheFile(key);
             if (TextUtils.isEmpty(cacheFile)) {
                 result = params.newDownloadRequest(key).download(task, null);
+                if (isTaskCancelled(task) || !validateResult(key, params, result)) {
+                    result = null;
+                }
             } else {
-                loadFromCache(task, params, cacheFile);
+                hitCache = loadFromCache(task, cacheFile);
                 if (!isTaskCancelled(task)) {
-                    result = download(task, key, params, cacheFile);
+                    result = download(task, key, params, cacheFile, hitCache);
                 }
             }
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load JSON value - key = " + key + "\n" + e);
         }
 
-        return result;
+        return new Pair<Result, Boolean>(result, hitCache);
     }
 
-    private void loadFromCache(Task task, LoadParams params, String cacheFile) {
+    @Override
+    /* package */ void startLoading(Key key, LoadParams<Key>[] params) {
+        if (TextUtils.isEmpty(params[0].getCacheFile(key))) {
+            onStartLoading(key, params);
+        }
+    }
+
+    private boolean loadFromCache(Task task, String cacheFile) {
         Result result = null;
         try {
             result = JsonUtils.newInstance(null, cacheFile, task);
@@ -86,15 +145,15 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
             Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
         }
 
-        params.mHitCache = (result != null);
         task.setProgress(result);
+        return (result != null);
     }
 
-    private Result download(Task task, Key key, LoadParams params, String cacheFile) throws Exception {
+    private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + ".tmp";
         final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-            if (params.mHitCache && compareFile(cacheFile, tempFile)) {
+            if (hitCache && compareFile(cacheFile, tempFile)) {
                 return null;
             }
 
@@ -123,16 +182,6 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
      * Class <tt>LoadParams</tt> used to {@link AsyncJsonLoader} to load JSON value.
      */
     public static abstract class LoadParams<Key> {
-        /* package */ volatile boolean mHitCache;
-
-        /**
-         * Tests if the JSON cache file parse succeeded.
-         * @return <tt>true</tt> if parse succeeded, <tt>false</tt> otherwise.
-         */
-        public final boolean isHitCache() {
-            return mHitCache;
-        }
-
         /**
          * Returns the absolute path of the JSON cache file on the filesystem.
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
@@ -149,6 +198,16 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
          * @throws Exception if an error occurs while opening the connection.
          */
         public abstract DownloadRequest newDownloadRequest(Key key) throws Exception;
+    }
+
+    /**
+     * Class <tt>URLLoadParams</tt> is an implementation of a {@link LoadParams}.
+     */
+    public static final class URLLoadParams extends LoadParams<String> {
+        @Override
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
+            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+        }
     }
 
     /**

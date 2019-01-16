@@ -3,36 +3,21 @@ package android.ext.temp;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.content.AsyncJsonLoader;
-import android.ext.util.JsonUtils;
 import android.util.Log;
 import android.util.Pair;
 import com.tencent.test.MainApplication;
 
-public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
-    public JsonLoader(Object owner) {
-        super(MainApplication.sInstance.getExecutor(), owner);
+public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
+    public JsonLoader(Activity ownerActivity) {
+        super(MainApplication.sInstance.getExecutor(), ownerActivity);
     }
 
     @Override
     protected void onStartLoading(String url, LoadParams<String>[] params) {
-        // Show loading UI.
-        Log.i("abc", "Show loading UI.");
-    }
-
-    @Override
-    protected void onProgressUpdate(String url, LoadParams<String>[] params, Object[] values) {
         final Activity activity = getOwner();
-        if (activity == null || activity.isDestroyed()) {
-            return;
-        }
-
-        final JSONObject result = (JSONObject)values[0];
-        if (result == null) {
+        if (activity != null && !activity.isDestroyed()) {
             // Show loading UI.
             Log.i("abc", "Show loading UI.");
-        } else {
-            // Loading cache file succeeded, update UI.
-            Log.i("abc", "Hit Cache Update UI.");
         }
     }
 
@@ -40,6 +25,7 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     protected void onLoadComplete(String url, LoadParams<String>[] params, Pair<JSONObject, Boolean> result) {
         final Activity activity = getOwner();
         if (activity == null || activity.isDestroyed()) {
+            // The owner activity has been destroyed or release by the GC.
             return;
         }
 
@@ -55,6 +41,6 @@ public class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
-        return (JsonUtils.optInt(result, "retCode", 0) == 200);
+        return (result != null && result.optInt("retCode") == 200);
     }
 }

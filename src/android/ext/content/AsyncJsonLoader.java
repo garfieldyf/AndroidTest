@@ -29,29 +29,17 @@ import android.util.Pair;
  *         super(executor, ownerActivity);
  *     }
  *
- *     // The LoadParams has no cache file.
  *     protected void onStartLoading(String url, LoadParams&lt;String&gt;[] params) {
- *         // Show loading UI.
- *     }
- *
- *     // The LoadParams has cache file.
- *     protected void onProgressUpdate(String url, LoadParams&lt;String&gt;[] params, Object[] values) {
  *         final Activity activity = getOwner();
- *         if (activity == null || activity.isDestroyed()) {
- *             return;
- *         }
- *
- *         final JSONObject result = (JSONObject)values[0];
- *         if (result == null) {
+ *         if (activity != null && !activity.isDestroyed()) {
  *             // Show loading UI.
- *         } else {
- *             // Loading cache file succeeded, update UI.
  *         }
  *     }
  *
- *     protected void onLoadComplete(String key, LoadParams&lt;String&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
+ *     protected void onLoadComplete(String url, LoadParams&lt;String&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
  *         final Activity activity = getOwner();
  *         if (activity == null || activity.isDestroyed()) {
+ *             // The owner activity has been destroyed or release by the GC.
  *             return;
  *         }
  *
@@ -68,8 +56,8 @@ import android.util.Pair;
  *     }
  * }
  *
- * final JsonLoader&lt;String, JSONObject&gt mLoader = new JsonLoader&lt;String, JSONObject&gt(executor, activity);
- * mLoader.load(url, new CacheLoadParams(context));</pre>
+ * final JsonLoader&lt;String, JSONObject&gt loader = new JsonLoader&lt;String, JSONObject&gt(executor, activity);
+ * loader.load(url, new CacheLoadParams(context));</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -103,6 +91,16 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
      */
     protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
         return true;
+    }
+
+    @Override
+    protected void onProgressUpdate(Key key, LoadParams<Key>[] params, Object[] values) {
+        final Result result = (Result)values[0];
+        if (result == null) {
+            onStartLoading(key, params);
+        } else {
+            onLoadComplete(key, params, new Pair<Result, Boolean>(result, false));
+        }
     }
 
     @Override

@@ -392,7 +392,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param uri The uri to decode, passed earlier by {@link ImageLoader#load}.
          * @param params The parameters, passed earlier by {@link ImageLoader#load}.
          * @param flags The flags, passed earlier by {@link ImageLoader#load}.
-         * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
+         * @param tempStorage May be <tt>null</tt>. The temporary storage to use for
+         * decoding. Suggest 16K.
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
          */
         Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);

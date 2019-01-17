@@ -182,6 +182,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     public static abstract class LoadParams<Key> {
         /**
          * Returns the absolute path of the JSON cache file on the filesystem.
+         * <p><b>Note: This method called on a background thread.</b></p>
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
          */
@@ -191,6 +192,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
 
         /**
          * Returns a new download request with the specified <em>key</em>.
+         * <p><b>Note: This method called on a background thread.</b></p>
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The instance of {@link DownloadRequest}.
          * @throws Exception if an error occurs while opening the connection.

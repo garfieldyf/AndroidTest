@@ -61,15 +61,6 @@ public class Parameters {
     }
 
     /**
-     * Enables to decode image bounds when decoding image.
-     * @return <tt>true</tt> if enable to decode image bounds,
-     * <tt>false</tt> otherwise.
-     */
-    public boolean requestDecodeBounds() {
-        return false;
-    }
-
-    /**
      * Computes the number of bytes that can be used to store the image's
      * pixels when decoding the image.
      * @param context The <tt>Context</tt>.

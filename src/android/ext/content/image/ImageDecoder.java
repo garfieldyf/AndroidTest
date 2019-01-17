@@ -91,9 +91,6 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
 
     @Override
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        // Decodes the image bounds.
-        decodeImageBounds(uri, flags, opts);
-
         if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
             // Decodes the gif image.
             return GIFImage.decode(mContext, uri, opts.inTempStorage);

@@ -70,7 +70,13 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
+            // Decodes the image bounds.
             opts.inTempStorage = tempStorage;
+            opts.inJustDecodeBounds = true;
+            BitmapUtils.decodeBitmap(mContext, uri, opts);
+            opts.inJustDecodeBounds = false;
+
+            // Decodes the image pixels.
             return decodeImage(uri, params, flags, opts);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
@@ -108,19 +114,6 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     }
 
     /**
-     * Decodes an image bounds (width, height and MIME type) from the specified <em>uri</em>.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} to store the <tt>out...</tt> fields.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     */
-    protected final void decodeImageBounds(Object uri, int flags, Options opts) throws Exception {
-        opts.inJustDecodeBounds = true;
-        BitmapUtils.decodeBitmap(mContext, uri, opts);
-        opts.inJustDecodeBounds = false;
-    }
-
-    /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>. If the <tt>opts.inBitmap</tt> is not
      * <tt>null</tt> this method will attempt to reuse the bitmap (decode in <tt>opts.inBitmap</tt>).
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
@@ -153,7 +146,8 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode.
+     * @param opts The {@link Options} used to decode. The <em>opts's</em>
+     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      * @see #decodeImage(Object, Object[], int, byte[])

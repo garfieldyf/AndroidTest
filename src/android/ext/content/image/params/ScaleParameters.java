@@ -48,11 +48,6 @@ public class ScaleParameters extends Parameters {
     }
 
     @Override
-    public boolean requestDecodeBounds() {
-        return true;
-    }
-
-    @Override
     public int computeByteCount(Context context, Options opts) {
         return computeByteCountImpl(context, opts);
     }

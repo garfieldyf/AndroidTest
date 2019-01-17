@@ -85,13 +85,8 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
     @Override
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        // Decodes the image bounds.
-        final Parameters parameters = getParameters(params, flags);
-        if (parameters.requestDecodeBounds()) {
-            decodeImageBounds(uri, flags, opts);
-        }
-
         // Computes the sample size.
+        final Parameters parameters = getParameters(params, flags);
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(mContext, opts);
 

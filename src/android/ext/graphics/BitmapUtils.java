@@ -190,12 +190,10 @@ public final class BitmapUtils {
             final Options opts = new Options();
             opts.inTempStorage = tempStorage;
 
-            // Decodes the bitmap bounds, if need.
-            if (parameters.requestDecodeBounds()) {
-                opts.inJustDecodeBounds = true;
-                decodeBitmap(context, uri, opts);
-                opts.inJustDecodeBounds = false;
-            }
+            // Decodes the bitmap bounds.
+            opts.inJustDecodeBounds = true;
+            decodeBitmap(context, uri, opts);
+            opts.inJustDecodeBounds = false;
 
             // Computes the sample size.
             opts.inPreferredConfig = parameters.config;
@@ -350,7 +348,7 @@ public final class BitmapUtils {
      * @param height The original height.
      * @param desiredWidth The desired width.
      * @param desiredHeight The desired height.
-     * @return The sample size.
+     * @return The sample size rounded down to the nearest power of 2.
      */
     public static int computeSampleSize(int width, int height, int desiredWidth, int desiredHeight) {
         final int sampleSize = Math.max(width / desiredWidth, height / desiredHeight);

@@ -70,9 +70,6 @@ public class CacheBitmapDecoder extends BitmapDecoder {
 
     @Override
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        // Decodes the image bounds.
-        decodeImageBounds(uri, flags, opts);
-
         // Computes the sample size.
         final Parameters parameters = getParameters(params, flags);
         opts.inPreferredConfig = parameters.config;

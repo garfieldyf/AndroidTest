@@ -132,7 +132,7 @@ public final class BitmapUtils {
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
      * @param opts The {@link Options} to use for decoding.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @throws IOException if an error occurs while decode from <em>uri</em>.
      */
     public static Bitmap decodeBitmap(Context context, Object uri, Options opts) throws IOException {
@@ -145,15 +145,16 @@ public final class BitmapUtils {
     }
 
     /**
-     * Equivalent to calling <tt>decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null)</tt>.
+     * Equivalent to calling <tt>decodeBitmap(context, UriUtils.getResourceUri(context, resId), null, null)</tt>.
      * @param context The <tt>Context</tt>.
-     * @param uri The uri to decode.
-     * @param id The xml resource id of the {@link Parameters}.
+     * @param resId The resource id of the image data.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeBitmap(Context, int, int)
+     * @see #decodeBitmap(Context, Object, int)
      * @see #decodeBitmap(Context, Object, Parameters, byte[])
      */
-    public static Bitmap decodeBitmap(Context context, Object uri, int id) {
-        return decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null);
+    public static Bitmap decodeBitmap(Context context, int resId) {
+        return decodeBitmap(context, UriUtils.getResourceUri(context, resId), null, null);
     }
 
     /**
@@ -161,12 +162,27 @@ public final class BitmapUtils {
      * @param context The <tt>Context</tt>.
      * @param resId The resource id of the image data.
      * @param id The xml resource id of the {@link Parameters}.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decodeBitmap(Context, int)
      * @see #decodeBitmap(Context, Object, int)
      * @see #decodeBitmap(Context, Object, Parameters, byte[])
      */
     public static Bitmap decodeBitmap(Context context, int resId, int id) {
         return decodeBitmap(context, UriUtils.getResourceUri(context, resId), XmlResources.loadParameters(context, id), null);
+    }
+
+    /**
+     * Equivalent to calling <tt>decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null)</tt>.
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param id The xml resource id of the {@link Parameters}.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decodeBitmap(Context, int)
+     * @see #decodeBitmap(Context, int, int)
+     * @see #decodeBitmap(Context, Object, Parameters, byte[])
+     */
+    public static Bitmap decodeBitmap(Context context, Object uri, int id) {
+        return decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null);
     }
 
     /**
@@ -178,26 +194,29 @@ public final class BitmapUtils {
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
-     * @param parameters The {@link Parameters} to use for decoding.
+     * @param parameters May be <tt>null</tt>. The {@link Parameters} to use for decoding.
      * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decodeBitmap(Context, int)
      * @see #decodeBitmap(Context, int, int)
      * @see #decodeBitmap(Context, Object, int)
      */
     public static Bitmap decodeBitmap(Context context, Object uri, Parameters parameters, byte[] tempStorage) {
-        DebugUtils.__checkError(uri == null || parameters == null, "uri == null || parameters == null");
+        DebugUtils.__checkError(uri == null, "uri == null");
         try {
             final Options opts = new Options();
             opts.inTempStorage = tempStorage;
 
-            // Decodes the bitmap bounds.
-            opts.inJustDecodeBounds = true;
-            decodeBitmap(context, uri, opts);
-            opts.inJustDecodeBounds = false;
+            if (parameters != null) {
+                // Decodes the bitmap bounds.
+                opts.inJustDecodeBounds = true;
+                decodeBitmap(context, uri, opts);
+                opts.inJustDecodeBounds = false;
 
-            // Computes the sample size.
-            opts.inPreferredConfig = parameters.config;
-            parameters.computeSampleSize(context, opts);
+                // Computes the sample size.
+                opts.inPreferredConfig = parameters.config;
+                parameters.computeSampleSize(context, opts);
+            }
 
             // Decodes the bitmap pixels.
             return decodeBitmap(context, uri, opts);

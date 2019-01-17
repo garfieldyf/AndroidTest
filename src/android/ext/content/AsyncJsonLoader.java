@@ -61,7 +61,7 @@ import android.util.Pair;
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key>, Pair<Result, Boolean>> {
+public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key>, Pair<Result, Boolean>> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -99,7 +99,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
         if (result == null) {
             onStartLoading(key, params);
         } else {
-            onLoadComplete(key, params, new Pair<Result, Boolean>(result, false));
+            onLoadComplete(key, params, new Pair(result, false));
         }
     }
 
@@ -129,7 +129,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
     }
 
     @Override
-    /* package */ void startLoading(Key key, LoadParams<Key>[] params) {
+    /* package */ void startLoading(Key key, LoadParams[] params) {
         if (TextUtils.isEmpty(params[0].getCacheFile(key))) {
             onStartLoading(key, params);
         }

@@ -182,7 +182,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
     protected Object decodeImage(Object uri, byte[] tempBuffer) {
-        return BitmapUtils.decodeBitmap(mContext, uri, mParameters != null ? mParameters : Parameters.defaultParameters(), tempBuffer);
+        return BitmapUtils.decodeBitmap(mContext, uri, mParameters, tempBuffer);
     }
 
     /**

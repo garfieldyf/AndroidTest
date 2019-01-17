@@ -353,7 +353,7 @@ public class DownloadRequest {
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream()));
         try {
-            return JsonUtils.newInstance(reader, cancelable);
+            return JsonUtils.parse(reader, cancelable);
         } finally {
             reader.close();
         }

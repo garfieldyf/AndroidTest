@@ -413,15 +413,15 @@ public final class BitmapUtils {
         final int density = bitmap.getDensity();
         final Config config = bitmap.getConfig();
         final int allocSize = bitmap.getAllocationByteCount();
-        final int scaledDensity = context.getResources().getDisplayMetrics().densityDpi;
+        final int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
 
         result.append(" { width = ").append(bitmap.getWidth())
               .append(", height = ").append(bitmap.getHeight())
-              .append(", density = ").append(density).append('(').append(DeviceUtils.toDensity(density)).append(')')
+              .append(", scaledWidth = ").append(bitmap.getScaledWidth(targetDensity))
+              .append(", scaledHeight = ").append(bitmap.getScaledHeight(targetDensity))
               .append(", config = ").append(config != null ? config.name() : "UNKNOWN")
-              .append(", scaledWidth = ").append(bitmap.getScaledWidth(scaledDensity))
-              .append(", scaledHeight = ").append(bitmap.getScaledHeight(scaledDensity))
-              .append(", scaledDensity = ").append(scaledDensity).append('(').append(DeviceUtils.toDensity(scaledDensity)).append(')')
+              .append(", density = ").append(density).append('(').append(DeviceUtils.toDensity(density)).append(')')
+              .append(", targetDensity = ").append(targetDensity).append('(').append(DeviceUtils.toDensity(targetDensity)).append(')')
               .append(", size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
               .append(", allocSize = ").append(allocSize).append('(').append(Formatter.formatFileSize(context, allocSize)).append(')')
               .append(", mutable = ").append(bitmap.isMutable())

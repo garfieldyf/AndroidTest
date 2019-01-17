@@ -257,22 +257,22 @@ public final class JsonUtils {
     }
 
     /**
-     * Returns a new instance parsed from the specified <em>reader</em>.
+     * Parses a JSON value from the specified <em>reader</em>.
      * @param reader The {@link JsonReader} to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
-     * @see #newInstance(Context, Object, Cancelable)
+     * @see #parse(Context, Object, Cancelable)
      */
-    public static <T> T newInstance(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
-            return (T)newArrayImpl(reader, FileUtils.wrap(cancelable));
+            return (T)parseArray(reader, FileUtils.wrap(cancelable));
 
         case BEGIN_OBJECT:
-            return (T)newInstanceImpl(reader, FileUtils.wrap(cancelable));
+            return (T)parseObject(reader, FileUtils.wrap(cancelable));
 
         default:
             throw new Error("Invalid json token - " + reader.peek());
@@ -280,7 +280,7 @@ public final class JsonUtils {
     }
 
     /**
-     * Returns a new instance parsed from the specified <em>uri</em>.
+     * Parses a JSON value from the specified <em>uri</em>.
      * <h5>Accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
@@ -293,12 +293,12 @@ public final class JsonUtils {
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
-     * @see #newInstance(JsonReader, Cancelable)
+     * @see #parse(JsonReader, Cancelable)
      */
-    public static <T> T newInstance(Context context, Object uri, Cancelable cancelable) throws IOException, JSONException {
+    public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri)));
         try {
-            return newInstance(reader, cancelable);
+            return parse(reader, cancelable);
         } finally {
             reader.close();
         }
@@ -407,7 +407,7 @@ public final class JsonUtils {
         return Double.valueOf(result);
     }
 
-    private static JSONArray newArrayImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    private static JSONArray parseArray(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONArray result = new JSONArray();
         reader.beginArray();
 
@@ -426,11 +426,11 @@ public final class JsonUtils {
                 break;
 
             case BEGIN_ARRAY:
-                result.put(newArrayImpl(reader, cancelable));
+                result.put(parseArray(reader, cancelable));
                 break;
 
             case BEGIN_OBJECT:
-                result.put(newInstanceImpl(reader, cancelable));
+                result.put(parseObject(reader, cancelable));
                 break;
 
             default:
@@ -446,7 +446,7 @@ public final class JsonUtils {
         return result;
     }
 
-    private static JSONObject newInstanceImpl(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    private static JSONObject parseObject(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
         final JSONObject result = new JSONObject();
         reader.beginObject();
 
@@ -466,11 +466,11 @@ public final class JsonUtils {
                 break;
 
             case BEGIN_ARRAY:
-                result.put(name, newArrayImpl(reader, cancelable));
+                result.put(name, parseArray(reader, cancelable));
                 break;
 
             case BEGIN_OBJECT:
-                result.put(name, newInstanceImpl(reader, cancelable));
+                result.put(name, parseObject(reader, cancelable));
                 break;
 
             default:

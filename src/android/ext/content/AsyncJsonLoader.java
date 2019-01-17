@@ -90,7 +90,7 @@ public class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParam
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
-        return true;
+        return (result != null);
     }
 
     @Override

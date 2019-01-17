@@ -1,4 +1,4 @@
-package android.ext.net;
+package android.ext.content.image;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -7,11 +7,13 @@ import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
+import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -168,7 +170,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      * @return The <tt>DownloadRequest</tt> object.
      * @throws IOException if an error occurs while creating the download request.
      */
-    protected DownloadRequest createDownloadRequest(URI uri) throws IOException {
+    protected DownloadRequest newDownloadRequest(URI uri) throws IOException {
         return new DownloadRequest(uri.toString()).connectTimeout(30000).readTimeout(30000);
     }
 
@@ -193,7 +195,7 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
 
         final String imageFile = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath() + "/" + Thread.currentThread().hashCode();
         try {
-            final int statusCode = createDownloadRequest(uri).download(imageFile, this, tempBuffer);
+            final int statusCode = newDownloadRequest(uri).download(imageFile, this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());

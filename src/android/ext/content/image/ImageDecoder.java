@@ -97,6 +97,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
         } else {
             // Computes the sample size.
             final Parameters parameters = getParameters(params, flags);
+            opts.inMutable = parameters.mutable;
             opts.inPreferredConfig = parameters.config;
             parameters.computeSampleSize(mContext, opts);
 

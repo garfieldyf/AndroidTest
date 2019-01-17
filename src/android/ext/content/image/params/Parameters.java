@@ -16,6 +16,7 @@ import android.util.AttributeSet;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+ *      app:mutable="true"
  *      app:sampleSize="2"
  *      app:attribute1="value1"
  *      app:attribute2="value2"
@@ -37,14 +38,33 @@ public class Parameters {
     public final Config config;
 
     /**
+     * If set the decoder always return a mutable bitmap.
+     */
+    public final boolean mutable;
+
+    /**
      * Constructor
      * @param config The {@link Config} to decode.
      * @param sampleSize The sample size to decode.
+     * @see #Parameters(Config, int, boolean)
      * @see #Parameters(Context, AttributeSet)
      */
     public Parameters(Config config, int sampleSize) {
-        this.value  = fixSampleSize(sampleSize);
-        this.config = (config != null ? config : Config.ARGB_8888);
+        this(config, sampleSize, false);
+    }
+
+    /**
+     * Constructor
+     * @param config The {@link Config} to decode.
+     * @param sampleSize The sample size to decode.
+     * @param mutable Whether to decode a mutable bitmap.
+     * @see #Parameters(Config, int)
+     * @see #Parameters(Context, AttributeSet)
+     */
+    public Parameters(Config config, int sampleSize, boolean mutable) {
+        this.mutable = mutable;
+        this.value   = fixSampleSize(sampleSize);
+        this.config  = (config != null ? config : Config.ARGB_8888);
     }
 
     /**
@@ -52,11 +72,13 @@ public class Parameters {
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #Parameters(Config, int)
+     * @see #Parameters(Config, int, boolean)
      */
     public Parameters(Context context, AttributeSet attrs) {
         final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "Parameters"));
-        this.config = parseConfig(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), 2));
-        this.value  = fixSampleSize(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_sampleSize"), 1));
+        this.value   = fixSampleSize(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_sampleSize"), 1));
+        this.config  = parseConfig(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), 2));
+        this.mutable = a.getBoolean((int)ClassUtils.getAttributeValue(context, "Parameters_mutable"), false);
         a.recycle();
     }
 
@@ -84,6 +106,7 @@ public class Parameters {
         return new StringBuilder(128).append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", sampleSize = ").append(value)
+            .append(", mutable = ").append(mutable)
             .append(" }").toString();
     }
 
@@ -91,15 +114,17 @@ public class Parameters {
      * Constructor
      * @param value The Object by user-defined to decode.
      * @param config The {@link Config} to decode.
+     * @param mutable Whether to decode a mutable bitmap.
      */
-    protected Parameters(Object value, Config config) {
-        this.value  = value;
-        this.config = config;
+    protected Parameters(Object value, Config config, boolean mutable) {
+        this.value   = value;
+        this.config  = config;
+        this.mutable = mutable;
     }
 
     /**
      * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = ARGB_8888).
+     * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
@@ -133,9 +158,9 @@ public class Parameters {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = ARGB_8888).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = ARGB_8888, mutable = false).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new Parameters(1, Config.ARGB_8888);
+        public static final Parameters sInstance = new Parameters(1, Config.ARGB_8888, false);
     }
 }

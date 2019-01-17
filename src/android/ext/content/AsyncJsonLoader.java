@@ -99,7 +99,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         if (result == null) {
             onStartLoading(key, params);
         } else {
-            onLoadComplete(key, params, new Pair(result, false));
+            onLoadComplete(key, params, new Pair<Result, Boolean>(result, false));
         }
     }
 
@@ -129,7 +129,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     @Override
-    /* package */ void startLoading(Key key, LoadParams[] params) {
+    /* package */ void startLoading(Key key, LoadParams<Key>[] params) {
         if (TextUtils.isEmpty(params[0].getCacheFile(key))) {
             onStartLoading(key, params);
         }

@@ -87,6 +87,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         final Parameters parameters = getParameters(params, flags);
+        opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(mContext, opts);
 

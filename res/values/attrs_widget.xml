@@ -16,6 +16,7 @@
             <enum name="rgb_565" value="1" />
             <enum name="argb_8888" value="2" />
         </attr>
+        <attr name="mutable" format="boolean" />
         <attr name="sampleSize" format="integer" />
     </declare-styleable>
 

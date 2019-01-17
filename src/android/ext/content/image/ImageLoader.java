@@ -132,7 +132,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = RGB_565).
+     * (The default parameters sample size = 1, config = RGB_565, mutable = false).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
@@ -277,10 +277,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = false).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new Parameters(Config.RGB_565, 1);
+        public static final Parameters sInstance = new Parameters(Config.RGB_565, 1, false);
     }
 
     /**

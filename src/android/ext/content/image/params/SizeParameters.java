@@ -16,6 +16,7 @@ import android.util.AttributeSet;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      android:width="200dp"
  *      android:height="300dp"
+ *      app:mutable="true"
  *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]" /&gt;</pre>
  * @author Garfield
  */
@@ -40,6 +41,7 @@ public class SizeParameters extends Parameters {
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #SizeParameters(Context, Config, int, int)
+     * @see #SizeParameters(Context, Config, int, int, boolean)
      */
     public SizeParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,9 +63,24 @@ public class SizeParameters extends Parameters {
      * @param desiredWidth The desired width to decode.
      * @param desiredHeight The desired height to decode.
      * @see #SizeParameters(Context, AttributeSet)
+     * @see #SizeParameters(Context, Config, int, int, boolean)
      */
     public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
-        super(desiredWidth, config);
+        this(context, config, desiredWidth, desiredHeight, false);
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param config The {@link Config} to decode.
+     * @param desiredWidth The desired width to decode.
+     * @param desiredHeight The desired height to decode.
+     * @param mutable Whether to decode a mutable bitmap.
+     * @see #SizeParameters(Context, AttributeSet)
+     * @see #SizeParameters(Context, Config, int, int)
+     */
+    public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight, boolean mutable) {
+        super(desiredWidth, config, mutable);
 
         DebugUtils.__checkError(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
         this.desiredHeight = desiredHeight;
@@ -100,6 +117,7 @@ public class SizeParameters extends Parameters {
             .append(" { config = ").append(config.name())
             .append(", desiredWidth = ").append(value)
             .append(", desiredHeight = ").append(desiredHeight)
+            .append(", mutable = ").append(mutable)
             .append(" }").toString();
     }
 }

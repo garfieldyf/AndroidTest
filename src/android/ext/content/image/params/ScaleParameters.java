@@ -14,6 +14,7 @@ import android.util.AttributeSet;
  * &lt;ScaleParameters
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+ *      app:mutable="true"
  *      app:scale="0.7" /&gt;</pre>
  * @author Garfield
  */
@@ -25,6 +26,7 @@ public class ScaleParameters extends Parameters {
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #ScaleParameters(Context, Config, float)
+     * @see #ScaleParameters(Context, Config, float, boolean)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -41,9 +43,23 @@ public class ScaleParameters extends Parameters {
      * @param config The {@link Config} to decode.
      * @param scale The scale amount of the image's size to decode.
      * @see #ScaleParameters(Context, AttributeSet)
+     * @see #ScaleParameters(Context, Config, float, boolean)
      */
     public ScaleParameters(Context context, Config config, float scale) {
-        super(scale, config);
+        this(context, config, scale, false);
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param config The {@link Config} to decode.
+     * @param scale The scale amount of the image's size to decode.
+     * @param mutable Whether to decode a mutable bitmap.
+     * @see #ScaleParameters(Context, AttributeSet)
+     * @see #ScaleParameters(Context, Config, float)
+     */
+    public ScaleParameters(Context context, Config config, float scale, boolean mutable) {
+        super(scale, config, mutable);
         mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
     }
 
@@ -73,6 +89,7 @@ public class ScaleParameters extends Parameters {
         return new StringBuilder(128).append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(value)
+            .append(", mutable = ").append(mutable)
             .append(" }").toString();
     }
 }

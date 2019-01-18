@@ -47,7 +47,7 @@ import android.util.Pair;
  *         if (result.first != null) {
  *             // Loading succeeded, update UI.
  *         } else if (!result.second) {
- *             // Loading failed and file cache not hit, show error UI.
+ *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
  *     }
  *

@@ -70,7 +70,7 @@ __STATIC_INLINE__ jint computeFileImpl(const __NS::File& file, JNIEnv* env, jbyt
     while ((readBytes = file.read(buffer, sizeof(buffer))) > 0)
         digest.update(buffer, readBytes);
 
-    return (readBytes == 0 ? digestImpl(digest, env, result, offset) : -1);
+    return (readBytes == 0 ? digestImpl(digest, env, result, offset) : 0);
 }
 
 template <typename TMessageDigest>
@@ -119,7 +119,7 @@ JNIEXPORT_METHOD(jint) computeFile(JNIEnv* env, jclass /*clazz*/, jstring filena
     assert(result);
     assert(filename);
 
-    jint length = -1;
+    jint length = 0;
     __NS::File file;
     if (file.open(JNI::jstring_t(env, filename), O_RDONLY) == 0)
     {

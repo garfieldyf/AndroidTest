@@ -64,7 +64,7 @@ public final class MessageDigests {
     public static byte[] computeFile(String filename, Algorithm algorithm) {
         DebugUtils.__checkError(StringUtils.getLength(filename) == 0, "Invalid parameter - The filename is null or 0-length");
         final byte[] result = new byte[algorithm.digestLength];
-        return (computeFile(filename, result, 0, algorithm.ordinal()) != -1 ? result : null);
+        return (computeFile(filename, result, 0, algorithm.ordinal()) > 0 ? result : null);
     }
 
     /**
@@ -75,7 +75,7 @@ public final class MessageDigests {
      * @param offset The start position in the <em>result</em>.
      * @param algorithm The {@link Algorithm} to compute.
      * @return The number of bytes written to <em>result</em> if the operation succeeded,
-     * <tt>-1</tt> otherwise.
+     * <tt>0</tt> otherwise.
      * @see #computeFile(String, Algorithm)
      */
     public static int computeFile(String filename, byte[] result, int offset, Algorithm algorithm) {
@@ -125,6 +125,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, Algorithm algorithm) {
+        DebugUtils.__checkError(data == null, "data == null");
         final byte[] result = new byte[algorithm.digestLength];
         computeByteArray(data, 0, data.length, result, 0, algorithm.ordinal());
         return result;

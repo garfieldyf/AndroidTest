@@ -95,12 +95,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
     @Override
     protected void onProgressUpdate(Key key, LoadParams<Key>[] params, Object[] values) {
-        final Result result = (Result)values[0];
-        if (result == null) {
-            onStartLoading(key, params);
-        } else {
-            onLoadComplete(key, params, new Pair<Result, Boolean>(result, false));
-        }
+        onLoadComplete(key, params, new Pair<Result, Boolean>((Result)values[0], false));
     }
 
     @Override
@@ -130,7 +125,8 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
     @Override
     /* package */ void startLoading(Key key, LoadParams<Key>[] params) {
-        if (TextUtils.isEmpty(params[0].getCacheFile(key))) {
+        final String cacheFile = params[0].getCacheFile(key);
+        if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
             onStartLoading(key, params);
         }
     }
@@ -143,18 +139,25 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
         }
 
-        task.setProgress(result);
-        return (result != null);
+        if (result != null) {
+            task.setProgress(result);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + ".tmp";
         final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
+            // If cache file is hit and the cache file contents equals
+            // the temp file contents. Returns null, do not update UI.
             if (hitCache && compareFile(cacheFile, tempFile)) {
                 return null;
             }
 
+            // Parse the temp file and save it cache file.
             final Result result = JsonUtils.parse(null, tempFile, task);
             if (!isTaskCancelled(task) && validateResult(key, params, result)) {
                 FileUtils.moveFile(tempFile, cacheFile);

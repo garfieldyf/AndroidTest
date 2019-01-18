@@ -92,6 +92,8 @@
         <activity
             android:name="PrinterActivity" />
         <activity
+            android:name="ViewPagerActivity" />
+        <activity
             android:name="PercentActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />

@@ -239,7 +239,7 @@ public final class PackageUtils {
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
          */
-        public Pair<CharSequence, Drawable> loadArchiveInfo(Context context) {
+        public Pair<CharSequence, Drawable> load(Context context) {
             DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
             final AssetManager assets = new AssetManager();
             try {
@@ -387,7 +387,7 @@ public final class PackageUtils {
         protected StringBuilder dump(StringBuilder out) {
             final ComponentInfo ci = getComponentInfo();
             return out.append(" name = ").append(ci.name)
-                .append(", packageName = ").append(ci.packageName)
+                .append(", packageName = ").append(getPackageName())
                 .append(", process = ").append(ci.processName)
                 .append(", system = ").append((ci.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         }

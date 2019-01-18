@@ -46,19 +46,7 @@ public class Parameters {
      * Constructor
      * @param config The {@link Config} to decode.
      * @param sampleSize The sample size to decode.
-     * @see #Parameters(Config, int, boolean)
-     * @see #Parameters(Context, AttributeSet)
-     */
-    public Parameters(Config config, int sampleSize) {
-        this(config, sampleSize, false);
-    }
-
-    /**
-     * Constructor
-     * @param config The {@link Config} to decode.
-     * @param sampleSize The sample size to decode.
      * @param mutable Whether to decode a mutable bitmap.
-     * @see #Parameters(Config, int)
      * @see #Parameters(Context, AttributeSet)
      */
     public Parameters(Config config, int sampleSize, boolean mutable) {
@@ -71,7 +59,6 @@ public class Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #Parameters(Config, int)
      * @see #Parameters(Config, int, boolean)
      */
     public Parameters(Context context, AttributeSet attrs) {

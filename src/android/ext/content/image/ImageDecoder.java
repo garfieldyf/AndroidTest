@@ -52,24 +52,10 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * Copy constructor
      * <p>Creates a new {@link ImageDecoder} from the specified <em>decoder</em>. The
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>ImageDecoder</tt> to copy.
-     * @param id The resource id of the {@link Parameters} to load.
-     * @see #ImageDecoder(ImageDecoder, Parameters)
-     */
-    public ImageDecoder(ImageDecoder decoder, int id) {
-        super(decoder);
-        mParameters = XmlResources.loadParameters(mContext, id);
-    }
-
-    /**
-     * Copy constructor
-     * <p>Creates a new {@link ImageDecoder} from the specified <em>decoder</em>. The
-     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>ImageDecoder</tt> to copy.
+     * @param decoder The decoder to set.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @see #ImageDecoder(ImageDecoder, int)
      */
-    public ImageDecoder(ImageDecoder decoder, Parameters parameters) {
+    public ImageDecoder(AbsImageDecoder<Object> decoder, Parameters parameters) {
         super(decoder);
         mParameters = parameters;
     }

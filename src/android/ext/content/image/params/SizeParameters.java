@@ -40,7 +40,6 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #SizeParameters(Context, Config, int, int)
      * @see #SizeParameters(Context, Config, int, int, boolean)
      */
     public SizeParameters(Context context, AttributeSet attrs) {
@@ -62,22 +61,8 @@ public class SizeParameters extends Parameters {
      * @param config The {@link Config} to decode.
      * @param desiredWidth The desired width to decode.
      * @param desiredHeight The desired height to decode.
-     * @see #SizeParameters(Context, AttributeSet)
-     * @see #SizeParameters(Context, Config, int, int, boolean)
-     */
-    public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight) {
-        this(context, config, desiredWidth, desiredHeight, false);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param config The {@link Config} to decode.
-     * @param desiredWidth The desired width to decode.
-     * @param desiredHeight The desired height to decode.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
-     * @see #SizeParameters(Context, Config, int, int)
      */
     public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight, boolean mutable) {
         super(desiredWidth, config, mutable);

@@ -25,7 +25,6 @@ public class ScaleParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #ScaleParameters(Context, Config, float)
      * @see #ScaleParameters(Context, Config, float, boolean)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
@@ -42,21 +41,8 @@ public class ScaleParameters extends Parameters {
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
      * @param scale The scale amount of the image's size to decode.
-     * @see #ScaleParameters(Context, AttributeSet)
-     * @see #ScaleParameters(Context, Config, float, boolean)
-     */
-    public ScaleParameters(Context context, Config config, float scale) {
-        this(context, config, scale, false);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param config The {@link Config} to decode.
-     * @param scale The scale amount of the image's size to decode.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #ScaleParameters(Context, AttributeSet)
-     * @see #ScaleParameters(Context, Config, float)
      */
     public ScaleParameters(Context context, Config config, float scale, boolean mutable) {
         super(scale, config, mutable);

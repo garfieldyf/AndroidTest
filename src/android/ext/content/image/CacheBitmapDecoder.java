@@ -46,22 +46,8 @@ public class CacheBitmapDecoder extends BitmapDecoder {
      * Copy constructor
      * <p>Creates a new {@link CacheBitmapDecoder} from the specified <em>decoder</em>.
      * The returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>CacheBitmapDecoder</tt> to copy.
-     * @param id The resource id of the {@link Parameters} to load.
-     * @see #CacheBitmapDecoder(CacheBitmapDecoder, Parameters)
-     */
-    public CacheBitmapDecoder(CacheBitmapDecoder decoder, int id) {
-        super(decoder, id);
-        mBitmapPool = decoder.mBitmapPool;
-    }
-
-    /**
-     * Copy constructor
-     * <p>Creates a new {@link CacheBitmapDecoder} from the specified <em>decoder</em>.
-     * The returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>CacheBitmapDecoder</tt> to copy.
+     * @param decoder The decoder to set.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @see #CacheBitmapDecoder(CacheBitmapDecoder, int)
      */
     public CacheBitmapDecoder(CacheBitmapDecoder decoder, Parameters parameters) {
         super(decoder, parameters);

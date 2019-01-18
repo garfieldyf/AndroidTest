@@ -44,7 +44,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     private String mFlashMode;
 
     private Rect mClipBounds;
-    private Point mPreviewSize;
+    private int mPreviewWidth;
+    private int mPreviewHeight;
     private OnBarcodeCameraListener mListener;
 
     public BarcodeCameraView(Context context) {
@@ -146,13 +147,23 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
-     * Returns the camera preview size. Note that this is not a copy, you should
-     * not change the <tt>Point</tt> returned by this method. <p>Note: The
-     * returned {@link Point} relative to the camera preview orientation.</p>
-     * @return The {@link Point} contains the width and height in pixels.
+     * Returns the camera preview width. <p>Note: The returned
+     * width relative to the camera preview orientation.</p>
+     * @return The preview width in pixels.
+     * @see #getPreviewHeight()
      */
-    public final Point getPreviewSize() {
-        return mPreviewSize;
+    public final int getPreviewWidth() {
+        return mPreviewWidth;
+    }
+
+    /**
+     * Returns the camera preview height. <p>Note: The returned
+     * height relative to the camera preview orientation.</p>
+     * @return The preview height in pixels.
+     * @see #getPreviewWidth()
+     */
+    public final int getPreviewHeight() {
+        return mPreviewHeight;
     }
 
     /**
@@ -185,10 +196,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         getDisplay().getRealSize(screenSize);
 
         // Computes the bounds of the barcode clip area on the screen.
-        mClipBounds.left   = (scanningBounds.top + location[1]) * mPreviewSize.x / screenSize.y;
-        mClipBounds.top    = mPreviewSize.y - (scanningBounds.right + location[0]) * mPreviewSize.y / screenSize.x;
-        mClipBounds.right  = (scanningBounds.bottom + location[1]) * mPreviewSize.x / screenSize.y;
-        mClipBounds.bottom = mPreviewSize.y - (scanningBounds.left  + location[0]) * mPreviewSize.y / screenSize.x;
+        mClipBounds.left   = (scanningBounds.top + location[1]) * mPreviewWidth / screenSize.y;
+        mClipBounds.top    = mPreviewHeight - (scanningBounds.right + location[0]) * mPreviewHeight / screenSize.x;
+        mClipBounds.right  = (scanningBounds.bottom + location[1]) * mPreviewWidth / screenSize.y;
+        mClipBounds.bottom = mPreviewHeight - (scanningBounds.left  + location[0]) * mPreviewHeight / screenSize.x;
 
         return mClipBounds;
     }
@@ -218,7 +229,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
             }
 
             final boolean autoFocus = setCameraParameters();
-            holder.setFixedSize(mPreviewSize.y, mPreviewSize.x);
+            holder.setFixedSize(mPreviewHeight, mPreviewWidth);
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
             if (autoFocus) {
@@ -259,8 +270,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
     private void initView() {
         mMaxZoom = INVALID_ZOOM;
-        mClipBounds  = new Rect();
-        mPreviewSize = new Point();
+        mClipBounds = new Rect();
         setKeepScreenOn(true);
 
         final SurfaceHolder holder = getHolder();
@@ -286,11 +296,12 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
         // Computes the camera preview size.
         final Size previewSize = computePreviewSize(params);
-        mPreviewSize.set(previewSize.width, previewSize.height);
+        mPreviewWidth  = previewSize.width;
+        mPreviewHeight = previewSize.height;
         params.setPreviewFormat(ImageFormat.NV21);
-        params.setPreviewSize(previewSize.width, previewSize.height);
+        params.setPreviewSize(mPreviewWidth, mPreviewHeight);
         if (mListener != null) {
-            mListener.onPreviewSizeChanged(mCamera, mPreviewSize);
+            mListener.onPreviewSizeChanged(mCamera, mPreviewWidth, mPreviewHeight);
         }
 
         // Sets the camera focus mode and scene mode.
@@ -375,8 +386,9 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
          * Callback method to be invoked when the camera preview size has been changed.
          * <p>Note: The preview size relative to the camera preview orientation.</p>
          * @param camera The <tt>Camera</tt> device.
-         * @param previewSize The camera preview size in pixels.
+         * @param previewWidth The camera preview width in pixels.
+         * @param previewHeight The camera preview height in pixels.
          */
-        void onPreviewSizeChanged(Camera camera, Point previewSize);
+        void onPreviewSizeChanged(Camera camera, int previewWidth, int previewHeight);
     }
 }

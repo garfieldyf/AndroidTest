@@ -6,6 +6,7 @@ import java.util.Comparator;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
+import android.ext.util.FileUtils;
 import android.graphics.ImageFormat;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -130,20 +131,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Comparat
         }
 
         if (mCamera != null) {
-            try {
-                mCamera.close();
-                if (mImageReader != null) {
-                    mImageReader.close();
-                }
-
-                if (mSession != null) {
-                    mSession.close();
-                }
-            } catch (Exception e) {
-                Log.e(getClass().getName(), e.getMessage(), e);
-            } finally {
-                mCamera = null;
-            }
+            FileUtils.close(mCamera);
+            FileUtils.close(mSession);
+            FileUtils.close(mImageReader);
+            mCamera = null;
         }
     }
 
@@ -185,7 +176,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Comparat
             
 //            characteristics.get(CameraCharacteristics.LENS_FACING);
             
-//            final StreamConfigurationMap configurations = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+            final StreamConfigurationMap configurations = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 //            //int[] modes = characteristics.get(CameraCharacteristics.CONTROL_AF_AVAILABLE_MODES);
 //            characteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_SCENE_MODES);
 //            characteristics.get(CameraCharacteristics.LENS_INFO_MINIMUM_FOCUS_DISTANCE);

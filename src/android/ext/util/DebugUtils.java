@@ -120,10 +120,6 @@ public final class DebugUtils {
         return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
     }
 
-    // This ant task is imported by the project build file. It can be delete the __checkXXX methods invocation.
-    // <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
-    //     <fileset dir="${src.dir}" includes="**/*.java" />
-    // </replaceregexp>
     public static void __checkUIThread(String method) {
         if (Looper.getMainLooper() != Looper.myLooper()) {
             throw new AssertionError("The " + method + " method must be invoked on the UI thread.");

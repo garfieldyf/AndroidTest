@@ -38,11 +38,7 @@
                 <exclude name="**/temp/**" />
                 <exclude name="**/focus/**" />
                 <exclude name="**/reference/**" />
-                <exclude name="**/graphics/ShapeLayer.java" />
-                <exclude name="**/graphics/OutlineUtils.java" />
                 <exclude name="**/drawable/FrameDrawable.java" />
-                <exclude name="**/service/SyncService.java" />
-                <exclude name="**/service/SyncMessenger.java" />
                 <exclude name="**/widget/FocusManager.java" />
                 <exclude name="**/widget/PrinterView.java" />
                 <exclude name="**/widget/FocusViewPager.java" />

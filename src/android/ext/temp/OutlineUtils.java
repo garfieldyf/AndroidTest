@@ -1,4 +1,4 @@
-package android.ext.graphics;
+package android.ext.temp;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;

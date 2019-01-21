@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
@@ -22,115 +23,29 @@ import android.util.Log;
  */
 public class SyncMessenger implements ServiceConnection {
     private Messenger mService;
+    private final Intent mIntent;
+    private final Context mContext;
 
     /**
-     * Connects the service.
+     * Constructor
      * @param context The <tt>Context</tt>.
-     * @param service The service <tt>Intent</tt> to connect to.
-     * @return <tt>true</tt> if you have successfully bound to the service,
-     * <tt>false</tt> if the connection is not made so you will not receive
-     * the service object.
-     * @see #connect(Context, String, String)
-     * @see #disconnect(Context)
-     * @see #isConnected()
+     * @param service The service <tt>Intent</tt>.
+     * @see #SyncMessenger(Context, String, String)
      */
-    public boolean connect(Context context, Intent service) {
-        return (mService != null || context.getApplicationContext().bindService(service, this, Context.BIND_AUTO_CREATE));
+    public SyncMessenger(Context context, Intent service) {
+        mIntent  = service;
+        mContext = context.getApplicationContext();
     }
 
     /**
-     * Connects the service.
+     * Constructor
      * @param context The <tt>Context</tt>.
      * @param packageName The service package name.
      * @param className The service fully qualified class name.
-     * @return <tt>true</tt> if you have successfully bound to the service,
-     * <tt>false</tt> if the connection is not made so you will not receive
-     * the service object.
-     * @see #connect(Context, Intent)
-     * @see #disconnect(Context)
-     * @see #isConnected()
+     * @see #SyncMessenger(Context, Intent)
      */
-    public final boolean connect(Context context, String packageName, String className) {
-        final Intent service = new Intent();
-        service.setClassName(packageName, className);
-        return connect(context, service);
-    }
-
-    /**
-     * Connects the service synchronously. <p><em>This method will block the
-     * calling thread until the service was connected.</em></p>
-     * @param context The <tt>Context</tt>.
-     * @param service The service <tt>Intent</tt> to connect to.
-     * @return <tt>true</tt> if you have successfully bound to the service,
-     * <tt>false</tt> if the connection is not made so you will not receive
-     * the service object.
-     * @see #connectSync(Context, String, String)
-     * @see #disconnect(Context)
-     * @see #isConnected()
-     */
-    public boolean connectSync(Context context, Intent service) {
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            throw new RuntimeException("This method can NOT be called from the main application thread");
-        }
-
-        synchronized (this) {
-            final boolean successful = connect(context, service);
-            while (successful && mService == null) {
-                try {
-                    // If the service has been started, wait
-                    // until the Messenger has been created.
-                    wait();
-                } catch (InterruptedException e) {
-                }
-            }
-
-            return successful;
-        }
-    }
-
-    /**
-     * Connects the service synchronously. <p><em>This method will block the
-     * calling thread until the service was connected.</em></p>
-     * @param context The <tt>Context</tt>.
-     * @param packageName The service package name.
-     * @param className The service fully qualified class name.
-     * @return <tt>true</tt> if you have successfully bound to the service,
-     * <tt>false</tt> if the connection is not made so you will not receive
-     * the service object.
-     * @see #connectSync(Context, Intent)
-     * @see #disconnect(Context)
-     * @see #isConnected()
-     */
-    public final boolean connectSync(Context context, String packageName, String className) {
-        final Intent service = new Intent();
-        service.setClassName(packageName, className);
-        return connectSync(context, service);
-    }
-
-    /**
-     * Returns whether this object connected the service.
-     * @return <tt>true</tt> if this object connected the
-     * service, <tt>false</tt> otherwise.
-     * @see #connect(Context, Intent)
-     * @see #connectSync(Context, Intent)
-     * @see #disconnect(Context)
-     */
-    public boolean isConnected() {
-        return (mService != null);
-    }
-
-    /**
-     * Disconnects the service.
-     * @param context The <tt>Context</tt>.
-     * @see #connect(Context, Intent)
-     * @see #connectSync(Context, Intent)
-     * @see #isConnected()
-     */
-    public void disconnect(Context context) {
-        if (mService != null) {
-            context.getApplicationContext().unbindService(this);
-            mService = null;
-        }
+    public SyncMessenger(Context context, String packageName, String className) {
+        this(context, makeService(packageName, className));
     }
 
     /**
@@ -140,12 +55,12 @@ public class SyncMessenger implements ServiceConnection {
      * send to the service, <tt>false</tt> otherwise.
      */
     public boolean sendMessage(Message msg) {
-        if (mService != null) {
+        if (bindService()) {
             try {
                 mService.send(msg);
                 return true;
             } catch (RemoteException e) {
-                Log.e(SyncMessenger.class.getName(), "Couldn't send message - " + msg.toString(), e);
+                Log.e(getClass().getName(), new StringBuilder("Couldn't send message - ").append(msg).toString(), e);
             }
         }
 
@@ -210,7 +125,7 @@ public class SyncMessenger implements ServiceConnection {
      * @return The reply message if succeeded, or <tt>null</tt> if an error or timeout.
      */
     public Message sendMessageSync(Message msg, long timeout) {
-        return (mService != null ? SyncHandler.POOL.obtain().sendMessage(mService, msg, timeout) : null);
+        return (bindService() ? SyncHandler.POOL.obtain().sendMessage(mService, msg, timeout) : null);
     }
 
     /**
@@ -267,30 +182,72 @@ public class SyncMessenger implements ServiceConnection {
         return sendMessageSync(Message.obtain(null, what, arg1, arg2, obj), timeout);
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        synchronized (this) {
-            mService = new Messenger(service);
-            notifyAll();
+    /**
+     * Disconnects the service.
+     */
+    public synchronized void disconnect() {
+        if (mService != null) {
+            mContext.unbindService(this);
+            mService = null;
         }
     }
 
     @Override
-    public void onServiceDisconnected(ComponentName name) {
+    public synchronized void onServiceDisconnected(ComponentName name) {
         mService = null;
     }
 
+    @Override
+    public synchronized void onServiceConnected(ComponentName name, IBinder service) {
+        mService = new Messenger(service);
+        notifyAll();
+    }
+
+    private synchronized boolean bindService() {
+        DebugUtils.__checkError(Looper.myLooper() == Looper.getMainLooper(), "This method can NOT be called from the UI thread");
+        if (mService != null) {
+            return true;
+        }
+
+        final boolean successful = mContext.bindService(mIntent, this, Context.BIND_AUTO_CREATE);
+        while (successful && mService == null) {
+            try {
+                // If the service has been started, wait
+                // until the Messenger has been created.
+                wait();
+            } catch (InterruptedException e) {
+                // Ignored.
+            }
+        }
+
+        return successful;
+    }
+
+    private static Intent makeService(String packageName, String className) {
+        final Intent service = new Intent();
+        service.setClassName(packageName, className);
+        return service;
+    }
+
     /**
-     * Nested class SyncHandler
+     * Nested class <tt>SyncHandler</tt> is an implementation of a {@link Handler}.
      */
     private static final class SyncHandler extends Handler {
         private static final Looper sLooper;
-        private Message mResult;
+        private volatile Message mResult;
         private final Messenger mReplier;
 
         public SyncHandler() {
             super(sLooper);
             mReplier = new Messenger(this);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            mResult = Message.obtain(msg);
+            synchronized (mReplier) {
+                mReplier.notify();
+            }
         }
 
         public final Message sendMessage(Messenger service, Message msg, long timeout) {
@@ -302,7 +259,7 @@ public class SyncMessenger implements ServiceConnection {
                     mReplier.wait(timeout);
                 }
             } catch (Throwable e) {
-                Log.e(SyncMessenger.class.getName(), "Couldn't send message synchronously - " + msg.toString(), e);
+                Log.e(SyncMessenger.class.getName(), new StringBuilder("Couldn't send message synchronously - ").append(msg).toString(), e);
             } finally {
                 result  = mResult;
                 mResult = null;
@@ -312,20 +269,12 @@ public class SyncMessenger implements ServiceConnection {
             return result;
         }
 
-        @Override
-        public void handleMessage(Message msg) {
-            mResult = Message.obtain(msg);
-            synchronized (mReplier) {
-                mReplier.notify();
-            }
-        }
-
-        /* package */ static final Pool<SyncHandler> POOL = Pools.synchronizedPool(Pools.newPool(new Factory<SyncHandler>() {
+        public static final Pool<SyncHandler> POOL = Pools.synchronizedPool(Pools.newPool(new Factory<SyncHandler>() {
             @Override
             public SyncHandler newInstance() {
                 return new SyncHandler();
             }
-        }, 5));
+        }, 2));
 
         static {
             final HandlerThread thread = new HandlerThread("SyncMessenger");

@@ -3,7 +3,6 @@ package android.support.v7.widget;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v7.widget.PageScroller.OnPageChangeListener;
-import android.util.AttributeSet;
 import android.view.View;
 
 /**
@@ -18,7 +17,6 @@ public final class PageLinearLayoutManager extends LinearLayoutManager {
      * @param context The <tt>Context</tt>.
      * @param pageSize The page size in pixels.
      * @see #PageLinearLayoutManager(Context, int, boolean, int)
-     * @see #PageLinearLayoutManager(Context, AttributeSet, int, int)
      */
     public PageLinearLayoutManager(Context context, int pageSize) {
         super(context);
@@ -33,28 +31,10 @@ public final class PageLinearLayoutManager extends LinearLayoutManager {
      * @param reverseLayout When set to <tt>true</tt>, layouts from end to start.
      * @param pageSize The page size in pixels.
      * @see #PageLinearLayoutManager(Context, int)
-     * @see #PageLinearLayoutManager(Context, AttributeSet, int, int)
      */
     public PageLinearLayoutManager(Context context, int orientation, boolean reverseLayout, int pageSize) {
         super(context, orientation, reverseLayout);
         mScroller = new PageScroller(this, pageSize);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param attrs The attributes of the XML tag that is inflating the data.
-     * @param defStyleAttr An attribute in the current theme that contains a reference to
-     * a style resource to apply. If <tt>0</tt>, no default style will be applied.
-     * @param defStyleRes A resource identifier of a style resource that supplies default
-     * values, used only if <em>defStyleAttr</em> is <tt>0</tt> or can not be found in the
-     * theme. Can be <tt>0</tt> to not look for defaults.
-     * @see #PageLinearLayoutManager(Context, int)
-     * @see #PageLinearLayoutManager(Context, int, boolean, int)
-     */
-    public PageLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        mScroller = new PageScroller(context, attrs, this);
     }
 
     /**

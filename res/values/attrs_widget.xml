@@ -31,9 +31,4 @@
         <attr name="defaultImage" format="reference|color" />
     </declare-styleable>
 
-    <!-- PageScroller styleable -->
-    <declare-styleable name="PageScroller">
-        <attr name="pageSize" format="dimension" />
-    </declare-styleable>
-
 </resources>

@@ -1,11 +1,7 @@
 package android.support.v7.widget;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.ext.util.ClassUtils;
 import android.ext.util.UIHandler;
 import android.graphics.Rect;
-import android.util.AttributeSet;
 import android.view.View;
 
 /**
@@ -23,25 +19,10 @@ public class PageScroller {
      * Constructor
      * @param layoutManager The {@link LinearLayoutManager}.
      * @param pageSize The page size in pixels.
-     * @see #PageScroller(Context, AttributeSet, LinearLayoutManager)
      */
     public PageScroller(LinearLayoutManager layoutManager, int pageSize) {
         mPageSize = pageSize;
         mLayoutManager = layoutManager;
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param attrs The attributes of the XML tag that is inflating the data.
-     * @param layoutManager The {@link LinearLayoutManager}.
-     * @see #PageScroller(LinearLayoutManager, int)
-     */
-    public PageScroller(Context context, AttributeSet attrs, LinearLayoutManager layoutManager) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "PageScroller"));
-        mPageSize = a.getDimensionPixelOffset(0 /* R.styleable.PageScroller_pageSize */, 0);
-        mLayoutManager = layoutManager;
-        a.recycle();
     }
 
     /**

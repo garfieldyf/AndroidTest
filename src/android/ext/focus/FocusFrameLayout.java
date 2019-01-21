@@ -1,7 +1,6 @@
 package android.ext.focus;
 
 import android.content.Context;
-import android.ext.graphics.drawable.FrameDrawable;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
@@ -11,7 +10,7 @@ import android.widget.FrameLayout;
  * @author Garfield
  */
 public class FocusFrameLayout extends FrameLayout {
-    private final FrameDrawable mDrawable;
+    private final FocusDrawable mDrawable;
 
     public FocusFrameLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -19,7 +18,7 @@ public class FocusFrameLayout extends FrameLayout {
 
     public FocusFrameLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mDrawable = new FrameDrawable(context, attrs);
+        mDrawable = new FocusDrawable(context, attrs);
     }
 
     @Override

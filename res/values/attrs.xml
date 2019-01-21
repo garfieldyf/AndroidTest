@@ -62,8 +62,8 @@
 	    <attr name="scanningIndicatorHeight" format="dimension" />
     </declare-styleable>
 
-    <!-- FrameDrawable styleable -->
-    <declare-styleable name="FrameDrawable">
-        <attr name="frame" format="reference|color" />
+    <!-- FocusDrawable styleable -->
+    <declare-styleable name="FocusDrawable">
+        <attr name="focus" format="reference|color" />
     </declare-styleable>
 </resources>

@@ -1,7 +1,6 @@
 package android.ext.focus;
 
 import android.content.Context;
-import android.ext.graphics.drawable.FrameDrawable;
 import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.widget.LinearLayout;
@@ -11,7 +10,7 @@ import android.widget.LinearLayout;
  * @author Garfield
  */
 public class FocusLinearLayout extends LinearLayout {
-    private final FrameDrawable mDrawable;
+    private final FocusDrawable mDrawable;
 
     public FocusLinearLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -19,7 +18,7 @@ public class FocusLinearLayout extends LinearLayout {
 
     public FocusLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        mDrawable = new FrameDrawable(context, attrs);
+        mDrawable = new FocusDrawable(context, attrs);
     }
 
     @Override

@@ -22,7 +22,7 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
      * @see #LruImageCache(Cache, Cache)
      */
     public LruImageCache(float scaleMemory, int maxImageSize) {
-        this(Caches.<K>createBitmapCache(scaleMemory), (maxImageSize > 0 ? new LruCache<K, Image>(maxImageSize) : null));
+        this(Caches.<K>createBitmapCache(scaleMemory, 0), (maxImageSize > 0 ? new LruCache<K, Image>(maxImageSize) : null));
     }
 
     /**

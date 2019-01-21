@@ -17,7 +17,7 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
      * @param maxSize The maximum the number of bytes to allow in this cache.
      * @param bitmapPool The {@link BitmapPool} to recycle the evicted bitmap
      * from this cache.
-     * @see #LruBitmapCache2(float, BitmapPool)
+     * @see #LruBitmapCache2(float, int)
      */
     public LruBitmapCache2(int maxSize, BitmapPool bitmapPool) {
         super(maxSize);
@@ -28,13 +28,13 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
      * Constructor
      * @param scaleMemory The scale of memory, expressed as a percentage
      * of this application maximum memory of the current device.
-     * @param bitmapPool The {@link BitmapPool} to recycle the evicted
-     * bitmap from this cache.
+     * @param maxPoolSize The maximum number of bitmaps to allow in the
+     * internal {@link BitmapPool}.
      * @see #LruBitmapCache2(int, BitmapPool)
      */
-    public LruBitmapCache2(float scaleMemory, BitmapPool bitmapPool) {
+    public LruBitmapCache2(float scaleMemory, int maxPoolSize) {
         super(scaleMemory);
-        mBitmapPool = bitmapPool;
+        mBitmapPool = new LinkedBitmapPool(maxPoolSize);
     }
 
     /**

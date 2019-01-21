@@ -72,7 +72,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @return The {@link ImageModule}.
      */
     public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, float scaleMemory, int maxFileSize) {
-        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory), createFileCache(context, maxFileSize));
+        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory, 0), createFileCache(context, maxFileSize));
     }
 
     /**

@@ -25,10 +25,12 @@ public final class Caches {
      * Returns a new <tt>Bitmap</tt> {@link Cache} instance.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this
      * application maximum memory of the current device.
+     * @param maxPoolSize May be <tt>0</tt>. The maximum number of bitmaps to allow in the internal
+     * bitmap pool of the bitmap cache.
      * @return A new {@link LruBitmapCache} instance or <tt>null</tt> if the <tt>scaleMemory <= 0.
      */
-    public static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory) {
-        return (Float.compare(scaleMemory, +0.0f) > 0 ? new LruBitmapCache<K>(scaleMemory) : null);
+    public static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory, int maxPoolSize) {
+        return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxPoolSize > 0 ? new LruBitmapCache2<K>(scaleMemory, maxPoolSize) : new LruBitmapCache<K>(scaleMemory)) : null);
     }
 
     public static void dumpCache(Object cache, Context context, Printer printer) {

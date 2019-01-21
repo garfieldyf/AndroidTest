@@ -27,14 +27,14 @@ public class SizeParameters extends Parameters {
     };
 
     /**
+     * The desired width to decode.
+     */
+    public final int desiredWidth;
+
+    /**
      * The desired height to decode.
      */
     public final int desiredHeight;
-
-    /**
-     * The screen density.
-     */
-    private final int targetDensity;
 
     /**
      * Constructor
@@ -46,12 +46,12 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.value = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
+        this.value = context.getResources().getDisplayMetrics().densityDpi;
+        this.desiredWidth  = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
         this.desiredHeight = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
-        this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
         a.recycle();
 
-        DebugUtils.__checkError((int)value <= 0, "The tag requires a valid 'width' attribute");
+        DebugUtils.__checkError(desiredWidth <= 0, "The tag requires a valid 'width' attribute");
         DebugUtils.__checkError(desiredHeight <= 0, "The tag requires a valid 'height' attribute");
     }
 
@@ -65,11 +65,10 @@ public class SizeParameters extends Parameters {
      * @see #SizeParameters(Context, AttributeSet)
      */
     public SizeParameters(Context context, Config config, int desiredWidth, int desiredHeight, boolean mutable) {
-        super(desiredWidth, config, mutable);
-
-        DebugUtils.__checkError(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
+        super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
+        this.desiredWidth  = desiredWidth;
         this.desiredHeight = desiredHeight;
-        this.targetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        DebugUtils.__checkError(desiredWidth <= 0 || desiredHeight <= 0, "desiredWidth <= 0 || desiredHeight <= 0");
     }
 
     @Override
@@ -85,12 +84,12 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / desiredHeight;
          *      scale  = max(scaleX, scaleY);
          */
-        final int desiredWidth = (int)value;
         opts.inSampleSize = 1;
         if (opts.outWidth <= desiredWidth || opts.outHeight <= desiredHeight) {
             opts.inDensity = opts.inTargetDensity = 0;
         } else {
             final float scale = Math.max((float)opts.outWidth / desiredWidth, (float)opts.outHeight / desiredHeight);
+            final int targetDensity = (int)value;
             opts.inTargetDensity = targetDensity;
             opts.inDensity = (int)(targetDensity * scale);
         }
@@ -100,7 +99,7 @@ public class SizeParameters extends Parameters {
     public String toString() {
         return new StringBuilder(128).append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", desiredWidth = ").append(value)
+            .append(", desiredWidth = ").append(desiredWidth)
             .append(", desiredHeight = ").append(desiredHeight)
             .append(", mutable = ").append(mutable)
             .append(" }").toString();

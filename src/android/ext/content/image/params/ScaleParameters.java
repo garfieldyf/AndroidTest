@@ -19,7 +19,10 @@ import android.util.AttributeSet;
  * @author Garfield
  */
 public class ScaleParameters extends Parameters {
-    private final int mTargetDensity;
+    /**
+     * The scale amount of the image's size to decode.
+     */
+    public final float scale;
 
     /**
      * Constructor
@@ -31,8 +34,8 @@ public class ScaleParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "ScaleParameters"));
-        value = a.getFloat(0 /* R.styleable.ScaleParameters_scale */, 0);
-        mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        this.value = context.getResources().getDisplayMetrics().densityDpi;
+        this.scale = a.getFloat(0 /* R.styleable.ScaleParameters_scale */, 0);
         a.recycle();
     }
 
@@ -45,8 +48,8 @@ public class ScaleParameters extends Parameters {
      * @see #ScaleParameters(Context, AttributeSet)
      */
     public ScaleParameters(Context context, Config config, float scale, boolean mutable) {
-        super(scale, config, mutable);
-        mTargetDensity = context.getResources().getDisplayMetrics().densityDpi;
+        super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
+        this.scale = scale;
     }
 
     @Override
@@ -60,13 +63,13 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
-        final float scale = (float)value;
         opts.inSampleSize = 1;
         if (scale <= 0 || scale >= 1.0f) {
             opts.inDensity = opts.inTargetDensity = 0;
         } else {
-            opts.inTargetDensity = mTargetDensity;
-            opts.inDensity = (int)(mTargetDensity * (opts.outWidth / (opts.outWidth * scale)));
+            final int targetDensity = (int)value;
+            opts.inTargetDensity = targetDensity;
+            opts.inDensity = (int)(targetDensity * (opts.outWidth / (opts.outWidth * scale)));
         }
     }
 
@@ -74,7 +77,7 @@ public class ScaleParameters extends Parameters {
     public String toString() {
         return new StringBuilder(128).append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", scale = ").append(value)
+            .append(", scale = ").append(scale)
             .append(", mutable = ").append(mutable)
             .append(" }").toString();
     }

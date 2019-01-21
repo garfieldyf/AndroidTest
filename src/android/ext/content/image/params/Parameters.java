@@ -110,6 +110,21 @@ public class Parameters {
     }
 
     /**
+     * Computes the number of bytes that can be used to store
+     * the image's pixels when decoding the image.
+     * @param opts The {@link Options} to compute byte count.
+     */
+    /* package */ final int computeByteCount(Options opts) {
+        final int byteCount = BitmapUtils.getBytesPerPixel(config);
+        if (opts.inTargetDensity == 0) {
+            return (opts.outWidth * opts.outHeight * byteCount);
+        } else {
+            final float scale = (float)opts.inTargetDensity / opts.inDensity;
+            return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
+        }
+    }
+
+    /**
      * Returns the default {@link Parameters} associated with this class
      * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
      */
@@ -132,16 +147,6 @@ public class Parameters {
 
     private static int fixSampleSize(int sampleSize) {
         return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
-    }
-
-    /* package */ static int computeByteCountImpl(Context context, Options opts) {
-        final int byteCount = BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
-        if (opts.inTargetDensity == 0) {
-            return (opts.outWidth * opts.outHeight * byteCount);
-        } else {
-            final float scale = (float)opts.inTargetDensity / opts.inDensity;
-            return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
-        }
     }
 
     /**

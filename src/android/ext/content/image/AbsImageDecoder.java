@@ -100,11 +100,13 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.outWidth  = 0;
         opts.outHeight = 0;
         opts.inMutable = false;
+
         opts.inDither  = false;
         opts.mCancel   = false;
         opts.inSampleSize  = 0;
         opts.outMimeType   = null;
         opts.inTempStorage = null;
+
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
         opts.inJustDecodeBounds = false;
@@ -126,7 +128,6 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
-            DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {

@@ -375,6 +375,7 @@ public final class BitmapUtils {
         return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
     }
 
+    @SuppressWarnings("deprecation")
     public static void dumpOptions(String tag, Options opts) {
         if (opts == null) {
             Log.d(tag, "The opts is null");
@@ -385,14 +386,19 @@ public final class BitmapUtils {
                .append("\n  inSampleSize  = ").append(opts.inSampleSize)
                .append("\n  inTempStorage = ").append(opts.inTempStorage)
                .append("\n  inPreferredConfig = ").append(opts.inPreferredConfig)
+
                .append("\n  inDensity = ").append(opts.inDensity)
                .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
                .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
                .append("\n  inScaled = ").append(opts.inScaled)
                .append("\n  inDither = ").append(opts.inDither)
+
                .append("\n  inPremultiplied = ").append(opts.inPremultiplied)
+               .append("\n  inPurgeable = ").append(opts.inPurgeable)
+               .append("\n  inInputShareable = ").append(opts.inInputShareable)
                .append("\n  inPreferQualityOverSpeed = ").append(opts.inPreferQualityOverSpeed)
                .append("\n  mCancel = ").append(opts.mCancel)
+
                .append("\n  outWidth  = ").append(opts.outWidth)
                .append("\n  outHeight = ").append(opts.outHeight)
                .append("\n  outMimeType = ").append(opts.outMimeType)

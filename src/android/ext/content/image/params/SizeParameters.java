@@ -74,7 +74,7 @@ public class SizeParameters extends Parameters {
 
     @Override
     public int computeByteCount(Context context, Options opts) {
-        return computeByteCountImpl(context, opts);
+        return computeByteCount(opts);
     }
 
     @Override

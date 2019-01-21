@@ -257,7 +257,7 @@ public final class JsonUtils {
     }
 
     /**
-     * Parses a JSON value from the specified <em>reader</em>.
+     * Parses a JSON data from the specified <em>reader</em>.
      * @param reader The {@link JsonReader} to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
@@ -280,7 +280,7 @@ public final class JsonUtils {
     }
 
     /**
-     * Parses a JSON value from the specified <em>uri</em>.
+     * Parses a JSON data from the specified <em>uri</em>.
      * <h5>Accepts the following URI schemes:</h5>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>

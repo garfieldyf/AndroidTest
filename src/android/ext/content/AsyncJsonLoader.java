@@ -16,7 +16,7 @@ import android.util.Log;
 import android.util.Pair;
 
 /**
- * Class <tt>AsyncJsonLoader</tt> allows to load the JSON value on a background thread and publish
+ * Class <tt>AsyncJsonLoader</tt> allows to load the JSON data on a background thread and publish
  * results on the UI thread.
  * <h5>AsyncJsonLoader's generic types</h5>
  * <p>The two types used by a JSON loader are the following:</p>
@@ -86,7 +86,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      * validate the <em>result</em>.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The {@link LoadParams}, passed earlier by {@link #load}.
-     * @param result The JSON value. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
+     * @param result The JSON data. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
@@ -117,7 +117,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
                 }
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load JSON value - key = " + key + "\n" + e);
+            Log.e(getClass().getName(), "Couldn't load JSON data - key = " + key + "\n" + e);
         }
 
         return new Pair<Result, Boolean>(result, hitCache);
@@ -136,7 +136,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         try {
             result = JsonUtils.parse(null, cacheFile, task);
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load JSON value from the cache - " + cacheFile);
+            Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
         }
 
         if (result != null) {
@@ -180,7 +180,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link AsyncJsonLoader} to load JSON value.
+     * Class <tt>LoadParams</tt> used to {@link AsyncJsonLoader} to load JSON data.
      */
     public static abstract class LoadParams<Key> {
         /**

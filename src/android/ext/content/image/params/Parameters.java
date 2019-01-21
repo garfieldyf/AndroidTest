@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.ClassUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -104,6 +105,7 @@ public class Parameters {
      * @param mutable Whether to decode a mutable bitmap.
      */
     protected Parameters(Object value, Config config, boolean mutable) {
+        DebugUtils.__checkError(config == null, "config == null");
         this.value   = value;
         this.config  = config;
         this.mutable = mutable;

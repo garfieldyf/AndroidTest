@@ -184,7 +184,8 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     @Override
     public void stop() {
         if (isRunning()) {
-            unscheduleSelf(0);
+            mFrameIndex = 0;
+            unscheduleSelf();
         }
     }
 
@@ -237,10 +238,10 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
             // Schedules the GIF image next frame.
             if (isRunning()) {
-                if (!isOneShot() || mFrameIndex != mState.mImage.getFrameCount() - 1) {
-                    scheduleSelf();
+                if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
+                    unscheduleSelf();
                 } else {
-                    unscheduleSelf(mFrameIndex);
+                    scheduleSelf();
                 }
             }
         }
@@ -266,10 +267,8 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         }
     }
 
-    private void unscheduleSelf(int frameIndex) {
-        mFrameIndex = frameIndex;
+    private void unscheduleSelf() {
         mFlags &= ~FLAG_RUNNING;
-
         final Callback callback = getCallback();
         if (callback != null) {
             callback.invalidateDrawable(this);
@@ -278,7 +277,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
         // Dispatch the animation was ended.
         if (mCallback != null) {
-            mCallback.onAnimationEnd(this, frameIndex);
+            mCallback.onAnimationEnd(this, mFrameIndex);
         }
     }
 

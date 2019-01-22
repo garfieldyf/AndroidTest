@@ -16,8 +16,8 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected void onStartLoading(String url, LoadParams<String>[] params) {
-        final Activity activity = getOwner();
-        if (activity != null && !activity.isDestroyed()) {
+        final Activity activity = getOwnerActivity();
+        if (activity != null) {
             // Show loading UI.
             Log.i("abc", "Show loading UI.");
         }
@@ -30,8 +30,8 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected void onLoadComplete(String url, LoadParams<String>[] params, Pair<JSONObject, Boolean> result) {
-        final Activity activity = getOwner();
-        if (activity == null || activity.isDestroyed()) {
+        final Activity activity = getOwnerActivity();
+        if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
             return;
         }

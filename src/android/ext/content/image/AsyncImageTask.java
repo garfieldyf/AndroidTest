@@ -3,6 +3,7 @@ package android.ext.content.image;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import android.app.Activity;
 import android.content.Context;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
@@ -39,8 +40,8 @@ import android.util.Log;
  *     }
  *
  *     protected void onPostExecute(Object[] results) {
- *         final Activity activity = getOwner();
- *         if (activity == null || activity.isDestroyed()) {
+ *         final Activity activity = getOwnerActivity();
+ *         if (activity == null) {
  *              // The owner activity has been destroyed or release by the GC.
  *              return;
  *         }
@@ -97,8 +98,8 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
 
     /**
      * Returns the object that owns this task.
-     * @return The owner object or <tt>null</tt> if
-     * no owner set or the owner released by the GC.
+     * @return The owner object or <tt>null</tt>
+     * if the owner released by the GC.
      * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")
@@ -108,10 +109,24 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
     }
 
     /**
+     * Alias of {@link #getOwner()}.
+     * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
+     * the owner activity has been finished or destroyed or release by the GC.
+     * @see #setOwner(Object)
+     */
+    @SuppressWarnings("unchecked")
+    public final <T extends Activity> T getOwnerActivity() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final T activity = (T)mOwner.get();
+        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    }
+
+    /**
      * Sets the object that owns this task.
      * @param owner The owner object.
      * @return This task.
      * @see #getOwner()
+     * @see #getOwnerActivity()
      */
     public final AsyncImageTask<URI> setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);

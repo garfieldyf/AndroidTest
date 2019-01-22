@@ -17,7 +17,7 @@ import android.util.Pair;
 
 /**
  * Class <tt>AsyncJsonLoader</tt> allows to load the JSON data on a background thread and publish
- * results on the UI thread.
+ * results on the UI thread. This class can be support the JSON cache file.
  * <h5>AsyncJsonLoader's generic types</h5>
  * <p>The two types used by a JSON loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
@@ -30,15 +30,15 @@ import android.util.Pair;
  *     }
  *
  *     protected void onStartLoading(String url, LoadParams&lt;String&gt;[] params) {
- *         final Activity activity = getOwner();
- *         if (activity != null && !activity.isDestroyed()) {
+ *         final Activity activity = getOwnerActivity();
+ *         if (activity != null) {
  *             // Show loading UI.
  *         }
  *     }
  *
  *     protected void onLoadComplete(String url, LoadParams&lt;String&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
- *         final Activity activity = getOwner();
- *         if (activity == null || activity.isDestroyed()) {
+ *         final Activity activity = getOwnerActivity();
+ *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
  *             return;
  *         }

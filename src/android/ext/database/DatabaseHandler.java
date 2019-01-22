@@ -2,6 +2,7 @@ package android.ext.database;
 
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
+import android.app.Activity;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
 
@@ -48,8 +49,8 @@ public abstract class DatabaseHandler {
 
     /**
      * Returns the object that owns this handler.
-     * @return The owner object or <tt>null</tt> if
-     * no owner set or the owner released by the GC.
+     * @return The owner object or <tt>null</tt>
+     * if the owner released by the GC.
      * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")
@@ -59,9 +60,23 @@ public abstract class DatabaseHandler {
     }
 
     /**
+     * Alias of {@link #getOwner()}.
+     * @return The <tt>Activity</tt> that owns this handler or <tt>null</tt> if
+     * the owner activity has been finished or destroyed or release by the GC.
+     * @see #setOwner(Object)
+     */
+    @SuppressWarnings("unchecked")
+    public final <T extends Activity> T getOwnerActivity() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final T activity = (T)mOwner.get();
+        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    }
+
+    /**
      * Sets the object that owns this handler.
      * @param owner The owner object.
      * @see #getOwner()
+     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);

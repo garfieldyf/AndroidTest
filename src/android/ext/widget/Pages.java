@@ -3,16 +3,14 @@ package android.ext.widget;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
+import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.DebugUtils;
-import android.util.ArrayMap;
 import android.util.Printer;
-import android.util.SparseArray;
 
 /**
  * Class Pages
@@ -57,10 +55,10 @@ public final class Pages {
      * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link Page} {@link Cache} instance.
      * @see SimpleLruCache
-     * @see SparsePageCache
+     * @see ArrayMapCache
      */
     public static <E> Cache<Integer, Page<E>> createPageCache(int maxPages) {
-        return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new SparsePageCache<E>());
+        return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new ArrayMapCache<Integer, Page<E>>(8));
     }
 
     /**
@@ -157,93 +155,6 @@ public final class Pages {
         @Override
         public String toString() {
             return Pages.toString(this, mData);
-        }
-    }
-
-    /**
-     * Class <tt>ArrayPageCache</tt> is an implementation of a {@link Cache}.
-     */
-    public static class ArrayPageCache<E> implements Cache<Integer, Page<E>> {
-        protected final ArrayMap<Integer, Page<E>> mPages;
-
-        /**
-         * Constructor
-         */
-        public ArrayPageCache() {
-            mPages = new ArrayMap<Integer, Page<E>>(8);
-        }
-
-        @Override
-        public void clear() {
-            mPages.clear();
-        }
-
-        @Override
-        public Page<E> remove(Integer key) {
-            return mPages.remove(key);
-        }
-
-        @Override
-        public Page<E> get(Integer key) {
-            return mPages.get(key);
-        }
-
-        @Override
-        public Page<E> put(Integer key, Page<E> page) {
-            return mPages.put(key, page);
-        }
-
-        @Override
-        public Map<Integer, Page<E>> snapshot() {
-            return new ArrayMap<Integer, Page<E>>(mPages);
-        }
-    }
-
-    /**
-     * Class <tt>SparsePageCache</tt> is an implementation of a {@link Cache}.
-     * This page cache is the <b>unlimited-size</b> cache.
-     */
-    public static class SparsePageCache<E> implements Cache<Integer, Page<E>> {
-        protected final SparseArray<Page<E>> mPages;
-
-        /**
-         * Constructor
-         */
-        public SparsePageCache() {
-            mPages = new SparseArray<Page<E>>(8);
-        }
-
-        @Override
-        public void clear() {
-            mPages.clear();
-        }
-
-        @Override
-        public Page<E> remove(Integer key) {
-            mPages.delete(key);
-            return null;
-        }
-
-        @Override
-        public Page<E> get(Integer key) {
-            return mPages.get(key, null);
-        }
-
-        @Override
-        public Page<E> put(Integer key, Page<E> page) {
-            mPages.append(key, page);
-            return null;
-        }
-
-        @Override
-        public Map<Integer, Page<E>> snapshot() {
-            final int size = mPages.size();
-            final Map<Integer, Page<E>> result = new ArrayMap<Integer, Page<E>>(size);
-            for (int i = 0; i < size; ++i) {
-                result.put(mPages.keyAt(i), mPages.valueAt(i));
-            }
-
-            return result;
         }
     }
 

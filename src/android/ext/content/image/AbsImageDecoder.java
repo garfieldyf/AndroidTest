@@ -58,6 +58,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android_asset ({@link #SCHEME_FILE})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to decode, passed earlier by {@link ImageLoader#load}.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.

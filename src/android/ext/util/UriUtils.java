@@ -24,6 +24,7 @@ public final class UriUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android_asset ({@link #SCHEME_FILE})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to open.
@@ -34,7 +35,7 @@ public final class UriUtils {
         DebugUtils.__checkError(uri == null, "uri == null");
         if (uri instanceof Uri) {
             if (SCHEME_FILE.equalsIgnoreCase(((Uri)uri).getScheme())) {
-                return openFileInputStream(context, uri.toString());
+                return openInputStreamImpl(context, uri.toString());
             } else {
                 return context.getContentResolver().openInputStream((Uri)uri);
             }
@@ -43,7 +44,7 @@ public final class UriUtils {
             if (FileUtils.isAbsolutePath(uriString)) {
                 return new FileInputStream(uriString);
             } else if (SCHEME_FILE.regionMatches(true, 0, uriString, 0, 4)) {
-                return openFileInputStream(context, uriString);
+                return openInputStreamImpl(context, uriString);
             } else {
                 return context.getContentResolver().openInputStream(Uri.parse(uriString));
             }
@@ -125,7 +126,7 @@ public final class UriUtils {
         return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
     }
 
-    private static InputStream openFileInputStream(Context context, String uri) throws IOException {
+    private static InputStream openInputStreamImpl(Context context, String uri) throws IOException {
         DebugUtils.__checkError(uri.length() <= 7, "Invalid uri - " + uri);
         if (uri.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
             return new FileInputStream(uri.substring(7 /* skip 'file://' */));

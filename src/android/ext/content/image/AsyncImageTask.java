@@ -18,8 +18,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI on a background thread
- * and publish result on the UI thread.
+ * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI
+ * on a background thread and publish result on the UI thread.
  * <h5>AsyncImageTask's generic types</h5>
  * <p>The one type used by an image task are the following:</p>
  * <tt>URI</tt>, The URI type of the task, accepts the following URI schemes:
@@ -29,6 +29,7 @@ import android.util.Log;
  * <li>https ({@link #SCHEME_HTTPS})</li>
  * <li>file ({@link #SCHEME_FILE})</li>
  * <li>content ({@link #SCHEME_CONTENT})</li>
+ * <li>android_asset ({@link #SCHEME_FILE})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <h2>Usage</h2>
  * <p>Here is an example:</p><pre>

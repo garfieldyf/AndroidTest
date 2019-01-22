@@ -128,6 +128,7 @@ public final class BitmapUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android_asset ({@link #SCHEME_FILE})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
@@ -191,6 +192,7 @@ public final class BitmapUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android_asset ({@link #SCHEME_FILE})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.

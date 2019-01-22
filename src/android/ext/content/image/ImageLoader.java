@@ -82,6 +82,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <li>https ({@link #SCHEME_HTTPS})</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android_asset ({@link #SCHEME_FILE})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to load.
      * @return The {@link LoadRequest}.

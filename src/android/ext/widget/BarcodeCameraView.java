@@ -148,7 +148,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
     /**
      * Returns the camera preview width. <p>Note: The returned
-     * width relative to the camera preview orientation.</p>
+     * width relative to the camera preview orientation (The
+     * default camera preview orientation is landscape).</p>
      * @return The preview width in pixels.
      * @see #getPreviewHeight()
      */
@@ -158,7 +159,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
     /**
      * Returns the camera preview height. <p>Note: The returned
-     * height relative to the camera preview orientation.</p>
+     * height relative to the camera preview orientation (The
+     * default camera preview orientation is landscape).</p>
      * @return The preview height in pixels.
      * @see #getPreviewWidth()
      */
@@ -170,7 +172,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
      * Returns the bounds of the barcode clip area on the screen. Note that this
      * is not a copy, you should not change the rectangle returned by this method.
      * <p>Note: The returned rectangle's coordinates relative to the camera preview
-     * orientation.</p>
+     * orientation (The default camera preview orientation is landscape).</p>
      * @return The barcode clip bounds in pixels.
      * @see #computeBarcodeClipBounds(Rect)
      */
@@ -182,7 +184,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
      * Computes the bounds of the barcode clip area on the screen. Note that this
      * is not a copy, you should not change the rectangle returned by this method.
      * <p>Note: The returned rectangle's coordinates relative to the camera preview
-     * orientation.</p>
+     * orientation (The default camera preview orientation is landscape).</p>
      * @param scanningBounds The barcode preview scanning bounds in pixels.
      * @return The barcode clip bounds in pixels.
      * @see #getBarcodeClipBounds()
@@ -196,6 +198,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         getDisplay().getRealSize(screenSize);
 
         // Computes the bounds of the barcode clip area on the screen.
+        // The clip bounds equals the scanning bounds rotate 90 degrees on the screen.
         mClipBounds.left   = (scanningBounds.top + location[1]) * mPreviewWidth / screenSize.y;
         mClipBounds.top    = mPreviewHeight - (scanningBounds.right + location[0]) * mPreviewHeight / screenSize.x;
         mClipBounds.right  = (scanningBounds.bottom + location[1]) * mPreviewWidth / screenSize.y;
@@ -384,7 +387,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     public static interface OnBarcodeCameraListener extends PreviewCallback, ErrorCallback {
         /**
          * Callback method to be invoked when the camera preview size has been changed.
-         * <p>Note: The preview size relative to the camera preview orientation.</p>
+         * <p>Note: The preview size relative to the camera preview orientation (The
+         * default camera preview orientation is landscape).</p>
          * @param camera The <tt>Camera</tt> device.
          * @param previewWidth The camera preview width in pixels.
          * @param previewHeight The camera preview height in pixels.

@@ -313,7 +313,7 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos to the "crash.crashes" table.
+         * Writes the crash infos to the "crash.db.crashes" table.
          */
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);

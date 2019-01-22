@@ -80,11 +80,11 @@ public final class DeviceUtils {
     /**
      * Formats the cpu frequency to be in the form of KHz, MHz, GHz, etc.
      * @param freq The cpu frequency in KHz.
-     * @return The formatted string with the <tt>freq</tt>.
+     * @return The formatted string with the <em>freq</em> or <tt>fallback</tt>.
      */
-    public static String formatCpuFreq(int freq) {
+    public static String formatCpuFreq(int freq, String fallback) {
         if (freq <= 0) {
-            return "N/A";
+            return fallback;
         }
 
         float result = freq;
@@ -169,9 +169,9 @@ public final class DeviceUtils {
         infos.setLength(0);
         for (int i = 0; i < cpuCore; ++i) {
             dumpWhiteSpace(infos, i).append("cpu").append(i)
-                 .append(" [ curFrequency = ").append(formatCpuFreq(getCpuCurFreq(i)))
-                 .append(", maxFrequency = ").append(formatCpuFreq(getCpuMaxFreq(i)))
-                 .append(", minFrequency = ").append(formatCpuFreq(getCpuMinFreq(i)))
+                 .append(" [ curFrequency = ").append(formatCpuFreq(getCpuCurFreq(i), "N/A"))
+                 .append(", maxFrequency = ").append(formatCpuFreq(getCpuMaxFreq(i), "N/A"))
+                 .append(", minFrequency = ").append(formatCpuFreq(getCpuMinFreq(i), "N/A"))
                  .append(" ]");
         }
         printer.println(infos.toString());

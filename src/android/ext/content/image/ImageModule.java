@@ -18,7 +18,6 @@ import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.ClassUtils;
-import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 
@@ -175,7 +174,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         private Object mBinder;
         private Object mDecoder;
         private Object mParameters;
-        private FileCache mFileCache;
         private final ImageModule mModule;
 
         /**
@@ -203,16 +201,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
          */
         public final Builder<URI, Image> noMemoryCache() {
             mFlags |= FLAG_NO_MEMORY_CACHE;
-            return this;
-        }
-
-        /**
-         * Sets the {@link FileCache} used to store the image files.
-         * @param cache The <tt>FileCache</tt>.
-         * @return This builder.
-         */
-        public final Builder<URI, Image> setFileCache(FileCache cache) {
-            mFileCache = cache;
             return this;
         }
 
@@ -298,9 +286,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
          */
         public final ImageLoader<URI, Image> create() {
             // Retrieves the image cache and file cache from image module, may be null.
-            DebugUtils.__checkWarning((mFlags & FLAG_NO_FILE_CACHE) != 0 && mFileCache != null, Builder.class.getName(), "The builder has no file cache, setFileCache will be ignore.");
             final Cache imageCache = ((mFlags & FLAG_NO_MEMORY_CACHE) == 0 ? mModule.mImageCache : null);
-            final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? (mFileCache != null ? mFileCache : mModule.mFileCache) : null);
+            final FileCache fileCache = ((mFlags & FLAG_NO_FILE_CACHE) == 0 ? mModule.mFileCache : null);
 
             // Creates the binder.
             final Binder binder;

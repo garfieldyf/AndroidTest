@@ -275,7 +275,7 @@ public final class JsonUtils {
             return (T)parseObject(reader, FileUtils.wrap(cancelable));
 
         default:
-            throw new Error("Invalid json token - " + reader.peek());
+            throw new AssertionError("Invalid json token - " + reader.peek());
         }
     }
 
@@ -338,7 +338,7 @@ public final class JsonUtils {
         } else if (object instanceof Map) {
             return writeValues(writer, ((Map<String, Object>)object).entrySet());
         } else {
-            throw new Error("Unsupported type - " + object.getClass().toString());
+            throw new AssertionError("Unsupported type - " + object.getClass().toString());
         }
     }
 

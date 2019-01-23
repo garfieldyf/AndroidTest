@@ -249,7 +249,7 @@ public final class ProcessUtils {
             try {
                 return (RunningNativeProcessInfo)super.clone();
             } catch (CloneNotSupportedException e) {
-                throw new Error(e);
+                throw new AssertionError(e);
             }
         }
 

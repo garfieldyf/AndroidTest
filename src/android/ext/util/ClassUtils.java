@@ -80,7 +80,7 @@ public final class ClassUtils {
         try {
             return Class.forName(context.getPackageName() + ".R$styleable").getField(name).get(null);
         } catch (Throwable e) {
-            throw new Error(e);
+            throw new AssertionError(e);
         }
     }
 

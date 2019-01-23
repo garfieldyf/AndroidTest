@@ -1013,7 +1013,7 @@ public final class FileUtils {
             try {
                 return (Stat)super.clone();
             } catch (CloneNotSupportedException e) {
-                throw new Error(e);
+                throw new AssertionError(e);
             }
         }
 
@@ -1322,7 +1322,7 @@ public final class FileUtils {
             try {
                 return (Dirent)super.clone();
             } catch (CloneNotSupportedException e) {
-                throw new Error(e);
+                throw new AssertionError(e);
             }
         }
 

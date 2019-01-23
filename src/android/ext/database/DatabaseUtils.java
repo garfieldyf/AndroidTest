@@ -387,7 +387,7 @@ public final class DatabaseUtils {
         } else if (componentType == boolean.class) {
             result = createBooleanArray(cursor);
         } else {
-            throw new Error("Unsupported component type - " + componentType.toString());
+            throw new AssertionError("Unsupported component type - " + componentType.toString());
         }
 
         return (T)result;
@@ -617,7 +617,7 @@ public final class DatabaseUtils {
             } else if (type == boolean.class) {
                 field.setBoolean(result, cursor.getInt(columnIndex) != 0);
             } else {
-                throw new Error("Unsupported field type - " + type.toString());
+                throw new AssertionError("Unsupported field type - " + type.toString());
             }
         }
 

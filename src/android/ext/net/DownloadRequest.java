@@ -127,6 +127,26 @@ public class DownloadRequest {
     }
 
     /**
+     * Equivalent to calling <tt>requestHeader("Accept-Charset", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest acceptCharset(String value) {
+        mConnection.setRequestProperty("Accept-Charset", value);
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("Accept-Encoding", value)</tt>.
+     * @param value The value of the field.
+     * @return This request.
+     */
+    public final DownloadRequest acceptEncoding(String value) {
+        mConnection.setRequestProperty("Accept-Encoding", value);
+        return this;
+    }
+
+    /**
      * Equivalent to calling <tt>requestHeader("User-Agent", value)</tt>.
      * @param value The value of the field.
      * @return This request.
@@ -147,10 +167,11 @@ public class DownloadRequest {
     }
 
     /**
-     * Equivalent to calling <tt>requestHeader("Range", "bytes=<em>value</em>")</tt>.
+     * Equivalent to calling <tt>requestHeader("Range", "bytes=value")</tt>.
      * @param value The value of the field.
      * @return This request.
      * @see #range(int)
+     * @see #range(int, int)
      */
     public final DownloadRequest range(String value) {
         mConnection.setRequestProperty("Range", "bytes=" + value);
@@ -158,13 +179,27 @@ public class DownloadRequest {
     }
 
     /**
-     * Equivalent to calling <tt>requestHeader("Range", "bytes=<em>offset</em>-")</tt>.
-     * @param offset The start byte of the range.
+     * Equivalent to calling <tt>requestHeader("Range", "bytes=offset-")</tt>.
+     * @param offset The start bytes of the range.
      * @return This request.
      * @see #range(String)
+     * @see #range(int, int)
      */
     public final DownloadRequest range(int offset) {
         mConnection.setRequestProperty("Range", "bytes=" + offset + "-");
+        return this;
+    }
+
+    /**
+     * Equivalent to calling <tt>requestHeader("Range", "bytes=start-end")</tt>.
+     * @param start The start bytes of the range.
+     * @param end The end bytes of the range.
+     * @return This request.
+     * @see #range(int)
+     * @see #range(String)
+     */
+    public final DownloadRequest range(int start, int end) {
+        mConnection.setRequestProperty("Range", "bytes=" + start + "-" + end);
         return this;
     }
 

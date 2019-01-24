@@ -5,7 +5,7 @@ package android.ext.cache;
  * of keys and files in which each key is mapped to a single file.
  * @author Garfield
  */
-public interface FileCache extends Cache<String, String> {
+public interface FileCache {
     /**
      * Returns the absolute path of the cache directory.
      * @return The absolute path of the cache directory.

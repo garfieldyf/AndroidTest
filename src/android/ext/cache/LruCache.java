@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,8 +75,8 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     }
 
     @Override
-    public synchronized Map<K, V> snapshot() {
-        return new LinkedHashMap<K, V>(map);
+    public synchronized Map<K, V> entries() {
+        return Collections.unmodifiableMap(new LinkedHashMap<K, V>(map));
     }
 
     @Override

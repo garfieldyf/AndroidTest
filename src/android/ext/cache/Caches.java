@@ -56,7 +56,7 @@ public final class Caches {
         }
 
         @Override
-        public Map<Object, Object> snapshot() {
+        public Map<Object, Object> entries() {
             return Collections.emptyMap();
         }
 

@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import android.content.Context;
@@ -61,11 +62,11 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
     }
 
     @Override
-    public Map<K, Object> snapshot() {
+    public Map<K, Object> entries() {
         final Map<K, Object> result = new LinkedHashMap<K, Object>();
-        result.putAll(mBitmapCache.snapshot());
-        result.putAll(mImageCache.snapshot());
-        return result;
+        result.putAll(mBitmapCache.entries());
+        result.putAll(mImageCache.entries());
+        return Collections.unmodifiableMap(result);
     }
 
     /**

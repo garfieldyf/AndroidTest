@@ -157,7 +157,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
                 return null;
             }
 
-            // Parse the temp file and save it cache file.
+            // Parse the temp file and save it to the cache file.
             final Result result = JsonUtils.parse(null, tempFile, task);
             if (!isTaskCancelled(task) && validateResult(key, params, result)) {
                 FileUtils.moveFile(tempFile, cacheFile);

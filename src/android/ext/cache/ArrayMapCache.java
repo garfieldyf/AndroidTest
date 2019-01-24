@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -14,7 +15,7 @@ import android.util.Printer;
  * @author Garfield
  */
 public class ArrayMapCache<K, V> implements Cache<K, V> {
-    protected final ArrayMap<K, V> map;
+    private final ArrayMap<K, V> map;
 
     /**
      * Constructor
@@ -54,13 +55,13 @@ public class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Map<K, V> snapshot() {
-        return new ArrayMap<K, V>(map);
+    public Map<K, V> entries() {
+        return Collections.unmodifiableMap(map);
     }
 
     /* package */ final void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
-        final Set<Entry<K, V>> entries = snapshot().entrySet();
+        final Set<Entry<K, V>> entries = entries().entrySet();
 
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), entries.size());
         for (Entry<?, ?> entry : entries) {

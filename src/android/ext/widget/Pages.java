@@ -269,7 +269,7 @@ public final class Pages {
         /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
             final Formatter formatter  = new Formatter(result);
-            final Set<Entry<Integer, Page<E>>> entries = mPageCache.snapshot().entrySet();
+            final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
             DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
             result.setLength(0);

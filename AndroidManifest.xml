@@ -32,7 +32,8 @@
             android:configChanges="keyboard|orientation"
             android:icon="@drawable/icon"
             android:label="@string/app_name"
-            android:launchMode="singleTask" >
+            android:launchMode="singleTask"
+            android:theme="@style/TransitionsTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -47,7 +48,8 @@
             android:name="RecyclerActivity"
             android:configChanges="keyboard|orientation"
             android:exported="true"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:theme="@style/TransitionsTheme" />
         <activity android:name="AndroidTestActivity" />
         <activity
             android:name="DrawActivity"
@@ -77,8 +79,8 @@
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
             android:name="EncodeActivity"
-            android:theme="@style/TranslucentTheme"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/TranslucentTheme" />
         <activity
             android:name="ContactsActivity"
             android:screenOrientation="portrait" />
@@ -89,17 +91,13 @@
             android:name="WebViewActivity"
             android:screenOrientation="landscape" >
         </activity>
-        <activity
-            android:name="PrinterActivity" />
-        <activity
-            android:name="ViewPagerActivity" />
+        <activity android:name="PrinterActivity" />
+        <activity android:name="ViewPagerActivity" />
         <activity
             android:name="PercentActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />
-
-        <activity
-            android:name="PackageActivity" />
+        <activity android:name="PackageActivity" />
 
         <service
             android:name="CrashService"

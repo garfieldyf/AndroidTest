@@ -68,10 +68,10 @@ public final class SimpleFileCache implements FileCache {
     }
 
     /**
-     * @return Always returns an empty (<tt>0-size</tt>) {@link Map}.
+     * @return Always returns an empty, immutable {@link Map}.
      */
     @Override
-    public Map<String, String> snapshot() {
+    public Map<String, String> entries() {
         return Collections.emptyMap();
     }
 

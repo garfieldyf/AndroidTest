@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import java.util.concurrent.Executor;
 import android.ext.content.Loader.Task;
 import android.ext.database.DatabaseHandler;
 import android.os.Handler;
@@ -173,16 +172,6 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Called on the <tt>ThreadPool</tt> internal, do not call this method directly.
-     */
-    public final void execute(Executor executor, Runnable task) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_EXECUTE;
-        msg.obj  = executor;
-        sendMessageDelayed(msg, 100);
-    }
-
-    /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
     public final void finish(Task task) {
@@ -223,11 +212,6 @@ public final class UIHandler extends Handler {
         case MESSAGE_PROGRESS:
         case MESSAGE_FINISHED:
             ((Task)msg.getCallback()).handleMessage(msg);
-            break;
-
-        // Dispatch the ThreadPool messages.
-        case MESSAGE_EXECUTE:
-            ((Executor)msg.obj).execute(msg.getCallback());
             break;
 
         // Dispatch the RecyclerView messages.
@@ -280,11 +264,8 @@ public final class UIHandler extends Handler {
     }
 
     // The Loader.Task messages.
-    private static final int MESSAGE_PROGRESS = 0xCECECECE;
-    public static final int MESSAGE_FINISHED  = 0xCFCFCFCF;
-
-    // The ThreadPool messages.
-    private static final int MESSAGE_EXECUTE  = 0xDFDFDFDF;
+    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
+    public static final int MESSAGE_FINISHED  = 0xDFDFDFDF;
 
     // The RecyclerView messages.
     private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;

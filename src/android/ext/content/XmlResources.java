@@ -38,8 +38,8 @@ public final class XmlResources {
      * @return The <tt>Parameters</tt> object.
      * @throws NotFoundException if the given <em>id</em> cannot be loaded.
      */
-    public static Parameters loadParameters(Context context, int id) throws NotFoundException {
-        return (Parameters)load(context, id, XmlParametersInflater.sInstance);
+    public static <T extends Parameters> T loadParameters(Context context, int id) throws NotFoundException {
+        return (T)load(context, id, XmlParametersInflater.sInstance);
     }
 
     /**
@@ -49,8 +49,8 @@ public final class XmlResources {
      * @return The <tt>Transformer</tt> object.
      * @throws NotFoundException if the given <em>id</em> cannot be loaded.
      */
-    public static <URI, Image> Transformer<URI, Image> loadTransformer(Context context, int id) throws NotFoundException {
-        return (Transformer<URI, Image>)load(context, id, XmlTransformerInflater.sInstance);
+    public static <URI, Image, T extends Transformer<URI, Image>> T loadTransformer(Context context, int id) throws NotFoundException {
+        return (T)load(context, id, XmlTransformerInflater.sInstance);
     }
 
     /**

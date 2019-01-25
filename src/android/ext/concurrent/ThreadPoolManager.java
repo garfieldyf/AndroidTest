@@ -23,31 +23,27 @@ public class ThreadPoolManager extends ThreadPool {
      * <P>Creates a new <tt>ThreadPoolManager</tt> to execute the given task. At any point,
      * at most <em>maxThreads</em> threads will be active processing tasks. If additional
      * tasks are submitted when all threads are active, they will wait in the queue until
-     * a thread is available.</P>
-     * <P>Calls to <em>execute</em> will reuse previously constructed threads if available.
-     * If no existing thread is available, a new thread will be created and added to this pool.
-     * Threads that have not been used for <em>60</em> seconds are terminated and removed from
-     * the cache.</P>
-     * @param coreThreads The number of threads to keep in this pool, even if they are idle.
+     * a thread is available. Threads that have not been used for <em>60</em> seconds are
+     * terminated and removed from the cache.</P>
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @see #ThreadPoolManager(int, int, long, TimeUnit)
+     * @see #ThreadPoolManager(int, long, TimeUnit)
      */
-    public ThreadPoolManager(int coreThreads, int maxThreads) {
-        this(coreThreads, maxThreads, 60, TimeUnit.SECONDS);
+    public ThreadPoolManager(int maxThreads) {
+        this(maxThreads, 60, TimeUnit.SECONDS);
     }
 
     /**
      * Constructor
-     * <P>Like as {@link #ThreadPoolManager(int, int)}, but the threads will wait <em>keepAliveTime</em>
+     * <P>Like as {@link #ThreadPoolManager(int)}, but the threads will wait <em>keepAliveTime</em>
      * for new tasks before terminating in this pool.</P>
-     * @param coreThreads The number of threads to keep in this pool, even if they are idle.
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks before terminating.
+     * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks before
+     * terminating.
      * @param unit The time unit for the <em>keepAliveTime</em> parameter.
-     * @see #ThreadPoolManager(int, int)
+     * @see #ThreadPoolManager(int)
      */
-    public ThreadPoolManager(int coreThreads, int maxThreads, long keepAliveTime, TimeUnit unit) {
-        super(coreThreads, maxThreads, keepAliveTime, unit);
+    public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit) {
+        super(maxThreads, keepAliveTime, unit);
         mRunningTasks = new ConcurrentLinkedQueue<Task>();
     }
 
@@ -71,7 +67,7 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         // Cancel and remove from pending task queue.
-        final Iterator<Runnable> iter = mPendingTasks.iterator();
+        final Iterator<Runnable> iter = getQueue().iterator();
         while (iter.hasNext()) {
             final Runnable task = iter.next();
             if (task instanceof Task && ((Task)task).cancel(id, false)) {
@@ -95,7 +91,7 @@ public class ThreadPoolManager extends ThreadPool {
     public boolean cancelAll(boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
         // Cancel and remove from pending task queue.
         boolean result = false;
-        final Iterator<Runnable> itor = mPendingTasks.iterator();
+        final Iterator<Runnable> itor = getQueue().iterator();
         while (itor.hasNext()) {
             final Runnable task = itor.next();
             if (task instanceof Task) {
@@ -117,7 +113,7 @@ public class ThreadPoolManager extends ThreadPool {
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(96);
         dumpQueue(printer, result, mRunningTasks, " Dumping %s Running Tasks [ size = %d ] ");
-        dumpQueue(printer, result, mPendingTasks, " Dumping %s Pending Tasks [ size = %d ] ");
+        dumpQueue(printer, result, getQueue(), " Dumping %s Pending Tasks [ size = %d ] ");
     }
 
     @Override
@@ -132,8 +128,6 @@ public class ThreadPoolManager extends ThreadPool {
         if (target instanceof Task) {
             mRunningTasks.remove(target);
         }
-
-        super.afterExecute(target, throwable);
     }
 
     private void dumpQueue(Printer printer, StringBuilder result, Queue<?> queue, String format) {

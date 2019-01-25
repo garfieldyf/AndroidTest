@@ -277,7 +277,6 @@ public final class ProcessUtils {
     /**
      * Class <tt>UncaughtHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
      */
-    @SuppressWarnings("unused")
     private static final class UncaughtHandler implements UncaughtExceptionHandler {
         private final Context mContext;
         private final UncaughtExceptionHandler mDefaultHandler;
@@ -315,6 +314,7 @@ public final class ProcessUtils {
         /**
          * Writes the crash infos to the "crash.db.crashes" table.
          */
+        @SuppressWarnings("unused")
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {

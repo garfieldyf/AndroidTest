@@ -57,13 +57,11 @@ public abstract class AbsDownloadTask<Params, Progress, Result> extends AsyncTas
     /**
      * Sets the object that owns this task.
      * @param owner The owner object.
-     * @return This task.
      * @see #getOwner()
      * @see #getOwnerActivity()
      */
-    public final AbsDownloadTask<Params, Progress, Result> setOwner(Object owner) {
+    public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
-        return this;
     }
 
     /**

@@ -100,10 +100,10 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsDownloadTask<Para
         Result result = null;
         try {
             final String cacheFile = getCacheFile(params);
-            final Result cachedResult = loadFromCache(cacheFile);
-            if (cachedResult != null) {
+            final Result value = loadFromCache(cacheFile);
+            if (value != null) {
                 hitCache = true;
-                publishProgress(cachedResult);
+                publishProgress(value);
             }
 
             if (!isCancelled()) {

@@ -124,13 +124,11 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
     /**
      * Sets the object that owns this task.
      * @param owner The owner object.
-     * @return This task.
      * @see #getOwner()
      * @see #getOwnerActivity()
      */
-    public final AsyncImageTask<URI> setOwner(Object owner) {
+    public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
-        return this;
     }
 
     /**

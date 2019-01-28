@@ -4,7 +4,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.content.AsyncJsonLoader;
+import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import com.tencent.test.MainApplication;
@@ -16,10 +18,10 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected void onStartLoading(String url, LoadParams<String>[] params) {
-        final Activity activity = getOwnerActivity();
-        if (activity != null) {
+        final String cacheFile = params[0].getCacheFile(url);
+        if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
             // Show loading UI.
-            Log.i("abc", "Show loading UI.");
+            Log.i("abc", "JsonLoader - Show loading UI.");
         }
     }
 
@@ -39,10 +41,10 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         // Hide loading UI, if need.
         if (result.first != null) {
             // Loading succeeded, update UI.
-            Log.i("abc", "Load Succeeded Update UI. - " + getName(result.first));
+            Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.first));
         } else if (!result.second) {
             // Loading failed and file cache not hit, show error UI.
-            Log.i("abc", "Show error UI.");
+            Log.i("abc", "JsonLoader - Show error UI.");
         }
     }
 

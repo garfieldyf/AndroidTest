@@ -5,15 +5,10 @@ import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.ref.WeakReference;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import android.app.Activity;
 import android.ext.util.ByteArrayBuffer;
-import android.ext.util.Cancelable;
-import android.ext.util.DebugUtils;
-import android.os.AsyncTask;
 import android.util.Log;
 
 /**
@@ -27,7 +22,7 @@ import android.util.Log;
  *     }
  *
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
- *         return new DownloadRequest(params[0]).readTimeout(60000).connectTimeout(60000);
+ *         return new DownloadRequest(params[0]).readTimeout(30000).connectTimeout(30000);
  *     }
  *
  *     protected void onPostExecute(JSONObject result) {
@@ -46,16 +41,15 @@ import android.util.Log;
  * new JSONDownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
+@SuppressWarnings("unchecked")
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsDownloadTask<Params, Progress, Result> {
     private DownloadRequest mRequest;
-    private WeakReference<Object> mOwner;
 
     /**
      * Constructor
      * @see #AsyncDownloadTask(Object)
      */
     public AsyncDownloadTask() {
-        DebugUtils.__checkMemoryLeaks(getClass());
     }
 
     /**
@@ -64,49 +58,10 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @see #AsyncDownloadTask()
      */
     public AsyncDownloadTask(Object owner) {
-        DebugUtils.__checkMemoryLeaks(getClass());
-        mOwner = new WeakReference<Object>(owner);
-    }
-
-    /**
-     * Returns the object that owns this task.
-     * @return The owner object or <tt>null</tt>
-     * if the owner released by the GC.
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T> T getOwner() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        return (T)mOwner.get();
-    }
-
-    /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
-    }
-
-    /**
-     * Sets the object that owns this task.
-     * @param owner The owner object.
-     * @return This task.
-     * @see #getOwner()
-     * @see #getOwnerActivity()
-     */
-    public final AsyncDownloadTask<Params, Progress, Result> setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
-        return this;
+        super(owner);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
         try {
             mRequest = newDownloadRequest(params);
@@ -119,6 +74,23 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
                 mRequest.disconnect();
             }
         }
+    }
+
+    /**
+     * Override this method to downloads the resource from the remote server on a background thread.
+     * <p>The default implementation downloads the JSON data from the remote server and returns a
+     * {@link JSONObject} or {@link JSONArray} object.</p>
+     * @param conn The {@link URLConnection} whose connecting the remote server.
+     * @param statusCode The response code returned by the remote server.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @return A result, defined by the subclass of this task.
+     * @throws Exception if an error occurs while downloading the resource.
+     * @see #download()
+     * @see #download(String, int, byte[])
+     * @see #download(OutputStream, byte[])
+     */
+    protected Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
+        return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
 
     /**
@@ -171,30 +143,5 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
             mRequest.downloadImpl(filename, this, tempBuffer, true);
             break;
         }
-    }
-
-    /**
-     * Returns a new download request with the specified <em>params</em>.
-     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
-     * @return The instance of {@link DownloadRequest}.
-     * @throws Exception if an error occurs while opening the connection.
-     */
-    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
-
-    /**
-     * Override this method to downloads the resource from the remote server on a background thread.
-     * <p>The default implementation downloads the JSON data from the remote server and returns a
-     * {@link JSONObject} or {@link JSONArray} object.</p>
-     * @param conn The {@link URLConnection} whose connecting the remote server.
-     * @param statusCode The response code returned by the remote server.
-     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
-     * @return A result, defined by the subclass of this task.
-     * @throws Exception if an error occurs while downloading the resource.
-     * @see #download()
-     * @see #download(String, int, byte[])
-     * @see #download(OutputStream, byte[])
-     */
-    protected Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
-        return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
 }

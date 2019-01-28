@@ -1,7 +1,6 @@
 package android.ext.content;
 
 import java.net.HttpURLConnection;
-import java.util.Arrays;
 import java.util.concurrent.Executor;
 import android.content.Context;
 import android.ext.content.AsyncJsonLoader.LoadParams;
@@ -30,10 +29,14 @@ import android.util.Pair;
  *     }
  *
  *     protected void onStartLoading(String url, LoadParams&lt;String&gt;[] params) {
- *         final Activity activity = getOwnerActivity();
- *         if (activity != null) {
- *             // Show loading UI.
+ *         final String cacheFile = params[0].getCacheFile(url);
+ *         if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
+ *             // If the cache file not exists, show loading UI.
  *         }
+ *     }
+ *
+ *     protected boolean validateResult(String url, LoadParams&lt;String&gt; params, JSONObject result) {
+ *         return (result != null && result.optInt("retCode") == 200);
  *     }
  *
  *     protected void onLoadComplete(String url, LoadParams&lt;String&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
@@ -49,10 +52,6 @@ import android.util.Pair;
  *         } else if (!result.second) {
  *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
- *     }
- *
- *     protected boolean validateResult(String url, LoadParams&lt;String&gt; params, JSONObject result) {
- *         return (result != null && result.optInt("retCode") == 200);
  *     }
  * }
  *
@@ -123,14 +122,6 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         return new Pair<Result, Boolean>(result, hitCache);
     }
 
-    @Override
-    /* package */ void startLoading(Key key, LoadParams<Key>[] params) {
-        final String cacheFile = params[0].getCacheFile(key);
-        if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
-            onStartLoading(key, params);
-        }
-    }
-
     private boolean loadFromCache(Task task, String cacheFile) {
         Result result = null;
         try {
@@ -153,7 +144,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
             // If cache file is hit and the cache file contents equals
             // the temp file contents. Returns null, do not update UI.
-            if (hitCache && compareFile(cacheFile, tempFile)) {
+            if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 return null;
             }
 
@@ -166,17 +157,6 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         }
 
         return null;
-    }
-
-    private static boolean compareFile(String cacheFile, String tempFile) {
-        boolean result = false;
-        if (FileUtils.getFileLength(cacheFile) == FileUtils.getFileLength(tempFile)) {
-            final byte[] digest1 = MessageDigests.computeFile(tempFile, Algorithm.SHA1);
-            final byte[] digest2 = MessageDigests.computeFile(cacheFile, Algorithm.SHA1);
-            result = Arrays.equals(digest1, digest2);
-        }
-
-        return result;
     }
 
     /**

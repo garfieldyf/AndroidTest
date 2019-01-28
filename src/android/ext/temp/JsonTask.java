@@ -4,9 +4,9 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.net.AsyncJsonTask;
 import android.ext.net.DownloadRequest;
-import android.os.Environment;
 import android.util.Log;
 import android.util.Pair;
+import com.tencent.test.MainApplication;
 
 public class JsonTask extends AsyncJsonTask<String, JSONObject> {
     public JsonTask(Object ownerActivity) {
@@ -15,12 +15,17 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
 
     @Override
     protected String getCacheFile(String[] params) {
-        return Environment.getExternalStorageDirectory().getPath() + "/.json_files/aaa.json";
+        return MainApplication.sInstance.getFilesDir().getPath() + "/.json_files/channel";
     }
 
     @Override
     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
         return new DownloadRequest(params[0]).connectTimeout(30000).readTimeout(30000);
+    }
+
+    @Override
+    protected boolean validateResult(String[] params, JSONObject result) {
+        return (result != null && result.optInt("retCode") == 200);
     }
 
     @Override
@@ -35,14 +40,10 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
         if (result.first != null) {
             // Loading succeeded, update UI.
             Log.i("abc", "JsonTask - Load Succeeded Update UI.");
+            //Toast.makeText(activity, "JsonTask - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
         } else if (!result.second) {
             // Loading failed and file cache not hit, show error UI.
             Log.i("abc", "JsonTask - Show error UI.");
         }
-    }
-
-    @Override
-    protected boolean validateResult(String[] params, JSONObject result) {
-        return (result != null && result.optInt("retCode") == 200);
     }
 }

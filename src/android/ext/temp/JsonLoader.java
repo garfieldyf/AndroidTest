@@ -25,9 +25,9 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
     }
 
-    private static String getName(JSONObject result) {
-        final JSONArray rows = JsonUtils.optJSONArray(JsonUtils.optJSONObject(result, "data"), "rows");
-        return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
+    @Override
+    protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
+        return (result != null && result.optInt("retCode") == 200);
     }
 
     @Override
@@ -42,14 +42,15 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         if (result.first != null) {
             // Loading succeeded, update UI.
             Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.first));
+            //Toast.makeText(activity, "JsonLoader - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
         } else if (!result.second) {
             // Loading failed and file cache not hit, show error UI.
             Log.i("abc", "JsonLoader - Show error UI.");
         }
     }
 
-    @Override
-    protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
-        return (result != null && result.optInt("retCode") == 200);
+    private static String getName(JSONObject result) {
+        final JSONArray rows = JsonUtils.optJSONArray(JsonUtils.optJSONObject(result, "data"), "rows");
+        return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
 }

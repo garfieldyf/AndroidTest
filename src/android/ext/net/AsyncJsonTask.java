@@ -22,7 +22,7 @@ import android.util.Pair;
  *     }
  *
  *     protected String getCacheFile(String[] params) {
- *         return Environment.getExternalStorageDirectory().getPath() + "/cacheFile.json";
+ *         return context.getFilesDir().getPath() + "/.json_files/cacheFile.json"
  *     }
  *
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {

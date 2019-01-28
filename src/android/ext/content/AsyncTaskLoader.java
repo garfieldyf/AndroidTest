@@ -152,13 +152,12 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
-     * Called on the UI thread when updates progress values. <p>The default
-     * implementation do nothing. If you write your own implementation, do
-     * not call <tt>super.onProgressUpdate()</tt>.</p>
+     * Called on the UI thread after {@link Task#setProgress(Object[])}.
+     * <p>The default implementation do nothing. If you write your own
+     * implementation, do not call <tt>super.onProgressUpdate()</tt>.</p>
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param values The progress values to update.
-     * @see Task#setProgress(Object[])
      */
     protected void onProgressUpdate(Key key, Params[] params, Object[] values) {
     }

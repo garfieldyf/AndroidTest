@@ -48,7 +48,7 @@ import android.util.Pair;
  *     }
  * }
  *
- * new JsonTask&lt;String, JSONObject&gt(activity).execute(url);</pre>
+ * new JsonTask(activity).execute(url);</pre>
  * @author Garfield
  */
 public abstract class AsyncJsonTask<Params, Result> extends AbsDownloadTask<Params, Object, Pair<Result, Boolean>> {
@@ -101,7 +101,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsDownloadTask<Para
         try {
             final String cacheFile = getCacheFile(params);
             final Result value = loadFromCache(cacheFile);
-            if (value != null) {
+            if (validateResult(params, value)) {
                 hitCache = true;
                 publishProgress(value);
             }

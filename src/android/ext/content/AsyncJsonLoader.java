@@ -55,8 +55,8 @@ import android.util.Pair;
  *     }
  * }
  *
- * final JsonLoader&lt;String, JSONObject&gt loader = new JsonLoader&lt;String, JSONObject&gt(executor, activity);
- * loader.load(url, new CacheLoadParams(context));</pre>
+ * final JsonLoader mLoader = new JsonLoader(executor, activity);
+ * mLoader.load(url, new CacheLoadParams(context));</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -110,7 +110,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
                     result = null;
                 }
             } else {
-                hitCache = loadFromCache(task, cacheFile);
+                hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
                     result = download(task, key, params, cacheFile, hitCache);
                 }
@@ -122,7 +122,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         return new Pair<Result, Boolean>(result, hitCache);
     }
 
-    private boolean loadFromCache(Task task, String cacheFile) {
+    private boolean loadFromCache(Task task, Key key, LoadParams params, String cacheFile) {
         Result result = null;
         try {
             result = JsonUtils.parse(null, cacheFile, task);
@@ -130,12 +130,12 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
         }
 
-        if (result != null) {
+        final boolean isValid = validateResult(key, params, result);
+        if (isValid) {
             task.setProgress(result);
-            return true;
-        } else {
-            return false;
         }
+
+        return isValid;
     }
 
     private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
@@ -165,7 +165,6 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     public static abstract class LoadParams<Key> {
         /**
          * Returns the absolute path of the JSON cache file on the filesystem.
-         * <p><b>Note: This method called on a background thread.</b></p>
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
          */
@@ -175,7 +174,6 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
         /**
          * Returns a new download request with the specified <em>key</em>.
-         * <p><b>Note: This method called on a background thread.</b></p>
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The instance of {@link DownloadRequest}.
          * @throws Exception if an error occurs while opening the connection.

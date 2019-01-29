@@ -22,6 +22,7 @@ import android.ext.content.image.params.Parameters;
 import android.ext.content.image.params.ScaleParameters;
 import android.ext.content.image.params.SizeParameters;
 import android.ext.util.ClassUtils;
+import android.ext.util.DebugUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
 
@@ -108,27 +109,42 @@ public final class XmlResources {
     }
 
     /**
-     * Returns the corner radii associated with <em>attrs</em>.
+     * Equivalent to calling <tt>loadCornerRadii(res, attrs, new float[8])</tt>.
      * @param res The {@link Resources} object containing the data.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @return The corner radii, array of 8 values, 4 pairs of [X,Y] radii.
+     * @see #loadCornerRadii(Resources, AttributeSet, float[])
      */
     public static float[] loadCornerRadii(Resources res, AttributeSet attrs) {
-        final TypedArray a  = res.obtainAttributes(attrs, DRAWABLE_CORNERS_ATTRS);
-        final float radius  = a.getDimension(0 /* android.R.attr.radius */, Float.NaN);
-        final float[] radii = new float[8];
+        return loadCornerRadii(res, attrs, new float[8]);
+    }
+
+    /**
+     * Returns the corner radii associated with <em>attrs</em>. Each corner receives two
+     * radius values [X, Y]. The corners are ordered <tt>top-left</tt>, <tt>top-right</tt>,
+     * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
+     * @param res The {@link Resources} object containing the data.
+     * @param attrs The attributes of the XML tag that is inflating the data.
+     * @param outRadii Array of 8 values to store the radii, 4 pairs of [X,Y] radii.
+     * @return The <em>outRadii</em>.
+     * @see #loadCornerRadii(Resources, AttributeSet)
+     */
+    public static float[] loadCornerRadii(Resources res, AttributeSet attrs, float[] outRadii) {
+        DebugUtils.__checkError(outRadii == null || outRadii.length < 8, "outRadii == null || outRadii.length < 8");
+        final TypedArray a = res.obtainAttributes(attrs, DRAWABLE_CORNERS_ATTRS);
+        final float radius = a.getDimension(0 /* android.R.attr.radius */, Float.NaN);
 
         if (Float.compare(radius, Float.NaN) != 0) {
-            Arrays.fill(radii, radius);
+            Arrays.fill(outRadii, radius);
         } else {
-            radii[0] = radii[1] = a.getDimension(1 /* android.R.attr.topLeftRadius */, 0);
-            radii[2] = radii[3] = a.getDimension(2 /* android.R.attr.topRightRadius */, 0);
-            radii[6] = radii[7] = a.getDimension(3 /* android.R.attr.bottomLeftRadius */, 0);
-            radii[4] = radii[5] = a.getDimension(4 /* android.R.attr.bottomRightRadius */, 0);
+            outRadii[0] = outRadii[1] = a.getDimension(1 /* android.R.attr.topLeftRadius */, 0);
+            outRadii[2] = outRadii[3] = a.getDimension(2 /* android.R.attr.topRightRadius */, 0);
+            outRadii[6] = outRadii[7] = a.getDimension(3 /* android.R.attr.bottomLeftRadius */, 0);
+            outRadii[4] = outRadii[5] = a.getDimension(4 /* android.R.attr.bottomRightRadius */, 0);
         }
 
         a.recycle();
-        return radii;
+        return outRadii;
     }
 
     /**

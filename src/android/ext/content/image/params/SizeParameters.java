@@ -84,10 +84,9 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / desiredHeight;
          *      scale  = max(scaleX, scaleY);
          */
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity != 0 || opts.inTargetDensity != 0");
         opts.inSampleSize = 1;
-        if (opts.outWidth <= desiredWidth || opts.outHeight <= desiredHeight) {
-            opts.inDensity = opts.inTargetDensity = 0;
-        } else {
+        if (opts.outWidth > desiredWidth && opts.outHeight > desiredHeight) {
             final float scale = Math.max((float)opts.outWidth / desiredWidth, (float)opts.outHeight / desiredHeight);
             final int targetDensity = (int)value;
             opts.inTargetDensity = targetDensity;

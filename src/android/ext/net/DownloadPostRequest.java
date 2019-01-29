@@ -127,6 +127,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             connectImpl();
             ((PostCallback)mData).onPostData(mConnection, mParams, tempBuffer);
         } else {
+            DebugUtils.__checkWarning(true, "DownloadPostRequest", "Unsupported POST type - " + (mData != null ? mData.getClass().toString() : "unknown"));
             mConnection.connect();
         }
 

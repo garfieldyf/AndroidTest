@@ -3,6 +3,7 @@ package android.ext.content.image.params;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.ClassUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -63,10 +64,9 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity != 0 || opts.inTargetDensity != 0");
         opts.inSampleSize = 1;
-        if (scale <= 0 || scale >= 1.0f) {
-            opts.inDensity = opts.inTargetDensity = 0;
-        } else {
+        if (scale > 0f && scale < 1.0f) {
             final int targetDensity = (int)value;
             opts.inTargetDensity = targetDensity;
             opts.inDensity = (int)(targetDensity * (opts.outWidth / (opts.outWidth * scale)));

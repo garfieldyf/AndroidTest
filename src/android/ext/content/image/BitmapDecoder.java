@@ -71,14 +71,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
 
     @Override
     protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        // Computes the sample size.
-        final Parameters parameters = getParameters(params, flags);
-        opts.inMutable = parameters.mutable;
-        opts.inPreferredConfig = parameters.config;
-        parameters.computeSampleSize(mContext, opts);
-
-        // Decodes the image pixels.
-        return decodeBitmap(uri, params, flags, opts);
+        return decodeBitmap(uri, getParameters(params, flags), opts);
     }
 
     /**
@@ -87,7 +80,7 @@ public class BitmapDecoder extends AbsImageDecoder<Bitmap> {
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @return The <tt>Parameters</tt> to decode.
      */
-    /* package */ final Parameters getParameters(Object[] params, int flags) {
+    private Parameters getParameters(Object[] params, int flags) {
         return ((flags & ImageLoader.FLAG_CUSTOM_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
     }
 }

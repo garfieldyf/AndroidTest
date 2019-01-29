@@ -2,6 +2,7 @@ package android.ext.content.image;
 
 import static android.graphics.Bitmap.Config.ARGB_8888;
 import android.content.Context;
+import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -120,13 +121,11 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * Decodes a {@link Bitmap} from the specified <em>uri</em>. If the <tt>opts.inBitmap</tt> is not
      * <tt>null</tt> this method will attempt to reuse the bitmap (decode in <tt>opts.inBitmap</tt>).
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected Bitmap decodeBitmap(Object uri, Object[] params, int flags, Options opts) throws Exception {
+    private Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
@@ -141,6 +140,36 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         }
 
         return bitmap;
+    }
+
+    /**
+     * Retrieves the bitmap from the internal bitmap cache to reuse.
+     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
+     * @param opts The {@link Options} used to decode. The <em>opts's</em>
+     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
+     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
+     */
+    /* package */ Bitmap getCachedBitmap(Parameters parameters, Options opts) {
+        return null;
+    }
+
+    /**
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
+     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
+     * @param parameters The {@link Parameters} to decode bitmap.
+     * @param opts The {@link Options} to decode bitmap.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
+     * @throws Exception if an error occurs while decode from <em>uri</em>.
+     */
+    /* package */ final Bitmap decodeBitmap(Object uri, Parameters parameters, Options opts) throws Exception {
+        // Computes the sample size.
+        opts.inMutable = parameters.mutable;
+        opts.inPreferredConfig = parameters.config;
+        parameters.computeSampleSize(mContext, opts);
+
+        // Retrieves the bitmap from bitmap pool to reuse it.
+        opts.inBitmap = getCachedBitmap(parameters, opts);
+        return decodeBitmap(uri, opts);
     }
 
     /**

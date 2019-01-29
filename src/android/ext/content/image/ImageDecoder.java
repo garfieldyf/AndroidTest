@@ -5,7 +5,6 @@ import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
 
@@ -77,31 +76,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
 
     @Override
     protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        if (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType)) {
-            // Decodes the gif image.
-            return GIFImage.decode(mContext, uri, opts.inTempStorage);
-        } else {
-            // Computes the sample size.
-            final Parameters parameters = getParameters(params, flags);
-            opts.inMutable = parameters.mutable;
-            opts.inPreferredConfig = parameters.config;
-            parameters.computeSampleSize(mContext, opts);
-
-            // Retrieves the bitmap from bitmap pool to reuse it.
-            opts.inBitmap = getCachedBitmap(parameters, opts);
-            return decodeBitmap(uri, params, flags, opts);
-        }
-    }
-
-    /**
-     * Retrieves the bitmap from the internal bitmap cache to reuse.
-     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts's</em>
-     * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.
-     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
-     */
-    /* package */ Bitmap getCachedBitmap(Parameters parameters, Options opts) {
-        return null;
+        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : decodeBitmap(uri, getParameters(params, flags), opts));
     }
 
     /**

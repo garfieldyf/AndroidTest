@@ -1017,23 +1017,13 @@ public final class FileUtils {
             return (resId > 0 ? context.getString(resId, result) : result);
         }
 
-        @Override
-        public Stat clone() {
-            try {
-                return (Stat)super.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new AssertionError(e);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return new StringBuilder(256)
+        public final void dump(Context context, Printer printer) {
+            printer.println(new StringBuilder(256)
                 .append("Stat { mode = ").append(Integer.toOctalString(mode))
                 .append(", uid = ").append(uid)
                 .append(", gid = ").append(gid)
                 .append(", type = ").append(Integer.toOctalString(mode & S_IFMT))
-                .append(", size = ").append(size)
+                .append(", size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
                 .append(", perm = ").append(toCharType(mode & S_IFMT))
                 .append((mode & S_IRUSR) == S_IRUSR ? 'r' : '-')
                 .append((mode & S_IWUSR) == S_IWUSR ? 'w' : '-')
@@ -1047,7 +1037,16 @@ public final class FileUtils {
                 .append(", blocks = ").append(blocks)
                 .append(", blksize = ").append(blksize)
                 .append(", mtime = ").append(DateFormat.format("yyyy-MM-dd kk:mm:ss", mtime))
-                .append(" }").toString();
+                .append(" }").toString());
+        }
+
+        @Override
+        public Stat clone() {
+            try {
+                return (Stat)super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
         }
 
         private static char toCharType(int type) {

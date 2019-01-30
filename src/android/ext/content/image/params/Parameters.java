@@ -8,6 +8,7 @@ import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
+import android.util.Printer;
 
 /**
  * Class <tt>Parameters</tt> can be used to decode bitmap.
@@ -89,13 +90,13 @@ public class Parameters {
         opts.inSampleSize = (int)value;
     }
 
-    @Override
-    public String toString() {
-        return new StringBuilder(128).append(getClass().getSimpleName())
+    public void dump(Printer printer, String indent) {
+        printer.println(new StringBuilder(128).append(indent)
+            .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", sampleSize = ").append(value)
             .append(", mutable = ").append(mutable)
-            .append(" }").toString();
+            .append(" }").toString());
     }
 
     /**

@@ -7,6 +7,7 @@ import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
+import android.util.Printer;
 
 /**
  * Class <tt>ScaleParameters</tt> is an implementation of a {@link Parameters}.
@@ -74,11 +75,12 @@ public class ScaleParameters extends Parameters {
     }
 
     @Override
-    public String toString() {
-        return new StringBuilder(128).append(getClass().getSimpleName())
+    public void dump(Printer printer, String indent) {
+        printer.println(new StringBuilder(128).append(indent)
+            .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(scale)
             .append(", mutable = ").append(mutable)
-            .append(" }").toString();
+            .append(" }").toString());
     }
 }

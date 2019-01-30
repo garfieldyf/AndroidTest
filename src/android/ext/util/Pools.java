@@ -204,11 +204,6 @@ public final class Pools {
             }
         }
 
-        @Override
-        public String toString() {
-            return toString(getClass().getSimpleName());
-        }
-
         public final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(96);
             DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
@@ -216,15 +211,6 @@ public final class Pools {
                 result.setLength(0);
                 printer.println(dump(result, elements[i]));
             }
-        }
-
-        /* package */ final String toString(String className) {
-            final StringBuilder result = new StringBuilder(96).append(className).append(" [ size = ").append(size).append(", maxSize = ").append(elements.length);
-            if (size > 0) {
-                result.append(", elementType = ").append(elements[0].getClass().getSimpleName());
-            }
-
-            return result.append(" ]").toString();
         }
 
         /* package */ String dump(StringBuilder result, Object element) {
@@ -335,11 +321,6 @@ public final class Pools {
         @Override
         public synchronized void recycle(T element) {
             pool.recycle(element);
-        }
-
-        @Override
-        public synchronized String toString() {
-            return (pool instanceof ArrayPool ? ((ArrayPool<?>)pool).toString("SynchronizedPool") : super.toString());
         }
 
         public synchronized final void dump(Printer printer) {

@@ -62,19 +62,6 @@ public final class Pages {
     }
 
     /**
-     * Returns a string containing a concise, human-readable description of the <em>page</em>.
-     */
-    public static String toString(Page<?> page, Object data) {
-        final int count = page.getCount();
-        final StringBuilder result = DebugUtils.toSimpleString(data, new StringBuilder(64)).append(" { count = ").append(count);
-        if (count > 0) {
-            result.append(", itemType = ").append(page.getItem(0).getClass().getName());
-        }
-
-        return result.append(" }").toString();
-    }
-
-    /**
      * A <tt>Page</tt> is a collection used to adds the page data to the adapter.
      */
     public static interface Page<E> {
@@ -119,11 +106,6 @@ public final class Pages {
         public E getItem(int position) {
             return mData.get(position);
         }
-
-        @Override
-        public String toString() {
-            return Pages.toString(this, mData);
-        }
     }
 
     /**
@@ -150,11 +132,6 @@ public final class Pages {
         @SuppressWarnings("unchecked")
         public E getItem(int position) {
             return (E)mData.opt(position);
-        }
-
-        @Override
-        public String toString() {
-            return Pages.toString(this, mData);
         }
     }
 

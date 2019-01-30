@@ -67,15 +67,6 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
         return (one.getAllocationByteCount() - another.getAllocationByteCount());
     }
 
-    @Override
-    public synchronized String toString() {
-        return new StringBuilder(64)
-            .append(getClass().getSimpleName())
-            .append(" { size = ").append(mBitmaps.size())
-            .append(", maxSize = ").append(mMaxSize)
-            .append(" }").toString();
-    }
-
     /* package */ final void dump(Context context, Printer printer) {
         final List<Bitmap> bitmaps = new ArrayList<Bitmap>(mBitmaps);
         final StringBuilder result = new StringBuilder(288);

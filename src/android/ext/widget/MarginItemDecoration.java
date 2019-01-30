@@ -5,6 +5,7 @@ import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.State;
+import android.util.Printer;
 import android.view.View;
 
 /**
@@ -84,18 +85,17 @@ public final class MarginItemDecoration extends ItemDecoration {
         this.bottomMargin = bottomMargin;
     }
 
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state) {
-        outRect.set(leftMargin, topMargin, rightMargin, bottomMargin);
-    }
-
-    @Override
-    public String toString() {
-        return new StringBuilder(80)
+    public final void dump(Printer printer) {
+        printer.println(new StringBuilder(80)
             .append("MarginItemDecoration { leftMargin = ").append(leftMargin)
             .append(", topMargin = ").append(topMargin)
             .append(", rightMargin = ").append(rightMargin)
             .append(", bottomMargin = ").append(bottomMargin)
-            .append(" }").toString();
+            .append(" }").toString());
+    }
+
+    @Override
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state) {
+        outRect.set(leftMargin, topMargin, rightMargin, bottomMargin);
     }
 }

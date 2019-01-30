@@ -79,11 +79,6 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         return Collections.unmodifiableMap(new LinkedHashMap<K, V>(map));
     }
 
-    @Override
-    public String toString() {
-        return toString(96).append(" }").toString();
-    }
-
     /**
      * Returns the size of the entry for <tt>key</tt> and <tt>value</tt> in
      * user-defined units. The default implementation returns 1 so that size
@@ -115,13 +110,5 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         }
 
         return previous;
-    }
-
-    /* package */ synchronized final StringBuilder toString(int capacity) {
-        return new StringBuilder(capacity)
-            .append(getClass().getSimpleName())
-            .append(" { count = ").append(map.size())
-            .append(", size = ").append(size)
-            .append(", maxSize = ").append(maxSize);
     }
 }

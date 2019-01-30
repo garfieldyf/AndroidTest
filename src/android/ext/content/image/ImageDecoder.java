@@ -71,7 +71,7 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
     public void dump(Printer printer) {
         super.dump(printer);
         DebugUtils.dumpSummary(printer, new StringBuilder(80), 80, " Dumping Parameters ", (Object[])null);
-        printer.println("  " + mParameters.toString());
+        mParameters.dump(printer, "  ");
     }
 
     @Override

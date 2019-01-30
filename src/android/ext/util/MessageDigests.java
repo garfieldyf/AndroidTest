@@ -45,12 +45,6 @@ public final class MessageDigests {
         private Algorithm(int digestLength) {
             this.digestLength = digestLength;
         }
-
-        @Override
-        public String toString() {
-            final String name = name();
-            return new StringBuilder(name.length() + 4).append(name).append('(').append(digestLength).append(')').toString();
-        }
     }
 
     /**

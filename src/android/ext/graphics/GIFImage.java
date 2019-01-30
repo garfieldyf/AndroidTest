@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Build;
 import android.util.Log;
+import android.util.Printer;
 
 /**
  * Class GIFImage
@@ -172,14 +173,13 @@ public final class GIFImage {
         return Bitmap.createBitmap(nativeGetWidth(mNativeImage), nativeGetHeight(mNativeImage), Config.ARGB_8888);
     }
 
-    @Override
-    public String toString() {
-        return new StringBuilder(96)
+    public final void dump(Printer printer) {
+        printer.println(new StringBuilder(96)
             .append("GIFImage { nativePtr = 0x").append(Long.toHexString(mNativeImage))
             .append(", width = ").append(nativeGetWidth(mNativeImage))
             .append(", height = ").append(nativeGetHeight(mNativeImage))
             .append(", frameCount = ").append(nativeGetFrameCount(mNativeImage))
-            .append(" }").toString();
+            .append(" }").toString());
     }
 
     @Override

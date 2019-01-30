@@ -57,11 +57,6 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     }
 
     @Override
-    public String toString() {
-        return toString(160).append(", cacheDir = ").append(mCacheDir).append(" }").toString();
-    }
-
-    @Override
     protected void entryRemoved(boolean evicted, String key, String oldValue, String newValue) {
         if (evicted || !oldValue.equals(newValue)) {
             FileUtils.deleteFiles(oldValue, false);

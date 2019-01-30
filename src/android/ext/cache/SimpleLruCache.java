@@ -138,15 +138,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         }
     }
 
-    @Override
-    public String toString() {
-        return new StringBuilder(64)
-            .append(getClass().getSimpleName())
-            .append(" { size = ").append(map.size())
-            .append(", maxSize = ").append(maxSize)
-            .append(" }").toString();
-    }
-
     /**
      * Called for entries that have been evicted or removed. This method is invoked when a value
      * is evicted to make space, removed by a call to {@link #remove}, or replaced by a call to

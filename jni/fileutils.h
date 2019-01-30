@@ -23,6 +23,7 @@
 // mkdirs()
 // moveFile()
 // scanFiles()
+// compareFile()
 // deleteFiles()
 // fileAccess()
 // fileStatus()
@@ -45,6 +46,9 @@ enum
     SC_STOP  = 1,
     SC_BREAK = 2,
     SC_BREAK_PARENT = 3,
+
+    // The flag use with compareFile function.
+    BUFFER_SIZE = 2048,
 
     // The flag use with mkdirs function.
     FLAG_IGNORE_FILENAME = 0x01,
@@ -73,6 +77,37 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
 __STATIC_INLINE__ bool isDirectory(struct dirent* entry, const char* path)
 {
     return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
+}
+
+__STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
+{
+    assert(one);
+    assert(another);
+
+    struct stat buf;
+    jboolean result = JNI_FALSE;
+    if (__NS::fileStatus(one, buf) == 0)
+    {
+        const int64_t length = buf.st_size;
+        result = (__NS::fileStatus(another, buf) == 0 && length == buf.st_size);
+    }
+
+    return result;
+}
+
+__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE])
+{
+    assert(!file.isEmpty());
+
+    ssize_t count, readBytes = 0;
+    while ((count = file.read(buf + readBytes, _countof(buf) - readBytes)) > 0)
+    {
+        readBytes += count;
+        if (readBytes == _countof(buf))
+            break;
+    }
+
+    return readBytes;
 }
 
 __STATIC_INLINE__ void buildUniqueFileName(char* path, size_t length, const stdutil::char_sequence& dirPath, const char* name)
@@ -255,6 +290,53 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
+// Method:    compareFile
+// Signature: (Ljava/lang/String;Ljava/lang/String;)Z
+
+JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring file1, jstring file2)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, file1) == 0 || JNI::getLength(env, file2) == 0, "file1 == null || file1.length() == 0 || file2 == null || file2.length() == 0", JNI_FALSE);
+
+    const JNI::jstring_t jfile1(env, file1), jfile2(env, file2);
+    jboolean result = compareLength(jfile1, jfile2);
+    if (result)
+    {
+        __NS::File f1, f2;
+        result = (f1.open(jfile1, O_RDONLY) == 0 && f2.open(jfile2, O_RDONLY) == 0);
+        if (result)
+        {
+            ssize_t readBytes;
+            uint8_t buf1[BUFFER_SIZE], buf2[BUFFER_SIZE];
+        #ifndef NDEBUG
+            ssize_t readBytes2;
+            while ((readBytes = readFile(f1, buf1)) > 0 && (readBytes2 = readFile(f2, buf2)) > 0)
+            {
+                assert_log(readBytes == readBytes2, "The read bytes are NOT equal (readBytes1 = %zd, readBytes2 = %zd)\n", readBytes, readBytes2);
+                if (::memcmp(buf1, buf2, readBytes) != 0)
+                {
+                    result = JNI_FALSE;
+                    break;
+                }
+            }
+        #else
+            while ((readBytes = readFile(f1, buf1)) > 0 && readFile(f2, buf2) > 0)
+            {
+                if (::memcmp(buf1, buf2, readBytes) != 0)
+                {
+                    result = JNI_FALSE;
+                    break;
+                }
+            }
+        #endif  // NDEBUG
+        }
+    }
+
+    return result;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
 // Method:    deleteFiles
 // Signature: (Ljava/lang/String;Z)I
 
@@ -431,6 +513,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "getLastModified", "(Ljava/lang/String;)J", (void*)getLastModified },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
+        { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
         { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)fileStatus },
         { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;ILjava/lang/Object;)I", (void*)scanFiles },

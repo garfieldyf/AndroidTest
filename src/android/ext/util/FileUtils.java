@@ -7,12 +7,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import android.content.Context;
-import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.Pools.Factory;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
@@ -611,20 +609,12 @@ public final class FileUtils {
 
     /**
      * Compares the two specified file's contents are equal.
-     * @param file1 The first file to compare.
-     * @param file2 The second file to compare.
-     * @return <tt>true</tt> if file1's contents and file2's contents are equal.
+     * @param file1 The first file to compare, must be absolute file path.
+     * @param file2 The second file to compare, must be absolute file path.
+     * @return <tt>true</tt> if file1's contents and file2's contents are equal,
+     * <tt>false</tt> otherwise.
      */
-    public static boolean compareFile(String file1, String file2) {
-        boolean result = false;
-        if (getFileLength(file1) == getFileLength(file2)) {
-            final byte[] digest1 = MessageDigests.computeFile(file1, Algorithm.SHA1);
-            final byte[] digest2 = MessageDigests.computeFile(file2, Algorithm.SHA1);
-            result = Arrays.equals(digest1, digest2);
-        }
-
-        return result;
-    }
+    public static native boolean compareFile(String file1, String file2);
 
     /**
      * Deletes a file or directory with specified <em>path</em>. if <em>path</em>

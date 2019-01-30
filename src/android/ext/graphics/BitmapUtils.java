@@ -381,26 +381,24 @@ public final class BitmapUtils {
     public static void dumpOptions(String tag, Options opts) {
         if (opts == null) {
             Log.d(tag, "The opts is null");
-        } else if (!opts.inJustDecodeBounds) {
+        } else {
             Log.d(tag, new StringBuilder(opts.toString()).append("\n{")
                .append("\n  inMutable = ").append(opts.inMutable)
                .append("\n  inBitmap  = ").append(opts.inBitmap)
                .append("\n  inSampleSize  = ").append(opts.inSampleSize)
                .append("\n  inTempStorage = ").append(opts.inTempStorage)
                .append("\n  inPreferredConfig = ").append(opts.inPreferredConfig)
-
+               .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
                .append("\n  inDensity = ").append(opts.inDensity)
                .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
                .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
                .append("\n  inScaled = ").append(opts.inScaled)
                .append("\n  inDither = ").append(opts.inDither)
-
                .append("\n  inPremultiplied = ").append(opts.inPremultiplied)
                .append("\n  inPurgeable = ").append(opts.inPurgeable)
                .append("\n  inInputShareable = ").append(opts.inInputShareable)
                .append("\n  inPreferQualityOverSpeed = ").append(opts.inPreferQualityOverSpeed)
                .append("\n  mCancel = ").append(opts.mCancel)
-
                .append("\n  outWidth  = ").append(opts.outWidth)
                .append("\n  outHeight = ").append(opts.outHeight)
                .append("\n  outMimeType = ").append(opts.outMimeType)

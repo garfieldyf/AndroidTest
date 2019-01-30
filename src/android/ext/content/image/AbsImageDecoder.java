@@ -102,13 +102,11 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.outWidth  = 0;
         opts.outHeight = 0;
         opts.inMutable = false;
-
         opts.inDither  = false;
         opts.mCancel   = false;
         opts.inSampleSize  = 0;
         opts.outMimeType   = null;
         opts.inTempStorage = null;
-
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
         opts.inJustDecodeBounds = false;

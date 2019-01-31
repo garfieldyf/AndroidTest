@@ -81,23 +81,23 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
     }
 
     @Override
-    public long getItemId(int position) {
-        return -1;
-    }
-
-    @Override
     public T getItem(int position) {
         return mData.get(position);
     }
 
     @Override
+    public long getItemId(int position) {
+        return -1;
+    }
+
+    @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final T item = mData.get(position);
+        final T itemData = mData.get(position);
         if (view == null) {
-            view = newView(item, position, parent);
+            view = newView(itemData, position, parent);
         }
 
-        bindView(item, position, view);
+        bindView(itemData, position, view);
         return view;
     }
 
@@ -111,8 +111,8 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
     }
 
     @Override
-    public CharSequence convertToString(T item) {
-        return item.toString();
+    public CharSequence convertToString(T itemData) {
+        return itemData.toString();
     }
 
     @Override
@@ -122,22 +122,22 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
 
     /**
      * Makes a new view to hold the item data.
-     * @param item The item to create a new view.
-     * @param position The position of the item.
+     * @param itemData The item data to create a new view.
+     * @param position The position of the item data.
      * @param parent The parent to which the new view is attached to.
      * @return The newly created view.
      * @see #bindView(T, int, View)
      */
-    protected abstract View newView(T item, int position, ViewGroup parent);
+    protected abstract View newView(T itemData, int position, ViewGroup parent);
 
     /**
      * Binds an existing view to hold the item data.
-     * @param item The item to bind view.
-     * @param position The position of the item.
+     * @param itemData The item data to bind view.
+     * @param position The position of the item data.
      * @param view Existing view, returned earlier by <tt>newView</tt>.
      * @see #newView(T, int, ViewGroup)
      */
-    protected abstract void bindView(T item, int position, View view);
+    protected abstract void bindView(T itemData, int position, View view);
 
     /**
      * Returns a {@link Filter} that can be used to constrain data
@@ -198,11 +198,11 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
         }
 
         @Override
-        protected void bindView(T item, int position, View view) {
+        protected void bindView(T itemData, int position, View view) {
         }
 
         @Override
-        protected View newView(T item, int position, ViewGroup parent) {
+        protected View newView(T itemData, int position, ViewGroup parent) {
             return null;
         }
     }

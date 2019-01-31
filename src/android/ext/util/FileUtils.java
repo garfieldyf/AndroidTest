@@ -454,8 +454,8 @@ public final class FileUtils {
     public static native long getLastModified(String filename);
 
     /**
-     * Moves the <em>src</em> file to <em>dst</em> file. If the specified file
-     * <em>dst</em> already exists, it can be overrided to. <p>Note: This method
+     * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
+     * file already exists, it will be override to. <p>Note: This method
      * will be create the necessary directories.</p>
      * @param src The source file to move, must be absolute file path.
      * @param dst The destination file to move to, must be absolute file path.

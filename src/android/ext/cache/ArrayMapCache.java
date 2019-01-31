@@ -2,8 +2,6 @@ package android.ext.cache;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
-import java.util.Map.Entry;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.util.ArrayMap;
@@ -60,13 +58,12 @@ public class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     /* package */ final void dump(Context context, Printer printer) {
+        final int size = map.size();
         final StringBuilder result = new StringBuilder(256);
-        final Set<Entry<K, V>> entries = entries().entrySet();
-
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), entries.size());
-        for (Entry<?, ?> entry : entries) {
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
+        for (int i = 0; i < size; ++i) {
             result.setLength(0);
-            printer.println(result.append("  ").append(entry.getKey()).append(" ==> ").append(entry.getValue()).toString());
+            printer.println(result.append("  ").append(map.keyAt(i)).append(" ==> ").append(map.valueAt(i)).toString());
         }
     }
 }

@@ -277,7 +277,7 @@ public final class BitmapUtils {
      * @see #createRotateBitmap(Bitmap, float, Config, Paint)
      */
     public static Bitmap createRotateBitmap(Bitmap bitmap, float degrees, float px, float py, Config newConfig, Paint paint) {
-        if (Float.compare(degrees, 0) != 0) {
+        if (Float.compare(degrees, +0.0f) != 0) {
             final Matrix matrix = MatrixPool.obtain();
             matrix.setRotate(degrees, px, py);
             bitmap = createBitmap(bitmap, matrix, newConfig, paint);

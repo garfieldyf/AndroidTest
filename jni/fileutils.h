@@ -110,13 +110,12 @@ __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER
     return readBytes;
 }
 
-__STATIC_INLINE__ void buildUniqueFileName(char* path, size_t length, const stdutil::char_sequence& dirPath, const char* name)
+__STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil::char_sequence& dirPath, const char* name)
 {
-    assert(path);
     assert(name);
     assert(!dirPath.empty());
 
-    ::snprintf(path, length, "%.*s/%s", dirPath.size, dirPath.data, name);
+    ::snprintf(path, _countof(path), "%.*s/%s", dirPath.size, dirPath.data, name);
     if (::access(path, F_OK) == 0)
     {
         // Builds the unique filename.
@@ -129,7 +128,7 @@ __STATIC_INLINE__ void buildUniqueFileName(char* path, size_t length, const stdu
         int index = 0;
         do
         {
-            ::snprintf(path, length, format, ++index);
+            ::snprintf(path, _countof(path), format, ++index);
         } while (::access(path, F_OK) == 0);
     }
 }
@@ -468,7 +467,7 @@ JNIEXPORT_METHOD(jstring) createUniqueFile(JNIEnv* env, jclass /*clazz*/, jstrin
     {
         // Builds the unique filename.
         char path[MAX_PATH];
-        buildUniqueFileName(path, _countof(path), dirPath, name);
+        buildUniqueFileName(path, dirPath, name);
 
         // Create the file.
         __NS::File file;

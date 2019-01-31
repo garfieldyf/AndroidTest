@@ -26,9 +26,9 @@
 // compareFile()
 // deleteFiles()
 // fileAccess()
-// fileStatus()
 // getFileMode()
 // getFileLength()
+// getFileStatus()
 // getLastModified()
 // createFile()
 // createUniqueFile()
@@ -86,10 +86,10 @@ __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
 
     struct stat buf;
     jboolean result = JNI_FALSE;
-    if (__NS::fileStatus(one, buf) == 0)
+    if (__NS::getFileStatus(one, buf) == 0)
     {
         const int64_t length = buf.st_size;
-        result = (__NS::fileStatus(another, buf) == 0 && length == buf.st_size);
+        result = (__NS::getFileStatus(another, buf) == 0 && length == buf.st_size);
     }
 
     return result;
@@ -365,24 +365,6 @@ JNIEXPORT_METHOD(jint) fileAccess(JNIEnv* env, jclass /*clazz*/, jstring path, j
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    stat
-// Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$Stat;)I
-
-JNIEXPORT_METHOD(jint) fileStatus(JNIEnv* env, jclass clazz, jstring path, jobject outStat)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0 || outStat == NULL, "path == null || path.length() == 0 || outStat == null", EINVAL);
-
-    struct stat buf;
-    const jint errnum = __NS::fileStatus(JNI::jstring_t(env, path), buf);
-    if (errnum == 0)
-        env->CallStaticVoidMethod(clazz, _setStatID, outStat, (jint)buf.st_mode, (jint)buf.st_uid, (jint)buf.st_gid, (jlong)buf.st_size, (jlong)buf.st_blocks, (jlong)buf.st_blksize, (jlong)buf.st_mtime * MILLISECONDS);
-
-    return errnum;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
 // Method:    getFileMode
 // Signature: (Ljava/lang/String;)I
 
@@ -392,7 +374,7 @@ JNIEXPORT_METHOD(jint) getFileMode(JNIEnv* env, jclass /*clazz*/, jstring path)
     AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", 0);
 
     struct stat buf;
-    return (__NS::fileStatus(JNI::jstring_t(env, path), buf) == 0 ? buf.st_mode : 0);
+    return (__NS::getFileStatus(JNI::jstring_t(env, path), buf) == 0 ? buf.st_mode : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -406,7 +388,25 @@ JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring fil
     AssertThrowErrnoException(env, JNI::getLength(env, filename) == 0, "filename == null || filename.length() == 0", 0);
 
     struct stat buf;
-    return (__NS::fileStatus(JNI::jstring_t(env, filename), buf) == 0 ? buf.st_size : 0);
+    return (__NS::getFileStatus(JNI::jstring_t(env, filename), buf) == 0 ? buf.st_size : 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
+// Method:    stat
+// Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$Stat;)I
+
+JNIEXPORT_METHOD(jint) getFileStatus(JNIEnv* env, jclass clazz, jstring path, jobject outStat)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0 || outStat == NULL, "path == null || path.length() == 0 || outStat == null", EINVAL);
+
+    struct stat buf;
+    const jint errnum = __NS::getFileStatus(JNI::jstring_t(env, path), buf);
+    if (errnum == 0)
+        env->CallStaticVoidMethod(clazz, _setStatID, outStat, (jint)buf.st_mode, (jint)buf.st_uid, (jint)buf.st_gid, (jlong)buf.st_size, (jlong)buf.st_blocks, (jlong)buf.st_blksize, (jlong)buf.st_mtime * MILLISECONDS);
+
+    return errnum;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -420,7 +420,7 @@ JNIEXPORT_METHOD(jlong) getLastModified(JNIEnv* env, jclass /*clazz*/, jstring f
     AssertThrowErrnoException(env, JNI::getLength(env, filename) == 0, "filename == null || filename.length() == 0", 0);
 
     struct stat buf;
-    return (__NS::fileStatus(JNI::jstring_t(env, filename), buf) == 0 ? (jlong)buf.st_mtime * MILLISECONDS : 0);
+    return (__NS::getFileStatus(JNI::jstring_t(env, filename), buf) == 0 ? (jlong)buf.st_mtime * MILLISECONDS : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -515,7 +515,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
-        { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)fileStatus },
+        { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)getFileStatus },
         { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;ILjava/lang/Object;)I", (void*)scanFiles },
     };
 

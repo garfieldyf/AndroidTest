@@ -581,7 +581,8 @@ public final class DatabaseUtils {
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
-                if ((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) == 0 && field.getAnnotation(CursorField.class) != null) {
+                DebugUtils.__checkError((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0, "Unsupported static or final field - " + field.toString());
+                if (field.getAnnotation(CursorField.class) != null) {
                     result.add(field);
                     field.setAccessible(true);
                 }
@@ -596,7 +597,6 @@ public final class DatabaseUtils {
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Field field = fields.get(i);
             final String name = field.getAnnotation(CursorField.class).value();
-            DebugUtils.__checkError(Modifier.isFinal(field.getModifiers()), "Unsupported final field - " + field.getName());
             DebugUtils.__checkError(cursor.getColumnIndex(name) == -1, "The column '" + name + "' does not exist");
             final int columnIndex = cursor.getColumnIndexOrThrow(name);
             final Class<?> type = field.getType();

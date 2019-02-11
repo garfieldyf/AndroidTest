@@ -99,15 +99,15 @@ __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER
 {
     assert(!file.isEmpty());
 
-    ssize_t count, readBytes = 0;
-    while ((count = file.read(buf + readBytes, _countof(buf) - readBytes)) > 0)
+    ssize_t readBytes, count = 0;
+    while ((readBytes = file.read(buf + count, _countof(buf) - count)) > 0)
     {
-        readBytes += count;
-        if (readBytes == _countof(buf))
+        count += readBytes;
+        if (count == _countof(buf))
             break;
     }
 
-    return readBytes;
+    return count;
 }
 
 __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil::char_sequence& dirPath, const char* name)

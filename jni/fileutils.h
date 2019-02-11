@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // fileutils.h
 //
-// Copyright(c) 2018, Garfield. All rights reserved.
+// Copyright(c) 2019, Garfield. All rights reserved.
 // Author  : Garfield
 // Version : 4.0
 // Creation Date : 2012/5/23

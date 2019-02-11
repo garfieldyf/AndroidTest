@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // bmputils.h
 //
-// Copyright(c) 2018, Garfield. All rights reserved.
+// Copyright(c) 2019, Garfield. All rights reserved.
 // Author  : Garfield
 // Version : 1.0
 // Creation Date : 2013/6/8

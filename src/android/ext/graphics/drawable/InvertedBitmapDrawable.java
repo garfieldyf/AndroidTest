@@ -4,6 +4,7 @@ import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.DrawUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
@@ -158,7 +159,7 @@ public class InvertedBitmapDrawable extends AbstractDrawable<InvertedBitmapDrawa
 
         /* package */ final void setSource(Object source, int width, int height) {
             final Canvas canvas = new Canvas(mBitmap);
-            mBitmap.eraseColor(0);
+            mBitmap.eraseColor(Color.TRANSPARENT);
             DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);
             canvas.setBitmap(null);
         }

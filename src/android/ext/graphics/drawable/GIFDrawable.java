@@ -31,6 +31,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     };
 
     private static final int FLAG_RUNNING = 0x01;   // mFlags
+    private static final int FLAG_SCHED   = 0x02;   // mFlags
     private static final int FLAG_ONESHOT = 0x01;   // mState.mFlags
 
     /**
@@ -171,7 +172,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     @Override
     public void start() {
         if (!isRunning() && mState.mImage.getFrameCount() > 1) {
-            mFlags |= FLAG_RUNNING;
+            mFlags = (mFlags | FLAG_RUNNING) & ~FLAG_SCHED;
             mFrameIndex = 0;
             invalidateSelf();
 
@@ -187,6 +188,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         if (isRunning()) {
             mFrameIndex = 0;
             unscheduleSelf();
+            dispatchAnimationEnd();
         }
     }
 
@@ -197,6 +199,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
 
     @Override
     public void run() {
+        mFlags &= ~FLAG_SCHED;
         mFrameIndex = (mFrameIndex + 1) % mState.mImage.getFrameCount();
         invalidateSelf();
     }
@@ -227,6 +230,16 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     }
 
     @Override
+    public boolean setVisible(boolean visible, boolean restart) {
+        final boolean changed = super.setVisible(visible, restart);
+        if (changed && !visible) {
+            unscheduleSelf();
+        }
+
+        return changed;
+    }
+
+    @Override
     protected GIFImageState copyConstantState() {
         return new GIFImageState(mState);
     }
@@ -241,8 +254,10 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             if (isRunning()) {
                 if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
                     unscheduleSelf();
-                } else {
-                    scheduleSelf();
+                    dispatchAnimationEnd();
+                } else if ((mFlags & FLAG_SCHED) == 0) {
+                    mFlags |= FLAG_SCHED;
+                    scheduleSelf(this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
                 }
             }
         }
@@ -260,14 +275,6 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
         a.recycle();
     }
 
-    private void scheduleSelf() {
-        final Callback callback = getCallback();
-        if (callback != null) {
-            callback.unscheduleDrawable(this, this);
-            callback.scheduleDrawable(this, this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
-        }
-    }
-
     private void unscheduleSelf() {
         mFlags &= ~FLAG_RUNNING;
         final Callback callback = getCallback();
@@ -275,8 +282,9 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
             callback.invalidateDrawable(this);
             callback.unscheduleDrawable(this, this);
         }
+    }
 
-        // Dispatch the animation was ended.
+    private void dispatchAnimationEnd() {
         if (mCallback != null) {
             mCallback.onAnimationEnd(this, mFrameIndex);
         }

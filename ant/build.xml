@@ -154,14 +154,11 @@
         <property name="proguard.dir" value="${sdk.dir}/tools/proguard" />
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
 
-        <!-- build jar file -->
-        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}" />
-
         <proguard>
             -include        "${basedir}/../proguard.txt"
             -injars         ${file.out.dir}/${jar.file.name}
             -outjars        "${file.out.dir}/${jar.file.name}"
-            -libraryjars    ${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
             -dump           "${file.out.dir}/dump.txt"
             -printseeds     "${file.out.dir}/seeds.txt"
             -printusage     "${file.out.dir}/usage.txt"
@@ -172,13 +169,14 @@
     <!-- target -compile-dex -->
     <target name="-compile-dex">
         <property name="dx.dir" value="${sdk.dir}/build-tools/25.0.3" />
-        <property name="out.dex.file" value="${file.out.dir}/${ndk.module}-dex.jar" />
+        <property name="dex.file.name" value="${ndk.module}-dex.jar" />
 
         <!-- compile dex file -->
         <echo level="info">dx --dex --output=${ndk.module}-dex.jar ${jar.file.name}</echo>
         <exec executable="cmd.exe">
-            <arg line="/C ${dx.dir}/dx.bat --dex --output=${out.dex.file} ${file.out.dir}/${jar.file.name}" />
+            <arg line="/C ${dx.dir}/dx.bat --dex --output=${file.out.dir}/${dex.file.name} ${file.out.dir}/${jar.file.name}" />
         </exec>
+        <echo level="info">Install: ${file.out.dir}/${dex.file.name}</echo>
     </target>
     <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
 

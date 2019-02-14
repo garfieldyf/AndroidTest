@@ -68,6 +68,25 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, Drawable> i
     }
 
     /**
+     * Removes the icon from the specified <em>name</em>.
+     * @param name The name of the item to remove.
+     * From the "android:name" attribute.
+     * @see #removeIcon(PackageItemInfo)
+     */
+    public final void removeIcon(String name) {
+        getCache().remove(name);
+    }
+
+    /**
+     * Equivalent to calling <tt>removeIcon(info.name)</tt>.
+     * @param info The {@link PackageItemInfo} to remove.
+     * @see #removeIcon(String)
+     */
+    public final void removeIcon(PackageItemInfo info) {
+        getCache().remove(info.name);
+    }
+
+    /**
      * Returns the default image associated with this loader.
      * @return The <tt>Drawable</tt> or <tt>null</tt>.
      */

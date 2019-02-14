@@ -39,7 +39,7 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Like as {@link Adapter#notifyDataSetChanged()}. But if the <em>recyclerView</em> is currently
+     * Like as {@link Adapter#notifyDataSetChanged()}. If the <em>recyclerView</em> is currently
      * computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
      */
@@ -85,8 +85,8 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Like as {@link Adapter#notifyItemMoved(int, int)}. But if the <em>recyclerView</em> is
-     * currently computing a layout this method will be post the change using the <tt>UIHandler</tt>.
+     * Like as {@link Adapter#notifyItemMoved(int, int)}. If the <em>recyclerView</em> is currently
+     * computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
      * @param fromPosition The previous position of the item.
      * @param toPosition The new position of the item.
@@ -102,7 +102,7 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Like as {@link Adapter#notifyItemRangeRemoved(int, int)}. But if the <em>recyclerView</em> is
+     * Like as {@link Adapter#notifyItemRangeRemoved(int, int)}. If the <em>recyclerView</em> is
      * currently computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
      * @param positionStart The position of the first item that was removed.
@@ -119,7 +119,7 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Like as {@link Adapter#notifyItemRangeInserted(int, int)}. But if the <em>recyclerView</em> is
+     * Like as {@link Adapter#notifyItemRangeInserted(int, int)}. If the <em>recyclerView</em> is
      * currently computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
      * @param positionStart The position of the first item that was inserted.
@@ -154,7 +154,7 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Like as {@link Adapter#notifyItemRangeChanged(int, int, Object)}. But if the <em>recyclerView</em>
+     * Like as {@link Adapter#notifyItemRangeChanged(int, int, Object)}. If the <em>recyclerView</em>
      * is currently computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
      * @param positionStart The position of the first item that has changed.
@@ -174,19 +174,10 @@ public final class UIHandler extends Handler {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void finish(Task task) {
+    public final void sendMessage(Task task, int what, Object obj) {
         final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_FINISHED;
-        sendMessage(msg);
-    }
-
-    /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     */
-    public final void setProgress(Task task, Object[] values) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_PROGRESS;
-        msg.obj  = values;
+        msg.what = what;
+        msg.obj  = obj;
         sendMessage(msg);
     }
 
@@ -208,7 +199,7 @@ public final class UIHandler extends Handler {
     @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
-        // Dispatch the Loader.Task messages.
+        // Dispatch the Task messages.
         case MESSAGE_PROGRESS:
         case MESSAGE_FINISHED:
             ((Task)msg.getCallback()).handleMessage(msg);
@@ -263,19 +254,19 @@ public final class UIHandler extends Handler {
         }
     }
 
-    // The Loader.Task messages.
-    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
-    public static final int MESSAGE_FINISHED  = 0xDFDFDFDF;
+    // The Task messages
+    public static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
+    public static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
-    // The RecyclerView messages.
+    // The RecyclerView messages
     private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;
-    private static final int MESSAGE_ITEM_MOVED    = 0xECECECEC;
-    private static final int MESSAGE_DATA_CHANGED  = 0xEBEBEBEB;
+    private static final int MESSAGE_ITEM_MOVED    = 0xEBEBEBEB;
+    private static final int MESSAGE_DATA_CHANGED  = 0xECECECEC;
     private static final int MESSAGE_ITEM_REMOVED  = 0xEDEDEDED;
-    private static final int MESSAGE_ITEM_CHANGED  = 0xEFEFEFEF;
-    private static final int MESSAGE_ITEM_INSERTED = 0xEEEEEEEE;
+    private static final int MESSAGE_ITEM_CHANGED  = 0xEEEEEEEE;
+    private static final int MESSAGE_ITEM_INSERTED = 0xEFEFEFEF;
 
-    // The DatabaseHandler messages.
+    // The DatabaseHandler messages
     private static final int MESSAGE_DISPATCH_MESSAGE = 0xFEFEFEFE;
 
     /**

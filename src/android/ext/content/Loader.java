@@ -1,5 +1,7 @@
 package android.ext.content;
 
+import static android.ext.util.UIHandler.MESSAGE_FINISHED;
+import static android.ext.util.UIHandler.MESSAGE_PROGRESS;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
@@ -165,9 +167,7 @@ public abstract class Loader implements Factory<Task> {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
-        /* package */ Result mResult;
         /* package */ Params[] mParams;
-
         private volatile Thread mRunner;
         private final AtomicInteger mState;
 
@@ -184,7 +184,7 @@ public abstract class Loader implements Factory<Task> {
          */
         public final void setProgress(Object... values) {
             if (mState.get() == RUNNING) {
-                UIHandler.sInstance.setProgress(this, values);
+                UIHandler.sInstance.sendMessage(this, MESSAGE_PROGRESS, values);
             }
         }
 
@@ -209,11 +209,16 @@ public abstract class Loader implements Factory<Task> {
          * <p><b>Note: Do not call this method directly.</b></p>
          * @param msg A {@link Message} to handle.
          */
+        @SuppressWarnings("unchecked")
         public final void handleMessage(Message msg) {
-            if (msg.what == UIHandler.MESSAGE_FINISHED) {
-                onPostExecute(mParams, mResult);
-            } else {
+            switch (msg.what) {
+            case MESSAGE_PROGRESS:
                 onProgress(mParams, (Object[])msg.obj);
+                break;
+
+            case MESSAGE_FINISHED:
+                onPostExecute(mParams, (Result)msg.obj);
+                break;
             }
         }
 
@@ -224,17 +229,18 @@ public abstract class Loader implements Factory<Task> {
 
         @Override
         public final void run() {
+            Object result = null;
             if (mState.get() == RUNNING) {
                 try {
                     mRunner = Thread.currentThread();
-                    mResult = doInBackground(mParams);
+                    result  = doInBackground(mParams);
                 } finally {
                     mRunner = null;
                     mState.compareAndSet(RUNNING, COMPLETED);
                 }
             }
 
-            UIHandler.sInstance.finish(this);
+            UIHandler.sInstance.sendMessage(this, MESSAGE_FINISHED, result);
         }
 
         /**
@@ -242,7 +248,6 @@ public abstract class Loader implements Factory<Task> {
          */
         /* package */ final void clearForRecycle() {
             mParams = null;
-            mResult = null;
             mRunner = null;
             mState.set(RUNNING);
         }

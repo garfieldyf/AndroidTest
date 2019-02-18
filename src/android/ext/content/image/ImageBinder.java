@@ -49,7 +49,7 @@ import android.widget.ImageView;
  *         ... ... /&gt;
  *
  *     &lt;!-- Image Transformer (Optional) --&gt;
- *     &lt;[ GIFTransformer | DrawableTransformer | transformer ]
+ *     &lt;[ GIFTransformer | transformer ]
  *         class="classFullName"
  *         android:src="@xml/transformer2"
  *         app:attribute1="value1"
@@ -359,32 +359,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
-     * Class <tt>DrawableTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static final class DrawableTransformer implements Transformer<Object, Drawable> {
-        private static final DrawableTransformer sInstance = new DrawableTransformer();
-
-        /**
-         * Constructor
-         */
-        private DrawableTransformer() {
-        }
-
-        /**
-         * Returns a type-safe {@link Transformer} to transforms a {@link Drawable} to a {@link Drawable}.
-         * @return The <tt>Transformer</tt>.
-         */
-        public static <URI> Transformer<URI, Drawable> getInstance() {
-            return (Transformer<URI, Drawable>)sInstance;
-        }
-
-        @Override
-        public Drawable transform(Object uri, Object target, Drawable drawable) {
-            return drawable;
-        }
-    }
-
-    /**
      * Class <tt>ImageTransformer</tt> is an implementation of a {@link Transformer}.
      */
     public static final class ImageTransformer implements Transformer {
@@ -442,8 +416,10 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
         @Override
         public Drawable transform(Object uri, Object target, Object image) {
-            Drawable drawable = mImageCache.get(uri);
-            if (drawable == null) {
+            Drawable drawable;
+            if (image instanceof Drawable) {
+                drawable = (Drawable)image;
+            } else if ((drawable = mImageCache.get(uri)) == null) {
                 mImageCache.put(uri, drawable = mTransformer.transform(uri, target, image));
             }
 

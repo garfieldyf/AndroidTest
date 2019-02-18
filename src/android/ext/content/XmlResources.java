@@ -12,7 +12,6 @@ import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.image.BackgroundBinder;
 import android.ext.content.image.ImageBinder;
 import android.ext.content.image.ImageBinder.BitmapTransformer;
-import android.ext.content.image.ImageBinder.DrawableTransformer;
 import android.ext.content.image.ImageBinder.GIFTransformer;
 import android.ext.content.image.ImageBinder.OvalTransformer;
 import android.ext.content.image.ImageBinder.RoundedRectTransformer;
@@ -245,9 +244,6 @@ public final class XmlResources {
 
             case "OvalTransformer":
                 return OvalTransformer.getInstance();
-
-            case "DrawableTransformer":
-                return DrawableTransformer.getInstance();
 
             case "RoundedRectTransformer":
                 return new RoundedRectTransformer(context, Xml.asAttributeSet(parser));

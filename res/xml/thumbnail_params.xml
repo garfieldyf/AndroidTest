@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Parameters xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
+    tencent:sampleSize="8"
+    tencent:config="rgb_565" />

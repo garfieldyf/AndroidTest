@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<!-- WindowTitle style -->
+	<style name="WindowTitle">
+		<item name="android:singleLine">true</item>
+		<item name="android:textColor">@null</item>
+	</style>
+
+	<!-- WindowTitleBackground style -->
+    <style name="WindowTitleBackground">
+        <item name="android:background">@null</item>
+    </style>
+
+	<!-- NoTitleBar theme -->
+    <style name="Theme.NoTitleBar" parent="android:Theme">
+        <item name="android:windowTitleSize">0dp</item>
+    </style>
+
+	<!-- CustomTitleBar theme -->
+    <style name="Theme.CustomTitleBar" parent="android:Theme">
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowTitleSize">50dip</item>
+        <item name="android:windowTitleStyle">@style/WindowTitle</item>
+        <item name="android:windowTitleBackgroundStyle">@style/WindowTitleBackground</item>
+    </style>
+
+    <style name="AppLightTheme" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="buttonTextColor">#000000</item>
+        <item name="buttonTextSize">30px</item>
+        <item name="buttonTextBackground">#ffffff</item>
+    </style>
+
+    <style name="AppDarkTheme" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="buttonTextColor">#ffffff</item>
+        <item name="buttonTextSize">18px</item>
+        <item name="buttonTextBackground">#000000</item>
+    </style>
+
+    <style name="TranslucentTheme" parent="android:Theme.DeviceDefault.Light.NoActionBar">
+	    <item name="android:windowTranslucentStatus">false</item>
+	    <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="TransitionsTheme" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen">
+        <item name="android:windowContentTransitions">true</item>
+    </style>
+
+</resources>

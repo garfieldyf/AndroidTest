@@ -4,6 +4,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import java.util.concurrent.Executor;
 import android.content.Context;
 import android.ext.cache.Cache;
+import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.image.ImageBinder.CacheTransformer;
@@ -119,6 +120,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     @Override
     public void dump(Context context, Printer printer) {
+        super.dump(context, printer);
         Pools.dumpPool(mBufferPool, printer);
         if (mDecoder instanceof AbsImageDecoder) {
             ((AbsImageDecoder<?>)mDecoder).dump(printer);
@@ -128,7 +130,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             ((ImageBinder<?, ?>)mBinder).dump(context, printer);
         }
 
-        super.dump(context, printer);
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping shared memory cache and file cache ");
+        Caches.dumpCache(getCache(), context, printer);
+        if (mLoader instanceof ImageLoader.FileCacheLoader) {
+            Caches.dumpCache(((FileCacheLoader)mLoader).mCache, context, printer);
+        }
     }
 
     /**
@@ -235,7 +241,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
     private final class FileCacheLoader implements Loader<Image> {
-        private final FileCache mCache;
+        /* package */ final FileCache mCache;
 
         /**
          * Constructor

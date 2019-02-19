@@ -1,6 +1,8 @@
 package android.ext.util;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -8,12 +10,13 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.RandomAccess;
+import android.util.Log;
 
 /**
  * Class ArrayUtils
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public final class ArrayUtils {
     /**
      * The <tt>0-length</tt> byte array.
@@ -301,6 +304,49 @@ public final class ArrayUtils {
     }
 
     /**
+     * Sorts the specified range in the <em>list</em> in ascending natural order.
+     * @param list The {@link List} to sort.
+     * @param start The inclusive start index in <em>list</em> to sort.
+     * @param end The exclusive end index in <em>list</em> to sort.
+     * @see #sort(List, int, int, Comparator)
+     */
+    public static <T extends Comparable<? super T>> void sort(List<T> list, int start, int end) {
+        DebugUtils.__checkRange(start, end - start, list.size());
+        if (list instanceof ArrayList) {
+            try {
+                Arrays.sort(array(list), start, end);
+            } catch (Exception e) {
+                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array");
+                sortList(list, start, end);
+            }
+        } else {
+            sortList(list, start, end);
+        }
+    }
+
+    /**
+     * Sorts the specified range in the <em>list</em> using the specified <em>comparator</em>.
+     * @param list The {@link List} to sort.
+     * @param start The inclusive start index in <em>list</em> to sort.
+     * @param end The exclusive end index in <em>list</em> to sort.
+     * @param comparator The {@link Comparator} to compare.
+     * @see #sort(List, int, int)
+     */
+    public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
+        DebugUtils.__checkRange(start, end - start, list.size());
+        if (list instanceof ArrayList) {
+            try {
+                Arrays.sort(array(list), start, end, (Comparator<Object>)comparator);
+            } catch (Exception e) {
+                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array");
+                sortList(list, start, end, comparator);
+            }
+        } else {
+            sortList(list, start, end, comparator);
+        }
+    }
+
+    /**
      * Finds the <tt>Collection</tt> with specified <em>filter</em> and returns the element
      * of the first occurrence.
      * @param collection The <tt>Collection</tt> to find.
@@ -479,6 +525,34 @@ public final class ArrayUtils {
         return writtenBytes;
     }
 
+    private static void sortList(List list, int start, int end) {
+        final Object[] array = list.toArray();
+        Arrays.sort(array, start, end);
+        ArrayUtils.copy(list, array, start, end);
+    }
+
+    private static void sortList(List list, int start, int end, Comparator comparator) {
+        final Object[] array = list.toArray();
+        Arrays.sort(array, start, end, comparator);
+        ArrayUtils.copy(list, array, start, end);
+    }
+
+    private static void copy(List list, Object[] array, int start, int end) {
+        final ListIterator itor = list.listIterator(start);
+        for (int i = start; i < end; ++i) {
+            itor.next();
+            itor.set(array[i]);
+        }
+    }
+
+    private static synchronized Object[] array(Object list) throws Exception {
+        if (sArrayField == null) {
+            sArrayField = ClassUtils.getDeclaredField(ArrayList.class, "array");
+        }
+
+        return (Object[])sArrayField.get(list);
+    }
+
     /**
      * An interface for filtering objects based on their informations.
      * @see Filter#accept(T)
@@ -492,6 +566,11 @@ public final class ArrayUtils {
          */
         public boolean accept(T value);
     }
+
+    /**
+     * The {@link ArrayList#array} field.
+     */
+    private static Field sArrayField;
 
     /**
      * This utility class cannot be instantiated.

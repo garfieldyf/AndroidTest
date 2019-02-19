@@ -120,7 +120,7 @@ public class PageScroller {
                 }
             }
 
-            UIHandler.sInstance.requestChildFocus(mLayoutManager, position);
+            UIHandler.requestChildFocus(mLayoutManager, position);
         }
     }
 

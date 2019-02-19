@@ -39,6 +39,15 @@ public final class UIHandler extends Handler {
     }
 
     /**
+     * Called when an item in the data set of the adapter wants focus.
+     * @param layoutManager The {@link LayoutManager}.
+     * @param position The position of the item in the data set of the adapter.
+     */
+    public static void requestChildFocus(LayoutManager layoutManager, int position) {
+        requestChildFocus(layoutManager, position, 2);
+    }
+
+    /**
      * Like as {@link Adapter#notifyDataSetChanged()}. If the <em>recyclerView</em> is currently
      * computing a layout this method will be post the change using the <tt>UIHandler</tt>.
      * @param recyclerView The {@link RecyclerView}.
@@ -182,13 +191,6 @@ public final class UIHandler extends Handler {
     }
 
     /**
-     * Called on the <tt>PageScroller</tt> internal, do not call this method directly.
-     */
-    public final void requestChildFocus(LayoutManager layoutManager, int position) {
-        requestChildFocus(layoutManager, position, 2);
-    }
-
-    /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      */
     public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
@@ -245,12 +247,12 @@ public final class UIHandler extends Handler {
     /**
      * Handle the recycler view's child view request focus.
      */
-    private void requestChildFocus(LayoutManager layoutManager, int position, int retryCount) {
+    private static void requestChildFocus(LayoutManager layoutManager, int position, int retryCount) {
         final View child = layoutManager.findViewByPosition(position);
         if (child != null) {
             child.requestFocus();
         } else if (retryCount > 0) {
-            sendMessage(Message.obtain(this, MESSAGE_CHILD_FOCUS, position, retryCount - 1, layoutManager));
+            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, position, retryCount - 1, layoutManager));
         }
     }
 

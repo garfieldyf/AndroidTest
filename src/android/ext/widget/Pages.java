@@ -206,8 +206,11 @@ public final class Pages {
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
                 // Computes the page offset and page Size.
-                int pageOffset = 0, pageSize = mFirstPageSize;
-                if (page > 0) {
+                final int pageOffset, pageSize;
+                if (page == 0) {
+                    pageOffset = 0;
+                    pageSize = mFirstPageSize;
+                } else {
                     pageSize = mPageSize;
                     pageOffset = (page - 1) * mPageSize + mFirstPageSize;
                 }

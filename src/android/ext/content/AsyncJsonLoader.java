@@ -22,8 +22,8 @@ import android.util.Pair;
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
  * <h2>Usage</h2>
- * <p>Here is an example:</p><pre>
- * public final class JsonLoader extends AsyncJsonLoader&lt;String, JSONObject&gt; {
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static class JsonLoader extends AsyncJsonLoader&lt;String, JSONObject&gt; {
  *     public JsonLoader(Executor executor, Activity ownerActivity) {
  *         super(executor, ownerActivity);
  *     }

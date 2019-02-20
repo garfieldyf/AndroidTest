@@ -140,14 +140,14 @@ public final class DebugUtils {
 
     public static void __checkWarning(boolean reportWarning, String tag, String message) {
         if (reportWarning) {
-            Log.e(tag, "WARNING: " + message);
+            Log.w(tag, "WARNING: " + message);
         }
     }
 
     public static void __checkMemoryLeaks(Class<?> clazz) {
         if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
             final String className = clazz.getName();
-            Log.e(className, "WARNING: The " + className + " class should be a static inner member class to avoid memory leaks");
+            Log.e(className, "WARNING: The " + className + " class should be a static inner member class to avoid potential memory leaks.");
         }
     }
 

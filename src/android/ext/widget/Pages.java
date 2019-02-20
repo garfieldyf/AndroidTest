@@ -139,7 +139,7 @@ public final class Pages {
      * A <tt>PageLoader</tt> used to load page data.
      */
     /* package */ static interface PageLoader<E> {
-        Page<E> loadPage(int position, int page, int pageOffset, int pageSize);
+        Page<E> loadPage(int page, int offset, int count);
     }
 
     /**
@@ -205,19 +205,9 @@ public final class Pages {
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
-                // Computes the page offset and page Size.
-                final int pageOffset, pageSize;
-                if (page == 0) {
-                    pageOffset = 0;
-                    pageSize = mFirstPageSize;
-                } else {
-                    pageSize = mPageSize;
-                    pageOffset = (page - 1) * mPageSize + mFirstPageSize;
-                }
-
                 // Marks the page loading state, if the page is not load.
                 mPageStates.set(page);
-                result = mPageLoader.loadPage(position, page, pageOffset, pageSize);
+                result = mPageLoader.loadPage(page, position, (page == 0 ? mFirstPageSize : mPageSize));
                 if (getCount(result) > 0) {
                     // If the page is load successful.
                     // 1. Adds the page to page cache.

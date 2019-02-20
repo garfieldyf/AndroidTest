@@ -79,8 +79,8 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int, int)} to obtain the item when
-     * the item was not present.</p>
+     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the item when the
+     * item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(View)
@@ -118,7 +118,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int, int)}
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)}
      * when the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
@@ -157,8 +157,8 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
 
     /**
      * Returns the {@link Page} associated with the specified index <em>page</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int, int)} to obtain the page when
-     * the page was not present.</p>
+     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the page when the
+     * page was not present.</p>
      * @param page The index of the page.
      * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #peekPage(int)
@@ -169,8 +169,8 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
 
     /**
      * Returns the {@link Page} associated with the specified index <em>page</em> in this adapter.
-     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int, int)}
-     * when the page was not present.</p>
+     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int)} when
+     * the page was not present.</p>
      * @param page The index of the page.
      * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
      * @see #getPage(int)
@@ -295,12 +295,11 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * <p>If you want to asynchronously load the page data to prevent blocking
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
-     * @param position The adapter position of the item in this adapter.
      * @param page The index of the page whose data should be returned.
-     * @param pageOffset The start position of the first item in the <em>page</em>.
-     * @param pageSize The number of items in the <em>page</em>.
+     * @param offset The start position of the first item.
+     * @param count The number of items in the <em>page</em>.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      * @see #setPage(int, Page, Object)
      */
-    public abstract Page<E> loadPage(int position, int page, int pageOffset, int pageSize);
+    public abstract Page<E> loadPage(int page, int offset, int count);
 }

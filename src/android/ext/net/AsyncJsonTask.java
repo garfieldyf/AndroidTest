@@ -2,6 +2,7 @@ package android.ext.net;
 
 import java.net.HttpURLConnection;
 import java.util.Arrays;
+import android.ext.content.AbsAsyncTask;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
@@ -15,8 +16,8 @@ import android.util.Pair;
  * <ol><li><tt>Params</tt>, The parameters type of the task.</li>
  * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
  * <h2>Usage</h2>
- * <p>Here is an example:</p><pre>
- * public final class JsonTask extends AsyncJsonTask&lt;String, JSONObject&gt; {
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static class JsonTask extends AsyncJsonTask&lt;String, JSONObject&gt; {
  *     public JsonTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
@@ -51,7 +52,7 @@ import android.util.Pair;
  * new JsonTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncJsonTask<Params, Result> extends AbsDownloadTask<Params, Object, Pair<Result, Boolean>> {
+public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params, Object, Pair<Result, Boolean>> {
     /**
      * Constructor
      * @see #AsyncJsonTask(Object)
@@ -86,6 +87,14 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsDownloadTask<Para
     protected boolean validateResult(Params[] params, Result result) {
         return (result != null);
     }
+
+    /**
+     * Returns a new download request with the specified <em>params</em>.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @return The instance of {@link DownloadRequest}.
+     * @throws Exception if an error occurs while opening the connection.
+     */
+    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
     @Override
     @SuppressWarnings("unchecked")

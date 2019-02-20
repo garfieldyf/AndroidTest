@@ -1,4 +1,4 @@
-package android.ext.net;
+package android.ext.content;
 
 import java.lang.ref.WeakReference;
 import android.app.Activity;
@@ -7,28 +7,62 @@ import android.ext.util.DebugUtils;
 import android.os.AsyncTask;
 
 /**
- * Class AbsDownloadTask
+ * Like as {@link AsyncTask}, but this class has an owner <tt>Object</tt> to avoid potential memory
+ * leaks. The owner object may be a <tt>Activity</tt>, <tt>Dialog</tt> or <tt>Fragment</tt> etc.
+ * <h2>Usage</h2>
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static class DownloadTask extends AbsAsyncTask&lt;String, Object, Long&gt; {
+ *     public DownloadTask(Activity ownerActivity) {
+ *         super(ownerActivity);
+ *     }
+ *
+ *     protected Long doInBackground(String... urls) {
+ *         ... ...
+ *     }
+ *
+ *     protected void onPostExecute(Long result) {
+ *         final Activity activity = getOwnerActivity();
+ *         if (activity == null) {
+ *              // The owner activity has been destroyed or release by the GC.
+ *              return;
+ *         }
+ *
+ *         Log.i(TAG, "Downloaded " + result + " bytes");
+ *     }
+ * }
+ *
+ * new DownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public abstract class AbsDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
+public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
     private WeakReference<Object> mOwner;
 
     /**
      * Constructor
-     * @see #AbsDownloadTask(Object)
+     * @see #AbsAsyncTask(Object)
      */
-    public AbsDownloadTask() {
+    public AbsAsyncTask() {
         DebugUtils.__checkMemoryLeaks(getClass());
     }
 
     /**
      * Constructor
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AbsDownloadTask()
+     * @see #AbsAsyncTask()
      */
-    public AbsDownloadTask(Object owner) {
+    public AbsAsyncTask(Object owner) {
         DebugUtils.__checkMemoryLeaks(getClass());
+        mOwner = new WeakReference<Object>(owner);
+    }
+
+    /**
+     * Sets the object that owns this task.
+     * @param owner The owner object.
+     * @see #getOwner()
+     * @see #getOwnerActivity()
+     */
+    public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
     }
 
@@ -53,22 +87,4 @@ public abstract class AbsDownloadTask<Params, Progress, Result> extends AsyncTas
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
-
-    /**
-     * Sets the object that owns this task.
-     * @param owner The owner object.
-     * @see #getOwner()
-     * @see #getOwnerActivity()
-     */
-    public final void setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
-    }
-
-    /**
-     * Returns a new download request with the specified <em>params</em>.
-     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
-     * @return The instance of {@link DownloadRequest}.
-     * @throws Exception if an error occurs while opening the connection.
-     */
-    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 }

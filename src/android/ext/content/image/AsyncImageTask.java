@@ -1,21 +1,18 @@
 package android.ext.content.image;
 
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
-import android.app.Activity;
 import android.content.Context;
+import android.ext.content.AbsAsyncTask;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
-import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Log;
 
 /**
@@ -33,8 +30,8 @@ import android.util.Log;
  * <li>android_asset ({@link #SCHEME_FILE})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <h2>Usage</h2>
- * <p>Here is an example:</p><pre>
- * public final class DownloadBitmapTask extends AsyncImageTask&lt;String&gt; {
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static class DownloadBitmapTask extends AsyncImageTask&lt;String&gt; {
  *     public DownloadBitmapTask(Activity ownerActivity) {
  *         super(ownerActivity, ownerActivity);
  *     }
@@ -58,7 +55,7 @@ import android.util.Log;
  *    .execute(url);</pre>
  * @author Garfield
  */
-public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implements Cancelable {
+public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -70,17 +67,11 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
     protected Parameters mParameters;
 
     /**
-     * The owner object.
-     */
-    private WeakReference<Object> mOwner;
-
-    /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @see #AsyncImageTask(Context, Object)
      */
     public AsyncImageTask(Context context) {
-        DebugUtils.__checkMemoryLeaks(getClass());
         mContext = context.getApplicationContext();
     }
 
@@ -91,44 +82,8 @@ public class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> implem
      * @see #AsyncImageTask(Context)
      */
     public AsyncImageTask(Context context, Object owner) {
-        DebugUtils.__checkMemoryLeaks(getClass());
-        mOwner = new WeakReference<Object>(owner);
+        super(owner);
         mContext = context.getApplicationContext();
-    }
-
-    /**
-     * Returns the object that owns this task.
-     * @return The owner object or <tt>null</tt>
-     * if the owner released by the GC.
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T> T getOwner() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        return (T)mOwner.get();
-    }
-
-    /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
-    }
-
-    /**
-     * Sets the object that owns this task.
-     * @param owner The owner object.
-     * @see #getOwner()
-     * @see #getOwnerActivity()
-     */
-    public final void setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
     }
 
     /**

@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import android.ext.content.AbsAsyncTask;
 import android.ext.util.ByteArrayBuffer;
 import android.util.Log;
 
@@ -15,8 +16,8 @@ import android.util.Log;
  * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote server on a
  * background thread and publish results on the UI thread.
  * <h2>Usage</h2>
- * <p>Here is an example:</p><pre>
- * public final class JSONDownloadTask extends AsyncDownloadTask&lt;String, Object, JSONObject&gt; {
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static class JSONDownloadTask extends AsyncDownloadTask&lt;String, Object, JSONObject&gt; {
  *     public JSONDownloadTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
@@ -42,7 +43,7 @@ import android.util.Log;
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsDownloadTask<Params, Progress, Result> {
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsyncTask<Params, Progress, Result> {
     private DownloadRequest mRequest;
 
     /**
@@ -144,4 +145,12 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsDow
             break;
         }
     }
+
+    /**
+     * Returns a new download request with the specified <em>params</em>.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @return The instance of {@link DownloadRequest}.
+     * @throws Exception if an error occurs while opening the connection.
+     */
+    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 }

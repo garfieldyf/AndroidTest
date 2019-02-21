@@ -1,5 +1,6 @@
 package android.ext.temp;
 
+import java.io.File;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.net.AsyncJsonTask;
@@ -14,8 +15,10 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
     }
 
     @Override
-    protected String getCacheFile(String[] params) {
-        return MainApplication.sInstance.getFilesDir().getPath() + "/.json_files/channel";
+    protected File getCacheFile(String[] params) {
+        final File cacheFile = new File(MainApplication.sInstance.getFilesDir(), "/.json_files/channel");
+//        Log.i("abc", "cacheFile = " + cacheFile);
+        return cacheFile;
     }
 
     @Override
@@ -40,7 +43,7 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
         if (result.first != null) {
             // Loading succeeded, update UI.
             Log.i("abc", "JsonTask - Load Succeeded Update UI.");
-            //Toast.makeText(activity, "JsonTask - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(activity, "JsonTask - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
         } else if (!result.second) {
             // Loading failed and file cache not hit, show error UI.
             Log.i("abc", "JsonTask - Show error UI.");

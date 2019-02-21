@@ -1,5 +1,6 @@
 package android.ext.net;
 
+import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import android.ext.content.AbsAsyncTask;
@@ -22,8 +23,8 @@ import android.util.Pair;
  *         super(ownerActivity);
  *     }
  *
- *     protected String getCacheFile(String[] params) {
- *         return context.getFilesDir().getPath() + "/.json_files/cacheFile.json"
+ *     protected File getCacheFile(String[] params) {
+ *         return new File("mnt/sdcard/xxx/cacheFile.json");
  *     }
  *
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
@@ -71,17 +72,20 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
 
     /**
      * Returns the absolute path of the JSON cache file on the filesystem.
-     * Subclasses should override this method to returns the cache file path.
+     * <p>Subclasses should override this method to returns the cache file path.
+     * The default implementation returns <tt>null</tt> value.</p>
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @return The path of the JSON cache file.
+     * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
      */
-    protected abstract String getCacheFile(Params[] params);
+    protected File getCacheFile(Params[] params) {
+        return null;
+    }
 
     /**
      * Tests if the <em>result</em> is valid. Subclasses should override this method to
      * validate the <em>result</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param result The JSON data. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
+     * @param result The JSON value or <tt>null<tt>.
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Params[] params, Result result) {
@@ -108,15 +112,17 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         boolean hitCache = false;
         Result result = null;
         try {
-            final String cacheFile = getCacheFile(params);
-            final Result value = loadFromCache(cacheFile);
-            if (validateResult(params, value)) {
-                hitCache = true;
-                publishProgress(value);
-            }
-
-            if (!isCancelled()) {
-                result = download(params, cacheFile, hitCache);
+            final File cacheFile = getCacheFile(params);
+            if (cacheFile == null) {
+                result = newDownloadRequest(params).download(this, null);
+                if (isCancelled() || !validateResult(params, result)) {
+                    result = null;
+                }
+            } else {
+                hitCache = loadFromCache(params, cacheFile);
+                if (!isCancelled()) {
+                    result = download(params, cacheFile.getPath(), hitCache);
+                }
             }
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load JSON data - params = " + Arrays.toString(params) + "\n" + e);
@@ -125,13 +131,20 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         return new Pair<Result, Boolean>(result, hitCache);
     }
 
-    private Result loadFromCache(String cacheFile) {
+    private boolean loadFromCache(Params[] params, File cacheFile) {
+        Result result = null;
         try {
-            return JsonUtils.parse(null, cacheFile, this);
+            result = JsonUtils.parse(null, cacheFile, this);
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
-            return null;
         }
+
+        final boolean hitCache = validateResult(params, result);
+        if (hitCache) {
+            publishProgress(result);
+        }
+
+        return hitCache;
     }
 
     private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {

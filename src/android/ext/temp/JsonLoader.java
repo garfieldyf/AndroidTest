@@ -1,12 +1,11 @@
 package android.ext.temp;
 
+import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.content.AsyncJsonLoader;
-import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import com.tencent.test.MainApplication;
@@ -18,8 +17,8 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     @Override
     protected void onStartLoading(String url, LoadParams<String>[] params) {
-        final String cacheFile = params[0].getCacheFile(url);
-        if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
+        final File cacheFile = params[0].getCacheFile(url);
+        if (cacheFile == null || !cacheFile.exists()) {
             // Show loading UI.
             Log.i("abc", "JsonLoader - Show loading UI.");
         }

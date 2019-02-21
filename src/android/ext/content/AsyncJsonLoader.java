@@ -1,5 +1,6 @@
 package android.ext.content;
 
+import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import android.content.Context;
@@ -10,7 +11,6 @@ import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
-import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -29,8 +29,8 @@ import android.util.Pair;
  *     }
  *
  *     protected void onStartLoading(String url, LoadParams&lt;String&gt;[] params) {
- *         final String cacheFile = params[0].getCacheFile(url);
- *         if (TextUtils.isEmpty(cacheFile) || FileUtils.access(cacheFile, FileUtils.F_OK) != 0) {
+ *         final File cacheFile = params[0].getCacheFile(url);
+ *         if (cacheFile == null || !cacheFile.exists()) {
  *             // If the cache file not exists, show loading UI.
  *         }
  *     }
@@ -85,7 +85,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      * validate the <em>result</em>.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The {@link LoadParams}, passed earlier by {@link #load}.
-     * @param result The JSON data. May be a <tt>JSONObject</tt> or <tt>JSONArray</tt>.
+     * @param result The JSON value or <tt>null<tt>.
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
@@ -103,8 +103,8 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         Result result = null;
         try {
             final LoadParams params = loadParams[0];
-            final String cacheFile  = params.getCacheFile(key);
-            if (TextUtils.isEmpty(cacheFile)) {
+            final File cacheFile = params.getCacheFile(key);
+            if (cacheFile == null) {
                 result = params.newDownloadRequest(key).download(task, null);
                 if (isTaskCancelled(task) || !validateResult(key, params, result)) {
                     result = null;
@@ -112,7 +112,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             } else {
                 hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
-                    result = download(task, key, params, cacheFile, hitCache);
+                    result = download(task, key, params, cacheFile.getPath(), hitCache);
                 }
             }
         } catch (Exception e) {
@@ -122,7 +122,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         return new Pair<Result, Boolean>(result, hitCache);
     }
 
-    private boolean loadFromCache(Task task, Key key, LoadParams params, String cacheFile) {
+    private boolean loadFromCache(Task task, Key key, LoadParams params, File cacheFile) {
         Result result = null;
         try {
             result = JsonUtils.parse(null, cacheFile, task);
@@ -130,12 +130,12 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
         }
 
-        final boolean isValid = validateResult(key, params, result);
-        if (isValid) {
+        final boolean hitCache = validateResult(key, params, result);
+        if (hitCache) {
             task.setProgress(result);
         }
 
-        return isValid;
+        return hitCache;
     }
 
     private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
@@ -168,7 +168,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
          */
-        public String getCacheFile(Key key) {
+        public File getCacheFile(Key key) {
             return null;
         }
 
@@ -209,9 +209,9 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         }
 
         @Override
-        public String getCacheFile(String url) {
+        public File getCacheFile(String url) {
             final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
-            return StringUtils.toHexString(new StringBuilder(mContext.getFilesDir().getPath()).append("/.json_files/"), digest, 0, digest.length).toString();
+            return new File(mContext.getFilesDir(), StringUtils.toHexString(new StringBuilder("/.json_files/"), digest, 0, digest.length).toString());
         }
 
         @Override

@@ -73,7 +73,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     /**
      * Returns the absolute path of the JSON cache file on the filesystem.
      * <p>Subclasses should override this method to returns the cache file path.
-     * The default implementation returns <tt>null</tt> value.</p>
+     * The default implementation returns <tt>null</tt>.</p>
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
      */
@@ -85,7 +85,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
      * Tests if the <em>result</em> is valid. Subclasses should override this method to
      * validate the <em>result</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param result The JSON value or <tt>null<tt>.
+     * @param result The JSON value or <tt>null</tt>.
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Params[] params, Result result) {

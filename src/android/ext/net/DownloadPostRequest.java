@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import android.content.ContentValues;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
@@ -58,8 +57,8 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be an <tt>InputStream, String, File, JSONObject, JSONArray,
-     * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param data May be a <tt>String, File, InputStream, JSONObject,
+     * JSONArray</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[], int, int)
      * @see #post(PostCallback, Object[])
@@ -107,7 +106,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     @Override
     /* package */ int connect(byte[] tempBuffer) throws IOException {
         __checkDumpHeaders(true);
-        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[] || mData instanceof ContentValues) {
+        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
             connectImpl();
             postData(mData);
         } else if (mData instanceof File) {

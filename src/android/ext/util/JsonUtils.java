@@ -13,7 +13,6 @@ import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import android.content.ContentValues;
 import android.content.Context;
 import android.ext.util.ArrayUtils.Filter;
 import android.util.JsonReader;
@@ -308,8 +307,8 @@ public final class JsonUtils {
     /**
      * Writes the specified <em>object</em> into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
-     * @param object May be a <tt>String, Boolean, Number, JSONObject, JSONArray,
-     * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>String, Boolean, Number, JSONObject,
+     * JSONArray</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeObject(String, Object)
@@ -333,8 +332,6 @@ public final class JsonUtils {
             return writeValues(writer, (Set<Entry<String, Object>>)object);
         } else if (object instanceof Collection) {
             return writeValues(writer, (Collection<Object>)object);
-        } else if (object instanceof ContentValues) {
-            return writeValues(writer, ((ContentValues)object).valueSet());
         } else if (object instanceof Map) {
             return writeValues(writer, ((Map<String, Object>)object).entrySet());
         } else {
@@ -346,8 +343,8 @@ public final class JsonUtils {
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
      * <p>Note: This method will be create the necessary directories.</p>
      * @param jsonFile The json file to write.
-     * @param object May be a <tt>String, Boolean, Number, JSONObject, JSONArray,
-     * ContentValues</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param object May be a <tt>String, Boolean, Number, JSONObject,
+     * JSONArray</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @throws IOException if an error occurs while writing to the file.
      * @see #writeObject(JsonWriter, Object)
      */

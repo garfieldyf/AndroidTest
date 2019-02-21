@@ -85,7 +85,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      * validate the <em>result</em>.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The {@link LoadParams}, passed earlier by {@link #load}.
-     * @param result The JSON value or <tt>null<tt>.
+     * @param result The JSON value or <tt>null</tt>.
      * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
      */
     protected boolean validateResult(Key key, LoadParams<Key> params, Result result) {
@@ -165,6 +165,8 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     public static abstract class LoadParams<Key> {
         /**
          * Returns the absolute path of the JSON cache file on the filesystem.
+         * <p>Subclasses should override this method to returns the cache file
+         * path. The default implementation returns <tt>null</tt>.</p>
          * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
          * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
          */

@@ -2,6 +2,7 @@ package android.ext.content.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
@@ -68,7 +69,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(ImageModule.computeMaximumPoolSize(executor), 16384));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(computeBufferPoolMaxSize(executor), 16384));
         DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
     }
 
@@ -194,6 +195,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
             return null;
         }
+    }
+
+    /**
+     * Computes the maximum buffer pool size of the image loader.
+     */
+    private static int computeBufferPoolMaxSize(Executor executor) {
+        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4);
+        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize + 1);
     }
 
     /**

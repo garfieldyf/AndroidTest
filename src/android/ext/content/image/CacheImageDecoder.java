@@ -20,12 +20,11 @@ public class CacheImageDecoder extends ImageDecoder {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the {@link Parameters} to load.
-     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
      * @param bitmapPool The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
-     * @see #CacheImageDecoder(Context, Parameters, int, BitmapPool)
+     * @see #CacheImageDecoder(Context, Parameters, BitmapPool)
      */
-    public CacheImageDecoder(Context context, int id, int maxPoolSize, BitmapPool bitmapPool) {
-        super(context, id, maxPoolSize);
+    public CacheImageDecoder(Context context, int id, BitmapPool bitmapPool) {
+        super(context, id);
         mBitmapPool = bitmapPool;
     }
 
@@ -33,12 +32,11 @@ public class CacheImageDecoder extends ImageDecoder {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
      * @param bitmapPool The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
-     * @see #CacheImageDecoder(Context, int, int, BitmapPool)
+     * @see #CacheImageDecoder(Context, int, BitmapPool)
      */
-    public CacheImageDecoder(Context context, Parameters parameters, int maxPoolSize, BitmapPool bitmapPool) {
-        super(context, parameters, maxPoolSize);
+    public CacheImageDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
+        super(context, parameters);
         mBitmapPool = bitmapPool;
     }
 

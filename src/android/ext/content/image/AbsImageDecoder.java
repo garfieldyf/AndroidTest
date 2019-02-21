@@ -31,17 +31,16 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
      * @see #AbsImageDecoder(AbsImageDecoder)
      */
-    public AbsImageDecoder(Context context, int maxPoolSize) {
+    public AbsImageDecoder(Context context) {
         mContext = context.getApplicationContext();
-        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
+        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, 12));
     }
 
     /**
      * Copy constructor
-     * @see #AbsImageDecoder(Context, int)
+     * @see #AbsImageDecoder(Context)
      */
     public AbsImageDecoder(AbsImageDecoder<Image> decoder) {
         mContext = decoder.mContext;

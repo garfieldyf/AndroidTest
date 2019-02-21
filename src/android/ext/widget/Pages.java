@@ -258,7 +258,7 @@ public final class Pages {
                 final Page<E> page = entry.getValue();
                 result.setLength(0);
 
-                formatter.format("    Page %-3d ==> [ ", entry.getKey());
+                formatter.format("    Page %-2d ==> [ ", entry.getKey());
                 printer.println(DebugUtils.toString(page, result).append(", count = ").append(page.getCount()).append(" ]").toString());
             }
         }

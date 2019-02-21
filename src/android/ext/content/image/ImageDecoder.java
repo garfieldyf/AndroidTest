@@ -27,11 +27,10 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the {@link Parameters} to load.
-     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
-     * @see #ImageDecoder(Context, Parameters, int)
+     * @see #ImageDecoder(Context, Parameters)
      */
-    public ImageDecoder(Context context, int id, int maxPoolSize) {
-        super(context, maxPoolSize);
+    public ImageDecoder(Context context, int id) {
+        super(context);
         mParameters = XmlResources.loadParameters(mContext, id);
     }
 
@@ -39,11 +38,10 @@ public class ImageDecoder extends AbsImageDecoder<Object> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @param maxPoolSize The maximum number of {@link Options} in the internal pool.
-     * @see #ImageDecoder(Context, int, int)
+     * @see #ImageDecoder(Context, int)
      */
-    public ImageDecoder(Context context, Parameters parameters, int maxPoolSize) {
-        super(context, maxPoolSize);
+    public ImageDecoder(Context context, Parameters parameters) {
+        super(context);
         mParameters = parameters;
     }
 

@@ -122,7 +122,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @see #peekPage(int)
      */
     public Page<E> getPage(int page) {
-        return mImpl.getPage(page, mImpl.getPositionForPage(page, 0));
+        return mImpl.getPage(page);
     }
 
     /**

@@ -174,7 +174,7 @@ public final class Pages {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = getPage(getOriginalPage(combinedPosition), position);
+            final Page<E> page = getPage(getOriginalPage(combinedPosition));
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
@@ -186,28 +186,24 @@ public final class Pages {
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
-        /* package */ final int setPage(int page, Page<E> data) {
-            // Clears the page loading state when the page is load complete.
-            DebugUtils.__checkUIThread("setPage");
-            DebugUtils.__checkError(page < 0, "page < 0");
-            mPageStates.clear(page);
-            final int count = getCount(data);
-            if (count > 0) {
-                mPageCache.put(page, data);
-            }
-
-            return count;
-        }
-
-        /* package */ final Page<E> getPage(int page, int position) {
+        /* package */ final Page<E> getPage(int page) {
             DebugUtils.__checkUIThread("getPage");
             DebugUtils.__checkError(page < 0, "page < 0");
-            DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
-                // Marks the page loading state, if the page is not load.
+                // Computes the offset and item count to load.
+                final int offset, count;
+                if (page == 0) {
+                    offset = 0;
+                    count  = mFirstPageSize;
+                } else {
+                    count  = mPageSize;
+                    offset = (page - 1) * mPageSize + mFirstPageSize;
+                }
+
+                // Loads the page data and marks the page loading state.
                 mPageStates.set(page);
-                result = mPageLoader.loadPage(page, position, (page == 0 ? mFirstPageSize : mPageSize));
+                result = mPageLoader.loadPage(page, offset, count);
                 if (getCount(result) > 0) {
                     // If the page is load successful.
                     // 1. Adds the page to page cache.
@@ -218,6 +214,19 @@ public final class Pages {
             }
 
             return result;
+        }
+
+        /* package */ final int setPage(int page, Page<E> data) {
+            DebugUtils.__checkUIThread("setPage");
+            DebugUtils.__checkError(page < 0, "page < 0");
+            // Clears the page loading state when the page is load complete.
+            mPageStates.clear(page);
+            final int count = getCount(data);
+            if (count > 0) {
+                mPageCache.put(page, data);
+            }
+
+            return count;
         }
 
         /* package */ final long getPageForPosition(int position) {

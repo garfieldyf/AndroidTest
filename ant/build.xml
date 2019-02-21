@@ -70,30 +70,11 @@
         <delete dir="${src.dir}/${ndk.package}/barcode"/>
     </target>
 
-    <!-- target -delete-debug-call -->
-    <target name="-delete-debug-call">
-        <!-- delete call the __checkXXX methods -->
-        <echo level="info">Delete __checkXXX() methods call</echo>
-        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
-            <fileset dir="${src.dir}" includes="**/*.java" />
-        </replaceregexp>
-    </target>
-
-    <!-- target -replace-release-call -->
-    <target name="-replace-release-call">
-        <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
-        <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
-        <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
-            <replacefilter token="this.writeUncaughtException" value="this.storeUncaughtException" />
-        </replace>
-    </target>
-
     <!-- target -pre-compile-debug -->
     <target name="-pre-compile-debug">
         <property name="ndk.debug" value="1" />
         <property name="file.out.dir" value="${out.dir}/debug" />
         <echo level="info">Builds the ${ndk.module} module in DEBUG mode.</echo>
-        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
     </target>
 
     <!-- target -pre-compile-release -->
@@ -101,7 +82,18 @@
         <property name="ndk.debug" value="0" />
         <property name="file.out.dir" value="${out.dir}/release" />
         <echo level="info">Builds the ${ndk.module} module in RELEASE mode.</echo>
-        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
+
+        <!-- delete call the __checkXXX methods -->
+        <echo level="info">Delete __checkXXX() methods call</echo>
+        <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </replaceregexp>
+
+        <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
+        <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
+        <replace dir="${src.dir}" includes="**/ProcessUtils.java" encoding="UTF-8">
+            <replacefilter token="this.writeUncaughtException" value="this.storeUncaughtException" />
+        </replace>
     </target>
 
     <!-- target -compile-jar -->
@@ -133,6 +125,8 @@
     <!-- target -compile-so -->
     <target name="-compile-so">
         <!-- compile c++ files -->
+        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
+        <echo level="info" />
         <exec executable="cmd.exe">
             <arg line="/C ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}" />
         </exec>
@@ -204,13 +198,13 @@
     </target>
 
     <!-- target test -->
-    <target name="test" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -post-compile" />
+    <target name="test" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -post-compile" />
 
     <!-- target debug -->
     <target name="debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -delete-debug-call, -replace-release-call, -compile-jar, -compile-so, -post-compile" />
+    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all -->
     <target name="all">

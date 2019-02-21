@@ -2,6 +2,7 @@ package android.ext.util;
 
 import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import static android.content.ContentResolver.SCHEME_FILE;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,8 @@ public final class UriUtils {
             } else {
                 return context.getContentResolver().openInputStream((Uri)uri);
             }
+        } else if (uri instanceof File) {
+            return new FileInputStream((File)uri);
         } else {
             final String uriString = uri.toString();
             if (FileUtils.isAbsolutePath(uriString)) {

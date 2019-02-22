@@ -88,7 +88,7 @@ public final class SimpleFileCache implements FileCache {
             if (dirent.isDirectory()) {
                 ++index;
                 final Pair<Integer, Long> pair = getFileCount(dirent);
-                result.append("  ").append(dirent.getName()).append(" [ files = ").append(pair.first).append(", size = ").append(Formatter.formatFileSize(context, pair.second)).append(" ]");
+                result.append("  ").append(dirent.getName()).append(" { files = ").append(pair.first).append(", size = ").append(Formatter.formatFileSize(context, pair.second)).append(" }");
 
                 fileCount += pair.first;
                 fileBytes += pair.second;

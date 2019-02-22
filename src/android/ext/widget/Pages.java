@@ -250,16 +250,13 @@ public final class Pages {
             final Formatter formatter  = new Formatter(result);
             final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
-            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
-            result.setLength(0);
-            printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
-
+            DebugUtils.dumpSummary(printer, result, 100, " PageCache [ %s, size = %d ] ", DebugUtils.toString(mPageCache), entries.size());
             for (Entry<Integer, Page<E>> entry : entries) {
                 final Page<E> page = entry.getValue();
                 result.setLength(0);
 
-                formatter.format("    Page %-2d ==> [ ", entry.getKey());
-                printer.println(DebugUtils.toString(page, result).append(", count = ").append(page.getCount()).append(" ]").toString());
+                formatter.format("  Page %-2d ==> ", entry.getKey());
+                printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
             }
         }
     }

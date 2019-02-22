@@ -241,7 +241,7 @@ public final class Pools {
 
         @Override
         /* package */ String dump(StringBuilder result, Object element) {
-            return result.append("  ").append(element).append(", length = ").append(((byte[])element).length).toString();
+            return result.append("  ").append(element).append(" { length = ").append(((byte[])element).length).append(" }").toString();
         }
     }
 

@@ -250,8 +250,7 @@ public final class DrawUtils {
      * @see #drawMirroredBitmap(Canvas, Bitmap, RectF, boolean, Paint)
      */
     public static void drawMirroredBitmap(Canvas canvas, Bitmap bitmap, float left, float top, float right, float bottom, boolean horizontal, Paint paint) {
-        final RectF rect = RectFPool.obtain();
-        rect.set(left, top, right, bottom);
+        final RectF rect = RectFPool.obtain(left, top, right, bottom);
         drawMirroredBitmap(canvas, bitmap, rect, horizontal, paint);
         RectFPool.recycle(rect);
     }
@@ -377,11 +376,9 @@ public final class DrawUtils {
      * @param container The frame of the containing space, in which the object will be placed.
      */
     public static void setShaderMatrix(Shader shader, int width, int height, RectF container) {
-        final RectF src = RectFPool.obtain();
-        src.set(0, 0, width, height);
-
         // Computes the scale value that map the source
         // rectangle to the destination rectangle.
+        final RectF src = RectFPool.obtain(0, 0, width, height);
         final Matrix matrix = MatrixPool.obtain();
         matrix.setRectToRect(src, container, ScaleToFit.FILL);
 
@@ -502,6 +499,12 @@ public final class DrawUtils {
             return sInstance.pool.obtain();
         }
 
+        public static Rect obtain(int left, int top, int right, int bottom) {
+            final Rect result = sInstance.pool.obtain();
+            result.set(left, top, right, bottom);
+            return result;
+        }
+
         public static void recycle(Rect rect) {
             sInstance.pool.recycle(rect);
         }
@@ -521,6 +524,12 @@ public final class DrawUtils {
 
         public static RectF obtain() {
             return sInstance.pool.obtain();
+        }
+
+        public static RectF obtain(float left, float top, float right, float bottom) {
+            final RectF result = sInstance.pool.obtain();
+            result.set(left, top, right, bottom);
+            return result;
         }
 
         public static void recycle(RectF rect) {
@@ -552,7 +561,7 @@ public final class DrawUtils {
     /**
      * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
-    public static final class FontMetricsPool implements Factory<FontMetrics> {
+    private static final class FontMetricsPool implements Factory<FontMetrics> {
         private static final FontMetricsPool sInstance = new FontMetricsPool();
         private final Pool<FontMetrics> pool = Pools.newSimplePool(this);
 

@@ -84,7 +84,7 @@
         <echo level="info">Builds the ${ndk.module} module in RELEASE mode.</echo>
 
         <!-- delete call the __checkXXX methods -->
-        <echo level="info">Delete __checkXXX() methods call</echo>
+        <echo level="info">Delete __checkXXX() methods</echo>
         <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>

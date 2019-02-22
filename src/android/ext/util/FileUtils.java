@@ -540,13 +540,7 @@ public final class FileUtils {
     }
 
     /**
-     * Reads the specified file contents into a {@link ByteArrayBuffer}.
-     * <h5>Accepts the following URI schemes:</h5>
-     * <ul><li>path (no scheme)</li>
-     * <li>file ({@link #SCHEME_FILE})</li>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
-     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * Equivalent to calling <tt>readFile(context, uri, new ByteArrayBuffer(), null, null)</tt>.
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read.
      * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
@@ -562,12 +556,6 @@ public final class FileUtils {
 
     /**
      * Equivalent to calling <tt>readFile(context, uri, out, null, null)</tt>.
-     * <h5>Accepts the following URI schemes:</h5>
-     * <ul><li>path (no scheme)</li>
-     * <li>file ({@link #SCHEME_FILE})</li>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
-     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read.
      * @param out The <tt>OutputStream</tt> to write to.
@@ -638,7 +626,7 @@ public final class FileUtils {
      * code. See {@link ErrnoException}.
      */
     public static int deleteOlderFiles(String dirPath, long minAge, int flags) {
-        return (minAge == -1 ? deleteFiles(dirPath, false) : scanFiles(dirPath, new DeleteCallback(minAge), flags, null));
+        return (minAge == -1 ? deleteFiles(dirPath, false) : scanFiles(dirPath, DeleteCallback.sInstance, flags, minAge));
     }
 
     /**
@@ -1565,18 +1553,14 @@ public final class FileUtils {
      * Class <tt>DeleteCallback</tt> is an implementation of a {@link ScanCallback}.
      */
     private static final class DeleteCallback implements ScanCallback {
-        private final long minAge;
-
-        public DeleteCallback(long minAge) {
-            this.minAge = minAge;
-        }
+        public static final ScanCallback sInstance = new DeleteCallback();
 
         @Keep
         @Override
         public int onScanFile(String path, int type, Object cookie) {
             if (type == Dirent.DT_REG) {
                 final long age = System.currentTimeMillis() - getLastModified(path);
-                if (age > minAge) {
+                if (age > (long)cookie) {
                     deleteFiles(path, false);
                 }
             }

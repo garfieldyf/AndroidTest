@@ -3,13 +3,11 @@ package android.ext.net;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.ext.content.AbsAsyncTask;
-import android.ext.util.ByteArrayBuffer;
 import android.util.Log;
 
 /**
@@ -86,7 +84,6 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
-     * @see #download()
      * @see #download(String, int, byte[])
      * @see #download(OutputStream, byte[])
      */
@@ -95,29 +92,10 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     }
 
     /**
-     * Downloads the resource from the remote server write to the {@link ByteArrayBuffer}.
-     * @return The {@link ByteArrayBuffer} contains the resource.
-     * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(String, int, byte[])
-     * @see #download(OutputStream, byte[])
-     */
-    protected final ByteArrayBuffer download() throws IOException {
-        final InputStream is = mRequest.mConnection.getInputStream();
-        try {
-            final ByteArrayBuffer result = new ByteArrayBuffer();
-            result.readFrom(is, this);
-            return result;
-        } finally {
-            is.close();
-        }
-    }
-
-    /**
      * Downloads the resource from the remote server write to the specified <em>out</em>.
      * @param out The {@link OutputStream} to write the resource.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download()
      * @see #download(String, int, byte[])
      */
     protected final void download(OutputStream out, byte[] tempBuffer) throws IOException {
@@ -131,7 +109,6 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param statusCode The response code returned by the remote server.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download()
      * @see #download(OutputStream, byte[])
      */
     protected final void download(String filename, int statusCode, byte[] tempBuffer) throws IOException {

@@ -89,7 +89,7 @@ public final class JsonUtils {
 
     /**
      * Equivalent to calling {@link JSONObject#optJSONArray(String)},
-     * handling <tt>null object</tt>.
+     * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return A <tt>JSONArray</tt> or <tt>null</tt>.
@@ -100,7 +100,7 @@ public final class JsonUtils {
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
-     * handling <tt>null array</tt>.
+     * handling <tt>null</tt> <em>array</em>.
      * @param array The <tt>JSONArray</tt>.
      * @param index The index of the <tt>JSONObject</tt>.
      * @return A <tt>JSONObject</tt> or <tt>null</tt>.
@@ -112,7 +112,7 @@ public final class JsonUtils {
 
     /**
      * Equivalent to calling {@link JSONObject#optJSONObject(String)},
-     * handling <tt>null object</tt>.
+     * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return A <tt>JSONObject</tt> or <tt>null</tt>.
@@ -124,7 +124,7 @@ public final class JsonUtils {
 
     /**
      * Equivalent to calling {@link JSONObject#optInt(String, int)},
-     * handling <tt>null object</tt>.
+     * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return An integer value or <em>fallback</em>.
@@ -135,7 +135,7 @@ public final class JsonUtils {
 
     /**
      * Equivalent to calling {@link JSONObject#optLong(String, long)},
-     * handling <tt>null object</tt>.
+     * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return A long value or <em>fallback</em>.
@@ -145,14 +145,36 @@ public final class JsonUtils {
     }
 
     /**
+     * Equivalent to calling {@link JSONObject#optDouble(String, double)},
+     * handling <tt>null</tt> <em>object</em>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A double value or <em>fallback</em>.
+     */
+    public static double optDouble(JSONObject object, String name, double fallback) {
+        return (object != null ? object.optDouble(name, fallback) : fallback);
+    }
+
+    /**
      * Equivalent to calling {@link JSONObject#optString(String, String)},
-     * handling <tt>null object</tt>.
+     * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return A <tt>String</tt> value or <em>fallback</em>.
      */
     public static String optString(JSONObject object, String name, String fallback) {
         return (object != null ? object.optString(name, fallback) : fallback);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optBoolean(String, boolean)},
+     * handling <tt>null</tt> <em>object</em>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A boolean value or <em>fallback</em>.
+     */
+    public static boolean optBoolean(JSONObject object, String name, boolean fallback) {
+        return (object != null ? object.optBoolean(name, fallback) : fallback);
     }
 
     /**

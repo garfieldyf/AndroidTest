@@ -75,21 +75,19 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
 
     @Override
     /* package */ void dump(Context context, Printer printer) {
-        final String className = getClass().getSimpleName();
         final StringBuilder result = new StringBuilder(256);
         final Collection<String> files = entries().values();
-
-        if (this instanceof LruFileCache2) {
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", className, files.size(), Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));
-        } else {
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", className, files.size(), maxSize());
-        }
+        dumpSummary(context, printer, result, files.size());
 
         for (String file : files) {
             result.setLength(0);
             printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, FileUtils.getFileLength(file))).append(" }").toString());
         }
 
-        SimpleFileCache.dumpCachedFiles(context, printer, mCacheDir, result, className);
+        SimpleFileCache.dumpCachedFiles(context, printer, mCacheDir, result, getClass().getSimpleName());
+    }
+
+    /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), count, maxSize());
     }
 }

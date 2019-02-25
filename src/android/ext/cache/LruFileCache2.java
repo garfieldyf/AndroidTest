@@ -1,7 +1,11 @@
 package android.ext.cache;
 
+import android.content.Context;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.os.StatFs;
+import android.text.format.Formatter;
+import android.util.Printer;
 
 /**
  * Like as {@link LruFileCache}, but the {@link #maxSize()}
@@ -35,5 +39,10 @@ public class LruFileCache2 extends LruFileCache {
     @Override
     protected int sizeOf(String key, String value) {
         return (int)FileUtils.getFileLength(value);
+    }
+
+    @Override
+    /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", getClass().getSimpleName(), count, Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));
     }
 }

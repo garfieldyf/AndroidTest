@@ -9,7 +9,7 @@ import android.util.Printer;
  * to recycle the evicted bitmap to reused.
  * @author Garfield
  */
-public class LruBitmapCache2<K> extends LruBitmapCache<K> {
+public class LruBitmapCache2<K> extends LruBitmapCache<K> implements ImageCache<K, Bitmap> {
     protected final BitmapPool mBitmapPool;
 
     /**
@@ -37,18 +37,15 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
         mBitmapPool = new LinkedBitmapPool(maxPoolSize);
     }
 
-    /**
-     * Returns the {@link BitmapPool} associated with this cache.
-     * @return The <tt>BitmapPool</tt>.
-     */
-    public final BitmapPool getBitmapPool() {
-        return mBitmapPool;
-    }
-
     @Override
     public void clear() {
         super.clear();
         mBitmapPool.clear();
+    }
+
+    @Override
+    public BitmapPool getBitmapPool() {
+        return mBitmapPool;
     }
 
     @Override

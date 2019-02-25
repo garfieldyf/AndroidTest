@@ -8,6 +8,7 @@ import android.ext.cache.BitmapPool;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
+import android.ext.cache.ImageCache;
 import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
@@ -334,13 +335,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         }
 
         private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, Class clazz) {
-            BitmapPool bitmapPool = null;
-            if (imageCache instanceof LruBitmapCache2) {
-                bitmapPool = ((LruBitmapCache2)imageCache).getBitmapPool();
-            } else if (imageCache instanceof LruImageCache) {
-                bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
-            }
-
+            final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
             return (bitmapPool != null ? newInstance(clazz, new Class[] { Context.class, Parameters.class, BitmapPool.class }, context, parameters, bitmapPool) : newInstance(clazz, new Class[] { Context.class, Parameters.class }, context, parameters));
         }
     }

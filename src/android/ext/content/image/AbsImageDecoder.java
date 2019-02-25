@@ -140,7 +140,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     }
 
     /**
-     * Retrieves the bitmap from the internal bitmap cache to reuse.
+     * Retrieves the bitmap from the internal bitmap cache to reuse it.
      * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em>
      * <tt>inTempStorage</tt> and <tt>out...</tt> fields are set.

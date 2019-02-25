@@ -11,7 +11,7 @@ import android.util.Printer;
  * Class <tt>LruImageCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
  */
-public final class LruImageCache<K, Image> implements Cache<K, Object> {
+public final class LruImageCache<K, Image> implements ImageCache<K, Object> {
     private final Cache<K, Image> mImageCache;
     private final Cache<K, Bitmap> mBitmapCache;
 
@@ -69,12 +69,9 @@ public final class LruImageCache<K, Image> implements Cache<K, Object> {
         return Collections.unmodifiableMap(result);
     }
 
-    /**
-     * Returns the {@link BitmapPool} associated with this cache.
-     * @return The <tt>BitmapPool</tt> or <tt>null</tt>.
-     */
-    public final BitmapPool getBitmapPool() {
-        return (mBitmapCache instanceof LruBitmapCache2 ? ((LruBitmapCache2<?>)mBitmapCache).getBitmapPool() : null);
+    @Override
+    public BitmapPool getBitmapPool() {
+        return (mBitmapCache instanceof ImageCache ? ((ImageCache<?, ?>)mBitmapCache).getBitmapPool() : null);
     }
 
     /* package */ final void dump(Context context, Printer printer) {

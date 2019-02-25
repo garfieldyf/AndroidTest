@@ -212,6 +212,62 @@ public class PageScroller {
         return handled;
     }
 
+    public boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {
+        final int parentLeft  = parent.getPaddingLeft();
+        final int parentRight = parent.getWidth() - parent.getPaddingRight();
+        final int childLeft  = child.getLeft() + rect.left - child.getScrollX();
+        final int childRight = childLeft + rect.width();
+        final int offScreenLeft  = Math.min(0, childLeft - parentLeft);
+        final int offScreenRight = Math.max(0, childRight - parentRight);
+
+        int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(childLeft - parentLeft, offScreenRight));
+        if (dx != 0) {
+            if (dx > 0) {
+                dx = childLeft - parentLeft;
+            } else {
+                dx = -(parentRight - childRight);
+            }
+
+            if (immediate) {
+                parent.scrollBy(dx, 0);
+            } else {
+                parent.smoothScrollBy(dx, 0);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean scrollVertically(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {
+        final int parentTop = parent.getPaddingTop();
+        final int parentBottom = parent.getHeight() - parent.getPaddingBottom();
+        final int childTop = child.getTop() + rect.top - child.getScrollY();
+        final int childBottom  = childTop + rect.height();
+        final int offScreenTop = Math.min(0, childTop - parentTop);
+        final int offScreenBottom = Math.max(0, childBottom - parentBottom);
+
+        int dy = (offScreenTop != 0 ? offScreenTop : Math.min(childTop - parentTop, offScreenBottom));
+        if (dy != 0) {
+            if (dy > 0) {
+                dy = childTop - parentTop;
+            } else {
+                dy = -(parentBottom - childBottom);
+            }
+
+            if (immediate) {
+                parent.scrollBy(0, dy);
+            } else {
+                parent.smoothScrollBy(0, dy);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * Returns the adapter position of visible view from <tt>fromIndex</tt> to <tt>toIndex</tt>.
      * <p>Note: This method recommended call in the {@link LinearLayoutManager#findOneVisibleChild(int, int, boolean, boolean)}.</p>

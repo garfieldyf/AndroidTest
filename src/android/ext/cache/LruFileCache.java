@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import java.io.File;
 import java.util.Collection;
 import android.content.Context;
 import android.ext.util.DebugUtils;
@@ -11,8 +12,8 @@ import android.util.Printer;
  * Class <tt>LruFileCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
  */
-public class LruFileCache extends LruCache<String, String> implements FileCache {
-    protected final String mCacheDir;
+public class LruFileCache extends LruCache<String, File> implements FileCache {
+    protected final File mCacheDir;
 
     /**
      * Constructor
@@ -20,7 +21,7 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
      * @param maxSize The maximum number of files to allow in this cache.
      * @see #LruFileCache(Context, String, int)
      */
-    public LruFileCache(String cacheDir, int maxSize) {
+    public LruFileCache(File cacheDir, int maxSize) {
         super(maxSize);
         mCacheDir = cacheDir;
     }
@@ -28,27 +29,26 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param name A relative path within the cache directory, such as
-     * <tt>"file_cache"</tt>.
+     * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
      * @param maxSize The maximum number of files to allow in this cache.
-     * @see #LruFileCache(String, int)
+     * @see #LruFileCache(File, int)
      */
     public LruFileCache(Context context, String name, int maxSize) {
         super(maxSize);
-        mCacheDir = FileUtils.getCacheDir(context, name).getPath();
+        mCacheDir = FileUtils.getCacheDir(context, name);
     }
 
     @Override
-    public String getCacheDir() {
+    public File getCacheDir() {
         return mCacheDir;
     }
 
     @Override
-    public String get(String key) {
-        String result = super.get(key);
+    public File get(String key) {
+        File result = super.get(key);
         if (result == null) {
             result = buildCacheFile(key);
-            if (FileUtils.access(result, FileUtils.F_OK) == 0) {
+            if (result.exists()) {
                 put(key, result);
             }
         }
@@ -57,9 +57,9 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
     }
 
     @Override
-    protected void entryRemoved(boolean evicted, String key, String oldValue, String newValue) {
-        if (evicted || !oldValue.equals(newValue)) {
-            FileUtils.deleteFiles(oldValue, false);
+    protected void entryRemoved(boolean evicted, String key, File oldFile, File newFile) {
+        if (evicted || !oldFile.equals(newFile)) {
+            oldFile.delete();
         }
     }
 
@@ -67,21 +67,22 @@ public class LruFileCache extends LruCache<String, String> implements FileCache 
      * Builds the cache file with the specified <em>key</em>. <p>The method is called without
      * synchronization: other threads may access the cache while this method is executing.</p>
      * @param key The key.
-     * @return The absolute path of the cache file. Never <tt>null</tt>.
+     * @return The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
      */
-    protected String buildCacheFile(String key) {
-        return new StringBuilder(mCacheDir.length() + key.length() + 3).append(mCacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString();
+    protected File buildCacheFile(String key) {
+        final String cacheDir = mCacheDir.getPath();
+        return new File(new StringBuilder(cacheDir.length() + key.length() + 3).append(cacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     @Override
     /* package */ void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
-        final Collection<String> files = entries().values();
+        final Collection<File> files = entries().values();
         dumpSummary(context, printer, result, files.size());
 
-        for (String file : files) {
+        for (File file : files) {
             result.setLength(0);
-            printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, FileUtils.getFileLength(file))).append(" }").toString());
+            printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, file.length())).append(" }").toString());
         }
 
         SimpleFileCache.dumpCachedFiles(context, printer, mCacheDir, result, getClass().getSimpleName());

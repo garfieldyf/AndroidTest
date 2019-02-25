@@ -1,6 +1,7 @@
 package android.ext.content.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import android.content.Context;
@@ -186,11 +187,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?> task, String url, String imageFile, Object[] params, int flags, byte[] buffer) {
+    protected Image loadImage(Task<?, ?> task, String url, File imageFile, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
-            return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(url).append("'\n").append(e).toString());
             return null;
@@ -225,23 +226,23 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
     private final class URLLoader implements Loader<Image> {
-        private final String mCacheDir;
+        private final File mCacheDir;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
          */
         public URLLoader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache").getPath();
+            mCacheDir = FileUtils.getCacheDir(context, ".temp_image_cache");
         }
 
         @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
-            final String imageFile = mCacheDir + "/" + Thread.currentThread().hashCode();
+            final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
             } finally {
-                FileUtils.deleteFiles(imageFile, false);
+                imageFile.delete();
             }
         }
     }
@@ -263,10 +264,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         @Override
         public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
-            final String imageFile = mCache.get(hashKey);
+            final File imageFile = mCache.get(hashKey);
             Image result = null;
 
-            if (FileUtils.access(imageFile, FileUtils.F_OK) == 0) {
+            if (imageFile.exists()) {
                 // Decodes the image file, If file cache hit.
                 if ((result = mDecoder.decodeImage(imageFile, params, flags, buffer)) != null) {
                     return result;
@@ -278,13 +279,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
             if (!isTaskCancelled(task)) {
                 // Loads the image from url, If the image file is not exists or decode failed.
-                final String tempFile = imageFile + "." + Thread.currentThread().hashCode();
-                if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile, imageFile) == 0) {
+                final File tempFile = new File(imageFile.getPath() + "." + Thread.currentThread().hashCode());
+                if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
                     // Saves the image file to file cache, If load succeeded.
                     mCache.put(hashKey, imageFile);
                 } else {
-                    // Deletes the image file, If load failed.
-                    FileUtils.deleteFiles(tempFile, false);
+                    // Deletes the temp file, If load failed.
+                    tempFile.delete();
                 }
             }
 

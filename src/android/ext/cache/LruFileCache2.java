@@ -1,8 +1,8 @@
 package android.ext.cache;
 
+import java.io.File;
 import android.content.Context;
 import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
 import android.os.StatFs;
 import android.text.format.Formatter;
 import android.util.Printer;
@@ -18,9 +18,9 @@ public class LruFileCache2 extends LruFileCache {
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum sum of the bytes of the files
      * to allow in this cache.
-     * @see #LruFileCache2(String, float)
+     * @see #LruFileCache2(File, float)
      */
-    public LruFileCache2(String cacheDir, int maxSize) {
+    public LruFileCache2(File cacheDir, int maxSize) {
         super(cacheDir, maxSize);
     }
 
@@ -30,15 +30,15 @@ public class LruFileCache2 extends LruFileCache {
      * @param scaleStorage The scale of storage, expressed as a
      * percentage of the total number of bytes supported by the
      * current device.
-     * @see #LruFileCache2(String, int)
+     * @see #LruFileCache2(File, int)
      */
-    public LruFileCache2(String cacheDir, float scaleStorage) {
-        super(cacheDir, Math.min((int)(new StatFs(cacheDir).getTotalBytes() * scaleStorage), 300 * 1024 * 1024));
+    public LruFileCache2(File cacheDir, float scaleStorage) {
+        super(cacheDir, Math.min((int)(new StatFs(cacheDir.getPath()).getTotalBytes() * scaleStorage), 300 * 1024 * 1024));
     }
 
     @Override
-    protected int sizeOf(String key, String value) {
-        return (int)FileUtils.getFileLength(value);
+    protected int sizeOf(String key, File file) {
+        return (int)file.length();
     }
 
     @Override

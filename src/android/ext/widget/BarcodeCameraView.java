@@ -308,12 +308,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         }
 
         // Sets the camera focus mode and scene mode.
-        final List<String> focusModes = params.getSupportedFocusModes();
-        final boolean autoFocus = (focusModes == null || !focusModes.contains(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE));
+        final boolean autoFocus = !contains(params.getSupportedFocusModes(), Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         params.setFocusMode(autoFocus ? Parameters.FOCUS_MODE_AUTO : Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
 
-        final List<String> sceneModes = params.getSupportedSceneModes();
-        if (sceneModes != null && sceneModes.contains(Parameters.SCENE_MODE_BARCODE)) {
+        if (contains(params.getSupportedSceneModes(), Parameters.SCENE_MODE_BARCODE)) {
             params.setSceneMode(Parameters.SCENE_MODE_BARCODE);
         }
 
@@ -364,6 +362,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         }
 
         return (previewSize != null ? previewSize : params.getPreviewSize());
+    }
+
+    private static boolean contains(List<String> supportedModes, String mode) {
+        return (supportedModes != null && supportedModes.contains(mode));
     }
 
     private static void __checkDumpSize(List<Size> sizes, Point screenSize) {

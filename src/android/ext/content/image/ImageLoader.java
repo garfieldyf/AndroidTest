@@ -208,7 +208,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Interface <tt>Loader</tt> used to load image from the specified url.
      */
-    public static interface Loader<Image> {
+    private static interface Loader<Image> {
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.

@@ -25,31 +25,6 @@ import android.util.Printer;
  */
 public final class FileUtils {
     /**
-     * The file exists, this flag use with {@link #access(String, int)}.
-     */
-    public static final int F_OK = 0x00;
-
-    /**
-     * The file executable, this flag use with {@link #access(String, int)}.
-     */
-    public static final int X_OK = 0x01;
-
-    /**
-     * The file writable, this flag use with {@link #access(String, int)}.
-     */
-    public static final int W_OK = 0x02;
-
-    /**
-     * The file readable, this flag use with {@link #access(String, int)}.
-     */
-    public static final int R_OK = 0x04;
-
-    /**
-     * The file readable, writable and executable, this flag use with {@link #access(String, int)}.
-     */
-    public static final int A_OK = R_OK | W_OK | X_OK;
-
-    /**
      * This flag use with {@link #mkdirs(String, int)}. If
      * set the last item in path is a file name, so ignore.
      * <P>Example: if path is "/mnt/sdcard/mydir/myfile",
@@ -227,17 +202,6 @@ public final class FileUtils {
     public static native int mkdirs(String path, int flags);
 
     /**
-     * Checks the file access mode with the specified <em>path</em>.
-     * This operation is supported for both file and directory.
-     * @param path The file or directory path, must be absolute file path.
-     * @param mode The access mode. May be any combination of {@link #F_OK},
-     * {@link #R_OK}, {@link #W_OK}, {@link #X_OK} and {@link #A_OK}.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise
-     * returns an error code. See {@link ErrnoException}.
-     */
-    public static native int access(String path, int mode);
-
-    /**
      * Returns the file status (include mode, uid, gid, size, etc.) with the specified
      * <em>path</em>. This operation is supported for both file and directory.
      * @param path The file or directory path, must be absolute file path.
@@ -334,8 +298,8 @@ public final class FileUtils {
     /**
      * Returns the start index of the extension in the specified <em>path</em>.
      * @param path The file pathname.
-     * @return The start index of the extension (excluding dot <tt>.</tt>),
-     * or <tt>-1</tt> if the extension was not found.
+     * @return The start index of the extension (excluding dot <tt>.</tt>), or
+     * <tt>-1</tt> if the extension was not found.
      * @see #findFileName(String)
      */
     public static int findFileExtension(String path) {
@@ -390,8 +354,7 @@ public final class FileUtils {
      * Returns the file extension of specified file. The result string
      * excluding dot (<tt>.</tt>)
      * @param path The file pathname.
-     * @return The extension, or <tt>null</tt> if the extension was not
-     * found.
+     * @return The extension, or <tt>null</tt> if the extension was not found.
      * @see #getFileName(String)
      * @see #getFileParent(String)
      * @see #getFileMimeType(String)
@@ -404,8 +367,7 @@ public final class FileUtils {
     /**
      * Return the MIME type (such as "text/plain") of specified file.
      * @param path The file pathname.
-     * @return The MIME type, or <tt>null</tt> if the MIME type was
-     * not found.
+     * @return The MIME type, or <tt>null</tt> if the MIME type was not found.
      * @see #getFileName(String)
      * @see #getFileParent(String)
      * @see #getFileExtension(String)
@@ -420,7 +382,6 @@ public final class FileUtils {
      * @return The file type, one of <tt>Stat.S_IFXXX</tt> constants if the
      * operation succeeded, <tt>0</tt> otherwise.
      * @see #getFileMode(String)
-     * @see #getFileLength(String)
      */
     public static int getFileType(String path) {
         return (getFileMode(path) & Stat.S_IFMT);
@@ -432,26 +393,8 @@ public final class FileUtils {
      * @param path The file or directory path, must be absolute file path.
      * @return The file protection if the operation succeeded, <tt>0</tt> otherwise.
      * @see #getFileType(String)
-     * @see #getFileLength(String)
      */
     public static native int getFileMode(String path);
-
-    /**
-     * Returns the length of the file with the specified <em>filename</em> in bytes.
-     * @param filename The filename, must be absolute file path.
-     * @return The number of bytes if the operation succeeded, <tt>0</tt> otherwise.
-     * @see #getFileMode(String)
-     * @see #getFileType(String)
-     */
-    public static native long getFileLength(String filename);
-
-    /**
-     * Returns the specified file the last modified time, in milliseconds since January
-     * 1, 1970, midnight.
-     * @param filename The filename, must be absolute file path.
-     * @return The last modified time if the operation succeeded, <tt>0</tt> otherwise.
-     */
-    public static native long getLastModified(String filename);
 
     /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
@@ -614,20 +557,6 @@ public final class FileUtils {
      * error code. See {@link ErrnoException}.
      */
     public static native int deleteFiles(String path, boolean deleteSelf);
-
-    /**
-     * Delete older files in a directory until only those younger than <em>minAge</em>.
-     * @param dirPath The directory path, must be absolute file path.
-     * @param minAge Always keep files younger than this age, or <tt>-1</tt> delete all
-     * files in the <em>dirPath</em>.
-     * @param flags The flags. May be <tt>0</tt> or any combination of
-     * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error
-     * code. See {@link ErrnoException}.
-     */
-    public static int deleteOlderFiles(String dirPath, long minAge, int flags) {
-        return (minAge == -1 ? deleteFiles(dirPath, false) : scanFiles(dirPath, DeleteCallback.sInstance, flags, minAge));
-    }
 
     /**
      * Creates a file with the specified <em>filename</em>. If the file was
@@ -922,8 +851,8 @@ public final class FileUtils {
         public long size;
 
         /**
-         * The last modify time, in milliseconds. This corresponds
-         * to the linux <tt>stat.st_mtime</tt> field.
+         * The last modify time, in milliseconds since
+         * January 1st, 1970, midnight.
          */
         public long mtime;
 
@@ -1195,15 +1124,6 @@ public final class FileUtils {
         }
 
         /**
-         * Returns the length of this <tt>Dirent</tt> in bytes.
-         * @return The number of bytes if the operation succeeded,
-         * <tt>0</tt> otherwise.
-         */
-        public long length() {
-            return getFileLength(path);
-        }
-
-        /**
          * Returns the file's name of this <tt>Dirent</tt>.
          * @return The file's name of this <tt>Dirent</tt>.
          * @see #getParent()
@@ -1260,14 +1180,6 @@ public final class FileUtils {
             this.path = path;
             this.type = getType(path);
             Dirent.__checkDirentType(this);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.access(path, mode)</tt>.
-         * @see FileUtils#access(String, int)
-         */
-        public int access(int mode) {
-            return FileUtils.access(path, mode);
         }
 
         /**
@@ -1392,7 +1304,7 @@ public final class FileUtils {
          */
         public static int getType(String path) {
             DebugUtils.__checkError(path == null, "path == null");
-            return (getFileMode(path) & Stat.S_IFMT) >> 12;
+            return (getFileType(path) >> 12);
         }
 
         /**
@@ -1545,26 +1457,6 @@ public final class FileUtils {
             final Dirent dirent = (Dirent)result.first.newInstance();
             dirent.initialize(path, type);
             result.second.add(dirent);
-            return SC_CONTINUE;
-        }
-    }
-
-    /**
-     * Class <tt>DeleteCallback</tt> is an implementation of a {@link ScanCallback}.
-     */
-    private static final class DeleteCallback implements ScanCallback {
-        public static final ScanCallback sInstance = new DeleteCallback();
-
-        @Keep
-        @Override
-        public int onScanFile(String path, int type, Object cookie) {
-            if (type == Dirent.DT_REG) {
-                final long age = System.currentTimeMillis() - getLastModified(path);
-                if (age > (long)cookie) {
-                    deleteFiles(path, false);
-                }
-            }
-
             return SC_CONTINUE;
         }
     }

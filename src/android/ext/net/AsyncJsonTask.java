@@ -132,16 +132,14 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {
-        Result result = null;
+        boolean hitCache = false;
         try {
-            result = JsonUtils.parse(null, cacheFile, this);
+            final Result result = JsonUtils.parse(null, cacheFile, this);
+            if (hitCache = validateResult(params, result)) {
+                publishProgress(result);
+            }
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
-        }
-
-        final boolean hitCache = validateResult(params, result);
-        if (hitCache) {
-            publishProgress(result);
         }
 
         return hitCache;

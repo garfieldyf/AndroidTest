@@ -123,16 +123,14 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     private boolean loadFromCache(Task task, Key key, LoadParams params, File cacheFile) {
-        Result result = null;
+        boolean hitCache = false;
         try {
-            result = JsonUtils.parse(null, cacheFile, task);
+            final Result result = JsonUtils.parse(null, cacheFile, task);
+            if (hitCache = validateResult(key, params, result)) {
+                task.setProgress(result);
+            }
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
-        }
-
-        final boolean hitCache = validateResult(key, params, result);
-        if (hitCache) {
-            task.setProgress(result);
         }
 
         return hitCache;

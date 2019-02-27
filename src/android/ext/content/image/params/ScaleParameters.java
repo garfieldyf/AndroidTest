@@ -67,10 +67,9 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity and opts.inTargetDensity uninitialized");
         opts.inSampleSize = 1;
-        if (Float.compare(scale, +0.0f) <= 0 || Float.compare(scale, +1.0f) >= 0) {
-            opts.inDensity = opts.inTargetDensity = 0;
-        } else {
+        if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
             final int targetDensity = (int)value;
             opts.inTargetDensity = targetDensity;
             opts.inDensity = (int)(targetDensity * (opts.outWidth / (opts.outWidth * scale)));

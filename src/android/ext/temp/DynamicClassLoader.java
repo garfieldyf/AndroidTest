@@ -1,9 +1,12 @@
-package android.ext.util;
+package android.ext.temp;
 
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import android.content.Context;
+import android.ext.util.ArrayUtils;
+import android.ext.util.ClassUtils;
+import android.ext.util.FileUtils;
 import dalvik.system.DexClassLoader;
 
 /**

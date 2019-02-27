@@ -149,9 +149,10 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         final String tempFile = cacheFile + ".tmp";
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isCancelled()) {
-            // If cache file is hit and the cache file's contents are equal
-            // the temp file's contents. Returns null, do not update UI.
+            // If cache file is hit and the cache file's contents are equal the temp
+            // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
+                FileUtils.deleteFiles(tempFile, false);
                 return null;
             }
 

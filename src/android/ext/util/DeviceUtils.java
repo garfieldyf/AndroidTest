@@ -9,7 +9,6 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.ext.net.NetworkUtils;
-import android.ext.util.FileUtils.Stat;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
@@ -101,15 +100,6 @@ public final class DeviceUtils {
         }
 
         return String.format(format.toString(), result);
-    }
-
-    /**
-     * Checks the device is rooted.
-     * @return <tt>true</tt> if the device is rooted, <tt>false</tt> otherwise.
-     */
-    public static boolean checkSuperUser() {
-        final Stat stat = new Stat();
-        return (checkSuperUser("/system/bin/su", stat) || checkSuperUser("/system/xbin/su", stat));
     }
 
     /**
@@ -306,10 +296,6 @@ public final class DeviceUtils {
         }
 
         return userLabel;
-    }
-
-    private static boolean checkSuperUser(String path, Stat stat) {
-        return (FileUtils.stat(path, stat) == 0 && stat.uid == 0 && (stat.mode & (Stat.S_ISUID | Stat.S_IXOTH)) != 0);
     }
 
     /**

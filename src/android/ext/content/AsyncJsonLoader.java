@@ -140,9 +140,10 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         final String tempFile = cacheFile + ".tmp";
         final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-            // If cache file is hit and the cache file's contents are equal
-            // the temp file's contents. Returns null, do not update UI.
+            // If cache file is hit and the cache file's contents are equal the temp
+            // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
+                FileUtils.deleteFiles(tempFile, false);
                 return null;
             }
 

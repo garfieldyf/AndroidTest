@@ -66,8 +66,7 @@ public final class SimpleFileCache implements FileCache {
     }
 
     private File buildCacheFile(String key) {
-        final String cacheDir = mCacheDir.getPath();
-        return new File(new StringBuilder(cacheDir.length() + key.length() + 3).append(cacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString());
+        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     /* package */ final void dump(Context context, Printer printer) {

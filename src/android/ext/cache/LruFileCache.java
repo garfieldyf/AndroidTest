@@ -70,8 +70,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
      * @return The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
      */
     protected File buildCacheFile(String key) {
-        final String cacheDir = mCacheDir.getPath();
-        return new File(new StringBuilder(cacheDir.length() + key.length() + 3).append(cacheDir).append('/').append(key.charAt(0)).append('/').append(key).toString());
+        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     @Override

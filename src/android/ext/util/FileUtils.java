@@ -9,7 +9,6 @@ import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.regex.Pattern;
 import android.content.Context;
 import android.ext.util.Pools.Factory;
 import android.support.annotation.Keep;
@@ -135,15 +134,6 @@ public final class FileUtils {
                 Log.e(FileUtils.class.getName(), "Couldn't close - " + c.getClass().getName(), e);
             }
         }
-    }
-
-    /**
-     * Tests if the filename is valid.
-     * @param filename The filename to test.
-     * @return <tt>true</tt> if the filename is valid, <tt>false</tt> otherwise.
-     */
-    public static boolean isFilenameValid(CharSequence filename) {
-        return (!(StringUtils.getLength(filename) == 0 || ".".contentEquals(filename) || "..".contentEquals(filename)) && RegexPattern.sInstance.matcher(filename).matches());
     }
 
     /**
@@ -1078,6 +1068,7 @@ public final class FileUtils {
          */
         public Dirent(String path, int type) {
             initialize(path, type);
+            Dirent.__checkDirentType(type);
         }
 
         /**
@@ -1091,6 +1082,7 @@ public final class FileUtils {
          */
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
+            Dirent.__checkDirentType(type);
             initialize(buildPath(dir, name), type);
         }
 
@@ -1172,57 +1164,16 @@ public final class FileUtils {
         }
 
         /**
-         * Sets the {@link #path} to the specified <em>path</em>.
+         * Sets the specified <em>path</em> to this <tt>Dirent</tt>.
          * @param path The absolute file path. Never <tt>null</tt>.
+         * If the file can not be found on the filesystem, The type
+         * of this <tt>Dirent</tt> is {@link #DT_UNKNOWN}.
          */
         public void setPath(String path) {
             DebugUtils.__checkError(path == null, "path == null");
             this.path = path;
             this.type = getType(path);
             Dirent.__checkDirentType(this);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.mkdirs(path, flags)</tt>.
-         * @see FileUtils#mkdirs(String, int)
-         */
-        public int mkdirs(int flags) {
-            return FileUtils.mkdirs(path, flags);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.stat(path)</tt>.
-         * @see #stat(Stat)
-         * @see FileUtils#stat(String)
-         */
-        public Stat stat() {
-            final Stat stat = new Stat();
-            return (FileUtils.stat(path, stat) == 0 ? stat : null);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.stat(path, outStat)</tt>.
-         * @see #stat()
-         * @see FileUtils#stat(String, Stat)
-         */
-        public int stat(Stat outStat) {
-            return FileUtils.stat(path, outStat);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.listFiles(path, 0)</tt>.
-         * @see FileUtils#listFiles(String, int)
-         */
-        public List<Dirent> listFiles() {
-            return FileUtils.listFiles(path, 0);
-        }
-
-        /**
-         * Equivalent to calling <tt>FileUtils.scanFiles(path, callback, flags, cookie)</tt>.
-         * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
-         */
-        public int scanFiles(ScanCallback callback, int flags, Object cookie) {
-            return FileUtils.scanFiles(path, callback, flags, cookie);
         }
 
         @Override
@@ -1371,6 +1322,23 @@ public final class FileUtils {
             }
         }
 
+        private static void __checkDirentType(int type) {
+            switch (type) {
+            case DT_UNKNOWN:
+            case DT_FIFO:
+            case DT_CHR:
+            case DT_DIR:
+            case DT_BLK:
+            case DT_REG:
+            case DT_LNK:
+            case DT_SOCK:
+                break;
+
+            default:
+                throw new AssertionError("Unknown Dirent type - " + type);
+            }
+        }
+
         private static void __checkDirentType(Dirent dirent) {
             final int type;
             switch (getFileType(dirent.path)) {
@@ -1422,13 +1390,6 @@ public final class FileUtils {
                 return new Dirent();
             }
         };
-    }
-
-    /**
-     * Regular expression for valid filenames : no spaces or metacharacters.
-     */
-    private static final class RegexPattern {
-        public static final Pattern sInstance = Pattern.compile("[\\w%+,./=_-]+");
     }
 
     /**

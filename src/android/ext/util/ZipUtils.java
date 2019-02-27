@@ -180,8 +180,8 @@ public final class ZipUtils {
             os.putNextEntry(new ZipEntry(name));
 
             // lists the sub files from path.
-            final List<Dirent> dirents = dirent.listFiles();
-            for (int i = 0, size = dirents.size(); i < size; ++i) {
+            final List<Dirent> dirents = FileUtils.listFiles(dirent.path, 0);
+            for (int i = 0, size = ArrayUtils.getSize(dirents); i < size; ++i) {
                 final Dirent child = dirents.get(i);
                 compress(os, child, name + child.getName(), cancelable, buffer);
             }

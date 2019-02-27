@@ -12,7 +12,6 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.UIHandler;
-import android.os.Message;
 import android.util.ArrayMap;
 import android.util.Printer;
 
@@ -204,24 +203,6 @@ public abstract class Loader implements Factory<Task> {
             return result;
         }
 
-        /**
-         * Called on the UI thread when this task handle messages.
-         * <p><b>Note: Do not call this method directly.</b></p>
-         * @param msg A {@link Message} to handle.
-         */
-        @SuppressWarnings("unchecked")
-        public final void handleMessage(Message msg) {
-            switch (msg.what) {
-            case MESSAGE_PROGRESS:
-                onProgress(mParams, (Object[])msg.obj);
-                break;
-
-            case MESSAGE_FINISHED:
-                onPostExecute(mParams, (Result)msg.obj);
-                break;
-            }
-        }
-
         @Override
         public final boolean isCancelled() {
             return (mState.get() == CANCELLED);
@@ -256,26 +237,24 @@ public abstract class Loader implements Factory<Task> {
          * Runs on the UI thread after {@link #setProgress(Object[])} is
          * invoked. The default implementation do nothing. If you write
          * your own implementation, do not call <tt>super.onProgress()</tt>
-         * @param params The parameters of the task.
          * @param values The progress values, passed earlier by {@link #setProgress}.
          */
-        /* package */ void onProgress(Params[] params, Object[] values) {
+        public void onProgress(Object[] values) {
         }
+
+        /**
+         * Runs on the UI thread after {@link #doInBackground(Params[])}.
+         * @param result The result, returned earlier by {@link #doInBackground}.
+         * @see #doInBackground(Params[])
+         */
+        public abstract void onPostExecute(Result result);
 
         /**
          * Overrides this method to perform a computation on a background thread.
          * @param params The parameters of the task.
          * @return A result, defined by the subclass of this task.
-         * @see #onPostExecute(Params[], Result)
+         * @see #onPostExecute(Result)
          */
-        /* package */ abstract Result doInBackground(Params[] params);
-
-        /**
-         * Runs on the UI thread after {@link #doInBackground(Params[])}.
-         * @param params The parameters of the task.
-         * @param result The result, returned earlier by {@link #doInBackground}.
-         * @see #doInBackground(Params[])
-         */
-        /* package */ abstract void onPostExecute(Params[] params, Result result);
+        public abstract Result doInBackground(Params[] params);
     }
 }

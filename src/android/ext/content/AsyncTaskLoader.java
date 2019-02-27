@@ -193,20 +193,20 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         /* package */ Key mKey;
 
         @Override
-        /* package */ Result doInBackground(Params[] params) {
+        public Result doInBackground(Params[] params) {
             waitResumeIfPaused();
             return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, params) : null);
         }
 
         @Override
-        /* package */ void onProgress(Params[] params, Object[] values) {
+        public void onProgress(Object[] values) {
             if (mState != SHUTDOWN) {
-                onProgressUpdate(mKey, params, values);
+                onProgressUpdate(mKey, mParams, values);
             }
         }
 
         @Override
-        /* package */ void onPostExecute(Params[] params, Result result) {
+        public void onPostExecute(Result result) {
             if (mState != SHUTDOWN) {
                 // Removes the finished task from running
                 // tasks, excluding the cancelled task.
@@ -215,9 +215,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
                 }
 
                 if (isCancelled()) {
-                    onLoadCancelled(mKey, params, result);
+                    onLoadCancelled(mKey, mParams, result);
                 } else {
-                    onLoadComplete(mKey, params, result);
+                    onLoadComplete(mKey, mParams, result);
                 }
             }
 

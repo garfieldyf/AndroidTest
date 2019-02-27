@@ -253,7 +253,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         /* package */ Binder mBinder;
 
         @Override
-        /* package */ Value doInBackground(Params[] params) {
+        public Value doInBackground(Params[] params) {
             waitResumeIfPaused();
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
@@ -267,9 +267,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         }
 
         @Override
-        /* package */ void onPostExecute(Params[] params, Value value) {
+        public void onPostExecute(Value value) {
             if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
-                mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
+                mBinder.bindValue(mKey, mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
             // Recycles this task to avoid potential memory

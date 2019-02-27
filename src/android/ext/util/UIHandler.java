@@ -16,7 +16,7 @@ import android.view.View;
  * Class UIHandler
  * @author Garfield
  */
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class UIHandler extends Handler {
     /**
      * The {@link Handler} associated with the UI thread's message queue.
@@ -174,7 +174,7 @@ public final class UIHandler extends Handler {
         final Adapter adapter = recyclerView.getAdapter();
         DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
         if (recyclerView.isComputingLayout()) {
-            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair<Adapter, Object>(adapter, payload)));
+            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_ITEM_CHANGED, positionStart, itemCount, new Pair(adapter, payload)));
         } else {
             adapter.notifyItemRangeChanged(positionStart, itemCount, payload);
         }
@@ -194,22 +194,28 @@ public final class UIHandler extends Handler {
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      */
     public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
-        sendMessage(Message.obtain(this, MESSAGE_DISPATCH_MESSAGE, message, token, new Pair<DatabaseHandler, Object>(handler, result)));
+        sendMessage(Message.obtain(this, MESSAGE_DATABASE_MESSAGE, message, token, new Pair(handler, result)));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
         // Dispatch the Task messages.
         case MESSAGE_PROGRESS:
+            ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
+            break;
+
         case MESSAGE_FINISHED:
-            ((Task)msg.getCallback()).handleMessage(msg);
+            ((Task)msg.getCallback()).onPostExecute(msg.obj);
             break;
 
         // Dispatch the RecyclerView messages.
         case MESSAGE_CHILD_FOCUS:
             requestChildFocus((LayoutManager)msg.obj, msg.arg1, msg.arg2);
+            break;
+
+        case MESSAGE_ITEM_CHANGED:
+            dispatchItemChanged(msg);
             break;
 
         case MESSAGE_DATA_CHANGED:
@@ -228,15 +234,9 @@ public final class UIHandler extends Handler {
             ((Adapter)msg.obj).notifyItemRangeInserted(msg.arg1, msg.arg2);
             break;
 
-        case MESSAGE_ITEM_CHANGED:
-            final Pair<Adapter, Object> params = (Pair<Adapter, Object>)msg.obj;
-            params.first.notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
-            break;
-
         // Dispatch the DatabaseHandler messages.
-        case MESSAGE_DISPATCH_MESSAGE:
-            final Pair<DatabaseHandler, Object> param = (Pair<DatabaseHandler, Object>)msg.obj;
-            param.first.dispatchMessage(msg.arg1, msg.arg2, param.second);
+        case MESSAGE_DATABASE_MESSAGE:
+            dispatchDatabaseMessage(msg);
             break;
 
         default:
@@ -244,9 +244,16 @@ public final class UIHandler extends Handler {
         }
     }
 
-    /**
-     * Handle the recycler view's child view request focus.
-     */
+    private static void dispatchItemChanged(Message msg) {
+        final Pair params = (Pair)msg.obj;
+        ((Adapter)params.first).notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
+    }
+
+    private static void dispatchDatabaseMessage(Message msg) {
+        final Pair params = (Pair)msg.obj;
+        ((DatabaseHandler)params.first).dispatchMessage(msg.arg1, msg.arg2, params.second);
+    }
+
     private static void requestChildFocus(LayoutManager layoutManager, int position, int retryCount) {
         final View child = layoutManager.findViewByPosition(position);
         if (child != null) {
@@ -269,7 +276,7 @@ public final class UIHandler extends Handler {
     private static final int MESSAGE_ITEM_INSERTED = 0xEFEFEFEF;
 
     // The DatabaseHandler messages
-    private static final int MESSAGE_DISPATCH_MESSAGE = 0xFEFEFEFE;
+    private static final int MESSAGE_DATABASE_MESSAGE = 0xFEFEFEFE;
 
     /**
      * This class cannot be instantiated.

@@ -528,16 +528,16 @@ public final class ArrayUtils {
     private static void sortList(List list, int start, int end) {
         final Object[] array = list.toArray();
         Arrays.sort(array, start, end);
-        ArrayUtils.copy(list, array, start, end);
+        ArrayUtils.copyOfRange(list, array, start, end);
     }
 
     private static void sortList(List list, int start, int end, Comparator comparator) {
         final Object[] array = list.toArray();
         Arrays.sort(array, start, end, comparator);
-        ArrayUtils.copy(list, array, start, end);
+        ArrayUtils.copyOfRange(list, array, start, end);
     }
 
-    private static void copy(List list, Object[] array, int start, int end) {
+    private static void copyOfRange(List list, Object[] array, int start, int end) {
         final ListIterator itor = list.listIterator(start);
         for (int i = start; i < end; ++i) {
             itor.next();

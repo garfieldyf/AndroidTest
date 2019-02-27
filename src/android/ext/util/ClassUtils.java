@@ -71,7 +71,7 @@ public final class ClassUtils {
     }
 
     /**
-     * Retrieves the R.styleable.<em>name</em> attribute value. Like as <tt>R.styleable.Parameters</tt>.
+     * Retrieves the R.styleable.<em>name</em> attribute value.
      * @param context The <tt>Context</tt>.
      * @param name The name of styleable to retrieve.
      * @return The value of the attribute field.

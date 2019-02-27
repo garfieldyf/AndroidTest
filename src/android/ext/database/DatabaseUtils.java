@@ -31,6 +31,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
 import android.util.JsonWriter;
 import android.util.Log;
+import android.util.LogPrinter;
+import android.util.Pair;
+import android.util.Printer;
 
 /**
  * Class DatabaseUtils
@@ -574,31 +577,33 @@ public final class DatabaseUtils {
         return outValues;
     }
 
-    private static List<Field> getCursorFields(Class<?> clazz) {
+    private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
         DebugUtils.__checkError(clazz == null, "clazz == null");
         DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz.isPrimitive() || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
-        final List<Field> result = new ArrayList<Field>();
+        final List<Pair<Field, String>> result = new ArrayList<Pair<Field, String>>();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
-                DebugUtils.__checkError((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0, "Unsupported static or final field - " + field.toString());
-                if (field.getAnnotation(CursorField.class) != null) {
-                    result.add(field);
+                final CursorField cursorField = field.getAnnotation(CursorField.class);
+                if (cursorField != null) {
+                    DebugUtils.__checkError((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0, "Unsupported static or final field - " + field.toString());
                     field.setAccessible(true);
+                    result.add(new Pair<Field, String>(field, cursorField.value()));
                 }
             }
         }
 
+        DatabaseUtils.__checkDumpFields(result);
         return result;
     }
 
-    private static Object newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Field> fields) throws ReflectiveOperationException {
+    private static Object newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
         final Object result = constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
-            final Field field = fields.get(i);
-            final String name = field.getAnnotation(CursorField.class).value();
-            DebugUtils.__checkError(cursor.getColumnIndex(name) == -1, "The column '" + name + "' does not exist");
-            final int columnIndex = cursor.getColumnIndexOrThrow(name);
+            final Pair<Field, String> fieldInfo = fields.get(i);
+            final Field field = fieldInfo.first;
+            DebugUtils.__checkError(cursor.getColumnIndex(fieldInfo.second) == -1, "The column '" + fieldInfo.second + "' does not exist");
+            final int columnIndex = cursor.getColumnIndexOrThrow(fieldInfo.second);
             final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(result, cursor.getInt(columnIndex));
@@ -691,7 +696,7 @@ public final class DatabaseUtils {
         final int count = cursor.getCount();
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
-            final List<Field> fields = getCursorFields(componentType);
+            final List<Pair<Field, String>> fields = getCursorFields(componentType);
             final Constructor<?> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
             for (int i = 0; cursor.moveToNext(); ++i) {
                 result[i] = newInstanceImpl(cursor, constructor, fields);
@@ -728,6 +733,16 @@ public final class DatabaseUtils {
         }
 
         return result;
+    }
+
+    private static void __checkDumpFields(List<Pair<Field, String>> fields) {
+        final Printer printer = new LogPrinter(Log.DEBUG, DatabaseUtils.class.getSimpleName());
+        final StringBuilder result = new StringBuilder(100);
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fields.size());
+        for (Pair<Field, String> field : fields) {
+            result.setLength(0);
+            printer.println(result.append("  ").append(field.first).append(" { annotation = ").append(field.second).append(" }").toString());
+        }
     }
 
     /**

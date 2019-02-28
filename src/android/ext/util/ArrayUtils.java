@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.RandomAccess;
+import android.ext.util.Pools.Pool;
 import android.util.Log;
 
 /**
@@ -317,7 +318,7 @@ public final class ArrayUtils {
             try {
                 Arrays.sort(array(list), start, end);
             } catch (Exception e) {
-                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array");
+                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
                 sortList(list, start, end);
             }
         } else {
@@ -339,7 +340,7 @@ public final class ArrayUtils {
             try {
                 Arrays.sort(array(list), start, end, (Comparator<Object>)comparator);
             } catch (Exception e) {
-                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array");
+                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
                 sortList(list, start, end, comparator);
             }
         } else {
@@ -552,6 +553,34 @@ public final class ArrayUtils {
         }
 
         return (Object[])sArrayField.get(list);
+    }
+
+    /**
+     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
+     */
+    public static final class ByteArrayPool {
+        private static final Pool<byte[]> sInstance = Pools.newPool(2, 8192);
+
+        /**
+         * Retrieves a byte array from this pool. Allows us to avoid allocating new
+         * byte array in many cases. When the byte array can no longer be used, The
+         * caller should be call {@link #recycle(byte[])} to recycles the byte array.
+         * @return A byte array.
+         * @see #recycle(byte[])
+         */
+        public static byte[] obtain() {
+            return sInstance.obtain();
+        }
+
+        /**
+         * Recycles the specified <em>array</em> to this pool. After calling
+         * this function you must not ever touch the <em>array</em> again.
+         * @param array The byte array to recycle.
+         * @see #obtain()
+         */
+        public static void recycle(byte[] array) {
+            sInstance.recycle(array);
+        }
     }
 
     /**

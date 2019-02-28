@@ -14,6 +14,7 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
+import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.FileUtils.Dirent;
 
 /**
@@ -122,15 +123,16 @@ public final class ZipUtils {
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
         os.setLevel(compressionLevel);
 
+        final byte[] buffer = ByteArrayPool.obtain();
         try {
             // Compresses the files.
             final Dirent dirent = new Dirent();
-            final byte[] buffer = new byte[8192];
             for (int i = 0, size = ArrayUtils.getSize(files); i < size && !cancelable.isCancelled(); ++i) {
                 dirent.setPath(files.get(i));
                 compress(os, dirent, dirent.getName(), cancelable, buffer);
             }
         } finally {
+            ByteArrayPool.recycle(buffer);
             os.close();
         }
     }
@@ -147,7 +149,8 @@ public final class ZipUtils {
      * @see #compress(String, int, Cancelable, String[])
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
-        final ZipFile file = new ZipFile(zipFile);
+        final ZipFile file  = new ZipFile(zipFile);
+        final byte[] buffer = ByteArrayPool.obtain();
         try {
             // Creates the necessary directories.
             cancelable = FileUtils.wrap(cancelable);
@@ -155,7 +158,6 @@ public final class ZipUtils {
 
             // Enumerates the ZIP file entries.
             final CRC32 crc = new CRC32();
-            final byte[] buffer = new byte[8192];
             final Enumeration<? extends ZipEntry> entries = file.entries();
             while (entries.hasMoreElements() && !cancelable.isCancelled()) {
                 final ZipEntry entry  = entries.nextElement();
@@ -169,6 +171,7 @@ public final class ZipUtils {
                 }
             }
         } finally {
+            ByteArrayPool.recycle(buffer);
             file.close();
         }
     }

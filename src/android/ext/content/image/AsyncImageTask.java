@@ -9,6 +9,7 @@ import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
+import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
@@ -112,12 +113,13 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
-        final byte[] tempBuffer = new byte[16384];
+        final byte[] tempBuffer = ByteArrayPool.obtain();
         final Object[] results  = new Object[params.length];
         for (int i = 0; i < params.length && !isCancelled(); ++i) {
             results[i] = decodeImageInternal(params[i], tempBuffer);
         }
 
+        ByteArrayPool.recycle(tempBuffer);
         return results;
     }
 
@@ -147,7 +149,7 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
      * Decodes an image from the specified <em>uri</em>. Subclasses should override this method
      * to decode image. The default implementation returns a new {@link Bitmap} object.
      * @param uri The uri to decode.
-     * @param tempBuffer May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @param tempBuffer The temporary storage to use for decoding.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
     protected Object decodeImage(Object uri, byte[] tempBuffer) {

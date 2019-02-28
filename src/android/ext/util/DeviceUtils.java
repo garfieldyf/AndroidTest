@@ -38,7 +38,7 @@ public final class DeviceUtils {
      */
     public static int getCpuMaxFreq(int coreIndex) {
         try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_max_freq", 24));
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_max_freq"));
         } catch (Exception e) {
             return -1;
         }
@@ -54,7 +54,7 @@ public final class DeviceUtils {
      */
     public static int getCpuMinFreq(int coreIndex) {
         try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_min_freq", 24));
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_min_freq"));
         } catch (Exception e) {
             return -1;
         }
@@ -70,7 +70,7 @@ public final class DeviceUtils {
      */
     public static int getCpuCurFreq(int coreIndex) {
         try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/scaling_cur_freq", 24));
+            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/scaling_cur_freq"));
         } catch (Exception e) {
             return -1;
         }
@@ -108,28 +108,6 @@ public final class DeviceUtils {
     @SuppressWarnings("deprecation")
     public static String[] getSupportedABIs() {
         return (Build.VERSION.SDK_INT > 20 ? Build.SUPPORTED_ABIS : new String[] { Build.CPU_ABI, Build.CPU_ABI2 });
-    }
-
-    /**
-     * Reads the specified device file contents from the filesystem.
-     * @param deviceFile The device filename, must be absolute file path.
-     * @param maxSize The maximum number of byte to allow to read.
-     * @return The file contents as a string.
-     * @throws IOException if an error occurs while reading the data.
-     */
-    public static String readDeviceFile(String deviceFile, int maxSize) throws IOException {
-        final InputStream is = new FileInputStream(deviceFile);
-        try {
-            final byte[] data = new byte[maxSize];
-            int byteCount = is.read(data, 0, data.length);
-            if (data[byteCount - 1] == '\n') {
-                --byteCount;    // skip the '\n'
-            }
-
-            return new String(data, 0, byteCount);
-        } finally {
-            is.close();
-        }
     }
 
     public static void dumpSystemInfo(Context context, Printer printer) {
@@ -296,6 +274,21 @@ public final class DeviceUtils {
         }
 
         return userLabel;
+    }
+
+    private static String readDeviceFile(String deviceFile) throws IOException {
+        final InputStream is = new FileInputStream(deviceFile);
+        try {
+            final byte[] data = new byte[24];
+            int byteCount = is.read(data, 0, data.length);
+            if (data[byteCount - 1] == '\n') {
+                --byteCount;    // skip the '\n'
+            }
+
+            return new String(data, 0, byteCount);
+        } finally {
+            is.close();
+        }
     }
 
     /**

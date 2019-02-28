@@ -84,12 +84,12 @@ public final class Pools {
      */
     public static interface Pool<T> {
         /**
-         * Retrieves a new element from this <tt>Pool</tt>. Allows us to
-         * avoid allocating new elements in many cases. When the element
-         * can no longer be used, The caller should be call {@link #recycle(T)}
-         * to recycles the element. When this <tt>Pool</tt> is empty, should
-         * be call {@link Factory#newInstance()} to create a new element.
-         * @return A newly element.
+         * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
+         * allocating new elements in many cases. When the element can no
+         * longer be used, The caller should be call {@link #recycle(T)} to
+         * recycles the element. When this <tt>Pool</tt> is empty, should be
+         * call {@link Factory#newInstance()} to create a new element.
+         * @return The element.
          */
         T obtain();
 

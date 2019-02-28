@@ -6,6 +6,7 @@ import java.io.InputStream;
 import android.content.Context;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
+import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
@@ -202,8 +203,11 @@ public final class GIFImage {
         } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
             final AssetInputStream asset = (AssetInputStream)is;
             nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
+        } else if (tempStorage != null) {
+            nativeImage = nativeDecodeStream(is, tempStorage);
         } else {
-            nativeImage = nativeDecodeStream(is, tempStorage != null ? tempStorage : new byte[16384]);
+            nativeImage = nativeDecodeStream(is, tempStorage = ByteArrayPool.obtain());
+            ByteArrayPool.recycle(tempStorage);
         }
 
         return (nativeImage != 0 ? new GIFImage(nativeImage) : null);

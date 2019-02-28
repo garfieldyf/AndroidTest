@@ -8,6 +8,7 @@ import java.net.URLConnection;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.ext.content.AbsAsyncTask;
+import android.ext.net.DownloadRequest.DownloadCallback;
 import android.util.Log;
 
 /**
@@ -41,7 +42,7 @@ import android.util.Log;
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsyncTask<Params, Progress, Result> {
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {
     private DownloadRequest mRequest;
 
     /**
@@ -64,14 +65,10 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     protected Result doInBackground(Params... params) {
         try {
             mRequest = newDownloadRequest(params);
-            return onDownload(mRequest.mConnection, mRequest.connect(null), params);
+            return mRequest.download(this, params);
         } catch (Exception e) {
             Log.e(getClass().getName(), Log.getStackTraceString(e));
             return null;
-        } finally {
-            if (mRequest != null) {
-                mRequest.disconnect();
-            }
         }
     }
 
@@ -87,7 +84,8 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @see #download(String, int, byte[])
      * @see #download(OutputStream, byte[])
      */
-    protected Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
+    @Override
+    public Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
         return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
 

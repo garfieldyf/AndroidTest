@@ -124,7 +124,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             postData(data, 0, data.length);
         } else if (mData instanceof PostCallback) {
             connectImpl();
-            ((PostCallback)mData).onPostData(mConnection, mParams, tempBuffer);
+            ((PostCallback)mData).onPostData(mConnection, mParams);
         } else {
             DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "Unsupported POST type - " + (mData != null ? mData.getClass().toString() : "unknown"));
             mConnection.connect();
@@ -200,10 +200,8 @@ public final class DownloadPostRequest extends DownloadRequest {
          * Called on a background thread to post the data to the remote server.
          * @param conn The {@link URLConnection} whose connecting the remote server.
          * @param params The parameters, passed earlier by {@link DownloadPostRequest#post}.
-         * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for post,
-         * passed earlier by {@link DownloadRequest#download}.
          * @throws IOException if an error occurs while writing the data to the remote server.
          */
-        void onPostData(URLConnection conn, Object[] params, byte[] tempBuffer) throws IOException;
+        void onPostData(URLConnection conn, Object[] params) throws IOException;
     }
 }

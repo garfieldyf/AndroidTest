@@ -270,8 +270,8 @@ public class DownloadRequest {
      * @throws IOException if an error occurs while downloading the resource.
      * @throws JSONException if data can not be parsed.
      * @see #download(String, Cancelable, byte[])
+     * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
-     * @see #download(DownloadCallback, byte[], Object[])
      * @see JsonUtils#newInstance(JsonReader, Cancelable)
      */
     public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
@@ -292,8 +292,8 @@ public class DownloadRequest {
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #download(Cancelable)
+     * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
-     * @see #download(DownloadCallback, byte[], Object[])
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
@@ -324,7 +324,7 @@ public class DownloadRequest {
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
-     * @see #download(DownloadCallback, byte[], Object[])
+     * @see #download(DownloadCallback, Object[])
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
@@ -342,24 +342,21 @@ public class DownloadRequest {
     /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param callback The {@link DownloadCallback} to used to downloads.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @param params The parameters passed into {@link DownloadCallback#onDownload}. If no parameters,
-     * you can pass <em>(Object[])null</em> instead of allocating an empty array.
-     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
-     * @throws IOException if an error occurs while downloading the resource.
+     * you can pass <em>(Params[])null</em> instead of allocating an empty array.
+     * @return A result, defined by the subclass of the <tt>DownloadCallback</tt>.
+     * @throws Exception if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
-    public final int download(DownloadCallback callback, byte[] tempBuffer, Object... params) throws IOException {
-        final int statusCode = connect(tempBuffer);
+    @SuppressWarnings("unchecked")
+    public final <Params, Result> Result download(DownloadCallback<Params, Result> callback, Params... params) throws Exception {
         try {
-            callback.onDownload(mConnection, statusCode, params, tempBuffer);
+            return callback.onDownload(mConnection, connect(null), params);
         } finally {
             disconnect();
         }
-
-        return statusCode;
     }
 
     /**
@@ -435,16 +432,15 @@ public class DownloadRequest {
     /**
      * Callback interface used to download the data from the remote server.
      */
-    public static interface DownloadCallback {
+    public static interface DownloadCallback<Params, Result> {
         /**
          * Called on a background thread to download the data from the remote server.
          * @param conn The {@link URLConnection} whose connecting the remote server.
          * @param statusCode The response code returned by the remote server.
          * @param params The parameters, passed earlier by {@link DownloadRequest#download}.
-         * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for download,
-         * passed earlier by {@link DownloadRequest#download}.
-         * @throws IOException if an error occurs while downloading the data from the remote server.
+         * @return A result, defined by the subclass of this callback.
+         * @throws Exception if an error occurs while downloading the data from the remote server.
          */
-        void onDownload(URLConnection conn, int statusCode, Object[] params, byte[] tempBuffer) throws IOException;
+        Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception;
     }
 }

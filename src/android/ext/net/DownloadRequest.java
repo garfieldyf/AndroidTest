@@ -265,7 +265,6 @@ public class DownloadRequest {
     /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download was
      * cancelled before it completed normally the returned value is undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
@@ -275,9 +274,9 @@ public class DownloadRequest {
      * @see #download(DownloadCallback, byte[], Object[])
      * @see JsonUtils#newInstance(JsonReader, Cancelable)
      */
-    public final <T> T download(Cancelable cancelable, byte[] tempBuffer) throws IOException, JSONException {
+    public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
         try {
-            return (connect(tempBuffer) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connect(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -292,7 +291,7 @@ public class DownloadRequest {
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(Cancelable, byte[])
+     * @see #download(Cancelable)
      * @see #download(OutputStream, Cancelable, byte[])
      * @see #download(DownloadCallback, byte[], Object[])
      */
@@ -323,7 +322,7 @@ public class DownloadRequest {
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
-     * @see #download(Cancelable, byte[])
+     * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, byte[], Object[])
      */
@@ -348,7 +347,7 @@ public class DownloadRequest {
      * you can pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
-     * @see #download(Cancelable, byte[])
+     * @see #download(Cancelable)
      * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
      */

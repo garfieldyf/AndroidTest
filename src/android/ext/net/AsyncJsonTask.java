@@ -114,7 +114,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
-                result = newDownloadRequest(params).download(this, null);
+                result = newDownloadRequest(params).download(this);
                 if (isCancelled() || !validateResult(params, result)) {
                     result = null;
                 }

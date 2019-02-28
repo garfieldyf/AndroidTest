@@ -416,7 +416,7 @@ public final class FileUtils {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
         final OutputStream os = new FileOutputStream(outFile);
         try {
-            readFile(context, uri, os, null, null);
+            readFile(context, uri, os, null);
         } finally {
             os.close();
         }
@@ -476,31 +476,17 @@ public final class FileUtils {
     }
 
     /**
-     * Equivalent to calling <tt>readFile(context, uri, new ByteArrayBuffer(), null, null)</tt>.
+     * Equivalent to calling <tt>readFile(context, uri, new ByteArrayBuffer(), null)</tt>.
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read.
      * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
      * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
-     * @see #readFile(Context, Object, OutputStream)
-     * @see #readFile(Context, Object, OutputStream, Cancelable, byte[])
+     * @see #readFile(Context, Object, OutputStream, Cancelable)
      */
     public static ByteArrayBuffer readFile(Context context, Object uri) throws IOException {
         final ByteArrayBuffer result = new ByteArrayBuffer();
-        readFile(context, uri, result, null, null);
+        readFile(context, uri, result, null);
         return result;
-    }
-
-    /**
-     * Equivalent to calling <tt>readFile(context, uri, out, null, null)</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param uri The uri to read.
-     * @param out The <tt>OutputStream</tt> to write to.
-     * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #readFile(Context, Object)
-     * @see #readFile(Context, Object, OutputStream, Cancelable, byte[])
-     */
-    public static void readFile(Context context, Object uri, OutputStream out) throws IOException {
-        readFile(context, uri, out, null, null);
     }
 
     /**
@@ -517,15 +503,13 @@ public final class FileUtils {
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
      * the <em>out's</em> contents is undefined.
-     * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readFile(Context, Object)
-     * @see #readFile(Context, Object, OutputStream)
      */
-    public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+    public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable) throws IOException {
         final InputStream is = UriUtils.openInputStream(context, uri);
         try {
-            copyStream(is, out, cancelable, buffer);
+            copyStream(is, out, cancelable, null);
         } finally {
             is.close();
         }

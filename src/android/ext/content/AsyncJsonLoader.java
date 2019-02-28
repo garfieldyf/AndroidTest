@@ -105,7 +105,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             final LoadParams params = loadParams[0];
             final File cacheFile = params.getCacheFile(key);
             if (cacheFile == null) {
-                result = params.newDownloadRequest(key).download(task, null);
+                result = params.newDownloadRequest(key).download(task);
                 if (isTaskCancelled(task) || !validateResult(key, params, result)) {
                     result = null;
                 }

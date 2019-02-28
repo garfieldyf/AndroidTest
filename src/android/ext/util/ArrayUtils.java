@@ -559,7 +559,7 @@ public final class ArrayUtils {
      * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
      */
     public static final class ByteArrayPool {
-        private static final Pool<byte[]> sInstance = Pools.newPool(2, 8192);
+        private static final Pool<byte[]> sInstance = Pools.synchronizedPool(Pools.newPool(2, 8192));
 
         /**
          * Retrieves a byte array from this pool. Allows us to avoid allocating new

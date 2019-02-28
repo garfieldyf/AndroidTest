@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.ext.util.Pools.Factory;
+import android.ext.util.Pools.Pool;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
@@ -467,8 +468,10 @@ public final class FileUtils {
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
+        } else if (buffer != null) {
+            copyStreamImpl(is, out, wrap(cancelable), buffer);
         } else {
-            copyStreamImpl(is, out, wrap(cancelable), (buffer != null ? buffer : new byte[8192]));
+            ByteArrayPool.sInstance.recycle(copyStreamImpl(is, out, wrap(cancelable), ByteArrayPool.sInstance.obtain()));
         }
     }
 
@@ -574,7 +577,7 @@ public final class FileUtils {
     public static native String createUniqueFile(String filename, long length);
 
     /**
-     * Wrap the specified <tt>Cancelable</tt>, handling <tt>null cancelable</tt>.
+     * Wrap the specified <em>cancelable</em>, handling <tt>null Cancelable</tt>.
      */
     /* package */ static Cancelable wrap(Cancelable cancelable) {
         return (cancelable != null ? cancelable : CancelableImpl.sInstance);
@@ -583,7 +586,7 @@ public final class FileUtils {
     /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
-    /* package */ static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+    /* package */ static byte[] copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
             if ((readBytes = is.read(buffer, offset, buffer.length - offset)) <= 0) {
                 // Writes the last remaining bytes of the buffer.
@@ -598,6 +601,8 @@ public final class FileUtils {
                 out.write(buffer, 0, buffer.length);
             }
         }
+
+        return buffer;
     }
 
     /**
@@ -1390,6 +1395,13 @@ public final class FileUtils {
                 return new Dirent();
             }
         };
+    }
+
+    /**
+     * Class <tt>ByteArrayPool</tt>.
+     */
+    private static final class ByteArrayPool {
+        public static final Pool<byte[]> sInstance = Pools.newPool(2, 8192);
     }
 
     /**

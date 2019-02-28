@@ -44,7 +44,7 @@ public final class UIHandler extends Handler {
      * @param position The position of the item in the data set of the adapter.
      */
     public static void requestChildFocus(LayoutManager layoutManager, int position) {
-        requestChildFocus(layoutManager, position, 2);
+        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, position, 2, layoutManager));
     }
 
     /**
@@ -211,7 +211,7 @@ public final class UIHandler extends Handler {
 
         // Dispatch the RecyclerView messages.
         case MESSAGE_CHILD_FOCUS:
-            requestChildFocus((LayoutManager)msg.obj, msg.arg1, msg.arg2);
+            requestChildFocus(msg);
             break;
 
         case MESSAGE_ITEM_CHANGED:
@@ -254,12 +254,12 @@ public final class UIHandler extends Handler {
         ((DatabaseHandler)params.first).dispatchMessage(msg.arg1, msg.arg2, params.second);
     }
 
-    private static void requestChildFocus(LayoutManager layoutManager, int position, int retryCount) {
-        final View child = layoutManager.findViewByPosition(position);
+    private static void requestChildFocus(Message msg) {
+        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
         if (child != null) {
             child.requestFocus();
-        } else if (retryCount > 0) {
-            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, position, retryCount - 1, layoutManager));
+        } else if (msg.arg2 > 0) {
+            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 - 1, msg.obj));
         }
     }
 

@@ -81,22 +81,9 @@ public final class ArrayUtils {
      * @param map The <tt>Map</tt>.
      * @return The number of elements.
      * @see #getSize(Collection)
-     * @see #getSize(ByteArrayBuffer)
      */
     public static int getSize(Map<?, ?> map) {
         return (map != null ? map.size() : 0);
-    }
-
-    /**
-     * Returns the number of bytes in the <em>buffer</em>,
-     * handling <tt>null ByteArrayBuffer</tt>.
-     * @param buffer The <tt>ByteArrayBuffer</tt>.
-     * @return The number of bytes.
-     * @see #getSize(Map)
-     * @see #getSize(Collection)
-     */
-    public static int getSize(ByteArrayBuffer buffer) {
-        return (buffer != null ? buffer.size() : 0);
     }
 
     /**
@@ -105,7 +92,6 @@ public final class ArrayUtils {
      * @param collection The <tt>Collection</tt>.
      * @return The number of elements.
      * @see #getSize(Map)
-     * @see #getSize(ByteArrayBuffer)
      */
     public static int getSize(Collection<?> collection) {
         return (collection != null ? collection.size() : 0);
@@ -304,10 +290,25 @@ public final class ArrayUtils {
     }
 
     /**
+     * Removes the items in the specified range in the <em>list</em>.
+     * @param list The {@link List} to remove.
+     * @param start The inclusive start index in <em>list</em>.
+     * @param end The exclusive end index in <em>list</em>.
+     */
+    public static <T> void removeRange(List<T> list, int start, int end) {
+        DebugUtils.__checkRange(start, end - start, list.size());
+        final ListIterator<T> itor = list.listIterator(start);
+        for (int i = start; i < end; ++i) {
+            itor.next();
+            itor.remove();
+        }
+    }
+
+    /**
      * Sorts the specified range in the <em>list</em> in ascending natural order.
      * @param list The {@link List} to sort.
-     * @param start The inclusive start index in <em>list</em> to sort.
-     * @param end The exclusive end index in <em>list</em> to sort.
+     * @param start The inclusive start index in <em>list</em>.
+     * @param end The exclusive end index in <em>list</em>.
      * @see #sort(List, int, int, Comparator)
      */
     public static <T extends Comparable<? super T>> void sort(List<T> list, int start, int end) {
@@ -327,8 +328,8 @@ public final class ArrayUtils {
     /**
      * Sorts the specified range in the <em>list</em> using the specified <em>comparator</em>.
      * @param list The {@link List} to sort.
-     * @param start The inclusive start index in <em>list</em> to sort.
-     * @param end The exclusive end index in <em>list</em> to sort.
+     * @param start The inclusive start index in <em>list</em>.
+     * @param end The exclusive end index in <em>list</em>.
      * @param comparator The {@link Comparator} to compare.
      * @see #sort(List, int, int)
      */

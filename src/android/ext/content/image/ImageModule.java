@@ -1,6 +1,7 @@
 package android.ext.content.image;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -16,7 +17,6 @@ import android.ext.concurrent.ThreadPool;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
 import android.ext.content.image.params.Parameters;
-import android.ext.graphics.GIFImage;
 import android.ext.util.ClassUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
@@ -40,23 +40,23 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @param context The <tt>Context</tt>.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
-     * @see #ImageModule(Context, Cache, FileCache, int)
+     * @see #ImageModule(Context, Executor, Cache, FileCache)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, imageCache, fileCache, Math.min(Runtime.getRuntime().availableProcessors() * 2, 3));
+        this(context, ThreadPool.createImageThreadPool(Math.min(Runtime.getRuntime().availableProcessors() * 2, 3), 60, TimeUnit.SECONDS), imageCache, fileCache);
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
-     * @param maxThreads The maximum number of threads to allow in the thread pool.
-     * @see #ImageModule(Context, Cache, FileCache)
+     * @see ThreadPool#createImageThreadPool(int, long, TimeUnit)
      */
-    public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache, int maxThreads) {
-        mExecutor = ThreadPool.createImageThreadPool(maxThreads);
+    public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
         mContext  = context.getApplicationContext();
+        mExecutor = executor;
         mFileCache  = fileCache;
         mImageCache = imageCache;
         mContext.registerComponentCallbacks(this);
@@ -79,12 +79,12 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @param context The <tt>Context</tt>.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
      * of the current device. Pass <tt>0</tt> that the module has no bitmap cache.
-     * @param maxImageSize The maximum number of images in the cache. Pass <tt>0</tt> that the module has no image cache.
+     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> that the module has no image cache.
      * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
      * @return The {@link ImageModule}.
      */
     public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxImageSize, int maxFileSize) {
-        return new ImageModule<URI, Object>(context, new LruImageCache<URI, GIFImage>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
+        return new ImageModule<URI, Object>(context, new LruImageCache<URI>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
     }
 
     /**

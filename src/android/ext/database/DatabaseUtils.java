@@ -12,11 +12,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
@@ -60,7 +58,6 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
-     * @see #simpleQueryLong(ContentResolver, Uri, String, String, String[])
      */
     public static Long simpleQueryLong(SQLiteDatabase db, String sql, Object... bindArgs) {
         final SQLiteStatement prog = db.compileStatement(sql);
@@ -84,7 +81,6 @@ public final class DatabaseUtils {
      * @param selectionArgs You may include ? in selection, which will be replaced
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
-     * @see #simpleQueryLong(SQLiteDatabase, String, Object[])
      */
     public static Long simpleQueryLong(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
@@ -105,7 +101,6 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
-     * @see #simpleQueryString(ContentResolver, Uri, String, String, String[])
      */
     public static String simpleQueryString(SQLiteDatabase db, String sql, Object... bindArgs) {
         final SQLiteStatement prog = db.compileStatement(sql);
@@ -129,7 +124,6 @@ public final class DatabaseUtils {
      * @param selectionArgs You may include ? in selection, which will be replaced
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
-     * @see #simpleQueryString(SQLiteDatabase, String, Object[])
      */
     public static String simpleQueryString(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
@@ -143,20 +137,28 @@ public final class DatabaseUtils {
      * @param bindArgs You may include ? in where clause in the query, which will
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
-     * @return The {@link InputStream} for a copy of the blob value, or <tt>null</tt>
+     * @return An {@link InputStream} for a copy of the blob value, or <tt>null</tt>
      * if the value is <tt>null</tt> or could not be read for some reason.
-     * @throws SQLiteDoneException if the query returns <tt>0</tt> rows.
+     * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
+     * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
      */
-    @SuppressWarnings("resource")
     public static InputStream simpleQuery(SQLiteDatabase db, String sql, Object... bindArgs) {
         final SQLiteStatement prog = db.compileStatement(sql);
+        InputStream result = null;
         try {
             bindArgs(prog, bindArgs);
             final ParcelFileDescriptor fd = prog.simpleQueryForBlobFileDescriptor();
-            return (fd != null ? new AutoCloseInputStream(fd) : null);
+            if (fd != null) {
+                // Don't close the fd, The AutoCloseInputStream take care of close the fd.
+                result = new AutoCloseInputStream(fd);
+            }
+        } catch (SQLiteException e) {
+            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query blob - ").append(sql).toString(), e);
         } finally {
             prog.close();
         }
+
+        return result;
     }
 
     /**
@@ -166,10 +168,10 @@ public final class DatabaseUtils {
      * @param bindArgs You may include ? in where clause in the query, which will
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
-     * @return The {@link ByteArrayBuffer} of the blob value, or <tt>null</tt> if
+     * @return An {@link ByteArrayBuffer} of the blob value, or <tt>null</tt> if
      * the value is <tt>null</tt> or could not be read for some reason.
+     * @see #simpleQuery(SQLiteDatabase, String, Object[])
      * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
-     * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
     public static ByteArrayBuffer simpleQueryBlob(SQLiteDatabase db, String sql, Object... bindArgs) {
         try {
@@ -190,17 +192,18 @@ public final class DatabaseUtils {
      * @param bindArgs You may include ? in where clause in the query, which will
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
-     * @return <tt>true</tt> if query successful, <tt>false</tt> otherwise.
      * @throws IOException if an error occurs while writing to <em>out</em>.
+     * @see #simpleQuery(SQLiteDatabase, String, Object[])
      * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
-     * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
     public static void simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) throws IOException {
         final InputStream is = simpleQuery(db, sql, bindArgs);
-        try {
-            FileUtils.copyStream(is, out, null, null);
-        } finally {
-            is.close();
+        if (is != null) {
+            try {
+                FileUtils.copyStream(is, out, null, null);
+            } finally {
+                is.close();
+            }
         }
     }
 
@@ -215,8 +218,6 @@ public final class DatabaseUtils {
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The byte array of the blob value, or <tt>null</tt> if the value is
      * <tt>null</tt> or could not be read for some reason.
-     * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
-     * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
      */
     public static byte[] simpleQueryBlob(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
@@ -232,7 +233,6 @@ public final class DatabaseUtils {
      * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
      * <em>(String[])null</em> instead of allocating an empty array.
      * @return A new array, or <tt>null</tt>.
-     * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
      */
     public static <T> T query(SQLiteDatabase db, Class<?> componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
@@ -260,7 +260,6 @@ public final class DatabaseUtils {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @return A new array, or <tt>null</tt>.
-     * @see #query(SQLiteDatabase, Class, String, String[])
      */
     public static <T> T query(ContentResolver resolver, Class<?> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
@@ -346,20 +345,6 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns a new instance with the specified <em>cursor</em> and <em>clazz</em>.
-     * @param cursor The {@link Cursor} from which to get the data. The cursor must
-     * be move to the correct position.
-     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
-     * @return A new instance.
-     * @throws ReflectiveOperationException if the instance cannot be created.
-     * @see #newList(Cursor, Class)
-     * @see #newArray(Cursor, Class)
-     */
-    public static <T> T newInstance(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        return (T)newInstanceImpl(cursor, ClassUtils.getConstructor(clazz, (Class[])null), getCursorFields(clazz));
-    }
-
-    /**
      * Returns a new array with the specified <em>cursor</em> and <em>componentType</em>.
      * Equivalent to <tt>new componentType[cursor.getCount()]</tt>.
      * @param cursor The {@link Cursor} from which to get the data.
@@ -368,7 +353,6 @@ public final class DatabaseUtils {
      * @return A new array.
      * @throws ReflectiveOperationException if the array cannot be created.
      * @see #newList(Cursor, Class)
-     * @see #newInstance(Cursor, Class)
      */
     public static <T> T newArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         final Object result;
@@ -402,7 +386,6 @@ public final class DatabaseUtils {
      * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
      * @return An immutable <tt>List</tt>.
      * @see #newArray(Cursor, Class)
-     * @see #newInstance(Cursor, Class)
      */
     public static <T> List<T> newList(Cursor cursor, Class<? extends T> componentType) {
         try {
@@ -502,84 +485,9 @@ public final class DatabaseUtils {
         return writer.endObject();
     }
 
-    /**
-     * Equivalent to calling <tt>toContentValues(cursor, cursor.getColumnNames())</tt>.
-     * @param cursor The {@link Cursor} from which to get the data. The cursor
-     * must be move to the correct position.
-     * @return A {@link ContentValues} object.
-     * @see #toContentValues(Cursor, String[])
-     * @see #toContentValues(ContentValues, Cursor, int[], String[])
-     */
-    public static ContentValues toContentValues(Cursor cursor) {
-        return toContentValues(cursor, cursor.getColumnNames());
-    }
-
-    /**
-     * Returns a new {@link ContentValues} from the the specified <tt>Cursor</tt>.
-     * @param cursor The {@link Cursor} from which to get the data. The cursor must
-     * be move to the correct position.
-     * @param columnNames The name of the columns which the values to put.
-     * @return A {@link ContentValues} object.
-     * @see #toContentValues(Cursor)
-     * @see #toContentValues(ContentValues, Cursor, int[], String[])
-     */
-    public static ContentValues toContentValues(Cursor cursor, String... columnNames) {
-        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
-        final int[] columnIndexes = new int[columnNames.length];
-        for (int i = 0; i < columnNames.length; ++i) {
-            columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
-        }
-
-        return toContentValues(new ContentValues(columnNames.length), cursor, columnIndexes, columnNames);
-    }
-
-    /**
-     * Writes the specified <em>cursor's</em> contents into a {@link ContentValues}.
-     * @param outValues The <tt>ContentValues</tt> to write to.
-     * @param cursor The {@link Cursor} from which to get the data. The cursor must
-     * be move to the correct position.
-     * @param columnIndexes The index of the columns which the values to put.
-     * @param names The name of the value to put. The <em>names</em> length must be
-     * equals the <em>columnIndexes</em> length.
-     * @return The <em>outValues</em>.
-     * @see #toContentValues(Cursor)
-     * @see #toContentValues(Cursor, String[])
-     */
-    public static ContentValues toContentValues(ContentValues outValues, Cursor cursor, int[] columnIndexes, String... names) {
-        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
-        for (int i = 0; i < columnIndexes.length; ++i) {
-            final String name = names[i];
-            final int columnIndex = columnIndexes[i];
-            switch (cursor.getType(columnIndex)) {
-            case Cursor.FIELD_TYPE_NULL:
-                outValues.putNull(name);
-                break;
-
-            case Cursor.FIELD_TYPE_INTEGER:
-                outValues.put(name, cursor.getLong(columnIndex));
-                break;
-
-            case Cursor.FIELD_TYPE_FLOAT:
-                outValues.put(name, cursor.getDouble(columnIndex));
-                break;
-
-            case Cursor.FIELD_TYPE_STRING:
-                outValues.put(name, cursor.getString(columnIndex));
-                break;
-
-            case Cursor.FIELD_TYPE_BLOB:
-                outValues.put(name, cursor.getBlob(columnIndex));
-                break;
-            }
-        }
-
-        return outValues;
-    }
-
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
         DebugUtils.__checkError(clazz == null, "clazz == null");
-        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz.isPrimitive() || clazz == String.class || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
+        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz == String.class || clazz.isPrimitive() || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final List<Pair<Field, String>> result = new ArrayList<Pair<Field, String>>();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
@@ -597,7 +505,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Object newInstanceImpl(Cursor cursor, Constructor<?> constructor, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
+    private static Object newInstance(Cursor cursor, Constructor<?> constructor, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
         final Object result = constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Pair<Field, String> fieldInfo = fields.get(i);
@@ -629,7 +537,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static int[] createIntArray(Cursor cursor) {
+    private static Object createIntArray(Cursor cursor) {
         final int[] result = new int[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getInt(0);
@@ -638,7 +546,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static long[] createLongArray(Cursor cursor) {
+    private static Object createLongArray(Cursor cursor) {
         final long[] result = new long[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getLong(0);
@@ -647,7 +555,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static short[] createShortArray(Cursor cursor) {
+    private static Object createShortArray(Cursor cursor) {
         final short[] result = new short[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getShort(0);
@@ -656,7 +564,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static float[] createFloatArray(Cursor cursor) {
+    private static Object createFloatArray(Cursor cursor) {
         final float[] result = new float[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getFloat(0);
@@ -665,7 +573,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static double[] createDoubleArray(Cursor cursor) {
+    private static Object createDoubleArray(Cursor cursor) {
         final double[] result = new double[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getDouble(0);
@@ -674,7 +582,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static String[] createStringArray(Cursor cursor) {
+    private static Object createStringArray(Cursor cursor) {
         final String[] result = new String[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = cursor.getString(0);
@@ -683,7 +591,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static boolean[] createBooleanArray(Cursor cursor) {
+    private static Object createBooleanArray(Cursor cursor) {
         final boolean[] result = new boolean[cursor.getCount()];
         for (int i = 0; cursor.moveToNext(); ++i) {
             result[i] = (cursor.getInt(0) != 0);
@@ -692,14 +600,14 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Object[] createObjectArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
+    private static Object createObjectArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
         final int count = cursor.getCount();
         final Object[] result = (Object[])Array.newInstance(componentType, count);
         if (count > 0) {
             final List<Pair<Field, String>> fields = getCursorFields(componentType);
             final Constructor<?> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
             for (int i = 0; cursor.moveToNext(); ++i) {
-                result[i] = newInstanceImpl(cursor, constructor, fields);
+                result[i] = newInstance(cursor, constructor, fields);
             }
         }
 

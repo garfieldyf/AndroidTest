@@ -33,7 +33,7 @@ public class LruFileCache2 extends LruFileCache {
      * @see #LruFileCache2(File, int)
      */
     public LruFileCache2(File cacheDir, float scaleStorage) {
-        super(cacheDir, Math.min((int)(new StatFs(cacheDir.getPath()).getTotalBytes() * scaleStorage), 300 * 1024 * 1024));
+        super(cacheDir, Math.min((int)(new StatFs(cacheDir.getPath()).getTotalBytes() * scaleStorage), 200 * 1024 * 1024));
     }
 
     @Override

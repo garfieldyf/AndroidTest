@@ -141,7 +141,7 @@ public final class BarcodeBuilder {
      * @see #margins(int, int, int, int)
      */
     public final BarcodeBuilder margins(int margin) {
-        leftMargin = topMargin = rightMargin = bottomMargin = margin;
+        this.leftMargin = this.topMargin = this.rightMargin = this.bottomMargin = margin;
         return this;
     }
 

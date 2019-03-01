@@ -39,7 +39,7 @@ public final class Caches {
         } else if (cache instanceof SimpleFileCache) {
             ((SimpleFileCache)cache).dump(context, printer);
         } else if (cache instanceof LruImageCache) {
-            ((LruImageCache<?, ?>)cache).dump(context, printer);
+            ((LruImageCache<?>)cache).dump(context, printer);
         } else if (cache instanceof ArrayMapCache) {
             ((ArrayMapCache<?, ?>)cache).dump(context, printer);
         }

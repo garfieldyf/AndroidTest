@@ -6,6 +6,7 @@ import java.io.InputStream;
 import android.content.Context;
 import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -31,18 +32,15 @@ public final class GIFImage {
      * @param res The resource containing the GIF data.
      * @param id The resource id to be decoded.
      * @return The <tt>GIFImage</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
      * @see #decode(byte[], int, int)
      * @see #decode(InputStream, byte[])
      * @see #decode(Context, Object, byte[])
      */
     public static GIFImage decode(Resources res, int id) {
-        InputStream is = null;
+        final InputStream is = res.openRawResource(id);
         try {
-            is = res.openRawResource(id);
-            return decodeStream(is, null);
-        } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't decode resource ID #0x" + Integer.toHexString(id), e);
-            return null;
+            return decode(is, null);
         } finally {
             FileUtils.close(is);
         }
@@ -59,12 +57,20 @@ public final class GIFImage {
      */
     public static GIFImage decode(InputStream is, byte[] tempStorage) {
         DebugUtils.__checkError(is == null, "is == null");
-        try {
-            return decodeStream(is, tempStorage);
-        } catch (Exception e) {
-            Log.e(GIFImage.class.getName(), "Couldn't decode from - " + is.getClass().getName(), e);
-            return null;
+        final long nativeImage;
+        if (is instanceof FileInputStream) {
+            nativeImage = nativeDecodeFile(getFileDescriptor(is));
+        } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
+            final AssetInputStream asset = (AssetInputStream)is;
+            nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
+        } else if (tempStorage != null) {
+            nativeImage = nativeDecodeStream(is, tempStorage);
+        } else {
+            nativeImage = nativeDecodeStream(is, tempStorage = ByteArrayPool.obtain());
+            ByteArrayPool.recycle(tempStorage);
         }
+
+        return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }
 
     /**
@@ -103,7 +109,7 @@ public final class GIFImage {
         InputStream is = null;
         try {
             is = UriUtils.openInputStream(context, uri);
-            return decodeStream(is, tempStorage);
+            return decode(is, tempStorage);
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), "Couldn't decode from - " + uri, e);
             return null;
@@ -196,21 +202,12 @@ public final class GIFImage {
         mNativeImage = nativeImage;
     }
 
-    private static GIFImage decodeStream(InputStream is, byte[] tempStorage) throws Exception {
-        final long nativeImage;
-        if (is instanceof FileInputStream) {
-            nativeImage = nativeDecodeFile(((FileInputStream)is).getFD());
-        } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
-            final AssetInputStream asset = (AssetInputStream)is;
-            nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
-        } else if (tempStorage != null) {
-            nativeImage = nativeDecodeStream(is, tempStorage);
-        } else {
-            nativeImage = nativeDecodeStream(is, tempStorage = ByteArrayPool.obtain());
-            ByteArrayPool.recycle(tempStorage);
+    private static FileDescriptor getFileDescriptor(InputStream is) {
+        try {
+            return ((FileInputStream)is).getFD();
+        } catch (Exception e) {
+            throw new AssertionError(e);
         }
-
-        return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }
 
     private static native long nativeDecodeAsset(long asset);

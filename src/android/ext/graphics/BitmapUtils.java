@@ -1,6 +1,5 @@
 package android.ext.graphics;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
@@ -10,10 +9,8 @@ import android.ext.graphics.DrawUtils.MatrixPool;
 import android.ext.graphics.DrawUtils.RectFPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
-import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
@@ -317,28 +314,6 @@ public final class BitmapUtils {
         canvas.setBitmap(null);
 
         return result;
-    }
-
-    /**
-     * Saves a compressed version of the bitmap to the specified <em>filename</em>.
-     * @param filename The filename to save, must be absolute file path.
-     * @param bitmap The bitmap to save.
-     * @param format TThe format of the compressed image.
-     * @param quality Hint to the compressor, 0-100. 0 meaning compress for small
-     * size, 100 meaning compress for max quality.
-     * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
-     */
-    public static boolean saveBitmap(String filename, Bitmap bitmap, CompressFormat format, int quality) {
-        FileOutputStream os = null;
-        try {
-            os = new FileOutputStream(filename);
-            return bitmap.compress(format, quality, os);
-        } catch (Exception e) {
-            Log.e(BitmapUtils.class.getName(), new StringBuilder("Couldn't save bitmap to - ").append(filename).toString(), e);
-            return false;
-        } finally {
-            FileUtils.close(os);
-        }
     }
 
     /**

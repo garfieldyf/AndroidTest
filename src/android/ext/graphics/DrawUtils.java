@@ -442,9 +442,6 @@ public final class DrawUtils {
     }
 
     private static Align computeText(Paint paint, RectF outRect, float left, float top, float right, float bottom, int gravity) {
-        final FontMetrics fm = FontMetricsPool.obtain();
-        paint.getFontMetrics(fm);
-
         // Computes x-coordinate.
         final Align textAlign;
         switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
@@ -465,6 +462,7 @@ public final class DrawUtils {
         }
 
         // Computes y-coordinate.
+        final FontMetrics fm = FontMetricsPool.obtain(paint);
         switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
         case Gravity.BOTTOM:
             outRect.top = bottom - fm.descent;
@@ -488,7 +486,7 @@ public final class DrawUtils {
      */
     public static final class RectPool implements Factory<Rect> {
         private static final RectPool sInstance = new RectPool();
-        private final Pool<Rect> pool = Pools.newSimplePool(this);
+        private final Pool<Rect> mPool = Pools.newSimplePool(this);
 
         @Override
         public Rect newInstance() {
@@ -496,17 +494,17 @@ public final class DrawUtils {
         }
 
         public static Rect obtain() {
-            return sInstance.pool.obtain();
+            return sInstance.mPool.obtain();
         }
 
         public static Rect obtain(int left, int top, int right, int bottom) {
-            final Rect result = sInstance.pool.obtain();
+            final Rect result = sInstance.mPool.obtain();
             result.set(left, top, right, bottom);
             return result;
         }
 
         public static void recycle(Rect rect) {
-            sInstance.pool.recycle(rect);
+            sInstance.mPool.recycle(rect);
         }
     }
 
@@ -515,7 +513,7 @@ public final class DrawUtils {
      */
     public static final class RectFPool implements Factory<RectF> {
         private static final RectFPool sInstance = new RectFPool();
-        private final Pool<RectF> pool = Pools.newSimplePool(this);
+        private final Pool<RectF> mPool = Pools.newSimplePool(this);
 
         @Override
         public RectF newInstance() {
@@ -523,17 +521,17 @@ public final class DrawUtils {
         }
 
         public static RectF obtain() {
-            return sInstance.pool.obtain();
+            return sInstance.mPool.obtain();
         }
 
         public static RectF obtain(float left, float top, float right, float bottom) {
-            final RectF result = sInstance.pool.obtain();
+            final RectF result = sInstance.mPool.obtain();
             result.set(left, top, right, bottom);
             return result;
         }
 
         public static void recycle(RectF rect) {
-            sInstance.pool.recycle(rect);
+            sInstance.mPool.recycle(rect);
         }
     }
 
@@ -542,7 +540,7 @@ public final class DrawUtils {
      */
     public static final class MatrixPool implements Factory<Matrix> {
         private static final MatrixPool sInstance = new MatrixPool();
-        private final Pool<Matrix> pool = Pools.newSimplePool(this);
+        private final Pool<Matrix> mPool = Pools.newSimplePool(this);
 
         @Override
         public Matrix newInstance() {
@@ -550,11 +548,11 @@ public final class DrawUtils {
         }
 
         public static Matrix obtain() {
-            return sInstance.pool.obtain();
+            return sInstance.mPool.obtain();
         }
 
         public static void recycle(Matrix matrix) {
-            sInstance.pool.recycle(matrix);
+            sInstance.mPool.recycle(matrix);
         }
     }
 
@@ -563,19 +561,21 @@ public final class DrawUtils {
      */
     private static final class FontMetricsPool implements Factory<FontMetrics> {
         private static final FontMetricsPool sInstance = new FontMetricsPool();
-        private final Pool<FontMetrics> pool = Pools.newSimplePool(this);
+        private final Pool<FontMetrics> mPool = Pools.newSimplePool(this);
 
         @Override
         public FontMetrics newInstance() {
             return new FontMetrics();
         }
 
-        public static FontMetrics obtain() {
-            return sInstance.pool.obtain();
+        public static FontMetrics obtain(Paint paint) {
+            final FontMetrics result = sInstance.mPool.obtain();
+            paint.getFontMetrics(result);
+            return result;
         }
 
         public static void recycle(FontMetrics metrics) {
-            sInstance.pool.recycle(metrics);
+            sInstance.mPool.recycle(metrics);
         }
     }
 

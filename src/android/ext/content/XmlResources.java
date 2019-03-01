@@ -36,7 +36,7 @@ public final class XmlResources {
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the parameters to load.
      * @return The <tt>Parameters</tt> object.
-     * @throws NotFoundException if the given <em>id</em> cannot be loaded.
+     * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static <T extends Parameters> T loadParameters(Context context, int id) throws NotFoundException {
         return (T)load(context, id, XmlParametersInflater.sInstance);
@@ -47,7 +47,7 @@ public final class XmlResources {
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the transformer to load.
      * @return The <tt>Transformer</tt> object.
-     * @throws NotFoundException if the given <em>id</em> cannot be loaded.
+     * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static <URI, Image, T extends Transformer<URI, Image>> T loadTransformer(Context context, int id) throws NotFoundException {
         return (T)load(context, id, XmlTransformerInflater.sInstance);
@@ -58,7 +58,7 @@ public final class XmlResources {
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the binder to load.
      * @return The <tt>Binder</tt> object.
-     * @throws NotFoundException if the given <em>id</em> cannot be loaded.
+     * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static <URI, Params, Image, T extends Binder<URI, Params, Image>> T loadBinder(Context context, int id) throws NotFoundException {
         return (T)load(context, id, XmlBinderInflater.sInstance);
@@ -82,7 +82,7 @@ public final class XmlResources {
      * @param id The resource id of the object to load.
      * @param inflater The {@link XmlResourceInflater} to inflating XML data.
      * @return The newly object.
-     * @throws NotFoundException if the given <em>id</em> cannot be loaded.
+     * @throws NotFoundException if the given <em>id</em> cannot be load.
      * @see XmlResourceInflater#inflate(Context, XmlPullParser)
      */
     public static <T> T load(Context context, int id, XmlResourceInflater<T> inflater) throws NotFoundException {

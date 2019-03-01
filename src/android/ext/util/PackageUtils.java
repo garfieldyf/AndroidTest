@@ -3,7 +3,6 @@ package android.ext.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +19,6 @@ import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.Pools.Factory;
 import android.graphics.drawable.Drawable;
-import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Printer;
 
@@ -34,7 +32,7 @@ public final class PackageUtils {
      * @param context The <tt>Context</tt>.
      * @param flags Additional option flags. May be <tt>0</tt> or any
      * combination of <tt>PackageManager.GET_XXX</tt> constants.
-     * @return The {@link PackageInfo} object.
+     * @return A {@link PackageInfo} object.
      */
     public static PackageInfo myPackageInfo(Context context, int flags) {
         try {
@@ -227,7 +225,7 @@ public final class PackageUtils {
         /**
          * Initializes this object with the specified <em>packageInfo</em>.
          * @param context The <tt>Context</tt>.
-         * @param packageInfo The <tt>PackageInfo</tt> to set.
+         * @param packageInfo The <tt>PackageInfo</tt> to initialize.
          */
         public void initialize(Context context, PackageInfo packageInfo) {
             this.packageInfo = packageInfo;
@@ -238,9 +236,11 @@ public final class PackageUtils {
          * The {@link #packageInfo} must be a package archive file's package info.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
+         * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public Pair<CharSequence, Drawable> load(Context context) {
             DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
+            DebugUtils.__checkError(packageInfo.applicationInfo.sourceDir == null, "The packageInfo.applicationInfo.sourceDir uninitialized");
             final AssetManager assets = new AssetManager();
             try {
                 // Adds an additional archive file to the assets.
@@ -292,50 +292,6 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>AppPackageInfo</tt> contains an application's label, icon and {@link PackageInfo}.
-     */
-    public static class AppPackageInfo extends AbsPackageInfo implements Comparable<AppPackageInfo> {
-        /**
-         * The application's icon, load from the &lt;application&gt
-         * tag's "icon" attribute;
-         */
-        public Drawable icon;
-
-        /**
-         * The application's label, load from the &lt;application&gt
-         * tag's "label" attribute;
-         */
-        public CharSequence label;
-
-        @Override
-        public void initialize(Context context, PackageInfo packageInfo) {
-            super.initialize(context, packageInfo);
-
-            final PackageManager pm = context.getPackageManager();
-            this.icon  = packageInfo.applicationInfo.loadIcon(pm);
-            this.label = packageInfo.applicationInfo.loadLabel(pm);
-        }
-
-        @Override
-        public int compareTo(AppPackageInfo another) {
-            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
-            return label.toString().compareTo(another.label.toString());
-        }
-
-        @Override
-        protected StringBuilder dump(StringBuilder out) {
-            return super.dump(out).append(", label = ").append(label).append(", icon = ").append(icon);
-        }
-
-        public static final Factory<AppPackageInfo> FACTORY = new Factory<AppPackageInfo>() {
-            @Override
-            public AppPackageInfo newInstance() {
-                return new AppPackageInfo();
-            }
-        };
-    }
-
-    /**
      * Class <tt>AbsResolveInfo</tt> contains a component's {@link ResolveInfo}.
      */
     public static abstract class AbsResolveInfo {
@@ -347,14 +303,14 @@ public final class PackageUtils {
         /**
          * Initializes this object with the specified <em>resolveInfo</em>.
          * @param context The <tt>Context</tt>.
-         * @param resolveInfo The <tt>ResolveInfo</tt> to set.
+         * @param resolveInfo The <tt>ResolveInfo</tt> to initialize.
          */
         public void initialize(Context context, ResolveInfo resolveInfo) {
             this.resolveInfo = resolveInfo;
         }
 
         /**
-         * Returns a {@link ComponentInfo} of this object.
+         * Returns a {@link ComponentInfo} of this component.
          * @return The <tt>ComponentInfo</tt>.
          */
         public ComponentInfo getComponentInfo() {
@@ -371,7 +327,7 @@ public final class PackageUtils {
         }
 
         /**
-         * Returns a package name of this object.
+         * Returns a package name of this component.
          * @return The package name.
          */
         public final String getPackageName() {
@@ -385,11 +341,11 @@ public final class PackageUtils {
         }
 
         protected StringBuilder dump(StringBuilder out) {
-            final ComponentInfo ci = getComponentInfo();
-            return out.append(" name = ").append(ci.name)
+            final ComponentInfo info = getComponentInfo();
+            return out.append(" name = ").append(info.name)
                 .append(", packageName = ").append(getPackageName())
-                .append(", process = ").append(ci.processName)
-                .append(", system = ").append((ci.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+                .append(", process = ").append(info.processName)
+                .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
@@ -398,53 +354,10 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>AppResolveInfo</tt> contains a component's label, icon and {@link ResolveInfo}.
-     */
-    public static class AppResolveInfo extends AbsResolveInfo implements Comparable<AppResolveInfo> {
-        /**
-         * The component's icon.
-         */
-        public Drawable icon;
-
-        /**
-         * The component's label.
-         */
-        public CharSequence label;
-
-        @Override
-        public void initialize(Context context, ResolveInfo resolveInfo) {
-            super.initialize(context, resolveInfo);
-
-            final PackageManager pm = context.getPackageManager();
-            this.icon  = resolveInfo.loadIcon(pm);
-            this.label = StringUtils.trim(resolveInfo.loadLabel(pm));
-        }
-
-        @Override
-        public int compareTo(AppResolveInfo another) {
-            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
-            return label.toString().compareTo(another.label.toString());
-        }
-
-        @Override
-        protected StringBuilder dump(StringBuilder out) {
-            return super.dump(out).append(", label = ").append(label).append(", icon = ").append(icon);
-        }
-
-        public static final Factory<AppResolveInfo> FACTORY = new Factory<AppResolveInfo>() {
-            @Override
-            public AppResolveInfo newInstance() {
-                return new AppResolveInfo();
-            }
-        };
-    }
-
-    /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
      * @param <T> A class that extends {@link AbsPackageInfo} that will be
      * the parser result type.
      */
-    @SuppressWarnings("unchecked")
     public static class PackageParser<T extends AbsPackageInfo> implements ScanCallback {
         /**
          * The application <tt>Context</tt>.
@@ -466,65 +379,71 @@ public final class PackageUtils {
             mContext = context.getApplicationContext();
         }
 
-        /**
-         * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable)</tt>.
-         * @param dirPath The path of directory, must be absolute file path.
-         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally the returned value is undefined.
-         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects., <tt>null</tt> otherwise.
-         * @see #parsePackages(String, int, int, Cancelable)
-         * @see #parsePackages(String, int, int, Cancelable, List)
-         */
-        public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
-            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), 0, cancelable);
-            return (FileUtils.scanFiles(dirPath, this, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, parsedResult) == 0 ? parsedResult.result : null);
+        public final Request<T> parsePackages(String dirPath) {
+            DebugUtils.__checkError(StringUtils.getLength(dirPath) == 0, "Invalid parameter - The dirPath is null or 0-length");
+            return new Request<T>(dirPath, this);
         }
 
-        /**
-         * Equivalent to calling <tt>parsePackages(dirPath, scanFlags, parseFlags, cancelable, new ArrayList())</tt>.
-         * @param dirPath The path of directory, must be absolute file path.
-         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
-         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
-         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally the returned value is undefined.
-         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects., <tt>null</tt> otherwise.
-         * @see #parsePackages(String, Cancelable)
-         * @see #parsePackages(String, int, int, Cancelable, List)
-         */
-        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
-            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), parseFlags, cancelable);
-            return (FileUtils.scanFiles(dirPath, this, scanFlags, parsedResult) == 0 ? parsedResult.result : null);
-        }
-
-        /**
-         * Parses the package archive files in the specified <em>dirPath</em>.
-         * @param dirPath The path of directory, must be absolute file path.
-         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
-         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
-         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-         * If the parse was cancelled before it completed normally the <em>outResults's</em> contents are undefined.
-         * @param outResults A <tt>List</tt> to store the {@link AbsPackageInfo} subclass objects.
-         * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-         * @see #parsePackages(String, Cancelable)
-         * @see #parsePackages(String, int, int, Cancelable)
-         */
-        public final int parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable, List<? super T> outResults) {
-            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult(outResults, parseFlags, cancelable));
-        }
+//        /**
+//         * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable)</tt>.
+//         * @param dirPath The path of directory, must be absolute file path.
+//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
+//         * If the parse was cancelled before it completed normally the returned value is undefined.
+//         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects, <tt>null</tt> otherwise.
+//         * @see #parsePackages(String, int, int, Cancelable)
+//         * @see #parsePackages(String, int, int, Cancelable, List)
+//         */
+//        public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
+//            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), 0, cancelable);
+//            return (FileUtils.scanFiles(dirPath, this, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, parsedResult) == 0 ? parsedResult.result : null);
+//        }
+//
+//        /**
+//         * Equivalent to calling <tt>parsePackages(dirPath, scanFlags, parseFlags, cancelable, new ArrayList())</tt>.
+//         * @param dirPath The path of directory, must be absolute file path.
+//         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+//         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
+//         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
+//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
+//         * If the parse was cancelled before it completed normally the returned value is undefined.
+//         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects, <tt>null</tt> otherwise.
+//         * @see #parsePackages(String, Cancelable)
+//         * @see #parsePackages(String, int, int, Cancelable, List)
+//         */
+//        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
+//            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), parseFlags, cancelable);
+//            return (FileUtils.scanFiles(dirPath, this, scanFlags, parsedResult) == 0 ? parsedResult.result : null);
+//        }
+//
+//        /**
+//         * Parses the package archive files in the specified <em>dirPath</em>.
+//         * @param dirPath The path of directory, must be absolute file path.
+//         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
+//         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
+//         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
+//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
+//         * If the parse was cancelled before it completed normally the <em>outResults's</em> contents are undefined.
+//         * @param outResults A <tt>List</tt> to store the {@link AbsPackageInfo} subclass objects.
+//         * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
+//         * @see #parsePackages(String, Cancelable)
+//         * @see #parsePackages(String, int, int, Cancelable)
+//         */
+//        public final int parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable, List<? super T> outResults) {
+//            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult(outResults, parseFlags, cancelable));
+//        }
 
         @Override
+        @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object cookie) {
-            final ParsedResult parsedResult = (ParsedResult)cookie;
+            final Request<T> request = (Request<T>)cookie;
             if (isArchiveFile(path, type)) {
-                final T result = parsePackage(mContext, path, parsedResult.parseFlags, mFactory);
+                final T result = parsePackage(mContext, path, request.mParseFlags, mFactory);
                 if (result != null) {
-                    parsedResult.result.add(result);
+                    request.mResult.add(result);
                 }
             }
 
-            return (parsedResult.cancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
+            return (request.mCancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
         }
 
         /**
@@ -540,6 +459,50 @@ public final class PackageUtils {
             }
 
             return false;
+        }
+    }
+
+    public static final class Request<T extends AbsPackageInfo> {
+        int mScanFlags;
+        int mParseFlags;
+        Cancelable mCancelable;
+        List<? super T> mResult;
+
+        final String mPath;
+        final ScanCallback mCallback;
+
+        Request(String dirPath, ScanCallback callback) {
+            mPath = dirPath;
+            mCallback = callback;
+        }
+
+        public final Request<T> addScanFlags(int flags) {
+            mScanFlags |= flags;
+            return this;
+        }
+
+        public final Request<T> addParseFlags(int flags) {
+            mParseFlags |= flags;
+            return this;
+        }
+
+        public final Request<T> setResult(List<? super T> result) {
+            mResult = result;
+            return this;
+        }
+
+        public final Request<T> setCancelable(Cancelable cancelable) {
+            mCancelable = cancelable;
+            return this;
+        }
+
+        public final List<? super T> submit() {
+            if (mResult == null) {
+                mResult = new ArrayList<T>();
+            }
+
+            mCancelable = FileUtils.wrap(mCancelable);
+            return (FileUtils.scanFiles(mPath, mCallback, mScanFlags, this) == 0 ? mResult : null);
         }
     }
 
@@ -566,7 +529,7 @@ public final class PackageUtils {
          * @see #InstalledPackageFilter(List)
          */
         public InstalledPackageFilter(String excludingPackage) {
-            this.packages = (TextUtils.isEmpty(excludingPackage) ? Collections.<String>emptyList() : Collections.singletonList(excludingPackage));
+            this.packages = Collections.singletonList(excludingPackage);
         }
 
         /**
@@ -585,39 +548,21 @@ public final class PackageUtils {
         }
     }
 
-    /**
-     * Class <tt>PackageNameComparator</tt> compares the package name of the {@link AbsPackageInfo}.
-     */
-    public static final class PackageNameComparator implements Comparator<AbsPackageInfo> {
-        public static final PackageNameComparator sInstance = new PackageNameComparator();
-
-        /**
-         * This class cannot be instantiated.
-         */
-        private PackageNameComparator() {
-        }
-
-        @Override
-        public int compare(AbsPackageInfo one, AbsPackageInfo another) {
-            return one.packageInfo.packageName.compareTo(another.packageInfo.packageName);
-        }
-    }
-
-    /**
-     * Class <tt>ParsedResult</tt> store the {@link PackageParser} parsed result.
-     */
-    @SuppressWarnings("rawtypes")
-    private static final class ParsedResult {
-        public final List result;
-        public final int parseFlags;
-        public final Cancelable cancelable;
-
-        public ParsedResult(List result, int parseFlags, Cancelable cancelable) {
-            this.result = result;
-            this.parseFlags = parseFlags;
-            this.cancelable = FileUtils.wrap(cancelable);
-        }
-    }
+//    /**
+//     * Class <tt>ParsedResult</tt> store the {@link PackageParser} parsed result.
+//     */
+//    @SuppressWarnings("rawtypes")
+//    private static final class ParsedResult {
+//        public final List result;
+//        public final int parseFlags;
+//        public final Cancelable cancelable;
+//
+//        public ParsedResult(List result, int parseFlags, Cancelable cancelable) {
+//            this.result = result;
+//            this.parseFlags = parseFlags;
+//            this.cancelable = FileUtils.wrap(cancelable);
+//        }
+//    }
 
     /**
      * This utility class cannot be instantiated.

@@ -48,15 +48,14 @@ public final class NetworkUtils {
 
     /**
      * Returns the MAC address from the network interface.
-     * @param ifname The network interface name. Pass {@link #WLAN},
+     * @param ifname The network interface name. May be {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
      * @return The MAC address or <tt>null</tt> if it has no address.
      * @see #getMacAddress(String, String)
      */
     public static byte[] getMacAddress(String ifname) {
         try {
-            final NetworkInterface network = NetworkInterface.getByName(ifname);
-            return (network != null ? network.getHardwareAddress() : null);
+            return NetworkInterface.getByName(ifname).getHardwareAddress();
         } catch (Exception e) {
             return null;
         }
@@ -64,7 +63,7 @@ public final class NetworkUtils {
 
     /**
      * Returns the MAC address from the network interface.
-     * @param ifname The network interface name. Pass {@link #WLAN},
+     * @param ifname The network interface name. May be {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
      * @return The MAC address or <tt>fallback</tt>.
      * @see #getMacAddress(String)
@@ -76,10 +75,6 @@ public final class NetworkUtils {
 
     /**
      * Equivalent to calling <tt>toMacAddress(macAddress, new byte[6])</tt>.
-     * @param macAddress The MAC address in <tt>XX:XX:XX:XX:XX:XX</tt>,
-     * <tt>XX-XX-XX-XX-XX-XX</tt> or any separated by white space character
-     * ('\s') in <em>macAddress</em>.
-     * @return The byte array MAC address.
      * @see #toMacAddress(String, byte[])
      */
     public static byte[] toMacAddress(String macAddress) {

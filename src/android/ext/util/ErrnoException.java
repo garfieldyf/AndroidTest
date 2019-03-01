@@ -1,7 +1,5 @@
 package android.ext.util;
 
-import java.io.IOException;
-
 /**
  * Class <tt>ErrnoException</tt> is wrapper for system <tt>errno</tt>.
  * @author Garfield
@@ -692,12 +690,5 @@ public final class ErrnoException extends RuntimeException {
     public ErrnoException(int errno, String detailMessage, Throwable throwable) {
         super(detailMessage, throwable);
         this.errno = errno;
-    }
-
-    /**
-     * Throws this exception as an <tt>IOException</tt>.
-     */
-    public final void throwAsIOException() throws IOException {
-        throw new IOException(getMessage());
     }
 }

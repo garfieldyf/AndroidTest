@@ -104,7 +104,6 @@ public final class JsonUtils {
      * @param array The <tt>JSONArray</tt>.
      * @param index The index of the <tt>JSONObject</tt>.
      * @return A <tt>JSONObject</tt> or <tt>null</tt>.
-     * @see #optJSONObject(JSONObject, String)
      */
     public static JSONObject optJSONObject(JSONArray array, int index) {
         return (array != null ? array.optJSONObject(index) : null);
@@ -116,7 +115,6 @@ public final class JsonUtils {
      * @param object The <tt>JSONObject</tt>.
      * @param name The JSON property name.
      * @return A <tt>JSONObject</tt> or <tt>null</tt>.
-     * @see #optJSONObject(JSONArray, int)
      */
     public static JSONObject optJSONObject(JSONObject object, String name) {
         return (object != null ? object.optJSONObject(name) : null);
@@ -184,7 +182,6 @@ public final class JsonUtils {
      * @param value A <tt>JSONObject, JSONArray, String, Boolean,
      * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>array</em>.
-     * @see #putOpt(JSONObject, String, Object)
      */
     public static JSONArray putOpt(JSONArray array, int index, Object value) {
         try {
@@ -201,7 +198,6 @@ public final class JsonUtils {
      * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
      * {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>object</em>.
-     * @see #putOpt(JSONArray, int, Object)
      */
     public static JSONObject putOpt(JSONObject object, String name, Object value) {
         try {
@@ -412,19 +408,19 @@ public final class JsonUtils {
     }
 
     private static Number readNumber(JsonReader reader) throws IOException {
-        final String result = reader.nextString();
-        if (result.indexOf('.') == -1) {
+        final String string = reader.nextString();
+        if (string.indexOf('.') == -1) {
             try {
-                return Integer.valueOf(result, 10);
+                return Integer.valueOf(string, 10);
             } catch (NumberFormatException e) {
                 try {
-                    return Long.valueOf(result, 10);
+                    return Long.valueOf(string, 10);
                 } catch (NumberFormatException ex) {
                 }
             }
         }
 
-        return Double.valueOf(result);
+        return Double.valueOf(string);
     }
 
     private static JSONArray parseArray(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {

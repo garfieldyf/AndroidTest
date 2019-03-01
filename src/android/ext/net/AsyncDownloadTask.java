@@ -41,7 +41,6 @@ import android.util.Log;
  * new JSONDownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
 public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {
     private DownloadRequest mRequest;
 
@@ -62,6 +61,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
         try {
             mRequest = newDownloadRequest(params);
@@ -94,7 +94,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param out The {@link OutputStream} to write the resource.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(String, int, byte[])
+     * @see #onDownload(URLConnection, int, Params[])
      */
     protected final void download(OutputStream out, byte[] tempBuffer) throws IOException {
         mRequest.downloadImpl(out, this, tempBuffer);
@@ -107,7 +107,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param statusCode The response code returned by the remote server.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
-     * @see #download(OutputStream, byte[])
+     * @see #onDownload(URLConnection, int, Params[])
      */
     protected final void download(String filename, int statusCode, byte[] tempBuffer) throws IOException {
         switch (statusCode) {

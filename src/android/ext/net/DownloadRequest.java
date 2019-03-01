@@ -272,7 +272,6 @@ public class DownloadRequest {
      * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
-     * @see JsonUtils#newInstance(JsonReader, Cancelable)
      */
     public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
         try {

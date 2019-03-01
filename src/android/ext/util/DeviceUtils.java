@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import android.annotation.SuppressLint;
@@ -37,11 +36,7 @@ public final class DeviceUtils {
      * @see #getCpuMinFreq(int)
      */
     public static int getCpuMaxFreq(int coreIndex) {
-        try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_max_freq"));
-        } catch (Exception e) {
-            return -1;
-        }
+        return readCpuFrequency(coreIndex, "cpuinfo_max_freq");
     }
 
     /**
@@ -53,11 +48,7 @@ public final class DeviceUtils {
      * @see #getCpuMaxFreq(int)
      */
     public static int getCpuMinFreq(int coreIndex) {
-        try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/cpuinfo_min_freq"));
-        } catch (Exception e) {
-            return -1;
-        }
+        return readCpuFrequency(coreIndex, "cpuinfo_min_freq");
     }
 
     /**
@@ -69,11 +60,7 @@ public final class DeviceUtils {
      * @see #getCpuMinFreq(int)
      */
     public static int getCpuCurFreq(int coreIndex) {
-        try {
-            return Integer.parseInt(readDeviceFile("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/scaling_cur_freq"));
-        } catch (Exception e) {
-            return -1;
-        }
+        return readCpuFrequency(coreIndex, "scaling_cur_freq");
     }
 
     /**
@@ -276,18 +263,21 @@ public final class DeviceUtils {
         return userLabel;
     }
 
-    private static String readDeviceFile(String deviceFile) throws IOException {
-        final InputStream is = new FileInputStream(deviceFile);
+    private static int readCpuFrequency(int coreIndex, String filename) {
+        InputStream is = null;
         try {
+            is = new FileInputStream("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/" + filename);
             final byte[] data = new byte[24];
             int byteCount = is.read(data, 0, data.length);
             if (data[byteCount - 1] == '\n') {
                 --byteCount;    // skip the '\n'
             }
 
-            return new String(data, 0, byteCount);
+            return Integer.parseInt(new String(data, 0, byteCount));
+        } catch (Exception e) {
+            return -1;
         } finally {
-            is.close();
+            FileUtils.close(is);
         }
     }
 

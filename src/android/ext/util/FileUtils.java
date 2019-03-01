@@ -248,6 +248,7 @@ public final class FileUtils {
      * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
      * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded, <tt>null</tt> otherwise.
+     * @see Dirent#FACTORY
      * @see #listFiles(String, int)
      * @see #listFiles(String, int, Factory, List)
      */
@@ -907,12 +908,11 @@ public final class FileUtils {
         /**
          * Formats the total size to be in the from of bytes, kilobytes, megabytes, etc.
          * @param context The <tt>Context</tt>.
-         * @param resId May be <tt>0</tt>. The resource id for the format string.
+         * @param resId The resource id for the format string.
          * @return A formatted string with the {@link #size}.
          */
         public final String formatSize(Context context, int resId) {
-            final String result = Formatter.formatFileSize(context, size);
-            return (resId > 0 ? context.getString(resId, result) : result);
+            return context.getString(resId, Formatter.formatFileSize(context, size));
         }
 
         public final void dump(Context context, Printer printer) {

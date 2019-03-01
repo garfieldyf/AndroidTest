@@ -285,7 +285,7 @@ public final class ArrayUtils {
             list.clear();
         } else {
             final ListIterator<T> itor = list.listIterator(start);
-            for (int i = start; i < end; ++i) {
+            for (; start < end; ++start) {
                 itor.next();
                 itor.remove();
             }
@@ -530,9 +530,9 @@ public final class ArrayUtils {
 
     private static void copyOfRange(List list, Object[] array, int start, int end) {
         final ListIterator itor = list.listIterator(start);
-        for (int i = start; i < end; ++i) {
+        for (; start < end; ++start) {
             itor.next();
-            itor.set(array[i]);
+            itor.set(array[start]);
         }
     }
 

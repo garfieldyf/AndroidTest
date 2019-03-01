@@ -16,7 +16,7 @@ public final class Pools {
      * Creates a new <b>one-size</b> {@link Pool}.
      * @param factory The {@link Factory} to create
      * a new element when the pool is empty.
-     * @return The newly created <tt>Pool</tt>.
+     * @return An newly created <tt>Pool</tt>.
      */
     public static <T> Pool<T> newSimplePool(Factory<T> factory) {
         return new SimplePool<T>(factory);
@@ -27,7 +27,7 @@ public final class Pools {
      * @param maxSize The maximum number of byte arrays to allow in the pool.
      * @param bufferSize The maximum number of bytes in the each byte array.
      * Suggest 8K, 16K, etc.
-     * @return The newly byte array <tt>Pool</tt>.
+     * @return An newly byte array <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
     public static Pool<byte[]> newPool(int maxSize, int bufferSize) {
@@ -39,7 +39,7 @@ public final class Pools {
      * @param factory The {@link Factory} to create a new element
      * when the pool is empty.
      * @param maxSize The maximum number of elements in the pool.
-     * @return The newly created <tt>Pool</tt>.
+     * @return An newly created <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
@@ -50,7 +50,7 @@ public final class Pools {
      * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
      * @param animation The initial property animation.
      * @param maxSize The maximum number of animators in the pool.
-     * @return The newly animator <tt>Pool</tt>.
+     * @return An newly <tt>Animator Pool</tt>.
      * @see #newPool(Context, int, int)
      */
     public static Pool<Animator> newPool(Animator animation, int maxSize) {
@@ -62,7 +62,7 @@ public final class Pools {
      * @param context The <tt>Context</tt>.
      * @param resId The resource id of the property animation to load.
      * @param maxSize The maximum number of animators in the pool.
-     * @return The newly animator <tt>Pool</tt>.
+     * @return An newly <tt>Animator Pool</tt>.
      * @see #newPool(Animator, int)
      */
     public static Pool<Animator> newPool(Context context, int resId, int maxSize) {

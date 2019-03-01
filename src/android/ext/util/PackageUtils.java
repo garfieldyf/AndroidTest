@@ -355,8 +355,18 @@ public final class PackageUtils {
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
-     * @param <T> A class that extends {@link AbsPackageInfo} that will be
-     * the parser result type.
+     * <h5>PackageParser's generic types</h5>
+     * <p>Only one type used by a package parser is the following:</p>
+     * <ol><li><tt>T</tt>, A class that extends {@link AbsPackageInfo} that
+     * will be the parser result type.</li></ol>
+     * <h2>Usage</h2>
+     * <p>Here is an example:</p><pre>
+     * final List&lt;MyPackageInfo&gt; result = new PackageParser&lt;MyPackageInfo&gt;(context, MyPackageInfo.FACTORY)
+     *     .parse(dirPath1, dirPath2)
+     *     .addParseFlags(PackageManager.GET_ACTIVITIES)
+     *     .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
+     *     .setCancelable(cancelable)
+     *     .submit();</pre>
      */
     public static class PackageParser<T extends AbsPackageInfo> implements ScanCallback {
         /**
@@ -379,58 +389,14 @@ public final class PackageUtils {
             mContext = context.getApplicationContext();
         }
 
-        public final Request<T> parsePackages(String dirPath) {
-            DebugUtils.__checkError(StringUtils.getLength(dirPath) == 0, "Invalid parameter - The dirPath is null or 0-length");
-            return new Request<T>(dirPath, this);
+        /**
+         * Parses the package archive files with the specified <em>dirPaths</em>.
+         * @param dirPaths An array of the directory paths, must be absolute file path.
+         * @return The {@link Request}.
+         */
+        public final Request<T> parse(String... dirPaths) {
+            return new Request<T>(dirPaths, this);
         }
-
-//        /**
-//         * Equivalent to calling <tt>parsePackages(dirPath, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, 0, cancelable)</tt>.
-//         * @param dirPath The path of directory, must be absolute file path.
-//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-//         * If the parse was cancelled before it completed normally the returned value is undefined.
-//         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects, <tt>null</tt> otherwise.
-//         * @see #parsePackages(String, int, int, Cancelable)
-//         * @see #parsePackages(String, int, int, Cancelable, List)
-//         */
-//        public final List<T> parsePackages(String dirPath, Cancelable cancelable) {
-//            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), 0, cancelable);
-//            return (FileUtils.scanFiles(dirPath, this, FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS, parsedResult) == 0 ? parsedResult.result : null);
-//        }
-//
-//        /**
-//         * Equivalent to calling <tt>parsePackages(dirPath, scanFlags, parseFlags, cancelable, new ArrayList())</tt>.
-//         * @param dirPath The path of directory, must be absolute file path.
-//         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-//         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
-//         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
-//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-//         * If the parse was cancelled before it completed normally the returned value is undefined.
-//         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo} subclass objects, <tt>null</tt> otherwise.
-//         * @see #parsePackages(String, Cancelable)
-//         * @see #parsePackages(String, int, int, Cancelable, List)
-//         */
-//        public final List<T> parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable) {
-//            final ParsedResult parsedResult = new ParsedResult(new ArrayList<T>(), parseFlags, cancelable);
-//            return (FileUtils.scanFiles(dirPath, this, scanFlags, parsedResult) == 0 ? parsedResult.result : null);
-//        }
-//
-//        /**
-//         * Parses the package archive files in the specified <em>dirPath</em>.
-//         * @param dirPath The path of directory, must be absolute file path.
-//         * @param scanFlags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-//         * {@link #FLAG_SCAN_FOR_DESCENDENTS}. See {@link FileUtils#scanFiles}.
-//         * @param parseFlags The parse flags. May be <tt>0</tt> or any combination of <tt>PackageManager.GET_XXX</tt> constants.
-//         * @param cancelable A {@link Cancelable} can be check the parse is cancelled, or <tt>null</tt> if none.
-//         * If the parse was cancelled before it completed normally the <em>outResults's</em> contents are undefined.
-//         * @param outResults A <tt>List</tt> to store the {@link AbsPackageInfo} subclass objects.
-//         * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-//         * @see #parsePackages(String, Cancelable)
-//         * @see #parsePackages(String, int, int, Cancelable)
-//         */
-//        public final int parsePackages(String dirPath, int scanFlags, int parseFlags, Cancelable cancelable, List<? super T> outResults) {
-//            return FileUtils.scanFiles(dirPath, this, scanFlags, new ParsedResult(outResults, parseFlags, cancelable));
-//        }
 
         @Override
         @SuppressWarnings("unchecked")
@@ -462,47 +428,87 @@ public final class PackageUtils {
         }
     }
 
+    /**
+     * The <tt>Request</tt> class used to {@link PackageParser} parse the package archive files.
+     */
     public static final class Request<T extends AbsPackageInfo> {
-        int mScanFlags;
-        int mParseFlags;
-        Cancelable mCancelable;
-        List<? super T> mResult;
+        /* package */ int mScanFlags;
+        /* package */ int mParseFlags;
+        /* package */ Cancelable mCancelable;
+        /* package */ List<? super T> mResult;
+        /* package */ final String[] mPaths;
+        /* package */ final ScanCallback mCallback;
 
-        final String mPath;
-        final ScanCallback mCallback;
-
-        Request(String dirPath, ScanCallback callback) {
-            mPath = dirPath;
+        /**
+         * Constructor
+         * @param dirPaths An array of the directory paths, must be absolute file path.
+         * @param callback The {@link ScanCallback} used to scan the package archive files.
+         */
+        /* package */ Request(String[] dirPaths, ScanCallback callback) {
+            mPaths = dirPaths;
             mCallback = callback;
         }
 
+        /**
+         * Adds the scan flags to scan the package archive files.
+         * @param flags The scan flags. May be <tt>0</tt> or any combination
+         * of {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+         * @return This <em>request</em>.
+         * @see {@link FileUtils#scanFiles}
+         */
         public final Request<T> addScanFlags(int flags) {
             mScanFlags |= flags;
             return this;
         }
 
+        /**
+         * Adds the parse flags to parse the package info.
+         * @param flags The parse flags. May be <tt>0</tt> or any
+         * combination of <tt>PackageManager.GET_XXX</tt> constants.
+         * @return This <em>request</em>.
+         * @see {@link PackageManager#getPackageArchiveInfo}
+         */
         public final Request<T> addParseFlags(int flags) {
             mParseFlags |= flags;
             return this;
         }
 
+        /**
+         * Sets a {@link List} to store the parsed result.
+         * @param result The <tt>List</tt>.
+         * @return This <em>request</em>.
+         */
         public final Request<T> setResult(List<? super T> result) {
             mResult = result;
             return this;
         }
 
+        /**
+         * Sets a {@link Cancelable} to be check the operation is cancelled.
+         * @param cancelable A {@link Cancelable}. If the operation was cancelled
+         * before it completed normally the parsed result is undefined.
+         * @return This <em>request</em>.
+         */
         public final Request<T> setCancelable(Cancelable cancelable) {
             mCancelable = cancelable;
             return this;
         }
 
+        /**
+         * Parses the package archive files with the arguments supplied to this request.
+         * @return The parsed result.
+         */
         public final List<? super T> submit() {
             if (mResult == null) {
                 mResult = new ArrayList<T>();
             }
 
             mCancelable = FileUtils.wrap(mCancelable);
-            return (FileUtils.scanFiles(mPath, mCallback, mScanFlags, this) == 0 ? mResult : null);
+            for (int i = 0; i < mPaths.length; ++i) {
+                FileUtils.scanFiles(mPaths[i], mCallback, mScanFlags, this);
+            }
+
+            return mResult;
         }
     }
 
@@ -547,22 +553,6 @@ public final class PackageUtils {
             return (!packages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) == 0);
         }
     }
-
-//    /**
-//     * Class <tt>ParsedResult</tt> store the {@link PackageParser} parsed result.
-//     */
-//    @SuppressWarnings("rawtypes")
-//    private static final class ParsedResult {
-//        public final List result;
-//        public final int parseFlags;
-//        public final Cancelable cancelable;
-//
-//        public ParsedResult(List result, int parseFlags, Cancelable cancelable) {
-//            this.result = result;
-//            this.parseFlags = parseFlags;
-//            this.cancelable = FileUtils.wrap(cancelable);
-//        }
-//    }
 
     /**
      * This utility class cannot be instantiated.

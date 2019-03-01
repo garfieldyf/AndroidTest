@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import java.util.RandomAccess;
 import android.ext.util.Pools.Pool;
 import android.util.Log;
 
@@ -176,18 +175,10 @@ public final class ArrayUtils {
      */
     public static <T> int indexOf(List<T> list, int start, int end, Filter<? super T> filter) {
         DebugUtils.__checkRange(start, end - start, list.size());
-        if (list instanceof RandomAccess) {
-            for (; start < end; ++start) {
-                if (filter.accept(list.get(start))) {
-                    return start;
-                }
-            }
-        } else {
-            final ListIterator<T> itor = list.listIterator(start);
-            for (; itor.hasNext() && start < end; ++start) {
-                if (filter.accept(itor.next())) {
-                    return itor.previousIndex();
-                }
+        final ListIterator<T> itor = list.listIterator(start);
+        for (; start < end; ++start) {
+            if (filter.accept(itor.next())) {
+                return itor.previousIndex();
             }
         }
 
@@ -272,18 +263,10 @@ public final class ArrayUtils {
      */
     public static <T> int lastIndexOf(List<T> list, int start, int end, Filter<? super T> filter) {
         DebugUtils.__checkRange(start, end - start, list.size());
-        if (list instanceof RandomAccess) {
-            for (--end; end >= start; --end) {
-                if (filter.accept(list.get(end))) {
-                    return end;
-                }
-            }
-        } else {
-            final ListIterator<T> itor = list.listIterator(end);
-            for (; itor.hasPrevious() && start < end; ++start) {
-                if (filter.accept(itor.previous())) {
-                    return itor.nextIndex();
-                }
+        final ListIterator<T> itor = list.listIterator(end);
+        for (; start < end; ++start) {
+            if (filter.accept(itor.previous())) {
+                return itor.nextIndex();
             }
         }
 
@@ -298,10 +281,14 @@ public final class ArrayUtils {
      */
     public static <T> void removeRange(List<T> list, int start, int end) {
         DebugUtils.__checkRange(start, end - start, list.size());
-        final ListIterator<T> itor = list.listIterator(start);
-        for (int i = start; i < end; ++i) {
-            itor.next();
-            itor.remove();
+        if (start == 0 && end == list.size()) {
+            list.clear();
+        } else {
+            final ListIterator<T> itor = list.listIterator(start);
+            for (int i = start; i < end; ++i) {
+                itor.next();
+                itor.remove();
+            }
         }
     }
 
@@ -517,14 +504,16 @@ public final class ArrayUtils {
      * @see #toByteArray(CharSequence, byte[], int)
      */
     public static int toByteArray(CharSequence hex, int start, int end, byte[] out, int offset) {
-        final int writtenBytes = (end - start) >> 1;
-        for (int high, low; start < end; ++offset) {
-            high = Character.digit((int)hex.charAt(start++), 16) << 4;
-            low  = Character.digit((int)hex.charAt(start++), 16);
+        DebugUtils.__checkRange(start, end - start, hex.length());
+        DebugUtils.__checkRange(offset, (end - start) >> 1, out.length);
+        DebugUtils.__checkError((end - start) % 2 != 0, "The hex length (" + (end - start) + ") must be even.");
+        for (int i = start, high, low; i < end; ++offset) {
+            high = Character.digit((int)hex.charAt(i++), 16) << 4;
+            low  = Character.digit((int)hex.charAt(i++), 16);
             out[offset] = (byte)(high + low);
         }
 
-        return writtenBytes;
+        return (end - start) >> 1;
     }
 
     private static void sortList(List list, int start, int end) {

@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -232,15 +233,15 @@ public final class PackageUtils {
         }
 
         /**
-         * Retrieve the application's label and icon associated with the package info.
+         * Retrieve the application's label and icon associated with this component.
          * The {@link #packageInfo} must be a package archive file's package info.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public Pair<CharSequence, Drawable> load(Context context) {
-            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
-            DebugUtils.__checkError(packageInfo.applicationInfo.sourceDir == null, "The packageInfo.applicationInfo.sourceDir uninitialized");
+            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            DebugUtils.__checkError(packageInfo.applicationInfo.sourceDir == null, "This " + getClass().getSimpleName() + " uninitialized");
             final AssetManager assets = new AssetManager();
             try {
                 // Adds an additional archive file to the assets.
@@ -257,7 +258,7 @@ public final class PackageUtils {
         }
 
         public final void dump(Printer printer) {
-            DebugUtils.__checkError(packageInfo == null, "The packageInfo uninitialized");
+            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             printer.println(dumpImpl(new StringBuilder(256)));
         }
 
@@ -265,6 +266,7 @@ public final class PackageUtils {
             return out.append(" package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
                 .append(", system = ").append((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                .append(", updatedSystem = ").append((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
@@ -314,7 +316,7 @@ public final class PackageUtils {
          * @return The <tt>ComponentInfo</tt>.
          */
         public ComponentInfo getComponentInfo() {
-            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             if (resolveInfo.activityInfo != null) {
                 return resolveInfo.activityInfo;
             } else if (resolveInfo.serviceInfo != null) {
@@ -331,12 +333,12 @@ public final class PackageUtils {
          * @return The package name.
          */
         public final String getPackageName() {
-            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return (resolveInfo.resolvePackageName != null ? resolveInfo.resolvePackageName : getComponentInfo().packageName);
         }
 
         public final void dump(Printer printer) {
-            DebugUtils.__checkError(resolveInfo == null, "The resolveInfo uninitialized");
+            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             printer.println(dumpImpl(new StringBuilder(196)));
         }
 
@@ -345,7 +347,8 @@ public final class PackageUtils {
             return out.append(" name = ").append(info.name)
                 .append(", packageName = ").append(getPackageName())
                 .append(", process = ").append(info.processName)
-                .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+                .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
+                .append(", updatedSystem = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
@@ -355,18 +358,16 @@ public final class PackageUtils {
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
-     * <h5>PackageParser's generic types</h5>
-     * <p>Only one type used by a package parser is the following:</p>
-     * <ol><li><tt>T</tt>, A class that extends {@link AbsPackageInfo} that
-     * will be the parser result type.</li></ol>
+     * <h5>PackageParser's generic types</h5></br>
+     * <tt>T</tt>, A class that extends {@link AbsPackageInfo} that
+     * will be the parser result type.
      * <h2>Usage</h2>
      * <p>Here is an example:</p><pre>
      * final List&lt;MyPackageInfo&gt; result = new PackageParser&lt;MyPackageInfo&gt;(context, MyPackageInfo.FACTORY)
-     *     .parse(dirPath1, dirPath2)
      *     .addParseFlags(PackageManager.GET_ACTIVITIES)
      *     .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
      *     .setCancelable(cancelable)
-     *     .submit();</pre>
+     *     .parse(dirPath1, dirPath2);</pre>
      */
     public static class PackageParser<T extends AbsPackageInfo> implements ScanCallback {
         /**
@@ -374,9 +375,9 @@ public final class PackageUtils {
          */
         public final Context mContext;
 
-        /**
-         * The {@link Factory} to create the {@link AbsPackageInfo} subclass object.
-         */
+        private int mScanFlags;
+        private int mParseFlags;
+        private Cancelable mCancelable;
         private final Factory<? extends T> mFactory;
 
         /**
@@ -390,26 +391,84 @@ public final class PackageUtils {
         }
 
         /**
+         * Adds the scan flags to scan the package archive files.
+         * @param flags The scan flags. May be <tt>0</tt> or any combination
+         * of {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+         * @return This <em>parser</em>.
+         * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
+         */
+        public final PackageParser<T> addScanFlags(int flags) {
+            mScanFlags |= flags;
+            return this;
+        }
+
+        /**
+         * Adds the parse flags to parse the package info.
+         * @param flags The parse flags. May be <tt>0</tt> or any
+         * combination of <tt>PackageManager.GET_XXX</tt> constants.
+         * @return This <em>parser</em>.
+         * @see PackageManager#getPackageArchiveInfo(String, int)
+         */
+        public final PackageParser<T> addParseFlags(int flags) {
+            mParseFlags |= flags;
+            return this;
+        }
+
+        /**
+         * Sets a {@link Cancelable} to be check the operation is cancelled.
+         * @param cancelable A {@link Cancelable}. If the operation was cancelled
+         * before it completed normally the parsed result is undefined.
+         * @return This <em>parser</em>.
+         */
+        public final PackageParser<T> setCancelable(Cancelable cancelable) {
+            mCancelable = cancelable;
+            return this;
+        }
+
+        /**
          * Parses the package archive files with the specified <em>dirPaths</em>.
          * @param dirPaths An array of the directory paths, must be absolute file path.
-         * @return The {@link Request}.
+         * @return If the parse succeeded return a {@link List} of {@link AbsPackageInfo}
+         * subclass objects, <tt>null</tt> otherwise.
+         * @see #parse(List, String[])
          */
-        public final Request<T> parse(String... dirPaths) {
-            return new Request<T>(dirPaths, this);
+        public final List<T> parse(String... dirPaths) {
+            final List<T> result = new ArrayList<T>();
+            return (parse(result, dirPaths) == 0 ? result : null);
+        }
+
+        /**
+         * Parses the package archive files with the specified <em>dirPaths</em>.
+         * @param dirPaths An array of the directory paths, must be absolute file path.
+         * @param outResult A <tt>List</tt> to store the {@link AbsPackageInfo} subclass objects.
+         * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code.
+         * See {@link ErrnoException}.
+         * @see #parse(String[])
+         */
+        public final int parse(List<? super T> outResult, String... dirPaths) {
+            int result = 0;
+            mCancelable = FileUtils.wrap(mCancelable);
+            for (int i = 0; i < dirPaths.length; ++i) {
+                result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outResult);
+                if (result != 0) {
+                    break;
+                }
+            }
+
+            return result;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object cookie) {
-            final Request<T> request = (Request<T>)cookie;
             if (isArchiveFile(path, type)) {
-                final T result = parsePackage(mContext, path, request.mParseFlags, mFactory);
+                final T result = parsePackage(mContext, path, mParseFlags, mFactory);
                 if (result != null) {
-                    request.mResult.add(result);
+                    ((List<T>)cookie).add(result);
                 }
             }
 
-            return (request.mCancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
+            return (mCancelable.isCancelled() ? SC_STOP : SC_CONTINUE);
         }
 
         /**
@@ -429,128 +488,33 @@ public final class PackageUtils {
     }
 
     /**
-     * The <tt>Request</tt> class used to {@link PackageParser} parse the package archive files.
-     */
-    public static final class Request<T extends AbsPackageInfo> {
-        /* package */ int mScanFlags;
-        /* package */ int mParseFlags;
-        /* package */ Cancelable mCancelable;
-        /* package */ List<? super T> mResult;
-        /* package */ final String[] mPaths;
-        /* package */ final ScanCallback mCallback;
-
-        /**
-         * Constructor
-         * @param dirPaths An array of the directory paths, must be absolute file path.
-         * @param callback The {@link ScanCallback} used to scan the package archive files.
-         */
-        /* package */ Request(String[] dirPaths, ScanCallback callback) {
-            mPaths = dirPaths;
-            mCallback = callback;
-        }
-
-        /**
-         * Adds the scan flags to scan the package archive files.
-         * @param flags The scan flags. May be <tt>0</tt> or any combination
-         * of {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-         * @return This <em>request</em>.
-         * @see {@link FileUtils#scanFiles}
-         */
-        public final Request<T> addScanFlags(int flags) {
-            mScanFlags |= flags;
-            return this;
-        }
-
-        /**
-         * Adds the parse flags to parse the package info.
-         * @param flags The parse flags. May be <tt>0</tt> or any
-         * combination of <tt>PackageManager.GET_XXX</tt> constants.
-         * @return This <em>request</em>.
-         * @see {@link PackageManager#getPackageArchiveInfo}
-         */
-        public final Request<T> addParseFlags(int flags) {
-            mParseFlags |= flags;
-            return this;
-        }
-
-        /**
-         * Sets a {@link List} to store the parsed result.
-         * @param result The <tt>List</tt>.
-         * @return This <em>request</em>.
-         */
-        public final Request<T> setResult(List<? super T> result) {
-            mResult = result;
-            return this;
-        }
-
-        /**
-         * Sets a {@link Cancelable} to be check the operation is cancelled.
-         * @param cancelable A {@link Cancelable}. If the operation was cancelled
-         * before it completed normally the parsed result is undefined.
-         * @return This <em>request</em>.
-         */
-        public final Request<T> setCancelable(Cancelable cancelable) {
-            mCancelable = cancelable;
-            return this;
-        }
-
-        /**
-         * Parses the package archive files with the arguments supplied to this request.
-         * @return The parsed result.
-         */
-        public final List<? super T> submit() {
-            if (mResult == null) {
-                mResult = new ArrayList<T>();
-            }
-
-            mCancelable = FileUtils.wrap(mCancelable);
-            for (int i = 0; i < mPaths.length; ++i) {
-                FileUtils.scanFiles(mPaths[i], mCallback, mScanFlags, this);
-            }
-
-            return mResult;
-        }
-    }
-
-    /**
      * Class <tt>InstalledPackageFilter</tt> filtering the installed application
      * {@link PackageInfo} objects (excluding the system and the updated system application).
      */
     public static final class InstalledPackageFilter implements Filter<PackageInfo> {
-        private final List<String> packages;
+        private final List<String> mPackages;
 
         /**
          * Constructor
+         * @param excludingPackages An array of package names to filter.
          * @see #InstalledPackageFilter(List)
-         * @see #InstalledPackageFilter(String)
          */
-        public InstalledPackageFilter() {
-            this.packages = Collections.<String>emptyList();
+        public InstalledPackageFilter(String... excludingPackages) {
+            mPackages = (excludingPackages != null ? Arrays.asList(excludingPackages) : Collections.<String>emptyList());
         }
 
         /**
          * Constructor
-         * @param excludingPackage The package name to excluding.
-         * @see #InstalledPackageFilter()
-         * @see #InstalledPackageFilter(List)
-         */
-        public InstalledPackageFilter(String excludingPackage) {
-            this.packages = Collections.singletonList(excludingPackage);
-        }
-
-        /**
-         * Constructor
-         * @param excludingPackages A <tt>List</tt> of package names to excluding.
-         * @see #InstalledPackageFilter()
-         * @see #InstalledPackageFilter(String)
+         * @param excludingPackages A <tt>List</tt> of package names to filter.
+         * @see #InstalledPackageFilter(String[])
          */
         public InstalledPackageFilter(List<String> excludingPackages) {
-            this.packages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
+            mPackages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
         }
 
         @Override
         public boolean accept(PackageInfo packageInfo) {
-            return (!packages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) == 0);
+            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) == 0);
         }
     }
 

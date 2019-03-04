@@ -306,10 +306,10 @@ public final class ArrayUtils {
                 Arrays.sort(array(list), start, end);
             } catch (Exception e) {
                 Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
-                sortList(list, start, end);
+                sortList(list, start, end, null);
             }
         } else {
-            sortList(list, start, end);
+            sortList(list, start, end, null);
         }
     }
 
@@ -516,19 +516,14 @@ public final class ArrayUtils {
         return (end - start) >> 1;
     }
 
-    private static void sortList(List list, int start, int end) {
-        final Object[] array = list.toArray();
-        Arrays.sort(array, start, end);
-        ArrayUtils.copyOfRange(list, array, start, end);
-    }
-
     private static void sortList(List list, int start, int end, Comparator comparator) {
         final Object[] array = list.toArray();
-        Arrays.sort(array, start, end, comparator);
-        ArrayUtils.copyOfRange(list, array, start, end);
-    }
+        if (comparator == null) {
+            Arrays.sort(array, start, end);
+        } else {
+            Arrays.sort(array, start, end, comparator);
+        }
 
-    private static void copyOfRange(List list, Object[] array, int start, int end) {
         final ListIterator itor = list.listIterator(start);
         for (; start < end; ++start) {
             itor.next();

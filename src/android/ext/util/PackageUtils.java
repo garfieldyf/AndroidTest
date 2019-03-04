@@ -170,6 +170,30 @@ public final class PackageUtils {
         return null;
     }
 
+    /**
+     * Retrieve the application's label and icon associated with the specified <em>info</em>.
+     * @param context The <tt>Context</tt>.
+     * @param info The {@link PackageInfo} must be a package archive file's package info.
+     * @return A <tt>Pair</tt> containing the application's icon and label.
+     * @see PackageManager#getPackageArchiveInfo(String, int)
+     */
+    public static Pair<CharSequence, Drawable> loadPackageArchiveInfo(Context context, PackageInfo info) {
+        DebugUtils.__checkError(info.applicationInfo.sourceDir == null, "The info.applicationInfo.sourceDir == null");
+        final AssetManager assets = new AssetManager();
+        try {
+            // Adds an additional archive file to the assets.
+            assets.addAssetPath(info.applicationInfo.sourceDir);
+
+            // Loads the application's label and icon.
+            final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
+            return new Pair<CharSequence, Drawable>(loadLabel(res, info), loadIcon(context, res, info));
+        } finally {
+            // Close the assets to avoid ProcessKiller
+            // kill my process after unmounting usb disk.
+            assets.close();
+        }
+    }
+
     public static void dumpPackageInfos(Printer printer, Collection<? extends AbsPackageInfo> infos) {
         final StringBuilder result = new StringBuilder(256);
         final int size = ArrayUtils.getSize(infos);
@@ -194,6 +218,30 @@ public final class PackageUtils {
                 printer.println(info.dumpImpl(result.append("  ")));
             }
         }
+    }
+
+    /**
+     * Retrieve the current label associated with the specified <em>info</em>.
+     */
+    private static CharSequence loadLabel(Resources res, PackageInfo info) {
+        if (info.applicationInfo.nonLocalizedLabel != null) {
+            return info.applicationInfo.nonLocalizedLabel;
+        }
+
+        return StringUtils.trim(res.getText(info.applicationInfo.labelRes, info.packageName));
+    }
+
+    /**
+     * Retrieve the current icon associated with the specified <em>info</em>.
+     */
+    @SuppressWarnings("deprecation")
+    private static Drawable loadIcon(Context context, Resources res, PackageInfo info) {
+        Drawable icon = null;
+        if (info.applicationInfo.icon != 0) {
+            icon = res.getDrawable(info.applicationInfo.icon);
+        }
+
+        return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
     }
 
     /**
@@ -233,28 +281,14 @@ public final class PackageUtils {
         }
 
         /**
-         * Retrieve the application's label and icon associated with this component.
-         * The {@link #packageInfo} must be a package archive file's package info.
+         * Equivalent to calling <tt>PackageUtils.loadPackageArchiveInfo(context, packageInfo)</tt>.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
-         * @see PackageManager#getPackageArchiveInfo(String, int)
+         * @see PackageUtils#loadPackageArchiveInfo(Context, PackageInfo)
          */
         public Pair<CharSequence, Drawable> load(Context context) {
             DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            DebugUtils.__checkError(packageInfo.applicationInfo.sourceDir == null, "This " + getClass().getSimpleName() + " uninitialized");
-            final AssetManager assets = new AssetManager();
-            try {
-                // Adds an additional archive file to the assets.
-                assets.addAssetPath(packageInfo.applicationInfo.sourceDir);
-
-                // Loads the application's label and icon.
-                final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
-                return new Pair<CharSequence, Drawable>(loadLabel(res), loadIcon(context, res));
-            } finally {
-                // Close the assets to avoid ProcessKiller
-                // kill my process after unmounting usb disk.
-                assets.close();
-            }
+            return loadPackageArchiveInfo(context, packageInfo);
         }
 
         public final void dump(Printer printer) {
@@ -272,24 +306,6 @@ public final class PackageUtils {
 
         /* package */ final String dumpImpl(StringBuilder out) {
             return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
-        }
-
-        @SuppressWarnings("deprecation")
-        private Drawable loadIcon(Context context, Resources res) {
-            Drawable icon = null;
-            if (packageInfo.applicationInfo.icon != 0) {
-                icon = res.getDrawable(packageInfo.applicationInfo.icon);
-            }
-
-            return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
-        }
-
-        private CharSequence loadLabel(Resources res) {
-            if (packageInfo.applicationInfo.nonLocalizedLabel != null) {
-                return packageInfo.applicationInfo.nonLocalizedLabel;
-            }
-
-            return StringUtils.trim(res.getText(packageInfo.applicationInfo.labelRes, packageInfo.packageName));
         }
     }
 
@@ -449,8 +465,7 @@ public final class PackageUtils {
             int result = 0;
             mCancelable = FileUtils.wrap(mCancelable);
             for (int i = 0; i < dirPaths.length; ++i) {
-                result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outResult);
-                if (result != 0) {
+                if ((result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outResult)) != 0) {
                     break;
                 }
             }

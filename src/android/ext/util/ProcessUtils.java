@@ -19,7 +19,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.database.DatabaseUtils;
 import android.os.Build;
-import android.os.Debug.MemoryInfo;
 import android.os.Process;
 import android.text.format.DateFormat;
 import android.util.JsonWriter;
@@ -53,15 +52,6 @@ public final class ProcessUtils {
     public static native String myGroupName();
 
     /**
-     * Returns the current process name.
-     * @param context The <tt>Context</tt>.
-     * @return The current process name.
-     */
-    public static String myProcessName(Context context) {
-        return getRunningProcessInfo(context, Process.myPid()).processName;
-    }
-
-    /**
      * Returns the user name assigned to a particular <em>uid</em>.
      * @param uid The user id.
      * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
@@ -76,6 +66,15 @@ public final class ProcessUtils {
      * @see #getUserName(int)
      */
     public static native String getGroupName(int gid);
+
+    /**
+     * Returns the current process name.
+     * @param context The <tt>Context</tt>.
+     * @return The current process name.
+     */
+    public static String myProcessName(Context context) {
+        return getRunningProcessInfo(context, Process.myPid()).processName;
+    }
 
     /**
      * Returns the {@link RunningAppProcessInfo} with the specified <em>pid</em>.
@@ -93,27 +92,6 @@ public final class ProcessUtils {
         }
 
         return null;
-    }
-
-    /**
-     * Returns information about the memory usage of the current process.
-     * @param context The <tt>Context</tt>.
-     * @return The {@link MemoryInfo}.
-     * @see #getProcessMemoryInfo(Context, int[])
-     */
-    public static MemoryInfo getProcessMemoryInfo(Context context) {
-        return ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getProcessMemoryInfo(new int[] { Process.myPid() })[0];
-    }
-
-    /**
-     * Returns information about the memory usage of one or more processes.
-     * @param context The <tt>Context</tt>.
-     * @param pids An array of the ids of the processes to be retrieved.
-     * @return An array of memory information.
-     * @see #getProcessMemoryInfo(Context)
-     */
-    public static MemoryInfo[] getProcessMemoryInfo(Context context, int... pids) {
-        return ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getProcessMemoryInfo(pids);
     }
 
     /**

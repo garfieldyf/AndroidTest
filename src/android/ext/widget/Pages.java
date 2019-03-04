@@ -18,16 +18,6 @@ import android.util.Printer;
  */
 public final class Pages {
     /**
-     * Returns the total number of items in the <em>page</em>,
-     * handling <tt>null Page</tt>.
-     * @param page The {@link Page}.
-     * @return The total number of items.
-     */
-    public static int getCount(Page<?> page) {
-        return (page != null ? page.getCount() : 0);
-    }
-
-    /**
      * Returns the index of the page with the given the <em>combinedPosition</em>.
      * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
      * @return The index of the page.
@@ -259,6 +249,10 @@ public final class Pages {
                 formatter.format("  Page %-2d ==> ", entry.getKey());
                 printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
             }
+        }
+
+        private static int getCount(Page<?> page) {
+            return (page != null ? page.getCount() : 0);
         }
     }
 

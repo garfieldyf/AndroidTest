@@ -44,28 +44,13 @@ public final class PackageUtils {
     }
 
     /**
-     * Equivalent to calling <tt>getInstalledPackages(context.getPackageManager(), flags, filter)</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
-     * <tt>PackageManager.GET_XXX</tt> constants.
-     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
-     * @return A <tt>List</tt> of {@link PackageInfo} objects.
-     * @see #getInstalledPackages(PackageManager, int, Filter)
-     * @see InstalledPackageFilter
-     */
-    public static List<PackageInfo> getInstalledPackages(Context context, int flags, Filter<PackageInfo> filter) {
-        final List<PackageInfo> result = context.getPackageManager().getInstalledPackages(flags);
-        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
-    }
-
-    /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param pm The <tt>PackageManager</tt>.
      * @param flags Additional option flags. May be <tt>0</tt> or any combination of
      * <tt>PackageManager.GET_XXX</tt> constants.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link PackageInfo} objects.
-     * @see #getInstalledPackages(Context, int, Filter)
+     * @see #getInstalledPackages(Context, int, Factory, Filter)
      * @see InstalledPackageFilter
      */
     public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
@@ -81,6 +66,7 @@ public final class PackageUtils {
      * @param factory The {@link Factory} to create the {@link AbsPackageInfo} subclass object.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link AbsPackageInfo} subclass objects.
+     * @see #getInstalledPackages(PackageManager, int, Filter)
      * @see InstalledPackageFilter
      */
     public static <T extends AbsPackageInfo> List<T> getInstalledPackages(Context context, int flags, Factory<T> factory, Filter<PackageInfo> filter) {
@@ -104,29 +90,28 @@ public final class PackageUtils {
     }
 
     /**
-     * Retrieve all displayed in the top-level launcher activities that can be performed.
-     * @param context The <tt>Context</tt>.
-     * @param flags Additional option flags. See <tt>queryIntentActivities</tt>.
-     * @param factory The {@link Factory} to create the {@link AbsResolveInfo} subclass object.
+     * Retrieve all activities that can be performed for the given intent.
+     * @param pm The <tt>PackageManager</tt>.
+     * @param intent The desired intent as per resolveActivity().
+     * @param flags Additional option flags. See {@link PackageManager#queryIntentActivities}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
-     * @return A <tt>List</tt> of {@link AbsResolveInfo} subclass objects.
-     * @see PackageManager#queryIntentActivities(Intent, int)
+     * @return A <tt>List</tt> of {@link ResolveInfo} containing one entry for each matching Activity.
+     * @see #queryIntentActivities(Context, Intent, int, Factory, Filter)
      */
-    public static <T extends AbsResolveInfo> List<T> queryLauncherActivities(Context context, int flags, Factory<T> factory, Filter<ResolveInfo> filter) {
-        final Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_LAUNCHER);
-        return queryIntentActivities(context, intent, flags, factory, filter);
+    public static List<ResolveInfo> queryIntentActivities(PackageManager pm, Intent intent, int flags, Filter<ResolveInfo> filter) {
+        final List<ResolveInfo> result = pm.queryIntentActivities(intent, flags);
+        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
      * Retrieve all activities that can be performed for the given intent.
      * @param context The <tt>Context</tt>.
      * @param intent The desired intent as per resolveActivity().
-     * @param flags Additional option flags. See <tt>queryIntentActivities</tt>.
+     * @param flags Additional option flags. See {@link PackageManager#queryIntentActivities}.
      * @param factory The {@link Factory} to create the {@link AbsResolveInfo} subclass object.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
      * @return A <tt>List</tt> of {@link AbsResolveInfo} subclass objects.
-     * @see PackageManager#queryIntentActivities(Intent, int)
+     * @see #queryIntentActivities(PackageManager, Intent, int, Filter)
      */
     public static <T extends AbsResolveInfo> List<T> queryIntentActivities(Context context, Intent intent, int flags, Factory<T> factory, Filter<ResolveInfo> filter) {
         final List<ResolveInfo> infos = context.getPackageManager().queryIntentActivities(intent, flags);
@@ -156,7 +141,7 @@ public final class PackageUtils {
      * of <tt>PackageManager.GET_XXX</tt> constants.
      * @param factory The {@link Factory} to create the {@link AbsPackageInfo}
      * subclass object.
-     * @return A {@link AbsPackageInfo} subclass object if the parse succeeded,
+     * @return An {@link AbsPackageInfo} subclass object if the parse succeeded,
      * <tt>null</tt> otherwise.
      */
     public static <T extends AbsPackageInfo> T parsePackage(Context context, String archiveFile, int flags, Factory<T> factory) {
@@ -177,6 +162,7 @@ public final class PackageUtils {
      * @return A <tt>Pair</tt> containing the application's icon and label.
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
+    @SuppressWarnings("deprecation")
     public static Pair<CharSequence, Drawable> loadPackageArchiveInfo(Context context, PackageInfo info) {
         DebugUtils.__checkError(info.applicationInfo.sourceDir == null, "The info.applicationInfo.sourceDir == null");
         final AssetManager assets = new AssetManager();
@@ -184,9 +170,24 @@ public final class PackageUtils {
             // Adds an additional archive file to the assets.
             assets.addAssetPath(info.applicationInfo.sourceDir);
 
-            // Loads the application's label and icon.
+            // Loads the application's icon.
             final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
-            return new Pair<CharSequence, Drawable>(loadLabel(res, info), loadIcon(context, res, info));
+            final Drawable icon;
+            if (info.applicationInfo.icon != 0) {
+                icon = res.getDrawable(info.applicationInfo.icon);
+            } else {
+                icon = context.getPackageManager().getDefaultActivityIcon();
+            }
+
+            // Loads the application's label.
+            final CharSequence label;
+            if (info.applicationInfo.nonLocalizedLabel != null) {
+                label = info.applicationInfo.nonLocalizedLabel;
+            } else {
+                label = res.getText(info.applicationInfo.labelRes, info.packageName);
+            }
+
+            return new Pair<CharSequence, Drawable>(StringUtils.trim(label), icon);
         } finally {
             // Close the assets to avoid ProcessKiller
             // kill my process after unmounting usb disk.
@@ -221,30 +222,6 @@ public final class PackageUtils {
     }
 
     /**
-     * Retrieve the current label associated with the specified <em>info</em>.
-     */
-    private static CharSequence loadLabel(Resources res, PackageInfo info) {
-        if (info.applicationInfo.nonLocalizedLabel != null) {
-            return info.applicationInfo.nonLocalizedLabel;
-        }
-
-        return StringUtils.trim(res.getText(info.applicationInfo.labelRes, info.packageName));
-    }
-
-    /**
-     * Retrieve the current icon associated with the specified <em>info</em>.
-     */
-    @SuppressWarnings("deprecation")
-    private static Drawable loadIcon(Context context, Resources res, PackageInfo info) {
-        Drawable icon = null;
-        if (info.applicationInfo.icon != 0) {
-            icon = res.getDrawable(info.applicationInfo.icon);
-        }
-
-        return (icon != null ? icon : context.getPackageManager().getDefaultActivityIcon());
-    }
-
-    /**
      * Create a {@link AbsPackageInfo} subclass object with the specified <em>packageInfo</em>.
      */
     private static <T extends AbsPackageInfo> T newPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
@@ -272,15 +249,6 @@ public final class PackageUtils {
         public PackageInfo packageInfo;
 
         /**
-         * Initializes this object with the specified <em>packageInfo</em>.
-         * @param context The <tt>Context</tt>.
-         * @param packageInfo The <tt>PackageInfo</tt> to initialize.
-         */
-        public void initialize(Context context, PackageInfo packageInfo) {
-            this.packageInfo = packageInfo;
-        }
-
-        /**
          * Equivalent to calling <tt>PackageUtils.loadPackageArchiveInfo(context, packageInfo)</tt>.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
@@ -289,6 +257,15 @@ public final class PackageUtils {
         public Pair<CharSequence, Drawable> load(Context context) {
             DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return loadPackageArchiveInfo(context, packageInfo);
+        }
+
+        /**
+         * Initializes this object with the specified <em>packageInfo</em>.
+         * @param context The <tt>Context</tt>.
+         * @param packageInfo The <tt>PackageInfo</tt> to initialize.
+         */
+        protected void initialize(Context context, PackageInfo packageInfo) {
+            this.packageInfo = packageInfo;
         }
 
         public final void dump(Printer printer) {
@@ -319,15 +296,6 @@ public final class PackageUtils {
         public ResolveInfo resolveInfo;
 
         /**
-         * Initializes this object with the specified <em>resolveInfo</em>.
-         * @param context The <tt>Context</tt>.
-         * @param resolveInfo The <tt>ResolveInfo</tt> to initialize.
-         */
-        public void initialize(Context context, ResolveInfo resolveInfo) {
-            this.resolveInfo = resolveInfo;
-        }
-
-        /**
          * Returns a {@link ComponentInfo} of this component.
          * @return The <tt>ComponentInfo</tt>.
          */
@@ -351,6 +319,15 @@ public final class PackageUtils {
         public final String getPackageName() {
             DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return (resolveInfo.resolvePackageName != null ? resolveInfo.resolvePackageName : getComponentInfo().packageName);
+        }
+
+        /**
+         * Initializes this object with the specified <em>resolveInfo</em>.
+         * @param context The <tt>Context</tt>.
+         * @param resolveInfo The <tt>ResolveInfo</tt> to initialize.
+         */
+        protected void initialize(Context context, ResolveInfo resolveInfo) {
+            this.resolveInfo = resolveInfo;
         }
 
         public final void dump(Printer printer) {
@@ -386,6 +363,8 @@ public final class PackageUtils {
      *     .parse(dirPath1, dirPath2);</pre>
      */
     public static class PackageParser<T extends AbsPackageInfo> implements ScanCallback {
+        private boolean __checkParseStatus;
+
         /**
          * The application <tt>Context</tt>.
          */
@@ -462,6 +441,7 @@ public final class PackageUtils {
          * @see #parse(String[])
          */
         public final int parse(List<? super T> outResult, String... dirPaths) {
+            this.__checkParseStatus();
             int result = 0;
             mCancelable = FileUtils.wrap(mCancelable);
             for (int i = 0; i < dirPaths.length; ++i) {
@@ -499,6 +479,16 @@ public final class PackageUtils {
             }
 
             return false;
+        }
+
+        private void __checkParseStatus() {
+            boolean checkParseStatus = false;
+            checkParseStatus = this.__checkParseStatus;
+            this.__checkParseStatus = true;
+
+            if (checkParseStatus) {
+                throw new AssertionError("Cannot parse: the PackageParser has already been parsed (a PackageParser can be parsed only once)");
+            }
         }
     }
 

@@ -48,11 +48,6 @@ public final class SimpleFileCache implements FileCache {
     }
 
     @Override
-    public File put(String key, File cacheFile) {
-        return null;
-    }
-
-    @Override
     public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
         return buildCacheFile(key);
@@ -63,6 +58,11 @@ public final class SimpleFileCache implements FileCache {
         DebugUtils.__checkError(key == null, "key == null");
         final File result = buildCacheFile(key);
         return (result.delete() ? result : null);
+    }
+
+    @Override
+    public File put(String key, File cacheFile) {
+        return null;
     }
 
     private File buildCacheFile(String key) {

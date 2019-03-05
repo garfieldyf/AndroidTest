@@ -52,6 +52,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
+     * @see #ImageModule(Context, Cache, FileCache)
      * @see ThreadPool#createImageThreadPool(int, long, TimeUnit)
      */
     public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
@@ -79,11 +80,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @param context The <tt>Context</tt>.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
      * of the current device. Pass <tt>0</tt> that the module has no bitmap cache.
-     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> that the module has no image cache.
      * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
+     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> that the module has no image cache.
      * @return The {@link ImageModule}.
      */
-    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxImageSize, int maxFileSize) {
+    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxFileSize, int maxImageSize) {
         return new ImageModule<URI, Object>(context, new LruImageCache<URI>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
     }
 

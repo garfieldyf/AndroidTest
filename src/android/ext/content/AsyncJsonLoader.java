@@ -3,14 +3,10 @@ package android.ext.content;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
-import android.content.Context;
 import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.net.DownloadRequest;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
-import android.ext.util.MessageDigests;
-import android.ext.util.MessageDigests.Algorithm;
-import android.ext.util.StringUtils;
 import android.util.Log;
 import android.util.Pair;
 
@@ -180,44 +176,5 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
          * @throws Exception if an error occurs while opening the connection.
          */
         public abstract DownloadRequest newDownloadRequest(Key key) throws Exception;
-    }
-
-    /**
-     * Class <tt>URLLoadParams</tt> is an implementation of a {@link LoadParams}.
-     */
-    public static final class URLLoadParams extends LoadParams<String> {
-        @Override
-        public DownloadRequest newDownloadRequest(String url) throws Exception {
-            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
-        }
-    }
-
-    /**
-     * Class <tt>CacheLoadParams</tt> is an implementation of a {@link LoadParams}.
-     */
-    public static class CacheLoadParams extends LoadParams<String> {
-        /**
-         * The application <tt>Context</tt>.
-         */
-        public final Context mContext;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         */
-        public CacheLoadParams(Context context) {
-            mContext = context.getApplicationContext();
-        }
-
-        @Override
-        public File getCacheFile(String url) {
-            final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
-            return new File(mContext.getFilesDir(), StringUtils.toHexString(new StringBuilder("/.json_files/"), digest, 0, digest.length).toString());
-        }
-
-        @Override
-        public DownloadRequest newDownloadRequest(String url) throws Exception {
-            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
-        }
     }
 }

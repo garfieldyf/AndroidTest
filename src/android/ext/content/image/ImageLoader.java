@@ -350,7 +350,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * Adds the loading flags to load image.
          * @param flags Loading flags. May be any combination of
          * <tt>FLAG_XXX</tt> constants.
-         * @return This <em>request</em>.
+         * @return This request.
          */
         public final LoadRequest<URI, Image> addFlags(int flags) {
             mFlags |= flags;
@@ -359,7 +359,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
         /**
          * Equivalent to calling <tt>addFlags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
-         * @return This <em>request</em>.
+         * @return This request.
          * @see #addFlags(int)
          * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE FLAG_IGNORE_MEMORY_CACHE
          */
@@ -371,7 +371,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         /**
          * Sets the parameters to load image.
          * @param params The parameters of the load task.
-         * @return This <em>request</em>.
+         * @return This request.
          */
         public final LoadRequest<URI, Image> setParams(Object... params) {
             mParams = params;
@@ -381,7 +381,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         /**
          * Sets the custom {@link Parameters} to decode image.
          * @param parameters The <tt>Parameters</tt> to decode.
-         * @return This <em>request</em>.
+         * @return This request.
          * @see ImageLoader#FLAG_CUSTOM_PARAMETERS FLAG_CUSTOM_PARAMETERS
          */
         public final LoadRequest<URI, Image> setParameters(Parameters parameters) {
@@ -393,7 +393,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         /**
          * Sets the {@link Binder} to bind the image to target.
          * @param binder The <tt>Binder</tt> to bind.
-         * @return This <em>request</em>.
+         * @return This request.
          */
         public final LoadRequest<URI, Image> setBinder(Binder<URI, Object, Image> binder) {
             mBinder = binder;

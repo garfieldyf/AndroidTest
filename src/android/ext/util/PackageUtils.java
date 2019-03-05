@@ -389,7 +389,7 @@ public final class PackageUtils {
          * Adds the scan flags to scan the package archive files.
          * @param flags The scan flags. May be <tt>0</tt> or any combination
          * of {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-         * @return This <em>parser</em>.
+         * @return This parser.
          * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */
         public final PackageParser<T> addScanFlags(int flags) {
@@ -401,7 +401,7 @@ public final class PackageUtils {
          * Adds the parse flags to parse the package info.
          * @param flags The parse flags. May be <tt>0</tt> or any
          * combination of <tt>PackageManager.GET_XXX</tt> constants.
-         * @return This <em>parser</em>.
+         * @return This parser.
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public final PackageParser<T> addParseFlags(int flags) {
@@ -413,7 +413,7 @@ public final class PackageUtils {
          * Sets a {@link Cancelable} to be check the operation is cancelled.
          * @param cancelable A {@link Cancelable}. If the operation was cancelled
          * before it completed normally the parsed result is undefined.
-         * @return This <em>parser</em>.
+         * @return This parser.
          */
         public final PackageParser<T> setCancelable(Cancelable cancelable) {
             mCancelable = cancelable;

@@ -4,8 +4,14 @@ import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.app.Activity;
+import android.content.Context;
 import android.ext.content.AsyncJsonLoader;
+import android.ext.content.AsyncJsonLoader.LoadParams;
+import android.ext.net.DownloadRequest;
 import android.ext.util.JsonUtils;
+import android.ext.util.MessageDigests;
+import android.ext.util.StringUtils;
+import android.ext.util.MessageDigests.Algorithm;
 import android.util.Log;
 import android.util.Pair;
 import com.tencent.test.MainApplication;
@@ -51,5 +57,44 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     private static String getName(JSONObject result) {
         final JSONArray rows = JsonUtils.optJSONArray(JsonUtils.optJSONObject(result, "data"), "rows");
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
+    }
+
+    /**
+     * Class <tt>URLLoadParams</tt> is an implementation of a {@link LoadParams}.
+     */
+    public static final class URLLoadParams extends LoadParams<String> {
+        @Override
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
+            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+        }
+    }
+
+    /**
+     * Class <tt>CacheLoadParams</tt> is an implementation of a {@link LoadParams}.
+     */
+    public static class CacheLoadParams extends LoadParams<String> {
+        /**
+         * The application <tt>Context</tt>.
+         */
+        public final Context mContext;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         */
+        public CacheLoadParams(Context context) {
+            mContext = context.getApplicationContext();
+        }
+
+        @Override
+        public File getCacheFile(String url) {
+            final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
+            return new File(mContext.getFilesDir(), StringUtils.toHexString(new StringBuilder("/.json_files/"), digest, 0, digest.length).toString());
+        }
+
+        @Override
+        public DownloadRequest newDownloadRequest(String url) throws Exception {
+            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+        }
     }
 }

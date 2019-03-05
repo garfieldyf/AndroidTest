@@ -336,23 +336,6 @@ public final class ArrayUtils {
     }
 
     /**
-     * Finds the <tt>Collection</tt> with specified <em>filter</em> and returns the element
-     * of the first occurrence.
-     * @param collection The <tt>Collection</tt> to find.
-     * @param filter The {@link Filter} to find.
-     * @return The element of the first occurrence, or <tt>null</tt> if it was not found.
-     */
-    public static <T> T find(Collection<T> collection, Filter<? super T> filter) {
-        for (T value : collection) {
-            if (filter.accept(value)) {
-                return value;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Filters the specified <em>collection</em> using the specified <em>filter</em>.
      * @param collection The collection to filter.
      * @param filter The {@link Filter}.

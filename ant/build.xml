@@ -39,8 +39,6 @@
                 <exclude name="**/focus/**" />
                 <exclude name="**/reference/**" />
                 <exclude name="**/widget/FocusManager.java" />
-                <exclude name="**/widget/PrinterView.java" />
-                <exclude name="**/widget/FocusViewPager.java" />
                 <exclude name="**/widget/RecyclerAdapter.java" />
                 <exclude name="**/widget/BarcodeDecorView.java" />
                 <exclude name="**/widget/ListRecyclerAdapter.java" />

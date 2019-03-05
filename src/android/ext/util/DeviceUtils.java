@@ -161,6 +161,7 @@ public final class DeviceUtils {
         infos.append("  totalMemory = ").append(Formatter.formatFileSize(context, info.totalMem))
              .append("\n  usedMemory  = ").append(Formatter.formatFileSize(context, info.totalMem - info.availMem))
              .append("\n  availMemory = ").append(Formatter.formatFileSize(context, info.availMem))
+             .append("\n  lowMemory = ").append(info.lowMemory)
              .append("\n  availThreshold = ").append(Formatter.formatFileSize(context, info.threshold))
              .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()));
         printer.println(infos.toString());

@@ -1,4 +1,4 @@
-package android.ext.widget;
+package android.ext.temp;
 
 import android.content.Context;
 import android.ext.util.StringUtils;
@@ -12,7 +12,7 @@ import android.widget.TextView;
  * Class PrinterView
  * @author Garfield
  */
-public final class PrinterView extends TextView implements Printer {
+public class PrinterView extends TextView implements Printer {
     public PrinterView(Context context) {
         super(context);
     }

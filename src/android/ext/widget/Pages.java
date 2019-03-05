@@ -145,7 +145,7 @@ public final class Pages {
         /* package */ final Cache<Integer, Page<E>> mPageCache;
 
         @SuppressWarnings("unchecked")
-        /* package */ PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
+        /* package */ PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<? extends E>> pageCache, int firstPageSize, int pageSize) {
             DebugUtils.__checkError(pageSize <= 0 || firstPageSize <= 0, "pageSize <= 0 || firstPageSize <= 0");
             mPageCache  = (Cache<Integer, Page<E>>)pageCache;
             mPageSize   = pageSize;

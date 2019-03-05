@@ -29,24 +29,24 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * Constructor
      * @param maxPages The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
-     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of per-page (page index > 0).
      * @see #PageAdapter(Cache, int, int)
      * @see Pages#createPageCache(int)
      */
-    public PageAdapter(int maxPages, int pageSize, int firstPageSize) {
-        this(Pages.<E>createPageCache(maxPages), pageSize, firstPageSize);
+    public PageAdapter(int maxPages, int firstPageSize, int pageSize) {
+        this(Pages.<E>createPageCache(maxPages), firstPageSize, pageSize);
     }
 
     /**
      * Constructor
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
-     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of per-page (page index > 0).
      * @see #PageAdapter(int, int, int)
      */
-    public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
-        mImpl = new PageAdapterImpl<E>(this, pageCache, pageSize, firstPageSize);
+    public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int firstPageSize, int pageSize) {
+        mImpl = new PageAdapterImpl<E>(this, pageCache, firstPageSize, pageSize);
     }
 
     /**

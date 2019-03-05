@@ -36,24 +36,24 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * Constructor
      * @param maxPages The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
-     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of per-page (page index > 0).
      * @see #RecyclerPageAdapter(Cache, int, int)
      * @see Pages#createPageCache(int)
      */
-    public RecyclerPageAdapter(int maxPages, int pageSize, int firstPageSize) {
-        this(Pages.<E>createPageCache(maxPages), pageSize, firstPageSize);
+    public RecyclerPageAdapter(int maxPages, int firstPageSize, int pageSize) {
+        this(Pages.<E>createPageCache(maxPages), firstPageSize, pageSize);
     }
 
     /**
      * Constructor
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
-     * @param pageSize The item count of per-page (page index > 0).
      * @param firstPageSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of per-page (page index > 0).
      * @see #RecyclerPageAdapter(int, int, int)
      */
-    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int pageSize, int firstPageSize) {
-        mImpl = new PageAdapterImpl<E>(this, pageCache, pageSize, firstPageSize);
+    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int firstPageSize, int pageSize) {
+        mImpl = new PageAdapterImpl<E>(this, pageCache, firstPageSize, pageSize);
     }
 
     /**

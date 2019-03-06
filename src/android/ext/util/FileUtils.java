@@ -12,6 +12,8 @@ import java.util.List;
 import android.content.Context;
 import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.Pools.Factory;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
@@ -668,7 +670,7 @@ public final class FileUtils {
     /**
      * Class <tt>Stat</tt> is wrapper for linux structure <tt>stat</tt>.
      */
-    public static final class Stat implements Cloneable {
+    public static final class Stat implements Parcelable, Cloneable {
         /**
          * The permission of read, write and execute by all users.
          * Same as <em>S_IRWXU | S_IRWXG | S_IRWXO</em>.
@@ -918,8 +920,8 @@ public final class FileUtils {
         public final void dump(Context context, Printer printer) {
             printer.println(new StringBuilder(256)
                 .append("Stat { mode = ").append(Integer.toOctalString(mode))
-                .append(", uid = ").append(uid)
-                .append(", gid = ").append(gid)
+                .append(", user = ").append(getUserName()).append('(').append(uid).append(')')
+                .append(", group = ").append(getGroupName()).append('(').append(gid).append(')')
                 .append(", type = ").append(Integer.toOctalString(mode & S_IFMT))
                 .append(", size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
                 .append(", perm = ").append(toCharType(mode & S_IFMT))
@@ -936,6 +938,41 @@ public final class FileUtils {
                 .append(", blksize = ").append(blksize)
                 .append(", mtime = ").append(DateFormat.format("yyyy-MM-dd kk:mm:ss", mtime))
                 .append(" }").toString());
+        }
+
+        /**
+         * Reads this object from the data stored in the specified parcel. To
+         * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
+         * @param source The parcel to read the data.
+         * @see #writeToParcel(Parcel, int)
+         */
+        public void readFromParcel(Parcel source) {
+            this.mode    = source.readInt();
+            this.uid     = source.readInt();
+            this.gid     = source.readInt();
+            this.size    = source.readLong();
+            this.mtime   = source.readLong();
+            this.blocks  = source.readLong();
+            this.blksize = source.readLong();
+        }
+
+        /**
+         * @see #readFromParcel(Parcel)
+         */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mode);
+            dest.writeInt(uid);
+            dest.writeInt(gid);
+            dest.writeLong(size);
+            dest.writeLong(mtime);
+            dest.writeLong(blocks);
+            dest.writeLong(blksize);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
         }
 
         @Override
@@ -971,12 +1008,26 @@ public final class FileUtils {
                 return '-';
             }
         }
+
+        public static final Creator<Stat> CREATOR = new Creator<Stat>() {
+            @Override
+            public Stat createFromParcel(Parcel source) {
+                final Stat stat = new Stat();
+                stat.readFromParcel(source);
+                return stat;
+            }
+
+            @Override
+            public Stat[] newArray(int size) {
+                return new Stat[size];
+            }
+        };
     }
 
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Cloneable, Comparable<Dirent> {
+    public static class Dirent implements Parcelable, Cloneable, Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1167,6 +1218,31 @@ public final class FileUtils {
             Dirent.__checkDirentType(this);
         }
 
+        /**
+         * Reads this object from the data stored in the specified parcel. To
+         * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
+         * @param source The parcel to read the data.
+         * @see #writeToParcel(Parcel, int)
+         */
+        public void readFromParcel(Parcel source) {
+            this.path = source.readString();
+            this.type = source.readInt();
+        }
+
+        /**
+         * @see #readFromParcel(Parcel)
+         */
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(path);
+            dest.writeInt(type);
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
         @Override
         public Dirent clone() {
             try {
@@ -1177,15 +1253,18 @@ public final class FileUtils {
         }
 
         @Override
-        public int hashCode() {
-            return 31 * type + path.hashCode();
-        }
-
-        @Override
         public String toString() {
             return path;
         }
 
+        @Override
+        public int hashCode() {
+            return 31 * type + path.hashCode();
+        }
+
+        /**
+         * @see #equalsIgnoreCase(Dirent)
+         */
         @Override
         public boolean equals(Object object) {
             if (object == this) {
@@ -1198,6 +1277,18 @@ public final class FileUtils {
             }
 
             return false;
+        }
+
+        /**
+         * Compares the given <em>dirent</em> to this <tt>Dirent</tt> ignoring
+         * the {@link #path} field case differences.
+         * @param dirent The <tt>Dirent</tt> to compare.
+         * @return <tt>true</tt> if the specified <em>dirent</em> is equal to
+         * this <tt>Dirent</tt>, <tt>false</tt> otherwise.
+         * @see #equals(Object)
+         */
+        public boolean equalsIgnoreCase(Dirent dirent) {
+            return (dirent != null && type == dirent.type && path.equalsIgnoreCase(dirent.path));
         }
 
         /**
@@ -1379,6 +1470,20 @@ public final class FileUtils {
             @Override
             public Dirent newInstance() {
                 return new Dirent();
+            }
+        };
+
+        public static final Creator<Dirent> CREATOR = new Creator<Dirent>() {
+            @Override
+            public Dirent createFromParcel(Parcel source) {
+                final Dirent dirent = new Dirent();
+                dirent.readFromParcel(source);
+                return dirent;
+            }
+
+            @Override
+            public Dirent[] newArray(int size) {
+                return new Dirent[size];
             }
         };
     }

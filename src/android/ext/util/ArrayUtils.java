@@ -274,25 +274,6 @@ public final class ArrayUtils {
     }
 
     /**
-     * Removes the items in the specified range in the <em>list</em>.
-     * @param list The {@link List} to remove.
-     * @param start The inclusive start index in <em>list</em>.
-     * @param end The exclusive end index in <em>list</em>.
-     */
-    public static <T> void removeRange(List<T> list, int start, int end) {
-        DebugUtils.__checkRange(start, end - start, list.size());
-        if (start == 0 && end == list.size()) {
-            list.clear();
-        } else {
-            final ListIterator<T> itor = list.listIterator(start);
-            for (; start < end; ++start) {
-                itor.next();
-                itor.remove();
-            }
-        }
-    }
-
-    /**
      * Sorts the specified range in the <em>list</em> in ascending natural order.
      * @param list The {@link List} to sort.
      * @param start The inclusive start index in <em>list</em>.
@@ -302,12 +283,7 @@ public final class ArrayUtils {
     public static <T extends Comparable<? super T>> void sort(List<T> list, int start, int end) {
         DebugUtils.__checkRange(start, end - start, list.size());
         if (list instanceof ArrayList) {
-            try {
-                Arrays.sort(array(list), start, end);
-            } catch (Exception e) {
-                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
-                sortList(list, start, end, null);
-            }
+            sortArrayList(list, start, end, null);
         } else {
             sortList(list, start, end, null);
         }
@@ -324,12 +300,7 @@ public final class ArrayUtils {
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         DebugUtils.__checkRange(start, end - start, list.size());
         if (list instanceof ArrayList) {
-            try {
-                Arrays.sort(array(list), start, end, (Comparator<Object>)comparator);
-            } catch (Exception e) {
-                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
-                sortList(list, start, end, comparator);
-            }
+            sortArrayList(list, start, end, comparator);
         } else {
             sortList(list, start, end, comparator);
         }
@@ -499,6 +470,14 @@ public final class ArrayUtils {
         return (end - start) >> 1;
     }
 
+    private static synchronized Object[] array(Object list) throws Exception {
+        if (sArrayField == null) {
+            sArrayField = ClassUtils.getDeclaredField(ArrayList.class, "array");
+        }
+
+        return (Object[])sArrayField.get(list);
+    }
+
     private static void sortList(List list, int start, int end, Comparator comparator) {
         final Object[] array = list.toArray();
         if (comparator == null) {
@@ -514,12 +493,17 @@ public final class ArrayUtils {
         }
     }
 
-    private static synchronized Object[] array(Object list) throws Exception {
-        if (sArrayField == null) {
-            sArrayField = ClassUtils.getDeclaredField(ArrayList.class, "array");
+    private static void sortArrayList(List list, int start, int end, Comparator comparator) {
+        try {
+            if (comparator == null) {
+                Arrays.sort(array(list), start, end);
+            } else {
+                Arrays.sort(array(list), start, end, comparator);
+            }
+        } catch (Exception e) {
+            Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());
+            sortList(list, start, end, comparator);
         }
-
-        return (Object[])sArrayField.get(list);
     }
 
     /**

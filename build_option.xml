@@ -14,6 +14,7 @@
 
     <!-- debug output filename -->
     <target name="-rename-debug-out-file">
+        <property name="out.file.dir" value="debug" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.jar.file" value="${basedir}/lib/debug/funshion.jar" />
@@ -28,6 +29,7 @@
 
     <!-- release output filename -->
     <target name="-rename-release-out-file">
+        <property name="out.file.dir" value="release" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.jar.file" value="${basedir}/lib/release/funshion.jar" />
@@ -121,7 +123,7 @@
         </exec>
 
         <!-- copy the build apk files -->
-        <property name="out.final.dir" value="${basedir}/out/${version.name}" />
+        <property name="out.final.dir" value="${basedir}/out/${version.name}/${out.file.dir}" />
         <mkdir dir="${out.final.dir}" />
         <copy todir="${out.final.dir}" overwrite="true">
             <fileset dir="${out.absolute.dir}" />

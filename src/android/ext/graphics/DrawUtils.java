@@ -9,7 +9,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.FontMetrics;
@@ -42,7 +41,7 @@ public final class DrawUtils {
     public static final int BACKWARD_DIAGONAL = 0x20000000;
 
     /**
-     * Draws a single specified range of text, specified by start/end, with it's content in rect,
+     * Draw a single specified range of text, specified by start/end, with it's content in rect,
      * with the specified paint and gravity.
      * @param canvas The <tt>Canvas</tt>.
      * @param paint The <tt>Paint</tt> used to draw the <em>text</em> (e.g. color, size, style).
@@ -60,7 +59,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws a single specified range of text, specified by start/end, with it's content in
+     * Draw a single specified range of text, specified by start/end, with it's content in
      * rect (left, top, right, bottom), with the specified paint and gravity.
      * @param canvas The <tt>Canvas</tt>.
      * @param paint The <tt>Paint</tt> used to draw the <em>text</em> (e.g. color, size, style).
@@ -124,64 +123,51 @@ public final class DrawUtils {
     }
 
     /**
-     * Equivalent to calling <tt>drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec,
-     * 0, 0, view.getWidth(), view.getHeight())</tt>.
+     * Draw a frame drawable with the specified the {@link View}'s states.
      * @param canvas The canvas to draw into.
-     * @param drawable The drawable to be drawn.
+     * @param frame The drawable to be drawn.
      * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View} states. If the <em>drawable</em> is state
-     * full, this parameter will be ignored.
-     * @see #drawDrawable(Canvas, Drawable, View, int[], int, int, int, int)
-     * @see #drawDrawable(Canvas, Drawable, int[], int[], int, int, int, int)
+     * @param stateSpec An array of required {@link View}'s states. If the
+     * <em>drawable</em> is state full, this parameter will be ignored.
      */
-    public static void drawDrawable(Canvas canvas, Drawable drawable, View view, int[] stateSpec) {
-        drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec, 0, 0, view.getWidth(), view.getHeight());
-    }
-
-    /**
-     * Equivalent to calling <tt>drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec,
-     * left, top, right, bottom)</tt>.
-     * @param canvas The canvas to draw into.
-     * @param drawable The drawable to be drawn.
-     * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View} states. If the <em>drawable</em> is state
-     * full, this parameter will be ignored.
-     * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
-     * @param top The specified a bounding rectangle top coordinate for the <em>drawable</em>.
-     * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
-     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
-     * @see #drawDrawable(Canvas, Drawable, View, int[])
-     * @see #drawDrawable(Canvas, Drawable, int[], int[], int, int, int, int)
-     */
-    public static void drawDrawable(Canvas canvas, Drawable drawable, View view, int[] stateSpec, int left, int top, int right, int bottom) {
-        drawDrawable(canvas, drawable, view.getDrawableState(), stateSpec, left, top, right, bottom);
-    }
-
-    /**
-     * Draw the drawable with the specified the {@link View} states.
-     * @param canvas The canvas to draw into.
-     * @param drawable The drawable to be drawn.
-     * @param stateSet An array of the {@link View} current states.
-     * @param stateSpec An array of required {@link View} states. If the <em>drawable</em> is
-     * state full, this parameter will be ignored.
-     * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
-     * @param top The specified a bounding rectangle top coordinate for the <em>drawable</em>.
-     * @param right The specified a bounding rectangle right coordinate for the <em>drawable</em>.
-     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>drawable</em>.
-     * @see #drawDrawable(Canvas, Drawable, View, int[])
-     * @see #drawDrawable(Canvas, Drawable, View, int[], int, int, int, int)
-     */
-    public static void drawDrawable(Canvas canvas, Drawable drawable, int[] stateSet, int[] stateSpec, int left, int top, int right, int bottom) {
-        if (drawable.isStateful()) {
-            drawable.setState(stateSet);
-            drawDrawable(canvas, drawable, left, top, right, bottom);
-        } else if (StateSet.stateSetMatches(stateSpec, stateSet)) {
-            drawDrawable(canvas, drawable, left, top, right, bottom);
+    public static void drawFrameDrawable(Canvas canvas, Drawable frame, View view, int[] stateSpec) {
+        if (frame.isStateful()) {
+            frame.setState(view.getDrawableState());
+            drawFrameDrawable(canvas, frame, 0, 0, view.getWidth(), view.getHeight());
+        } else if (StateSet.stateSetMatches(stateSpec, view.getDrawableState())) {
+            drawFrameDrawable(canvas, frame, 0, 0, view.getWidth(), view.getHeight());
         }
     }
 
     /**
-     * Draws a mirrored drawable with given the <em>drawable</em> and <em>canvas</em>.
+     * Draw a frame drawable with given the <em>frame</em> and <em>canvas</em>.
+     * @param canvas The canvas to draw into.
+     * @param frame The frame drawable to be drawn.
+     * @param left The specified a bounding rectangle left coordinate for the <em>frame</em>.
+     * @param top The specified a bounding rectangle top coordinate for the <em>frame</em>.
+     * @param right The specified a bounding rectangle right coordinate for the <em>frame</em>.
+     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>frame</em>.
+     */
+    public static void drawFrameDrawable(Canvas canvas, Drawable frame, int left, int top, int right, int bottom) {
+        if (frame instanceof DrawableContainer) {
+            frame = ((DrawableContainer)frame).getCurrent();
+        }
+
+        final Rect padding = RectPool.obtain();
+        if (frame.getPadding(padding)) {
+            left   -= padding.left;
+            top    -= padding.top;
+            right  += padding.right;
+            bottom += padding.bottom;
+        }
+
+        RectPool.recycle(padding);
+        frame.setBounds(left, top, right, bottom);
+        frame.draw(canvas);
+    }
+
+    /**
+     * Draw a mirrored drawable with given the <em>drawable</em> and <em>canvas</em>.
      * The <em>drawable</em> must has already called {@link Drawable#setBounds}.
      * @param canvas The <tt>Canvas</tt>.
      * @param drawable The drawable to be drawn.
@@ -194,7 +180,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws a mirrored drawable with given the <em>drawable</em> and <em>canvas</em>.
+     * Draw a mirrored drawable with given the <em>drawable</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
      * @param drawable The drawable to be drawn.
      * @param left The specified a bounding rectangle left coordinate for the <em>drawable</em>.
@@ -210,7 +196,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws a mirrored bitmap with given the <em>bitmap</em> and <em>canvas</em>.
+     * Draw a mirrored bitmap with given the <em>bitmap</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
      * @param bitmap The bitmap to be drawn.
      * @param dst The rectangle that the <em>bitmap</em> to fit into.
@@ -238,7 +224,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws a mirrored bitmap with given the <em>bitmap</em> and <em>canvas</em>.
+     * Draw a mirrored bitmap with given the <em>bitmap</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
      * @param bitmap The bitmap to be drawn.
      * @param left The specified a bounding rectangle left coordinate for the <em>bitmap</em>.
@@ -256,7 +242,7 @@ public final class DrawUtils {
     }
 
     /**
-     * Draws an inverted bitmap with given the <em>source</em> and <em>canvas</em>.
+     * Draw an inverted bitmap with given the <em>source</em> and <em>canvas</em>.
      * @param canvas The <tt>Canvas</tt>.
      * @param source The source's contents to be drawn, Pass a {@link View} or {@link Bitmap} object.
      * @param width The horizontal size of the <em>source</em>.
@@ -369,26 +355,6 @@ public final class DrawUtils {
     }
 
     /**
-     * Sets the {@link Shader}'s local matrix.
-     * @param shader The <tt>Shader</tt> to set.
-     * @param width The horizontal size of the object.
-     * @param height The vertical size of the object.
-     * @param container The frame of the containing space, in which the object will be placed.
-     */
-    public static void setShaderMatrix(Shader shader, int width, int height, RectF container) {
-        // Computes the scale value that map the source
-        // rectangle to the destination rectangle.
-        final RectF src = RectFPool.obtain(0, 0, width, height);
-        final Matrix matrix = MatrixPool.obtain();
-        matrix.setRectToRect(src, container, ScaleToFit.FILL);
-
-        // Sets the shader scale matrix.
-        shader.setLocalMatrix(matrix);
-        RectFPool.recycle(src);
-        MatrixPool.recycle(matrix);
-    }
-
-    /**
      * Like as {@link Gravity#apply(int, int, int, Rect, Rect)}, but the <em>outRect</em> is {@link RectF}.
      * @param gravity The desired placement of the object, as defined by the constants in {@link Gravity}.
      * @param width The horizontal size of the object.
@@ -402,24 +368,6 @@ public final class DrawUtils {
         Gravity.apply(gravity, width, height, container, 0, 0, rect);
         outRect.set(rect);
         RectPool.recycle(rect);
-    }
-
-    private static void drawDrawable(Canvas canvas, Drawable drawable, int left, int top, int right, int bottom) {
-        if (drawable instanceof DrawableContainer) {
-            drawable = ((DrawableContainer)drawable).getCurrent();
-        }
-
-        final Rect padding = RectPool.obtain();
-        if (drawable.getPadding(padding)) {
-            left   -= padding.left;
-            top    -= padding.top;
-            right  += padding.right;
-            bottom += padding.bottom;
-        }
-
-        RectPool.recycle(padding);
-        drawable.setBounds(left, top, right, bottom);
-        drawable.draw(canvas);
     }
 
     private static void drawMirroredDrawable(Canvas canvas, Drawable drawable, int width, int height, boolean horizontal) {

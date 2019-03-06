@@ -9,26 +9,37 @@ import android.view.ViewGroup;
  * @author Garfield
  */
 public final class ChildDrawingOrder implements ChildDrawingOrderCallback {
-    private final ViewGroup mRootView;
+    private final ViewGroup mContainer;
 
     /**
      * Constructor
-     * @param rootView The root <tt>View</tt>.
+     * @param container The <tt>ViewGroup</tt>.
      */
-    public ChildDrawingOrder(ViewGroup rootView) {
-        mRootView = rootView;
+    public ChildDrawingOrder(ViewGroup container) {
+        mContainer = container;
     }
 
     @Override
     public int onGetChildDrawingOrder(int childCount, int i) {
-        final View focused = mRootView.getFocusedChild();
+        return getChildDrawingOrder(mContainer, childCount, i);
+    }
+
+    /**
+     * Returns the index of the child to draw for this iteration.
+     * @param container The <tt>ViewGroup</tt> whose child to draw.
+     * @param childCount The number of child to draw.
+     * @param i The current iteration.
+     * @return The index of the child to draw this iteration.
+     */
+    public static int getChildDrawingOrder(ViewGroup container, int childCount, int i) {
+        final View focused = container.getFocusedChild();
         if (focused != null) {
-            if (mRootView.getChildAt(i) == focused) {
+            if (container.getChildAt(i) == focused) {
                 // Move the focused child order to last.
                 return childCount - 1;
             } else if (i == childCount - 1) {
                 // Move the last child order to the focused child order.
-                return mRootView.indexOfChild(focused);
+                return container.indexOfChild(focused);
             }
         }
 

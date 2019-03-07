@@ -25,7 +25,7 @@ import android.util.AttributeSet;
  * Class GIFDrawable
  * @author Garfield
  */
-public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
+public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
     private static final int[] GIF_DRAWABLE_ATTRS = {
         android.R.attr.oneshot,
     };
@@ -298,7 +298,7 @@ public class GIFDrawable extends AbstractDrawable<GIFDrawable.GIFImageState> imp
     /**
      * Class <tt>GIFImageState</tt> is an implementation of a {@link ConstantState}.
      */
-    /* package */ static final class GIFImageState extends AbstractDrawable.BaseConstantState {
+    /* package */ static final class GIFImageState extends AbsBitmapDrawable.BaseConstantState {
         /* package */ Bitmap mCanvas;
         /* package */ GIFImage mImage;
 

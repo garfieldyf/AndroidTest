@@ -163,7 +163,7 @@ public final class PackageUtils {
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<CharSequence, Drawable> loadPackageArchiveInfo(Context context, PackageInfo info) {
+    public static Pair<CharSequence, Drawable> loadLabelAndIcon(Context context, PackageInfo info) {
         DebugUtils.__checkError(info.applicationInfo.sourceDir == null, "The info.applicationInfo.sourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
@@ -249,14 +249,36 @@ public final class PackageUtils {
         public PackageInfo packageInfo;
 
         /**
-         * Equivalent to calling <tt>PackageUtils.loadPackageArchiveInfo(context, packageInfo)</tt>.
+         * Equivalent to calling <tt>PackageUtils.loadLabelAndIcon(context, packageInfo)</tt>.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
-         * @see PackageUtils#loadPackageArchiveInfo(Context, PackageInfo)
+         * @see PackageUtils#loadLabelAndIcon(Context, PackageInfo)
          */
-        public Pair<CharSequence, Drawable> load(Context context) {
+        public final Pair<CharSequence, Drawable> loadLabelAndIcon(Context context) {
             DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return loadPackageArchiveInfo(context, packageInfo);
+            return PackageUtils.loadLabelAndIcon(context, packageInfo);
+        }
+
+        /**
+         * Tests if this application is a system application or an updated system application.
+         * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
+         */
+        public final boolean isSystem() {
+            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return ((packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0);
+        }
+
+        /**
+         * Tests if this application is an updated system application.
+         * @return <tt>true</tt> if this application is an updated system application, <tt>false</tt> otherwise.
+         */
+        public final boolean isUpdatedSystem() {
+            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+        }
+
+        public final void dump(Printer printer) {
+            printer.println(dumpImpl(new StringBuilder(256)));
         }
 
         /**
@@ -268,20 +290,16 @@ public final class PackageUtils {
             this.packageInfo = packageInfo;
         }
 
-        public final void dump(Printer printer) {
-            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            printer.println(dumpImpl(new StringBuilder(256)));
-        }
-
         protected StringBuilder dump(StringBuilder out) {
             return out.append(" package = ").append(packageInfo.packageName)
                 .append(", version = ").append(packageInfo.versionName)
-                .append(", system = ").append((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                .append(", updatedSystem = ").append((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
+                .append(", system = ").append(isSystem())
+                .append(", updatedSystem = ").append(isUpdatedSystem())
                 .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
+            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
         }
     }
@@ -322,6 +340,26 @@ public final class PackageUtils {
         }
 
         /**
+         * Tests if this application is a system application or an updated system application.
+         * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
+         */
+        public final boolean isSystem() {
+            return ((getComponentInfo().applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0);
+        }
+
+        /**
+         * Tests if this application is an updated system application.
+         * @return <tt>true</tt> if this application is an updated system application, <tt>false</tt> otherwise.
+         */
+        public final boolean isUpdatedSystem() {
+            return ((getComponentInfo().applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+        }
+
+        public final void dump(Printer printer) {
+            printer.println(dumpImpl(new StringBuilder(196)));
+        }
+
+        /**
          * Initializes this object with the specified <em>resolveInfo</em>.
          * @param context The <tt>Context</tt>.
          * @param resolveInfo The <tt>ResolveInfo</tt> to initialize.
@@ -330,21 +368,17 @@ public final class PackageUtils {
             this.resolveInfo = resolveInfo;
         }
 
-        public final void dump(Printer printer) {
-            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            printer.println(dumpImpl(new StringBuilder(196)));
-        }
-
         protected StringBuilder dump(StringBuilder out) {
             final ComponentInfo info = getComponentInfo();
             return out.append(" name = ").append(info.name)
                 .append(", packageName = ").append(getPackageName())
                 .append(", process = ").append(info.processName)
-                .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                .append(", updatedSystem = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+                .append(", system = ").append(isSystem())
+                .append(", updatedSystem = ").append(isUpdatedSystem());
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
+            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
         }
     }

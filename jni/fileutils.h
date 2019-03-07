@@ -91,26 +91,27 @@ __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
     jboolean result = JNI_FALSE;
     if (__NS::getFileStatus(one, buf) == 0)
     {
-        const int64_t length = buf.st_size;
+        const off_t length = buf.st_size;
         result = (__NS::getFileStatus(another, buf) == 0 && length == buf.st_size);
     }
 
     return result;
 }
 
-__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE])
+__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE], ssize_t& readCount)
 {
     assert(!file.isEmpty());
 
-    ssize_t readBytes, count = 0;
-    while ((readBytes = file.read(buf + count, _countof(buf) - count)) > 0)
+    readCount = 0;
+    ssize_t readBytes;
+    while ((readBytes = file.read(buf + readCount, _countof(buf) - readCount)) > 0)
     {
-        count += readBytes;
-        if (count == _countof(buf))
+        readCount += readBytes;
+        if (readCount == _countof(buf))
             break;
     }
 
-    return count;
+    return readBytes;
 }
 
 __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil::char_sequence& dirPath, const char* name)
@@ -308,29 +309,22 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
         result = (f1.open(jfile1, O_RDONLY) == 0 && f2.open(jfile2, O_RDONLY) == 0);
         if (result)
         {
-            ssize_t readBytes;
-            uint8_t buf1[BUFFER_SIZE], buf2[BUFFER_SIZE];
-        #ifndef NDEBUG
-            ssize_t readBytes2;
-            while ((readBytes = readFile(f1, buf1)) > 0 && (readBytes2 = readFile(f2, buf2)) > 0)
+            uint8_t buffer1[BUFFER_SIZE], buffer2[BUFFER_SIZE];
+            ssize_t readBytes1, readBytes2, readCount1, readCount2;
+
+            while ((readBytes1 = readFile(f1, buffer1, readCount1)) != 0 && (readBytes2 = readFile(f2, buffer2, readCount2)) != 0)
             {
-                assert_log(readBytes == readBytes2, "The read bytes are NOT equal (readBytes1 = %zd, readBytes2 = %zd)\n", readBytes, readBytes2);
-                if (::memcmp(buf1, buf2, readBytes) != 0)
+            #ifndef NDEBUG
+                if (readCount1 != readCount2)
+                    LOGE("Read count are NOT equal (readCount1 = %zd, readCount2 = %zd)\n", readCount1, readCount2);
+            #endif  // NDEBUG
+
+                if (readBytes1 == -1 || readBytes2 == -1 || readCount1 != readCount2 || ::memcmp(buffer1, buffer2, readCount1) != 0)
                 {
                     result = JNI_FALSE;
                     break;
                 }
             }
-        #else
-            while ((readBytes = readFile(f1, buf1)) > 0 && readFile(f2, buf2) > 0)
-            {
-                if (::memcmp(buf1, buf2, readBytes) != 0)
-                {
-                    result = JNI_FALSE;
-                    break;
-                }
-            }
-        #endif  // NDEBUG
         }
     }
 

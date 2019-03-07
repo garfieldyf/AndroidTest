@@ -495,10 +495,11 @@ public final class ArrayUtils {
 
     private static void sortArrayList(List list, int start, int end, Comparator comparator) {
         try {
+            final Object[] array = array(list);
             if (comparator == null) {
-                Arrays.sort(array(list), start, end);
+                Arrays.sort(array, start, end);
             } else {
-                Arrays.sort(array(list), start, end, comparator);
+                Arrays.sort(array, start, end, comparator);
             }
         } catch (Exception e) {
             Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e.getMessage());

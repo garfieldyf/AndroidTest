@@ -137,7 +137,7 @@ public final class GIFImage {
     }
 
     /**
-     * Returns this GIF image frame count.
+     * Returns the number of frames of this GIF image.
      * @return The frame count, must be >= 1.
      * @see #getFrameDelay(int)
      */

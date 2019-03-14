@@ -23,18 +23,23 @@ import android.util.Pair;
  *         super(ownerActivity);
  *     }
  *
+ *     {@code @Override}
  *     protected File getCacheFile(String[] params) {
+ *         // Builds the cache file, For example:
  *         return new File("mnt/sdcard/xxx/cacheFile.json");
  *     }
  *
+ *     {@code @Override}
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
  *         return new DownloadRequest(params[0]).connectTimeout(30000).readTimeout(30000);
  *     }
  *
+ *     {@code @Override}
  *     protected boolean validateResult(String[] params, JSONObject result) {
  *         return (result != null && result.optInt("retCode") == 200);
  *     }
  *
+ *     {@code @Override}
  *     protected void onPostExecute(Pair&lt;JSONObject, Boolean&gt result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
@@ -146,7 +151,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     }
 
     private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
-        final String tempFile = cacheFile + ".tmp";
+        final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isCancelled()) {
             // If cache file is hit and the cache file's contents are equal the temp

@@ -340,6 +340,14 @@ public final class PackageUtils {
         }
 
         /**
+         * Returns an {@link ApplicationInfo} of this component.
+         * @return The <tt>ApplicationInfo</tt>.
+         */
+        public final ApplicationInfo getApplicationInfo() {
+            return getComponentInfo().applicationInfo;
+        }
+
+        /**
          * Tests if this application is a system application or an updated system application.
          * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
          */
@@ -378,7 +386,6 @@ public final class PackageUtils {
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
-            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
         }
     }
@@ -390,6 +397,21 @@ public final class PackageUtils {
      * will be the parser result type.
      * <h2>Usage</h2>
      * <p>Here is an example:</p><pre>
+     * private static class MyPackageInfo extends AbsPackageInfo {
+     *     {@code @Override}
+     *     protected void initialize(Context context, PackageInfo packageInfo) {
+     *         super.initialize(context, packageInfo);
+     *         // Initialize ... ...
+     *     }
+     *
+     *     public static final Factory&lt;MyPackageInfo&gt; FACTORY = new Factory&lt;MyPackageInfo&gt;() {
+     *         {@code @Override}
+     *         public MyPackageInfo newInstance() {
+     *             return new MyPackageInfo();
+     *         }
+     *     };
+     * }
+     *
      * final List&lt;MyPackageInfo&gt; result = new PackageParser&lt;MyPackageInfo&gt;(context, MyPackageInfo.FACTORY)
      *     .addParseFlags(PackageManager.GET_ACTIVITIES)
      *     .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)

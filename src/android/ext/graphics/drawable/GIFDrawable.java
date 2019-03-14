@@ -134,7 +134,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
     }
 
     /**
-     * Returns this drawable frame count.
+     * Returns the number of frames of this drawable.
      * @return The frame count, must be >= 1.
      */
     public final int getFrameCount() {

@@ -1,5 +1,6 @@
 package android.ext.content.image;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import android.content.Context;
@@ -37,6 +38,7 @@ import android.util.Log;
  *         super(ownerActivity, ownerActivity);
  *     }
  *
+ *     {@code @Override}
  *     protected void onPostExecute(Object[] results) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
@@ -164,15 +166,15 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
             return decodeImage(uri, tempBuffer);
         }
 
-        final String imageFile = FileUtils.getCacheDir(mContext, ".temp_image_cache").getPath() + "/" + Thread.currentThread().hashCode();
+        final File imageFile = new File(FileUtils.getCacheDir(mContext, ".temp_image_cache"), Integer.toString(Thread.currentThread().hashCode()));
         try {
-            final int statusCode = newDownloadRequest(uri).download(imageFile, this, tempBuffer);
+            final int statusCode = newDownloadRequest(uri).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
             return null;
         } finally {
-            FileUtils.deleteFiles(imageFile, false);
+            imageFile.delete();
         }
     }
 }

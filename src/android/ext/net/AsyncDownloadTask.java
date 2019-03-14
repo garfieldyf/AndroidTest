@@ -21,10 +21,12 @@ import android.util.Log;
  *         super(ownerActivity);
  *     }
  *
+ *     {@code @Override}
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
  *         return new DownloadRequest(params[0]).readTimeout(30000).connectTimeout(30000);
  *     }
  *
+ *     {@code @Override}
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {

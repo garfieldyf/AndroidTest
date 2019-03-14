@@ -16,10 +16,12 @@ import android.os.AsyncTask;
  *         super(ownerActivity);
  *     }
  *
+ *     {@code @Override}
  *     protected Long doInBackground(String... urls) {
  *         ... ...
  *     }
  *
+ *     {@code @Override}
  *     protected void onPostExecute(Long result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {

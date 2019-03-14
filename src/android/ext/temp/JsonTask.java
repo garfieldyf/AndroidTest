@@ -3,32 +3,33 @@ package android.ext.temp;
 import java.io.File;
 import org.json.JSONObject;
 import android.app.Activity;
+import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.net.AsyncJsonTask;
 import android.ext.net.DownloadRequest;
 import android.util.Log;
 import android.util.Pair;
-import com.tencent.test.MainApplication;
 
 public class JsonTask extends AsyncJsonTask<String, JSONObject> {
-    public JsonTask(Object ownerActivity) {
+    private final LoadParams<String, JSONObject> mLoadParams;
+
+    public JsonTask(Activity ownerActivity, LoadParams<String, JSONObject> params) {
         super(ownerActivity);
+        mLoadParams = params;
     }
 
     @Override
     protected File getCacheFile(String[] params) {
-        final File cacheFile = new File(MainApplication.sInstance.getFilesDir(), "/.json_files/channel");
-//        Log.i("abc", "cacheFile = " + cacheFile);
-        return cacheFile;
+        return mLoadParams.getCacheFile(params[0]);
     }
 
     @Override
     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
-        return new DownloadRequest(params[0]).connectTimeout(30000).readTimeout(30000);
+        return mLoadParams.newDownloadRequest(params[0]);
     }
 
     @Override
     protected boolean validateResult(String[] params, JSONObject result) {
-        return (result != null && result.optInt("retCode") == 200);
+        return mLoadParams.validateResult(params[0], result);
     }
 
     @Override

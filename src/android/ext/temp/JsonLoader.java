@@ -6,12 +6,11 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AsyncJsonLoader;
-import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.net.DownloadRequest;
 import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
-import android.ext.util.StringUtils;
 import android.ext.util.MessageDigests.Algorithm;
+import android.ext.util.StringUtils;
 import android.util.Log;
 import android.util.Pair;
 import com.tencent.test.MainApplication;
@@ -22,7 +21,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     @Override
-    protected void onStartLoading(String url, LoadParams<String>[] params) {
+    protected void onStartLoading(String url, LoadParams<String, JSONObject>[] params) {
         final File cacheFile = params[0].getCacheFile(url);
         if (cacheFile == null || !cacheFile.exists()) {
             // Show loading UI.
@@ -31,12 +30,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     @Override
-    protected boolean validateResult(String url, LoadParams<String> params, JSONObject result) {
-        return (result != null && result.optInt("retCode") == 200);
-    }
-
-    @Override
-    protected void onLoadComplete(String url, LoadParams<String>[] params, Pair<JSONObject, Boolean> result) {
+    protected void onLoadComplete(String url, LoadParams<String, JSONObject>[] params, Pair<JSONObject, Boolean> result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
@@ -47,7 +41,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         if (result.first != null) {
             // Loading succeeded, update UI.
             Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.first));
-            //Toast.makeText(activity, "JsonLoader - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
+            // Toast.makeText(activity, "JsonLoader - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
         } else if (!result.second) {
             // Loading failed and file cache not hit, show error UI.
             Log.i("abc", "JsonLoader - Show error UI.");
@@ -59,20 +53,19 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
 
-    /**
-     * Class <tt>URLLoadParams</tt> is an implementation of a {@link LoadParams}.
-     */
-    public static final class URLLoadParams extends LoadParams<String> {
+    public static class URLLoadParams extends LoadParams<String, JSONObject> {
+        @Override
+        public boolean validateResult(String key, JSONObject result) {
+            return (result != null && result.optInt("retCode") == 200);
+        }
+
         @Override
         public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
         }
     }
 
-    /**
-     * Class <tt>CacheLoadParams</tt> is an implementation of a {@link LoadParams}.
-     */
-    public static class CacheLoadParams extends LoadParams<String> {
+    public static class JsonLoadParams extends URLLoadParams {
         /**
          * The application <tt>Context</tt>.
          */
@@ -82,7 +75,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
          * Constructor
          * @param context The <tt>Context</tt>.
          */
-        public CacheLoadParams(Context context) {
+        public JsonLoadParams(Context context) {
             mContext = context.getApplicationContext();
         }
 
@@ -90,11 +83,6 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         public File getCacheFile(String url) {
             final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
             return new File(mContext.getFilesDir(), StringUtils.toHexString(new StringBuilder("/.json_files/"), digest, 0, digest.length).toString());
-        }
-
-        @Override
-        public DownloadRequest newDownloadRequest(String url) throws Exception {
-            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
         }
     }
 }

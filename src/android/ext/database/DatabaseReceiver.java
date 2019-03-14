@@ -70,6 +70,33 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      */
     public static final int STATEMENT_REPLACE = 4;
 
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (ACTION_TABLE_CONTENT_CHANGED.equals(intent.getAction())) {
+            final int statement = intent.getIntExtra(EXTRA_STATEMENT, STATEMENT_UNKNOWN);
+            switch (statement) {
+            case STATEMENT_INSERT:
+                onHandleInsert(intent);
+                break;
+
+            case STATEMENT_UPDATE:
+                onHandleUpdate(intent);
+                break;
+
+            case STATEMENT_DELETE:
+                onHandleDelete(intent);
+                break;
+
+            case STATEMENT_REPLACE:
+                onHandleReplace(intent);
+                break;
+
+            default:
+                onHandleIntent(statement, intent);
+            }
+        }
+    }
+
     /**
      * Register this receiver for the local broadcasts.
      * @param context The <tt>Context</tt>.
@@ -165,6 +192,42 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
            .append(", statement = ").append(toString(intent.getIntExtra(EXTRA_STATEMENT, STATEMENT_UNKNOWN)))
            .append(", result = ").append(intent.getBundleExtra(EXTRA_RESULT))
            .append(" }").toString());
+    }
+
+    /**
+     * Called on the UI thread when a SQL statement INSERT to process.
+     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
+     */
+    protected void onHandleInsert(Intent intent) {
+    }
+
+    /**
+     * Called on the UI thread when a SQL statement UPDATE to process.
+     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
+     */
+    protected void onHandleUpdate(Intent intent) {
+    }
+
+    /**
+     * Called on the UI thread when a SQL statement DELETE to process.
+     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
+     */
+    protected void onHandleDelete(Intent intent) {
+    }
+
+    /**
+     * Called on the UI thread when a SQL statement REPALCE to process.
+     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
+     */
+    protected void onHandleReplace(Intent intent) {
+    }
+
+    /**
+     * Called on the UI thread when a SQL statement type to process.
+     * @param statement The SQL statement type.
+     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
+     */
+    protected void onHandleIntent(int statement, Intent intent) {
     }
 
     private static String toString(int statement) {

@@ -77,6 +77,16 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
+     * Sets the object that owns this loader.
+     * @param owner The owner object.
+     * @see #getOwner()
+     * @see #getOwnerActivity()
+     */
+    public final void setOwner(Object owner) {
+        mOwner = new WeakReference<Object>(owner);
+    }
+
+    /**
      * Returns the object that owns this loader.
      * @return The owner object or <tt>null</tt>
      * if the owner released by the GC.
@@ -97,16 +107,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
-    }
-
-    /**
-     * Sets the object that owns this loader.
-     * @param owner The owner object.
-     * @see #getOwner()
-     * @see #getOwnerActivity()
-     */
-    public final void setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
     }
 
     @Override

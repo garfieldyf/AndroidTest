@@ -66,23 +66,19 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     public static class JsonLoadParams extends URLLoadParams {
-        /**
-         * The application <tt>Context</tt>.
-         */
-        public final Context mContext;
+        private final File mCacheDir;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
          */
         public JsonLoadParams(Context context) {
-            mContext = context.getApplicationContext();
+            mCacheDir = new File(context.getFilesDir(), ".json_files");
         }
 
         @Override
         public File getCacheFile(String url) {
-            final byte[] digest = MessageDigests.computeString(url, Algorithm.SHA1);
-            return new File(mContext.getFilesDir(), StringUtils.toHexString(new StringBuilder("/.json_files/"), digest, 0, digest.length).toString());
+            return new File(mCacheDir, StringUtils.toHexString(MessageDigests.computeString(url, Algorithm.SHA1)));
         }
     }
 }

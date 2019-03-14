@@ -48,7 +48,7 @@ import android.util.Pair;
  *         }
  *
  *         if (result.first != null) {
- *             // Loading succeeded, update UI.
+ *             // Loading succeeded (may be file cache hit or load finish), update UI.
  *         } else if (!result.second) {
  *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
@@ -98,6 +98,19 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     }
 
     /**
+     * Called on a background thread to download the JSON data.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @param cacheFile The JSON cache file to store the JSON data, or <tt>null</tt> if no cache file.
+     * @return If the <em>cacheFile</em> is <tt>null</tt> returns the HTTP response code (<tt>Integer</tt>),
+     * Otherwise returns the JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).
+     * @throws Exception if an error occurs while downloading to the resource.
+     */
+    protected Object onDownload(Params[] params, String cacheFile) throws Exception {
+        final DownloadRequest request = newDownloadRequest(params);
+        return (cacheFile != null ? request.download(cacheFile, this, null) : request.download(this));
+    }
+
+    /**
      * Returns a new download request with the specified <em>params</em>.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return The instance of {@link DownloadRequest}.
@@ -119,7 +132,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
-                result = newDownloadRequest(params).download(this);
+                result = (Result)onDownload(params, null);
                 if (isCancelled() || !validateResult(params, result)) {
                     result = null;
                 }
@@ -152,7 +165,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
 
     private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
+        final int statusCode  = (int)onDownload(params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isCancelled()) {
             // If cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.

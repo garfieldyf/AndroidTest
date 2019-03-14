@@ -60,7 +60,7 @@ import android.util.Pair;
  *
  *         // Hide loading UI, if need.
  *         if (result.first != null) {
- *             // Loading succeeded, update UI.
+ *             // Loading succeeded (may be file cache hit or load finish), update UI.
  *         } else if (!result.second) {
  *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
@@ -92,6 +92,21 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         super(executor, owner);
     }
 
+    /**
+     * Called on a background thread to download the JSON data.
+     * @param task The {@link Task} whose executing this method.
+     * @param key The key, passed earlier by {@link #load}.
+     * @param params The parameters, passed earlier by {@link #load}.
+     * @param cacheFile The JSON cache file to store the JSON data, or <tt>null</tt> if no cache file.
+     * @return If the <em>cacheFile</em> is <tt>null</tt> returns the HTTP response code (<tt>Integer</tt>),
+     * Otherwise returns the JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).
+     * @throws Exception if an error occurs while downloading to the resource.
+     */
+    protected Object onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
+        final DownloadRequest request = params.newDownloadRequest(key);
+        return (cacheFile != null ? request.download(cacheFile, task, null) : request.download(task));
+    }
+
     @Override
     protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
         onLoadComplete(key, params, new Pair<Result, Boolean>((Result)values[0], false));
@@ -105,7 +120,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             final LoadParams params = loadParams[0];
             final File cacheFile = params.getCacheFile(key);
             if (cacheFile == null) {
-                result = params.newDownloadRequest(key).download(task);
+                result = (Result)onDownload(task, key, params, null);
                 if (isTaskCancelled(task) || !params.validateResult(key, result)) {
                     result = null;
                 }
@@ -138,7 +153,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
     private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
+        final int statusCode  = (int)onDownload(task, key, params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
             // If cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.
@@ -166,7 +181,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
          * Returns the absolute path of the JSON cache file on the filesystem.
          * <p>Subclasses should override this method to returns the cache file
          * path. The default implementation returns <tt>null</tt>.</p>
-         * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
+         * @param key The key, passed earlier by {@link #load}.
          * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
          */
         public File getCacheFile(Key key) {
@@ -176,7 +191,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         /**
          * Tests if the <em>result</em> is valid. Subclasses should override this method
          * to validate the <em>result</em>.
-         * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
+         * @param key The key, passed earlier by {@link #load}.
          * @param result The result or <tt>null</tt>.
          * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
          */
@@ -186,7 +201,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
         /**
          * Returns a new download request with the specified <em>key</em>.
-         * @param key The key, passed earlier by {@link AsyncJsonLoader#load}.
+         * @param key The key, passed earlier by {@link #load}.
          * @return The {@link DownloadRequest} object.
          * @throws Exception if an error occurs while opening the connection.
          */

@@ -260,12 +260,12 @@ public final class PackageUtils {
         }
 
         /**
-         * Tests if this application is a system application or an updated system application.
+         * Tests if this application is a system application.
          * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
          */
         public final boolean isSystem() {
             DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return ((packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0);
+            return ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         }
 
         /**
@@ -348,11 +348,11 @@ public final class PackageUtils {
         }
 
         /**
-         * Tests if this application is a system application or an updated system application.
+         * Tests if this application is a system application.
          * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
          */
         public final boolean isSystem() {
-            return ((getComponentInfo().applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) != 0);
+            return ((getComponentInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         }
 
         /**

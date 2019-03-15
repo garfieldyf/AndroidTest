@@ -4,4 +4,7 @@
     <string name="shape">roundRect</string>
     <string name="barcode_scanning_hint">请将二维码放入框内，即可自动扫描</string>
     <string name="camera_error_uninitialized">无法打开相机，请检查相机权限</string>
+
+    <string name="left">左边</string>
+    <string name="right">右边</string>
 </resources>

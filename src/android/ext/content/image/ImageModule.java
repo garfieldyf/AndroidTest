@@ -127,7 +127,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
     @Override
     public void onLowMemory() {
-        onTrimMemory(TRIM_MEMORY_RUNNING_LOW);
+        onTrimMemory(TRIM_MEMORY_COMPLETE);
     }
 
     @Override

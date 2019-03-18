@@ -1262,9 +1262,6 @@ public final class FileUtils {
             return 31 * type + path.hashCode();
         }
 
-        /**
-         * @see #equalsIgnoreCase(Dirent)
-         */
         @Override
         public boolean equals(Object object) {
             if (object == this) {
@@ -1280,19 +1277,6 @@ public final class FileUtils {
         }
 
         /**
-         * Compares the given <em>dirent</em> to this <tt>Dirent</tt> ignoring
-         * the {@link #path} field case differences.
-         * @param dirent The <tt>Dirent</tt> to compare.
-         * @return <tt>true</tt> if the specified <em>dirent</em> is equal to
-         * this <tt>Dirent</tt>, <tt>false</tt> otherwise.
-         * @see #equals(Object)
-         */
-        public boolean equalsIgnoreCase(Dirent dirent) {
-            return (dirent != null && type == dirent.type && path.equalsIgnoreCase(dirent.path));
-        }
-
-        /**
-         * @see #compareToIgnoreCase(Dirent)
          * @see #caseInsensitiveOrder()
          */
         @Override
@@ -1309,28 +1293,6 @@ public final class FileUtils {
         }
 
         /**
-         * Compares the specified <tt>Dirent</tt> to this <tt>Dirent</tt>, ignoring
-         * the {@link #path} field case differences.
-         * @param another The <tt>Dirent</tt> to compare.
-         * @return <tt>0</tt> if the <tt>Dirent</tt>s are equal; a negative integer
-         * if this <tt>Dirent</tt> is less than <em>another</em>; a positive integer
-         * if this <tt>Dirent</tt> is greater than <em>another</em>.
-         * @see #compareTo(Dirent)
-         * @see #caseInsensitiveOrder()
-         */
-        public int compareToIgnoreCase(Dirent another) {
-            if (type != another.type) {
-                if (type == DT_DIR) {
-                    return -1;
-                } else if (another.type == DT_DIR) {
-                    return 1;
-                }
-            }
-
-            return path.compareToIgnoreCase(another.path);
-        }
-
-        /**
          * Returns the file type of the specified <em>path</em>.
          * @param path The absolute file path. Never <tt>null</tt>.
          * @return The file type. One of <tt>DT_XXX</tt> constants.
@@ -1344,7 +1306,6 @@ public final class FileUtils {
          * Returns a <tt>Comparator</tt> ignoring the {@link #path} field case differences.
          * @return The <tt>Comparator</tt>.
          * @see #compareTo(Dirent)
-         * @see #compareToIgnoreCase(Dirent)
          */
         public static Comparator<Dirent> caseInsensitiveOrder() {
             return CaseInsensitiveComparator.sInstance;
@@ -1527,7 +1488,15 @@ public final class FileUtils {
 
         @Override
         public int compare(Dirent one, Dirent another) {
-            return one.compareToIgnoreCase(another);
+            if (one.type != another.type) {
+                if (one.type == Dirent.DT_DIR) {
+                    return -1;
+                } else if (another.type == Dirent.DT_DIR) {
+                    return 1;
+                }
+            }
+
+            return one.path.compareToIgnoreCase(another.path);
         }
     }
 

@@ -76,12 +76,6 @@ __STATIC_INLINE__ bool isDirectory(const struct dirent* entry, const char* path)
     return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
 }
 
-__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path)
-{
-    assert(path);
-    return ::snprintf(outPath, _countof(outPath), (path[::strlen(path) - 1] == '/' ? "%s" : "%s/"), path);
-}
-
 __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
 {
     assert(one);
@@ -96,6 +90,15 @@ __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
     }
 
     return result;
+}
+
+__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)
+{
+    assert(path);
+    if (length == INVALID_LENGTH)
+        length = ::strlen(path);
+
+    return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
 __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE], ssize_t& readCount)
@@ -159,7 +162,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
         if ((errnum = dir.open(dirPath.c_str())) == 0)
         {
             char filePath[MAX_PATH];
-            const int length = buildPath(filePath, dirPath.c_str());
+            const int length = buildPath(filePath, dirPath.c_str(), dirPath.size());
 
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
@@ -277,7 +280,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
         if ((errnum = dir.open(jdirPath)) == 0)
         {
             char filePath[MAX_PATH];
-            const int length = buildPath(filePath, jdirPath.str());
+            const int length = buildPath(filePath, jdirPath.str(), jdirPath.length);
 
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {

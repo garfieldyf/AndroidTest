@@ -1,23 +1,21 @@
 package android.ext.widget;
 
 import android.database.Cursor;
+import android.ext.temp.AnimatorManager;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorAdapter.CursorAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.CursorFilterClient;
 import android.ext.widget.Filters.DataSetObserver;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 /**
  * Abstract class CursorRecyclerAdapter
  * @author Garfield
  */
-public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends RecyclerAdapter<VH> implements Filterable, CursorObserverClient, CursorFilterClient, DataSetObserver {
+public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient, DataSetObserver {
     /**
      * If set the adapter will register a content observer on the
      * cursor and will call {@link #onContentChanged(boolean, Uri)}
@@ -108,10 +106,12 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
     }
 
     /**
+     * Changes the underlying cursor to a new cursor.
+     * If there is an existing cursor it will be closed.
+     * @param cursor The new cursor to be used.
      * @see #swapCursor(Cursor)
      * @see #getCursor()
      */
-    @Override
     public void changeCursor(Cursor cursor) {
         FileUtils.close(mAdapter.swapCursor(cursor, this));
     }
@@ -167,23 +167,8 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
     }
 
     @Override
-    public Filter getFilter() {
-        return mAdapter.getFilter(this);
-    }
-
-    @Override
     public void notifyDataSetInvalidated() {
         notifyDataSetChanged();
-    }
-
-    @Override
-    public CharSequence convertToString(Cursor cursor) {
-        return null;
-    }
-
-    @Override
-    public Cursor onPerformFiltering(CharSequence constraint) {
-        return mAdapter.mCursor;
     }
 
     @Override

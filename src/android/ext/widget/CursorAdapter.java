@@ -132,7 +132,11 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
 
     @Override
     public Filter getFilter() {
-        return getFilter(this);
+        if (mFilter == null) {
+            mFilter = new CursorFilter(this);
+        }
+
+        return mFilter;
     }
 
     @Override
@@ -185,20 +189,6 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
     /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
         mObserver = observer;
         swapCursor(cursor, this);
-    }
-
-    /**
-     * Returns a {@link Filter} that can be used to constrain data
-     * with a filtering pattern.
-     * @param client The {@link CursorFilterClient}.
-     * @return A <tt>Filter</tt> used to constrain data.
-     */
-    /* package */ final Filter getFilter(CursorFilterClient client) {
-        if (mFilter == null) {
-            mFilter = new CursorFilter(client);
-        }
-
-        return mFilter;
     }
 
     /**

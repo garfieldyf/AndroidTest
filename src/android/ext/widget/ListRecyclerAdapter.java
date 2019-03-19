@@ -2,22 +2,20 @@ package android.ext.widget;
 
 import java.util.List;
 import android.content.Context;
+import android.ext.temp.AnimatorManager;
 import android.ext.widget.BaseListAdapter.ListAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.DataSetObserver;
-import android.ext.widget.Filters.ListFilterClient;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 /**
  * Abstract class ListRecyclerAdapter
  * @author Garfield
  */
-public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends RecyclerAdapter<VH> implements Filterable, ListFilterClient<T>, CursorObserverClient, DataSetObserver {
+public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient, DataSetObserver {
     private final BaseListAdapter<T> mAdapter;
 
     /**
@@ -95,9 +93,11 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
     }
 
     /**
+     * Changes the underlying data to a new data.
+     * @param newData The new data to be used or
+     * <tt>null</tt> to clear the underlying data.
      * @see #getData()
      */
-    @Override
     public void changeData(List<T> newData) {
         mAdapter.changeData(newData, this);
     }
@@ -132,26 +132,11 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
     }
 
     @Override
-    public Filter getFilter() {
-        return mAdapter.getFilter(this);
-    }
-
-    @Override
     public void notifyDataSetInvalidated() {
         notifyDataSetChanged();
     }
 
     @Override
-    public CharSequence convertToString(T item) {
-        return item.toString();
-    }
-
-    @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
-    }
-
-    @Override
-    public List<T> onPerformFiltering(CharSequence constraint, List<T> originalData) {
-        return mAdapter.mData;
     }
 }

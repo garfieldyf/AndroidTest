@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import android.content.Context;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.CursorFilterClient;
 import android.ext.widget.Filters.DataSetObserver;
 import android.ext.widget.Filters.ListFilter;
 import android.ext.widget.Filters.ListFilterClient;
@@ -103,7 +102,11 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
 
     @Override
     public Filter getFilter() {
-        return getFilter(this);
+        if (mFilter == null) {
+            mFilter = new ListFilter<T>(mData, this);
+        }
+
+        return mFilter;
     }
 
     @Override
@@ -138,20 +141,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      * @see #newView(T, int, ViewGroup)
      */
     protected abstract void bindView(T itemData, int position, View view);
-
-    /**
-     * Returns a {@link Filter} that can be used to constrain data
-     * with a filtering pattern.
-     * @param client The {@link CursorFilterClient}.
-     * @return A <tt>Filter</tt> used to constrain data.
-     */
-    /* package */ final Filter getFilter(ListFilterClient<T> client) {
-        if (mFilter == null) {
-            mFilter = new ListFilter<T>(mData, client);
-        }
-
-        return mFilter;
-    }
 
     /**
      * Changes the underlying data to a new data.

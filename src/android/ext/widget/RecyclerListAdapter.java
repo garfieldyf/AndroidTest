@@ -5,19 +5,16 @@ import android.content.Context;
 import android.ext.widget.BaseListAdapter.ListAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.DataSetObserver;
-import android.ext.widget.Filters.ListFilterClient;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.widget.Filter;
-import android.widget.Filterable;
 
 /**
  * Abstract class RecyclerListAdapter
  * @author Garfield
  */
-public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adapter<VH> implements Filterable, ListFilterClient<T>, CursorObserverClient, DataSetObserver {
+public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adapter<VH> implements CursorObserverClient, DataSetObserver {
     private final BaseListAdapter<T> mAdapter;
 
     /**
@@ -60,9 +57,11 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Changes the underlying data to a new data.
+     * @param newData The new data to be used or
+     * <tt>null</tt> to clear the underlying data.
      * @see #getData()
      */
-    @Override
     public void changeData(List<T> newData) {
         mAdapter.changeData(newData, this);
     }
@@ -97,26 +96,11 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
     }
 
     @Override
-    public Filter getFilter() {
-        return mAdapter.getFilter(this);
-    }
-
-    @Override
     public void notifyDataSetInvalidated() {
         notifyDataSetChanged();
     }
 
     @Override
-    public CharSequence convertToString(T item) {
-        return item.toString();
-    }
-
-    @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
-    }
-
-    @Override
-    public List<T> onPerformFiltering(CharSequence constraint, List<T> originalData) {
-        return mAdapter.mData;
     }
 }

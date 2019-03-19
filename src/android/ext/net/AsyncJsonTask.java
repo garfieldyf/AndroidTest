@@ -30,13 +30,13 @@ import android.util.Pair;
  *     }
  *
  *     {@code @Override}
- *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
- *         return new DownloadRequest(params[0]).connectTimeout(30000).readTimeout(30000);
+ *     protected boolean validateResult(String[] params, JSONObject result) {
+ *         return (result != null && result.optInt("retCode") == 200);
  *     }
  *
  *     {@code @Override}
- *     protected boolean validateResult(String[] params, JSONObject result) {
- *         return (result != null && result.optInt("retCode") == 200);
+ *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
+ *         return new DownloadRequest(params[0]).connectTimeout(30000).readTimeout(30000);
  *     }
  *
  *     {@code @Override}

@@ -153,6 +153,7 @@ public final class GIFImage {
      * @see #getFrameCount()
      */
     public final int getFrameDelay(int frameIndex) {
+        DebugUtils.__checkError(frameIndex < 0 || frameIndex >= getFrameCount(), "Index out of bounds - [ frameIndex = " + frameIndex + ", frameCount = " + getFrameCount() + " ]");
         return nativeGetFrameDelay(mNativeImage, frameIndex);
     }
 

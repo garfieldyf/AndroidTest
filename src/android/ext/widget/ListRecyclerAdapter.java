@@ -5,7 +5,7 @@ import android.content.Context;
 import android.ext.temp.AnimatorManager;
 import android.ext.widget.BaseListAdapter.ListAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.DataSetObserver;
+import android.ext.widget.RecyclerListAdapter.AdapterDataObserver;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -15,7 +15,7 @@ import android.view.View;
  * Abstract class ListRecyclerAdapter
  * @author Garfield
  */
-public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient, DataSetObserver {
+public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient {
     private final BaseListAdapter<T> mAdapter;
 
     /**
@@ -27,8 +27,7 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
      * @see #ListRecyclerAdapter(RecyclerView, AnimatorManager, List, int)
      */
     public ListRecyclerAdapter(RecyclerView view, List<T> data, int flags) {
-        super(view, flags);
-        mAdapter = new ListAdapterImpl<T>(data);
+        this(view, null, data, flags);
     }
 
     /**
@@ -42,7 +41,7 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
      */
     public ListRecyclerAdapter(RecyclerView view, AnimatorManager animatorManager, List<T> data, int flags) {
         super(view, animatorManager, flags);
-        mAdapter = new ListAdapterImpl<T>(data);
+        mAdapter = new ListAdapterImpl<T>(data, new AdapterDataObserver(this));
     }
 
     /**
@@ -99,7 +98,7 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
      * @see #getData()
      */
     public void changeData(List<T> newData) {
-        mAdapter.changeData(newData, this);
+        mAdapter.changeData(newData);
     }
 
     /**
@@ -129,11 +128,6 @@ public abstract class ListRecyclerAdapter<T, VH extends ViewHolder> extends Recy
     @Override
     public int getItemCount() {
         return mAdapter.mData.size();
-    }
-
-    @Override
-    public void notifyDataSetInvalidated() {
-        notifyDataSetChanged();
     }
 
     @Override

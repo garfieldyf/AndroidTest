@@ -150,21 +150,6 @@ public final class Filters {
     }
 
     /**
-     * Used for being notified when the data set is changed.
-     */
-    /* package */ static interface DataSetObserver {
-        /**
-         * Notifies any registered observers that the data set has changed.
-         */
-        void notifyDataSetChanged();
-
-        /**
-         * Notifies any registered observers that the underlying data is no longer valid.
-         */
-        void notifyDataSetInvalidated();
-    }
-
-    /**
      * This utility class cannot be instantiated.
      */
     private Filters() {

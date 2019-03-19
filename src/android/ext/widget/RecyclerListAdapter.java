@@ -2,9 +2,9 @@ package android.ext.widget;
 
 import java.util.List;
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.ext.widget.BaseListAdapter.ListAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.DataSetObserver;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
@@ -14,7 +14,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
  * Abstract class RecyclerListAdapter
  * @author Garfield
  */
-public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adapter<VH> implements CursorObserverClient, DataSetObserver {
+public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adapter<VH> implements CursorObserverClient {
     private final BaseListAdapter<T> mAdapter;
 
     /**
@@ -22,7 +22,7 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
      * @param data The data to represent in the <tt>RecyclerView</tt> or <tt>null</tt>.
      */
     public RecyclerListAdapter(List<T> data) {
-        mAdapter = new ListAdapterImpl<T>(data);
+        mAdapter = new ListAdapterImpl<T>(data, new AdapterDataObserver(this));
     }
 
     /**
@@ -63,7 +63,7 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
      * @see #getData()
      */
     public void changeData(List<T> newData) {
-        mAdapter.changeData(newData, this);
+        mAdapter.changeData(newData);
     }
 
     /**
@@ -96,11 +96,31 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
     }
 
     @Override
-    public void notifyDataSetInvalidated() {
-        notifyDataSetChanged();
+    public void onContentChanged(boolean selfChange, Uri uri) {
     }
 
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
+    /**
+     * Class <tt>AdapterDataObserver</tt> is an implementation of a {@link DataSetObserver}.
+     */
+    /* package */ static final class AdapterDataObserver extends DataSetObserver {
+        private final Adapter<?> mAdapter;
+
+        /**
+         * Constructor
+         * @param adapter The <tt>Adapter</tt>.
+         */
+        public AdapterDataObserver(Adapter<?> adapter) {
+            mAdapter = adapter;
+        }
+
+        @Override
+        public void onChanged() {
+            mAdapter.notifyDataSetChanged();
+        }
+
+        @Override
+        public void onInvalidated() {
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }

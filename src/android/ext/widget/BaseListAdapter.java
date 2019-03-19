@@ -3,8 +3,8 @@ package android.ext.widget;
 import java.util.Collections;
 import java.util.List;
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.DataSetObserver;
 import android.ext.widget.Filters.ListFilter;
 import android.ext.widget.Filters.ListFilterClient;
 import android.net.Uri;
@@ -18,7 +18,7 @@ import android.widget.Filterable;
  * Abstract class BaseListAdapter
  * @author Garfield
  */
-public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterable, ListFilterClient<T>, CursorObserverClient, DataSetObserver {
+public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterable, ListFilterClient<T>, CursorObserverClient {
     /* package */ List<T> mData;
     private Filter mFilter;
     private CursorObserver mObserver;
@@ -45,7 +45,15 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      */
     @Override
     public void changeData(List<T> newData) {
-        changeData(newData, this);
+        if (mData != newData) {
+            mFilter = null;
+            mData = (newData != null ? newData : Collections.<T>emptyList());
+            if (mData.size() > 0) {
+                notifyDataSetChanged();
+            } else {
+                notifyDataSetInvalidated();
+            }
+        }
     }
 
     /**
@@ -143,23 +151,6 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
     protected abstract void bindView(T itemData, int position, View view);
 
     /**
-     * Changes the underlying data to a new data.
-     * @param newData The new data to be used.
-     * @param observer The {@link DataSetObserver}.
-     */
-    /* package */ final void changeData(List<T> newData, DataSetObserver observer) {
-        if (mData != newData) {
-            mFilter = null;
-            mData = (newData != null ? newData : Collections.<T>emptyList());
-            if (mData.size() > 0) {
-                observer.notifyDataSetChanged();
-            } else {
-                observer.notifyDataSetInvalidated();
-            }
-        }
-    }
-
-    /**
      * Register an observer that gets callbacks when data identified by a given
      * content URI changes.
      * @param context The <tt>Context</tt>.
@@ -182,8 +173,9 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      * Class <tt>ListAdapterImpl</tt> is an implementation of a {@link BaseListAdapter}.
      */
     /* package */ static final class ListAdapterImpl<T> extends BaseListAdapter<T> {
-        public ListAdapterImpl(List<T> data) {
+        public ListAdapterImpl(List<T> data, DataSetObserver observer) {
             super(data);
+            registerDataSetObserver(observer);
         }
 
         @Override

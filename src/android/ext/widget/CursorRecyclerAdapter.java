@@ -5,7 +5,7 @@ import android.ext.temp.AnimatorManager;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorAdapter.CursorAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.DataSetObserver;
+import android.ext.widget.RecyclerListAdapter.AdapterDataObserver;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -15,7 +15,7 @@ import android.view.View;
  * Abstract class CursorRecyclerAdapter
  * @author Garfield
  */
-public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient, DataSetObserver {
+public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends RecyclerAdapter<VH> implements CursorObserverClient {
     /**
      * If set the adapter will register a content observer on the
      * cursor and will call {@link #onContentChanged(boolean, Uri)}
@@ -51,7 +51,7 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
      */
     public CursorRecyclerAdapter(RecyclerView view, Cursor cursor, AnimatorManager animatorManager, int flags) {
         super(view, animatorManager, flags);
-        mAdapter = new CursorAdapterImpl(cursor, (flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
+        mAdapter = new CursorAdapterImpl(cursor, new AdapterDataObserver(this), (flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
     }
 
     /**
@@ -113,7 +113,7 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
      * @see #getCursor()
      */
     public void changeCursor(Cursor cursor) {
-        FileUtils.close(mAdapter.swapCursor(cursor, this));
+        FileUtils.close(mAdapter.swapCursor(cursor));
     }
 
     /**
@@ -127,7 +127,7 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
      * @see #getCursor()
      */
     public Cursor swapCursor(Cursor newCursor) {
-        return mAdapter.swapCursor(newCursor, this);
+        return mAdapter.swapCursor(newCursor);
     }
 
     /**
@@ -164,11 +164,6 @@ public abstract class CursorRecyclerAdapter<VH extends ViewHolder> extends Recyc
     @Override
     public long getItemId(int position) {
         return (hasStableIds() ? mAdapter.getItemId(position) : RecyclerView.NO_ID);
-    }
-
-    @Override
-    public void notifyDataSetInvalidated() {
-        notifyDataSetChanged();
     }
 
     @Override

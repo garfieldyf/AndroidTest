@@ -1,11 +1,11 @@
 package android.ext.widget;
 
 import android.database.Cursor;
+import android.database.DataSetObserver;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.CursorFilter;
 import android.ext.widget.Filters.CursorFilterClient;
-import android.ext.widget.Filters.DataSetObserver;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.view.View;
@@ -18,7 +18,7 @@ import android.widget.Filterable;
  * Abstract class CursorAdapter
  * @author Garfield
  */
-public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorObserverClient, CursorFilterClient, DataSetObserver {
+public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorObserverClient, CursorFilterClient {
     /**
      * If set the adapter will register a content observer on the
      * cursor and will call {@link #onContentChanged(boolean, Uri)}
@@ -40,7 +40,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      */
     public CursorAdapter(Cursor cursor, int flags) {
         mObserver = ((flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
-        swapCursor(cursor, this);
+        swapCursor(cursor);
     }
 
     /**
@@ -60,7 +60,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      */
     @Override
     public void changeCursor(Cursor cursor) {
-        FileUtils.close(swapCursor(cursor, this));
+        FileUtils.close(swapCursor(cursor));
     }
 
     /**
@@ -74,7 +74,32 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      * @see #getCursor()
      */
     public Cursor swapCursor(Cursor newCursor) {
-        return swapCursor(newCursor, this);
+        if (mCursor == newCursor) {
+            return null;
+        }
+
+        // Unregister the ContentObserver from old cursor.
+        final Cursor oldCursor = mCursor;
+        unregisterContentObserver();
+        mCursor = newCursor;
+
+        if (mCursor != null) {
+            // Register the ContentObserver to new cursor.
+            if (mObserver != null) {
+                mObserver.register(mCursor);
+            }
+
+            // Notifies the attached observers that the underlying data has been
+            // changed and any View reflecting the data set should refresh itself.
+            mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
+            notifyDataSetChanged();
+        } else {
+            // Notifies the attached observers that the underlying data is no longer valid.
+            mRowIDColumn = -1;
+            notifyDataSetInvalidated();
+        }
+
+        return oldCursor;
     }
 
     /**
@@ -188,51 +213,16 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      */
     /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
         mObserver = observer;
-        swapCursor(cursor, this);
-    }
-
-    /**
-     * Swap in a new cursor, returning the old cursor.
-     * @param newCursor The new cursor to be used.
-     * @param observer The {@link DataSetObserver}.
-     * @return Returns the previously set cursor, or <tt>null</tt> if
-     * there was a not one. If the given new cursor is the same instance
-     * is the previously set cursor, <tt>null</tt> is also returned.
-     */
-    /* package */ final Cursor swapCursor(Cursor newCursor, DataSetObserver observer) {
-        Cursor oldCursor = null;
-        if (mCursor != newCursor) {
-            // Unregister the ContentObserver from old cursor.
-            oldCursor = mCursor;
-            unregisterContentObserver();
-            mCursor = newCursor;
-
-            if (mCursor != null) {
-                // Register the ContentObserver to new cursor.
-                if (mObserver != null) {
-                    mObserver.register(mCursor);
-                }
-
-                // Notifies the attached observers that the underlying data has been
-                // changed and any View reflecting the data set should refresh itself.
-                mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
-                observer.notifyDataSetChanged();
-            } else {
-                // Notifies the attached observers that the underlying data is no longer valid.
-                mRowIDColumn = -1;
-                observer.notifyDataSetInvalidated();
-            }
-        }
-
-        return oldCursor;
+        swapCursor(cursor);
     }
 
     /**
      * Class <tt>CursorAdapterImpl</tt> is an implementation of a {@link CursorAdapter}.
      */
     /* package */ static final class CursorAdapterImpl extends CursorAdapter {
-        public CursorAdapterImpl(Cursor cursor, CursorObserver observer) {
-            super(cursor, observer);
+        public CursorAdapterImpl(Cursor cursor, DataSetObserver observer, CursorObserver cursorObserver) {
+            super(cursor, cursorObserver);
+            registerDataSetObserver(observer);
         }
 
         @Override

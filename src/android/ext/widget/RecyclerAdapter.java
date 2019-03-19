@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import android.ext.temp.AnimatorManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;

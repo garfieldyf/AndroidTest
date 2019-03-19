@@ -240,7 +240,7 @@ public final class FileUtils {
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
         final Pair<Factory<Dirent>, List<Dirent>> result = new Pair<Factory<Dirent>, List<Dirent>>(Dirent.FACTORY, new ArrayList<Dirent>());
-        return (scanFiles(dirPath, DefaultCallback.sInstance, flags, result) == 0 ? result.second : null);
+        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
@@ -256,7 +256,7 @@ public final class FileUtils {
      */
     public static <T extends Dirent> List<T> listFiles(String dirPath, int flags, Factory<T> factory) {
         final Pair<Factory<T>, List<T>> result = new Pair<Factory<T>, List<T>>(factory, new ArrayList<T>());
-        return (scanFiles(dirPath, DefaultCallback.sInstance, flags, result) == 0 ? result.second : null);
+        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result.second : null);
     }
 
     /**
@@ -274,7 +274,7 @@ public final class FileUtils {
      * @see #listFiles(String, int, Factory)
      */
     public static <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents) {
-        return scanFiles(dirPath, DefaultCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
+        return scanFiles(dirPath, ListCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
     }
 
     /**
@@ -1462,11 +1462,11 @@ public final class FileUtils {
     }
 
     /**
-     * Class <tt>DefaultScanCallback</tt> is an implementation of a {@link ScanCallback}.
+     * Class <tt>ListCallback</tt> is an implementation of a {@link ScanCallback}.
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    private static final class DefaultCallback implements ScanCallback {
-        public static final ScanCallback sInstance = new DefaultCallback();
+    private static final class ListCallback implements ScanCallback {
+        public static final ScanCallback sInstance = new ListCallback();
 
         @Keep
         @Override

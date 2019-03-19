@@ -31,6 +31,7 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
      */
     public LruBitmapCache(float scaleMemory) {
         super((int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f));
+        DebugUtils.__checkError(Float.compare(scaleMemory, +1.0f) >= 0, "scaleMemory >= 1.0f");
     }
 
     @Override

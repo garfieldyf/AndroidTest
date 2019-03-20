@@ -20,8 +20,6 @@ import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.DrawableContainer;
-import android.util.StateSet;
 import android.view.Gravity;
 import android.view.View;
 
@@ -120,50 +118,6 @@ public final class DrawUtils {
         computeLine(rect, left, top, right, bottom, gravity);
         canvas.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
         RectFPool.recycle(rect);
-    }
-
-    /**
-     * Draw a frame drawable with the specified the {@link View}'s states.
-     * @param canvas The canvas to draw into.
-     * @param frame The drawable to be drawn.
-     * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View}'s states. If the
-     * <em>drawable</em> is state full, this parameter will be ignored.
-     */
-    public static void drawFrameDrawable(Canvas canvas, Drawable frame, View view, int[] stateSpec) {
-        if (frame.isStateful()) {
-            frame.setState(view.getDrawableState());
-            drawFrameDrawable(canvas, frame, 0, 0, view.getWidth(), view.getHeight());
-        } else if (StateSet.stateSetMatches(stateSpec, view.getDrawableState())) {
-            drawFrameDrawable(canvas, frame, 0, 0, view.getWidth(), view.getHeight());
-        }
-    }
-
-    /**
-     * Draw a frame drawable with given the <em>frame</em> and <em>canvas</em>.
-     * @param canvas The canvas to draw into.
-     * @param frame The frame drawable to be drawn.
-     * @param left The specified a bounding rectangle left coordinate for the <em>frame</em>.
-     * @param top The specified a bounding rectangle top coordinate for the <em>frame</em>.
-     * @param right The specified a bounding rectangle right coordinate for the <em>frame</em>.
-     * @param bottom The specified a bounding rectangle bottom coordinate for the <em>frame</em>.
-     */
-    public static void drawFrameDrawable(Canvas canvas, Drawable frame, int left, int top, int right, int bottom) {
-        if (frame instanceof DrawableContainer) {
-            frame = ((DrawableContainer)frame).getCurrent();
-        }
-
-        final Rect padding = RectPool.obtain();
-        if (frame.getPadding(padding)) {
-            left   -= padding.left;
-            top    -= padding.top;
-            right  += padding.right;
-            bottom += padding.bottom;
-        }
-
-        RectPool.recycle(padding);
-        frame.setBounds(left, top, right, bottom);
-        frame.draw(canvas);
     }
 
     /**

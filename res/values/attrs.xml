@@ -51,19 +51,15 @@
         <attr name="android:text" />
         <attr name="android:textSize" />
         <attr name="android:textColor" />
-	    <attr name="textOffset" format="dimension" />
-	    <attr name="borderWidth" format="dimension" />
-	    <attr name="cornerWidth" format="dimension" />
-	    <attr name="cornerHeight" format="dimension" />
-	    <attr name="maskColor" format="reference|color" />
-	    <attr name="borderColor" format="reference|color" />
-	    <attr name="cornerColor" format="reference|color" />
-	    <attr name="scanningIndicator" format="reference|color" />
-	    <attr name="scanningIndicatorHeight" format="dimension" />
+        <attr name="textOffset" format="dimension" />
+        <attr name="borderWidth" format="dimension" />
+        <attr name="cornerWidth" format="dimension" />
+        <attr name="cornerHeight" format="dimension" />
+        <attr name="maskColor" format="reference|color" />
+        <attr name="borderColor" format="reference|color" />
+        <attr name="cornerColor" format="reference|color" />
+        <attr name="scanningIndicator" format="reference|color" />
+        <attr name="scanningIndicatorHeight" format="dimension" />
     </declare-styleable>
 
-    <!-- FocusDrawable styleable -->
-    <declare-styleable name="FocusDrawable">
-        <attr name="focus" format="reference|color" />
-    </declare-styleable>
 </resources>

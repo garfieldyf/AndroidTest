@@ -1,4 +1,4 @@
-package android.ext.content.image.params;
+package android.ext.image.params;
 
 import android.content.Context;
 import android.content.res.TypedArray;

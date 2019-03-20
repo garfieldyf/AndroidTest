@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.image.binder;
 
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
@@ -19,6 +19,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Printer;
 import android.util.Xml;
 import android.widget.ImageView;
@@ -137,6 +138,12 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         return mTransformer;
     }
 
+    public void dump(Context context, Printer printer) {
+        if (mTransformer instanceof CacheTransformer) {
+            Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
+        }
+    }
+
     @Override
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         ((ImageView)target).setImageDrawable(value != null ? mTransformer.transform(uri, target, value) : mDefaultImage);
@@ -200,9 +207,12 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         return XmlResources.inflateTransformer(context, parser);
     }
 
-    /* package */ final void dump(Context context, Printer printer) {
-        if (mTransformer instanceof CacheTransformer) {
-            Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
+    /**
+     * Called on the <tt>ImageLoader</tt> internal, do not call this method directly.
+     */
+    public static void __checkTransformer(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
+        if (imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer) {
+            Log.w(clazz.getName(), "WARNING: The " + clazz.getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
         }
     }
 

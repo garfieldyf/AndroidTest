@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.image;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,8 +6,8 @@ import java.net.HttpURLConnection;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.XmlResources;
-import android.ext.content.image.params.Parameters;
 import android.ext.graphics.BitmapUtils;
+import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ArrayUtils.ByteArrayPool;

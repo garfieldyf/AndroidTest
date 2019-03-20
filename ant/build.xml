@@ -195,6 +195,11 @@
         <delete dir="${file.out.dir}"/>
     </target>
 
+    <!-- target compile-so -->
+    <target name="compile-so">
+        <ant antfile="${basedir}/../jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
+    </target>
+
     <!-- target test -->
     <target name="test" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -post-compile" />
 
@@ -208,5 +213,6 @@
     <target name="all">
         <antcall target="debug" />
         <antcall target="release" />
+        <antcall target="compile-so" />
     </target>
 </project>

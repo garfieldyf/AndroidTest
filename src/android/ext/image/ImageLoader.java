@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
@@ -9,8 +9,9 @@ import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
-import android.ext.content.image.ImageBinder.CacheTransformer;
-import android.ext.content.image.params.Parameters;
+import android.ext.image.binder.ImageBinder;
+import android.ext.image.decoder.AbsImageDecoder;
+import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -71,7 +72,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
         mBufferPool = Pools.synchronizedPool(Pools.newPool(computeBufferPoolMaxSize(executor), 16384));
-        DebugUtils.__checkWarning(imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer, getClass().getName(), "The " + getClass().getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
+        ImageBinder.__checkTransformer(getClass(), imageCache, binder);
     }
 
     /**
@@ -117,7 +118,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @return The {@link Drawable} of the default image or <tt>null</tt>.
      */
     public final Drawable getDefaultImage() {
-        return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).mDefaultImage : null);
+        return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).getDefaultImage() : null);
     }
 
     @Override

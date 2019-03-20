@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.image.binder;
 
 import android.content.Context;
 import android.ext.cache.Cache;

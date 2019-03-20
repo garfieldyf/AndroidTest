@@ -1,4 +1,4 @@
-package android.ext.content.image;
+package android.ext.image;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -10,13 +10,14 @@ import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.cache.ImageCache;
-import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
-import android.ext.content.image.params.Parameters;
+import android.ext.image.decoder.BitmapDecoder;
+import android.ext.image.decoder.ImageDecoder;
+import android.ext.image.params.Parameters;
 import android.ext.util.ClassUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
@@ -301,14 +302,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
             }
         }
 
-        private static Object newInstance(Class clazz, Class[] parameterTypes, Object... args) {
-            try {
-                return ClassUtils.getConstructor(clazz, parameterTypes).newInstance(args);
-            } catch (Throwable e) {
-                throw new IllegalArgumentException("Couldn't create " + clazz.getName() + " instance", e);
-            }
-        }
-
         private Object createImageDecoder(Cache imageCache) {
             if (mDecoder instanceof ImageLoader.ImageDecoder) {
                 return mDecoder;
@@ -323,21 +316,22 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
                 parameters = Parameters.defaultParameters();
             }
 
+            final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
             if (mDecoder instanceof Class) {
-                return createImageDecoder(mModule.mContext, imageCache, parameters, (Class)mDecoder);
-            } else if (imageCache instanceof LruBitmapCache2) {
-                return new CacheBitmapDecoder(mModule.mContext, parameters, ((LruBitmapCache2)imageCache).getBitmapPool());
+                return newInstance((Class)mDecoder, new Class[] { Context.class, Parameters.class, BitmapPool.class }, mModule.mContext, parameters, bitmapPool);
             } else if (imageCache instanceof LruImageCache) {
-                final BitmapPool bitmapPool = ((LruImageCache)imageCache).getBitmapPool();
-                return (bitmapPool != null ? new CacheImageDecoder(mModule.mContext, parameters, bitmapPool) : new ImageDecoder(mModule.mContext, parameters));
+                return new ImageDecoder(mModule.mContext, parameters, bitmapPool);
             } else {
-                return new BitmapDecoder(mModule.mContext, parameters);
+                return new BitmapDecoder(mModule.mContext, parameters, bitmapPool);
             }
         }
 
-        private static Object createImageDecoder(Context context, Cache imageCache, Parameters parameters, Class clazz) {
-            final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
-            return (bitmapPool != null ? newInstance(clazz, new Class[] { Context.class, Parameters.class, BitmapPool.class }, context, parameters, bitmapPool) : newInstance(clazz, new Class[] { Context.class, Parameters.class }, context, parameters));
+        private static Object newInstance(Class clazz, Class[] parameterTypes, Object... args) {
+            try {
+                return ClassUtils.getConstructor(clazz, parameterTypes).newInstance(args);
+            } catch (Throwable e) {
+                throw new IllegalArgumentException("Couldn't create " + clazz.getName() + " instance", e);
+            }
         }
     }
 }

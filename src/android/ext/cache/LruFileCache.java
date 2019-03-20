@@ -84,7 +84,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, file.length())).append(" }").toString());
         }
 
-        SimpleFileCache.dumpCachedFiles(context, printer, mCacheDir, result, getClass().getSimpleName());
+        Caches.dumpCacheFiles(context, printer, mCacheDir, result, getClass().getSimpleName());
     }
 
     /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {

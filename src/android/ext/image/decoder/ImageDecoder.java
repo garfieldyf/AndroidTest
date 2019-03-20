@@ -7,7 +7,7 @@ import android.ext.image.params.Parameters;
 import android.graphics.BitmapFactory.Options;
 
 /**
- * Class ImageDecoder
+ * Class <tt>ImageDecoder</tt> used to decode the image data to a <tt>Bitmap</tt> or a GIF image.
  * @author Garfield
  */
 public class ImageDecoder extends BitmapDecoder<Object> {
@@ -22,6 +22,7 @@ public class ImageDecoder extends BitmapDecoder<Object> {
      * @param id The resource id of the {@link Parameters} to load.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
+     * @see #ImageDecoder(BitmapDecoder, Parameters)
      * @see #ImageDecoder(Context, Parameters, BitmapPool)
      */
     public ImageDecoder(Context context, int id, BitmapPool bitmapPool) {
@@ -35,6 +36,7 @@ public class ImageDecoder extends BitmapDecoder<Object> {
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
      * @see #ImageDecoder(Context, int, BitmapPool)
+     * @see #ImageDecoder(BitmapDecoder, Parameters)
      */
     public ImageDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
         super(context, parameters, bitmapPool);
@@ -44,10 +46,12 @@ public class ImageDecoder extends BitmapDecoder<Object> {
      * Copy constructor
      * <p>Creates a new {@link ImageDecoder} from the specified <em>decoder</em>. The
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>ImageDecoder</tt> to set.
+     * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param parameters The {@link Parameters} to decode bitmap.
+     * @see #ImageDecoder(Context, int, BitmapPool)
+     * @see #ImageDecoder(Context, Parameters, BitmapPool)
      */
-    public ImageDecoder(ImageDecoder decoder, Parameters parameters) {
+    public ImageDecoder(BitmapDecoder<Object> decoder, Parameters parameters) {
         super(decoder, parameters);
     }
 

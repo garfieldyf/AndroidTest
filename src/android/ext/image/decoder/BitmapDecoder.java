@@ -13,7 +13,9 @@ import android.util.Log;
 import android.util.Printer;
 
 /**
- * Class BitmapDecoder
+ * Class <tt>BitmapDecoder</tt> used to decode the image data to a {@link Bitmap}.
+ * @param <Image> Must be <tt>Bitmap</tt> or <tt>Object</tt> that will be decode
+ * the result type.
  * @author Garfield
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
@@ -33,6 +35,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * @param id The resource id of the {@link Parameters} to load.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
+     * @see #BitmapDecoder(BitmapDecoder, Parameters)
      * @see #BitmapDecoder(Context, Parameters, BitmapPool)
      */
     public BitmapDecoder(Context context, int id, BitmapPool bitmapPool) {
@@ -48,6 +51,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
      * @see #BitmapDecoder(Context, int, BitmapPool)
+     * @see #BitmapDecoder(BitmapDecoder, Parameters)
      */
     public BitmapDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
         super(context);
@@ -59,8 +63,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * Copy constructor
      * <p>Creates a new {@link BitmapDecoder} from the specified <em>decoder</em>. The
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>BitmapDecoder</tt> to set.
+     * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param parameters The {@link Parameters} to decode bitmap.
+     * @see #BitmapDecoder(Context, int, BitmapPool)
+     * @see #BitmapDecoder(Context, Parameters, BitmapPool)
      */
     public BitmapDecoder(BitmapDecoder<Image> decoder, Parameters parameters) {
         super(decoder);

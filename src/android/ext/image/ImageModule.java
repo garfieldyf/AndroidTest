@@ -259,7 +259,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
          * @return This builder.
          * @see #setImageDecoder(ImageLoader.ImageDecoder)
          */
-        public final Builder<URI, Image> setImageDecoder(Class<? extends ImageLoader.ImageDecoder<Image>> clazz) {
+        public final Builder<URI, Image> setImageDecoder(Class<? extends ImageLoader.ImageDecoder> clazz) {
             mDecoder = clazz;
             return this;
         }

@@ -19,6 +19,8 @@ import android.util.Printer;
 public final class Caches {
     /**
      * Returns a type-safe empty {@link Cache} associated with this class.
+     * An empty cache is a placeholder to avoid <tt>NullPointerException</tt>
+     * and all methods implementation do nothing.
      * @return An empty <tt>Cache</tt>.
      */
     @SuppressWarnings("unchecked")

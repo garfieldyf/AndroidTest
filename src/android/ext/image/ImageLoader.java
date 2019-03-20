@@ -133,10 +133,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             ((ImageBinder<?, ?>)mBinder).dump(context, printer);
         }
 
-        final Cache<URI, Image> cache = getCache();
-        if (cache != null || mLoader instanceof ImageLoader.FileCacheLoader) {
-            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping shared memory cache and file cache ");
-            Caches.dumpCache(cache, context, printer);
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping shared memory cache and file cache ");
+        Caches.dumpCache(getCache(), context, printer);
+        if (mLoader instanceof ImageLoader.FileCacheLoader) {
             Caches.dumpCache(((ImageLoader<?, ?>.FileCacheLoader)mLoader).mCache, context, printer);
         }
     }

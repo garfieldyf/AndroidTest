@@ -58,6 +58,7 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         V value;
         while (true) {
             synchronized (this) {
+                DebugUtils.__checkError(size < 0 || (map.isEmpty() && size != 0), getClass().getName() + ".sizeOf() is reporting inconsistent results!");
                 if (size <= maxSize || map.isEmpty()) {
                     break;
                 }
@@ -103,10 +104,14 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
     @Override
     /* package */ synchronized V putImpl(K key, V value) {
-        size += sizeOf(key, value);
+        int result = sizeOf(key, value);
+        DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + value);
+        size += result;
         final V previous = map.put(key, value);
         if (previous != null) {
-            size -= sizeOf(key, previous);
+            result = sizeOf(key, previous);
+            DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + previous);
+            size -= result;
         }
 
         return previous;

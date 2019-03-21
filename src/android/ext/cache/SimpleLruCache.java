@@ -33,21 +33,21 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Returns the number of entries in this cache.
-     * @return The number of entries in this cache.
-     * @see #maxSize()
-     */
-    public int size() {
-        return map.size();
-    }
-
-    /**
      * Returns the maximum size in this cache in user-defined units.
      * @return The maximum size.
      * @see #size()
      */
     public final int maxSize() {
         return maxSize;
+    }
+
+    /**
+     * Returns the number of entries in this cache.
+     * @return The number of entries in this cache.
+     * @see #maxSize()
+     */
+    public int size() {
+        return map.size();
     }
 
     /**

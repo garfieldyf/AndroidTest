@@ -150,24 +150,24 @@ public class PageScroller {
         }
 
         // Gets the child left and right relative to it's parent.
-        final int childLeft  = child.getLeft() + rect.left;
+        final int childLeft  = child.getLeft() + rect.left - child.getScrollX();
         final int childRight = childLeft + rect.width();
 
         // Gets the offscreen left and right.
         final int offScreenLeft  = Math.min(0, childLeft  - parentLeft);
         final int offScreenRight = Math.max(0, childRight - parentRight);
 
-        boolean handled = false;
         final int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(childLeft - parentLeft, offScreenRight));
         if (dx < 0) {
             // scroll to previous page.
-            handled = scrollToPage(mCurrentPage - 1, immediate);
+            return scrollToPage(mCurrentPage - 1, immediate);
         } else if (dx > 0) {
             // scroll to next page.
-            handled = scrollToPage(mCurrentPage + 1, immediate);
+            return scrollToPage(mCurrentPage + 1, immediate);
+        } else {
+            // no scroll.
+            return false;
         }
-
-        return handled;
     }
 
     /**
@@ -192,80 +192,24 @@ public class PageScroller {
         }
 
         // Gets the child top and bottom relative to it's parent.
-        final int childTop    = child.getTop() + rect.top;
+        final int childTop    = child.getTop() + rect.top - child.getScrollY();
         final int childBottom = childTop + rect.height();
 
         // Gets the offscreen top and bottom.
         final int offScreenTop    = Math.min(0, childTop - parentTop);
         final int offScreenBottom = Math.max(0, childBottom - parentBottom);
 
-        boolean handled = false;
         final int dy = (offScreenTop != 0 ? offScreenTop : Math.min(childTop - parentTop, offScreenBottom));
         if (dy < 0) {
             // scroll to previous page.
-            handled = scrollToPage(mCurrentPage - 1, immediate);
+            return scrollToPage(mCurrentPage - 1, immediate);
         } else if (dy > 0) {
             // scroll to next page.
-            handled = scrollToPage(mCurrentPage + 1, immediate);
+            return scrollToPage(mCurrentPage + 1, immediate);
+        } else {
+            // no scroll.
+            return false;
         }
-
-        return handled;
-    }
-
-    public boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {
-        final int parentLeft  = parent.getPaddingLeft();
-        final int parentRight = parent.getWidth() - parent.getPaddingRight();
-        final int childLeft  = child.getLeft() + rect.left - child.getScrollX();
-        final int childRight = childLeft + rect.width();
-        final int offScreenLeft  = Math.min(0, childLeft - parentLeft);
-        final int offScreenRight = Math.max(0, childRight - parentRight);
-
-        int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(childLeft - parentLeft, offScreenRight));
-        if (dx != 0) {
-            if (dx > 0) {
-                dx = childLeft - parentLeft;
-            } else {
-                dx = -(parentRight - childRight);
-            }
-
-            if (immediate) {
-                parent.scrollBy(dx, 0);
-            } else {
-                parent.smoothScrollBy(dx, 0);
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public boolean scrollVertically(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {
-        final int parentTop = parent.getPaddingTop();
-        final int parentBottom = parent.getHeight() - parent.getPaddingBottom();
-        final int childTop = child.getTop() + rect.top - child.getScrollY();
-        final int childBottom  = childTop + rect.height();
-        final int offScreenTop = Math.min(0, childTop - parentTop);
-        final int offScreenBottom = Math.max(0, childBottom - parentBottom);
-
-        int dy = (offScreenTop != 0 ? offScreenTop : Math.min(childTop - parentTop, offScreenBottom));
-        if (dy != 0) {
-            if (dy > 0) {
-                dy = childTop - parentTop;
-            } else {
-                dy = -(parentBottom - childBottom);
-            }
-
-            if (immediate) {
-                parent.scrollBy(0, dy);
-            } else {
-                parent.smoothScrollBy(0, dy);
-            }
-
-            return true;
-        }
-
-        return false;
     }
 
     /**

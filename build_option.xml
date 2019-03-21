@@ -4,6 +4,7 @@
     <property name="java.source" value="1.7" />
     <property name="java.target" value="1.7" />
     <property name="libs.jar.dir" value="E:/Include/java" />
+    <property name="lib.native.jar.name" value="funshion.jar" />
 
     <!-- pre-build target -->
     <target name="-pre-build">
@@ -17,12 +18,8 @@
         <property name="out.file.dir" value="debug" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
-        <property name="funshion.jar.file" value="${basedir}/lib/debug/funshion.jar" />
-
-        <!-- copy debug so files -->
-        <copy todir="${jar.libs.dir}" overwrite="true">
-            <fileset dir="${basedir}/lib/debug" excludes="**/*.jar" />
-        </copy>
+        <property name="libs.native.dir" value="${basedir}/lib/debug" />
+        <property name="lib.native.jar" value="${libs.native.dir}/${lib.native.jar.name}" />
     </target>
 
     <target name="-set-debug-files" depends="-rename-debug-out-file, android_rules.-set-debug-files" />
@@ -32,12 +29,8 @@
         <property name="out.file.dir" value="release" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
-        <property name="funshion.jar.file" value="${basedir}/lib/release/funshion.jar" />
-
-        <!-- copy release so files -->
-        <copy todir="${jar.libs.dir}" overwrite="true">
-            <fileset dir="${basedir}/lib/release" excludes="**/*.jar" />
-        </copy>
+        <property name="libs.native.dir" value="${basedir}/lib/release" />
+        <property name="lib.native.jar" value="${libs.native.dir}/${lib.native.jar.name}" />
     </target>
 
     <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
@@ -50,14 +43,20 @@
         <replaceregexp file="${manifest.abs.file}" match="android:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
         <replaceregexp file="${manifest.abs.file}" match="android:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
 
+        <!-- copy so files -->
+        <echo message="Copy libs from ${libs.native.dir} to ${jar.libs.dir}" />
+        <copy todir="${jar.libs.dir}" overwrite="true">
+            <fileset dir="${libs.native.dir}" excludes="**/*.jar" />
+        </copy>
+
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${libs.jar.dir}/zxing/zxing.jar" />
         </path>
 
-        <path id="funshion.jar.path">
+        <path id="lib.native.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${funshion.jar.file}" />
+            <pathelement location="${lib.native.jar}" />
         </path>
 
         <path id="vasdolly.jar.path">
@@ -83,7 +82,7 @@
         <path id="project.all.jars.path">
             <path refid="zxing.jar.path" />
             <path refid="vasdolly.jar.path" />
-            <path refid="funshion.jar.path" />
+            <path refid="lib.native.jar.path" />
             <path refid="support.v4.jar.path" />
             <path refid="recyclerview.jar.path" />
         </path>

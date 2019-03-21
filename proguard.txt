@@ -6,3 +6,6 @@
 
 # Keep the source file, line number
 -keepattributes SourceFile, LineNumberTable
+
+# Obfuscates the entire packaging, by combining obfuscated classes into a single package: 'a'
+# -repackageclasses 'a'

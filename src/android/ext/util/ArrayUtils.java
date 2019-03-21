@@ -502,7 +502,7 @@ public final class ArrayUtils {
                 Arrays.sort(array, start, end, comparator);
             }
         } catch (Exception e) {
-            Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e);
+            Log.e(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e);
             sortList(list, start, end, comparator);
         }
     }

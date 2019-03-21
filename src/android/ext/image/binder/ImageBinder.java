@@ -212,7 +212,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      */
     public static void __checkTransformer(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
         if (imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer) {
-            Log.w(clazz.getName(), "WARNING: The " + clazz.getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
+            Log.e(clazz.getName(), "WARNING: The " + clazz.getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
         }
     }
 

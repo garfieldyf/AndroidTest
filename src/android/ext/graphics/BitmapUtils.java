@@ -221,7 +221,7 @@ public final class BitmapUtils {
             // Decodes the bitmap pixels.
             return decodeBitmap(context, uri, opts);
         } catch (Exception e) {
-            Log.e(BitmapUtils.class.getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
+            Log.e(BitmapUtils.class.getName(), "Couldn't decode image from - '" + uri + "'\n" + e);
             return null;
         }
     }

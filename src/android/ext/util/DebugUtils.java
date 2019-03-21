@@ -134,7 +134,7 @@ public final class DebugUtils {
 
     public static void __checkRange(int offset, int length, int arrayLength) {
         if ((offset | length) < 0 || arrayLength - offset < length) {
-            throw new AssertionError(new StringBuilder(96).append("Index out of bounds - [ offset = ").append(offset).append(", length = ").append(length).append(", array length = ").append(arrayLength).append(" ]").toString());
+            throw new AssertionError("Index out of bounds - [ offset = " + offset + ", length = " + length + ", array length = " + arrayLength + " ]");
         }
     }
 

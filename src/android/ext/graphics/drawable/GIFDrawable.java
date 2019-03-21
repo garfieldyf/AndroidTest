@@ -269,7 +269,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
         }
 
         mState.setImage(GIFImage.decode(res, id));
-        DebugUtils.__checkError(mState.mImage == null, new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
+        DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
         a.recycle();
     }
 

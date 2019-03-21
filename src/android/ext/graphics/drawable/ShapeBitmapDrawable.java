@@ -123,7 +123,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     @SuppressLint("NewApi")
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         final Drawable drawable = res.getDrawable(id, theme);
-        DebugUtils.__checkError(!(drawable instanceof BitmapDrawable), new StringBuilder(parser.getPositionDescription()).append(": The <").append(parser.getName()).append("> tag requires a valid 'src' attribute").toString());
+        DebugUtils.__checkError(!(drawable instanceof BitmapDrawable), parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
         mState.setBitmap(((BitmapDrawable)drawable).getBitmap());
     }
 

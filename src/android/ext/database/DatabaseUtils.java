@@ -153,7 +153,7 @@ public final class DatabaseUtils {
                 result = new AutoCloseInputStream(fd);
             }
         } catch (SQLiteException e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query blob - ").append(sql).toString(), e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query blob - " + sql, e);
         } finally {
             prog.close();
         }
@@ -179,7 +179,7 @@ public final class DatabaseUtils {
             simpleQueryBlob(db, result, sql, bindArgs);
             return result;
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query blob - ").append(sql).toString(), e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query blob - " + sql, e);
             return null;
         }
     }
@@ -240,7 +240,7 @@ public final class DatabaseUtils {
             cursor = db.rawQuery(sql, selectionArgs);
             return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query - ").append(sql).toString(), e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
         } finally {
             FileUtils.close(cursor);
@@ -267,7 +267,7 @@ public final class DatabaseUtils {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
             return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
             return null;
         } finally {
             FileUtils.close(cursor);
@@ -635,7 +635,7 @@ public final class DatabaseUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), new StringBuilder("Couldn't query uri - ").append(uri).toString(), e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query uri - " + uri, e);
         } finally {
             FileUtils.close(cursor);
         }

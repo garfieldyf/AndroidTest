@@ -55,8 +55,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      */
     public BitmapDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
         super(context);
+
         mBitmapPool = bitmapPool;
         mParameters = parameters;
+        DebugUtils.__checkError(parameters == null, "parameters == null");
     }
 
     /**
@@ -70,8 +72,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      */
     public BitmapDecoder(BitmapDecoder<Image> decoder, Parameters parameters) {
         super(decoder);
+
         mParameters = parameters;
         mBitmapPool = decoder.mBitmapPool;
+        DebugUtils.__checkError(parameters == null, "parameters == null");
     }
 
     /**

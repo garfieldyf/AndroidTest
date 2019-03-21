@@ -317,7 +317,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                     cursor.getCount();
                 }
             } catch (Exception e) {
-                Log.e(getClass().getName(), new StringBuilder("Couldn't query from - ").append(uri).toString(), e);
+                Log.e(getClass().getName(), "Couldn't query from - " + uri, e);
             }
 
             return cursor;
@@ -328,7 +328,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             try {
                 return resolver.applyBatch(selection, (ArrayList<ContentProviderOperation>)values);
             } catch (Exception e) {
-                throw new RuntimeException(new StringBuilder("Couldn't apply batch, authority - ").append(selection).toString(), e);
+                throw new RuntimeException("Couldn't apply batch, authority - " + selection, e);
             }
         }
     }

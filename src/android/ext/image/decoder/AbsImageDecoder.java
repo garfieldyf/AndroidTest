@@ -76,7 +76,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             // Decodes the image pixels.
             return decodeImage(uri, params, flags, opts);
         } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't decode image from - '").append(uri).append("'\n").append(e).toString());
+            Log.e(getClass().getName(), "Couldn't decode image from - '" + uri + "'\n" + e);
             return null;
         } finally {
             recycleOptions(opts);

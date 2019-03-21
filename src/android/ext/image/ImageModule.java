@@ -31,7 +31,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
-
     protected final Executor mExecutor;
     protected final FileCache mFileCache;
     protected final Cache<URI, Image> mImageCache;

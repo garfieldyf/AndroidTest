@@ -171,7 +171,7 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
             final int statusCode = newDownloadRequest(uri).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
-            Log.e(getClass().getName(), new StringBuilder("Couldn't load image data from - '").append(uri).append("'\n").append(e).toString());
+            Log.e(getClass().getName(), "Couldn't load image data from - '" + uri + "'\n" + e);
             return null;
         } finally {
             imageFile.delete();

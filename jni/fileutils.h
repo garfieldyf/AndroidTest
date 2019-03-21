@@ -83,10 +83,10 @@ __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
 
     struct stat buf;
     jboolean result = JNI_FALSE;
-    if (__NS::getFileStatus(one, buf) == 0)
+    if (::stat(one, &buf) == 0)
     {
         const off_t length = buf.st_size;
-        result = (__NS::getFileStatus(another, buf) == 0 && length == buf.st_size);
+        result = (::stat(another, &buf) == 0 && length == buf.st_size);
     }
 
     return result;

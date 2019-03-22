@@ -126,10 +126,9 @@ public final class ZipUtils {
         final byte[] buffer = ByteArrayPool.obtain();
         try {
             // Compresses the files.
-            final Dirent dirent = new Dirent();
             final int size = ArrayUtils.getSize(files);
             for (int i = 0; i < size && !cancelable.isCancelled(); ++i) {
-                dirent.setPath(files.get(i));
+                final Dirent dirent = new Dirent(files.get(i));
                 compress(os, dirent, dirent.getName(), cancelable, buffer);
             }
         } finally {
@@ -184,7 +183,7 @@ public final class ZipUtils {
             os.putNextEntry(new ZipEntry(name));
 
             // lists the sub files from path.
-            final List<Dirent> dirents = FileUtils.listFiles(dirent.path, 0);
+            final List<Dirent> dirents = dirent.listFiles(0);
             final int size = ArrayUtils.getSize(dirents);
             for (int i = 0; i < size && !cancelable.isCancelled(); ++i) {
                 final Dirent child = dirents.get(i);

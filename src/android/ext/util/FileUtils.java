@@ -11,14 +11,12 @@ import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.ext.util.ArrayUtils.ByteArrayPool;
-import android.ext.util.Pools.Factory;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
 import android.text.format.Formatter;
 import android.util.Log;
-import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -230,51 +228,31 @@ public final class FileUtils {
     public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
 
     /**
-     * Equivalent to calling <tt>listFiles(dirPath, flags, Dirent.FACTORY, new ArrayList())</tt>.
+     * Equivalent to calling <tt>listFiles(dirPath, flags, new ArrayList())</tt>.
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
      * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @return A <tt>List</tt> of <tt>Dirent</tt> objects if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #listFiles(String, int, Factory)
-     * @see #listFiles(String, int, Factory, List)
+     * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
+     * @see #listFiles(String, int, List)
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
-        final Pair<Factory<Dirent>, List<Dirent>> result = new Pair<Factory<Dirent>, List<Dirent>>(Dirent.FACTORY, new ArrayList<Dirent>());
-        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result.second : null);
+        final List<Dirent> result = new ArrayList<Dirent>();
+        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result : null);
     }
 
     /**
-     * Equivalent to calling <tt>listFiles(dirPath, flags, factory, new ArrayList())</tt>.
+     * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
+     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
+     * part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
      * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
-     * @return A <tt>List</tt> of <tt>Dirent</tt> or subclass objects if the operation succeeded, <tt>null</tt> otherwise.
-     * @see Dirent#FACTORY
-     * @see #listFiles(String, int)
-     * @see #listFiles(String, int, Factory, List)
-     */
-    public static <T extends Dirent> List<T> listFiles(String dirPath, int flags, Factory<T> factory) {
-        final Pair<Factory<T>, List<T>> result = new Pair<Factory<T>, List<T>>(factory, new ArrayList<T>());
-        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result.second : null);
-    }
-
-    /**
-     * Returns a <tt>List</tt> of {@link Dirent} or subclass objects with the sub files and directories
-     * in the <em>dirPath</em>.<p>The entries <tt>.</tt> and <tt>..</tt> representing the current and
-     * parent directory are not returned as part of the list.</p>
-     * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param factory The {@link Factory} to create the <tt>Dirent</tt> or subclass objects.
-     * @param outDirents A <tt>List</tt> to store the <tt>Dirent</tt> or subclass objects.
+     * @param outDirents A <tt>List</tt> to store the {@link Dirent} objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-     * @see Dirent#FACTORY
      * @see #listFiles(String, int)
-     * @see #listFiles(String, int, Factory)
      */
-    public static <T extends Dirent> int listFiles(String dirPath, int flags, Factory<T> factory, List<? super T> outDirents) {
-        return scanFiles(dirPath, ListCallback.sInstance, flags, new Pair<Factory<T>, List<? super T>>(factory, outDirents));
+    public static int listFiles(String dirPath, int flags, List<Dirent> outDirents) {
+        return scanFiles(dirPath, ListCallback.sInstance, flags, outDirents);
     }
 
     /**
@@ -1027,7 +1005,7 @@ public final class FileUtils {
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Parcelable, Cloneable, Comparable<Dirent> {
+    public static final class Dirent implements Cloneable, Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1071,45 +1049,37 @@ public final class FileUtils {
         /**
          * The absolute file path.
          */
-        public String path;
+        public final String path;
 
         /**
          * The file type. This corresponds to
          * the linux <tt>dirent.d_type</tt> field.
          */
-        public int type;
-
-        /**
-         * Constructor
-         * @see #Dirent(String)
-         * @see #Dirent(String, int)
-         * @see #Dirent(String, String, int)
-         */
-        public Dirent() {
-        }
+        public final int type;
 
         /**
          * Constructor
          * @param path The absolute file path. Never <tt>null</tt>.
-         * @see #Dirent()
          * @see #Dirent(String, int)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            initialize(path, getType(path));
-            Dirent.__checkDirentType(this);
+            DebugUtils.__checkError(path == null, "path == null");
+            this.path = path;
+            this.type = (getFileType(path) >> 12);
         }
 
         /**
          * Constructor
          * @param path The absolute file path. Never <tt>null</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
-         * @see #Dirent()
          * @see #Dirent(String)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            initialize(path, type);
+            DebugUtils.__checkError(path == null, "path == null");
+            this.path = path;
+            this.type = type;
             Dirent.__checkDirentType(type);
         }
 
@@ -1118,14 +1088,14 @@ public final class FileUtils {
          * @param dir The path of the directory.
          * @param name The file's name of this <tt>Dirent</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
-         * @see #Dirent()
          * @see #Dirent(String)
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
+            this.path = buildPath(dir, name);
+            this.type = type;
             Dirent.__checkDirentType(type);
-            initialize(buildPath(dir, name), type);
         }
 
         /**
@@ -1134,7 +1104,7 @@ public final class FileUtils {
          * a regular file, <tt>false</tt> otherwise.
          * @see #isDirectory()
          */
-        public boolean isFile() {
+        public final boolean isFile() {
             return (type == DT_REG);
         }
 
@@ -1144,7 +1114,7 @@ public final class FileUtils {
          * is a directory, <tt>false</tt> otherwise.
          * @see #isFile()
          */
-        public boolean isDirectory() {
+        public final boolean isDirectory() {
             return (type == DT_DIR);
         }
 
@@ -1153,7 +1123,7 @@ public final class FileUtils {
          * @return <tt>true</tt> if this <tt>Dirent</tt>
          * is a hidden file, <tt>false</tt> otherwise.
          */
-        public boolean isHidden() {
+        public final boolean isHidden() {
             return FileUtils.isHidden(path);
         }
 
@@ -1163,7 +1133,7 @@ public final class FileUtils {
          * @see #getParent()
          * @see #getExtension()
          */
-        public String getName() {
+        public final String getName() {
             return getFileName(path);
         }
 
@@ -1173,7 +1143,7 @@ public final class FileUtils {
          * @see #getName()
          * @see #getExtension()
          */
-        public String getParent() {
+        public final String getParent() {
             return getFileParent(path);
         }
 
@@ -1185,7 +1155,7 @@ public final class FileUtils {
          * @see #getName()
          * @see #getParent()
          */
-        public String getExtension() {
+        public final String getExtension() {
             if (type != DT_DIR) {
                 final int index = findFileExtension(path);
                 if (index != -1) {
@@ -1201,46 +1171,20 @@ public final class FileUtils {
          * @return The MIME type of this <tt>Dirent</tt>, or <tt>null</tt> if
          * this <tt>Dirent</tt> is a directory or the MIME type was not found.
          */
-        public String getMimeType() {
+        public final String getMimeType() {
             return (type != DT_DIR ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
         }
 
         /**
-         * Sets the specified <em>path</em> to this <tt>Dirent</tt>.
-         * @param path The absolute file path. Never <tt>null</tt>.
-         * If the file can not be found on the filesystem, The type
-         * of this <tt>Dirent</tt> is {@link #DT_UNKNOWN}.
+         * Equivalent to calling <tt>FileUtils.listFiles(path, flags)</tt>.
+         * @param flags The flags. May be <tt>0</tt> or any combination of
+         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+         * @return A <tt>List</tt> of {@link Dirent} objects if the operation
+         * succeeded, <tt>null</tt> otherwise.
+         * @see FileUtils#listFiles(String, int)
          */
-        public void setPath(String path) {
-            DebugUtils.__checkError(path == null, "path == null");
-            this.path = path;
-            this.type = getType(path);
-            Dirent.__checkDirentType(this);
-        }
-
-        /**
-         * Reads this object from the data stored in the specified parcel. To
-         * write this object to a parcel, call {@link #writeToParcel(Parcel, int)}.
-         * @param source The parcel to read the data.
-         * @see #writeToParcel(Parcel, int)
-         */
-        public void readFromParcel(Parcel source) {
-            this.path = source.readString();
-            this.type = source.readInt();
-        }
-
-        /**
-         * @see #readFromParcel(Parcel)
-         */
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(path);
-            dest.writeInt(type);
-        }
-
-        @Override
-        public int describeContents() {
-            return 0;
+        public final List<Dirent> listFiles(int flags) {
+            return FileUtils.listFiles(path, flags);
         }
 
         @Override
@@ -1293,16 +1237,6 @@ public final class FileUtils {
         }
 
         /**
-         * Returns the file type of the specified <em>path</em>.
-         * @param path The absolute file path. Never <tt>null</tt>.
-         * @return The file type. One of <tt>DT_XXX</tt> constants.
-         */
-        public static int getType(String path) {
-            DebugUtils.__checkError(path == null, "path == null");
-            return (getFileType(path) >> 12);
-        }
-
-        /**
          * Returns a <tt>Comparator</tt> ignoring the {@link #path} field case differences.
          * @return The <tt>Comparator</tt>.
          * @see #compareTo(Dirent)
@@ -1324,17 +1258,6 @@ public final class FileUtils {
                    .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
                    .append(", hidden = ").append(isHidden())
                    .append(" }").toString());
-        }
-
-        /**
-         * Initializes this object with the specified <em>path</em> and <em>type</em>.
-         * @param path The absolute file path. Never <tt>null</tt>.
-         * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
-         */
-        protected void initialize(String path, int type) {
-            DebugUtils.__checkError(path == null, "path == null");
-            this.path = path;
-            this.type = type;
         }
 
         private static String toString(int type) {
@@ -1381,72 +1304,6 @@ public final class FileUtils {
                 throw new AssertionError("Unknown Dirent type - " + type);
             }
         }
-
-        private static void __checkDirentType(Dirent dirent) {
-            final int type;
-            switch (getFileType(dirent.path)) {
-            case Stat.S_IFIFO:
-                type = DT_FIFO;
-                break;
-
-            case Stat.S_IFCHR:
-                type = DT_CHR;
-                break;
-
-            case Stat.S_IFDIR:
-                type = DT_DIR;
-                break;
-
-            case Stat.S_IFBLK:
-                type = DT_BLK;
-                break;
-
-            case Stat.S_IFREG:
-                type = DT_REG;
-                break;
-
-            case Stat.S_IFLNK:
-                type = DT_LNK;
-                break;
-
-            case Stat.S_IFSOCK:
-                type = DT_SOCK;
-                break;
-
-            default:
-                type = DT_UNKNOWN;
-                break;
-            }
-
-            if (type != dirent.type) {
-                throw new AssertionError("Couldn't convert Stat type to Dirent type");
-            }
-        }
-
-        /**
-         * The {@link Factory} to create a new {@link Dirent}.
-         * @see FileUtils#listFiles
-         */
-        public static final Factory<Dirent> FACTORY = new Factory<Dirent>() {
-            @Override
-            public Dirent newInstance() {
-                return new Dirent();
-            }
-        };
-
-        public static final Creator<Dirent> CREATOR = new Creator<Dirent>() {
-            @Override
-            public Dirent createFromParcel(Parcel source) {
-                final Dirent dirent = new Dirent();
-                dirent.readFromParcel(source);
-                return dirent;
-            }
-
-            @Override
-            public Dirent[] newArray(int size) {
-                return new Dirent[size];
-            }
-        };
     }
 
     /**
@@ -1464,17 +1321,14 @@ public final class FileUtils {
     /**
      * Class <tt>ListCallback</tt> is an implementation of a {@link ScanCallback}.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static final class ListCallback implements ScanCallback {
         public static final ScanCallback sInstance = new ListCallback();
 
         @Keep
         @Override
-        public int onScanFile(String path, int type, Object cookie) {
-            final Pair<Factory, List> result = (Pair<Factory, List>)cookie;
-            final Dirent dirent = (Dirent)result.first.newInstance();
-            dirent.initialize(path, type);
-            result.second.add(dirent);
+        @SuppressWarnings({ "unchecked", "rawtypes" })
+        public int onScanFile(String path, int type, Object result) {
+            ((List)result).add(new Dirent(path, type));
             return SC_CONTINUE;
         }
     }

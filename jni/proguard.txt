@@ -2,10 +2,6 @@
 # http://proguard.sourceforge.net/index.html#manual/usage.html
 # AUTO-GENERATED FILE. DO NOT MODIFY.
 
-# Don't warn the classes in the android-sdk-internal.jar.
--dontwarn android.os.storage.**
--dontwarn android.content.res.**
-
 # Keeps the R.styleable class fields.
 -keepclasseswithmembers class **.R$styleable {
     <fields>;

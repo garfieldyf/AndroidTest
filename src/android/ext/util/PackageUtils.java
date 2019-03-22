@@ -27,13 +27,14 @@ import android.util.Printer;
  * Class PackageUtils
  * @author Garfield
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public final class PackageUtils {
     /**
      * Returns the {@link PackageInfo} object of the current application.
      * @param context The <tt>Context</tt>.
      * @param flags Additional option flags. May be <tt>0</tt> or any
      * combination of <tt>PackageManager.GET_XXX</tt> constants.
-     * @return A {@link PackageInfo} object.
+     * @return A <tt>PackageInfo</tt> object.
      */
     public static PackageInfo myPackageInfo(Context context, int flags) {
         try {
@@ -46,8 +47,7 @@ public final class PackageUtils {
     /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param pm The <tt>PackageManager</tt>.
-     * @param flags Additional option flags. May be <tt>0</tt> or any combination of
-     * <tt>PackageManager.GET_XXX</tt> constants.
+     * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link PackageInfo} objects.
      * @see #getInstalledPackages(Context, int, Factory, Filter)
@@ -61,32 +61,41 @@ public final class PackageUtils {
     /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param context The <tt>Context</tt>.
-     * @param flags Additional option flags. May be <tt>0</tt> or any combination
-     * of <tt>PackageManager.GET_XXX</tt> constants.
+     * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
      * @param factory The {@link Factory} to create the {@link AbsPackageInfo} subclass object.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
-     * @return A <tt>List</tt> of {@link AbsPackageInfo} subclass objects.
+     * @return A <tt>List</tt> of <tt>AbsPackageInfo</tt> subclass objects.
      * @see #getInstalledPackages(PackageManager, int, Filter)
      * @see InstalledPackageFilter
      */
     public static <T extends AbsPackageInfo> List<T> getInstalledPackages(Context context, int flags, Factory<T> factory, Filter<PackageInfo> filter) {
-        final List<PackageInfo> infos = context.getPackageManager().getInstalledPackages(flags);
-        final int size = ArrayUtils.getSize(infos);
-        final List<T> result = new ArrayList<T>(size);
-        if (filter != null) {
-            for (int i = 0; i < size; ++i) {
-                final PackageInfo info = infos.get(i);
-                if (filter.accept(info)) {
-                    result.add(newPackageInfo(context, info, factory));
-                }
-            }
-        } else {
-            for (int i = 0; i < size; ++i) {
-                result.add(newPackageInfo(context, infos.get(i), factory));
-            }
-        }
+        return filterPackageItemInfos(context, context.getPackageManager().getInstalledPackages(flags), factory, filter);
+    }
 
-        return result;
+    /**
+     * Returns a <tt>List</tt> of all application packages that are installed on the device.
+     * @param pm The <tt>PackageManager</tt>.
+     * @param flags Additional option flags. See {@link PackageManager#getInstalledApplications(int)}.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the applications.
+     * @return A <tt>List</tt> of {@link ApplicationInfo} objects.
+     * @see #getInstalledApplications(Context, int, Factory, Filter)
+     */
+    public static List<ApplicationInfo> getInstalledApplications(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
+        final List<ApplicationInfo> result = pm.getInstalledApplications(flags);
+        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+    }
+
+    /**
+     * Returns a <tt>List</tt> of all application packages that are installed on the device.
+     * @param context The <tt>Context</tt>.
+     * @param flags Additional option flags. See {@link PackageManager#getInstalledApplications(int)}.
+     * @param factory The {@link Factory} to create the {@link AbsApplicationInfo} subclass object.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the applications.
+     * @return A <tt>List</tt> of <tt>AbsApplicationInfo</tt> subclass objects.
+     * @see #getInstalledApplications(PackageManager, int, Filter)
+     */
+    public static <T extends AbsApplicationInfo> List<T> getInstalledApplications(Context context, int flags, Factory<T> factory, Filter<ApplicationInfo> filter) {
+        return filterPackageItemInfos(context, context.getPackageManager().getInstalledApplications(flags), factory, filter);
     }
 
     /**
@@ -110,27 +119,11 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#queryIntentActivities}.
      * @param factory The {@link Factory} to create the {@link AbsResolveInfo} subclass object.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
-     * @return A <tt>List</tt> of {@link AbsResolveInfo} subclass objects.
+     * @return A <tt>List</tt> of <tt>AbsResolveInfo</tt> subclass objects.
      * @see #queryIntentActivities(PackageManager, Intent, int, Filter)
      */
     public static <T extends AbsResolveInfo> List<T> queryIntentActivities(Context context, Intent intent, int flags, Factory<T> factory, Filter<ResolveInfo> filter) {
-        final List<ResolveInfo> infos = context.getPackageManager().queryIntentActivities(intent, flags);
-        final int size = ArrayUtils.getSize(infos);
-        final List<T> result = new ArrayList<T>(size);
-        if (filter != null) {
-            for (int i = 0; i < size; ++i) {
-                final ResolveInfo info = infos.get(i);
-                if (filter.accept(info)) {
-                    result.add(newResolveInfo(context, info, factory));
-                }
-            }
-        } else {
-            for (int i = 0; i < size; ++i) {
-                result.add(newResolveInfo(context, infos.get(i), factory));
-            }
-        }
-
-        return result;
+        return filterPackageItemInfos(context, context.getPackageManager().queryIntentActivities(intent, flags), factory, filter);
     }
 
     /**
@@ -141,7 +134,7 @@ public final class PackageUtils {
      * of <tt>PackageManager.GET_XXX</tt> constants.
      * @param factory The {@link Factory} to create the {@link AbsPackageInfo}
      * subclass object.
-     * @return An {@link AbsPackageInfo} subclass object if the parse succeeded,
+     * @return An <tt>AbsPackageInfo</tt> subclass object if the parse succeeded,
      * <tt>null</tt> otherwise.
      */
     public static <T extends AbsPackageInfo> T parsePackage(Context context, String archiveFile, int flags, Factory<T> factory) {
@@ -149,7 +142,7 @@ public final class PackageUtils {
         final PackageInfo packageInfo = context.getPackageManager().getPackageArchiveInfo(archiveFile, flags);
         if (packageInfo != null) {
             packageInfo.applicationInfo.sourceDir = archiveFile;
-            return newPackageInfo(context, packageInfo, factory);
+            return newPackageItemInfo(context, packageInfo, factory);
         }
 
         return null;
@@ -195,26 +188,13 @@ public final class PackageUtils {
         }
     }
 
-    public static void dumpPackageInfos(Printer printer, Collection<? extends AbsPackageInfo> infos) {
-        final StringBuilder result = new StringBuilder(256);
+    public static void dumpPackageItemInfos(Printer printer, Collection<? extends PackageItemInfo<?>> infos) {
         final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
-
         if (size > 0) {
-            for (AbsPackageInfo info : infos) {
-                result.setLength(0);
-                printer.println(info.dumpImpl(result.append("  ")));
-            }
-        }
-    }
+            final StringBuilder result = new StringBuilder(256);
+            DebugUtils.dumpSummary(printer, result, 140, " Dumping %s collection [ size = %d ] ", infos.iterator().next().getClass().getSimpleName(), size);
 
-    public static void dumpResolveInfos(Printer printer, Collection<? extends AbsResolveInfo> infos) {
-        final StringBuilder result = new StringBuilder(256);
-        final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping ResolveInfos [ size = %d ] ", size);
-
-        if (size > 0) {
-            for (AbsResolveInfo info : infos) {
+            for (PackageItemInfo<?> info : infos) {
                 result.setLength(0);
                 printer.println(info.dumpImpl(result.append("  ")));
             }
@@ -222,59 +202,90 @@ public final class PackageUtils {
     }
 
     /**
-     * Create a {@link AbsPackageInfo} subclass object with the specified <em>packageInfo</em>.
+     * Filter a <tt>List</tt> of package item infos with the specified <em>filter</em>.
      */
-    private static <T extends AbsPackageInfo> T newPackageInfo(Context context, PackageInfo packageInfo, Factory<T> factory) {
-        final T result = factory.newInstance();
-        result.initialize(context, packageInfo);
-        return result;
-    }
-
-    /**
-     * Create a {@link AbsResolveInfo} subclass object with the specified <em>resolveInfo</em>.
-     */
-    private static <T extends AbsResolveInfo> T newResolveInfo(Context context, ResolveInfo resolveInfo, Factory<T> factory) {
-        final T result = factory.newInstance();
-        result.initialize(context, resolveInfo);
-        return result;
-    }
-
-    /**
-     * Class <tt>AbsPackageInfo</tt> contains an application's {@link PackageInfo}.
-     */
-    public static abstract class AbsPackageInfo {
-        /**
-         * The {@link PackageInfo}, parse from the <tt>AndroidManifest.xml</tt>.
-         */
-        public PackageInfo packageInfo;
-
-        /**
-         * Equivalent to calling <tt>PackageUtils.loadLabelAndIcon(context, packageInfo)</tt>.
-         * @param context The <tt>Context</tt>.
-         * @return A <tt>Pair</tt> containing the application's icon and label.
-         * @see PackageUtils#loadLabelAndIcon(Context, PackageInfo)
-         */
-        public final Pair<CharSequence, Drawable> loadLabelAndIcon(Context context) {
-            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return PackageUtils.loadLabelAndIcon(context, packageInfo);
+    private static List filterPackageItemInfos(Context context, List infos, Factory factory, Filter filter) {
+        final List result;
+        final int size = ArrayUtils.getSize(infos);
+        if (filter != null) {
+            result = new ArrayList(size);
+            for (int i = 0; i < size; ++i) {
+                final Object info = infos.get(i);
+                if (filter.accept(info)) {
+                    result.add(newPackageItemInfo(context, info, factory));
+                }
+            }
+        } else {
+            result = infos;
+            for (int i = 0; i < size; ++i) {
+                final Object info = infos.get(i);
+                infos.set(i, newPackageItemInfo(context, info, factory));
+            }
         }
 
+        return result;
+    }
+
+    /**
+     * Create a <tt>PackageItemInfo</tt> subclass object with the specified <em>info</em>.
+     */
+    private static <T extends PackageItemInfo> T newPackageItemInfo(Context context, Object info, Factory<T> factory) {
+        final T result = factory.newInstance();
+        result.initialize(context, info);
+        return result;
+    }
+
+    /**
+     * Base class containing information common to the package item.
+     */
+    public static abstract class PackageItemInfo<T> {
         /**
-         * Tests if this application is a system application.
-         * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
+         * The package item info.
+         */
+        public T info;
+
+        /**
+         * Returns a package name of this item.
+         * @return The package name.
+         */
+        public abstract String getPackageName();
+
+        /**
+         * Returns an {@link ApplicationInfo} of this item.
+         * @return The <tt>ApplicationInfo</tt> object.
+         */
+        public abstract ApplicationInfo getApplicationInfo();
+
+        /**
+         * Retrieve the current graphical icon associated with this item.
+         * @param pm The <tt>PackageManager</tt>.
+         * @return A {@link Drawable} containing this item's icon.
+         */
+        public abstract Drawable loadIcon(PackageManager pm);
+
+        /**
+         * Retrieve the current label associated with this item.
+         * @param pm The <tt>PackageManager</tt>.
+         * @return A {@link CharSequence} containing the item's label.
+         */
+        public abstract CharSequence loadLabel(PackageManager pm);
+
+        /**
+         * Tests if the application is a system application.
+         * @return <tt>true</tt> if the application is a system application, <tt>false</tt> otherwise.
          */
         public final boolean isSystem() {
-            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return ((getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0);
         }
 
         /**
-         * Tests if this application is an updated system application.
-         * @return <tt>true</tt> if this application is an updated system application, <tt>false</tt> otherwise.
+         * Tests if the application is an updated system application.
+         * @return <tt>true</tt> if the application is an updated system application, <tt>false</tt> otherwise.
          */
         public final boolean isUpdatedSystem() {
-            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return ((packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return ((getApplicationInfo().flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
         }
 
         public final void dump(Printer printer) {
@@ -282,111 +293,142 @@ public final class PackageUtils {
         }
 
         /**
-         * Initializes this object with the specified <em>packageInfo</em>.
+         * Initializes this item with the specified <em>info</em>.
          * @param context The <tt>Context</tt>.
-         * @param packageInfo The <tt>PackageInfo</tt> to initialize.
+         * @param info The package item info to initialize.
          */
-        protected void initialize(Context context, PackageInfo packageInfo) {
-            this.packageInfo = packageInfo;
+        protected void initialize(Context context, T info) {
+            this.info = info;
         }
 
         protected StringBuilder dump(StringBuilder out) {
-            return out.append(" package = ").append(packageInfo.packageName)
-                .append(", version = ").append(packageInfo.versionName)
+            return out.append(" package = ").append(getPackageName())
                 .append(", system = ").append(isSystem())
-                .append(", updatedSystem = ").append(isUpdatedSystem())
-                .append(", sourceDir = ").append(packageInfo.applicationInfo.sourceDir);
+                .append(", updatedSystem = ").append(isUpdatedSystem());
         }
 
         /* package */ final String dumpImpl(StringBuilder out) {
-            DebugUtils.__checkError(packageInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
             return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
+        }
+    }
+
+    /**
+     * Class <tt>AbsPackageInfo</tt> contains an application's {@link PackageInfo}.
+     */
+    public static abstract class AbsPackageInfo extends PackageItemInfo<PackageInfo> {
+        /**
+         * Equivalent to calling <tt>PackageUtils.loadLabelAndIcon(context, packageInfo)</tt>.
+         * @param context The <tt>Context</tt>.
+         * @return A <tt>Pair</tt> containing the application's icon and label.
+         * @see PackageUtils#loadLabelAndIcon(Context, PackageInfo)
+         */
+        public final Pair<CharSequence, Drawable> loadLabelAndIcon(Context context) {
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return PackageUtils.loadLabelAndIcon(context, info);
+        }
+
+        @Override
+        public String getPackageName() {
+            return info.packageName;
+        }
+
+        @Override
+        public ApplicationInfo getApplicationInfo() {
+            return info.applicationInfo;
+        }
+
+        @Override
+        public Drawable loadIcon(PackageManager pm) {
+            return info.applicationInfo.loadIcon(pm);
+        }
+
+        @Override
+        public CharSequence loadLabel(PackageManager pm) {
+            return info.applicationInfo.loadLabel(pm);
+        }
+
+        @Override
+        protected StringBuilder dump(StringBuilder out) {
+            return super.dump(out).append(", version = ").append(info.versionName).append(", sourceDir = ").append(info.applicationInfo.sourceDir);
         }
     }
 
     /**
      * Class <tt>AbsResolveInfo</tt> contains a component's {@link ResolveInfo}.
      */
-    public static abstract class AbsResolveInfo {
-        /**
-         * The {@link ResolveInfo} that is returned from resolving an intent.
-         */
-        public ResolveInfo resolveInfo;
-
+    public static abstract class AbsResolveInfo extends PackageItemInfo<ResolveInfo> {
         /**
          * Returns a {@link ComponentInfo} of this component.
          * @return The <tt>ComponentInfo</tt>.
          */
         public ComponentInfo getComponentInfo() {
-            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            if (resolveInfo.activityInfo != null) {
-                return resolveInfo.activityInfo;
-            } else if (resolveInfo.serviceInfo != null) {
-                return resolveInfo.serviceInfo;
-            } else if (resolveInfo.providerInfo != null) {
-                return resolveInfo.providerInfo;
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            if (info.activityInfo != null) {
+                return info.activityInfo;
+            } else if (info.serviceInfo != null) {
+                return info.serviceInfo;
+            } else if (info.providerInfo != null) {
+                return info.providerInfo;
             } else {
                 throw new IllegalStateException("Missing ComponentInfo!");
             }
         }
 
-        /**
-         * Returns a package name of this component.
-         * @return The package name.
-         */
-        public final String getPackageName() {
-            DebugUtils.__checkError(resolveInfo == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return (resolveInfo.resolvePackageName != null ? resolveInfo.resolvePackageName : getComponentInfo().packageName);
+        @Override
+        public String getPackageName() {
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            return (info.resolvePackageName != null ? info.resolvePackageName : getComponentInfo().packageName);
         }
 
-        /**
-         * Returns an {@link ApplicationInfo} of this component.
-         * @return The <tt>ApplicationInfo</tt>.
-         */
-        public final ApplicationInfo getApplicationInfo() {
+        @Override
+        public ApplicationInfo getApplicationInfo() {
             return getComponentInfo().applicationInfo;
         }
 
-        /**
-         * Tests if this application is a system application.
-         * @return <tt>true</tt> if this application is a system application, <tt>false</tt> otherwise.
-         */
-        public final boolean isSystem() {
-            return ((getComponentInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+        @Override
+        public Drawable loadIcon(PackageManager pm) {
+            return info.loadIcon(pm);
         }
 
-        /**
-         * Tests if this application is an updated system application.
-         * @return <tt>true</tt> if this application is an updated system application, <tt>false</tt> otherwise.
-         */
-        public final boolean isUpdatedSystem() {
-            return ((getComponentInfo().applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+        @Override
+        public CharSequence loadLabel(PackageManager pm) {
+            return info.loadLabel(pm);
         }
 
-        public final void dump(Printer printer) {
-            printer.println(dumpImpl(new StringBuilder(196)));
-        }
-
-        /**
-         * Initializes this object with the specified <em>resolveInfo</em>.
-         * @param context The <tt>Context</tt>.
-         * @param resolveInfo The <tt>ResolveInfo</tt> to initialize.
-         */
-        protected void initialize(Context context, ResolveInfo resolveInfo) {
-            this.resolveInfo = resolveInfo;
-        }
-
+        @Override
         protected StringBuilder dump(StringBuilder out) {
-            final ComponentInfo info = getComponentInfo();
-            return out.append(" name = ").append(info.name)
-                .append(", packageName = ").append(getPackageName())
-                .append(", process = ").append(info.processName)
-                .append(", system = ").append(isSystem())
-                .append(", updatedSystem = ").append(isUpdatedSystem());
+            return super.dump(out).append(", name = ").append(getComponentInfo().name);
+        }
+    }
+
+    /**
+     * Class <tt>AbsApplicationInfo</tt> contains an application's {@link ApplicationInfo}.
+     */
+    public static abstract class AbsApplicationInfo extends PackageItemInfo<ApplicationInfo> {
+        @Override
+        public String getPackageName() {
+            return info.packageName;
         }
 
-        /* package */ final String dumpImpl(StringBuilder out) {
-            return dump(out.append(getClass().getSimpleName()).append(" {")).append(" }").toString();
+        @Override
+        public ApplicationInfo getApplicationInfo() {
+            return info;
+        }
+
+        @Override
+        public Drawable loadIcon(PackageManager pm) {
+            return info.loadIcon(pm);
+        }
+
+        @Override
+        public CharSequence loadLabel(PackageManager pm) {
+            return info.loadLabel(pm);
+        }
+
+        @Override
+        protected StringBuilder dump(StringBuilder out) {
+            return super.dump(out).append(", className = ").append(info.className);
         }
     }
 
@@ -510,7 +552,6 @@ public final class PackageUtils {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public int onScanFile(String path, int type, Object cookie) {
             if (isArchiveFile(path, type)) {
                 final T result = parsePackage(mContext, path, mParseFlags, mFactory);
@@ -550,7 +591,7 @@ public final class PackageUtils {
 
     /**
      * Class <tt>InstalledPackageFilter</tt> filtering the installed application
-     * {@link PackageInfo} objects (excluding the system and the updated system application).
+     * {@link PackageInfo} objects (excluding the system application).
      */
     public static final class InstalledPackageFilter implements Filter<PackageInfo> {
         private final List<String> mPackages;
@@ -575,7 +616,7 @@ public final class PackageUtils {
 
         @Override
         public boolean accept(PackageInfo packageInfo) {
-            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & (ApplicationInfo.FLAG_SYSTEM | ApplicationInfo.FLAG_UPDATED_SYSTEM_APP)) == 0);
+            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
         }
     }
 

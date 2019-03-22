@@ -3,6 +3,8 @@ package android.ext.widget;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.LayoutManager;
+import android.support.v7.widget.RecyclerView.Recycler;
+import android.support.v7.widget.RecyclerView.State;
 import android.view.View;
 
 /**
@@ -70,6 +72,16 @@ public final class LayoutManagerHelper {
             // no scroll.
             return false;
         }
+    }
+
+    /**
+     * Called when searching for a focusable view in the given direction
+     * has failed for the current content of the <tt>RecyclerView</tt>.
+     */
+    public static View onFocusSearchFailed(View focused, int focusDirection, Recycler recycler, State state) {
+        // Returns the currently focused view when searching for a focusable view has failed.
+        // This operation can be supported the RecyclerView has a fixed item count.
+        return focused;
     }
 
     private static boolean scrollBy(RecyclerView view, int dx, int dy, boolean immediate) {

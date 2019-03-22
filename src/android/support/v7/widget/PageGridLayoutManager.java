@@ -3,6 +3,8 @@ package android.support.v7.widget;
 import android.content.Context;
 import android.graphics.Rect;
 import android.support.v7.widget.PageScroller.OnPageChangeListener;
+import android.support.v7.widget.RecyclerView.Recycler;
+import android.support.v7.widget.RecyclerView.State;
 import android.view.View;
 
 /**
@@ -108,6 +110,13 @@ public final class PageGridLayoutManager extends GridLayoutManager {
 
     public final void setOnPageChangeListener(OnPageChangeListener listener) {
         mScroller.mOnPageChangeListener = listener;
+    }
+
+    @Override
+    public View onFocusSearchFailed(View focused, int focusDirection, Recycler recycler, State state) {
+        // Returns the currently focused view when searching for a focusable view has failed.
+        // This operation can be supported the RecyclerView has a fixed item count.
+        return focused;
     }
 
     @Override

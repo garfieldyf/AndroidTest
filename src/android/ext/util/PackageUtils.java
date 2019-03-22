@@ -1,5 +1,7 @@
 package android.ext.util;
 
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -276,7 +278,7 @@ public final class PackageUtils {
          */
         public final boolean isSystem() {
             DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return ((getApplicationInfo().flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+            return ((getApplicationInfo().flags & FLAG_SYSTEM) != 0);
         }
 
         /**
@@ -285,7 +287,7 @@ public final class PackageUtils {
          */
         public final boolean isUpdatedSystem() {
             DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            return ((getApplicationInfo().flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+            return ((getApplicationInfo().flags & FLAG_UPDATED_SYSTEM_APP) != 0);
         }
 
         public final void dump(Printer printer) {
@@ -318,10 +320,11 @@ public final class PackageUtils {
      */
     public static abstract class AbsPackageInfo extends PackageItemInfo<PackageInfo> {
         /**
-         * Equivalent to calling <tt>PackageUtils.loadLabelAndIcon(context, packageInfo)</tt>.
+         * Retrieve the application's label and icon associated with this package info.
+         * The package {@link #info} must be a package archive file's {@link PackageInfo}.
          * @param context The <tt>Context</tt>.
          * @return A <tt>Pair</tt> containing the application's icon and label.
-         * @see PackageUtils#loadLabelAndIcon(Context, PackageInfo)
+         * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public final Pair<CharSequence, Drawable> loadLabelAndIcon(Context context) {
             DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
@@ -358,23 +361,6 @@ public final class PackageUtils {
      * Class <tt>AbsResolveInfo</tt> contains a component's {@link ResolveInfo}.
      */
     public static abstract class AbsResolveInfo extends PackageItemInfo<ResolveInfo> {
-        /**
-         * Returns a {@link ComponentInfo} of this component.
-         * @return The <tt>ComponentInfo</tt>.
-         */
-        public ComponentInfo getComponentInfo() {
-            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
-            if (info.activityInfo != null) {
-                return info.activityInfo;
-            } else if (info.serviceInfo != null) {
-                return info.serviceInfo;
-            } else if (info.providerInfo != null) {
-                return info.providerInfo;
-            } else {
-                throw new IllegalStateException("Missing ComponentInfo!");
-            }
-        }
-
         @Override
         public String getPackageName() {
             DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
@@ -399,6 +385,23 @@ public final class PackageUtils {
         @Override
         protected StringBuilder dump(StringBuilder out) {
             return super.dump(out).append(", name = ").append(getComponentInfo().name);
+        }
+
+        /**
+         * Returns a {@link ComponentInfo} of this item.
+         * @return The <tt>ComponentInfo</tt>.
+         */
+        protected ComponentInfo getComponentInfo() {
+            DebugUtils.__checkError(info == null, "This " + getClass().getSimpleName() + " uninitialized, did not call initialize()");
+            if (info.activityInfo != null) {
+                return info.activityInfo;
+            } else if (info.serviceInfo != null) {
+                return info.serviceInfo;
+            } else if (info.providerInfo != null) {
+                return info.providerInfo;
+            } else {
+                throw new IllegalStateException("Missing ComponentInfo!");
+            }
         }
     }
 
@@ -616,7 +619,7 @@ public final class PackageUtils {
 
         @Override
         public boolean accept(PackageInfo packageInfo) {
-            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
+            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & FLAG_SYSTEM) == 0);
         }
     }
 

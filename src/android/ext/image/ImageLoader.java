@@ -22,7 +22,6 @@ import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.util.Printer;
@@ -103,6 +102,21 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
+     * Equivalent to calling<pre>
+     * load(uri).setParameters(Parameters.defaultParameters())
+     *     .setBinder(ImageLoader.defaultBinder())
+     *     .into(view);</pre>
+     * @param uri The uri to load.
+     * @param view The {@link ImageView} to bind.
+     * @see #load(URI)
+     * @see LoadRequest
+     */
+    @SuppressWarnings("unchecked")
+    public final void loadImage(URI uri, ImageView view) {
+        load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)defaultBinder(), Parameters.defaultParameters());
+    }
+
+    /**
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
@@ -143,14 +157,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         if (mLoader instanceof ImageLoader.FileCacheLoader) {
             Caches.dumpCache(((ImageLoader<?, ?>.FileCacheLoader)mLoader).mCache, context, printer);
         }
-    }
-
-    /**
-     * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = RGB_565, mutable = false).
-     */
-    public static Parameters defaultParameters() {
-        return DefaultParameters.sInstance;
     }
 
     /**
@@ -297,13 +303,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
             return result;
         }
-    }
-
-    /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = false).
-     */
-    private static final class DefaultParameters {
-        public static final Parameters sInstance = new Parameters(Config.RGB_565, 1, false);
     }
 
     /**

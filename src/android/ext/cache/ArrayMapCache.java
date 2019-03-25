@@ -58,8 +58,8 @@ public class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     /* package */ final void dump(Context context, Printer printer) {
-        final int size = map.size();
         final StringBuilder result = new StringBuilder(256);
+        final int size = map.size();
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
         for (int i = 0; i < size; ++i) {
             result.setLength(0);

@@ -84,6 +84,40 @@ public final class LayoutManagerHelper {
         return focused;
     }
 
+    /**
+     * Equivalent to calling <tt>onFocusChange(view, hasFocus, 1.14f, 120, invalidateParent)</tt>.
+     * @param view The view whose state has changed.
+     * @param hasFocus The new focus state of <em>view</em>.
+     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
+     * @see #onFocusChange(View, boolean, float, long, boolean)
+     */
+    public static void onFocusChange(View view, boolean hasFocus, boolean invalidateParent) {
+        onFocusChange(view, hasFocus, 1.14f, 120, invalidateParent);
+    }
+
+    /**
+     * Called when the focus state of a view has changed.
+     * @param view The view whose state has changed.
+     * @param hasFocus The new focus state of <em>view</em>.
+     * @param scale The scale value to be animated to.
+     * @param duration The length of the property animations, in milliseconds.
+     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
+     */
+    public static void onFocusChange(View view, boolean hasFocus, float scale, long duration, boolean invalidateParent) {
+        if (hasFocus) {
+            if (invalidateParent) {
+                final View parent = (View)view.getParent();
+                if (parent != null) {
+                    parent.invalidate(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+                }
+            }
+
+            view.animate().scaleX(scale).scaleY(scale).setDuration(duration).start();
+        } else {
+            view.animate().scaleX(1.0f).scaleY(1.0f).setDuration(duration).start();
+        }
+    }
+
     private static boolean scrollBy(RecyclerView view, int dx, int dy, boolean immediate) {
         if (immediate) {
             view.scrollBy(dx, dy);

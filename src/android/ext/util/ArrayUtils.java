@@ -279,6 +279,7 @@ public final class ArrayUtils {
      * @param start The inclusive start index in <em>list</em>.
      * @param end The exclusive end index in <em>list</em>.
      * @see #sort(List, int, int, Comparator)
+     * @see Arrays#sort(Object[], int, int)
      */
     public static <T extends Comparable<? super T>> void sort(List<T> list, int start, int end) {
         DebugUtils.__checkRange(start, end - start, list.size());
@@ -296,6 +297,7 @@ public final class ArrayUtils {
      * @param end The exclusive end index in <em>list</em>.
      * @param comparator The {@link Comparator} to compare.
      * @see #sort(List, int, int)
+     * @see Arrays#sort(Object[], int, int, Comparator)
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         DebugUtils.__checkRange(start, end - start, list.size());

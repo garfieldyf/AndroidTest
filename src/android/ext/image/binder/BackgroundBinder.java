@@ -2,6 +2,7 @@ package android.ext.image.binder;
 
 import android.content.Context;
 import android.ext.cache.Cache;
+import android.ext.graphics.drawable.GIFDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -49,6 +50,15 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
 
     @Override
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
-        ((View)target).setBackground(value != null ? mTransformer.transform(uri, target, value) : mDefaultImage);
+        final View view = (View)target;
+        if (value == null) {
+            view.setBackground(mDefaultImage);
+        } else {
+            final Drawable drawable = mTransformer.transform(uri, target, value);
+            view.setBackground(drawable);
+            if (drawable instanceof GIFDrawable) {
+                ((GIFDrawable)drawable).start();
+            }
+        }
     }
 }

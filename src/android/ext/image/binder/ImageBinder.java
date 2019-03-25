@@ -146,7 +146,16 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
     @Override
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
-        ((ImageView)target).setImageDrawable(value != null ? mTransformer.transform(uri, target, value) : mDefaultImage);
+        final ImageView view = (ImageView)target;
+        if (value == null) {
+            view.setImageDrawable(mDefaultImage);
+        } else {
+            final Drawable drawable = mTransformer.transform(uri, target, value);
+            view.setImageDrawable(drawable);
+            if (drawable instanceof GIFDrawable) {
+                ((GIFDrawable)drawable).start();
+            }
+        }
     }
 
     /**

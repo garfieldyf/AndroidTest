@@ -234,7 +234,8 @@ public final class DeviceUtils {
                 continue;
             }
 
-            dumpStorageInfo(context, statFs, dumpWhiteSpace(out, i).append(getUserLabel(context, volume))
+            dumpStorageInfo(context, statFs, dumpWhiteSpace(out, i)
+                .append(getUserLabel(context, volume))
                 .append(" [ path = ").append(path)
                 .append(", primary = ").append(volume.isPrimary())
                 .append(", state = ").append(state != null ? state : "unknown")

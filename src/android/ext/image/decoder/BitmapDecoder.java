@@ -20,6 +20,12 @@ import android.util.Printer;
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     /**
+     * If set the image decoder will be dump the {@link Options} when
+     * it will be decode image. <p>This flag can be used DEBUG mode.</p>
+     */
+    public static final int FLAG_DUMP_OPTIONS = 0x00200000;
+
+    /**
      * The {@link Parameters} to decode bitmap.
      */
     protected final Parameters mParameters;
@@ -101,23 +107,25 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         parameters.computeSampleSize(mContext, opts);
 
         // Decodes the image pixels.
-        return (Image)decodeBitmap(uri, parameters, opts);
+        return (Image)decodeBitmap(uri, parameters, flags, opts);
     }
 
     /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em> <tt>out...</tt> fields are set.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected Bitmap decodeBitmap(Object uri, Parameters parameters, Options opts) throws Exception {
+    protected Bitmap decodeBitmap(Object uri, Parameters parameters, int flags, Options opts) throws Exception {
         // Retrieves the bitmap from bitmap pool to reuse it.
         opts.inBitmap = getCachedBitmap(parameters, opts);
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
+            BitmapDecoder.__checkDumpOptions(opts, flags);
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
@@ -129,6 +137,12 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         }
 
         return bitmap;
+    }
+
+    private static void __checkDumpOptions(Options opts, int flags) {
+        if ((flags & FLAG_DUMP_OPTIONS) != 0) {
+            BitmapUtils.dumpOptions("BitmapDecoder", opts);
+        }
     }
 
     /**

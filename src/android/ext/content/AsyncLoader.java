@@ -18,10 +18,14 @@ import android.ext.util.DebugUtils;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
-     * If set the loader will be ignored the memory cache when
-     * it will be load value.
+     * If set the loader will be ignored the memory cache when it will be load value.
      */
     public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;
+
+    /**
+     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_DUMP_OPTIONS);
+     */
+    private static final int FLAG_MASK = 0xFF1FFFFF;
 
     /**
      * The {@link Cache} to store the loaded values.
@@ -66,7 +70,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null, "target == null");
         DebugUtils.__checkError(binder == null, "binder == null");
-        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
+        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
         if (mState != SHUTDOWN) {
             if (key == null) {
                 bindValue(binder, key, params, target, null, flags);
@@ -116,7 +120,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      */
     public final void preload(Key key, int flags, Params... params) {
         DebugUtils.__checkUIThread("preload");
-        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
+        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
         if (mState != SHUTDOWN && key != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0 && mCache.get(key) == null && !isTaskRunning(key, key)) {
             final LoadTask task = obtain(key, params, key, flags, EmptyBinder.sInstance);
             mRunningTasks.put(key, task);
@@ -145,7 +149,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #loadSync(Key)
      */
     public final Value loadSync(Key key, int flags, Params... params) {
-        DebugUtils.__checkError((flags & 0x3F3FFFFF) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & 0x3F3FFFFF));
+        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
         if (key == null || mState == SHUTDOWN) {
             return null;
         }

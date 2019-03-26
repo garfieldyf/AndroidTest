@@ -3,12 +3,14 @@ package android.ext.widget;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.Recycler;
 import android.support.v7.widget.RecyclerView.State;
 import android.util.Printer;
 import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Class LayoutManagerHelper
@@ -85,6 +87,37 @@ public final class LayoutManagerHelper {
         // Returns the currently focused view when searching for a focusable view has failed.
         // This operation can be supported the RecyclerView has a fixed item count.
         return focused;
+    }
+
+    /**
+     * Returns the index of the child to draw for this iteration.
+     * @param container The <tt>ViewGroup</tt> whose child to draw.
+     * @param childCount The number of child to draw.
+     * @param i The current iteration.
+     * @return The index of the child to draw this iteration.
+     */
+    public static int getChildDrawingOrder(ViewGroup container, int childCount, int i) {
+        final View focused = container.getFocusedChild();
+        if (focused != null) {
+            if (container.getChildAt(i) == focused) {
+                // Move the focused child order to last.
+                return childCount - 1;
+            } else if (i == childCount - 1) {
+                // Move the last child order to the focused child order.
+                return container.indexOfChild(focused);
+            }
+        }
+
+        return i;
+    }
+
+    /**
+     * Equivalent to calling <tt>recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView))</tt>.
+     * @param recyclerView The {@link RecyclerView} to set.
+     * @see RecyclerView#setChildDrawingOrderCallback(ChildDrawingOrderCallback)
+     */
+    public static void setChildDrawingOrderCallback(RecyclerView recyclerView) {
+        recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView));
     }
 
     /**
@@ -209,6 +242,26 @@ public final class LayoutManagerHelper {
         @Override
         public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state) {
             outRect.set(leftMargin, topMargin, rightMargin, bottomMargin);
+        }
+    }
+
+    /**
+     * Class <tt>ChildDrawingOrder</tt> is an implementation of a {@link ChildDrawingOrderCallback}.
+     */
+    public static final class ChildDrawingOrder implements ChildDrawingOrderCallback {
+        private final ViewGroup mContainer;
+
+        /**
+         * Constructor
+         * @param container The <tt>ViewGroup</tt>.
+         */
+        public ChildDrawingOrder(ViewGroup container) {
+            mContainer = container;
+        }
+
+        @Override
+        public int onGetChildDrawingOrder(int childCount, int i) {
+            return getChildDrawingOrder(mContainer, childCount, i);
         }
     }
 

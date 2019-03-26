@@ -63,11 +63,10 @@ public final class GIFImage {
         } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
             final AssetInputStream asset = (AssetInputStream)is;
             nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
-        } else if (tempStorage != null) {
-            nativeImage = nativeDecodeStream(is, tempStorage);
+        } else if (tempStorage == null) {
+            nativeImage = decodeStreamInternal(is);
         } else {
-            nativeImage = nativeDecodeStream(is, tempStorage = ByteArrayPool.obtain());
-            ByteArrayPool.recycle(tempStorage);
+            nativeImage = nativeDecodeStream(is, tempStorage);
         }
 
         return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
@@ -201,6 +200,15 @@ public final class GIFImage {
 
     private GIFImage(long nativeImage) {
         mNativeImage = nativeImage;
+    }
+
+    private static long decodeStreamInternal(InputStream is) {
+        final byte[] tempStorage = ByteArrayPool.obtain();
+        try {
+            return nativeDecodeStream(is, tempStorage);
+        } finally {
+            ByteArrayPool.recycle(tempStorage);
+        }
     }
 
     private static FileDescriptor getFileDescriptor(InputStream is) {

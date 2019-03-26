@@ -449,14 +449,10 @@ public final class FileUtils {
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
-        } else if (buffer != null) {
-            copyStreamImpl(is, out, wrap(cancelable), buffer);
+        } else if (buffer == null) {
+            copyStreamImpl(is, out, wrap(cancelable));
         } else {
-            try {
-                copyStreamImpl(is, out, wrap(cancelable), buffer = ByteArrayPool.obtain());
-            } finally {
-                ByteArrayPool.recycle(buffer);
-            }
+            copyStreamImpl(is, out, wrap(cancelable), buffer);
         }
     }
 
@@ -589,6 +585,18 @@ public final class FileUtils {
         }
 
         return path;
+    }
+
+    /**
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     */
+    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
+        final byte[] buffer = ByteArrayPool.obtain();
+        try {
+            copyStreamImpl(is, out, cancelable, buffer);
+        } finally {
+            ByteArrayPool.recycle(buffer);
+        }
     }
 
     /**

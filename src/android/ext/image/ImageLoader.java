@@ -112,7 +112,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see LoadRequest
      */
     @SuppressWarnings("unchecked")
-    public final void loadImage(URI uri, ImageView view) {
+    public final void load(URI uri, ImageView view) {
         load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)defaultBinder(), Parameters.defaultParameters());
     }
 
@@ -226,8 +226,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
-         * @param params The parameters, passed earlier by <tt>loadInBackground</tt>.
-         * @param flags Loading flags, passed earlier by by <tt>loadInBackground</tt>.
+         * @param params The parameters, passed earlier by {@link #load}.
+         * @param flags Loading flags, passed earlier by {@link #load}.
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */

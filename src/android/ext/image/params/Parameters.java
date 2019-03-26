@@ -78,7 +78,8 @@ public class Parameters {
      * @param opts The {@link Options} to compute byte count.
      */
     public int computeByteCount(Context context, Options opts) {
-        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(config);
+        DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
+        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
     }
 
     /**
@@ -113,26 +114,27 @@ public class Parameters {
     }
 
     /**
+     * Returns the default {@link Parameters} associated with this class
+     * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
+     */
+    public static Parameters defaultParameters() {
+        return DefaultParameters.sInstance;
+    }
+
+    /**
      * Computes the number of bytes that can be used to store
      * the image's pixels when decoding the image.
      * @param opts The {@link Options} to compute byte count.
      */
-    /* package */ final int computeByteCount(Options opts) {
-        final int byteCount = BitmapUtils.getBytesPerPixel(config);
+    /* package */ static int computeByteCount(Options opts) {
+        DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
+        final int byteCount = BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);
         } else {
             final float scale = (float)opts.inTargetDensity / opts.inDensity;
             return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
         }
-    }
-
-    /**
-     * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
-     */
-    public static Parameters defaultParameters() {
-        return DefaultParameters.sInstance;
     }
 
     private static Config parseConfig(int config) {

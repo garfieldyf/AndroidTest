@@ -48,7 +48,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         File result = super.get(key);
         if (result == null) {
             result = buildCacheFile(key);
-            if (result.exists()) {
+            if (isCacheFileValid(key, result)) {
                 put(key, result);
             }
         }
@@ -61,6 +61,18 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         if (evicted || !oldFile.equals(newFile)) {
             oldFile.delete();
         }
+    }
+
+    /**
+     * Tests if the <em>cacheFile</em> is valid. Subclasses should override this
+     * method to check the <em>cacheFile</em>.<p>The default implementation check
+     * the <em>cacheFile</em> exists.</p>
+     * @param key The key.
+     * @param cacheFile The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
+     * @return <tt>true</tt> if the <em>cacheFile</em> is valid, <tt>false</tt> otherwise.
+     */
+    protected boolean isCacheFileValid(String key, File cacheFile) {
+        return cacheFile.exists();
     }
 
     /**

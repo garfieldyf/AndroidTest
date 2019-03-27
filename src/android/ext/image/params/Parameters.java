@@ -66,7 +66,7 @@ public class Parameters {
     public Parameters(Context context, AttributeSet attrs) {
         final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "Parameters"));
         this.value   = fixSampleSize(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_sampleSize"), 1));
-        this.config  = parseConfig(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), ARGB_8888));
+        this.config  = a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
         this.mutable = a.getBoolean((int)ClassUtils.getAttributeValue(context, "Parameters_mutable"), false);
         a.recycle();
     }
@@ -135,10 +135,6 @@ public class Parameters {
             final float scale = (float)opts.inTargetDensity / opts.inDensity;
             return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
         }
-    }
-
-    private static Config parseConfig(int config) {
-        return (config == RGB_565 ? Config.RGB_565 : Config.ARGB_8888);
     }
 
     private static int fixSampleSize(int sampleSize) {

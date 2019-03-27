@@ -141,7 +141,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     private static void __checkDumpOptions(Options opts, int flags) {
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
-            BitmapUtils.dumpOptions("BitmapDecoder", opts);
+            BitmapUtils.dumpOptions(BitmapDecoder.class.getSimpleName(), opts);
         }
     }
 

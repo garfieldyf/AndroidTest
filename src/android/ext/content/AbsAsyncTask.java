@@ -62,7 +62,6 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * Sets the object that owns this task.
      * @param owner The owner object.
      * @see #getOwner()
-     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
@@ -84,7 +83,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * the owner activity has been finished or destroyed or release by the GC.
      * @see #setOwner(Object)
      */
-    public final <T extends Activity> T getOwnerActivity() {
+    protected final <T extends Activity> T getOwnerActivity() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);

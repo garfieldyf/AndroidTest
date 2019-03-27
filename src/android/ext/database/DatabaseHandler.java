@@ -51,7 +51,6 @@ public abstract class DatabaseHandler {
      * Sets the object that owns this handler.
      * @param owner The owner object.
      * @see #getOwner()
-     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
@@ -76,7 +75,7 @@ public abstract class DatabaseHandler {
      * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
+    protected final <T extends Activity> T getOwnerActivity() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);

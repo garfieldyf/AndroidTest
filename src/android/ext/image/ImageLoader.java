@@ -44,6 +44,7 @@ import android.widget.ImageView;
  * mImageLoader.load(uri).into(imageView);</pre>
  * @author Garfield
  */
+@SuppressWarnings("unchecked")
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * If set the image decoder will be use the custom {@link Parameters}
@@ -111,7 +112,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see #load(URI)
      * @see LoadRequest
      */
-    @SuppressWarnings("unchecked")
     public final void load(URI uri, ImageView view) {
         load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)defaultBinder(), Parameters.defaultParameters());
     }
@@ -120,16 +120,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
-    public final Binder<URI, Object, Image> getBinder() {
-        return mBinder;
+    public final <T extends Binder<URI, Object, Image>> T getBinder() {
+        return (T)mBinder;
     }
 
     /**
      * Returns the {@link ImageDecoder} associated with this loader.
      * @return The <tt>ImageDecoder</tt>.
      */
-    public final ImageDecoder<Image> getImageDecoder() {
-        return mDecoder;
+    public final <T extends ImageDecoder<Image>> T getImageDecoder() {
+        return (T)mDecoder;
     }
 
     /**
@@ -164,7 +164,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * The default binder has no default image, no drawable cache and
      * can only bind the {@link Bitmap} to {@link ImageView}.
      */
-    @SuppressWarnings("unchecked")
     public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
         return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
     }

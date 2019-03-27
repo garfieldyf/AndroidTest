@@ -16,6 +16,7 @@ import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.util.ClassUtils;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -152,8 +153,8 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         } else {
             final Drawable drawable = mTransformer.transform(uri, target, value);
             view.setImageDrawable(drawable);
-            if (drawable instanceof GIFDrawable) {
-                ((GIFDrawable)drawable).start();
+            if (drawable instanceof Animatable) {
+                ((Animatable)drawable).start();
             }
         }
     }

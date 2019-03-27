@@ -391,13 +391,16 @@ public final class FileUtils {
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read.
      * @param outFile The destination file to write, must be absolute file path.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled,
+     * or <tt>null</tt> if none. If the operation was cancelled before it completed
+     * normally the <em>outFile's</em> contents is undefined.
      * @throws IOException if an error occurs while writing to <em>outFile</em>.
      */
-    public static void copyFile(Context context, Object uri, String outFile) throws IOException {
+    public static void copyFile(Context context, Object uri, String outFile, Cancelable cancelable) throws IOException {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
         final OutputStream os = new FileOutputStream(outFile);
         try {
-            readFile(context, uri, os, null);
+            readFile(context, uri, os, cancelable);
         } finally {
             os.close();
         }
@@ -408,30 +411,20 @@ public final class FileUtils {
      * <p>Note: This method will be create the necessary directories.</p>
      * @param is The <tt>InputStream</tt> to read.
      * @param outFile The destination file to write, must be absolute file path.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled,
+     * or <tt>null</tt> if none. If the operation was cancelled before it completed
+     * normally the <em>outFile's</em> contents is undefined.
      * @throws IOException if an error occurs while writing to <em>outFile</em>.
-     * @see #copyStream(InputStream, OutputStream)
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
-    public static void copyStream(InputStream is, String outFile) throws IOException {
+    public static void copyStream(InputStream is, String outFile, Cancelable cancelable) throws IOException {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
         final OutputStream os = new FileOutputStream(outFile);
         try {
-            copyStream(is, os, null, null);
+            copyStream(is, os, cancelable, null);
         } finally {
             os.close();
         }
-    }
-
-    /**
-     * Equivalent to calling <tt>copyStream(is, out, null, null)</tt>.
-     * @param is The <tt>InputStream</tt> to read.
-     * @param out The <tt>OutputStream</tt> to write.
-     * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #copyStream(InputStream, String)
-     * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
-     */
-    public static void copyStream(InputStream is, OutputStream out) throws IOException {
-        copyStream(is, out, null, null);
     }
 
     /**
@@ -443,8 +436,7 @@ public final class FileUtils {
      * the <em>out's</em> contents is undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #copyStream(InputStream, String)
-     * @see #copyStream(InputStream, OutputStream)
+     * @see #copyStream(InputStream, OutputStream, Cancelable)
      */
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
@@ -457,16 +449,19 @@ public final class FileUtils {
     }
 
     /**
-     * Equivalent to calling <tt>readFile(context, uri, new ByteArrayBuffer(), null)</tt>.
+     * Equivalent to calling <tt>readFile(context, uri, new ByteArrayBuffer(), cancelable)</tt>.
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
+     * <tt>null</tt> if none. If the operation was cancelled before it completed normally
+     * the returned <tt>ByteArrayBuffer</tt> is undefined.
      * @return A <tt>ByteArrayBuffer</tt> contains the file contents.
      * @throws IOException if an error occurs while writing to <tt>ByteArrayBuffer</tt>.
      * @see #readFile(Context, Object, OutputStream, Cancelable)
      */
-    public static ByteArrayBuffer readFile(Context context, Object uri) throws IOException {
+    public static ByteArrayBuffer readFile(Context context, Object uri, Cancelable cancelable) throws IOException {
         final ByteArrayBuffer result = new ByteArrayBuffer();
-        readFile(context, uri, result, null);
+        readFile(context, uri, result, cancelable);
         return result;
     }
 
@@ -485,7 +480,7 @@ public final class FileUtils {
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
      * the <em>out's</em> contents is undefined.
      * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #readFile(Context, Object)
+     * @see #readFile(Context, Object, Cancelable)
      */
     public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable) throws IOException {
         final InputStream is = UriUtils.openInputStream(context, uri);
@@ -1086,9 +1081,9 @@ public final class FileUtils {
          */
         public Dirent(String path, int type) {
             DebugUtils.__checkError(path == null, "path == null");
+            Dirent.__checkType(type);
             this.path = path;
             this.type = type;
-            Dirent.__checkDirentType(type);
         }
 
         /**
@@ -1101,9 +1096,9 @@ public final class FileUtils {
          */
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
+            Dirent.__checkType(type);
             this.path = buildPath(dir, name);
             this.type = type;
-            Dirent.__checkDirentType(type);
         }
 
         /**
@@ -1296,7 +1291,7 @@ public final class FileUtils {
             }
         }
 
-        private static void __checkDirentType(int type) {
+        private static void __checkType(int type) {
             switch (type) {
             case DT_UNKNOWN:
             case DT_FIFO:
@@ -1327,10 +1322,10 @@ public final class FileUtils {
     }
 
     /**
-     * Class <tt>ListCallback</tt> is an implementation of a {@link ScanCallback}.
+     * Class <tt>ListCallback</tt> used to {@link FileUtils#listFiles(String, int)}.
      */
     private static final class ListCallback implements ScanCallback {
-        public static final ScanCallback sInstance = new ListCallback();
+        public static final ListCallback sInstance = new ListCallback();
 
         @Keep
         @Override

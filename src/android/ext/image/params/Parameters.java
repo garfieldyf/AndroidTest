@@ -17,7 +17,7 @@ import android.util.Printer;
  * &lt;[ Parameters | parameters ]
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
- *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]"
+ *      app:config="[ argb_8888 | rgb_565 ]"
  *      app:mutable="true"
  *      app:sampleSize="2"
  *      app:attribute1="value1"
@@ -26,8 +26,8 @@ import android.util.Printer;
  * @author Garfield
  */
 public class Parameters {
-    private static final int ALPHA_8 = 0;
-    private static final int RGB_565 = 1;
+    private static final int RGB_565   = 0;
+    private static final int ARGB_8888 = 1;
 
     /**
      * The Object by user-defined to decode.
@@ -66,7 +66,7 @@ public class Parameters {
     public Parameters(Context context, AttributeSet attrs) {
         final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "Parameters"));
         this.value   = fixSampleSize(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_sampleSize"), 1));
-        this.config  = parseConfig(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), 2));
+        this.config  = parseConfig(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), ARGB_8888));
         this.mutable = a.getBoolean((int)ClassUtils.getAttributeValue(context, "Parameters_mutable"), false);
         a.recycle();
     }
@@ -138,16 +138,7 @@ public class Parameters {
     }
 
     private static Config parseConfig(int config) {
-        switch (config) {
-        case ALPHA_8:
-            return Config.ALPHA_8;
-
-        case RGB_565:
-            return Config.RGB_565;
-
-        default:
-            return Config.ARGB_8888;
-        }
+        return (config == RGB_565 ? Config.RGB_565 : Config.ARGB_8888);
     }
 
     private static int fixSampleSize(int sampleSize) {

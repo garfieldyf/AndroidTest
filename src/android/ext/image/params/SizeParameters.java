@@ -18,7 +18,7 @@ import android.util.Printer;
  *      android:width="200dp"
  *      android:height="300dp"
  *      app:mutable="true"
- *      app:config="[ argb_8888 | rgb_565 | alpha_8 ]" /&gt;</pre>
+ *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
 public class SizeParameters extends Parameters {

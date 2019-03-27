@@ -12,9 +12,8 @@
     <!-- Parameters styleable -->
     <declare-styleable name="Parameters">
         <attr name="config">
-            <enum name="alpha_8" value="0" />
-            <enum name="rgb_565" value="1" />
-            <enum name="argb_8888" value="2" />
+            <enum name="rgb_565" value="0" />
+            <enum name="argb_8888" value="1" />
         </attr>
         <attr name="mutable" format="boolean" />
         <attr name="sampleSize" format="integer" />

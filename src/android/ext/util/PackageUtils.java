@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
@@ -47,11 +48,20 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link PackageInfo} objects.
-     * @see InstalledPackageFilter
+     * @see InstalledApplicationFilter
      */
-    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
+    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<PackageInfo> result = pm.getInstalledPackages(flags);
-        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+        if (filter != null && result != null) {
+            final Iterator<PackageInfo> itor = result.iterator();
+            while (itor.hasNext()) {
+                if (!filter.accept(itor.next().applicationInfo)) {
+                    itor.remove();
+                }
+            }
+        }
+
+        return result;
     }
 
     /**
@@ -60,6 +70,7 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledApplications(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the applications.
      * @return A <tt>List</tt> of {@link ApplicationInfo} objects.
+     * @see InstalledApplicationFilter
      */
     public static List<ApplicationInfo> getInstalledApplications(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<ApplicationInfo> result = pm.getInstalledApplications(flags);
@@ -271,33 +282,32 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>InstalledPackageFilter</tt> filtering the installed application
-     * {@link PackageInfo} objects (excluding the system application).
+     * Class <tt>InstalledApplicationFilter</tt> filtering the installed applications (excluding the system application).
      */
-    public static final class InstalledPackageFilter implements Filter<PackageInfo> {
-        private final List<String> mPackages;
+    public static final class InstalledApplicationFilter implements Filter<ApplicationInfo> {
+        private final Collection<String> mPackages;
 
         /**
          * Constructor
          * @param excludingPackages An array of package names to filter.
-         * @see #InstalledPackageFilter(List)
+         * @see #InstalledApplicationFilter(Collection)
          */
-        public InstalledPackageFilter(String... excludingPackages) {
+        public InstalledApplicationFilter(String... excludingPackages) {
             mPackages = (excludingPackages != null ? Arrays.asList(excludingPackages) : Collections.<String>emptyList());
         }
 
         /**
          * Constructor
-         * @param excludingPackages A <tt>List</tt> of package names to filter.
-         * @see #InstalledPackageFilter(String[])
+         * @param excludingPackages The <tt>Collection</tt> of package names to filter.
+         * @see #InstalledApplicationFilter(String[])
          */
-        public InstalledPackageFilter(List<String> excludingPackages) {
+        public InstalledApplicationFilter(Collection<String> excludingPackages) {
             mPackages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
         }
 
         @Override
-        public boolean accept(PackageInfo packageInfo) {
-            return (!mPackages.contains(packageInfo.packageName) && (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
+        public boolean accept(ApplicationInfo applicationInfo) {
+            return (!mPackages.contains(applicationInfo.packageName) && (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
         }
     }
 

@@ -35,25 +35,18 @@ public final class SimpleFileCache implements FileCache {
     }
 
     @Override
-    public void clear() {
-    }
-
-    @Override
     public File getCacheDir() {
         return mCacheDir;
     }
 
     @Override
-    public File get(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
-        return buildCacheFile(key);
+    public void clear() {
     }
 
     @Override
-    public File remove(String key) {
+    public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        final File result = buildCacheFile(key);
-        return (result.delete() ? result : null);
+        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     @Override
@@ -61,8 +54,11 @@ public final class SimpleFileCache implements FileCache {
         return null;
     }
 
-    private File buildCacheFile(String key) {
-        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
+    @Override
+    public File remove(String key) {
+        DebugUtils.__checkError(key == null, "key == null");
+        final File result = get(key);
+        return (result.delete() ? result : null);
     }
 
     /* package */ final void dump(Context context, Printer printer) {

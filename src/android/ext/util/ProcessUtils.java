@@ -305,7 +305,7 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos to "/storage/emulated/0/Android/data/packagename/files/crashes.log"
+         * Writes the crash infos to "/storage/emulated/0/Android/data/<em>packagename</em>/files/crashes.log"
          */
         private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             Formatter formatter = null;

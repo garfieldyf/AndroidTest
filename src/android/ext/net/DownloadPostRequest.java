@@ -115,13 +115,13 @@ public final class DownloadPostRequest extends DownloadRequest {
         } else if (mData instanceof byte[]) {
             connectImpl();
             postData((byte[])mData, (int)mParams[0], (int)mParams[1]);
-        } else if (mData instanceof InputStream) {
-            connectImpl();
-            postData((InputStream)mData, tempBuffer);
         } else if (mData instanceof String) {
             final byte[] data = ((String)mData).getBytes();
             connectImpl();
             postData(data, 0, data.length);
+        } else if (mData instanceof InputStream) {
+            connectImpl();
+            postData((InputStream)mData, tempBuffer);
         } else if (mData instanceof PostCallback) {
             connectImpl();
             ((PostCallback)mData).onPostData(mConnection, mParams);

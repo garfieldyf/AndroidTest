@@ -132,9 +132,9 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
-                result = (Result)onDownload(params, null);
-                if (isCancelled() || !validateResult(params, result)) {
-                    result = null;
+                final Result value = (Result)onDownload(params, null);
+                if (validateResult(params, value)) {
+                    result = value;
                 }
             } else {
                 hitCache = loadFromCache(params, cacheFile);
@@ -154,6 +154,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         try {
             final Result result = JsonUtils.parse(null, cacheFile, this);
             if (hitCache = validateResult(params, result)) {
+                // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
             }
         } catch (Exception e) {

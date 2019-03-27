@@ -120,9 +120,9 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             final LoadParams params = loadParams[0];
             final File cacheFile = params.getCacheFile(key);
             if (cacheFile == null) {
-                result = (Result)onDownload(task, key, params, null);
-                if (isTaskCancelled(task) || !params.validateResult(key, result)) {
-                    result = null;
+                final Result value = (Result)onDownload(task, key, params, null);
+                if (params.validateResult(key, value)) {
+                    result = value;
                 }
             } else {
                 hitCache = loadFromCache(task, key, params, cacheFile);
@@ -142,6 +142,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         try {
             final Result result = JsonUtils.parse(null, cacheFile, task);
             if (hitCache = params.validateResult(key, result)) {
+                // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
             }
         } catch (Exception e) {

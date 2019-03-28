@@ -39,15 +39,15 @@
 
 #ifdef __BUILD_GIFIMAGE__
 // Class FileDescriptor field IDs.
-STDCEXPORT jfieldID _descriptorID;
+__LIBC_HIDDEN__ jfieldID _descriptorID;
 #endif
 
 #ifdef __BUILD_FILEUTILS__
 // Class FileUtils method IDs.
-STDCEXPORT jmethodID _setStatID;
+__LIBC_HIDDEN__ jmethodID _setStatID;
 
 // Class ScanCallback method IDs.
-STDCEXPORT jmethodID _onScanFileID;
+__LIBC_HIDDEN__ jmethodID _onScanFileID;
 #endif
 
 __BEGIN_DECLS

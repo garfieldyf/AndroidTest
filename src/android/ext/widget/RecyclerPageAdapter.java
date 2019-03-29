@@ -36,24 +36,28 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * Constructor
      * @param maxPages The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
-     * @param firstPageSize The item count of the first page (page index == 0).
-     * @param pageSize The item count of per-page (page index > 0).
-     * @see #RecyclerPageAdapter(Cache, int, int)
+     * @param initialSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of the each page (page index > 0).
+     * @param prefetchDistance Defines how far to this adapter should prefetch
+     * the data. Pass <tt>0</tt> indicates that this adapter will not prefetch data.
+     * @see #RecyclerPageAdapter(Cache, int, int, int)
      * @see Pages#createPageCache(int)
      */
-    public RecyclerPageAdapter(int maxPages, int firstPageSize, int pageSize) {
-        this(Pages.<E>createPageCache(maxPages), firstPageSize, pageSize);
+    public RecyclerPageAdapter(int maxPages, int initialSize, int pageSize, int prefetchDistance) {
+        this(Pages.<E>createPageCache(maxPages), initialSize, pageSize, prefetchDistance);
     }
 
     /**
      * Constructor
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
-     * @param firstPageSize The item count of the first page (page index == 0).
-     * @param pageSize The item count of per-page (page index > 0).
-     * @see #RecyclerPageAdapter(int, int, int)
+     * @param initialSize The item count of the first page (page index == 0).
+     * @param pageSize The item count of the each page (page index > 0).
+     * @param prefetchDistance Defines how far to this adapter should prefetch
+     * the data. Pass <tt>0</tt> indicates that this adapter will not prefetch data.
+     * @see #RecyclerPageAdapter(int, int, int, int)
      */
-    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int firstPageSize, int pageSize) {
-        mImpl = new PageAdapterImpl<E>(this, pageCache, firstPageSize, pageSize);
+    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
+        mImpl = new PageAdapterImpl<E>(pageCache, initialSize, pageSize, prefetchDistance, this);
     }
 
     /**
@@ -245,13 +249,21 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     }
 
     /**
+     * Returns the maximum number of pages in this adapter.
+     * @return The maximum number of pages.
+     */
+    public final int getMaxPageCount() {
+        return mImpl.getMaxPageCount();
+    }
+
+    /**
      * Returns the item count of the specified index <em>page</em>.
      * @param page The index of the page.
      * @return The item count.
      */
     public final int getPageSize(int page) {
         DebugUtils.__checkError(page < 0, "page < 0");
-        return (page > 0 ? mImpl.mPageSize : mImpl.mFirstPageSize);
+        return (page > 0 ? mImpl.mPageSize : mImpl.mInitialSize);
     }
 
     /**
@@ -296,10 +308,9 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
      * @param page The index of the page whose data should be returned.
-     * @param offset The start position of the first item.
-     * @param count The number of items in the <em>page</em>.
+     * @param position The position of the first item to load.
+     * @param itemCount The number of items to load.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
-     * @see #setPage(int, Page, Object)
      */
-    public abstract Page<E> loadPage(int page, int offset, int count);
+    public abstract Page<E> loadPage(int page, int position, int itemCount);
 }

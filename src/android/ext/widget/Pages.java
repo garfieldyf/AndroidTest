@@ -129,7 +129,7 @@ public final class Pages {
      * A <tt>PageLoader</tt> used to load page data.
      */
     /* package */ static interface PageLoader<E> {
-        Page<E> loadPage(int page, int offset, int count);
+        Page<E> loadPage(int page, int position, int itemCount);
     }
 
     /**
@@ -138,20 +138,22 @@ public final class Pages {
     /* package */ static final class PageAdapterImpl<E> {
         /* package */ int mItemCount;
         /* package */ final int mPageSize;
-        /* package */ final int mFirstPageSize;
+        /* package */ final int mInitialSize;
+        /* package */ final int mPrefetchDistance;
 
         /* package */ final BitSet mPageStates;
         /* package */ final PageLoader<E> mPageLoader;
         /* package */ final Cache<Integer, Page<E>> mPageCache;
 
         @SuppressWarnings("unchecked")
-        /* package */ PageAdapterImpl(PageLoader<E> loader, Cache<Integer, ? extends Page<? extends E>> pageCache, int firstPageSize, int pageSize) {
-            DebugUtils.__checkError(pageSize <= 0 || firstPageSize <= 0, "pageSize <= 0 || firstPageSize <= 0");
+        /* package */ PageAdapterImpl(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance, PageLoader<E> loader) {
+            DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
             mPageCache  = (Cache<Integer, Page<E>>)pageCache;
             mPageSize   = pageSize;
             mPageLoader = loader;
             mPageStates = new BitSet();
-            mFirstPageSize = firstPageSize;
+            mInitialSize = initialSize;
+            mPrefetchDistance = prefetchDistance;
         }
 
         /* package */ final void setItemCount(int count) {
@@ -163,8 +165,14 @@ public final class Pages {
         /* package */ final E getItem(int position) {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+
             final long combinedPosition = getPageForPosition(position);
-            final Page<E> page = getPage(getOriginalPage(combinedPosition));
+            final int index = getOriginalPage(combinedPosition);
+            final Page<E> page = getPage(index);
+            if (mPrefetchDistance > 0) {
+                prefetchPage(index, (int)combinedPosition);
+            }
+
             return (page != null ? page.getItem((int)combinedPosition) : null);
         }
 
@@ -181,19 +189,19 @@ public final class Pages {
             DebugUtils.__checkError(page < 0, "page < 0");
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
-                // Computes the offset and item count to load.
-                final int offset, count;
+                // Computes the position and itemCount to load.
+                final int position, itemCount;
                 if (page == 0) {
-                    offset = 0;
-                    count  = mFirstPageSize;
+                    position  = 0;
+                    itemCount = mInitialSize;
                 } else {
-                    count  = mPageSize;
-                    offset = (page - 1) * mPageSize + mFirstPageSize;
+                    itemCount = mPageSize;
+                    position  = (page - 1) * mPageSize + mInitialSize;
                 }
 
                 // Loads the page data and marks the page loading state.
                 mPageStates.set(page);
-                result = mPageLoader.loadPage(page, offset, count);
+                result = mPageLoader.loadPage(page, position, itemCount);
                 if (getCount(result) > 0) {
                     // If the page is load successful.
                     // 1. Adds the page to page cache.
@@ -219,19 +227,28 @@ public final class Pages {
             return count;
         }
 
+        /* package */ final int getMaxPageCount() {
+            if (mItemCount == 0) {
+                return 0;
+            }
+
+            final int lastPosition = mItemCount - 1;
+            return (lastPosition < mInitialSize ? 1 : (lastPosition - mInitialSize) / mPageSize + 2);
+        }
+
         /* package */ final long getPageForPosition(int position) {
             DebugUtils.__checkError(position < 0, "position < 0");
-            if (position < mFirstPageSize) {
+            if (position < mInitialSize) {
                 return (position & 0xFFFFFFFFL);
-            } else {
-                final int delta = position - mFirstPageSize;
-                return (((long)(delta / mPageSize + 1) << 32) | ((delta % mPageSize) & 0xFFFFFFFFL));
             }
+
+            final int delta = position - mInitialSize;
+            return (((long)(delta / mPageSize + 1) << 32) | ((delta % mPageSize) & 0xFFFFFFFFL));
         }
 
         /* package */ final int getPositionForPage(int page, int position) {
             DebugUtils.__checkError(page < 0 || position < 0, "page < 0 || position < 0");
-            return (page > 0 ? (page - 1) * mPageSize + mFirstPageSize + position : position);
+            return (page > 0 ? (page - 1) * mPageSize + mInitialSize + position : position);
         }
 
         @SuppressWarnings("resource")
@@ -240,7 +257,7 @@ public final class Pages {
             final Formatter formatter  = new Formatter(result);
             final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
-            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ firstPageSize = %d, pageSize = %d, itemCount = %d ] ", className, mFirstPageSize, mPageSize, mItemCount);
+            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
             DebugUtils.dumpSummary(printer, result, 100, " PageCache [ %s, size = %d ] ", DebugUtils.toString(mPageCache), entries.size());
             for (Entry<Integer, Page<E>> entry : entries) {
                 final Page<E> page = entry.getValue();
@@ -248,6 +265,17 @@ public final class Pages {
 
                 formatter.format("  Page %-2d ==> ", entry.getKey());
                 printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+            }
+        }
+
+        private void prefetchPage(int currentPage, int position) {
+            final int lastPage = (mItemCount - mInitialSize - 1) / mPageSize + 1;
+            if (currentPage < lastPage) {
+                final int pageSize = (currentPage > 0 ? mPageSize : mInitialSize);
+                DebugUtils.__checkError(mPrefetchDistance > pageSize, "prefetchDistance - " + mPrefetchDistance + " greater than pageSize - " + pageSize);
+                if (position >= pageSize - mPrefetchDistance) {
+                    getPage(currentPage + 1);
+                }
             }
         }
 

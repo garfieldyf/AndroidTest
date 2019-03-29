@@ -15,11 +15,10 @@ import android.view.ViewGroup.LayoutParams;
 
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.
- * <p>NOTE For a layout to be inflated asynchronously it needs to have a parent whose
+ * <p>Note: For a layout to be inflated asynchronously it needs to have a parent whose
  * {@link ViewGroup#generateLayoutParams(AttributeSet)} is thread-safely and all the <tt>Views</tt>
  * being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</p>
- * <p>NOTE This inflater does not support setting a {@link LayoutInflater#Factory}. Similarly it does
- * not support inflating layouts that contain fragments.</p>
+ * <p>Note: This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</p>
  * @author Garfield
  */
 public final class AsyncViewStub extends View {
@@ -33,10 +32,7 @@ public final class AsyncViewStub extends View {
     /* package */ int mInflatedId;
 
     public AsyncViewStub(Context context) {
-        super(context);
-
-        setVisibility(GONE);
-        setWillNotDraw(true);
+        this(context, null, 0);
     }
 
     public AsyncViewStub(Context context, AttributeSet attrs) {
@@ -44,13 +40,16 @@ public final class AsyncViewStub extends View {
     }
 
     public AsyncViewStub(Context context, AttributeSet attrs, int defStyleAttr) {
-        this(context);
+        super(context);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, VIEW_STUB_ATTRS, defStyleAttr, 0);
         setId(a.getResourceId(0 /* android.R.attr.id */, NO_ID));
         mLayoutId   = a.getResourceId(1 /* android.R.attr.layout */, 0);
         mInflatedId = a.getResourceId(2 /* android.R.attr.inflatedId */, NO_ID);
         a.recycle();
+
+        setVisibility(GONE);
+        setWillNotDraw(true);
     }
 
     /**
@@ -135,7 +134,7 @@ public final class AsyncViewStub extends View {
 
         // Removes this AsyncViewStub from its parent.
         final int index = parent.indexOfChild(this);
-        parent.removeViewInLayout(this);
+        parent.removeViewsInLayout(index, 1);
 
         // Adds the inflated view to its parent.
         final LayoutParams params = getLayoutParams();

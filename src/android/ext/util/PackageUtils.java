@@ -48,7 +48,7 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link PackageInfo} objects.
-     * @see InstalledApplicationFilter
+     * @see InstalledApplicationsFilter
      */
     public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<PackageInfo> result = pm.getInstalledPackages(flags);
@@ -70,7 +70,7 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledApplications(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the applications.
      * @return A <tt>List</tt> of {@link ApplicationInfo} objects.
-     * @see InstalledApplicationFilter
+     * @see InstalledApplicationsFilter
      */
     public static List<ApplicationInfo> getInstalledApplications(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<ApplicationInfo> result = pm.getInstalledApplications(flags);
@@ -282,26 +282,26 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>InstalledApplicationFilter</tt> filtering the installed applications (excluding the system application).
+     * Class <tt>InstalledApplicationsFilter</tt> filtering the installed applications (excluding the system application).
      */
-    public static final class InstalledApplicationFilter implements Filter<ApplicationInfo> {
+    public static final class InstalledApplicationsFilter implements Filter<ApplicationInfo> {
         private final Collection<String> mPackages;
 
         /**
          * Constructor
          * @param excludingPackages An array of package names to filter.
-         * @see #InstalledApplicationFilter(Collection)
+         * @see #InstalledApplicationsFilter(Collection)
          */
-        public InstalledApplicationFilter(String... excludingPackages) {
+        public InstalledApplicationsFilter(String... excludingPackages) {
             mPackages = (excludingPackages != null ? Arrays.asList(excludingPackages) : Collections.<String>emptyList());
         }
 
         /**
          * Constructor
          * @param excludingPackages The <tt>Collection</tt> of package names to filter.
-         * @see #InstalledApplicationFilter(String[])
+         * @see #InstalledApplicationsFilter(String[])
          */
-        public InstalledApplicationFilter(Collection<String> excludingPackages) {
+        public InstalledApplicationsFilter(Collection<String> excludingPackages) {
             mPackages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
         }
 

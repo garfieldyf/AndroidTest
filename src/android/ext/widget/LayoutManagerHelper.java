@@ -144,7 +144,7 @@ public final class LayoutManagerHelper {
             if (invalidateParent) {
                 final View parent = (View)view.getParent();
                 if (parent != null) {
-                    parent.invalidate(view.getLeft(), view.getTop(), view.getRight(), view.getBottom());
+                    parent.invalidate();
                 }
             }
 

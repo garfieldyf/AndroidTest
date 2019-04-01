@@ -360,8 +360,8 @@ public final class FileUtils {
     }
 
     /**
-     * Returns the file protection with the specified <em>path</em>.
-     * This corresponds to the linux structure <tt>stat.st_mode</tt>.
+     * Returns the file protection with the specified <em>path</em>. The
+     * returned value corresponds to the linux structure <tt>stat.st_mode</tt>.
      * @param path The file or directory path, must be absolute file path.
      * @return The file protection if the operation succeeded, <tt>0</tt> otherwise.
      * @see #getFileType(String)

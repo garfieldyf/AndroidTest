@@ -71,9 +71,21 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     return (path.empty() ? EINVAL : __NS::createDirectory(path.data, path.size));
 }
 
-__STATIC_INLINE__ bool isDirectory(const struct dirent* entry, const char* path)
+__STATIC_INLINE__ bool isDirectory(const char* path, const struct dirent* entry)
 {
     return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
+}
+
+__STATIC_INLINE__ jint getFileType(const char* path, const struct dirent* entry)
+{
+    jint type = entry->d_type;
+    if (type == DT_LNK)
+    {
+        struct stat buf;
+        type = (::stat(path, &buf) == 0 ? ((buf.st_mode & S_IFMT) >> 12) : DT_UNKNOWN);
+    }
+
+    return type;
 }
 
 __STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
@@ -128,9 +140,9 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
         // Builds the unique filename.
         char format[MAX_PATH];
         if (const char* ext = ::strrchr(name, '.'))
-            ::snprintf(format, _countof(format), "%.*s/%.*s(%%d)%s", dirPath.size, dirPath.data, (uint32_t)(ext - name), name, ext);
+            ::snprintf(format, _countof(format), "%.*s/%.*s-%%d%s", dirPath.size, dirPath.data, (uint32_t)(ext - name), name, ext);
         else
-            ::snprintf(format, _countof(format), "%.*s/%s(%%d)", dirPath.size, dirPath.data, name);
+            ::snprintf(format, _countof(format), "%.*s/%s-%%d", dirPath.size, dirPath.data, name);
 
         int index = 0;
         do
@@ -167,7 +179,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, cookie);
+                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getFileType(filePath, entry), cookie);
                 if (result == SC_STOP) {
                     dirPaths.clear();
                     break;
@@ -175,7 +187,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                     break;
                 } else if (result == SC_BREAK) {
                     continue;
-                } else if (isDirectory(entry, filePath)) {
+                } else if (isDirectory(filePath, entry)) {
                     // If filePath is a directory adds it to dirPaths front.
                     dirPaths.push_front(filePath);
                 }
@@ -203,7 +215,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, cookie);
+            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getFileType(filePath, entry), cookie);
             if (result == SC_BREAK) {
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
@@ -211,7 +223,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
             }
 
             // Scans the sub directory.
-            if (isDirectory(entry, filePath) && ((errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result)) != 0 || result == SC_STOP)) {
+            if (isDirectory(filePath, entry) && ((errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result)) != 0 || result == SC_STOP)) {
                 break;
             }
         }
@@ -285,7 +297,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, (jint)entry->d_type, cookie) != SC_CONTINUE)
+                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getFileType(filePath, entry), cookie) != SC_CONTINUE)
                     break;
             }
         }
@@ -360,7 +372,7 @@ JNIEXPORT_METHOD(jint) getFileMode(JNIEnv* env, jclass /*clazz*/, jstring path)
     AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", 0);
 
     struct stat buf;
-    return (__NS::getFileStatus(JNI::jstring_t(env, path), buf) == 0 ? buf.st_mode : 0);
+    return (::stat(JNI::jstring_t(env, path), &buf) == 0 ? buf.st_mode : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -374,7 +386,9 @@ JNIEXPORT_METHOD(jint) getFileStatus(JNIEnv* env, jclass clazz, jstring path, jo
     AssertThrowErrnoException(env, JNI::getLength(env, path) == 0 || outStat == NULL, "path == null || path.length() == 0 || outStat == null", EINVAL);
 
     struct stat buf;
-    const jint errnum = __NS::getFileStatus(JNI::jstring_t(env, path), buf);
+    const JNI::jstring_t jpath(env, path);
+
+    const jint errnum = __verify((::stat(jpath, &buf) == 0 ? 0 : errno), "Couldn't get file '%s' status", jpath.str());
     if (errnum == 0)
         env->CallStaticVoidMethod(clazz, _setStatID, outStat, (jint)buf.st_mode, (jint)buf.st_uid, (jint)buf.st_gid, (jlong)buf.st_size, (jlong)buf.st_blocks, (jlong)buf.st_blksize, (jlong)buf.st_mtime * MILLISECONDS);
 

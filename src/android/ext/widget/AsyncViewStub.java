@@ -126,7 +126,7 @@ public final class AsyncViewStub extends View {
     /**
      * Called on the UI thread after this <tt>AsyncViewStub</tt> has successfully inflated its layout resource.
      */
-    /* package */ final void onFinishInflate(View view, ViewGroup parent, OnInflateListener listener) {
+    /* package */ final void onFinishInflate(View view, ViewGroup parent) {
         // Sets the inflated view id.
         if (mInflatedId != NO_ID) {
             view.setId(mInflatedId);
@@ -142,11 +142,6 @@ public final class AsyncViewStub extends View {
             parent.addView(view, index);
         } else {
             parent.addView(view, index, params);
-        }
-
-        // Notifies the listener this AsyncViewStub has successfully inflated.
-        if (listener != null) {
-            listener.onFinishInflate(this, view, mLayoutId);
         }
     }
 
@@ -196,11 +191,16 @@ public final class AsyncViewStub extends View {
 
         @Override
         protected void onPostExecute(View result) {
+            // Failed to inflate mLayoutId in the background.
+            // Inflating it on the UI thread.
             if (result == null) {
                 result = mInflater.inflate(mLayoutId, mParent, false);
             }
 
-            onFinishInflate(result, mParent, mListener);
+            onFinishInflate(result, mParent);
+            if (mListener != null) {
+                mListener.onFinishInflate(AsyncViewStub.this, result, mLayoutId);
+            }
         }
     }
 

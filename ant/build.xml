@@ -174,7 +174,7 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_widget.xml" />
+        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ndk.module}_widget.xml" />
         <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${ndk.module}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">

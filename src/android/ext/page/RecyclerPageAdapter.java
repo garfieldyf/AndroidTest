@@ -1,28 +1,27 @@
-package android.ext.widget;
+package android.ext.page;
 
-import java.util.Arrays;
-import java.util.List;
-import org.json.JSONArray;
 import android.ext.cache.Cache;
-import android.ext.util.ArrayUtils;
+import android.ext.page.Pages.PageAdapterImpl;
+import android.ext.page.Pages.PageLoader;
 import android.ext.util.DebugUtils;
-import android.ext.util.JsonUtils;
-import android.ext.widget.Pages.JSONPage;
-import android.ext.widget.Pages.ListPage;
-import android.ext.widget.Pages.Page;
-import android.ext.widget.Pages.PageAdapterImpl;
-import android.ext.widget.Pages.PageLoader;
+import android.ext.util.UIHandler;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 
 /**
- * Class <tt>PageAdapter</tt> allows to loading data by page.
- * @param E The item data type of the adapter.
+ * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page.
+ * <h5>RecyclerPageAdapter's generic types</h5>
+ * <p>The two types used by a page adapter are the following:</p>
+ * <ol><li><tt>E</tt>, The item data type of the adapter.</li>
+ * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will
+ * be used by the adapter.</li></ol>
  * @author Garfield
  */
-public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E> {
+public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adapter<VH> implements PageLoader<E> {
+    private RecyclerView mRecyclerView;
     private final PageAdapterImpl<E> mImpl;
 
     /**
@@ -34,11 +33,11 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param prefetchDistance Defines how far to the last item in the page to
      * this adapter should prefetch the data. Pass <tt>0</tt> indicates that
      * this adapter will not prefetch data.
-     * @see #PageAdapter(Cache, int, int, int)
-     * @see Pages#createPageCache(int)
+     * @see #RecyclerPageAdapter(Cache, int, int, int)
+     * @see Pages#newPageCache(int)
      */
-    public PageAdapter(int maxPages, int initialSize, int pageSize, int prefetchDistance) {
-        this(Pages.<E>createPageCache(maxPages), initialSize, pageSize, prefetchDistance);
+    public RecyclerPageAdapter(int maxPages, int initialSize, int pageSize, int prefetchDistance) {
+        this(Pages.<E>newPageCache(maxPages), initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -49,49 +48,31 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param prefetchDistance Defines how far to the last item in the page
      * to this adapter should prefetch the data. Pass <tt>0</tt> indicates
      * that this adapter will not prefetch data.
-     * @see #PageAdapter(int, int, int, int)
+     * @see #RecyclerPageAdapter(int, int, int, int)
      */
-    public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
+    public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
         mImpl = new PageAdapterImpl<E>(pageCache, initialSize, pageSize, prefetchDistance, this);
+    }
+
+    /**
+     * @see #setItemCount(int)
+     */
+    @Override
+    public int getItemCount() {
+        return mImpl.mItemCount;
     }
 
     /**
      * Sets total number of items in this adapter.
      * @param count The total number of items in this adapter.
-     * @see #getCount()
+     * @see #getItemCount()
      */
-    public void setCount(int count) {
+    public void setItemCount(int count) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         if (mImpl.mItemCount != count) {
             mImpl.setItemCount(count);
-            if (count > 0) {
-                notifyDataSetChanged();
-            } else {
-                notifyDataSetInvalidated();
-            }
+            UIHandler.notifyDataSetChanged(mRecyclerView);
         }
-    }
-
-    /**
-     * @see #setCount(int)
-     */
-    @Override
-    public int getCount() {
-        return mImpl.mItemCount;
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return -1;
-    }
-
-    @Override
-    public View getView(int position, View view, ViewGroup parent) {
-        if (view == null) {
-            view = newView(position, parent);
-        }
-
-        bindView(getItem(position), position, view);
-        return view;
     }
 
     /**
@@ -100,11 +81,37 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
-     * @see #peekItem(int)
+     * @see #getItem(View)
+     * @see #getItem(ViewHolder)
      */
-    @Override
     public E getItem(int position) {
         return mImpl.getItem(position);
+    }
+
+    /**
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(int)
+     * @see #getItem(ViewHolder)
+     */
+    public final E getItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
+     * @param viewHolder The {@link ViewHolder} to query its adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(int)
+     * @see #getItem(View)
+     */
+    public final E getItem(ViewHolder viewHolder) {
+        final int position = viewHolder.getAdapterPosition();
+        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
     }
 
     /**
@@ -113,10 +120,37 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * when the item was not present.</p>
      * @param position The adapter position of the item.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
-     * @see #getItem(int)
+     * @see #peekItem(View)
+     * @see #peekItem(ViewHolder)
      */
     public E peekItem(int position) {
         return mImpl.peekItem(position);
+    }
+
+    /**
+     * Equivalent to calling <tt>peekItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(int)
+     * @see #peekItem(ViewHolder)
+     */
+    public final E peekItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != RecyclerView.NO_POSITION ? peekItem(position) : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>peekItem(viewHolder.getAdapterPosition())</tt>.
+     * @param viewHolder The {@link ViewHolder} to query its adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(int)
+     * @see #peekItem(View)
+     */
+    public final E peekItem(ViewHolder viewHolder) {
+        final int position = viewHolder.getAdapterPosition();
+        return (position != RecyclerView.NO_POSITION ? peekItem(position) : null);
     }
 
     /**
@@ -145,55 +179,38 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
     }
 
     /**
+     * Equivalent to calling <tt>setPage(page, data, null)</tt>.
+     * @param page The index of the page.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
+     * @see #setPage(int, Page, Object)
+     */
+    public final void setPage(int page, Page<E> data) {
+        setPage(page, data, null);
+    }
+
+    /**
      * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
      * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
-     * @see #setPage(int, E[])
-     * @see #setPage(int, List)
-     * @see #setPage(int, JSONArray)
+     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
+     * @see #setPage(int, Page)
      */
-    public void setPage(int page, Page<E> data) {
-        if (mImpl.setPage(page, data) > 0) {
-            notifyDataSetChanged();
+    public void setPage(int page, Page<E> data, Object payload) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int count = mImpl.setPage(page, data);
+        if (count > 0) {
+            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), count, payload);
         }
     }
 
     /**
-     * Equivalent to calling <tt>setPage(page, new ListPage(data))</tt>.
-     * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The {@link List} of the page data.
-     * @see #setPage(int, E[])
-     * @see #setPage(int, Page)
-     * @see #setPage(int, JSONArray)
+     * Returns the {@link RecyclerView} associated with this adapter.
+     * @return The {@link RecyclerView} object or <tt>null</tt> if
+     * this adapter not attached to the <tt>RecyclerView</tt>.
      */
-    public final void setPage(int page, List<E> data) {
-        setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null));
-    }
-
-    /**
-     * Equivalent to calling <tt>setPage(page, new JSONPage(data))</tt>.
-     * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The {@link JSONArray} of the page data.
-     * @see #setPage(int, E[])
-     * @see #setPage(int, Page)
-     * @see #setPage(int, List)
-     */
-    public final void setPage(int page, JSONArray data) {
-        setPage(page, (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null));
-    }
-
-    /**
-     * Equivalent to calling <tt>setPage(page, new ListPage(Arrays.asList(data)))</tt>.
-     * @param page The index of the page.
-     * @param data May be <tt>null</tt>. An array of the page data.
-     * @see #setPage(int, List)
-     * @see #setPage(int, Page)
-     * @see #setPage(int, JSONArray)
-     */
-    @SuppressWarnings("unchecked")
-    public final void setPage(int page, E... data) {
-        setPage(page, (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null));
+    public final RecyclerView getRecyclerView() {
+        return mRecyclerView;
     }
 
     /**
@@ -244,30 +261,17 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
         mImpl.dump(printer, getClass().getSimpleName());
     }
 
-    /**
-     * Returns a new {@link View} to hold the item data.
-     * @param position The adapter position of the item.
-     * @param parent The parent to which the new view is attached to.
-     * @return The newly created view.
-     * @see #bindView(E, int, View)
-     */
-    protected abstract View newView(int position, ViewGroup parent);
-
-    /**
-     * Binds an existing {@link View} to hold the item data.
-     * @param item The item to bind view or <tt>null</tt>.
-     * @param position The adapter position of the item.
-     * @param view Existing view, returned earlier by {@link #newView}.
-     * @see #newView(int, ViewGroup)
-     */
-    protected abstract void bindView(E item, int position, View view);
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        mRecyclerView = recyclerView;
+    }
 
     /**
      * Returns the {@link Page} at the given position <em>page</em>. Subclasses
      * must implement this method to return <tt>Page</tt> for a particular page.
      * <p>If you want to asynchronously load the page data to prevent blocking
      * the UI, it is possible to return <tt>null</tt> and at a later time call
-     * {@link #setPage(int, Page)}.<p>
+     * {@link #setPage(int, Page, Object)}.<p>
      * @param page The index of the page whose data should be returned.
      * @param startPosition The position of the first item to load.
      * @param itemCount The number of items to load.

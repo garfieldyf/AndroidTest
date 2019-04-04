@@ -1,21 +1,27 @@
-package android.ext.widget;
+package android.ext.page;
 
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import org.json.JSONArray;
+import android.database.Cursor;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
+import android.ext.database.DatabaseUtils;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.JsonUtils;
 import android.util.Printer;
 
 /**
  * Class Pages
  * @author Garfield
  */
+@SuppressWarnings({ "unchecked", "resource" })
 public final class Pages {
     /**
      * Returns the index of the page with the given the <em>combinedPosition</em>.
@@ -40,89 +46,52 @@ public final class Pages {
     }
 
     /**
+     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
+     * @param data The {@link List} of the page data.
+     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     */
+    public static <E> Page<E> newPage(List<E> data) {
+        return (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null);
+    }
+
+    /**
+     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
+     * @param data An array of the page data.
+     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     */
+    public static <E> Page<E> newPage(E... data) {
+        return (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null);
+    }
+
+    /**
+     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
+     * @param data The {@link JSONArray} of the page data.
+     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     */
+    public static <E> Page<E> newPage(JSONArray data) {
+        return (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null);
+    }
+
+    /**
+     * Returns a new {@link Page} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
+     * @param cursor The {@link Cursor} of the page data.
+     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     */
+    public static Page<Cursor> newPage(Cursor cursor) {
+        return (DatabaseUtils.getCount(cursor) > 0 ? new CursorPage(cursor) : null);
+    }
+
+    /**
      * Returns a new page cache instance.
      * @param maxPages The maximum number of pages to allow in the page cache. Pass
      * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link Page} {@link Cache} instance.
      * @see SimpleLruCache
      * @see ArrayMapCache
+     * @see CursorPageCache
      */
-    public static <E> Cache<Integer, Page<E>> createPageCache(int maxPages) {
+    public static <E> Cache<Integer, Page<E>> newPageCache(int maxPages) {
         return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new ArrayMapCache<Integer, Page<E>>(8));
-    }
-
-    /**
-     * A <tt>Page</tt> is a collection used to adds the page data to the adapter.
-     */
-    public static interface Page<E> {
-        /**
-         * Returns the total number of items in this page.
-         * @return The total number of items in this page.
-         * @see #getItem(int)
-         */
-        int getCount();
-
-        /**
-         * Returns the item at the specified <em>position</em> in this page.
-         * @param position The position of the item.
-         * @return The item at the specified <em>position</em>, or <tt>null</tt>
-         * if this page has no item at <em>position</em>.
-         * @see #getCount()
-         */
-        E getItem(int position);
-    }
-
-    /**
-     * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
-     */
-    public static class ListPage<E> implements Page<E> {
-        protected final List<E> mData;
-
-        /**
-         * Constructor
-         * @param data A {@link List} of this page data.
-         */
-        public ListPage(List<E> data) {
-            DebugUtils.__checkError(data == null || data.size() <= 0, "data == null || data.size() <= 0");
-            mData = data;
-        }
-
-        @Override
-        public int getCount() {
-            return mData.size();
-        }
-
-        @Override
-        public E getItem(int position) {
-            return mData.get(position);
-        }
-    }
-
-    /**
-     * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
-     */
-    public static class JSONPage<E> implements Page<E> {
-        protected final JSONArray mData;
-
-        /**
-         * Constructor
-         * @param data A {@link JSONArray} of this page data.
-         */
-        public JSONPage(JSONArray data) {
-            DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
-            mData = data;
-        }
-
-        @Override
-        public int getCount() {
-            return mData.length();
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public E getItem(int position) {
-            return (E)mData.opt(position);
-        }
     }
 
     /**
@@ -145,7 +114,6 @@ public final class Pages {
         /* package */ final PageLoader<E> mPageLoader;
         /* package */ final Cache<Integer, Page<E>> mPageCache;
 
-        @SuppressWarnings("unchecked")
         /* package */ PageAdapterImpl(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance, PageLoader<E> loader) {
             DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
             DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
@@ -252,7 +220,6 @@ public final class Pages {
             return (page > 0 ? (page - 1) * mPageSize + mInitialSize + position : position);
         }
 
-        @SuppressWarnings("resource")
         /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
             final Formatter formatter  = new Formatter(result);

@@ -45,15 +45,8 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
 
     @Override
     public File get(String key) {
-        File result = super.get(key);
-        if (result == null) {
-            result = buildCacheFile(key);
-            if (isCacheFileValid(key, result)) {
-                put(key, result);
-            }
-        }
-
-        return result;
+        final File result = super.get(key);
+        return (result != null ? result : buildCacheFile(key));
     }
 
     @Override
@@ -64,25 +57,18 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     }
 
     /**
-     * Tests if the <em>cacheFile</em> is valid. Subclasses should override this
-     * method to check the <em>cacheFile</em>.<p>The default implementation check
-     * the <em>cacheFile</em> exists.</p>
-     * @param key The key.
-     * @param cacheFile The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
-     * @return <tt>true</tt> if the <em>cacheFile</em> is valid, <tt>false</tt> otherwise.
-     */
-    protected boolean isCacheFileValid(String key, File cacheFile) {
-        return cacheFile.exists();
-    }
-
-    /**
      * Builds the cache file with the specified <em>key</em>. <p>The method is called without
      * synchronization: other threads may access the cache while this method is executing.</p>
      * @param key The key.
      * @return The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
      */
     protected File buildCacheFile(String key) {
-        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
+        final File result = new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
+        if (result.exists()) {
+            put(key, result);
+        }
+
+        return result;
     }
 
     @Override

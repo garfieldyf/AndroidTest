@@ -269,9 +269,9 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page)}.<p>
      * @param page The index of the page whose data should be returned.
-     * @param position The position of the first item to load.
+     * @param startPosition The position of the first item to load.
      * @param itemCount The number of items to load.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
-    public abstract Page<E> loadPage(int page, int position, int itemCount);
+    public abstract Page<E> loadPage(int page, int startPosition, int itemCount);
 }

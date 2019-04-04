@@ -38,8 +38,9 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
-     * @param prefetchDistance Defines how far to this adapter should prefetch
-     * the data. Pass <tt>0</tt> indicates that this adapter will not prefetch data.
+     * @param prefetchDistance Defines how far to the last item in the page to
+     * this adapter should prefetch the data. Pass <tt>0</tt> indicates that
+     * this adapter will not prefetch data.
      * @see #RecyclerPageAdapter(Cache, int, int, int)
      * @see Pages#createPageCache(int)
      */
@@ -52,8 +53,9 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param pageCache The {@link Page} {@link Cache} to store the pages.
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
-     * @param prefetchDistance Defines how far to this adapter should prefetch
-     * the data. Pass <tt>0</tt> indicates that this adapter will not prefetch data.
+     * @param prefetchDistance Defines how far to the last item in the page
+     * to this adapter should prefetch the data. Pass <tt>0</tt> indicates
+     * that this adapter will not prefetch data.
      * @see #RecyclerPageAdapter(int, int, int, int)
      */
     public RecyclerPageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {

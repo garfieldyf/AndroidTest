@@ -8,7 +8,7 @@ import android.os.Looper;
  * @author Garfield
  */
 public abstract class CountDownTimer implements Runnable {
-    private int mCountDown;
+    private volatile int mCountDown;
     private final Handler mHandler;
     private final int mCountDownTime;
     private final long mIntervalMillis;
@@ -62,6 +62,7 @@ public abstract class CountDownTimer implements Runnable {
      * @see #start()
      */
     public final void cancel() {
+        mCountDown = -1;
         mHandler.removeCallbacks(this);
     }
 

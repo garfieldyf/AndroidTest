@@ -148,6 +148,7 @@ public final class Pages {
         @SuppressWarnings("unchecked")
         /* package */ PageAdapterImpl(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance, PageLoader<E> loader) {
             DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
+            DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
             mPageCache  = (Cache<Integer, Page<E>>)pageCache;
             mPageSize   = pageSize;
             mPageLoader = loader;
@@ -272,7 +273,6 @@ public final class Pages {
             final int lastPage = (mItemCount - mInitialSize - 1) / mPageSize + 1;
             if (currentPage < lastPage) {
                 final int pageSize = (currentPage > 0 ? mPageSize : mInitialSize);
-                DebugUtils.__checkError(mPrefetchDistance > pageSize, "prefetchDistance - " + mPrefetchDistance + " greater than pageSize - " + pageSize);
                 if (position >= pageSize - mPrefetchDistance) {
                     getPage(currentPage + 1);
                 }

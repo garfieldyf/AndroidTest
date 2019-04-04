@@ -73,11 +73,11 @@ public final class Pages {
     }
 
     /**
-     * Returns a new {@link Page} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
+     * Returns a new {@link ResourcePage} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
      * @param cursor The {@link Cursor} of the page data.
-     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     * @return A new <tt>ResourcePage</tt> or <tt>null</tt>.
      */
-    public static Page<Cursor> newPage(Cursor cursor) {
+    public static ResourcePage<Cursor> newPage(Cursor cursor) {
         return (DatabaseUtils.getCount(cursor) > 0 ? new CursorPage(cursor) : null);
     }
 
@@ -88,10 +88,93 @@ public final class Pages {
      * @return A new {@link Page} {@link Cache} instance.
      * @see SimpleLruCache
      * @see ArrayMapCache
-     * @see CursorPageCache
+     * @see ResourcePageCache
      */
     public static <E> Cache<Integer, Page<E>> newPageCache(int maxPages) {
         return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new ArrayMapCache<Integer, Page<E>>(8));
+    }
+
+    /**
+     * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
+     */
+    /* package */ static final class ListPage<E> implements Page<E> {
+        private final List<E> mData;
+
+        /**
+         * Constructor
+         * @param data A {@link List} of this page data.
+         */
+        public ListPage(List<E> data) {
+            DebugUtils.__checkError(data == null || data.size() <= 0, "data == null || data.size() <= 0");
+            mData = data;
+        }
+
+        @Override
+        public int getCount() {
+            return mData.size();
+        }
+
+        @Override
+        public E getItem(int position) {
+            return mData.get(position);
+        }
+    }
+
+    /**
+     * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
+     */
+    /* package */ static final class JSONPage<E> implements Page<E> {
+        private final JSONArray mData;
+
+        /**
+         * Constructor
+         * @param data A {@link JSONArray} of this page data.
+         */
+        public JSONPage(JSONArray data) {
+            DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
+            mData = data;
+        }
+
+        @Override
+        public int getCount() {
+            return mData.length();
+        }
+
+        @Override
+        public E getItem(int position) {
+            return (E)mData.opt(position);
+        }
+    }
+
+    /**
+     * Class <tt>CursorPage</tt> is an implementation of a {@link ResourcePage}.
+     */
+    /* package */ static final class CursorPage implements ResourcePage<Cursor> {
+        private final Cursor mCursor;
+
+        /**
+         * Constructor
+         * @param cursor A {@link Cursor} of this page data.
+         */
+        public CursorPage(Cursor cursor) {
+            DebugUtils.__checkError(cursor == null || cursor.getCount() <= 0, "cursor == null || cursor.getCount() <= 0");
+            mCursor = cursor;
+        }
+
+        @Override
+        public void close() {
+            mCursor.close();
+        }
+
+        @Override
+        public int getCount() {
+            return mCursor.getCount();
+        }
+
+        @Override
+        public Cursor getItem(int position) {
+            return (mCursor.moveToPosition(position) ? mCursor : null);
+        }
     }
 
     /**

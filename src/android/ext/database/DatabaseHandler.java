@@ -75,7 +75,7 @@ public abstract class DatabaseHandler {
      * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")
-    protected final <T extends Activity> T getOwnerActivity() {
+    public final <T extends Activity> T getOwnerActivity() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);

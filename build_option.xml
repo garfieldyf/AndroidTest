@@ -16,7 +16,7 @@
     <!-- debug output filename -->
     <target name="-rename-debug-out-file">
         <property name="out.file.dir" value="debug" />
-        <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
+        <property name="out.file.name" value="${ant.project.name}_v${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/debug" />
     </target>
@@ -26,7 +26,7 @@
     <!-- release output filename -->
     <target name="-rename-release-out-file">
         <property name="out.file.dir" value="release" />
-        <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
+        <property name="out.file.name" value="${ant.project.name}_v${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/release" />
     </target>

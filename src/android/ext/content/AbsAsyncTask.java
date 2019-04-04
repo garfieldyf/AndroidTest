@@ -83,7 +83,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * the owner activity has been finished or destroyed or release by the GC.
      * @see #setOwner(Object)
      */
-    protected final <T extends Activity> T getOwnerActivity() {
+    public final <T extends Activity> T getOwnerActivity() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);

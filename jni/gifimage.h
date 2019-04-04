@@ -9,7 +9,6 @@
 #ifndef __GIFIMAGE_H__
 #define __GIFIMAGE_H__
 
-#include <android/asset_manager_jni.h>
 #include "gif_lib.h"
 #include "gdiutil.h"
 #include "strmutil.h"
@@ -19,7 +18,6 @@
 // JNI native methods in this file:
 //
 // nativeDecodeFile()
-// nativeDecodeAsset()
 // nativeDecodeArray()
 // nativeDecodeStream()
 // nativeDraw()
@@ -98,19 +96,6 @@ JNIEXPORT_METHOD(jlong) nativeDecodeFile(JNIEnv* env, jclass /*clazz*/, jobject 
     assert(env);
 
     __NS::FileHandle file(env->GetIntField(fd, _descriptorID));
-    return reinterpret_cast<jlong>(GifDecodeImage(file));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     GIFImage
-// Method:    nativeDecodeAsset
-// Signature: (J)J
-
-JNIEXPORT_METHOD(jlong) nativeDecodeAsset(JNIEnv* /*env*/, jclass /*clazz*/, jlong asset)
-{
-    assert(asset);
-
-    __NS::AssetFileHandle file(reinterpret_cast<void*>(asset));
     return reinterpret_cast<jlong>(GifDecodeImage(file));
 }
 
@@ -257,7 +242,6 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "nativeDestroy", "(J)V", (void*)nativeDestroy },
         { "nativeGetWidth", "(J)I", (void*)nativeGetWidth },
         { "nativeGetHeight", "(J)I", (void*)nativeGetHeight },
-        { "nativeDecodeAsset", "(J)J", (void*)nativeDecodeAsset },
         { "nativeDecodeArray", "([BII)J", (void*)nativeDecodeArray },
         { "nativeGetFrameCount", "(J)I", (void*)nativeGetFrameCount },
         { "nativeGetFrameDelay", "(JI)I", (void*)nativeGetFrameDelay },

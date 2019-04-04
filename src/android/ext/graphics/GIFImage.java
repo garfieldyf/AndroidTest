@@ -4,7 +4,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import android.content.Context;
-import android.content.res.AssetManager.AssetInputStream;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.ext.util.ArrayUtils.ByteArrayPool;
@@ -13,7 +12,6 @@ import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.os.Build;
 import android.util.Log;
 import android.util.Printer;
 
@@ -60,9 +58,6 @@ public final class GIFImage {
         final long nativeImage;
         if (is instanceof FileInputStream) {
             nativeImage = nativeDecodeFile(getFileDescriptor(is));
-        } else if (is instanceof AssetInputStream && Build.VERSION.SDK_INT < 28) {
-            final AssetInputStream asset = (AssetInputStream)is;
-            nativeImage = nativeDecodeAsset(Build.VERSION.SDK_INT > 20 ? asset.getNativeAsset() : asset.getAssetInt());
         } else if (tempStorage == null) {
             nativeImage = decodeStreamInternal(is);
         } else {
@@ -219,7 +214,6 @@ public final class GIFImage {
         }
     }
 
-    private static native long nativeDecodeAsset(long asset);
     private static native long nativeDecodeFile(FileDescriptor fd);
     private static native long nativeDecodeArray(byte[] data, int offset, int length);
     private static native long nativeDecodeStream(InputStream is, byte[] tempStorage);

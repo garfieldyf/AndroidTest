@@ -3,6 +3,7 @@ package android.ext.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.DrawUtils;
+import android.ext.util.ClassUtils;
 import android.ext.util.StringUtils;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,7 +16,6 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
-import com.tencent.test.R;
 
 /**
  * Class BarcodeDecorView
@@ -50,23 +50,23 @@ public class BarcodeDecorView extends View {
         final DisplayMetrics dm = getResources().getDisplayMetrics();
         mScanningBounds = new Rect();
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.BarcodeDecorView);
-        mMaskColor    = a.getColor(R.styleable.BarcodeDecorView_maskColor, 0x80000000);
-        mBorderColor  = a.getColor(R.styleable.BarcodeDecorView_borderColor, 0xff808080);
-        mCornerColor  = a.getColor(R.styleable.BarcodeDecorView_cornerColor, 0xff80ff00);
-        mCornerWidth  = getDimension(a, R.styleable.BarcodeDecorView_cornerWidth, 15, TypedValue.COMPLEX_UNIT_DIP, dm);
-        mCornerHeight = getDimension(a, R.styleable.BarcodeDecorView_cornerHeight, 3, TypedValue.COMPLEX_UNIT_DIP, dm);
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "BarcodeDecorView"));
+        mMaskColor    = a.getColor((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_maskColor"), 0x80000000);
+        mBorderColor  = a.getColor((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_borderColor"), 0xff808080);
+        mCornerColor  = a.getColor((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_cornerColor"), 0xff80ff00);
+        mCornerWidth  = getDimension(context, a, "BarcodeDecorView_cornerWidth", 15, TypedValue.COMPLEX_UNIT_DIP, dm);
+        mCornerHeight = getDimension(context, a, "BarcodeDecorView_cornerHeight", 3, TypedValue.COMPLEX_UNIT_DIP, dm);
 
-        mText = a.getText(R.styleable.BarcodeDecorView_android_text);
-        mTextColor  = a.getColor(R.styleable.BarcodeDecorView_android_textColor, 0xffa4a4a4);
-        mTextOffset = getDimension(a, R.styleable.BarcodeDecorView_textOffset, 20, TypedValue.COMPLEX_UNIT_DIP, dm);
+        mText = a.getText((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_android_text"));
+        mTextColor  = a.getColor((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_android_textColor"), 0xffa4a4a4);
+        mTextOffset = getDimension(context, a, "BarcodeDecorView_textOffset", 20, TypedValue.COMPLEX_UNIT_DIP, dm);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setTextSize(getDimension(a, R.styleable.BarcodeDecorView_android_textSize, 15, TypedValue.COMPLEX_UNIT_SP, dm));
-        mPaint.setStrokeWidth(getDimension(a, R.styleable.BarcodeDecorView_borderWidth, 1, TypedValue.COMPLEX_UNIT_DIP, dm));
+        mPaint.setTextSize(getDimension(context, a, "BarcodeDecorView_android_textSize", 15, TypedValue.COMPLEX_UNIT_SP, dm));
+        mPaint.setStrokeWidth(getDimension(context, a, "BarcodeDecorView_borderWidth", 1, TypedValue.COMPLEX_UNIT_DIP, dm));
 
-        mScanningIndicator = a.getDrawable(R.styleable.BarcodeDecorView_scanningIndicator);
-        mScanningIndicatorHeight = a.getDimensionPixelOffset(R.styleable.BarcodeDecorView_scanningIndicatorHeight, 0);
+        mScanningIndicator = a.getDrawable((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_scanningIndicator"));
+        mScanningIndicatorHeight = a.getDimensionPixelOffset((int)ClassUtils.getAttributeValue(context, "BarcodeDecorView_scanningIndicatorHeight"), 0);
 
         if (mScanningIndicatorHeight <= 0 && mScanningIndicator != null) {
             mScanningIndicatorHeight = mScanningIndicator.getIntrinsicHeight();
@@ -384,8 +384,8 @@ public class BarcodeDecorView extends View {
         }
     }
 
-    private static float getDimension(TypedArray a, int index, float defaultValue, int unit, DisplayMetrics dm) {
-        final float value = a.getDimension(index, 0);
+    private static float getDimension(Context context, TypedArray a, String name, float defaultValue, int unit, DisplayMetrics dm) {
+        final float value = a.getDimension((int)ClassUtils.getAttributeValue(context, name), 0);
         return (Float.compare(value, +0.0f) != 0 ? value : TypedValue.applyDimension(unit, defaultValue, dm));
     }
 }

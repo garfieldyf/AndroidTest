@@ -13,7 +13,7 @@ import android.util.Printer;
  * @author Garfield
  */
 public class ArrayMapCache<K, V> implements Cache<K, V> {
-    private final ArrayMap<K, V> map;
+    protected final ArrayMap<K, V> map;
 
     /**
      * Constructor

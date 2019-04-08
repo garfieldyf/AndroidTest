@@ -319,18 +319,24 @@ public final class Pages {
             }
         }
 
+        private static int getCount(Page<?> page) {
+            return (page != null ? page.getCount() : 0);
+        }
+
         private void prefetchPage(int currentPage, int position) {
+            // Prefetch the previous page data.
+            if (currentPage > 0 && position == mPrefetchDistance - 1) {
+                getPage(currentPage - 1);
+            }
+
             final int lastPage = (mItemCount - mInitialSize - 1) / mPageSize + 1;
             if (currentPage < lastPage) {
+                // Prefetch the next page data.
                 final int pageSize = (currentPage > 0 ? mPageSize : mInitialSize);
-                if (position >= pageSize - mPrefetchDistance) {
+                if (position == pageSize - mPrefetchDistance) {
                     getPage(currentPage + 1);
                 }
             }
-        }
-
-        private static int getCount(Page<?> page) {
-            return (page != null ? page.getCount() : 0);
         }
     }
 

@@ -141,6 +141,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
      * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
+     * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data) {
         if (mImpl.setPage(page, data) > 0) {

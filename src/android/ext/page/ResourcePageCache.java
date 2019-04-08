@@ -45,21 +45,21 @@ public class ResourcePageCache<E> implements Cache<Integer, ResourcePage<E>> {
 
     @Override
     public ResourcePage<E> remove(Integer key) {
-        final ResourcePage<E> oldPage = mCache.remove(key);
-        if (oldPage != null) {
-            oldPage.close();
+        final ResourcePage<E> result = mCache.remove(key);
+        if (result != null) {
+            result.close();
         }
 
-        return oldPage;
+        return result;
     }
 
     @Override
     public ResourcePage<E> put(Integer key, ResourcePage<E> value) {
-        final ResourcePage<E> oldPage = mCache.put(key, value);
-        if (oldPage != null) {
-            oldPage.close();
+        final ResourcePage<E> result = mCache.put(key, value);
+        if (result != null) {
+            result.close();
         }
 
-        return oldPage;
+        return result;
     }
 }

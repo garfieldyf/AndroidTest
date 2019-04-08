@@ -7,5 +7,9 @@ import java.io.Closeable;
  * @author Garfield
  */
 public interface ResourcePage<E> extends Page<E>, Closeable {
+    /**
+     * Closes this page and release any system resources it holds. If
+     * the page already closed then invoking this method has no effect.
+     */
     public void close();
 }

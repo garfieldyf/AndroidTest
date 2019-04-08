@@ -183,6 +183,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param page The index of the page.
      * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
      * @see #setPage(int, Page, Object)
+     * @see Pages#newPage(java.util.List)
      */
     public final void setPage(int page, Page<E> data) {
         setPage(page, data, null);
@@ -195,12 +196,13 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
      * @see #setPage(int, Page)
+     * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data, Object payload) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        final int count = mImpl.setPage(page, data);
-        if (count > 0) {
-            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), count, payload);
+        final int itemCount = mImpl.setPage(page, data);
+        if (itemCount > 0) {
+            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), itemCount, payload);
         }
     }
 

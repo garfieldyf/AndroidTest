@@ -47,7 +47,7 @@ public final class Pages {
 
     /**
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
-     * @param data The {@link List} of the page data.
+     * @param data A {@link List} of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
      */
     public static <E> Page<E> newPage(List<E> data) {
@@ -65,7 +65,7 @@ public final class Pages {
 
     /**
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
-     * @param data The {@link JSONArray} of the page data.
+     * @param data A {@link JSONArray} of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
      */
     public static <E> Page<E> newPage(JSONArray data) {
@@ -74,7 +74,7 @@ public final class Pages {
 
     /**
      * Returns a new {@link ResourcePage} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
-     * @param cursor The {@link Cursor} of the page data.
+     * @param cursor A {@link Cursor} of the page data.
      * @return A new <tt>ResourcePage</tt> or <tt>null</tt>.
      */
     public static ResourcePage<Cursor> newPage(Cursor cursor) {
@@ -97,7 +97,7 @@ public final class Pages {
     /**
      * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
      */
-    /* package */ static final class ListPage<E> implements Page<E> {
+    private static final class ListPage<E> implements Page<E> {
         private final List<E> mData;
 
         /**
@@ -123,7 +123,7 @@ public final class Pages {
     /**
      * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
      */
-    /* package */ static final class JSONPage<E> implements Page<E> {
+    private static final class JSONPage<E> implements Page<E> {
         private final JSONArray mData;
 
         /**
@@ -149,7 +149,7 @@ public final class Pages {
     /**
      * Class <tt>CursorPage</tt> is an implementation of a {@link ResourcePage}.
      */
-    /* package */ static final class CursorPage implements ResourcePage<Cursor> {
+    private static final class CursorPage implements ResourcePage<Cursor> {
         private final Cursor mCursor;
 
         /**

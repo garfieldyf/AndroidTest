@@ -3,7 +3,7 @@
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
-    <property name="version" value="1.7.0" />
+    <property name="version" value="1.7.1" />
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
@@ -41,8 +41,6 @@
                 <exclude name="**/widget/FocusManager.java" />
                 <exclude name="**/widget/RecyclerAdapter.java" />
                 <exclude name="**/widget/BarcodeDecorView.java" />
-                <exclude name="**/widget/ListRecyclerAdapter.java" />
-                <exclude name="**/widget/CursorRecyclerAdapter.java" />
                 <exclude name="**/widget/ExpandableCursorAdapter.java" />
                 <exclude name="**/widget/ExpandableCursorTreeAdapter.java" />
             </fileset>

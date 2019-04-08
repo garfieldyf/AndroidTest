@@ -3,12 +3,13 @@ package android.ext.widget;
 import java.util.List;
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.ext.widget.BaseListAdapter.ListAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Abstract class RecyclerListAdapter
@@ -22,7 +23,7 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
      * @param data The data to represent in the <tt>RecyclerView</tt> or <tt>null</tt>.
      */
     public RecyclerListAdapter(List<T> data) {
-        mAdapter = new ListAdapterImpl<T>(data, new AdapterDataObserver(this));
+        mAdapter = new ListAdapterImpl<T>(data, this);
     }
 
     /**
@@ -97,6 +98,25 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
 
     @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
+    }
+
+    /**
+     * Class <tt>ListAdapterImpl</tt> is an implementation of a {@link BaseListAdapter}.
+     */
+    private static final class ListAdapterImpl<T> extends BaseListAdapter<T> {
+        public ListAdapterImpl(List<T> data, Adapter<?> adapter) {
+            super(data);
+            registerDataSetObserver(new AdapterDataObserver(adapter));
+        }
+
+        @Override
+        protected View newView(int position, ViewGroup parent) {
+            return null;
+        }
+
+        @Override
+        protected void bindView(T itemData, int position, View view) {
+        }
     }
 
     /**

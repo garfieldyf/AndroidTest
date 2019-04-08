@@ -1,7 +1,6 @@
 package android.ext.widget;
 
 import android.database.Cursor;
-import android.database.DataSetObserver;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.CursorFilter;
@@ -40,6 +39,16 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
      */
     public CursorAdapter(Cursor cursor, int flags) {
         mObserver = ((flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
+        swapCursor(cursor);
+    }
+
+    /**
+     * Constructor
+     * @param cursor The cursor from which to get the data. May be <tt>null</tt>.
+     * @param observer The {@link CursorObserver}.
+     */
+    /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
+        mObserver = observer;
         swapCursor(cursor);
     }
 
@@ -148,7 +157,7 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
         }
 
         if (view == null) {
-            view = newView(mCursor, position, parent);
+            view = newView(position, parent);
         }
 
         bindView(mCursor, position, view);
@@ -184,54 +193,23 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
     }
 
     /**
-     * Makes a new view to hold the data pointed to by cursor.
-     * @param cursor The cursor from which to get the data. The cursor
-     * is already moved to the correct position.
-     * @param position The position of the item within the adapter's
-     * data set of the item whose view we want.
+     * Returns a new {@link View} to hold the data pointed to by cursor.
+     * @param position The position of the item within the adapter's data
+     * set of the item whose view we want.
      * @param parent The parent to which the new view is attached to.
      * @return The newly created view.
      * @see #bindView(Cursor, int, View)
      */
-    protected abstract View newView(Cursor cursor, int position, ViewGroup parent);
+    protected abstract View newView(int position, ViewGroup parent);
 
     /**
-     * Binds an existing view to the data pointed to by cursor.
+     * Binds an existing {@link View} to the data pointed to by cursor.
      * @param cursor The cursor from which to get the data. The cursor
      * is already moved to the correct position.
      * @param position The position of the item within the adapter's
      * data set of the item whose view we want.
      * @param view Existing view, returned earlier by {@link #newView}.
-     * @see #newView(Cursor, int, ViewGroup)
+     * @see #newView(int, ViewGroup)
      */
     protected abstract void bindView(Cursor cursor, int position, View view);
-
-    /**
-     * Constructor
-     * @param cursor The cursor from which to get the data. May be <tt>null</tt>.
-     * @param observer The {@link CursorObserver}.
-     */
-    /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
-        mObserver = observer;
-        swapCursor(cursor);
-    }
-
-    /**
-     * Class <tt>CursorAdapterImpl</tt> is an implementation of a {@link CursorAdapter}.
-     */
-    /* package */ static final class CursorAdapterImpl extends CursorAdapter {
-        public CursorAdapterImpl(Cursor cursor, DataSetObserver observer, CursorObserver cursorObserver) {
-            super(cursor, cursorObserver);
-            registerDataSetObserver(observer);
-        }
-
-        @Override
-        protected void bindView(Cursor cursor, int position, View view) {
-        }
-
-        @Override
-        protected View newView(Cursor cursor, int position, ViewGroup parent) {
-            return null;
-        }
-    }
 }

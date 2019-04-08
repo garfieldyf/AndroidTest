@@ -3,7 +3,6 @@ package android.ext.widget;
 import java.util.Collections;
 import java.util.List;
 import android.content.Context;
-import android.database.DataSetObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.ListFilter;
 import android.ext.widget.Filters.ListFilterClient;
@@ -18,8 +17,8 @@ import android.widget.Filterable;
  * Abstract class BaseListAdapter
  * @author Garfield
  */
-public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterable, ListFilterClient<T>, CursorObserverClient {
-    /* package */ List<T> mData;
+public abstract class BaseListAdapter<E> extends BaseAdapter implements Filterable, ListFilterClient<E>, CursorObserverClient {
+    /* package */ List<E> mData;
     private Filter mFilter;
     private CursorObserver mObserver;
 
@@ -27,8 +26,8 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      * Constructor
      * @param data The data to represent in the <tt>ListView</tt> or <tt>null</tt>.
      */
-    public BaseListAdapter(List<T> data) {
-        mData = (data != null ? data : Collections.<T>emptyList());
+    public BaseListAdapter(List<E> data) {
+        mData = (data != null ? data : Collections.<E>emptyList());
     }
 
     /**
@@ -36,7 +35,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      * @return The underlying data of this adapter.
      * @see #changeData(List)
      */
-    public final List<T> getData() {
+    public final List<E> getData() {
         return mData;
     }
 
@@ -44,10 +43,10 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
      * @see #getData()
      */
     @Override
-    public void changeData(List<T> newData) {
+    public void changeData(List<E> newData) {
         if (mData != newData) {
             mFilter = null;
-            mData = (newData != null ? newData : Collections.<T>emptyList());
+            mData = (newData != null ? newData : Collections.<E>emptyList());
             if (mData.size() > 0) {
                 notifyDataSetChanged();
             } else {
@@ -88,7 +87,7 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
     }
 
     @Override
-    public T getItem(int position) {
+    public E getItem(int position) {
         return mData.get(position);
     }
 
@@ -99,19 +98,18 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
 
     @Override
     public View getView(int position, View view, ViewGroup parent) {
-        final T itemData = mData.get(position);
         if (view == null) {
-            view = newView(itemData, position, parent);
+            view = newView(position, parent);
         }
 
-        bindView(itemData, position, view);
+        bindView(mData.get(position), position, view);
         return view;
     }
 
     @Override
     public Filter getFilter() {
         if (mFilter == null) {
-            mFilter = new ListFilter<T>(mData, this);
+            mFilter = new ListFilter<E>(mData, this);
         }
 
         return mFilter;
@@ -122,33 +120,32 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
     }
 
     @Override
-    public CharSequence convertToString(T itemData) {
+    public CharSequence convertToString(E itemData) {
         return itemData.toString();
     }
 
     @Override
-    public List<T> onPerformFiltering(CharSequence constraint, List<T> originalData) {
+    public List<E> onPerformFiltering(CharSequence constraint, List<E> originalData) {
         return mData;
     }
 
     /**
-     * Makes a new view to hold the item data.
-     * @param itemData The item data to create a new view.
-     * @param position The position of the item data.
+     * Returns a new {@link View} to hold the item data.
+     * @param position The position of the item.
      * @param parent The parent to which the new view is attached to.
      * @return The newly created view.
-     * @see #bindView(T, int, View)
+     * @see #bindView(E, int, View)
      */
-    protected abstract View newView(T itemData, int position, ViewGroup parent);
+    protected abstract View newView(int position, ViewGroup parent);
 
     /**
-     * Binds an existing view to hold the item data.
+     * Binds an existing {@link View} to hold the item data.
      * @param itemData The item data to bind view.
-     * @param position The position of the item data.
-     * @param view Existing view, returned earlier by <tt>newView</tt>.
-     * @see #newView(T, int, ViewGroup)
+     * @param position The position of the item.
+     * @param view Existing view, returned earlier by {@link #newView}.
+     * @see #newView(int, ViewGroup)
      */
-    protected abstract void bindView(T itemData, int position, View view);
+    protected abstract void bindView(E itemData, int position, View view);
 
     /**
      * Register an observer that gets callbacks when data identified by a given
@@ -167,24 +164,5 @@ public abstract class BaseListAdapter<T> extends BaseAdapter implements Filterab
         }
 
         mObserver.register(context, uri, notifyForDescendents);
-    }
-
-    /**
-     * Class <tt>ListAdapterImpl</tt> is an implementation of a {@link BaseListAdapter}.
-     */
-    /* package */ static final class ListAdapterImpl<T> extends BaseListAdapter<T> {
-        public ListAdapterImpl(List<T> data, DataSetObserver observer) {
-            super(data);
-            registerDataSetObserver(observer);
-        }
-
-        @Override
-        protected void bindView(T itemData, int position, View view) {
-        }
-
-        @Override
-        protected View newView(T itemData, int position, ViewGroup parent) {
-            return null;
-        }
     }
 }

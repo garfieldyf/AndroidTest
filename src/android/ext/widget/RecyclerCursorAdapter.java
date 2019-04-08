@@ -2,13 +2,14 @@ package android.ext.widget;
 
 import android.database.Cursor;
 import android.ext.util.FileUtils;
-import android.ext.widget.CursorAdapter.CursorAdapterImpl;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.RecyclerListAdapter.AdapterDataObserver;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
+import android.view.ViewGroup;
 
 /**
  * Abstract class RecyclerCursorAdapter
@@ -34,7 +35,7 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
      * <tt>0</tt> or any combination of FLAG_XXX constants.
      */
     public RecyclerCursorAdapter(Cursor cursor, int flags) {
-        mAdapter = new CursorAdapterImpl(cursor, new AdapterDataObserver(this), (flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
+        mAdapter = new CursorAdapterImpl(cursor, this, (flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
     }
 
     /**
@@ -129,5 +130,24 @@ public abstract class RecyclerCursorAdapter<VH extends ViewHolder> extends Adapt
 
     @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
+    }
+
+    /**
+     * Class <tt>CursorAdapterImpl</tt> is an implementation of a {@link CursorAdapter}.
+     */
+    private static final class CursorAdapterImpl extends CursorAdapter {
+        public CursorAdapterImpl(Cursor cursor, Adapter<?> adapter, CursorObserver observer) {
+            super(cursor, observer);
+            registerDataSetObserver(new AdapterDataObserver(adapter));
+        }
+
+        @Override
+        protected View newView(int position, ViewGroup parent) {
+            return null;
+        }
+
+        @Override
+        protected void bindView(Cursor cursor, int position, View view) {
+        }
     }
 }

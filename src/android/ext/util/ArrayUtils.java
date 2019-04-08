@@ -391,12 +391,25 @@ public final class ArrayUtils {
      * handling <tt>null</tt> <em>array</em>.
      * @param array The array.
      * @return The <tt>List</tt> contains the array elements.
+     * @see #toList(T[], int, int)
      */
     public static <T> List<T> toList(T... array) {
-        final int size = getSize(array);
-        final List<T> result = new ArrayList<T>(size);
-        for (int i = 0; i < size; ++i) {
-            result.add(array[i]);
+        return (getSize(array) > 0 ? toList(array, 0, array.length) : new ArrayList<T>());
+    }
+
+    /**
+     * Returns a mutable {@link List} from the specified <em>array</em>.
+     * @param array The array.
+     * @param start The inclusive start index in <em>array</em>.
+     * @param end The exclusive end index in <em>array</em>.
+     * @return The <tt>List</tt> contains the range of [start, end) elements in <em>array</em>.
+     * @see #toList(T[])
+     */
+    public static <T> List<T> toList(T[] array, int start, int end) {
+        DebugUtils.__checkRange(start, end - start, array.length);
+        final List<T> result = new ArrayList<T>(end - start);
+        for (; start < end; ++start) {
+            result.add(array[start]);
         }
 
         return result;

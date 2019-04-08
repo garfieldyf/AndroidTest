@@ -32,13 +32,14 @@ public final class LayoutManagerHelper {
         final int childRight = childLeft + rect.width();
 
         // Gets the offscreen left and right.
-        final int offScreenLeft  = Math.min(0, childLeft  - parentLeft);
+        final int offsetLeft = childLeft - parentLeft;
+        final int offScreenLeft  = Math.min(0, offsetLeft);
         final int offScreenRight = Math.max(0, childRight - parentRight);
 
-        final int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(childLeft - parentLeft, offScreenRight));
+        final int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(offsetLeft, offScreenRight));
         if (dx > 0) {
             // scroll to right.
-            return scrollBy(parent, childLeft - parentLeft, 0, immediate);
+            return scrollBy(parent, offsetLeft, 0, immediate);
         } else if (dx < 0) {
             // scroll to left.
             return scrollBy(parent, -(parentRight - childRight), 0, immediate);
@@ -63,13 +64,14 @@ public final class LayoutManagerHelper {
         final int childBottom = childTop + rect.height();
 
         // Gets the offscreen top and bottom.
-        final int offScreenTop    = Math.min(0, childTop - parentTop);
+        final int offsetTop = childTop - parentTop;
+        final int offScreenTop    = Math.min(0, offsetTop);
         final int offScreenBottom = Math.max(0, childBottom - parentBottom);
 
-        final int dy = (offScreenTop != 0 ? offScreenTop : Math.min(childTop - parentTop, offScreenBottom));
+        final int dy = (offScreenTop != 0 ? offScreenTop : Math.min(offsetTop, offScreenBottom));
         if (dy > 0) {
             // scroll to down.
-            return scrollBy(parent, 0, childTop - parentTop, immediate);
+            return scrollBy(parent, 0, offsetTop, immediate);
         } else if (dy < 0) {
             // scroll to up.
             return scrollBy(parent, 0, -(parentBottom - childBottom), immediate);

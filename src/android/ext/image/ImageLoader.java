@@ -113,7 +113,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see LoadRequest
      */
     public final void load(URI uri, ImageView view) {
-        load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)defaultBinder(), Parameters.defaultParameters());
+        load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)DefaultBinder.sInstance, Parameters.defaultParameters());
     }
 
     /**

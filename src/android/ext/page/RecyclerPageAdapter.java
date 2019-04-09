@@ -199,9 +199,15 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data, Object payload) {
+        DebugUtils.__checkUIThread("setPage");
+        DebugUtils.__checkError(page < 0, "page < 0");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        final int itemCount = mImpl.setPage(page, data);
+
+        // Clears the page loading state when the page is load complete.
+        mImpl.mPageStates.clear(page);
+        final int itemCount = Pages.getCount(data);
         if (itemCount > 0) {
+            mImpl.mPageCache.put(page, data);
             UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), itemCount, payload);
         }
     }

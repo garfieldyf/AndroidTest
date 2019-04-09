@@ -1,5 +1,7 @@
 package android.ext.util;
 
+import static java.lang.reflect.Modifier.FINAL;
+import static java.lang.reflect.Modifier.STATIC;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -487,7 +489,14 @@ public final class ArrayUtils {
 
     private static synchronized Object[] array(Object list) throws Exception {
         if (sArrayField == null) {
-            sArrayField = ClassUtils.getDeclaredField(ArrayList.class, "array");
+            final Field[] fields = ArrayList.class.getDeclaredFields();
+            for (Field field : fields) {
+                if ((field.getModifiers() & (STATIC | FINAL)) == 0 && field.getType() == Object[].class) {
+                    field.setAccessible(true);
+                    sArrayField = field;
+                    break;
+                }
+            }
         }
 
         return (Object[])sArrayField.get(list);

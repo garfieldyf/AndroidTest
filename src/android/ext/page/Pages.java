@@ -112,7 +112,7 @@ public final class Pages {
          * @param data A {@link List} of this page data.
          */
         public ListPage(List<E> data) {
-            DebugUtils.__checkError(data == null || data.size() <= 0, "data == null || data.size() <= 0");
+            DebugUtils.__checkError(ArrayUtils.getSize(data) <= 0, "data == null || data.size() == 0");
             mData = data;
         }
 
@@ -138,7 +138,7 @@ public final class Pages {
          * @param data A {@link JSONArray} of this page data.
          */
         public JSONPage(JSONArray data) {
-            DebugUtils.__checkError(data == null || data.length() <= 0, "data == null || data.length() <= 0");
+            DebugUtils.__checkError(JsonUtils.getSize(data) <= 0, "data == null || data.length() == 0");
             mData = data;
         }
 
@@ -164,7 +164,7 @@ public final class Pages {
          * @param cursor A {@link Cursor} of this page data.
          */
         public CursorPage(Cursor cursor) {
-            DebugUtils.__checkError(cursor == null || cursor.getCount() <= 0, "cursor == null || cursor.getCount() <= 0");
+            DebugUtils.__checkError(DatabaseUtils.getCount(cursor) <= 0, "cursor == null || cursor.getCount() == 0");
             mCursor = cursor;
         }
 

@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.util.concurrent.Executor;
 import android.ext.content.Loader.Task;
 import android.ext.database.DatabaseHandler;
 import android.os.Handler;
@@ -17,7 +18,7 @@ import android.view.View;
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public final class UIHandler extends Handler {
+public final class UIHandler extends Handler implements Executor {
     /**
      * The {@link Handler} associated with the UI thread's message queue.
      */
@@ -31,11 +32,7 @@ public final class UIHandler extends Handler {
      * @param action The action to run on the UI thread.
      */
     public static void runOnUIThread(Runnable action) {
-        if (sInstance.getLooper() == Looper.myLooper()) {
-            action.run();
-        } else {
-            sInstance.post(action);
-        }
+        sInstance.execute(action);
     }
 
     /**
@@ -195,6 +192,15 @@ public final class UIHandler extends Handler {
      */
     public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
         sendMessage(Message.obtain(this, MESSAGE_DATABASE_MESSAGE, message, token, new Pair(handler, result)));
+    }
+
+    @Override
+    public void execute(Runnable command) {
+        if (getLooper() == Looper.myLooper()) {
+            command.run();
+        } else {
+            post(command);
+        }
     }
 
     @Override

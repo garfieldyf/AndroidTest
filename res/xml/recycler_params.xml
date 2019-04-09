@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <SizeParameters xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
-    android:height="320px"
+    android:height="250px"
     android:width="250px"
+    tencent:mutable="true"
     tencent:config="rgb_565" />

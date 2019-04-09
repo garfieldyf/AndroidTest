@@ -106,22 +106,25 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(mContext, opts);
 
+        // Retrieves the bitmap from bitmap pool to reuse it.
+        if (mBitmapPool != null) {
+            opts.inBitmap = mBitmapPool.get(parameters.computeByteCount(mContext, opts));
+            DebugUtils.__checkDebug(opts.inBitmap != null, getClass().getSimpleName(), "opts.inBitmap = " + opts.inBitmap);
+        }
+
         // Decodes the image pixels.
-        return (Image)decodeBitmap(uri, parameters, flags, opts);
+        return (Image)decodeBitmap(uri, flags, opts);
     }
 
     /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts's</em> <tt>out...</tt> fields are set.
+     * @param opts The {@link Options} used to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected Bitmap decodeBitmap(Object uri, Parameters parameters, int flags, Options opts) throws Exception {
-        // Retrieves the bitmap from bitmap pool to reuse it.
-        opts.inBitmap = getCachedBitmap(parameters, opts);
+    protected Bitmap decodeBitmap(Object uri, int flags, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
@@ -143,16 +146,5 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
             BitmapUtils.dumpOptions(BitmapDecoder.class.getSimpleName(), opts);
         }
-    }
-
-    /**
-     * Retrieves the bitmap from the internal bitmap cache to reuse it.
-     * @param parameters The decode parameters, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts's</em>
-     * <tt>out...</tt> fields are set.
-     * @return The {@link Bitmap}, or <tt>null</tt> if no bitmap cache.
-     */
-    private Bitmap getCachedBitmap(Parameters parameters, Options opts) {
-        return (mBitmapPool != null ? mBitmapPool.get(parameters.computeByteCount(mContext, opts)) : null);
     }
 }

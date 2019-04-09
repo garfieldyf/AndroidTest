@@ -138,6 +138,12 @@ public final class DebugUtils {
         }
     }
 
+    public static void __checkDebug(boolean reportDebug, String tag, String message) {
+        if (reportDebug) {
+            Log.d(tag, message);
+        }
+    }
+
     public static void __checkWarning(boolean reportWarning, String tag, String message) {
         if (reportWarning) {
             Log.w(tag, "WARNING: " + message);

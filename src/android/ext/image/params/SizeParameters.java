@@ -91,7 +91,7 @@ public class SizeParameters extends Parameters {
             final float scale = Math.max((float)opts.outWidth / desiredWidth, (float)opts.outHeight / desiredHeight);
             final int targetDensity = (int)value;
             opts.inTargetDensity = targetDensity;
-            opts.inDensity = (int)(targetDensity * scale);
+            opts.inDensity = (int)(targetDensity * scale + 0.5f);
         }
     }
 

@@ -184,7 +184,7 @@ public final class AsyncViewStub extends View {
             try {
                 return mInflater.inflate(mLayoutId, mParent, false);
             } catch (RuntimeException e) {
-                Log.e(AsyncViewStub.class.getSimpleName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread - parent = " + mParent.getClass().getSimpleName(), e);
+                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread - parent = " + mParent.getClass().getSimpleName(), e);
                 return null;
             }
         }

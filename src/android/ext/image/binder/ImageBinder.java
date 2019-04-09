@@ -10,14 +10,11 @@ import android.ext.cache.Caches;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.XmlResources;
-import android.ext.graphics.GIFImage;
-import android.ext.graphics.drawable.GIFDrawable;
-import android.ext.graphics.drawable.OvalBitmapDrawable;
-import android.ext.graphics.drawable.RoundedBitmapDrawable;
+import android.ext.image.transformer.BitmapTransformer;
+import android.ext.image.transformer.ImageTransformer;
+import android.ext.image.transformer.Transformer;
 import android.ext.util.ClassUtils;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -35,7 +32,10 @@ import android.widget.ImageView;
  *     class="classFullName"
  *     android:duration="@android:integer/config_longAnimTime"
  *     app:defaultImage="@drawable/ic_placeholder"
- *     app:maxCacheSize="128" &gt;
+ *     app:maxCacheSize="128"
+ *     app:attribute1="value1"
+ *     app:attribute2="value2"
+ *     ... ... &gt;
  *
  *     &lt;!-- Bitmap Transformer --&gt;
  *     &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
@@ -141,7 +141,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
     public void dump(Context context, Printer printer) {
         if (mTransformer instanceof CacheTransformer) {
-            Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
+            ((CacheTransformer)mTransformer).dump(context, printer);
         }
     }
 
@@ -151,7 +151,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         if (value == null) {
             view.setImageDrawable(mDefaultImage);
         } else {
-            final Drawable drawable = mTransformer.transform(uri, target, value);
+            final Drawable drawable = mTransformer.transform(uri, value);
             view.setImageDrawable(drawable);
             if (drawable instanceof Animatable) {
                 ((Animatable)drawable).start();
@@ -184,7 +184,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             // Inflates the image transformer from XML parser.
             final Transformer imageTransformer = inflate(context, parser);
             if (imageTransformer != null) {
-                transformer = new ImageTransformer(transformer, imageTransformer);
+                transformer = ImageTransformer.create(transformer, imageTransformer);
             }
 
             return transformer;
@@ -227,202 +227,11 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
-     * Class <tt>Transformer</tt> used to transforms an image to a {@link Drawable}.
-     */
-    public static interface Transformer<URI, Image> {
-        /**
-         * Transforms the <tt>Image</tt> to a <tt>Drawable</tt>.
-         * @param uri The uri, passed earlier by <tt>ImageBinder.bindValue</tt>.
-         * @param target The target, passed earlier by <tt>ImageBinder.bindValue</tt>.
-         * @param image The image to convert, passed earlier by <tt>ImageBinder.bindValue</tt>.
-         * @return The <tt>Drawable</tt>.
-         */
-        Drawable transform(URI uri, Object target, Image image);
-    }
-
-    /**
-     * Class <tt>BitmapTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static final class BitmapTransformer implements Transformer<Object, Bitmap> {
-        private static BitmapTransformer sInstance;
-        private final Context mContext;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         */
-        private BitmapTransformer(Context context) {
-            mContext = context.getApplicationContext();
-        }
-
-        /**
-         * Returns a type-safe {@link Transformer} to transforms a <tt>Bitmap</tt> to a {@link BitmapDrawable}.
-         * @param context The <tt>Context</tt>.
-         * @return The <tt>Transformer</tt>.
-         */
-        public static synchronized <URI> Transformer<URI, Bitmap> getInstance(Context context) {
-            if (sInstance == null) {
-                sInstance = new BitmapTransformer(context);
-            }
-
-            return (Transformer<URI, Bitmap>)sInstance;
-        }
-
-        @Override
-        public Drawable transform(Object uri, Object target, Bitmap bitmap) {
-            return new BitmapDrawable(mContext.getResources(), bitmap);
-        }
-    }
-
-    /**
-     * Class <tt>OvalTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static final class OvalTransformer implements Transformer<Object, Bitmap> {
-        private static final OvalTransformer sInstance = new OvalTransformer();
-
-        /**
-         * Constructor
-         */
-        private OvalTransformer() {
-        }
-
-        /**
-         * Returns a type-safe {@link Transformer} to transforms a <tt>Bitmap</tt> to an {@link OvalBitmapDrawable}.
-         * @return The <tt>Transformer</tt>.
-         */
-        public static <URI> Transformer<URI, Bitmap> getInstance() {
-            return (Transformer<URI, Bitmap>)sInstance;
-        }
-
-        @Override
-        public Drawable transform(Object uri, Object target, Bitmap bitmap) {
-            return new OvalBitmapDrawable(bitmap);
-        }
-    }
-
-    /**
-     * Class <tt>RoundedRectTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static class RoundedRectTransformer<URI> implements Transformer<URI, Bitmap> {
-        /**
-         * The corner radii, array of 8 values. Each corner receives two
-         * radius values [X, Y]. The corners are ordered <tt>top-left</tt>,
-         * <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
-         */
-        protected final float[] mRadii;
-
-        /**
-         * Constructor
-         * @param radii The corner radii, array of 8 values. Each corner receives two radius values [X, Y]. The
-         * corners are ordered <tt>top-left</tt>, <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
-         * @see #RoundedRectTransformer(Context, AttributeSet)
-         * @see #RoundedRectTransformer(float, float, float, float)
-         */
-        public RoundedRectTransformer(float[] radii) {
-            mRadii = radii;
-        }
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         * @param attrs The attributes of the XML tag that is inflating the data.
-         * @see #RoundedRectTransformer(float[])
-         * @see #RoundedRectTransformer(float, float, float, float)
-         */
-        public RoundedRectTransformer(Context context, AttributeSet attrs) {
-            mRadii = XmlResources.loadCornerRadii(context.getResources(), attrs);
-        }
-
-        /**
-         * Constructor
-         * @param topLeftRadius The top-left corner radius.
-         * @param topRightRadius The top-right corner radius.
-         * @param bottomLeftRadius The bottom-left corner radius.
-         * @param bottomRightRadius The bottom-right corner radius.
-         * @see #RoundedRectTransformer(float[])
-         * @see #RoundedRectTransformer(Context, AttributeSet)
-         */
-        public RoundedRectTransformer(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
-            mRadii = new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius };
-        }
-
-        @Override
-        public Drawable transform(URI uri, Object target, Bitmap bitmap) {
-            return new RoundedBitmapDrawable(bitmap, mRadii);
-        }
-    }
-
-    /**
-     * Class <tt>GIFTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static final class GIFTransformer implements Transformer<Object, GIFImage> {
-        private static final GIFTransformer sInstance = new GIFTransformer();
-
-        /**
-         * Constructor
-         */
-        private GIFTransformer() {
-        }
-
-        /**
-         * Returns a type-safe {@link Transformer} to transforms a {@link GIFImage} to a {@link GIFDrawable}.
-         * @return The <tt>Transformer</tt>.
-         */
-        public static <URI> Transformer<URI, GIFImage> getInstance() {
-            return (Transformer<URI, GIFImage>)sInstance;
-        }
-
-        @Override
-        public Drawable transform(Object uri, Object target, GIFImage image) {
-            return new GIFDrawable(image);
-        }
-    }
-
-    /**
-     * Class <tt>ImageTransformer</tt> is an implementation of a {@link Transformer}.
-     */
-    public static final class ImageTransformer implements Transformer {
-        private final Transformer mImageTransformer;
-        private final Transformer mBitmapTransformer;
-
-        /**
-         * Constructor
-         * @param bitmapTransformer The {@link Transformer} used to transforms a <tt>Bitmap</tt> to a <tt>Drawable</tt>.
-         * @param imageTransformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
-         */
-        /* package */ ImageTransformer(Transformer bitmapTransformer, Transformer imageTransformer) {
-            mImageTransformer  = imageTransformer;
-            mBitmapTransformer = bitmapTransformer;
-        }
-
-        /**
-         * Returns an image {@link Transformer} with the specified <em>bitmapTransformer</em> and <em>imageTransformer</em>.
-         * @param bitmapTransformer The {@link Transformer} used to transforms a <tt>Bitmap</tt> to a <tt>Drawable</tt>.
-         * @param imageTransformer The {@link Transformer} used to transforms an image to a <tt>Drawable</tt>.
-         * @return An image {@link Transformer} object.
-         */
-        public static <URI, Image> Transformer<URI, Object> create(Transformer<URI, Bitmap> bitmapTransformer, Transformer<URI, Image> imageTransformer) {
-            return new ImageTransformer(bitmapTransformer, imageTransformer);
-        }
-
-        @Override
-        public Drawable transform(Object uri, Object target, Object image) {
-            if (image instanceof Drawable) {
-                return (Drawable)image;
-            } else if (image instanceof Bitmap) {
-                return mBitmapTransformer.transform(uri, target, image);
-            } else {
-                return mImageTransformer.transform(uri, target, image);
-            }
-        }
-    }
-
-    /**
      * Class <tt>CacheTransformer</tt> is an implementation of a {@link Transformer}.
      */
-    /* package */ static final class CacheTransformer implements Transformer {
-        /* package */ final Transformer mTransformer;
-        /* package */ final Cache<Object, Drawable> mImageCache;
+    private static final class CacheTransformer implements Transformer {
+        private final Transformer mTransformer;
+        private final Cache<Object, Drawable> mImageCache;
 
         /**
          * Constructor
@@ -435,15 +244,19 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         }
 
         @Override
-        public Drawable transform(Object uri, Object target, Object image) {
+        public Drawable transform(Object uri, Object image) {
             Drawable drawable;
             if (image instanceof Drawable) {
                 drawable = (Drawable)image;
             } else if ((drawable = mImageCache.get(uri)) == null) {
-                mImageCache.put(uri, drawable = mTransformer.transform(uri, target, image));
+                mImageCache.put(uri, drawable = mTransformer.transform(uri, image));
             }
 
             return drawable;
+        }
+
+        public final void dump(Context context, Printer printer) {
+            Caches.dumpCache(mImageCache, context, printer);
         }
     }
 }

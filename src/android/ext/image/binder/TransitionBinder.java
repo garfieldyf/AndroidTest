@@ -3,6 +3,7 @@ package android.ext.image.binder;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.cache.Cache;
+import android.ext.image.transformer.Transformer;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
@@ -82,7 +83,7 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
         if (value == null) {
             view.setImageDrawable(mDefaultImage);
         } else {
-            final Drawable image = mTransformer.transform(uri, target, value);
+            final Drawable image = mTransformer.transform(uri, value);
             if ((state & STATE_LOAD_FROM_CACHE) != 0) {
                 view.setImageDrawable(image);
             } else {

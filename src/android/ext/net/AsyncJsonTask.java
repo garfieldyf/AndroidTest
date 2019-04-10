@@ -4,10 +4,10 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
 import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncJsonLoader.LoadResult;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
-import android.util.Pair;
 
 /**
  * Class <tt>AsyncJsonTask</tt> allows to load the JSON data on a background thread and publish
@@ -40,16 +40,16 @@ import android.util.Pair;
  *     }
  *
  *     {@code @Override}
- *     protected void onPostExecute(Pair&lt;JSONObject, Boolean&gt result) {
+ *     protected void onPostExecute(LoadResult&lt;JSONObject&gt result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
  *             return;
  *         }
  *
- *         if (result.first != null) {
- *             // Loading succeeded (may be file cache hit or load finish), update UI.
- *         } else if (!result.second) {
+ *         if (result.result != null) {
+ *             // Loading succeeded (may be file cache hit or download succeeded), update UI.
+ *         } else if (!result.hitCache) {
  *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
  *     }
@@ -58,7 +58,7 @@ import android.util.Pair;
  * new JsonTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params, Object, Pair<Result, Boolean>> {
+public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params, Object, LoadResult<Result>> {
     /**
      * Constructor
      * @see #AsyncJsonTask(Object)
@@ -121,12 +121,12 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     @Override
     @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Object... values) {
-        onPostExecute(new Pair<Result, Boolean>((Result)values[0], false));
+        onPostExecute(new LoadResult<Result>((Result)values[0], false));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Pair<Result, Boolean> doInBackground(Params... params) {
+    protected LoadResult<Result> doInBackground(Params... params) {
         boolean hitCache = false;
         Result result = null;
         try {
@@ -146,7 +146,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
             Log.e(getClass().getName(), "Couldn't load JSON data - params = " + Arrays.toString(params) + "\n" + e);
         }
 
-        return new Pair<Result, Boolean>(result, hitCache);
+        return new LoadResult<Result>(result, hitCache);
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {
@@ -168,7 +168,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = (int)onDownload(params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isCancelled()) {
-            // If cache file is hit and the cache file's contents are equal the temp
+            // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 FileUtils.deleteFiles(tempFile, false);

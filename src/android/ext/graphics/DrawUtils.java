@@ -454,6 +454,7 @@ public final class DrawUtils {
         }
 
         public static void recycle(Matrix matrix) {
+            matrix.reset();
             sInstance.mPool.recycle(matrix);
         }
     }

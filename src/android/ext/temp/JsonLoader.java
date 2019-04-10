@@ -12,7 +12,6 @@ import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
 import android.util.Log;
-import android.util.Pair;
 import com.tencent.test.MainApplication;
 
 public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
@@ -30,7 +29,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
     }
 
     @Override
-    protected void onLoadComplete(String url, LoadParams<String, JSONObject>[] params, Pair<JSONObject, Boolean> result) {
+    protected void onLoadComplete(String url, LoadParams<String, JSONObject>[] params, LoadResult<JSONObject> result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
@@ -38,11 +37,11 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
 
         // Hide loading UI, if need.
-        if (result.first != null) {
+        if (result.result != null) {
             // Loading succeeded, update UI.
-            Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.first));
+            Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.result));
             // Toast.makeText(activity, "JsonLoader - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
-        } else if (!result.second) {
+        } else if (!result.hitCache) {
             // Loading failed and file cache not hit, show error UI.
             Log.i("abc", "JsonLoader - Show error UI.");
         }

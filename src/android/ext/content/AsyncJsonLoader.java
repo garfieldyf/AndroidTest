@@ -4,11 +4,11 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import android.ext.content.AsyncJsonLoader.LoadParams;
+import android.ext.content.AsyncJsonLoader.LoadResult;
 import android.ext.net.DownloadRequest;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
-import android.util.Pair;
 
 /**
  * Class <tt>AsyncJsonLoader</tt> allows to load the JSON data on a background thread and publish
@@ -51,7 +51,7 @@ import android.util.Pair;
  *     }
  *
  *     {@code @Override}
- *     protected void onLoadComplete(String url, LoadParams&lt;String, JSONObject&gt;[] params, Pair&lt;JSONObject, Boolean&gt result) {
+ *     protected void onLoadComplete(String url, LoadParams&lt;String, JSONObject&gt;[] params, LoadResult&lt;JSONObject&gt result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
@@ -59,9 +59,9 @@ import android.util.Pair;
  *         }
  *
  *         // Hide loading UI, if need.
- *         if (result.first != null) {
- *             // Loading succeeded (may be file cache hit or load finish), update UI.
- *         } else if (!result.second) {
+ *         if (result.result != null) {
+ *             // Loading succeeded (may be file cache hit or download succeeded), update UI.
+ *         } else if (!result.hitCache) {
  *             // Loading failed and file cache not hit, show error or empty UI.
  *         }
  *     }
@@ -72,7 +72,7 @@ import android.util.Pair;
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, Pair<Result, Boolean>> {
+public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, LoadResult<Result>> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -109,11 +109,11 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
     @Override
     protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
-        onLoadComplete(key, params, new Pair<Result, Boolean>((Result)values[0], false));
+        onLoadComplete(key, params, new LoadResult<Result>((Result)values[0], false));
     }
 
     @Override
-    protected Pair<Result, Boolean> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
+    protected LoadResult<Result> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
         try {
@@ -134,7 +134,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             Log.e(getClass().getName(), "Couldn't load JSON data - key = " + key + "\n" + e);
         }
 
-        return new Pair<Result, Boolean>(result, hitCache);
+        return new LoadResult<Result>(result, hitCache);
     }
 
     private boolean loadFromCache(Task task, Key key, LoadParams params, File cacheFile) {
@@ -156,7 +156,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = (int)onDownload(task, key, params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
-            // If cache file is hit and the cache file's contents are equal the temp
+            // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 FileUtils.deleteFiles(tempFile, false);
@@ -172,6 +172,30 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         }
 
         return null;
+    }
+
+    /**
+     * Class <tt>LoadResult</tt> used to store the load result.
+     */
+    public static final class LoadResult<Result> {
+        /**
+         * The result of the load. If the result is <tt>null</tt> indicates the load failed or the
+         * cache file is hit and the cache file's contents are equal the downloaded file's contents.
+         */
+        public final Result result;
+
+        /**
+         * If <tt>true</tt> indicates the cache file load successfully, <tt>false</tt> otherwise.
+         */
+        public final boolean hitCache;
+
+        /**
+         * Constructor
+         */
+        public LoadResult(Result result, boolean hitCache) {
+            this.result = result;
+            this.hitCache = hitCache;
+        }
     }
 
     /**

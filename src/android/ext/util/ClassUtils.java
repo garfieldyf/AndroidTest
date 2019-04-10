@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import android.content.Context;
 
@@ -38,20 +37,6 @@ public final class ClassUtils {
      */
     public static Constructor<?> getConstructor(String className, Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException {
         return getConstructor(Class.forName(className), parameterTypes);
-    }
-
-    /**
-     * Returns a {@link Field} object with the specified field's <em>name</em>.
-     * The returned <tt>Field</tt> object accessible flag is <tt>true</tt>.
-     * @param clazz The <tt>Class</tt> which is declared the field.
-     * @param name The requested field's name.
-     * @return A <tt>Field</tt> object.
-     * @throws NoSuchFieldException if the requested field cannot be found.
-     */
-    public static Field getDeclaredField(Class<?> clazz, String name) throws NoSuchFieldException {
-        final Field result = clazz.getDeclaredField(name);
-        result.setAccessible(true);
-        return result;
     }
 
     /**

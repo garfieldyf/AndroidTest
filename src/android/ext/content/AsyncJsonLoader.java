@@ -23,7 +23,7 @@ import android.util.Log;
  *     {@code @Override}
  *     public File getCacheFile(String url) {
  *         // Builds the cache file, For example:
- *         return new File("mnt/sdcard/xxx/cacheFile.json");
+ *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
  *     }
  *
  *     {@code @Override}
@@ -179,13 +179,13 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      */
     public static final class LoadResult<Result> {
         /**
-         * The result of the load. If the result is <tt>null</tt> indicates the load failed or the
-         * cache file is hit and the cache file's contents are equal the downloaded file's contents.
+         * The result of the load. If the result is <tt>null</tt> indicates the load failed
+         * or the cache file is hit and it's contents are equal the loaded file's contents.
          */
         public final Result result;
 
         /**
-         * If <tt>true</tt> indicates the cache file load successfully, <tt>false</tt> otherwise.
+         * If <tt>true</tt> indicates the cache file has successfully loaded, <tt>false</tt> otherwise.
          */
         public final boolean hitCache;
 

@@ -48,7 +48,7 @@ public final class MessageDigests {
     }
 
     /**
-     * Computes the file contents the final hash value using the given <em>filename</em>
+     * Computes the file's contents the final hash value using the given <em>filename</em>
      * and <em>algorithm</em>.
      * @param filename The filename, must be absolute file path.
      * @param algorithm The {@link Algorithm} to compute.
@@ -62,7 +62,7 @@ public final class MessageDigests {
     }
 
     /**
-     * Computes the file contents the final hash value using the given <em>filename</em>
+     * Computes the file's contents the final hash value using the given <em>filename</em>
      * and <em>algorithm</em>, Stores the computed hash value in <em>result</em>.
      * @param filename The filename, must be absolute file path.
      * @param result The byte array to store the computed hash value.

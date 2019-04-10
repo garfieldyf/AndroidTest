@@ -383,7 +383,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         /**
-         * Sets the custom {@link Parameters} to decode image.
+         * Sets the custom {@link Parameters} to decode image. Equivalent to calling
+         * <pre>request.addFlags(FLAG_CUSTOM_PARAMETERS).setParams(parameters);</pre>
          * @param parameters The <tt>Parameters</tt> to decode.
          * @return This request.
          * @see ImageLoader#FLAG_CUSTOM_PARAMETERS FLAG_CUSTOM_PARAMETERS

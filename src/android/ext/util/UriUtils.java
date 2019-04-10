@@ -106,7 +106,7 @@ public final class UriUtils {
     /**
      * Equivalent to calling <tt>getResourceUri(context.getPackageName(), resource)</tt>.
      * @param context The <tt>Context</tt>.
-     * @param resource Type {@link Integer}, or {@link String} representation of the
+     * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
      * @return The uri string.
      * @see #getResourceUri(String, Object)
@@ -118,7 +118,7 @@ public final class UriUtils {
     /**
      * Constructs a scheme is "android.resource" uri string.
      * @param packageName The application's package name.
-     * @param resource Type {@link Integer}, or {@link String} representation of the
+     * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
      * @return The uri string.
      * @see #getResourceUri(Context, Object)
@@ -132,10 +132,12 @@ public final class UriUtils {
     private static InputStream openInputStreamImpl(Context context, String uri) throws IOException {
         DebugUtils.__checkError(uri.length() <= 7, "Invalid uri - " + uri);
         if (uri.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
-            return new FileInputStream(uri.substring(7 /* skip 'file://' */));
+            // Skips the prefix 'file://'
+            return new FileInputStream(uri.substring(7));
         } else {
+            // Skips the prefix 'file:///android_asset/'
             DebugUtils.__checkError(uri.length() <= 22, "Invalid uri - " + uri);
-            return context.getAssets().open(uri.substring(22) /* skip 'file:///android_asset/' */, AssetManager.ACCESS_STREAMING);
+            return context.getAssets().open(uri.substring(22), AssetManager.ACCESS_STREAMING);
         }
     }
 

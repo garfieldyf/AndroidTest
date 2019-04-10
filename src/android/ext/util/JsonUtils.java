@@ -183,11 +183,27 @@ public final class JsonUtils {
      * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
      * @return The <em>array</em>.
      */
-    public static JSONArray putOpt(JSONArray array, int index, Object value) {
+    public static JSONArray put(JSONArray array, int index, Object value) {
         try {
             return array.put(index, value);
         } catch (JSONException e) {
             return array;
+        }
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#put(String, Object)}.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
+     * {@link JSONObject#NULL}, or <tt>null</tt>.
+     * @return The <em>object</em>.
+     */
+    public static JSONObject put(JSONObject object, String name, Object value) {
+        try {
+            return object.put(name, value);
+        } catch (JSONException e) {
+            return object;
         }
     }
 

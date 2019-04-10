@@ -112,10 +112,6 @@ public final class DebugUtils {
         return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
     }
 
-    public static String toSimpleString(Object object) {
-        return toSimpleString(object, new StringBuilder(32)).toString();
-    }
-
     public static StringBuilder toSimpleString(Object object, StringBuilder result) {
         return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
     }

@@ -651,7 +651,7 @@ public final class FileUtils {
     /**
      * Class <tt>Stat</tt> is wrapper for linux structure <tt>stat</tt>.
      */
-    public static final class Stat implements Parcelable, Cloneable {
+    public static final class Stat implements Parcelable {
         /**
          * The permission of read, write and execute by all users.
          * Same as <em>S_IRWXU | S_IRWXG | S_IRWXO</em>.
@@ -956,15 +956,6 @@ public final class FileUtils {
             return 0;
         }
 
-        @Override
-        public Stat clone() {
-            try {
-                return (Stat)super.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new AssertionError(e);
-            }
-        }
-
         private static char toCharType(int type) {
             switch (type) {
             case S_IFIFO:
@@ -1008,7 +999,7 @@ public final class FileUtils {
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static final class Dirent implements Cloneable, Comparable<Dirent> {
+    public static final class Dirent implements Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1191,15 +1182,6 @@ public final class FileUtils {
         }
 
         @Override
-        public Dirent clone() {
-            try {
-                return (Dirent)super.clone();
-            } catch (CloneNotSupportedException e) {
-                throw new AssertionError(e);
-            }
-        }
-
-        @Override
         public String toString() {
             return path;
         }
@@ -1224,7 +1206,7 @@ public final class FileUtils {
         }
 
         /**
-         * @see #caseInsensitiveOrder()
+         * @see #compareToIgnoreCase(Dirent)
          */
         @Override
         public int compareTo(Dirent another) {
@@ -1240,9 +1222,32 @@ public final class FileUtils {
         }
 
         /**
+         * Compares the specified <tt>Dirent</tt> to this <tt>Dirent</tt>, ignoring
+         * the {@link #path} field case differences.
+         * @param another The <tt>Dirent</tt> to compare.
+         * @return <tt>0</tt> if the <tt>Dirent</tt>s are equal; a negative integer
+         * if this <tt>Dirent</tt> is less than <em>another</em>; a positive integer
+         * if this <tt>Dirent</tt> is greater than <em>another</em>.
+         * @see #compareTo(Dirent)
+         * @see #caseInsensitiveOrder()
+         */
+        public int compareToIgnoreCase(Dirent another) {
+            if (type != another.type) {
+                if (type == Dirent.DT_DIR) {
+                    return -1;
+                } else if (another.type == Dirent.DT_DIR) {
+                    return 1;
+                }
+            }
+
+            return path.compareToIgnoreCase(another.path);
+        }
+
+        /**
          * Returns a <tt>Comparator</tt> ignoring the {@link #path} field case differences.
          * @return The <tt>Comparator</tt>.
          * @see #compareTo(Dirent)
+         * @see #compareToIgnoreCase(Dirent)
          */
         public static Comparator<Dirent> caseInsensitiveOrder() {
             return CaseInsensitiveComparator.sInstance;
@@ -1345,15 +1350,7 @@ public final class FileUtils {
 
         @Override
         public int compare(Dirent one, Dirent another) {
-            if (one.type != another.type) {
-                if (one.type == Dirent.DT_DIR) {
-                    return -1;
-                } else if (another.type == Dirent.DT_DIR) {
-                    return 1;
-                }
-            }
-
-            return one.path.compareToIgnoreCase(another.path);
+            return one.compareToIgnoreCase(another);
         }
     }
 

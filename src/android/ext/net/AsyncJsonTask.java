@@ -26,7 +26,7 @@ import android.util.Log;
  *     {@code @Override}
  *     protected File getCacheFile(String[] params) {
  *         // Builds the cache file, For example:
- *         return new File("mnt/sdcard/xxx/cacheFile.json");
+ *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
  *     }
  *
  *     {@code @Override}

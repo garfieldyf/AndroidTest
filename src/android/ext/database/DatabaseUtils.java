@@ -508,10 +508,10 @@ public final class DatabaseUtils {
     private static Object newInstance(Cursor cursor, Constructor<?> constructor, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
         final Object result = constructor.newInstance((Object[])null);
         for (int i = 0, size = fields.size(); i < size; ++i) {
-            final Pair<Field, String> fieldInfo = fields.get(i);
-            final Field field = fieldInfo.first;
-            DebugUtils.__checkError(cursor.getColumnIndex(fieldInfo.second) == -1, "The column '" + fieldInfo.second + "' does not exist");
-            final int columnIndex = cursor.getColumnIndexOrThrow(fieldInfo.second);
+            final Pair<Field, String> info = fields.get(i);
+            final Field field = info.first;
+            DebugUtils.__checkError(cursor.getColumnIndex(info.second) == -1, "The column '" + info.second + "' does not exist");
+            final int columnIndex = cursor.getColumnIndexOrThrow(info.second);
             final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(result, cursor.getInt(columnIndex));

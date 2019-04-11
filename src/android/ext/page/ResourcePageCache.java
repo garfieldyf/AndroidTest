@@ -7,6 +7,7 @@ import android.ext.cache.Cache;
  * Class <tt>ResourcePageCache</tt> is an implementation of a {@link Cache}.
  * This cache is the <b>unlimited-size</b> and <b>not</b> thread-safely, but
  * it can be release the page resources when the page no longer be used.
+ * @see ResourcePage
  * @author Garfield
  */
 public final class ResourcePageCache<E> extends ArrayMapCache<Integer, ResourcePage<E>> {

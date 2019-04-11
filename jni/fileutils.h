@@ -10,9 +10,9 @@
 #define __FILEUTILS_H__
 
 #ifdef __NDK_STLP__
+#include <list>
 #include <string>
 #include <utility>
-#include <forward_list>
 #endif
 
 #include "fileutil.h"
@@ -160,8 +160,8 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     assert(filter);
     assert(callback);
 
-    std::forward_list<std::string> dirPaths;
-    dirPaths.push_front(path);
+    std::list<std::string> dirPaths;
+    dirPaths.push_back(path);
 
     jint errnum = 0;
     do
@@ -188,8 +188,8 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                 } else if (result == SC_BREAK) {
                     continue;
                 } else if (isDirectory(filePath, entry)) {
-                    // If filePath is a directory adds it to dirPaths front.
-                    dirPaths.push_front(filePath);
+                    // If filePath is a directory adds it to dirPaths.
+                    dirPaths.push_back(filePath);
                 }
             }
         }

@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -160,12 +161,12 @@ public final class ZipUtils {
             final CRC32 crc = new CRC32();
             final Enumeration<? extends ZipEntry> entries = file.entries();
             while (entries.hasMoreElements() && !cancelable.isCancelled()) {
-                final ZipEntry entry  = entries.nextElement();
-                final String pathName = FileUtils.buildPath(outPath, entry.getName());
+                final ZipEntry entry = entries.nextElement();
+                final File pathName  = new File(outPath, entry.getName());
 
                 // Creates the sub directory.
                 if (entry.isDirectory()) {
-                    FileUtils.mkdirs(pathName, 0);
+                    FileUtils.mkdirs(pathName.getPath(), 0);
                 } else {
                     uncompress(file, entry, pathName, crc, cancelable, buffer);
                 }
@@ -203,7 +204,7 @@ public final class ZipUtils {
         }
     }
 
-    private static void uncompress(ZipFile file, ZipEntry entry, String filename, CRC32 crc, Cancelable cancelable, byte[] buffer) throws IOException {
+    private static void uncompress(ZipFile file, ZipEntry entry, File filename, CRC32 crc, Cancelable cancelable, byte[] buffer) throws IOException {
         InputStream is  = null;
         OutputStream os = null;
         try {

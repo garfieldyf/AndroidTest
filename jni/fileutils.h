@@ -88,17 +88,17 @@ __STATIC_INLINE__ bool isDirectory(const char* path, const struct dirent* entry)
     return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
 }
 
-__STATIC_INLINE__ jboolean compareLength(const char* one, const char* another)
+__STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
 {
-    assert(one);
-    assert(another);
+    assert(file1);
+    assert(file2);
 
     struct stat buf;
     jboolean result = JNI_FALSE;
-    if (::stat(one, &buf) == 0)
+    if (::stat(file1, &buf) == 0)
     {
         const off_t length = buf.st_size;
-        result = (::stat(another, &buf) == 0 && length == buf.st_size);
+        result = (::stat(file2, &buf) == 0 && length == buf.st_size);
     }
 
     return result;

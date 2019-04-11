@@ -121,7 +121,7 @@ public class DynamicClassLoader {
      * @return The path of the cached code directory.
      */
     public static String getCodeCacheDir(Context context, String name) {
-        final String result = FileUtils.buildPath(context.getFilesDir().getPath(), name);
+        final String result = new File(context.getFilesDir(), name).getPath();
         FileUtils.mkdirs(result, 0);
         return result;
     }

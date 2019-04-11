@@ -158,31 +158,6 @@ public final class FileUtils {
     }
 
     /**
-     * Builds an absolute file path, adding a file separator if necessary.
-     * @param dir The path to the directory.
-     * @param name The file's name.
-     */
-    public static String buildPath(String dir, String name) {
-        final StringBuilder path = join(dir, name);
-        boolean haveSlash = false;
-        int newLength = 0;
-        for (int i = 0, length = path.length(); i < length; ++i) {
-            final char c = path.charAt(i);
-            if (c == '/') {
-                if (!haveSlash) {
-                    haveSlash = true;
-                    path.setCharAt(newLength++, '/');
-                }
-            } else {
-                haveSlash = false;
-                path.setCharAt(newLength++, c);
-            }
-        }
-
-        return path.substring(0, haveSlash && newLength > 1 ? newLength - 1 : newLength);
-    }
-
-    /**
      * Creates the directory with the specified <em>path</em>.
      * @param path The path to create, must be absolute file path.
      * @param flags Creating flags. Pass 0 or {@link #FLAG_IGNORE_FILENAME}.
@@ -561,25 +536,6 @@ public final class FileUtils {
                 out.write(buffer, 0, buffer.length);
             }
         }
-    }
-
-    /**
-     * Concatenates the <em>dir</em> and the <em>name</em>.
-     */
-    private static StringBuilder join(String dir, String name) {
-        final int length = StringUtils.getLength(dir);
-        final int count  = StringUtils.getLength(name);
-        final StringBuilder path = new StringBuilder(length + count + 1);
-
-        if (length > 0) {
-            path.append(dir).append('/');
-        }
-
-        if (count > 0) {
-            path.append(name);
-        }
-
-        return path;
     }
 
     /**
@@ -1054,6 +1010,8 @@ public final class FileUtils {
         /**
          * Constructor
          * @param path The absolute file path. Never <tt>null</tt>.
+         * If the file can not be found on the filesystem, The
+         * {@link #type} of this <tt>Dirent</tt> is {@link #DT_UNKNOWN}.
          * @see #Dirent(String, int)
          * @see #Dirent(String, String, int)
          */
@@ -1061,6 +1019,7 @@ public final class FileUtils {
             DebugUtils.__checkError(path == null, "path == null");
             this.path = path;
             this.type = (getFileType(path) >> 12);
+            Dirent.__checkType(type);
         }
 
         /**
@@ -1088,7 +1047,7 @@ public final class FileUtils {
         public Dirent(String dir, String name, int type) {
             DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
             Dirent.__checkType(type);
-            this.path = buildPath(dir, name);
+            this.path = new File(dir, name).getPath();
             this.type = type;
         }
 

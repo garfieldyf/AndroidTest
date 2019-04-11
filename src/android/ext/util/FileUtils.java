@@ -1009,14 +1009,14 @@ public final class FileUtils {
 
         /**
          * Constructor
-         * @param path The absolute file path. Never <tt>null</tt>.
+         * @param path The absolute file path.
          * If the file can not be found on the filesystem, The
          * {@link #type} of this <tt>Dirent</tt> is {@link #DT_UNKNOWN}.
          * @see #Dirent(String, int)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            DebugUtils.__checkError(path == null, "path == null");
+            DebugUtils.__checkError(StringUtils.getLength(path) > 0, "path == null || path.length() == 0");
             this.path = path;
             this.type = (getFileType(path) >> 12);
             Dirent.__checkType(type);
@@ -1024,13 +1024,13 @@ public final class FileUtils {
 
         /**
          * Constructor
-         * @param path The absolute file path. Never <tt>null</tt>.
+         * @param path The absolute file path.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          * @see #Dirent(String)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            DebugUtils.__checkError(path == null, "path == null");
+            DebugUtils.__checkError(StringUtils.getLength(path) > 0, "path == null || path.length() == 0");
             Dirent.__checkType(type);
             this.path = path;
             this.type = type;
@@ -1038,14 +1038,14 @@ public final class FileUtils {
 
         /**
          * Constructor
-         * @param dir The path of the directory.
+         * @param dir The absolute path of the directory.
          * @param name The file's name of this <tt>Dirent</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          * @see #Dirent(String)
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
-            DebugUtils.__checkError(dir == null || name == null, "dirPath == null || name == null");
+            DebugUtils.__checkError(StringUtils.getLength(dir) > 0, "dir == null || dir.length() == 0");
             Dirent.__checkType(type);
             this.path = new File(dir, name).getPath();
             this.type = type;

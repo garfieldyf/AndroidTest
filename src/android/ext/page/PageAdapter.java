@@ -25,7 +25,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param pageSize The item count of the each page (page index > 0).
      * @param prefetchDistance Defines how far to the first or last item in the
      * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
-     * that this adapter will not prefetch data.
+     * this adapter will not prefetch data.
      * @see #PageAdapter(Cache, int, int, int)
      * @see Pages#newPageCache(int)
      */
@@ -40,7 +40,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param pageSize The item count of the each page (page index > 0).
      * @param prefetchDistance Defines how far to the first or last item in the
      * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
-     * that this adapter will not prefetch data.
+     * this adapter will not prefetch data.
      * @see #PageAdapter(int, int, int, int)
      */
     public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {

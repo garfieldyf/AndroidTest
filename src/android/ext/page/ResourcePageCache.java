@@ -24,21 +24,21 @@ public final class ResourcePageCache<E> extends ArrayMapCache<Integer, ResourceP
 
     @Override
     public ResourcePage<E> remove(Integer key) {
-        final ResourcePage<E> result = map.remove(key);
-        if (result != null) {
-            result.close();
+        final ResourcePage<E> prevPage = map.remove(key);
+        if (prevPage != null) {
+            prevPage.close();
         }
 
-        return result;
+        return prevPage;
     }
 
     @Override
     public ResourcePage<E> put(Integer key, ResourcePage<E> value) {
-        final ResourcePage<E> result = map.put(key, value);
-        if (result != null) {
-            result.close();
+        final ResourcePage<E> prevPage = map.put(key, value);
+        if (prevPage != null) {
+            prevPage.close();
         }
 
-        return result;
+        return prevPage;
     }
 }

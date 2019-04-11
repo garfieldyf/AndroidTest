@@ -123,7 +123,7 @@ public final class Pages {
 
         @Override
         public E getItem(int position) {
-            return mData.get(position);
+            return (position >= 0 && position < mData.size() ? mData.get(position) : null);
         }
     }
 
@@ -207,11 +207,11 @@ public final class Pages {
         /* package */ PageAdapterImpl(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance, PageLoader<E> loader) {
             DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
             DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
-            mPageCache  = (Cache<Integer, Page<E>>)pageCache;
-            mPageSize   = pageSize;
-            mPageLoader = loader;
-            mPageStates = new BitSet();
             mInitialSize = initialSize;
+            mPageLoader  = loader;
+            mPageSize    = pageSize;
+            mPageStates  = new BitSet();
+            mPageCache   = (Cache<Integer, Page<E>>)pageCache;
             mPrefetchDistance = prefetchDistance;
         }
 
@@ -224,7 +224,6 @@ public final class Pages {
         /* package */ final E getItem(int position) {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
-
             final long combinedPosition = getPageForPosition(position);
             final int index = getOriginalPage(combinedPosition);
             final Page<E> page = getPage(index);

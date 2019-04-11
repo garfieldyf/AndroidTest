@@ -1,6 +1,8 @@
 package android.ext.cache;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Map;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -44,6 +46,20 @@ public final class SimpleFileCache implements FileCache {
     }
 
     @Override
+    public File remove(String key) {
+        final File result = get(key);
+        return (result.delete() ? result : null);
+    }
+
+    /**
+     * @return Always returns an empty (<tt>0-size</tt>), unmodifiable {@link Map}.
+     */
+    @Override
+    public Map<String, File> entries() {
+        return Collections.emptyMap();
+    }
+
+    @Override
     public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
         return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
@@ -52,13 +68,6 @@ public final class SimpleFileCache implements FileCache {
     @Override
     public File put(String key, File cacheFile) {
         return null;
-    }
-
-    @Override
-    public File remove(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
-        final File result = get(key);
-        return (result.delete() ? result : null);
     }
 
     /* package */ final void dump(Context context, Printer printer) {

@@ -9,7 +9,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.content.XmlResources;
+import android.ext.content.res.XmlResources;
 import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.ImageTransformer;
 import android.ext.image.transformer.Transformer;

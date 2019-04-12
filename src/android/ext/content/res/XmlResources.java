@@ -1,4 +1,4 @@
-package android.ext.content;
+package android.ext.content.res;
 
 import java.util.Arrays;
 import org.xmlpull.v1.XmlPullParser;

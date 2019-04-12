@@ -6,7 +6,7 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.ext.content.XmlResources;
+import android.ext.content.res.XmlResources;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.Path;

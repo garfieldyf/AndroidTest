@@ -1,7 +1,7 @@
 package android.ext.image.transformer;
 
 import android.content.Context;
-import android.ext.content.XmlResources;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;

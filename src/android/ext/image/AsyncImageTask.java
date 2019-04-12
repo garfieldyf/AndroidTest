@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
-import android.ext.content.XmlResources;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;

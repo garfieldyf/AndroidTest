@@ -3,7 +3,7 @@ package android.ext.image.decoder;
 import static android.ext.image.ImageLoader.FLAG_CUSTOM_PARAMETERS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
-import android.ext.content.XmlResources;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;

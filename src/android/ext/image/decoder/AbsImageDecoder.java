@@ -1,12 +1,12 @@
 package android.ext.image.decoder;
 
-import static android.graphics.Bitmap.Config.ARGB_8888;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import android.util.Printer;
@@ -96,17 +96,16 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.inDensity = 0;
         opts.outWidth  = 0;
         opts.outHeight = 0;
+        opts.inScaled  = true;
         opts.inMutable = false;
-        opts.inDither  = false;
-        opts.mCancel   = false;
         opts.inSampleSize  = 0;
         opts.outMimeType   = null;
         opts.inTempStorage = null;
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
+        opts.inPremultiplied = true;
         opts.inJustDecodeBounds = false;
-        opts.inPreferredConfig  = ARGB_8888;
-        opts.inPreferQualityOverSpeed = false;
+        opts.inPreferredConfig  = Config.ARGB_8888;
         mOptionsPool.recycle(opts);
     }
 

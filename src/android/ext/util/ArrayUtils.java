@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -331,49 +332,55 @@ public final class ArrayUtils {
      * Inserts the specified <em>value</em> into the specified sorted <em>list</em>
      * at the appropriate position. The <em>list</em> needs to be already sorted in
      * natural sorting order.
-     * @param list The sorted list to insert to.
+     * @param list The sorted {@link LinkedList} to insert to.
      * @param value The element to insert.
-     * @see #insert(List, T, Comparator)
+     * @see #insert(LinkedList, T, Comparator)
      */
-    public static <T extends Comparable<? super T>> void insert(List<T> list, T value) {
-        final ListIterator<T> itor = list.listIterator();
+    public static <T extends Comparable<? super T>> void insert(LinkedList<T> list, T value) {
+        final T last = list.peekLast();
+        if (last == null || value.compareTo(last) >= 0) {
+            list.addLast(value);
+            return;
+        }
+
+        final ListIterator<T> itor = list.listIterator(0);
         while (itor.hasNext()) {
             final T next = itor.next();
-            if (next.compareTo(value) > 0) {
-                // Swaps the value to next.
+            if (next.compareTo(value) >= 0) {
+                // Inserts the value into the list before the next value.
                 itor.set(value);
-                value = next;
+                itor.add(next);
                 break;
             }
         }
-
-        // Inserts the value into the list between previous and next.
-        itor.add(value);
     }
 
     /**
      * Inserts the specified <em>value</em> into the specified sorted <em>list</em> at
      * the appropriate position. The <em>list</em> needs to be already sorted according
      * to the <em>comparator</em>.
-     * @param list The sorted list to insert to.
+     * @param list The sorted {@link LinkedList} to insert to.
      * @param value The element to insert.
      * @param comparator The {@link Comparator} to compare.
-     * @see #insert(List, T)
+     * @see #insert(LinkedList, T)
      */
-    public static <T> void insert(List<? extends T> list, T value, Comparator<? super T> comparator) {
-        final ListIterator<T> itor = (ListIterator<T>)list.listIterator();
+    public static <T> void insert(LinkedList<? extends T> list, T value, Comparator<? super T> comparator) {
+        final T last = list.peekLast();
+        if (last == null || comparator.compare(value, last) >= 0) {
+            ((LinkedList<T>)list).addLast(value);
+            return;
+        }
+
+        final ListIterator<T> itor = (ListIterator<T>)list.listIterator(0);
         while (itor.hasNext()) {
             final T next = itor.next();
-            if (comparator.compare(next, value) > 0) {
-                // Swaps the value to next.
+            if (comparator.compare(next, value) >= 0) {
+                // Inserts the value into the list before the next value.
                 itor.set(value);
-                value = next;
+                itor.add(next);
                 break;
             }
         }
-
-        // Inserts the value into the list between previous and next.
-        itor.add(value);
     }
 
     /**

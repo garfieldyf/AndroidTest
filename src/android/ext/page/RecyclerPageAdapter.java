@@ -13,7 +13,7 @@ import android.view.View;
 
 /**
  * Class <tt>RecyclerPageAdapter</tt> allows to loading data by page.
- * <h5>RecyclerPageAdapter's generic types</h5>
+ * <h3>RecyclerPageAdapter's generic types</h3>
  * <p>The two types used by a page adapter are the following:</p>
  * <ol><li><tt>E</tt>, The item data type of the adapter.</li>
  * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will

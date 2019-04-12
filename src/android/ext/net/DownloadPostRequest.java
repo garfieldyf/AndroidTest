@@ -21,7 +21,7 @@ import android.util.JsonWriter;
 /**
  * Class <tt>DownloadPostRequest</tt> used to downloads the resource from the
  * remote HTTP server. This class both support HTTP "GET" and "POST" methods.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadPostRequest(url)
  *     .post(obj)

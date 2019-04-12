@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * Class <tt>GIFTransformer</tt> used to transforms a {@link GIFImage} to a {@link GIFDrawable}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;GIFTransformer /&gt;</pre>
  * @author Garfield

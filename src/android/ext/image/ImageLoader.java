@@ -30,11 +30,11 @@ import android.widget.ImageView;
 /**
  * Class <tt>ImageLoader</tt> allows to load the image from the URI
  * on a background thread and bind it to target on the UI thread.
- * <h5>ImageLoader's generic types</h5>
+ * <h3>ImageLoader's generic types</h3>
  * <p>The two types used by an image loader are the following:</p>
  * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final ImageLoader&lt;String, Bitmap&gt; mImageLoader = module.createImageLoader()
  *     .setParameters(R.xml.decode_params)
@@ -84,7 +84,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Loads the image from the specified <em>uri</em>, bind it to the target. If the image
      * is already cached, it is bind immediately. Otherwise loads the image on a background
      * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * <h5>The default implementation accepts the following URI schemes:</h5>
+     * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
      * <li>ftp ({@link #SCHEME_FTP})</li>
      * <li>http ({@link #SCHEME_HTTP})</li>

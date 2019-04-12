@@ -13,11 +13,11 @@ import android.util.Log;
 /**
  * Class <tt>AsyncJsonLoader</tt> allows to load the JSON data on a background thread and publish
  * results on the UI thread. This class can be support the JSON cache file.
- * <h5>AsyncJsonLoader's generic types</h5>
+ * <h3>AsyncJsonLoader's generic types</h3>
  * <p>The two types used by a JSON loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * public static class JsonLoadParams extends LoadParams&lt;String, JSONObject&gt; {
  *     {@code @Override}

@@ -150,7 +150,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
     /**
      * Class <tt>Builder</tt> to creates an {@link ImageLoader}.
-     * <h2>Usage</h2>
+     * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * final ImageLoader&lt;String, Bitmap&gt; mImageLoader = module.createImageLoader()
      *     .setParameters(R.xml.decode_params)

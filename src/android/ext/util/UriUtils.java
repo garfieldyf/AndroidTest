@@ -21,7 +21,7 @@ public final class UriUtils {
 
     /**
      * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
-     * <h5>Accepts the following URI schemes:</h5>
+     * <h3>Accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>

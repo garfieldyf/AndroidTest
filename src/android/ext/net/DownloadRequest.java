@@ -23,7 +23,7 @@ import android.util.LogPrinter;
 
 /**
  * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote server.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadRequest(url)
  *     .readTimeout(60000)

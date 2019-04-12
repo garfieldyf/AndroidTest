@@ -12,11 +12,11 @@ import android.util.Log;
 /**
  * Class <tt>AsyncJsonTask</tt> allows to load the JSON data on a background thread and publish
  * results on the UI thread. This class can be support the JSON cache file.
- * <h5>AsyncJsonTask's generic types</h5>
+ * <h3>AsyncJsonTask's generic types</h3>
  * <p>The two types used by a JSON task are the following:</p>
  * <ol><li><tt>Params</tt>, The parameters type of the task.</li>
  * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * private static class JsonTask extends AsyncJsonTask&lt;String, JSONObject&gt; {
  *     public JsonTask(Activity ownerActivity) {

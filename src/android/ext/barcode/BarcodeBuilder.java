@@ -13,7 +13,7 @@ import com.google.zxing.common.BitMatrix;
 
 /**
  * Class <tt>BarcodeBuilder</tt> used to converts the {@link BitMatrix} to a barcode image.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
  *     .logo(logo, Gravity.FILL)

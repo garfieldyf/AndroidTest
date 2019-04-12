@@ -11,7 +11,7 @@ import android.util.Printer;
 
 /**
  * Class <tt>ScaleParameters</tt> is an implementation of a {@link Parameters}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;ScaleParameters
  *      xmlns:app="http://schemas.android.com/apk/res-auto"

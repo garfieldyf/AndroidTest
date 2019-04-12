@@ -357,7 +357,7 @@ public final class FileUtils {
     /**
      * Copies the specified file contents to the specified <em>outFile</em>.
      * <p>Note: This method will be create the necessary directories.</p>
-     * <h5>Accepts the following URI schemes:</h5>
+     * <h3>Accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
@@ -442,7 +442,7 @@ public final class FileUtils {
 
     /**
      * Reads the specified file contents into the specified <em>out</em>.
-     * <h5>Accepts the following URI schemes:</h5>
+     * <h3>Accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>

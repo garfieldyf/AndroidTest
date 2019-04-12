@@ -8,7 +8,7 @@ import android.ext.util.DebugUtils;
 /**
  * Class <tt>AsyncLoader</tt> allows to load the resource on
  * a background thread and bind it to target on the UI thread.
- * <h5>AsyncLoader's generic types</h5>
+ * <h3>AsyncLoader's generic types</h3>
  * <p>The three types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Params</tt>, The load task's parameters type.</li>

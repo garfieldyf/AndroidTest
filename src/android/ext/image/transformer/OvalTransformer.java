@@ -6,7 +6,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * Class <tt>OvalTransformer</tt> used to transforms a {@link Bitmap} to a {@link OvalBitmapDrawable}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;OvalTransformer /&gt;</pre>
  * @author Garfield

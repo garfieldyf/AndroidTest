@@ -14,7 +14,7 @@ import android.util.Log;
 /**
  * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote server on a
  * background thread and publish results on the UI thread.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * private static class JSONDownloadTask extends AsyncDownloadTask&lt;String, Object, JSONObject&gt; {
  *     public JSONDownloadTask(Activity ownerActivity) {

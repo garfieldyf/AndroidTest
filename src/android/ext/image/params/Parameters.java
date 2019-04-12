@@ -12,7 +12,7 @@ import android.util.Printer;
 
 /**
  * Class <tt>Parameters</tt> can be used to decode bitmap.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;[ Parameters | parameters ]
  *      xmlns:app="http://schemas.android.com/apk/res-auto"

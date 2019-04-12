@@ -24,7 +24,7 @@ import android.widget.ImageView;
 
 /**
  * Class <tt>ImageBinder</tt> allows to bind the image to the {@link ImageView}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;[ ImageBinder | TransitionBinder | BackgroundBinder | binder ]
  *     xmlns:android="http://schemas.android.com/apk/res/android"

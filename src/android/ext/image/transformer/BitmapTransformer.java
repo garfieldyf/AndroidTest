@@ -7,7 +7,7 @@ import android.graphics.drawable.Drawable;
 
 /**
  * Class <tt>BitmapTransformer</tt> used to transforms a {@link Bitmap} to a {@link BitmapDrawable}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;BitmapTransformer /&gt;</pre>
  * @author Garfield

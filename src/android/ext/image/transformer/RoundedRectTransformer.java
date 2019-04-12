@@ -9,7 +9,7 @@ import android.util.AttributeSet;
 
 /**
  * Class <tt>RoundedRectTransformer</tt> used to transforms a {@link Bitmap} to a {@link RoundedBitmapDrawable}.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedRectTransformer xmlns:android="http://schemas.android.com/apk/res/android"
  *      android:radius="20dp"

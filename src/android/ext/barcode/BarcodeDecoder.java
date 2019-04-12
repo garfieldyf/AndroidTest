@@ -252,7 +252,7 @@ public class BarcodeDecoder {
 
     /**
      * Class <tt>Builder</tt> to creates the barcode decoder hints.
-     * <h2>Usage</h2>
+     * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * final Map&lt;DecodeHintType, Object&gt; hints = new BarcodeDecoder.Builder()
      *     .charset("UTF-8")

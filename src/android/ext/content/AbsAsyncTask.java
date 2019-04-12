@@ -9,7 +9,7 @@ import android.os.AsyncTask;
 /**
  * Like as {@link AsyncTask}, but this class has an owner <tt>Object</tt> to avoid potential memory
  * leaks. The owner object may be a <tt>Activity</tt>, <tt>Dialog</tt> or <tt>Fragment</tt> etc.
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * private static class DownloadTask extends AbsAsyncTask&lt;String, Object, Long&gt; {
  *     public DownloadTask(Activity ownerActivity) {

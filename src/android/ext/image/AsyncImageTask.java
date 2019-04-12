@@ -20,7 +20,7 @@ import android.util.Log;
 /**
  * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI
  * on a background thread and publish result on the UI thread.
- * <h5>AsyncImageTask's generic types</h5>
+ * <h3>AsyncImageTask's generic types</h3>
  * <p>The one type used by an image task are the following:</p>
  * <tt>URI</tt>, The URI type of the task, accepts the following URI schemes:
  * <ul><li>path (no scheme)</li>
@@ -31,7 +31,7 @@ import android.util.Log;
  * <li>content ({@link #SCHEME_CONTENT})</li>
  * <li>android_asset ({@link #SCHEME_FILE})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
- * <h2>Usage</h2>
+ * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * private static class DownloadBitmapTask extends AsyncImageTask&lt;String&gt; {
  *     public DownloadBitmapTask(Activity ownerActivity) {

@@ -149,7 +149,7 @@ public final class PackageUtils {
 
     /**
      * Class <tt>PackageParser</tt> used to parse the package archive files.
-     * <h2>Usage</h2>
+     * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * final List&lt;PackageInfo&gt; result = new PackageParser(context)
      *     .addParseFlags(PackageManager.GET_ACTIVITIES)

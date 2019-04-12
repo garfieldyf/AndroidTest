@@ -144,23 +144,9 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data) {
-        DebugUtils.__checkUIThread("setPage");
-        DebugUtils.__checkError(page < 0, "page < 0");
-
-        // Clears the page loading state when the page is load complete.
-        mImpl.mPageStates.clear(page);
-        if (Pages.getCount(data) > 0) {
-            mImpl.mPageCache.put(page, data);
+        if (mImpl.setPage(page, data) > 0) {
             notifyDataSetChanged();
         }
-    }
-
-    /**
-     * Returns the maximum number of pages in this adapter.
-     * @return The maximum number of pages.
-     */
-    public final int getMaxPageCount() {
-        return mImpl.getMaxPageCount();
     }
 
     /**

@@ -95,13 +95,6 @@ public final class Pages {
     }
 
     /**
-     * Returns the number of items in the <em>page</em>, handling <tt>null Page</tt>.
-     */
-    /* package */ static int getCount(Page<?> page) {
-        return (page != null ? page.getCount() : 0);
-    }
-
-    /**
      * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
      */
     private static final class ListPage<E> implements Page<E> {
@@ -272,13 +265,18 @@ public final class Pages {
             return result;
         }
 
-        /* package */ final int getMaxPageCount() {
-            if (mItemCount == 0) {
-                return 0;
+        /* package */ final int setPage(int page, Page<E> data) {
+            DebugUtils.__checkUIThread("setPage");
+            DebugUtils.__checkError(page < 0, "page < 0");
+
+            // Clears the page loading state when the page is load complete.
+            mPageStates.clear(page);
+            final int count = getCount(data);
+            if (count > 0) {
+                mPageCache.put(page, data);
             }
 
-            final int lastPosition = mItemCount - 1;
-            return (lastPosition < mInitialSize ? 1 : (lastPosition - mInitialSize) / mPageSize + 2);
+            return count;
         }
 
         /* package */ final long getPageForPosition(int position) {
@@ -310,6 +308,10 @@ public final class Pages {
                 formatter.format("  Page %-2d ==> ", entry.getKey());
                 printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
             }
+        }
+
+        private static int getCount(Page<?> page) {
+            return (page != null ? page.getCount() : 0);
         }
 
         private void prefetchPage(int currentPage, int position) {

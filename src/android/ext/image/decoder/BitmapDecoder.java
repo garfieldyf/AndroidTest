@@ -134,7 +134,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 opts.inBitmap = null;
-                Log.w(getClass().getName(), e);
+                Log.w(getClass().getName(), e.getMessage());
                 bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
             }
         }

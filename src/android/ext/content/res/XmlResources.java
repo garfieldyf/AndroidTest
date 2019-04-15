@@ -38,8 +38,8 @@ public final class XmlResources {
      * @return The <tt>Parameters</tt> object.
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
-    public static <T extends Parameters> T loadParameters(Context context, int id) throws NotFoundException {
-        return (T)load(context, id, XmlParametersInflater.sInstance);
+    public static Parameters loadParameters(Context context, int id) throws NotFoundException {
+        return load(context, id, XmlParametersInflater.sInstance);
     }
 
     /**
@@ -49,8 +49,8 @@ public final class XmlResources {
      * @return The <tt>Transformer</tt> object.
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
-    public static <URI, Image, T extends Transformer<URI, Image>> T loadTransformer(Context context, int id) throws NotFoundException {
-        return (T)load(context, id, XmlTransformerInflater.sInstance);
+    public static <URI, Image> Transformer<URI, Image> loadTransformer(Context context, int id) throws NotFoundException {
+        return (Transformer<URI, Image>)load(context, id, XmlTransformerInflater.sInstance);
     }
 
     /**
@@ -165,11 +165,11 @@ public final class XmlResources {
     /**
      * Class <tt>XmlParametersInflater</tt> is an implementation of a {@link XmlResourceInflater}.
      */
-    private static final class XmlParametersInflater implements XmlResourceInflater<Object> {
+    private static final class XmlParametersInflater implements XmlResourceInflater<Parameters> {
         public static final XmlParametersInflater sInstance = new XmlParametersInflater();
 
         @Override
-        public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+        public Parameters inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
             String name = parser.getName();
             if (name.equals("parameters") && (name = parser.getAttributeValue(null, "class")) == null) {
                 throw new XmlPullParserException(parser.getPositionDescription() + ": The <parameters> tag requires a valid 'class' attribute");
@@ -187,7 +187,7 @@ public final class XmlResources {
                 return new ScaleParameters(context, attrs);
 
             default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
+                return (Parameters)ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }

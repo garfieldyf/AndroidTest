@@ -5,6 +5,8 @@ import java.util.concurrent.TimeUnit;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.content.res.Resources.NotFoundException;
 import android.ext.cache.BitmapPool;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
@@ -19,8 +21,11 @@ import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.util.ClassUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
+import android.util.SparseArray;
+import android.util.TypedValue;
 
 /**
  * Class ImageModule
@@ -34,6 +39,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     protected final Executor mExecutor;
     protected final FileCache mFileCache;
     protected final Cache<URI, Image> mImageCache;
+    protected SparseArray<Parameters> mParamsCache;
 
     /**
      * Constructor
@@ -120,9 +126,30 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         return mImageCache;
     }
 
+    /**
+     * Return a {@link Parameters} object associated with a resource id.
+     * @param id The xml resource id of the <tt>Parameters</tt>.
+     * @return The <tt>Parameters</tt> object.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    public synchronized final Parameters getParameters(int id) {
+        if (mParamsCache == null) {
+            mParamsCache = new SparseArray<Parameters>(8);
+        }
+
+        Parameters parameters = mParamsCache.get(id, null);
+        if (parameters == null) {
+            DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
+            mParamsCache.append(id, parameters = XmlResources.loadParameters(mContext, id));
+        }
+
+        return parameters;
+    }
+
     public final void dump(Printer printer) {
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
+        dumpParamsCache(printer);
     }
 
     @Override
@@ -135,6 +162,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         if (mImageCache != null) {
             mImageCache.clear();
         }
+
+        synchronized (this) {
+            if (mParamsCache != null) {
+                DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Clears the Parameters cache - size = " + mParamsCache.size());
+                mParamsCache.clear();
+            }
+        }
     }
 
     @Override
@@ -146,6 +180,23 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      */
     protected static FileCache createFileCache(Context context, int maxSize) {
         return (maxSize > 0 ? new LruFileCache(context, "._image_cache", maxSize) : null);
+    }
+
+    /**
+     * Dumps the {@link mParamsCache}.
+     */
+    private synchronized void dumpParamsCache(Printer printer) {
+        if (mParamsCache != null) {
+            final int size = mParamsCache.size();
+            final TypedValue value = new TypedValue();
+            final Resources res = mContext.getResources();
+
+            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Parameters cache [ size = %d ] ", size);
+            for (int i = 0; i < size; ++i) {
+                res.getValue(mParamsCache.keyAt(i), value, true);
+                mParamsCache.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
+            }
+        }
     }
 
     /**

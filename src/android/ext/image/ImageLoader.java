@@ -6,14 +6,12 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import android.content.Context;
 import android.ext.cache.Cache;
-import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.image.binder.ImageBinder;
 import android.ext.image.decoder.AbsImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
-import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
@@ -144,18 +142,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public void dump(Context context, Printer printer) {
         super.dump(context, printer);
         Pools.dumpPool(mBufferPool, printer);
+
         if (mDecoder instanceof AbsImageDecoder) {
             ((AbsImageDecoder<?>)mDecoder).dump(printer);
         }
 
         if (mBinder instanceof ImageBinder) {
             ((ImageBinder<?, ?>)mBinder).dump(context, printer);
-        }
-
-        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping shared memory cache and file cache ");
-        Caches.dumpCache(getCache(), context, printer);
-        if (mLoader instanceof ImageLoader.FileCacheLoader) {
-            Caches.dumpCache(((ImageLoader<?, ?>.FileCacheLoader)mLoader).mCache, context, printer);
         }
     }
 
@@ -262,7 +255,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
     private final class FileCacheLoader implements Loader<Image> {
-        /* package */ final FileCache mCache;
+        private final FileCache mCache;
 
         /**
          * Constructor

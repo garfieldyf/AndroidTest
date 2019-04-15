@@ -791,9 +791,25 @@ public final class FileUtils {
 
         /**
          * Constructor
+         * @see #Stat(Stat)
          */
         @Keep
         public Stat() {
+        }
+
+        /**
+         * Copy constructor
+         * @param from The <tt>Stat</tt> to copy.
+         * @see #Stat()
+         */
+        public Stat(Stat from) {
+            this.mode    = from.mode;
+            this.uid     = from.uid;
+            this.gid     = from.gid;
+            this.size    = from.size;
+            this.mtime   = from.mtime;
+            this.blocks  = from.blocks;
+            this.blksize = from.blksize;
         }
 
         /**

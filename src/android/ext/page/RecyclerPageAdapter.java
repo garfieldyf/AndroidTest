@@ -27,7 +27,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     /**
      * Constructor
      * @param maxPages The maximum number of pages to allow in the page cache.
-     * Pass <tt>0</tt> that the page cache is the <b>unlimited-size</b> cache.
+     * Pass <tt>0</tt> indicates the page cache is the <b>unlimited-size</b> cache.
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
      * @param prefetchDistance Defines how far to the first or last item in the

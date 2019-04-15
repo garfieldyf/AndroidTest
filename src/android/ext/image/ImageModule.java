@@ -49,7 +49,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @see #ImageModule(Context, Executor, Cache, FileCache)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, ThreadPool.createImageThreadPool(Math.min(Runtime.getRuntime().availableProcessors() * 2, 3), 60, TimeUnit.SECONDS), imageCache, fileCache);
+        this(context, ThreadPool.createImageThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), 3), 60, TimeUnit.SECONDS), imageCache, fileCache);
     }
 
     /**
@@ -72,33 +72,37 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     /**
      * Creates a new {@link Bitmap} module.
      * @param context The <tt>Context</tt>.
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum
-     * memory of the current device. Pass <tt>0</tt> that the module has no memory cache.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
+     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
+     * of the current device. Pass <tt>0</tt> indicates the module has no bitmap cache.
+     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> indicates the module has no file cache.
+     * @param maxPoolSize The maximum number of bitmaps to allow in the internal {@link BitmapPool} of the bitmap cache.
+     * Pass <tt>0</tt> indicates the bitmap cache has no {@link BitmapPool}.
      * @return The {@link ImageModule}.
      */
-    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, float scaleMemory, int maxFileSize) {
-        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory, 0), createFileCache(context, maxFileSize));
+    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, float scaleMemory, int maxFileSize, int maxPoolSize) {
+        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory, maxPoolSize), createFileCache(context, maxFileSize));
     }
 
     /**
      * Creates a new image module.
      * @param context The <tt>Context</tt>.
      * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
-     * of the current device. Pass <tt>0</tt> that the module has no bitmap cache.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> that the module has no file cache.
-     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> that the module has no image cache.
+     * of the current device. Pass <tt>0</tt> indicates the module has no bitmap cache.
+     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> indicates the module has no file cache.
+     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> indicates the module has no image cache.
+     * @param maxPoolSize The maximum number of bitmaps to allow in the internal {@link BitmapPool} of the bitmap cache.
+     * Pass <tt>0</tt> indicates the bitmap cache has no {@link BitmapPool}.
      * @return The {@link ImageModule}.
      */
-    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxFileSize, int maxImageSize) {
-        return new ImageModule<URI, Object>(context, new LruImageCache<URI>(scaleMemory, maxImageSize), createFileCache(context, maxFileSize));
+    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxFileSize, int maxImageSize, int maxPoolSize) {
+        return new ImageModule<URI, Object>(context, new LruImageCache<URI>(scaleMemory, maxImageSize, maxPoolSize), createFileCache(context, maxFileSize));
     }
 
     /**
      * Returns a {@link Builder} to creates an {@link ImageLoader}.
      * @return The <tt>Builder</tt>.
      */
-    public Builder<URI, Image> createImageLoader() {
+    public final Builder<URI, Image> createImageLoader() {
         return new Builder<URI, Image>(this);
     }
 
@@ -176,13 +180,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     }
 
     /**
-     * Creates a new {@link FileCache} instance.
-     */
-    protected static FileCache createFileCache(Context context, int maxSize) {
-        return (maxSize > 0 ? new LruFileCache(context, "._image_cache", maxSize) : null);
-    }
-
-    /**
      * Dumps the {@link mParamsCache}.
      */
     private synchronized void dumpParamsCache(Printer printer) {
@@ -197,6 +194,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
                 mParamsCache.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
             }
         }
+    }
+
+    /**
+     * Creates a new {@link FileCache} instance.
+     */
+    private static FileCache createFileCache(Context context, int maxSize) {
+        return (maxSize > 0 ? new LruFileCache(context, "._image_module_image_cache", maxSize) : null);
     }
 
     /**

@@ -103,6 +103,7 @@
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />
         <activity android:name="PackageActivity" />
         <activity android:name="RecyclerViewActivity" />
+        <activity android:name="PackageArchiveActivity" />
         
         <service
             android:name="CrashService"

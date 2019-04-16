@@ -98,12 +98,12 @@ public final class PackageUtils {
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<CharSequence, Drawable> loadLabelAndIcon(Context context, PackageInfo info) {
-        DebugUtils.__checkError(info.applicationInfo.sourceDir == null, "The info.applicationInfo.sourceDir == null");
+    public static Pair<CharSequence, Drawable> loadPackageResources(Context context, PackageInfo info) {
+        DebugUtils.__checkError(info.applicationInfo.publicSourceDir == null, "The info.applicationInfo.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
             // Adds an additional archive file to the assets.
-            assets.addAssetPath(info.applicationInfo.sourceDir);
+            assets.addAssetPath(info.applicationInfo.publicSourceDir);
 
             // Loads the application's icon.
             final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
@@ -122,6 +122,11 @@ public final class PackageUtils {
                 label = res.getText(info.applicationInfo.labelRes, info.packageName);
             }
 
+            /*
+             * May be kill my process after unmounting usb disk.
+             * icon  = context.getPackageManager().getApplicationIcon(info.applicationInfo);
+             * lable = context.getPackageManager().getApplicationLabel(info.applicationInfo);
+             */
             return new Pair<CharSequence, Drawable>(StringUtils.trim(label), icon);
         } finally {
             // Close the assets to avoid ProcessKiller
@@ -141,7 +146,7 @@ public final class PackageUtils {
                     .append(", version = ").append(info.versionName)
                     .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
                     .append(", updatedSystem = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
-                    .append(", sourceDir = ").append(info.applicationInfo.sourceDir)
+                    .append(", sourceDir = ").append(info.applicationInfo.publicSourceDir)
                     .toString());
             }
         }
@@ -247,7 +252,7 @@ public final class PackageUtils {
             if (isArchiveFile(path, type)) {
                 final PackageInfo packageInfo = mPackageManager.getPackageArchiveInfo(path, mParseFlags);
                 if (packageInfo != null) {
-                    packageInfo.applicationInfo.sourceDir = path;
+                    packageInfo.applicationInfo.publicSourceDir = path;
                     ((List<PackageInfo>)cookie).add(packageInfo);
                 }
             }

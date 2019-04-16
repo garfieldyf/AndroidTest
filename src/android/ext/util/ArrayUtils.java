@@ -494,21 +494,6 @@ public final class ArrayUtils {
         return (end - start) >> 1;
     }
 
-    private static synchronized Object[] array(Object list) throws Exception {
-        if (sArrayField == null) {
-            final Field[] fields = ArrayList.class.getDeclaredFields();
-            for (Field field : fields) {
-                if ((field.getModifiers() & (STATIC | FINAL)) == 0 && field.getType() == Object[].class) {
-                    field.setAccessible(true);
-                    sArrayField = field;
-                    break;
-                }
-            }
-        }
-
-        return (Object[])sArrayField.get(list);
-    }
-
     private static void sortList(List list, int start, int end, Comparator comparator) {
         final Object[] array = list.toArray();
         if (comparator == null) {
@@ -526,7 +511,7 @@ public final class ArrayUtils {
 
     private static void sortArrayList(List list, int start, int end, Comparator comparator) {
         try {
-            final Object[] array = array(list);
+            final Object[] array = (Object[])ArrayField.sInstance.get(list);
             if (comparator == null) {
                 Arrays.sort(array, start, end);
             } else {
@@ -583,7 +568,21 @@ public final class ArrayUtils {
     /**
      * The {@link ArrayList#array} field.
      */
-    private static Field sArrayField;
+    private static final class ArrayField {
+        public static final Field sInstance = getArrayField();
+
+        private static Field getArrayField() {
+            final Field[] fields = ArrayList.class.getDeclaredFields();
+            for (Field field : fields) {
+                if ((field.getModifiers() & (STATIC | FINAL)) == 0 && field.getType() == Object[].class) {
+                    field.setAccessible(true);
+                    return field;
+                }
+            }
+
+            return null;
+        }
+    }
 
     /**
      * This utility class cannot be instantiated.

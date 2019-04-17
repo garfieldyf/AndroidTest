@@ -369,7 +369,7 @@ public final class JsonUtils {
         } else if (object instanceof Map) {
             return writeValues(writer, ((Map<String, Object>)object).entrySet());
         } else {
-            throw new AssertionError("Unsupported type - " + object.getClass().toString());
+            throw new AssertionError("Unsupported type - " + object.getClass().getName());
         }
     }
 

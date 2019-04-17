@@ -226,15 +226,15 @@ public class ThreadPoolManager extends ThreadPool {
          * Attempts to stop execution of this task. This attempt will fail
          * if this task has already completed, or already been cancelled.
          */
-        /* package */ final boolean cancel(boolean interrupt, boolean notify) {
+        /* package */ final boolean cancel(boolean mayInterruptIfRunning, boolean mayNotifyIfCancelled) {
             final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
             if (result) {
-                if (interrupt && mRunner != null) {
+                if (mayInterruptIfRunning && mRunner != null) {
                     mRunner.interrupt();
                 }
 
                 // Notify the callback method.
-                if (notify) {
+                if (mayNotifyIfCancelled) {
                     onCancelled();
                 }
             }

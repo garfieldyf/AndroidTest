@@ -19,8 +19,8 @@ public final class ClassUtils {
      * @throws NoSuchMethodException if the requested constructor cannot be found.
      * @see #getConstructor(String, Class[])
      */
-    public static Constructor<?> getConstructor(Class<?> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
-        final Constructor<?> result = clazz.getDeclaredConstructor(parameterTypes);
+    public static <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
+        final Constructor<T> result = clazz.getDeclaredConstructor(parameterTypes);
         result.setAccessible(true);
         return result;
     }

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Annotation type used to indicate the class field is a
  * cursor field. The cursor field has a column name string.
  * <h3>Example</h3><pre>
- * public static final class User {
+ * private static final class User {
  *     {@code @CursorField("_id")}
  *     [ <em>access modifier</em> ] long mId;
  *
@@ -19,7 +19,10 @@ import java.lang.annotation.Target;
  *     // No Cursor fields.
  *     private int mState;
  *     ...
- * }</pre>
+ * }
+ *
+ * final List&lt;User&gt; users = DatabaseUtils.newList(cursor, User.class);</pre>
+ * @see DatabaseUtils#newList(Cursor, Class)
  * @author Garfield
  */
 @Target(ElementType.FIELD)

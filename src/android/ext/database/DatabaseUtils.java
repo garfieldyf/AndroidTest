@@ -3,13 +3,10 @@ package android.ext.database;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import android.content.ContentResolver;
 import android.database.Cursor;
@@ -37,7 +34,6 @@ import android.util.Printer;
  * Class DatabaseUtils
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
 public final class DatabaseUtils {
     /**
      * Returns the numbers of rows in the <tt>Cursor</tt>,
@@ -225,20 +221,21 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Query the given SQL statement, returning a new array with the specified <em>componentType</em>.
+     * Query the given SQL statement, returning a new <tt>List</tt> with the specified <em>componentType</em>.
      * @param db The <tt>SQLiteDatabase</tt>.
-     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
+     * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
      * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values
      * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
      * <em>(String[])null</em> instead of allocating an empty array.
-     * @return A new array, or <tt>null</tt>.
+     * @return A new <tt>List</tt>, or <tt>null</tt>.
+     * @see #newList(Cursor, Class)
      */
-    public static <T> T query(SQLiteDatabase db, Class<?> componentType, String sql, String... selectionArgs) {
+    public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
+            return (cursor != null ? newList(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
@@ -248,9 +245,9 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Query the given URI, returning a new array with the specified <em>componentType</em>.
+     * Query the given URI, returning a new <tt>List</tt> with the specified <em>componentType</em>.
      * @param resolver The <tt>ContentResolver</tt>.
-     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
+     * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @param uri The URI, using the content:// scheme, for the content to retrieve.
      * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
      * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
@@ -259,13 +256,14 @@ public final class DatabaseUtils {
      * from <em>selectionArgs</em>. The values will be bound as Strings.
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
-     * @return A new array, or <tt>null</tt>.
+     * @return A new <tt>List</tt>, or <tt>null</tt>.
+     * @see #newList(Cursor, Class)
      */
-    public static <T> T query(ContentResolver resolver, Class<?> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-            return (cursor != null ? DatabaseUtils.<T>newArray(cursor, componentType) : null);
+            return (cursor != null ? newList(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
             return null;
@@ -345,56 +343,29 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns a new array with the specified <em>cursor</em> and <em>componentType</em>.
-     * Equivalent to <tt>new componentType[cursor.getCount()]</tt>.
+     * Returns a new <tt>List</tt> with the specified <em>cursor</em> and <em>componentType</em>.
      * @param cursor The {@link Cursor} from which to get the data.
-     * @param componentType A <tt>Class</tt> can be deserialized of the array elements.
-     * See {@link CursorField}.
-     * @return A new array.
-     * @throws ReflectiveOperationException if the array cannot be created.
-     * @see #newList(Cursor, Class)
+     * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
+     * @return A new <tt>List</tt>.
+     * @throws ReflectiveOperationException if the elements cannot be created.
      */
-    public static <T> T newArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
-        final Object result;
-        cursor.moveToPosition(-1);
-        if (componentType == String.class) {
-            result = createStringArray(cursor);
-        } else if (!componentType.isPrimitive()) {
-            result = createObjectArray(cursor, componentType);
-        } else if (componentType == int.class) {
-            result = createIntArray(cursor);
-        } else if (componentType == long.class) {
-            result = createLongArray(cursor);
-        } else if (componentType == short.class) {
-            result = createShortArray(cursor);
-        } else if (componentType == float.class) {
-            result = createFloatArray(cursor);
-        } else if (componentType == double.class) {
-            result = createDoubleArray(cursor);
-        } else if (componentType == boolean.class) {
-            result = createBooleanArray(cursor);
-        } else {
-            throw new AssertionError("Unsupported component type - " + componentType.toString());
+    public static <T> List<T> newList(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
+        DebugUtils.__checkError(cursor == null || componentType == null, "cursor == null || componentType == null");
+        DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
+        final int count = cursor.getCount();
+        final List<T> result = new ArrayList<T>(count);
+        if (count > 0) {
+            cursor.moveToPosition(-1);
+            final List<Pair<Field, String>> fields = getCursorFields(componentType);
+            final Constructor<? extends T> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
+            while (cursor.moveToNext()) {
+                final T object = constructor.newInstance((Object[])null);
+                setCursorFields(cursor, object, fields);
+                result.add(object);
+            }
         }
 
-        return (T)result;
-    }
-
-    /**
-     * Returns an immutable <tt>List</tt> with the specified <em>cursor</em> and <em>componentType</em>.
-     * @param cursor The {@link Cursor} from which to get the data.
-     * @param componentType A <tt>Class</tt> can be deserialized of the array elements. See {@link CursorField}.
-     * @return An immutable <tt>List</tt>.
-     * @see #newArray(Cursor, Class)
-     */
-    public static <T> List<T> newList(Cursor cursor, Class<? extends T> componentType) {
-        try {
-            DebugUtils.__checkError(componentType == null, "componentType == null");
-            DebugUtils.__checkError(componentType.isPrimitive(), "Unsupported primitive type - " + componentType.toString());
-            return Arrays.asList(DatabaseUtils.<T[]>newArray(cursor, componentType));
-        } catch (ReflectiveOperationException e) {
-            return Collections.emptyList();
-        }
+        return result;
     }
 
     /**
@@ -486,8 +457,6 @@ public final class DatabaseUtils {
     }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
-        DebugUtils.__checkError(clazz == null, "clazz == null");
-        DebugUtils.__checkError(clazz == Object.class || clazz == Void.class || clazz == String.class || clazz.isPrimitive() || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class type - " + clazz.toString());
         final List<Pair<Field, String>> result = new ArrayList<Pair<Field, String>>();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
@@ -505,8 +474,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static Object newInstance(Cursor cursor, Constructor<?> constructor, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
-        final Object result = constructor.newInstance((Object[])null);
+    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
         for (int i = 0, size = fields.size(); i < size; ++i) {
             final Pair<Field, String> info = fields.get(i);
             final Field field = info.first;
@@ -514,104 +482,25 @@ public final class DatabaseUtils {
             final int columnIndex = cursor.getColumnIndexOrThrow(info.second);
             final Class<?> type = field.getType();
             if (type == int.class) {
-                field.setInt(result, cursor.getInt(columnIndex));
+                field.setInt(object, cursor.getInt(columnIndex));
             } else if (type == long.class) {
-                field.setLong(result, cursor.getLong(columnIndex));
+                field.setLong(object, cursor.getLong(columnIndex));
             } else if (type == String.class) {
-                field.set(result, cursor.getString(columnIndex));
+                field.set(object, cursor.getString(columnIndex));
             } else if (type == byte[].class) {
-                field.set(result, cursor.getBlob(columnIndex));
+                field.set(object, cursor.getBlob(columnIndex));
             } else if (type == float.class) {
-                field.setFloat(result, cursor.getFloat(columnIndex));
+                field.setFloat(object, cursor.getFloat(columnIndex));
             } else if (type == short.class) {
-                field.setShort(result, cursor.getShort(columnIndex));
+                field.setShort(object, cursor.getShort(columnIndex));
             } else if (type == double.class) {
-                field.setDouble(result, cursor.getDouble(columnIndex));
+                field.setDouble(object, cursor.getDouble(columnIndex));
             } else if (type == boolean.class) {
-                field.setBoolean(result, cursor.getInt(columnIndex) != 0);
+                field.setBoolean(object, cursor.getInt(columnIndex) != 0);
             } else {
-                throw new AssertionError("Unsupported field type - " + type.toString());
+                throw new AssertionError("Unsupported field type - " + type.getName());
             }
         }
-
-        return result;
-    }
-
-    private static Object createIntArray(Cursor cursor) {
-        final int[] result = new int[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getInt(0);
-        }
-
-        return result;
-    }
-
-    private static Object createLongArray(Cursor cursor) {
-        final long[] result = new long[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getLong(0);
-        }
-
-        return result;
-    }
-
-    private static Object createShortArray(Cursor cursor) {
-        final short[] result = new short[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getShort(0);
-        }
-
-        return result;
-    }
-
-    private static Object createFloatArray(Cursor cursor) {
-        final float[] result = new float[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getFloat(0);
-        }
-
-        return result;
-    }
-
-    private static Object createDoubleArray(Cursor cursor) {
-        final double[] result = new double[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getDouble(0);
-        }
-
-        return result;
-    }
-
-    private static Object createStringArray(Cursor cursor) {
-        final String[] result = new String[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = cursor.getString(0);
-        }
-
-        return result;
-    }
-
-    private static Object createBooleanArray(Cursor cursor) {
-        final boolean[] result = new boolean[cursor.getCount()];
-        for (int i = 0; cursor.moveToNext(); ++i) {
-            result[i] = (cursor.getInt(0) != 0);
-        }
-
-        return result;
-    }
-
-    private static Object createObjectArray(Cursor cursor, Class<?> componentType) throws ReflectiveOperationException {
-        final int count = cursor.getCount();
-        final Object[] result = (Object[])Array.newInstance(componentType, count);
-        if (count > 0) {
-            final List<Pair<Field, String>> fields = getCursorFields(componentType);
-            final Constructor<?> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
-            for (int i = 0; cursor.moveToNext(); ++i) {
-                result[i] = newInstance(cursor, constructor, fields);
-            }
-        }
-
-        return result;
     }
 
     private static Object simpleQuery(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
@@ -649,7 +538,7 @@ public final class DatabaseUtils {
         DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fields.size());
         for (Pair<Field, String> field : fields) {
             result.setLength(0);
-            printer.println(result.append("  ").append(field.first).append(" { annotation = ").append(field.second).append(" }").toString());
+            printer.println(result.append("  ").append(field.first).append(" { @CursorField = ").append(field.second).append(" }").toString());
         }
     }
 

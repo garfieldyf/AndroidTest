@@ -93,39 +93,41 @@ public final class PackageUtils {
     /**
      * Retrieve the application's label and icon associated with the specified <em>info</em>.
      * @param context The <tt>Context</tt>.
-     * @param info The {@link PackageInfo} must be a package archive file's package info.
+     * @param info The {@link ApplicationInfo} must be a package archive file's application info
+     * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
+     * file full path.
      * @return A <tt>Pair</tt> containing the application's icon and label.
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<CharSequence, Drawable> loadPackageResources(Context context, PackageInfo info) {
-        DebugUtils.__checkError(info.applicationInfo.publicSourceDir == null, "The info.applicationInfo.publicSourceDir == null");
+    public static Pair<CharSequence, Drawable> loadApplicationResources(Context context, ApplicationInfo info) {
+        DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
             // Adds an additional archive file to the assets.
-            assets.addAssetPath(info.applicationInfo.publicSourceDir);
+            assets.addAssetPath(info.publicSourceDir);
 
             // Loads the application's icon.
             final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
             final Drawable icon;
-            if (info.applicationInfo.icon != 0) {
-                icon = res.getDrawable(info.applicationInfo.icon);
+            if (info.icon != 0) {
+                icon = res.getDrawable(info.icon);
             } else {
                 icon = context.getPackageManager().getDefaultActivityIcon();
             }
 
             // Loads the application's label.
             final CharSequence label;
-            if (info.applicationInfo.nonLocalizedLabel != null) {
-                label = info.applicationInfo.nonLocalizedLabel;
+            if (info.nonLocalizedLabel != null) {
+                label = info.nonLocalizedLabel;
             } else {
-                label = res.getText(info.applicationInfo.labelRes, info.packageName);
+                label = res.getText(info.labelRes, info.packageName);
             }
 
             /*
              * May be kill my process after unmounting usb disk.
-             * icon  = context.getPackageManager().getApplicationIcon(info.applicationInfo);
-             * lable = context.getPackageManager().getApplicationLabel(info.applicationInfo);
+             * icon  = context.getPackageManager().getApplicationIcon(info);
+             * lable = context.getPackageManager().getApplicationLabel(info);
              */
             return new Pair<CharSequence, Drawable>(StringUtils.trim(label), icon);
         } finally {

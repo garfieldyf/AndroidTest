@@ -126,20 +126,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
-     * Called on the UI thread when a load is complete.<p>This method
-     * won't be invoked if the task was cancelled.</p> <p>The default
-     * implementation do nothing. If you write your own implementation,
-     * do not call <tt>super.onLoadComplete()</tt>.</p>
-     * @param key The key, passed earlier by {@link #load}.
-     * @param params The parameters, passed earlier by {@link #load}.
-     * @param result The result, or <tt>null</tt> if the load failed.
-     * @see #onStartLoading(Key, Params[])
-     * @see #loadInBackground(Task, Key, Params[])
-     */
-    protected void onLoadComplete(Key key, Params[] params, Result result) {
-    }
-
-    /**
      * Called on the UI thread when a load was cancelled.<p>The default
      * implementation do nothing. If you write your own implementation,
      * do not call <tt>super.onLoadCancelled()</tt>.</p>
@@ -162,13 +148,23 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
+     * Called on the UI thread when a load is complete. This method
+     * won't be invoked if the task was cancelled.
+     * @param key The key, passed earlier by {@link #load}.
+     * @param params The parameters, passed earlier by {@link #load}.
+     * @param result The result, returned earlier by {@link #loadInBackground}.
+     * @see #onStartLoading(Key, Params[])
+     * @see #loadInBackground(Task, Key, Params[])
+     */
+    protected abstract void onLoadComplete(Key key, Params[] params, Result result);
+
+    /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
      * or <tt>null</tt> if the value load synchronously.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
-     * @return The result, or <tt>null</tt> if the load <em>task</em> was
-     * failed or cancelled.
+     * @return A result, defined by the subclass of this loader.
      * @see #onStartLoading(Key, Params[])
      * @see #onLoadComplete(Key, Params[], Result)
      */

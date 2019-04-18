@@ -198,7 +198,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param flags Loading flags, passed earlier by {@link #load}.
-     * @return The result, or <tt>null</tt> if the <em>task</em> was failed or cancelled.
+     * @return A result, defined by the subclass of this loader.
      * @see #loadSync(Key, int, Params[])
      * @see #load(Key, Object, int, Binder, Params[])
      */
@@ -307,15 +307,15 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         int STATE_LOAD_FROM_BACKGROUND = 0x80000000;
 
         /**
-         * Binds the specified <em>value</em> to the specified <em>target</em>
-         * on the UI thread.</p>
-         * @param key The key, passed earlier by {@link AsyncLoader#load}.
-         * @param params The parameters, passed earlier by {@link AsyncLoader#load}.
-         * @param target The <tt>Object</tt> to bind the <em>value</em>, passed
-         * earlier by {@link AsyncLoader#load}.
-         * @param value The load result, or <tt>null</tt> if the load failed.
-         * @param state May be <tt>0</tt> or any combination of <tt>STATE_XXX</tt>
-         * and <tt>FLAG_XXX</tt> constants.
+         * Binds the specified <em>value</em> to the specified <em>target</em> on the
+         * UI thread.
+         * @param key The key, passed earlier by {@link #load}.
+         * @param params The parameters, passed earlier by {@link #load}.
+         * @param target The <tt>Object</tt> to bind the <em>value</em>, passed earlier
+         * by {@link #load}.
+         * @param value The load result, returned earlier by {@link #loadInBackground}.
+         * @param state May be <tt>0</tt> or any combination of <tt>STATE_XXX</tt> and
+         * <tt>FLAG_XXX</tt> constants.
          */
         void bindValue(Key key, Params[] params, Object target, Value value, int state);
     }

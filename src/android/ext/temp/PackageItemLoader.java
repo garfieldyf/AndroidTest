@@ -13,15 +13,29 @@ import android.graphics.drawable.Drawable;
 import android.util.Pair;
 
 public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo, Pair<CharSequence, Drawable>> {
+    public static final int FLAG_APPLICATION_INFO = 0;
+    public static final int FLAG_ACTIVITY_INFO = 1;
+    public static final int FLAG_PACKAGE_ARCHIVE_INFO = 2;
     private final Loader mLoader;
 
-    public PackageItemLoader(Context context, Executor executor, boolean fromArchiveFile) {
-        this(context, executor, fromArchiveFile, new LruCache<String, Pair<CharSequence, Drawable>>(100));
+    public PackageItemLoader(Context context, Executor executor, int flags) {
+        this(context, executor, flags, new LruCache<String, Pair<CharSequence, Drawable>>(100));
     }
 
-    public PackageItemLoader(Context context, Executor executor, boolean fromArchiveFile, Cache<String, Pair<CharSequence, Drawable>> cache) {
+    public PackageItemLoader(Context context, Executor executor, int flags, Cache<String, Pair<CharSequence, Drawable>> cache) {
         super(executor, cache);
-        mLoader = (fromArchiveFile ? new ArchiveFileLoader(context) : new Loader(context));
+        switch (flags) {
+        case FLAG_ACTIVITY_INFO:
+            mLoader = new ActivityLoader(context);
+            break;
+
+        case FLAG_PACKAGE_ARCHIVE_INFO:
+            mLoader = new PackageArchiveLoader(context);
+            break;
+
+        default:
+            mLoader = new Loader(context);
+        }
     }
 
     public final void load(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, Pair<CharSequence, Drawable>> binder) {
@@ -53,7 +67,7 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
         }
 
         public String getItemName(PackageItemInfo info) {
-            return info.name;
+            return info.packageName;
         }
 
         public Pair<CharSequence, Drawable> load(PackageItemInfo info) {
@@ -62,14 +76,20 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
         }
     }
 
-    private static final class ArchiveFileLoader extends Loader {
-        public ArchiveFileLoader(Context context) {
+    private static final class ActivityLoader extends Loader {
+        public ActivityLoader(Context context) {
             super(context);
         }
 
         @Override
         public String getItemName(PackageItemInfo info) {
-            return info.packageName;
+            return info.name;
+        }
+    }
+
+    private static final class PackageArchiveLoader extends Loader {
+        public PackageArchiveLoader(Context context) {
+            super(context);
         }
 
         @Override

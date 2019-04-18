@@ -43,9 +43,9 @@ public final class Pools {
     }
 
     /**
-     * Returns a wrapper on the specified {@link Pool} which synchronizes
+     * Returns a wrapper on the specified <em>pool</em> which synchronizes
      * all access to the pool.
-     * @param pool The <tt>Pool</tt> to wrap in a synchronized pool.
+     * @param pool The {@link Pool} to wrap in a synchronized pool.
      * @return A synchronized <tt>Pool</tt>.
      */
     public static <T> Pool<T> synchronizedPool(Pool<T> pool) {

@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
-import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
+import android.ext.cache.LruCache;
 import android.ext.content.AsyncLoader;
 import android.ext.util.PackageUtils;
 import android.graphics.drawable.Drawable;
@@ -16,7 +16,7 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
     private final Loader mLoader;
 
     public PackageItemLoader(Context context, Executor executor, boolean fromArchiveFile) {
-        this(context, executor, fromArchiveFile, new ArrayMapCache<String, Pair<CharSequence, Drawable>>());
+        this(context, executor, fromArchiveFile, new LruCache<String, Pair<CharSequence, Drawable>>(100));
     }
 
     public PackageItemLoader(Context context, Executor executor, boolean fromArchiveFile, Cache<String, Pair<CharSequence, Drawable>> cache) {
@@ -34,6 +34,10 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
 
     public final void remove(PackageItemInfo info) {
         getCache().remove(mLoader.getItemName(info));
+    }
+
+    public final Context getContext() {
+        return mLoader.mContext;
     }
 
     @Override

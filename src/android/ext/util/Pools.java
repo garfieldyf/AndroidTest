@@ -1,6 +1,10 @@
 package android.ext.util;
 
 import java.util.concurrent.atomic.AtomicReference;
+import android.animation.Animator;
+import android.animation.Animator.AnimatorListener;
+import android.animation.AnimatorInflater;
+import android.content.Context;
 import android.util.Printer;
 
 /**
@@ -40,6 +44,29 @@ public final class Pools {
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
         return new ArrayPool<T>(factory, maxSize);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
+     * @param animation The initial property animation.
+     * @param maxSize The maximum number of animators in the pool.
+     * @return An newly <tt>Animator Pool</tt>.
+     * @see #newPool(Context, int, int)
+     */
+    public static Pool<Animator> newPool(Animator animation, int maxSize) {
+        return new AnimatorPool(animation, maxSize);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> {@link Animator} {@link Pool}.
+     * @param context The <tt>Context</tt>.
+     * @param resId The resource id of the property animation to load.
+     * @param maxSize The maximum number of animators in the pool.
+     * @return An newly <tt>Animator Pool</tt>.
+     * @see #newPool(Animator, int)
+     */
+    public static Pool<Animator> newPool(Context context, int resId, int maxSize) {
+        return new AnimatorPool(AnimatorInflater.loadAnimator(context, resId), maxSize);
     }
 
     /**
@@ -201,6 +228,59 @@ public final class Pools {
         @Override
         /* package */ String dump(StringBuilder result, Object element) {
             return result.append("  ").append(element).append(" { length = ").append(((byte[])element).length).append(" }").toString();
+        }
+    }
+
+    /**
+     * Class <tt>AnimatorPool</tt> is an implementation of a {@link Pool}.
+     */
+    private static final class AnimatorPool extends ArrayPool<Animator> implements AnimatorListener {
+        private final Animator animation;
+
+        /**
+         * Constructor
+         * @param animation The initial property animation.
+         * @param maxSize The maximum number of animators to allow in this pool.
+         */
+        public AnimatorPool(Animator animation, int maxSize) {
+            super(null, maxSize);
+            this.animation = animation;
+        }
+
+        @Override
+        public Animator newInstance() {
+            final Animator animation = this.animation.clone();
+            animation.addListener(this);
+            return animation;
+        }
+
+        @Override
+        public void recycle(Animator animation) {
+            animation.setTarget(null);
+            super.recycle(animation);
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            recycle(animation);
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+            recycle(animation);
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+        }
+
+        @Override
+        /* package */ String dump(StringBuilder result, Object element) {
+            return DebugUtils.toString(element, result.append("  ")).toString();
         }
     }
 

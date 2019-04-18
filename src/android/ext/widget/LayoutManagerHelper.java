@@ -123,40 +123,6 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Equivalent to calling <tt>onFocusChange(view, hasFocus, 1.14f, 120, invalidateParent)</tt>.
-     * @param view The view whose state has changed.
-     * @param hasFocus The new focus state of <em>view</em>.
-     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
-     * @see #onFocusChange(View, boolean, float, long, boolean)
-     */
-    public static void onFocusChange(View view, boolean hasFocus, boolean invalidateParent) {
-        onFocusChange(view, hasFocus, 1.14f, 120, invalidateParent);
-    }
-
-    /**
-     * Called when the focus state of a view has changed.
-     * @param view The view whose state has changed.
-     * @param hasFocus The new focus state of <em>view</em>.
-     * @param scale The scale value to be animated to.
-     * @param duration The length of the property animations, in milliseconds.
-     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
-     */
-    public static void onFocusChange(View view, boolean hasFocus, float scale, long duration, boolean invalidateParent) {
-        if (hasFocus) {
-            if (invalidateParent) {
-                final View parent = (View)view.getParent();
-                if (parent != null) {
-                    parent.invalidate();
-                }
-            }
-
-            view.animate().scaleX(scale).scaleY(scale).setDuration(duration).start();
-        } else {
-            view.animate().scaleX(1.0f).scaleY(1.0f).setDuration(duration).start();
-        }
-    }
-
-    /**
      * Class <tt>MarginItemDecoration</tt> is an implementation of an {@link ItemDecoration}.
      */
     public static final class MarginItemDecoration extends ItemDecoration {

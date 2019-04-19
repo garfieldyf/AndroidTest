@@ -123,6 +123,23 @@ public final class LayoutManagerHelper {
     }
 
     /**
+     * Called when the focus state of a view has changed.
+     * @param view The view whose state has changed.
+     * @param resId The resource id of the property animation to load.
+     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
+     */
+    public static void onFocusChange(View view, int resId, boolean invalidateParent) {
+        if (invalidateParent) {
+            final View parent = (View)view.getParent();
+            if (parent != null) {
+                parent.invalidate();
+            }
+        }
+
+        ViewAnimatorUtils.animate(view, resId).start();
+    }
+
+    /**
      * Class <tt>MarginItemDecoration</tt> is an implementation of an {@link ItemDecoration}.
      */
     public static final class MarginItemDecoration extends ItemDecoration {

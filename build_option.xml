@@ -11,6 +11,19 @@
         <!-- clean bin and gen dir -->
         <delete dir="${out.absolute.dir}" verbose="${verbose}" />
         <delete dir="${gen.absolute.dir}" verbose="${verbose}" />
+
+        <!-- modify AndroidManifest.xml versionCode, versionName -->
+        <echo message="versionCode : ${version.code}" />
+        <echo message="versionName : ${version.name}" />
+        <replaceregexp file="${manifest.abs.file}" match="\bandroid:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
+        <replaceregexp file="${manifest.abs.file}" match="\bandroid:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
+
+        <!-- modify DEBUG, BRAND in DeviceInfo.java
+        <property name="build.debug" value="DEBUG = true;" />
+        <property name="build.brand" value="BRAND = &quot;xiaomi&quot;;" />
+        <replaceregexp file="${source.dir}/com/xxx/test/DeviceInfo.java" match="\bDEBUG\s*=.*;" replace="${build.debug}" byline="false" encoding="utf-8" />
+        <replaceregexp file="${source.dir}/com/xxx/test/DeviceInfo.java" match="\bBRAND\s*=.*;" replace="${build.brand}" byline="false" encoding="utf-8" />
+        -->
     </target>
 
     <!-- debug output filename -->
@@ -34,13 +47,7 @@
     <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
 
     <!-- include jars -->
-    <target name="-pre-compile">
-        <!-- modify AndroidManifest.xml versionCode, versionName -->
-        <echo message="versionCode : ${version.code}" />
-        <echo message="versionName : ${version.name}" />
-        <replaceregexp file="${manifest.abs.file}" match="android:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
-        <replaceregexp file="${manifest.abs.file}" match="android:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
-
+    <target name="-pre-compile"> 
         <!-- copy so files -->
         <echo message="Copy libs from ${funshion.libs.dir} to ${jar.libs.dir}" />
         <copy todir="${jar.libs.dir}" overwrite="true">

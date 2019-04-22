@@ -69,10 +69,8 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      */
     public void setItemCount(int count) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mImpl.mItemCount != count) {
-            mImpl.setItemCount(count);
-            UIHandler.notifyDataSetChanged(mRecyclerView);
-        }
+        mImpl.setItemCount(count);
+        UIHandler.notifyDataSetChanged(mRecyclerView);
     }
 
     /**

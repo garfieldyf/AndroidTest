@@ -17,8 +17,8 @@
     <property name="class.dir" value="${basedir}/classes" />
 
     <property name="api.level" value="22" />
+    <property name="api.version" value="5.1.1" />
     <property name="sdk.dir" value="${env.ANDROID_HOME}" />
-    <property name="sdk.version" value="Android 5.1.1 (API ${api.level})" />
     <property name="libs.jar.dir" value="E:\Include\java" />
     <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
@@ -105,7 +105,7 @@
             <manifest>
                 <attribute name="Built-By" value="${author}" />
                 <attribute name="Version" value="${version}" />
-                <attribute name="SDK-Version" value="${sdk.version}" />
+                <attribute name="SDK-Version" value="Android ${api.version} (API ${api.level})" />
             </manifest>
         </jar>
 
@@ -114,7 +114,7 @@
             <manifest>
                 <attribute name="Built-By" value="${author}" />
                 <attribute name="Version" value="${version}" />
-                <attribute name="SDK-Version" value="${sdk.version}" />
+                <attribute name="SDK-Version" value="Android ${api.version} (API ${api.level})" />
             </manifest>
         </jar>
     </target>

@@ -313,7 +313,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
          * @param params The parameters, passed earlier by {@link #load}.
          * @param target The <tt>Object</tt> to bind the <em>value</em>, passed earlier
          * by {@link #load}.
-         * @param value The load result, returned earlier by {@link #loadInBackground}.
+         * @param value The load result or <tt>null</tt>.
          * @param state May be <tt>0</tt> or any combination of <tt>STATE_XXX</tt> and
          * <tt>FLAG_XXX</tt> constants.
          */

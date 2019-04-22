@@ -15,7 +15,7 @@ public final class ViewAnimatorUtils {
     /**
      * Returns an {@link Animator} object, which can be used to animate on the <em>view</em>.
      * @param view The {@link View} whose will be animate.
-     * @param resId The resource id of the property animation to load.
+     * @param resId The resource id of the property animation.
      * @return The <tt>Animator</tt> associated with the <em>view</em>.
      */
     public static Animator animate(View view, int resId) {
@@ -33,7 +33,7 @@ public final class ViewAnimatorUtils {
     /**
      * Returns an {@link Animation} object, which can be used to animate on the <em>view</em>.
      * @param view The {@link View} whose will be animate.
-     * @param resId The resource id of the animation to load.
+     * @param resId The resource id of the animation.
      * @return The <tt>Animation</tt> associated with the <em>view</em>.
      */
     public static Animation animation(View view, int resId) {

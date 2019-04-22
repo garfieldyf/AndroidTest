@@ -132,11 +132,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
     /**
      * Return a {@link Parameters} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>Parameters</tt>.
      * @return The <tt>Parameters</tt> object.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
-    public synchronized final Parameters getParameters(int id) {
+    public final Parameters getParameters(int id) {
+        DebugUtils.__checkUIThread("getParameters");
         if (mParamsCache == null) {
             mParamsCache = new SparseArray<Parameters>(8);
         }
@@ -153,36 +155,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     public final void dump(Printer printer) {
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
-        dumpParamsCache(printer);
-    }
 
-    @Override
-    public void onLowMemory() {
-        onTrimMemory(TRIM_MEMORY_COMPLETE);
-    }
-
-    @Override
-    public void onTrimMemory(int level) {
-        if (mImageCache != null) {
-            mImageCache.clear();
-        }
-
-        synchronized (this) {
-            if (mParamsCache != null) {
-                DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Clears the Parameters cache - size = " + mParamsCache.size());
-                mParamsCache.clear();
-            }
-        }
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-    }
-
-    /**
-     * Dumps the {@link mParamsCache}.
-     */
-    private synchronized void dumpParamsCache(Printer printer) {
         if (mParamsCache != null) {
             final int size = mParamsCache.size();
             final TypedValue value = new TypedValue();
@@ -194,6 +167,28 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
                 mParamsCache.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
             }
         }
+    }
+
+    @Override
+    public void onLowMemory() {
+        onTrimMemory(TRIM_MEMORY_COMPLETE);
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        DebugUtils.__checkUIThread("onTrimMemory");
+        if (mImageCache != null) {
+            mImageCache.clear();
+        }
+
+        if (mParamsCache != null) {
+            DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Clears the Parameters cache - size = " + mParamsCache.size());
+            mParamsCache.clear();
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
     }
 
     /**

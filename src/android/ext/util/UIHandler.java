@@ -180,18 +180,27 @@ public final class UIHandler extends Handler implements Executor {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void sendMessage(Task task, int what, Object obj) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = what;
-        msg.obj  = obj;
-        sendMessage(msg);
+    public final void finish(Task task, Object result) {
+        sendMessage(task, MESSAGE_FINISHED, result);
+    }
+
+    /**
+     * Called on the {@link Task} internal, do not call this method directly.
+     */
+    public final void setProgress(Task task, Object... values) {
+        sendMessage(task, MESSAGE_PROGRESS, values);
     }
 
     /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      */
     public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
-        sendMessage(Message.obtain(this, MESSAGE_DATABASE_MESSAGE, message, token, new Pair(handler, result)));
+        final Message msg = Message.obtain(this, handler);
+        msg.what = MESSAGE_DATABASE_MESSAGE;
+        msg.arg1 = message;
+        msg.arg2 = token;
+        msg.obj  = result;
+        sendMessage(msg);
     }
 
     @Override
@@ -242,7 +251,12 @@ public final class UIHandler extends Handler implements Executor {
 
         // Dispatch the DatabaseHandler messages.
         case MESSAGE_DATABASE_MESSAGE:
-            dispatchDatabaseMessage(msg);
+            /*
+             * message = msg.arg1;
+             * token   = msg.arg2;
+             * result  = msg.obj;
+             */
+            ((DatabaseHandler)msg.getCallback()).dispatchMessage(msg.arg1, msg.arg2, msg.obj);
             break;
 
         default:
@@ -250,14 +264,16 @@ public final class UIHandler extends Handler implements Executor {
         }
     }
 
+    private void sendMessage(Task task, int what, Object obj) {
+        final Message msg = Message.obtain(this, task);
+        msg.what = what;
+        msg.obj  = obj;
+        sendMessage(msg);
+    }
+
     private static void dispatchItemChanged(Message msg) {
         final Pair params = (Pair)msg.obj;
         ((Adapter)params.first).notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
-    }
-
-    private static void dispatchDatabaseMessage(Message msg) {
-        final Pair params = (Pair)msg.obj;
-        ((DatabaseHandler)params.first).dispatchMessage(msg.arg1, msg.arg2, params.second);
     }
 
     private static void requestChildFocus(Message msg) {
@@ -270,8 +286,8 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     // The Task messages
-    public static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
-    public static final int MESSAGE_FINISHED = 0xDFDFDFDF;
+    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
+    private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
     // The RecyclerView messages
     private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;

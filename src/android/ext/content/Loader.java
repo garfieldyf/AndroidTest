@@ -1,7 +1,5 @@
 package android.ext.content;
 
-import static android.ext.util.UIHandler.MESSAGE_FINISHED;
-import static android.ext.util.UIHandler.MESSAGE_PROGRESS;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
@@ -166,8 +164,21 @@ public abstract class Loader implements Factory<Task> {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
+        /**
+         * The parameters of this task.
+         */
         /* package */ Params[] mParams;
+
+        /**
+         * The thread running this task.
+         */
         private volatile Thread mRunner;
+
+        /**
+         * Possible state transitions:
+         * <ul><li>RUNNING -> CANCELLED</li>
+         * <li>RUNNING -> COMPLETED</li></ul>
+         */
         private final AtomicInteger mState;
 
         /**
@@ -183,7 +194,7 @@ public abstract class Loader implements Factory<Task> {
          */
         public final void setProgress(Object... values) {
             if (mState.get() == RUNNING) {
-                UIHandler.sInstance.sendMessage(this, MESSAGE_PROGRESS, values);
+                UIHandler.sInstance.setProgress(this, values);
             }
         }
 
@@ -221,7 +232,7 @@ public abstract class Loader implements Factory<Task> {
                 }
             }
 
-            UIHandler.sInstance.sendMessage(this, MESSAGE_FINISHED, result);
+            UIHandler.sInstance.finish(this, result);
         }
 
         /**

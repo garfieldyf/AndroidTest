@@ -10,7 +10,7 @@ import android.ext.util.DebugUtils;
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
-public abstract class DatabaseHandler {
+public abstract class DatabaseHandler implements Runnable {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -79,6 +79,11 @@ public abstract class DatabaseHandler {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    }
+
+    @Override
+    public void run() {
+        throw new RuntimeException("No Implementation, This method is a stub!");
     }
 
     /**

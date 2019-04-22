@@ -151,6 +151,7 @@ public final class Caches {
         private final Cache<K, V> mCache;
 
         public SynchronizedCache(Cache<K, V> cache) {
+            DebugUtils.__checkError(cache == null, "cache == null");
             mCache = cache;
         }
 

@@ -281,12 +281,8 @@ public final class Pages {
 
         /* package */ final long getPageForPosition(int position) {
             DebugUtils.__checkError(position < 0, "position < 0");
-            if (position < mInitialSize) {
-                return (position & 0xFFFFFFFFL);
-            }
-
-            final int delta = position - mInitialSize;
-            return (((long)(delta / mPageSize + 1) << 32) | ((delta % mPageSize) & 0xFFFFFFFFL));
+            final int offset = position - mInitialSize;
+            return (offset < 0 ? (position & 0xFFFFFFFFL) : (((long)(offset / mPageSize + 1) << 32) | ((offset % mPageSize) & 0xFFFFFFFFL)));
         }
 
         /* package */ final int getPositionForPage(int page, int position) {

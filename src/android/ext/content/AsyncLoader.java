@@ -2,7 +2,6 @@ package android.ext.content;
 
 import java.util.concurrent.Executor;
 import android.ext.cache.Cache;
-import android.ext.cache.Caches;
 import android.ext.util.DebugUtils;
 
 /**
@@ -40,7 +39,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
         super(executor);
-        mCache = (cache != null ? cache : Caches.<Key, Value>emptyCache());
+        mCache = cache;
     }
 
     /**
@@ -78,7 +77,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             }
 
             // Loads the value from the memory cache.
-            if ((flags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
+            if (isCacheValid(flags)) {
                 final Value value = mCache.get(key);
                 if (value != null) {
                     bindValue(binder, key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE);
@@ -121,7 +120,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     public final void preload(Key key, int flags, Params... params) {
         DebugUtils.__checkUIThread("preload");
         DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
-        if (mState != SHUTDOWN && key != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0 && mCache.get(key) == null && !isTaskRunning(key, key)) {
+        if (mState != SHUTDOWN && key != null && isCacheValid(flags) && mCache.get(key) == null && !isTaskRunning(key, key)) {
             final LoadTask task = obtain(key, params, key, flags, EmptyBinder.sInstance);
             mRunningTasks.put(key, task);
             mExecutor.execute(task);
@@ -155,7 +154,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         }
 
         Value value;
-        if ((flags & FLAG_IGNORE_MEMORY_CACHE) != 0) {
+        if (!isCacheValid(flags)) {
             value = loadInBackground(null, key, params, flags);
         } else if ((value = mCache.get(key)) == null) {
             value = loadInBackground(null, key, params, flags);
@@ -169,8 +168,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
     /**
      * Returns the {@link Cache} associated with this loader.
-     * @return The <tt>Cache</tt> or an empty <tt>Cache</tt>.
-     * @see Caches#emptyCache()
+     * @return The <tt>Cache</tt> or <tt>null</tt>.
      */
     public final Cache<Key, Value> getCache() {
         return mCache;
@@ -203,6 +201,13 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #load(Key, Object, int, Binder, Params[])
      */
     protected abstract Value loadInBackground(Task<?, ?> task, Key key, Params[] params, int flags);
+
+    /**
+     * Tests if the {@link mCache} is valid.
+     */
+    /* package */ final boolean isCacheValid(int flags) {
+        return (mCache != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0);
+    }
 
     /**
      * Tests the specified task is running.
@@ -257,7 +262,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
                 value = loadInBackground(this, mKey, params, mFlags);
-                if (value != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
+                if (value != null && isCacheValid(mFlags)) {
                     mCache.put(mKey, value);
                 }
             }

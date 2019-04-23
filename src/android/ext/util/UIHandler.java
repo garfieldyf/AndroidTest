@@ -252,9 +252,9 @@ public final class UIHandler extends Handler implements Executor {
         // Dispatch the DatabaseHandler messages.
         case MESSAGE_DATABASE_MESSAGE:
             /*
-             * message = msg.arg1;
-             * token   = msg.arg2;
-             * result  = msg.obj;
+             * msg.arg1 = message;
+             * msg.arg2 = token;
+             * msg.obj  = result;
              */
             ((DatabaseHandler)msg.getCallback()).dispatchMessage(msg.arg1, msg.arg2, msg.obj);
             break;
@@ -277,6 +277,11 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     private static void requestChildFocus(Message msg) {
+        /*
+         * msg.arg1 = position;
+         * msg.arg2 = retryCount;
+         * msg.obj  = layoutManager;
+         */
         final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
         if (child != null) {
             child.requestFocus();

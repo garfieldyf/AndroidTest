@@ -4,7 +4,6 @@
     <property name="java.source" value="1.7" />
     <property name="java.target" value="1.7" />
     <property name="libs.jar.dir" value="E:/Include/java" />
-    <property name="funshion.jar.name" value="funshion.jar" />
 
     <!-- pre-build target -->
     <target name="-pre-build">
@@ -66,7 +65,7 @@
 
         <path id="funshion.jar.path">
             <path path="${toString:project.all.jars.path}" />
-            <pathelement location="${funshion.libs.dir}/${funshion.jar.name}" />
+            <pathelement location="${funshion.libs.dir}/funshion.jar" />
         </path>
 
         <path id="recyclerview.jar.path">

@@ -43,6 +43,25 @@ public final class PackageUtils {
     }
 
     /**
+     * Returns the package name associated with the specified <em>info</em>.
+     * @param info The {@link ResolveInfo}.
+     * @return The package name.
+     */
+    public static String getPackageName(ResolveInfo info) {
+        if (info.resolvePackageName != null) {
+            return info.resolvePackageName;
+        } else if (info.activityInfo != null) {
+            return info.activityInfo.packageName;
+        } else if (info.serviceInfo != null) {
+            return info.serviceInfo.packageName;
+        } else if (info.providerInfo != null) {
+            return info.providerInfo.packageName;
+        } else {
+            throw new IllegalStateException("Missing ComponentInfo!");
+        }
+    }
+
+    /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param pm The <tt>PackageManager</tt>.
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.

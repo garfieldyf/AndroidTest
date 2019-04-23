@@ -110,7 +110,7 @@ public final class PackageUtils {
     }
 
     /**
-     * Retrieve the application's label and icon associated with the specified <em>info</em>.
+     * Retrieve the application's icon and label associated with the specified <em>info</em>.
      * @param context The <tt>Context</tt>.
      * @param info The {@link ApplicationInfo} must be a package archive file's application info
      * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
@@ -119,7 +119,7 @@ public final class PackageUtils {
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<CharSequence, Drawable> loadApplicationResources(Context context, ApplicationInfo info) {
+    public static Pair<Drawable, CharSequence> loadApplicationIcon(Context context, ApplicationInfo info) {
         DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
@@ -148,7 +148,7 @@ public final class PackageUtils {
              * icon  = context.getPackageManager().getApplicationIcon(info);
              * lable = context.getPackageManager().getApplicationLabel(info);
              */
-            return new Pair<CharSequence, Drawable>(StringUtils.trim(label), icon);
+            return new Pair<Drawable, CharSequence>(icon, StringUtils.trim(label));
         } finally {
             // Close the assets to avoid ProcessKiller
             // kill my process after unmounting usb disk.

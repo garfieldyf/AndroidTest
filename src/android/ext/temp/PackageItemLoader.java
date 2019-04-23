@@ -12,17 +12,17 @@ import android.ext.util.PackageUtils;
 import android.graphics.drawable.Drawable;
 import android.util.Pair;
 
-public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo, Pair<CharSequence, Drawable>> {
+public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo, Pair<Drawable, CharSequence>> {
     public static final int FLAG_APPLICATION_INFO = 0;
     public static final int FLAG_ACTIVITY_INFO = 1;
     public static final int FLAG_PACKAGE_ARCHIVE_INFO = 2;
     private final Loader mLoader;
 
     public PackageItemLoader(Context context, Executor executor, int flags) {
-        this(context, executor, flags, new LruCache<String, Pair<CharSequence, Drawable>>(100));
+        this(context, executor, flags, new LruCache<String, Pair<Drawable, CharSequence>>(100));
     }
 
-    public PackageItemLoader(Context context, Executor executor, int flags, Cache<String, Pair<CharSequence, Drawable>> cache) {
+    public PackageItemLoader(Context context, Executor executor, int flags, Cache<String, Pair<Drawable, CharSequence>> cache) {
         super(executor, cache);
         switch (flags) {
         case FLAG_ACTIVITY_INFO:
@@ -38,7 +38,7 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
         }
     }
 
-    public final void load(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, Pair<CharSequence, Drawable>> binder) {
+    public final void load(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, Pair<Drawable, CharSequence>> binder) {
         load(mLoader.getItemName(info), target, 0, binder, info);
     }
 
@@ -55,7 +55,7 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
     }
 
     @Override
-    protected Pair<CharSequence, Drawable> loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
+    protected Pair<Drawable, CharSequence> loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
         return mLoader.load(params[0]);
     }
 
@@ -70,9 +70,9 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
             return info.packageName;
         }
 
-        public Pair<CharSequence, Drawable> load(PackageItemInfo info) {
+        public Pair<Drawable, CharSequence> load(PackageItemInfo info) {
             final PackageManager pm = mContext.getPackageManager();
-            return new Pair<CharSequence, Drawable>(info.loadLabel(pm), info.loadIcon(pm));
+            return new Pair<Drawable, CharSequence>(info.loadIcon(pm), info.loadLabel(pm));
         }
     }
 
@@ -93,8 +93,8 @@ public final class PackageItemLoader extends AsyncLoader<String, PackageItemInfo
         }
 
         @Override
-        public Pair<CharSequence, Drawable> load(PackageItemInfo info) {
-            return PackageUtils.loadApplicationResources(mContext, (ApplicationInfo)info);
+        public Pair<Drawable, CharSequence> load(PackageItemInfo info) {
+            return PackageUtils.loadApplicationIcon(mContext, (ApplicationInfo)info);
         }
     }
 }

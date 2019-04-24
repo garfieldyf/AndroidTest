@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicReference;
 import android.util.Printer;
 
@@ -167,13 +168,16 @@ public final class Pools {
             final StringBuilder result = new StringBuilder(96);
             DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
             for (int i = 0; i < size; ++i) {
+                final Object element = elements[i];
                 result.setLength(0);
-                printer.println(dump(result, elements[i]));
-            }
-        }
 
-        /* package */ String dump(StringBuilder result, Object element) {
-            return result.append("  ").append(element).toString();
+                DebugUtils.toString(element, result.append("  "));
+                if (element.getClass().isArray()) {
+                    result.append(" { length = ").append(Array.getLength(element)).append(" }");
+                }
+
+                printer.println(result.toString());
+            }
         }
     }
 
@@ -196,11 +200,6 @@ public final class Pools {
         @Override
         public byte[] newInstance() {
             return new byte[bufferSize];
-        }
-
-        @Override
-        /* package */ String dump(StringBuilder result, Object element) {
-            return result.append("  ").append(element).append(" { length = ").append(((byte[])element).length).append(" }").toString();
         }
     }
 

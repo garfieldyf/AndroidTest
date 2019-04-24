@@ -119,7 +119,7 @@ public final class PackageUtils {
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<Drawable, CharSequence> loadApplicationIcon(Context context, ApplicationInfo info) {
+    public static Pair<Drawable, CharSequence> loadPackageIcon(Context context, ApplicationInfo info) {
         DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {

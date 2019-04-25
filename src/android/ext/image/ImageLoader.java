@@ -74,7 +74,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = binder;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(computeBufferPoolMaxSize(executor), 16384));
+        mBufferPool = Pools.synchronizedPool(Pools.<byte[]>newPool(computeBufferPoolMaxSize(executor), 16384, byte.class));
         ImageBinder.__checkTransformer(getClass(), imageCache, binder);
     }
 

@@ -20,18 +20,6 @@ public final class Pools {
     }
 
     /**
-     * Creates a new <b>fixed-size</b> byte array {@link Pool}.
-     * @param maxSize The maximum number of byte arrays to allow in the pool.
-     * @param bufferSize The maximum number of bytes in the each byte array.
-     * Suggest 8K, 16K, etc.
-     * @return An newly byte array <tt>Pool</tt>.
-     * @see #synchronizedPool(Pool)
-     */
-    public static Pool<byte[]> newPool(int maxSize, int bufferSize) {
-        return new ByteArrayPool(maxSize, bufferSize);
-    }
-
-    /**
      * Creates a new <b>fixed-size</b> {@link Pool}.
      * @param factory The {@link Factory} to create a new element
      * when the pool is empty.
@@ -41,6 +29,18 @@ public final class Pools {
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
         return new ArrayPool<T>(factory, maxSize);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> array {@link Pool}.
+     * @param maxSize The maximum number of arrays to allow in this pool.
+     * @param length The maximum number of elements in the each array.
+     * @param componentType The array's component type.
+     * @return An newly array <tt>Pool</tt>.
+     * @see #synchronizedPool(Pool)
+     */
+    public static <T> Pool<T> newPool(int maxSize, int length, Class<?> componentType) {
+        return new ObjectArrayPool<T>(maxSize, length, componentType);
     }
 
     /**
@@ -182,24 +182,28 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ByteArrayPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ObjectArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ByteArrayPool extends ArrayPool<byte[]> {
-        private final int bufferSize;
+    private static final class ObjectArrayPool<T> extends ArrayPool<T> {
+        private final int length;
+        private final Class<?> componentType;
 
         /**
          * Constructor
-         * @param maxSize The maximum number of byte arrays to allow in this pool.
-         * @param bufferSize The maximum number of bytes in the each byte array.
+         * @param maxSize The maximum number of arrays to allow in this pool.
+         * @param length The maximum number of elements in the each array.
+         * @param componentType The array's component type.
          */
-        public ByteArrayPool(int maxSize, int bufferSize) {
+        public ObjectArrayPool(int maxSize, int length, Class<?> componentType) {
             super(null, maxSize);
-            this.bufferSize = bufferSize;
+            this.length = length;
+            this.componentType = componentType;
         }
 
         @Override
-        public byte[] newInstance() {
-            return new byte[bufferSize];
+        @SuppressWarnings("unchecked")
+        public T newInstance() {
+            return (T)Array.newInstance(componentType, length);
         }
     }
 
@@ -230,7 +234,7 @@ public final class Pools {
 
         public synchronized final void dump(Printer printer) {
             if (pool instanceof ArrayPool) {
-                ((ArrayPool<?>)pool).dump(printer, "SynchronizedPool");
+                ((ArrayPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
         }
     }

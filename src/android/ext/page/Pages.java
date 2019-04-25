@@ -218,10 +218,10 @@ public final class Pages {
             DebugUtils.__checkUIThread("getItem");
             DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
             final long combinedPosition = getPageForPosition(position);
-            final int index = getOriginalPage(combinedPosition);
-            final Page<E> page = getPage(index);
+            final int currentPage = getOriginalPage(combinedPosition);
+            final Page<E> page = getPage(currentPage);
             if (mPrefetchDistance > 0) {
-                prefetchPage(index, (int)combinedPosition);
+                prefetchPage(currentPage, (int)combinedPosition);
             }
 
             return (page != null ? page.getItem((int)combinedPosition) : null);

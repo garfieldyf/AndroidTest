@@ -1,5 +1,6 @@
 package android.ext.graphics;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
@@ -407,6 +408,8 @@ public final class BitmapUtils {
     }
 
     /* package */ static void blurBitmap(RenderScript rs, ScriptIntrinsicBlur blur, Bitmap bitmap, float radius) {
+        DebugUtils.__checkError(bitmap == null, "bitmap == null");
+        DebugUtils.__checkError(bitmap.getConfig() != Config.ARGB_8888, "The bitmap must be ARGB_8888 pixel format.");
         final Allocation input  = Allocation.createFromBitmap(rs, bitmap);
         final Allocation output = Allocation.createTyped(rs, input.getType());
 
@@ -444,7 +447,7 @@ public final class BitmapUtils {
     /**
      * Class <tt>RenderScriptBlur</tt> used to blur the <tt>Bitmap</tt>.
      */
-    public static final class RenderScriptBlur {
+    public static final class RenderScriptBlur implements Closeable {
         private RenderScript mRS;
         private final ScriptIntrinsicBlur mBlur;
 
@@ -457,11 +460,8 @@ public final class BitmapUtils {
             mBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
         }
 
-        /**
-         * Destroys this <tt>RenderScriptBlur</tt>. Frees
-         * any native resources associated with this object.
-         */
-        public synchronized final void destroy() {
+        @Override
+        public synchronized final void close() {
             if (mRS != null) {
                 mBlur.destroy();
                 mRS.destroy();

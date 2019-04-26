@@ -174,6 +174,15 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         return mCache;
     }
 
+    /**
+     * Returns the target associated with the <em>task</em>.
+     * @param task The {@link Task}.
+     * @return The <tt>Object</tt> target.
+     */
+    public final Object getTarget(Task<?, ?> task) {
+        return ((LoadTask)task).mTarget;
+    }
+
     @Override
     public final Task<?, ?> newInstance() {
         return new LoadTask();

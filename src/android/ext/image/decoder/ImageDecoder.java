@@ -56,7 +56,7 @@ public class ImageDecoder extends BitmapDecoder<Object> {
     }
 
     @Override
-    protected Object decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : super.decodeImage(uri, params, flags, opts));
+    protected Object decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
+        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : super.decodeImage(uri, target, params, flags, opts));
     }
 }

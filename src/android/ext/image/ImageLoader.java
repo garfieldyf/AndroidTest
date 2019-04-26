@@ -180,7 +180,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mBufferPool.obtain();
         try {
-            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, getTarget(task), params, flags, buffer));
         } finally {
             mBufferPool.recycle(buffer);
         }
@@ -210,7 +210,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
-            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, getTarget(task), params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
             return null;
@@ -303,7 +303,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
             if (imageFile.exists()) {
                 // Decodes the image file, If file cache hit.
-                if ((result = mDecoder.decodeImage(imageFile, params, flags, buffer)) != null) {
+                if ((result = mDecoder.decodeImage(imageFile, getTarget(task), params, flags, buffer)) != null) {
                     return result;
                 }
 
@@ -435,13 +435,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public static interface ImageDecoder<Image> {
         /**
          * Decodes an image from the specified <em>uri</em>.
-         * @param uri The uri to decode, passed earlier by {@link ImageLoader#load}.
+         * @param uri The uri to decode.
+         * @param target The target, passed earlier by {@link ImageLoader#load}.
          * @param params The parameters, passed earlier by {@link ImageLoader#load}.
          * @param flags The flags, passed earlier by {@link ImageLoader#load}.
          * @param tempStorage May be <tt>null</tt>. The temporary storage to use for
          * decoding. Suggest 16K.
          * @return The image object, or <tt>null</tt> if the image data cannot be decode.
          */
-        Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage);
+        Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage);
     }
 }

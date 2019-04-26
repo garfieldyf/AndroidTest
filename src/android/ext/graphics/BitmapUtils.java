@@ -215,7 +215,7 @@ public final class BitmapUtils {
                 // Computes the sample size.
                 opts.inMutable = parameters.mutable;
                 opts.inPreferredConfig = parameters.config;
-                parameters.computeSampleSize(context, opts);
+                parameters.computeSampleSize(context, null, opts);
             }
 
             // Decodes the bitmap pixels.

@@ -62,7 +62,7 @@ public class ScaleParameters extends Parameters {
     }
 
     @Override
-    public void computeSampleSize(Context context, Options opts) {
+    public void computeSampleSize(Context context, Object target, Options opts) {
         /*
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%

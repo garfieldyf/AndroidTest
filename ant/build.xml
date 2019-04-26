@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module" basedir="." default="all">
+<project name="module" basedir="." default="compile-all">
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
@@ -200,19 +200,28 @@
         <ant antfile="${basedir}/../jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
     </target>
 
-    <!-- target test -->
-    <target name="test" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -post-compile" />
-
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
+    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -compile-so, -post-compile" />
+    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -post-compile" />
+
+    <!-- target compile-debug -->
+    <target name="compile-debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
+
+    <!-- target compile-release -->
+    <target name="compile-release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all -->
     <target name="all">
         <antcall target="debug" />
         <antcall target="release" />
+    </target>
+
+    <!-- target compile-all -->
+    <target name="compile-all">
+        <antcall target="compile-debug" />
+        <antcall target="compile-release" />
         <antcall target="compile-so" />
     </target>
 </project>

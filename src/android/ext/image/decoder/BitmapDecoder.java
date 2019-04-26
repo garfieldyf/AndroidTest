@@ -99,12 +99,12 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Image decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
+    protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
         final Parameters parameters = ((flags & FLAG_CUSTOM_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
-        parameters.computeSampleSize(mContext, opts);
+        parameters.computeSampleSize(mContext, target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
         if (mBitmapPool != null) {

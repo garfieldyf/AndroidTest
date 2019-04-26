@@ -1,7 +1,6 @@
 package android.ext.cache;
 
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -63,11 +62,10 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
                     break;
                 }
 
-                final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
-                final Entry<K, V> toEvict = itor.next();
+                final Entry<K, V> toEvict = map.entrySet().iterator().next();
                 key = toEvict.getKey();
                 value = toEvict.getValue();
-                itor.remove();
+                map.remove(key);
                 size -= sizeOf(key, value);
             }
 

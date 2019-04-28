@@ -1,5 +1,8 @@
 package android.ext.content;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
@@ -10,7 +13,6 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.UIHandler;
-import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
@@ -27,7 +29,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ final Executor mExecutor;
 
     /* package */ final Pool<Task> mTaskPool;
-    /* package */ final ArrayMap<Object, Task> mRunningTasks;
+    /* package */ final Map<Object, Task> mRunningTasks;
 
     /**
      * Constructor
@@ -37,7 +39,7 @@ public abstract class Loader implements Factory<Task> {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, 64);
-        mRunningTasks = new ArrayMap<Object, Task>();
+        mRunningTasks = new HashMap<Object, Task>();
     }
 
     /**
@@ -121,15 +123,12 @@ public abstract class Loader implements Factory<Task> {
     public void dump(Context context, Printer printer) {
         DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
-        final int size = mRunningTasks.size();
-        if (size > 0) {
-            final StringBuilder result = new StringBuilder(130);
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping Running Tasks [ size = %d ] ", size);
 
-            for (int i = 0; i < size; ++i) {
-                result.setLength(0);
-                printer.println(DebugUtils.toSimpleString(mRunningTasks.keyAt(i), result.append("  ")).append(" ==> ").append(mRunningTasks.valueAt(i)).toString());
-            }
+        final StringBuilder result = new StringBuilder(130);
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping Running Tasks [ size = %d ] ", mRunningTasks.size());
+        for (Entry<Object, Task> entry : mRunningTasks.entrySet()) {
+            result.setLength(0);
+            printer.println(DebugUtils.toSimpleString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
         }
     }
 
@@ -150,11 +149,13 @@ public abstract class Loader implements Factory<Task> {
      * Stops all running tasks.
      */
     private void cancelAll() {
-        for (int i = mRunningTasks.size() - 1; i >= 0; --i) {
-            mRunningTasks.valueAt(i).cancel(false);
-        }
+        if (mRunningTasks.size() > 0) {
+            for (Task task : mRunningTasks.values()) {
+                task.cancel(false);
+            }
 
-        mRunningTasks.clear();
+            mRunningTasks.clear();
+        }
     }
 
     /**

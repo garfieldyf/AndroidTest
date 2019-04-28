@@ -100,8 +100,8 @@ public class Parameters {
     }
 
     /**
-     * Returns the default {@link Parameters} associated with this class (The default parameters sample size = 1, config
-     * = ARGB_8888, mutable = false).
+     * Returns the default {@link Parameters} associated with this class
+     * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;

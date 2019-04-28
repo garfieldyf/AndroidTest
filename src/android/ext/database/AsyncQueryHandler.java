@@ -2,6 +2,7 @@ package android.ext.database;
 
 import java.util.ArrayList;
 import java.util.concurrent.Executor;
+import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -29,7 +30,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param context The <tt>Context</tt>.
      * @param executor The serial <tt>Executor</tt>.
      * See {@link ThreadPool#newSerialExecutor()}.
-     * @see #AsyncQueryHandler(Context, Executor, Object)
+     * @see #AsyncQueryHandler(Activity, Executor)
      */
     public AsyncQueryHandler(Context context, Executor executor) {
         super(executor);
@@ -38,15 +39,14 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
+     * @param activity The <tt>Activity</tt>.
      * @param executor The serial <tt>Executor</tt>.
      * See {@link ThreadPool#newSerialExecutor()}.
-     * @param owner The owner object. See {@link #setOwner(Object)}.
      * @see #AsyncQueryHandler(Context, Executor)
      */
-    public AsyncQueryHandler(Context context, Executor executor, Object owner) {
-        super(executor, owner);
-        mContext = context.getApplicationContext();
+    public AsyncQueryHandler(Activity activity, Executor executor) {
+        super(executor, activity);
+        mContext = activity.getApplicationContext();
     }
 
     /**

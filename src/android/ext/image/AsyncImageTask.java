@@ -2,7 +2,9 @@ package android.ext.image;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.res.XmlResources;
@@ -16,6 +18,7 @@ import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.ImageView;
 
 /**
  * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI
@@ -32,28 +35,9 @@ import android.util.Log;
  * <li>android_asset ({@link #SCHEME_FILE})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <h3>Usage</h3>
- * <p>Here is an example of subclassing:</p><pre>
- * private static class DownloadBitmapTask extends AsyncImageTask&lt;String&gt; {
- *     public DownloadBitmapTask(Activity ownerActivity) {
- *         super(ownerActivity, ownerActivity);
- *     }
- *
- *     {@code @Override}
- *     protected void onPostExecute(Object[] results) {
- *         final Activity activity = getOwnerActivity();
- *         if (activity == null) {
- *              // The owner activity has been destroyed or release by the GC.
- *              return;
- *         }
- *
- *         final Bitmap bitmap = (Bitmap)results[0];
- *         if (bitmap != null) {
- *             Log.i(TAG, bitmap.toString());
- *         }
- *     }
- * }
- *
- * new DownloadBitmapTask(activity)
+ * <p>Here is an example:</p><pre>
+ * new AsyncImageTask&lt;String&gt;(activity)
+ *    .setTarget(imageView)
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
  * @author Garfield
@@ -70,9 +54,14 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     protected Parameters mParameters;
 
     /**
+     * The <tt>Object</tt> to bind an image.
+     */
+    private WeakReference<Object> mTarget;
+
+    /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @see #AsyncImageTask(Context, Object)
+     * @see #AsyncImageTask(Activity)
      */
     public AsyncImageTask(Context context) {
         mContext = context.getApplicationContext();
@@ -80,13 +69,22 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param owner The owner object. See {@link #setOwner(Object)}.
+     * @param activity The <tt>Activity</tt>.
      * @see #AsyncImageTask(Context)
      */
-    public AsyncImageTask(Context context, Object owner) {
-        super(owner);
-        mContext = context.getApplicationContext();
+    public AsyncImageTask(Activity activity) {
+        super(activity);
+        mContext = activity.getApplicationContext();
+    }
+
+    /**
+     * Sets the target used to bind the image.
+     * @param target The <tt>Object</tt> to bind.
+     * @return This task.
+     */
+    public final AsyncImageTask<URI> setTarget(Object target) {
+        mTarget = new WeakReference<Object>(target);
+        return this;
     }
 
     /**
@@ -123,6 +121,24 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
 
         ByteArrayPool.recycle(tempBuffer);
         return results;
+    }
+
+    @Override
+    protected void onPostExecute(Object[] result) {
+        final ImageView target = getTarget();
+        if (target != null) {
+            target.setImageBitmap((Bitmap)result[0]);
+        }
+    }
+
+    /**
+     * Returns the target associated with this task.
+     * @return The target or <tt>null</tt> if the target released by the GC.
+     * @see #setTarget(Object)
+     */
+    @SuppressWarnings("unchecked")
+    protected final <T> T getTarget() {
+        return (mTarget != null ? (T)mTarget.get() : null);
     }
 
     /**

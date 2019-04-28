@@ -19,7 +19,6 @@ import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.graphics.drawable.Drawable;
-import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -115,11 +114,11 @@ public final class PackageUtils {
      * @param info The {@link ApplicationInfo} must be a package archive file's application info
      * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
      * file full path.
-     * @return A <tt>Pair</tt> containing the application's icon and label.
+     * @return An {@link IconResult} containing the application's icon and label.
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static Pair<Drawable, CharSequence> loadPackageIcon(Context context, ApplicationInfo info) {
+    public static IconResult loadPackageIcon(Context context, ApplicationInfo info) {
         DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
@@ -148,7 +147,7 @@ public final class PackageUtils {
              * icon  = context.getPackageManager().getApplicationIcon(info);
              * lable = context.getPackageManager().getApplicationLabel(info);
              */
-            return new Pair<Drawable, CharSequence>(icon, StringUtils.trim(label));
+            return new IconResult(icon, StringUtils.trim(label));
         } finally {
             // Close the assets to avoid ProcessKiller
             // kill my process after unmounting usb disk.
@@ -170,6 +169,33 @@ public final class PackageUtils {
                     .append(", sourceDir = ").append(info.applicationInfo.publicSourceDir)
                     .toString());
             }
+        }
+    }
+
+    /**
+     * Class <tt>IconResult</tt> used to store the package item's icon and label.
+     */
+    public static final class IconResult {
+        /**
+         * The package item's icon.
+         */
+        public final Drawable icon;
+
+        /**
+         * The package item's label.
+         */
+        public final CharSequence label;
+
+        /**
+         * Constructor
+         */
+        public IconResult(Drawable icon, CharSequence label) {
+            this.icon  = icon;
+            this.label = label;
+        }
+
+        public final StringBuilder dump(StringBuilder out) {
+            return out.append(getClass().getSimpleName() + " { lable = ").append(label).append(", icon = ").append(icon).append(" }");
         }
     }
 

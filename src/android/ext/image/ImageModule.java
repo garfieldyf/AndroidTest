@@ -177,6 +177,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     @Override
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
+        DebugUtils.__checkDebug(true, getClass().getSimpleName(), "onTrimMemory " + this + " level = " + level);
         if (mImageCache != null) {
             mImageCache.clear();
         }

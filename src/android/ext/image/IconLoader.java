@@ -11,8 +11,7 @@ import android.ext.cache.LruCache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader;
 import android.ext.util.DebugUtils;
-import android.graphics.drawable.Drawable;
-import android.util.Pair;
+import android.ext.util.PackageUtils.IconResult;
 import android.util.Printer;
 
 /**
@@ -20,7 +19,7 @@ import android.util.Printer;
  * and label on a background thread and bind it to target on the UI thread.
  * @author Garfield
  */
-public class IconLoader extends AsyncLoader<String, PackageItemInfo, Pair<Drawable, CharSequence>> {
+public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -30,10 +29,11 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, Pair<Drawab
      * Constructor
      * @param context The {@link Context}.
      * @param executor The <tt>Executor</tt> to executing load task.
+     * @param maxSize The maximum number of icons to allow in the internal cache.
      * @see #IconLoader(Context, Executor, Cache)
      */
-    public IconLoader(Context context, Executor executor) {
-        this(context, executor, new LruCache<String, Pair<Drawable, CharSequence>>(100));
+    public IconLoader(Context context, Executor executor, int maxSize) {
+        this(context, executor, new LruCache<String, IconResult>(maxSize));
     }
 
     /**
@@ -41,11 +41,19 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, Pair<Drawab
      * @param context The {@link Context}.
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache The {@link Cache} to store the loaded icons.
-     * @see #IconLoader(Context, Executor)
+     * @see #IconLoader(Context, Executor, int)
      */
-    public IconLoader(Context context, Executor executor, Cache<String, Pair<Drawable, CharSequence>> cache) {
+    public IconLoader(Context context, Executor executor, Cache<String, IconResult> cache) {
         super(executor, cache);
         mContext = context.getApplicationContext();
+    }
+
+    /**
+     * Equivalent to calling <tt>load(info.name, target, 0, binder, info)</tt>.
+     * @see AsyncLoader#load(Key, Object, int, Binder, Params[])
+     */
+    public final void loadIcon(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, IconResult> binder) {
+        load(info.name, target, 0, binder, info);
     }
 
     /**
@@ -62,26 +70,25 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, Pair<Drawab
         dumpIconCache(context, getCache(), printer);
     }
 
-    public static void dumpIconCache(Context context, Cache<String, Pair<Drawable, CharSequence>> cache, Printer printer) {
-        final Set<Entry<String, Pair<Drawable, CharSequence>>> entries = cache.entries().entrySet();
+    public static void dumpIconCache(Context context, Cache<String, IconResult> cache, Printer printer) {
+        final Set<Entry<String, IconResult>> entries = cache.entries().entrySet();
         final StringBuilder result = new StringBuilder(256);
         if (cache instanceof SimpleLruCache) {
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping IconCache [ size = %d, maxSize = %d ] ", entries.size(), ((SimpleLruCache<?, ?>)cache).maxSize());
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", cache.getClass().getSimpleName(), entries.size(), ((SimpleLruCache<?, ?>)cache).maxSize());
         } else {
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping IconCache [ size = %d ] ", entries.size());
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", cache.getClass().getSimpleName(), entries.size());
         }
 
-        for (Entry<String, Pair<Drawable, CharSequence>> entry : entries) {
+        for (Entry<String, IconResult> entry : entries) {
             result.setLength(0);
-            final Pair<Drawable, CharSequence> value = entry.getValue();
-            printer.println(result.append("  ").append(entry.getKey()).append(" ==> { lable = ").append(value.second).append(", icon = ").append(value.first).append(" }").toString());
+            printer.println(entry.getValue().dump(result.append("  ").append(entry.getKey()).append(" ==> ")).toString());
         }
     }
 
     @Override
-    protected Pair<Drawable, CharSequence> loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] infos, int flags) {
-        final PackageItemInfo info = infos[0];
+    protected IconResult loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
+        final PackageItemInfo info = params[0];
         final PackageManager pm = mContext.getPackageManager();
-        return new Pair<Drawable, CharSequence>(info.loadIcon(pm), info.loadLabel(pm));
+        return new IconResult(info.loadIcon(pm), info.loadLabel(pm));
     }
 }

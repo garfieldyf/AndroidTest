@@ -28,8 +28,15 @@ public class SizeParameters extends Parameters {
         android.R.attr.minHeight,
     };
 
-    private final int minWidth;
-    private final int minHeight;
+    /**
+     * The minimum width to decode, in pixels.
+     */
+    public final int minWidth;
+
+    /**
+     * The minimum height to decode, in pixels.
+     */
+    public final int minHeight;
 
     /**
      * Constructor
@@ -51,8 +58,8 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
-     * @param minWidth The minimum width to decode.
-     * @param minHeight The minimum height to decode.
+     * @param minWidth The minimum width to decode, in pixels.
+     * @param minHeight The minimum height to decode, in pixels.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */

@@ -34,22 +34,17 @@ public final class UriUtils {
      */
     public static InputStream openInputStream(Context context, Object uri) throws IOException {
         DebugUtils.__checkError(uri == null, "uri == null");
-        if (uri instanceof Uri) {
-            if (SCHEME_FILE.equalsIgnoreCase(((Uri)uri).getScheme())) {
-                return openInputStreamImpl(context, uri.toString());
-            } else {
-                return context.getContentResolver().openInputStream((Uri)uri);
-            }
-        } else if (uri instanceof File) {
+        if (uri instanceof File) {
             return new FileInputStream((File)uri);
         } else {
+            // The uri may be a String, Uri or Object.
             final String uriString = uri.toString();
             if (FileUtils.isAbsolutePath(uriString)) {
                 return new FileInputStream(uriString);
             } else if (SCHEME_FILE.regionMatches(true, 0, uriString, 0, 4)) {
-                return openInputStreamImpl(context, uriString);
+                return openInputStream(context, uriString);
             } else {
-                return context.getContentResolver().openInputStream(Uri.parse(uriString));
+                return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
             }
         }
     }
@@ -129,7 +124,7 @@ public final class UriUtils {
         return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
     }
 
-    private static InputStream openInputStreamImpl(Context context, String uri) throws IOException {
+    private static InputStream openInputStream(Context context, String uri) throws IOException {
         DebugUtils.__checkError(uri.length() <= 7, "Invalid uri - " + uri);
         if (uri.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
             // Skips the prefix 'file://'

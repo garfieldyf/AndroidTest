@@ -83,15 +83,15 @@ public class Parameters {
     /**
      * Computes a sample size for used to decode image.
      * @param context The <tt>Context</tt>.
-     * @param target The <tt>Object</tt> to compute.
+     * @param target May be <tt>null</tt>. The <tt>Object</tt> to compute.
      * @param opts The {@link Options} to store the sample size.
      */
     public void computeSampleSize(Context context, Object target, Options opts) {
         opts.inSampleSize = (int)value;
     }
 
-    public void dump(Printer printer, String indent) {
-        printer.println(new StringBuilder(128).append(indent)
+    public void dump(Printer printer, String prefix) {
+        printer.println(new StringBuilder(128).append(prefix)
             .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", sampleSize = ").append(value)

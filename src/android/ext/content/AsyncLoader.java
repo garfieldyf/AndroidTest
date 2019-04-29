@@ -96,38 +96,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     }
 
     /**
-     * Equivalent to calling <tt>preload(key, 0, (Params[])null)</tt>.
-     * @param key The key to find value.
-     * @see #preload(Key, int, Params[])
-     */
-    public final void preload(Key key) {
-        preload(key, 0, (Params[])null);
-    }
-
-    /**
-     * Preloads the value into the internal cache with the specified <em>key</em>.
-     * If the value is already cached, it is return immediately. If the parameter
-     * <em>flags</em> contains the {@link #FLAG_IGNORE_MEMORY_CACHE} then invoking
-     * this method has no effect. Otherwise loads the value on a background thread.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param key The key to find value.
-     * @param flags Loading flags. May be <tt>0</tt> or any combination of
-     * <tt>FLAG_XXX</tt> constants.
-     * @param params The parameters of the load task. If the task no parameters,
-     * you can pass <em>(Params[])null</em> instead of allocating an empty array.
-     * @see #preload(Key)
-     */
-    public final void preload(Key key, int flags, Params... params) {
-        DebugUtils.__checkUIThread("preload");
-        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
-        if (mState != SHUTDOWN && key != null && isCacheValid(flags) && mCache.get(key) == null && !isTaskRunning(key, key)) {
-            final LoadTask task = obtain(key, params, key, flags, EmptyBinder.sInstance);
-            mRunningTasks.put(key, task);
-            mExecutor.execute(task);
-        }
-    }
-
-    /**
      * Equivalent to calling <tt>loadSync(key, 0, (Params[])null)</tt>.
      * @param key The key to find value.
      * @see #loadSync(Key, int, Params[])
@@ -176,11 +144,11 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
     /**
      * Returns the target associated with the <em>task</em>.
-     * @param task The {@link Task}.
-     * @return The <tt>Object</tt> target.
+     * @param task The {@link Task} or <tt>null</tt>.
+     * @return The <tt>Object</tt> target or <tt>null</tt>.
      */
     public final Object getTarget(Task<?, ?> task) {
-        return ((LoadTask)task).mTarget;
+        return (task != null ? ((LoadTask)task).mTarget : null);
     }
 
     @Override

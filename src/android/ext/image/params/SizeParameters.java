@@ -104,8 +104,8 @@ public class SizeParameters extends Parameters {
     }
 
     @Override
-    public void dump(Printer printer, String indent) {
-        printer.println(new StringBuilder(128).append(indent)
+    public void dump(Printer printer, String prefix) {
+        printer.println(new StringBuilder(128).append(prefix)
             .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", minWidth = ").append(minWidth)

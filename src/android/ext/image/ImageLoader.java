@@ -177,7 +177,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     @Override
-    protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
+    protected Image loadInBackground(Task<?> task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mBufferPool.obtain();
         try {
             return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, getTarget(task), params, flags, buffer));
@@ -206,7 +206,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?> task, String url, File imageFile, Object[] params, int flags, byte[] buffer) {
+    protected Image loadImage(Task<?> task, String url, File imageFile, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
@@ -244,7 +244,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer);
+        Image load(Task<?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
@@ -266,7 +266,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task<?> task, String url, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
@@ -296,7 +296,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task<?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
             Image result = null;

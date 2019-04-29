@@ -161,14 +161,9 @@ public abstract class Loader implements Factory<Task> {
     /**
      * This abstract class should be implemented by any class whose instances are intended to be execute.
      */
-    public static abstract class Task<Params, Result> implements Runnable, Cancelable {
+    public static abstract class Task<Result> implements Runnable, Cancelable {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
-
-        /**
-         * The parameters of this task.
-         */
-        /* package */ Params[] mParams;
 
         /**
          * The thread running this task.
@@ -226,7 +221,7 @@ public abstract class Loader implements Factory<Task> {
             if (mState.get() == RUNNING) {
                 try {
                     mRunner = Thread.currentThread();
-                    result  = doInBackground(mParams);
+                    result  = doInBackground();
                 } finally {
                     mRunner = null;
                     mState.compareAndSet(RUNNING, COMPLETED);
@@ -240,7 +235,6 @@ public abstract class Loader implements Factory<Task> {
          * Clears all fields for recycle.
          */
         /* package */ final void clearForRecycle() {
-            mParams = null;
             mRunner = null;
             mState.set(RUNNING);
         }
@@ -255,18 +249,17 @@ public abstract class Loader implements Factory<Task> {
         }
 
         /**
-         * Runs on the UI thread after {@link #doInBackground(Params[])}.
-         * @param result The result, returned earlier by {@link #doInBackground}.
-         * @see #doInBackground(Params[])
-         */
-        public abstract void onPostExecute(Result result);
-
-        /**
          * Overrides this method to perform a computation on a background thread.
-         * @param params The parameters of the task.
          * @return A result, defined by the subclass of this task.
          * @see #onPostExecute(Result)
          */
-        public abstract Result doInBackground(Params[] params);
+        public abstract Result doInBackground();
+
+        /**
+         * Runs on the UI thread after {@link #doInBackground()}.
+         * @param result The result, returned earlier by {@link #doInBackground}.
+         * @see #doInBackground()
+         */
+        public abstract void onPostExecute(Result result);
     }
 }

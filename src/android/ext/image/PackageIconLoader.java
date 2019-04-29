@@ -47,7 +47,7 @@ public class PackageIconLoader extends IconLoader {
     }
 
     @Override
-    protected IconResult loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
+    protected IconResult loadInBackground(Task<?> task, String key, PackageItemInfo[] params, int flags) {
         return PackageUtils.loadPackageIcon(mContext, (ApplicationInfo)params[0]);
     }
 }

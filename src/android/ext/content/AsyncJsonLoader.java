@@ -102,7 +102,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      * Otherwise returns the JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).
      * @throws Exception if an error occurs while downloading to the resource.
      */
-    protected Object onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
+    protected Object onDownload(Task<?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
         final DownloadRequest request = params.newDownloadRequest(key);
         return (cacheFile != null ? request.download(cacheFile, task, null) : request.download(task));
     }
@@ -113,7 +113,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     @Override
-    protected LoadResult<Result> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
+    protected LoadResult<Result> loadInBackground(Task<?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
         try {

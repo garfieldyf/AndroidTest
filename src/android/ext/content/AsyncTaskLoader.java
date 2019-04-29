@@ -52,7 +52,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(key == null, "key == null");
         if (mState != SHUTDOWN) {
-            final Task<?, ?> task = mRunningTasks.get(key);
+            final Task<?> task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
                 onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
@@ -109,7 +109,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     @Override
-    public final Task<?, ?> newInstance() {
+    public final Task<?> newInstance() {
         return new LoadTask();
     }
 
@@ -168,7 +168,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #onStartLoading(Key, Params[])
      * @see #onLoadComplete(Key, Params[], Result)
      */
-    protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
+    protected abstract Result loadInBackground(Task<?> task, Key key, Params[] params);
 
     /**
      * Retrieves a new {@link Task} from the task pool.
@@ -184,13 +184,14 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Params, Result> {
+    /* package */ final class LoadTask extends Task<Result> {
         /* package */ Key mKey;
+        /* package */ Params[] mParams;
 
         @Override
-        public Result doInBackground(Params[] params) {
+        public Result doInBackground() {
             waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, params) : null);
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mParams) : null);
         }
 
         @Override
@@ -220,6 +221,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
             // leaks, Even the loader has been shut down.
             clearForRecycle();
             mKey = null;
+            mParams = null;
             mTaskPool.recycle(this);
         }
     }

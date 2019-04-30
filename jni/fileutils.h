@@ -83,9 +83,13 @@ __STATIC_INLINE__ jint getType(const char* path, const struct dirent* entry)
     return type;
 }
 
-__STATIC_INLINE__ bool isDirectory(const char* path, const struct dirent* entry)
+__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)
 {
-    return (entry->d_type == DT_DIR && ::access(path, F_OK) == 0);
+    assert(path);
+    if (length == INVALID_LENGTH)
+        length = ::strlen(path);
+
+    return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
 __STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
@@ -102,15 +106,6 @@ __STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
     }
 
     return result;
-}
-
-__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)
-{
-    assert(path);
-    if (length == INVALID_LENGTH)
-        length = ::strlen(path);
-
-    return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
 __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE], ssize_t& readCount)
@@ -187,7 +182,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
                     break;
                 } else if (result == SC_BREAK) {
                     continue;
-                } else if (isDirectory(filePath, entry)) {
+                } else if (entry->d_type == DT_DIR) {
                     // If filePath is a directory adds it to dirPaths.
                     dirPaths.push_back(filePath);
                 }
@@ -223,7 +218,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
             }
 
             // Scans the sub directory.
-            if (isDirectory(filePath, entry) && ((errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result)) != 0 || result == SC_STOP)) {
+            if (entry->d_type == DT_DIR && ((errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result)) != 0 || result == SC_STOP)) {
                 break;
             }
         }

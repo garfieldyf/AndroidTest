@@ -9,6 +9,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Bundle;
@@ -308,6 +309,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         }
 
         private Cursor execQuery(ContentResolver resolver) {
+            DebugUtils.__checkStartMethodTracing();
             Cursor cursor = null;
             try {
                 cursor = resolver.query(uri, (String[])values, selection, selectionArgs, sortOrder);
@@ -320,6 +322,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 Log.e(getClass().getName(), "Couldn't query from - " + uri, e);
             }
 
+            DebugUtils.__checkStopMethodTracing(AsyncQueryHandler.this.getClass().getSimpleName(), "execQuery");
             return cursor;
         }
 

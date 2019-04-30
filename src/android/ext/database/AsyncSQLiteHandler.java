@@ -5,6 +5,7 @@ import java.util.concurrent.Executor;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.util.Log;
 
@@ -267,6 +268,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         }
 
         private Cursor execQuery(SQLiteDatabase db) {
+            DebugUtils.__checkStartMethodTracing();
             final Cursor cursor;
             if (message == MESSAGE_RAWQUERY) {
                 cursor = db.rawQuery(selection, selectionArgs);
@@ -280,6 +282,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 cursor.getCount();
             }
 
+            DebugUtils.__checkStopMethodTracing(AsyncSQLiteHandler.this.getClass().getSimpleName(), "execQuery");
             return cursor;
         }
     }

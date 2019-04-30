@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 import java.util.Arrays;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.AsyncJsonLoader.LoadResult;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
@@ -152,7 +153,9 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     private boolean loadFromCache(Params[] params, File cacheFile) {
         boolean hitCache = false;
         try {
+            DebugUtils.__checkStartMethodTracing();
             final Result result = JsonUtils.parse(null, cacheFile, this);
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache - parse");
             if (hitCache = validateResult(params, result)) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -176,7 +179,9 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
             }
 
             // Parse the temp file and save it to the cache file.
+            DebugUtils.__checkStartMethodTracing();
             final Result result = JsonUtils.parse(null, tempFile, this);
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parse");
             if (!isCancelled() && validateResult(params, result)) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

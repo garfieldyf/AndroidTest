@@ -3,9 +3,11 @@ package android.ext.content;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
+import android.content.Context;
 import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.content.AsyncJsonLoader.LoadResult;
 import android.ext.net.DownloadRequest;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
@@ -138,12 +140,12 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         return new LoadResult<Result>(result, hitCache);
     }
 
-    private boolean loadFromCache(Task task, Key key, LoadParams params, File cacheFile) {
+    private boolean loadFromCache(Task task, Key key, LoadParams<Key, Result> params, File cacheFile) {
         boolean hitCache = false;
         try {
             DebugUtils.__checkStartMethodTracing();
-            final Result result = JsonUtils.parse(null, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache - parse");
+            final Result result = params.loadFromCache(task, key, cacheFile);
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
             if (hitCache = params.validateResult(key, result)) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -236,5 +238,18 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
          * @throws Exception if an error occurs while opening the connection.
          */
         public abstract DownloadRequest newDownloadRequest(Key key) throws Exception;
+
+        /**
+         * Called on a background thread to load the JSON data from the cache file.
+         * @param task The current {@link Task} whose executing this method.
+         * @param key The key, passed earlier by {@link #load}.
+         * @param cacheFile The JSON cache file to load.
+         * @return A result, defined by the subclass of this <tt>LoadParams</tt>.
+         * @throws Exception if JSON data can not be load.
+         * @see JsonUtils#parse(Context, Object, Cancelable)
+         */
+        public Result loadFromCache(Task<?, ?, ?> task, Key key, File cacheFile) throws Exception {
+            return JsonUtils.parse(null, cacheFile, task);
+        }
     }
 }

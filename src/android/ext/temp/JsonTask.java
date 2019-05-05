@@ -7,7 +7,10 @@ import android.ext.content.AsyncJsonLoader.LoadParams;
 import android.ext.content.AsyncJsonLoader.LoadResult;
 import android.ext.net.AsyncJsonTask;
 import android.ext.net.DownloadRequest;
+import android.ext.util.JsonUtils;
+import android.ext.util.UriUtils;
 import android.util.Log;
+import com.tencent.test.MainApplication;
 
 public class JsonTask extends AsyncJsonTask<String, JSONObject> {
     private final LoadParams<String, JSONObject> mLoadParams;
@@ -23,13 +26,26 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
     }
 
     @Override
-    protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
-        return mLoadParams.newDownloadRequest(params[0]);
+    protected boolean validateResult(String[] params, JSONObject result) {
+        return mLoadParams.validateResult(params[0], result);
     }
 
     @Override
-    protected boolean validateResult(String[] params, JSONObject result) {
-        return mLoadParams.validateResult(params[0], result);
+    protected JSONObject loadFromCache(String[] params, File cacheFile) throws Exception {
+        final Object uri;
+        if (cacheFile.exists()) {
+            uri = cacheFile;
+        } else {
+            uri = UriUtils.getAssetUri("json_cache/title");
+        }
+
+        Log.i("abc", uri.toString());
+        return JsonUtils.parse(MainApplication.sInstance, uri, this);
+    }
+
+    @Override
+    protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
+        return mLoadParams.newDownloadRequest(params[0]);
     }
 
     @Override

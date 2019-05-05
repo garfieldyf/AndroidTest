@@ -370,6 +370,7 @@ public final class FileUtils {
      * or <tt>null</tt> if none. If the operation was cancelled before it completed
      * normally the <em>outFile's</em> contents is undefined.
      * @throws IOException if an error occurs while writing to <em>outFile</em>.
+     * @see UriUtils#openInputStream(Context, Object)
      */
     public static void copyFile(Context context, Object uri, String outFile, Cancelable cancelable) throws IOException {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
@@ -456,6 +457,7 @@ public final class FileUtils {
      * the <em>out's</em> contents is undefined.
      * @throws IOException if an error occurs while writing to <em>out</em>.
      * @see #readFile(Context, Object, Cancelable)
+     * @see UriUtils#openInputStream(Context, Object)
      */
     public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable) throws IOException {
         final InputStream is = UriUtils.openInputStream(context, uri);

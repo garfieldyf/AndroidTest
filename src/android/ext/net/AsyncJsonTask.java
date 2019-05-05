@@ -3,8 +3,10 @@ package android.ext.net;
 import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.Arrays;
+import android.content.Context;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.AsyncJsonLoader.LoadResult;
+import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
@@ -99,6 +101,18 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
     }
 
     /**
+     * Called on a background thread to load the JSON data from the cache file.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @param cacheFile The JSON cache file to load.
+     * @return A result, defined by the subclass of this task.
+     * @throws Exception if JSON data can not be load.
+     * @see JsonUtils#parse(Context, Object, Cancelable)
+     */
+    protected Result loadFromCache(Params[] params, File cacheFile) throws Exception {
+        return JsonUtils.parse(null, cacheFile, this);
+    }
+
+    /**
      * Called on a background thread to download the JSON data.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @param cacheFile The JSON cache file to store the JSON data, or <tt>null</tt> if no cache file.
@@ -138,7 +152,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
                     result = value;
                 }
             } else {
-                hitCache = loadFromCache(params, cacheFile);
+                hitCache = loadFromCacheFile(params, cacheFile);
                 if (!isCancelled()) {
                     result = download(params, cacheFile.getPath(), hitCache);
                 }
@@ -150,12 +164,12 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
         return new LoadResult<Result>(result, hitCache);
     }
 
-    private boolean loadFromCache(Params[] params, File cacheFile) {
+    private boolean loadFromCacheFile(Params[] params, File cacheFile) {
         boolean hitCache = false;
         try {
             DebugUtils.__checkStartMethodTracing();
-            final Result result = JsonUtils.parse(null, cacheFile, this);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache - parse");
+            final Result result = loadFromCache(params, cacheFile);
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
             if (hitCache = validateResult(params, result)) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);

@@ -11,6 +11,7 @@ import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
+import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
@@ -78,6 +79,19 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         @Override
         public File getCacheFile(String url) {
             return new File(mCacheDir, StringUtils.toHexString(MessageDigests.computeString(url, Algorithm.SHA1)));
+        }
+
+        @Override
+        public JSONObject loadFromCache(Task<?, ?, ?> task, String key, File cacheFile) throws Exception {
+            final Object uri;
+            if (cacheFile.exists()) {
+                uri = cacheFile;
+            } else {
+                uri = UriUtils.getAssetUri("json_cache/content");
+            }
+
+            Log.i("abc", uri.toString());
+            return JsonUtils.parse(MainApplication.sInstance, uri, task);
         }
     }
 }

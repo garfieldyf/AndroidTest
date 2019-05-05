@@ -448,12 +448,21 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                DebugUtils.__checkError(true, "Unsupported column type - BLOB");
+                writeBlob(writer.name(name), cursor.getBlob(columnIndex));
                 break;
             }
         }
 
         return writer.endObject();
+    }
+
+    private static void writeBlob(JsonWriter writer, byte[] blob) throws IOException {
+        writer.beginArray();
+        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
+            writer.value(blob[i]);
+        }
+
+        writer.endArray();
     }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {

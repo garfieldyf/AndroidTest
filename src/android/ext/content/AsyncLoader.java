@@ -147,12 +147,12 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @param task The {@link Task} or <tt>null</tt>.
      * @return The <tt>Object</tt> target or <tt>null</tt>.
      */
-    public final Object getTarget(Task<?> task) {
+    public final Object getTarget(Task task) {
         return (task != null ? ((LoadTask)task).mTarget : null);
     }
 
     @Override
-    public final Task<?> newInstance() {
+    public final Task newInstance() {
         return new LoadTask();
     }
 
@@ -177,7 +177,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #loadSync(Key, int, Params[])
      * @see #load(Key, Object, int, Binder, Params[])
      */
-    protected abstract Value loadInBackground(Task<?> task, Key key, Params[] params, int flags);
+    protected abstract Value loadInBackground(Task<?, ?, ?> task, Key key, Params[] params, int flags);
 
     /**
      * Tests if the {@link mCache} is valid.
@@ -227,19 +227,17 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Value> {
-        /* package */ Key mKey;
+    /* package */ final class LoadTask extends Task<Key, Params, Value> {
         /* package */ int mFlags;
         /* package */ Object mTarget;
         /* package */ Binder mBinder;
-        /* package */ Params[] mParams;
 
         @Override
-        public Value doInBackground() {
+        public Value doInBackground(Key key, Params[] params) {
             waitResumeIfPaused();
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
-                value = loadInBackground(this, mKey, mParams, mFlags);
+                value = loadInBackground(this, key, params, mFlags);
                 if (value != null && isCacheValid(mFlags)) {
                     mCache.put(mKey, value);
                 }
@@ -257,10 +255,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
             clearForRecycle();
-            mKey = null;
             mTarget = null;
             mBinder = null;
-            mParams = null;
             mTaskPool.recycle(this);
         }
     }

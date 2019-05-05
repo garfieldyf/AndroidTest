@@ -15,7 +15,7 @@ import android.ext.util.DebugUtils;
  * <li><tt>Result</tt>, The load result type.</li></ol>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     private WeakReference<Object> mOwner;
 
@@ -52,7 +52,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(key == null, "key == null");
         if (mState != SHUTDOWN) {
-            final Task<?> task = mRunningTasks.get(key);
+            final Task task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
                 onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
@@ -109,7 +109,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     @Override
-    public final Task<?> newInstance() {
+    public final Task newInstance() {
         return new LoadTask();
     }
 
@@ -168,7 +168,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #onStartLoading(Key, Params[])
      * @see #onLoadComplete(Key, Params[], Result)
      */
-    protected abstract Result loadInBackground(Task<?> task, Key key, Params[] params);
+    protected abstract Result loadInBackground(Task<?, ?, ?> task, Key key, Params[] params);
 
     /**
      * Retrieves a new {@link Task} from the task pool.
@@ -184,21 +184,18 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Result> {
-        /* package */ Key mKey;
-        /* package */ Params[] mParams;
-
-        @Override
-        public Result doInBackground() {
-            waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mParams) : null);
-        }
-
+    /* package */ final class LoadTask extends Task<Key, Params, Result> {
         @Override
         public void onProgress(Object[] values) {
             if (mState != SHUTDOWN) {
                 onProgressUpdate(mKey, mParams, values);
             }
+        }
+
+        @Override
+        public Result doInBackground(Key key, Params[] params) {
+            waitResumeIfPaused();
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, key, params) : null);
         }
 
         @Override
@@ -220,8 +217,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
             clearForRecycle();
-            mKey = null;
-            mParams = null;
             mTaskPool.recycle(this);
         }
     }

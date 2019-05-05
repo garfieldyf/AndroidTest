@@ -93,7 +93,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     @Override
     public void dump(Printer printer) {
         super.dump(printer);
-        DebugUtils.dumpSummary(printer, new StringBuilder(80), 80, " Dumping Parameters ", (Object[])null);
+        DebugUtils.dumpSummary(printer, new StringBuilder(120), 120, " Dumping Parameters ", (Object[])null);
         mParameters.dump(printer, "  ");
     }
 

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -82,6 +83,7 @@ public class ScaleParameters extends Parameters {
             .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(scale)
+            .append(", density = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

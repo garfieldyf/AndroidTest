@@ -3,6 +3,7 @@ package android.ext.image.params;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -110,6 +111,7 @@ public class SizeParameters extends Parameters {
             .append(" { config = ").append(config.name())
             .append(", minWidth = ").append(minWidth)
             .append(", minHeight = ").append(minHeight)
+            .append(", density = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

@@ -83,13 +83,7 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
         @Override
         public JSONObject loadFromCache(Task<?, ?, ?> task, String key, File cacheFile) throws Exception {
-            final Object uri;
-            if (cacheFile.exists()) {
-                uri = cacheFile;
-            } else {
-                uri = UriUtils.getAssetUri("json_cache/content");
-            }
-
+            final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
             Log.i("abc", uri.toString());
             return JsonUtils.parse(MainApplication.sInstance, uri, task);
         }

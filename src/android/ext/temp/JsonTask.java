@@ -32,13 +32,7 @@ public class JsonTask extends AsyncJsonTask<String, JSONObject> {
 
     @Override
     protected JSONObject loadFromCache(String[] params, File cacheFile) throws Exception {
-        final Object uri;
-        if (cacheFile.exists()) {
-            uri = cacheFile;
-        } else {
-            uri = UriUtils.getAssetUri("json_cache/title");
-        }
-
+        final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/title"));
         Log.i("abc", uri.toString());
         return JsonUtils.parse(MainApplication.sInstance, uri, this);
     }

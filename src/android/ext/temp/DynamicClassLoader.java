@@ -5,7 +5,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
-import android.ext.util.ClassUtils;
 import android.ext.util.FileUtils;
 import dalvik.system.DexClassLoader;
 
@@ -75,7 +74,8 @@ public class DynamicClassLoader {
     public void load(String... libraryNames) throws Exception {
         if (ArrayUtils.getSize(libraryNames) > 0) {
             final Runtime runtime = Runtime.getRuntime();
-            final Method method = ClassUtils.getDeclaredMethod(Runtime.class, "loadLibrary", String.class, ClassLoader.class);
+            final Method method = Runtime.class.getDeclaredMethod("loadLibrary", String.class, ClassLoader.class);
+            method.setAccessible(true);
 
             for (String libraryName : libraryNames) {
                 method.invoke(runtime, libraryName, mClassLoader);

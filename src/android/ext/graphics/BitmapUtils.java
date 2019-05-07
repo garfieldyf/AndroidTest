@@ -5,11 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
 import android.ext.content.res.XmlResources;
-import android.ext.graphics.DrawUtils.MatrixPool;
-import android.ext.graphics.DrawUtils.RectFPool;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.ext.util.Pools.MatrixPool;
+import android.ext.util.Pools.RectFPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -239,10 +239,10 @@ public final class BitmapUtils {
      */
     public static Bitmap createScaledBitmap(Bitmap bitmap, float sx, float sy, Config newConfig, Paint paint) {
         if (Float.compare(sx, +1.0f) != 0 || Float.compare(sy, +1.0f) != 0) {
-            final Matrix matrix = MatrixPool.obtain();
+            final Matrix matrix = MatrixPool.sInstance.obtain();
             matrix.setScale(sx, sy);
             bitmap = createBitmap(bitmap, matrix, newConfig, paint);
-            MatrixPool.recycle(matrix);
+            MatrixPool.sInstance.recycle(matrix);
         }
 
         return bitmap;
@@ -276,10 +276,10 @@ public final class BitmapUtils {
      */
     public static Bitmap createRotateBitmap(Bitmap bitmap, float degrees, float px, float py, Config newConfig, Paint paint) {
         if (Float.compare(degrees, +0.0f) != 0) {
-            final Matrix matrix = MatrixPool.obtain();
+            final Matrix matrix = MatrixPool.sInstance.obtain();
             matrix.setRotate(degrees, px, py);
             bitmap = createBitmap(bitmap, matrix, newConfig, paint);
-            MatrixPool.recycle(matrix);
+            MatrixPool.sInstance.recycle(matrix);
         }
 
         return bitmap;
@@ -426,7 +426,7 @@ public final class BitmapUtils {
 
     private static Bitmap createBitmap(Bitmap source, Matrix matrix, Config config, Paint paint) {
         final RectF src = new RectF(0, 0, source.getWidth(), source.getHeight());
-        final RectF dst = RectFPool.obtain();
+        final RectF dst = RectFPool.sInstance.obtain();
         matrix.mapRect(dst, src);
 
         final Bitmap bitmap = Bitmap.createBitmap((int)(dst.width() + 0.5f), (int)(dst.height() + 0.5), config);
@@ -439,7 +439,7 @@ public final class BitmapUtils {
         canvas.concat(matrix);
         canvas.drawBitmap(source, null, src, paint);
         canvas.setBitmap(null);
-        RectFPool.recycle(dst);
+        RectFPool.sInstance.recycle(dst);
 
         return bitmap;
     }

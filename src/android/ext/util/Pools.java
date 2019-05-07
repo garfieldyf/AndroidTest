@@ -2,6 +2,9 @@ package android.ext.util;
 
 import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicReference;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Printer;
 
 /**
@@ -16,6 +19,7 @@ public final class Pools {
      * @return An newly created <tt>Pool</tt>.
      */
     public static <T> Pool<T> newSimplePool(Factory<T> factory) {
+        DebugUtils.__checkError(factory == null, "factory == null");
         return new SimplePool<T>(factory);
     }
 
@@ -88,9 +92,95 @@ public final class Pools {
     }
 
     /**
+     * Class <tt>RectPool</tt> is an <b>one-size</b> {@link Rect} pool.
+     */
+    public static final class RectPool extends SimplePool<Rect> {
+        public static final Pool<Rect> sInstance = new RectPool();
+
+        /**
+         * Constructor
+         */
+        private RectPool() {
+            super(null);
+        }
+
+        @Override
+        public Rect newInstance() {
+            return new Rect();
+        }
+
+        /**
+         * Equivalent to calling<pre>
+         * final Rect rect = RectPool.sInstance.obtain();
+         * rect.set(left, top, right, bottom);</pre>
+         */
+        public static Rect obtain(int left, int top, int right, int bottom) {
+            final Rect result = sInstance.obtain();
+            result.set(left, top, right, bottom);
+            return result;
+        }
+    }
+
+    /**
+     * Class <tt>RectFPool</tt> is an <b>one-size</b> {@link RectF} pool.
+     */
+    public static final class RectFPool extends SimplePool<RectF> {
+        public static final Pool<RectF> sInstance = new RectFPool();
+
+        /**
+         * Constructor
+         */
+        private RectFPool() {
+            super(null);
+        }
+
+        @Override
+        public RectF newInstance() {
+            return new RectF();
+        }
+
+        /**
+         * Equivalent to calling<pre>
+         * final RectF rect = RectFPool.sInstance.obtain();
+         * rect.set(left, top, right, bottom);</pre>
+         */
+        public static RectF obtain(float left, float top, float right, float bottom) {
+            final RectF result = sInstance.obtain();
+            result.set(left, top, right, bottom);
+            return result;
+        }
+    }
+
+    /**
+     * Class <tt>MatrixPool</tt> is an <b>one-size</b> {@link Matrix} pool.
+     */
+    public static final class MatrixPool extends SimplePool<Matrix> {
+        public static final Pool<Matrix> sInstance = new MatrixPool();
+
+        /**
+         * Constructor
+         */
+        private MatrixPool() {
+            super(null);
+        }
+
+        @Override
+        public Matrix newInstance() {
+            return new Matrix();
+        }
+    }
+
+    /**
+     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
+     */
+    public static final class ByteArrayPool {
+        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ObjectArrayPool<byte[]>(2, 8192, byte.class));
+    }
+
+    /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class SimplePool<T> implements Pool<T> {
+    private static class SimplePool<T> implements Pool<T>, Factory<T> {
         private final Factory<T> factory;
         private final AtomicReference<T> referent;
 
@@ -101,9 +191,13 @@ public final class Pools {
          * a new element when this pool is empty.
          */
         public SimplePool(Factory<T> factory) {
-            DebugUtils.__checkError(factory == null, "factory == null");
-            this.factory  = factory;
             this.referent = new AtomicReference<T>();
+            this.factory  = (factory != null ? factory : this);
+        }
+
+        @Override
+        public T newInstance() {
+            throw new IllegalStateException("Must be implementation!");
         }
 
         @Override

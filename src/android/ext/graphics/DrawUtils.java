@@ -4,11 +4,12 @@ import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.ext.util.Pools.RectFPool;
+import android.ext.util.Pools.RectPool;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Paint.Align;
 import android.graphics.Paint.FontMetrics;
@@ -74,14 +75,14 @@ public final class DrawUtils {
      * @see #drawText(Canvas, Paint, CharSequence, int, int, Rect, int)
      */
     public static float drawText(Canvas canvas, Paint paint, CharSequence text, int start, int end, float left, float top, float right, float bottom, int gravity) {
-        final RectF rect = RectFPool.obtain();
+        final RectF rect = RectFPool.sInstance.obtain();
         final Align oldAlign = paint.getTextAlign();
         paint.setTextAlign(computeText(paint, rect, left, top, right, bottom, gravity));
 
         final float y = rect.top;
         canvas.drawText(text, start, end, rect.left, y, paint);
         paint.setTextAlign(oldAlign);
-        RectFPool.recycle(rect);
+        RectFPool.sInstance.recycle(rect);
 
         return y;
     }
@@ -114,10 +115,10 @@ public final class DrawUtils {
      * @see #drawLine(Canvas, Paint, Rect, int)
      */
     public static void drawLine(Canvas canvas, Paint paint, float left, float top, float right, float bottom, int gravity) {
-        final RectF rect = RectFPool.obtain();
+        final RectF rect = RectFPool.sInstance.obtain();
         computeLine(rect, left, top, right, bottom, gravity);
         canvas.drawLine(rect.left, rect.top, rect.right, rect.bottom, paint);
-        RectFPool.recycle(rect);
+        RectFPool.sInstance.recycle(rect);
     }
 
     /**
@@ -192,7 +193,7 @@ public final class DrawUtils {
     public static void drawMirroredBitmap(Canvas canvas, Bitmap bitmap, float left, float top, float right, float bottom, boolean horizontal, Paint paint) {
         final RectF rect = RectFPool.obtain(left, top, right, bottom);
         drawMirroredBitmap(canvas, bitmap, rect, horizontal, paint);
-        RectFPool.recycle(rect);
+        RectFPool.sInstance.recycle(rect);
     }
 
     /**
@@ -318,10 +319,10 @@ public final class DrawUtils {
      * @see Gravity#apply(int, int, int, Rect, Rect)
      */
     public static void applyGravity(int gravity, int width, int height, Rect container, RectF outRect) {
-        final Rect rect = RectPool.obtain();
+        final Rect rect = RectPool.sInstance.obtain();
         Gravity.apply(gravity, width, height, container, 0, 0, rect);
         outRect.set(rect);
-        RectPool.recycle(rect);
+        RectPool.sInstance.recycle(rect);
     }
 
     private static void drawMirroredDrawable(Canvas canvas, Drawable drawable, int width, int height, boolean horizontal) {
@@ -384,87 +385,18 @@ public final class DrawUtils {
     }
 
     /**
-     * Class <tt>RectPool</tt> is an one-size {@link Rect} pool.
-     */
-    public static final class RectPool implements Factory<Rect> {
-        private static final RectPool sInstance = new RectPool();
-        private final Pool<Rect> mPool = Pools.newSimplePool(this);
-
-        @Override
-        public Rect newInstance() {
-            return new Rect();
-        }
-
-        public static Rect obtain() {
-            return sInstance.mPool.obtain();
-        }
-
-        public static Rect obtain(int left, int top, int right, int bottom) {
-            final Rect result = sInstance.mPool.obtain();
-            result.set(left, top, right, bottom);
-            return result;
-        }
-
-        public static void recycle(Rect rect) {
-            sInstance.mPool.recycle(rect);
-        }
-    }
-
-    /**
-     * Class <tt>RectFPool</tt> is an one-size {@link RectF} pool.
-     */
-    public static final class RectFPool implements Factory<RectF> {
-        private static final RectFPool sInstance = new RectFPool();
-        private final Pool<RectF> mPool = Pools.newSimplePool(this);
-
-        @Override
-        public RectF newInstance() {
-            return new RectF();
-        }
-
-        public static RectF obtain() {
-            return sInstance.mPool.obtain();
-        }
-
-        public static RectF obtain(float left, float top, float right, float bottom) {
-            final RectF result = sInstance.mPool.obtain();
-            result.set(left, top, right, bottom);
-            return result;
-        }
-
-        public static void recycle(RectF rect) {
-            sInstance.mPool.recycle(rect);
-        }
-    }
-
-    /**
-     * Class <tt>MatrixPool</tt> is an one-size {@link Matrix} pool.
-     */
-    public static final class MatrixPool implements Factory<Matrix> {
-        private static final MatrixPool sInstance = new MatrixPool();
-        private final Pool<Matrix> mPool = Pools.newSimplePool(this);
-
-        @Override
-        public Matrix newInstance() {
-            return new Matrix();
-        }
-
-        public static Matrix obtain() {
-            return sInstance.mPool.obtain();
-        }
-
-        public static void recycle(Matrix matrix) {
-            matrix.reset();
-            sInstance.mPool.recycle(matrix);
-        }
-    }
-
-    /**
      * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
     private static final class FontMetricsPool implements Factory<FontMetrics> {
         private static final FontMetricsPool sInstance = new FontMetricsPool();
-        private final Pool<FontMetrics> mPool = Pools.newSimplePool(this);
+        private final Pool<FontMetrics> mPool;
+
+        /**
+         * Constructor
+         */
+        private FontMetricsPool() {
+            mPool = Pools.newSimplePool(this);
+        }
 
         @Override
         public FontMetrics newInstance() {

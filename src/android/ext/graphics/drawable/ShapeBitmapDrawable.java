@@ -7,9 +7,9 @@ import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.DrawUtils;
-import android.ext.graphics.DrawUtils.MatrixPool;
-import android.ext.graphics.DrawUtils.RectFPool;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools.MatrixPool;
+import android.ext.util.Pools.RectFPool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -193,13 +193,13 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         // Computes the scale value that map the source
         // rectangle to the destination rectangle.
         final RectF src = RectFPool.obtain(0, 0, width, height);
-        final Matrix matrix = MatrixPool.obtain();
+        final Matrix matrix = MatrixPool.sInstance.obtain();
         matrix.setRectToRect(src, bounds, ScaleToFit.FILL);
 
         // Sets the shader scale matrix.
         mState.mShader.setLocalMatrix(matrix);
-        RectFPool.recycle(src);
-        MatrixPool.recycle(matrix);
+        RectFPool.sInstance.recycle(src);
+        MatrixPool.sInstance.recycle(matrix);
     }
 
     /**

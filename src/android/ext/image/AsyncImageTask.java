@@ -12,9 +12,9 @@ import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
-import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -113,14 +113,14 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
-        final byte[] tempBuffer = ByteArrayPool.obtain();
+        final byte[] tempBuffer = ByteArrayPool.sInstance.obtain();
         final Object[] results  = new Object[params.length];
         try {
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
                 results[i] = decodeImageInternal(params[i], tempBuffer);
             }
         } finally {
-            ByteArrayPool.recycle(tempBuffer);
+            ByteArrayPool.sInstance.recycle(tempBuffer);
         }
 
         return results;

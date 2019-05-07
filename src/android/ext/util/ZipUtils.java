@@ -15,8 +15,8 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.FileUtils.Dirent;
+import android.ext.util.Pools.ByteArrayPool;
 
 /**
  * Class ZipUtils
@@ -124,7 +124,7 @@ public final class ZipUtils {
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
         os.setLevel(compressionLevel);
 
-        final byte[] buffer = ByteArrayPool.obtain();
+        final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             // Compresses the files.
             final int size = ArrayUtils.getSize(files);
@@ -133,7 +133,7 @@ public final class ZipUtils {
                 compress(os, dirent, dirent.getName(), cancelable, buffer);
             }
         } finally {
-            ByteArrayPool.recycle(buffer);
+            ByteArrayPool.sInstance.recycle(buffer);
             os.close();
         }
     }
@@ -151,7 +151,7 @@ public final class ZipUtils {
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
         final ZipFile file  = new ZipFile(zipFile);
-        final byte[] buffer = ByteArrayPool.obtain();
+        final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
@@ -172,7 +172,7 @@ public final class ZipUtils {
                 }
             }
         } finally {
-            ByteArrayPool.recycle(buffer);
+            ByteArrayPool.sInstance.recycle(buffer);
             file.close();
         }
     }

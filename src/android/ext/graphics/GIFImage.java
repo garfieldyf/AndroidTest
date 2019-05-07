@@ -6,9 +6,9 @@ import java.io.InputStream;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
-import android.ext.util.ArrayUtils.ByteArrayPool;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -198,11 +198,11 @@ public final class GIFImage {
     }
 
     private static long decodeStreamInternal(InputStream is) {
-        final byte[] tempStorage = ByteArrayPool.obtain();
+        final byte[] tempStorage = ByteArrayPool.sInstance.obtain();
         try {
             return nativeDecodeStream(is, tempStorage);
         } finally {
-            ByteArrayPool.recycle(tempStorage);
+            ByteArrayPool.sInstance.recycle(tempStorage);
         }
     }
 

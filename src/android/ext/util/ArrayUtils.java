@@ -277,35 +277,22 @@ public final class ArrayUtils {
     }
 
     /**
-     * Sorts the specified range in the <em>list</em> in ascending natural order.
-     * @param list The {@link List} to sort.
-     * @param start The inclusive start index in <em>list</em>.
-     * @param end The exclusive end index in <em>list</em>.
-     * @see #sort(List, int, int, Comparator)
-     * @see Arrays#sort(Object[], int, int)
-     */
-    public static <T extends Comparable<? super T>> void sort(List<T> list, int start, int end) {
-        DebugUtils.__checkRange(start, end - start, list.size());
-        if (list instanceof ArrayList) {
-            sortArrayList(list, start, end, null);
-        } else {
-            sortList(list, start, end, null);
-        }
-    }
-
-    /**
      * Sorts the specified range in the <em>list</em> using the specified <em>comparator</em>.
      * @param list The {@link List} to sort.
      * @param start The inclusive start index in <em>list</em>.
      * @param end The exclusive end index in <em>list</em>.
-     * @param comparator The {@link Comparator} to compare.
-     * @see #sort(List, int, int)
+     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
      * @see Arrays#sort(Object[], int, int, Comparator)
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         DebugUtils.__checkRange(start, end - start, list.size());
         if (list instanceof ArrayList) {
-            sortArrayList(list, start, end, comparator);
+            try {
+                sortArray((Object[])ArrayField.sInstance.get(list), start, end, comparator);
+            } catch (Exception e) {
+                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e);
+                sortList(list, start, end, comparator);
+            }
         } else {
             sortList(list, start, end, comparator);
         }
@@ -496,12 +483,7 @@ public final class ArrayUtils {
 
     private static void sortList(List list, int start, int end, Comparator comparator) {
         final Object[] array = list.toArray();
-        if (comparator == null) {
-            Arrays.sort(array, start, end);
-        } else {
-            Arrays.sort(array, start, end, comparator);
-        }
-
+        sortArray(array, start, end, comparator);
         final ListIterator itor = list.listIterator(start);
         for (; start < end; ++start) {
             itor.next();
@@ -509,17 +491,11 @@ public final class ArrayUtils {
         }
     }
 
-    private static void sortArrayList(List list, int start, int end, Comparator comparator) {
-        try {
-            final Object[] array = (Object[])ArrayField.sInstance.get(list);
-            if (comparator == null) {
-                Arrays.sort(array, start, end);
-            } else {
-                Arrays.sort(array, start, end, comparator);
-            }
-        } catch (Exception e) {
-            Log.e(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e);
-            sortList(list, start, end, comparator);
+    private static void sortArray(Object[] array, int start, int end, Comparator comparator) {
+        if (comparator == null) {
+            Arrays.sort(array, start, end);
+        } else {
+            Arrays.sort(array, start, end, comparator);
         }
     }
 

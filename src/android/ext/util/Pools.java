@@ -28,6 +28,7 @@ public final class Pools {
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
+        DebugUtils.__checkError(factory == null, "factory == null");
         return new ArrayPool<T>(factory, maxSize);
     }
 
@@ -100,6 +101,7 @@ public final class Pools {
          * a new element when this pool is empty.
          */
         public SimplePool(Factory<T> factory) {
+            DebugUtils.__checkError(factory == null, "factory == null");
             this.factory  = factory;
             this.referent = new AtomicReference<T>();
         }
@@ -198,6 +200,7 @@ public final class Pools {
             super(null, maxSize);
             this.length = length;
             this.componentType = componentType;
+            DebugUtils.__checkError(length <= 0, "length <= 0");
         }
 
         @Override

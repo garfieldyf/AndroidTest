@@ -191,6 +191,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * match the "http", "https" and "ftp".
      * @param uri The uri to match.
      * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
+     * @see UriUtils#matchScheme(Object)
      */
     protected boolean matchScheme(URI uri) {
         return UriUtils.matchScheme(uri);

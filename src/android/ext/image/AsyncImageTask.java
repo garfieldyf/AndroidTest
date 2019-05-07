@@ -115,11 +115,14 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
         DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
         final byte[] tempBuffer = ByteArrayPool.obtain();
         final Object[] results  = new Object[params.length];
-        for (int i = 0; i < params.length && !isCancelled(); ++i) {
-            results[i] = decodeImageInternal(params[i], tempBuffer);
+        try {
+            for (int i = 0; i < params.length && !isCancelled(); ++i) {
+                results[i] = decodeImageInternal(params[i], tempBuffer);
+            }
+        } finally {
+            ByteArrayPool.recycle(tempBuffer);
         }
 
-        ByteArrayPool.recycle(tempBuffer);
         return results;
     }
 
@@ -146,6 +149,7 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
      * match the "http", "https" and "ftp".
      * @param uri The uri to match.
      * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
+     * @see UriUtils#matchScheme(Object)
      */
     protected boolean matchScheme(URI uri) {
         return UriUtils.matchScheme(uri);

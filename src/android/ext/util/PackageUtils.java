@@ -114,11 +114,11 @@ public final class PackageUtils {
      * @param info The {@link ApplicationInfo} must be a package archive file's application info
      * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
      * file full path.
-     * @return An {@link IconResult} containing the application's icon and label.
+     * @return A {@link PackageItemIcon} containing the application's icon and label.
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static IconResult loadPackageIcon(Context context, ApplicationInfo info) {
+    public static PackageItemIcon loadPackageItemIcon(Context context, ApplicationInfo info) {
         DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
@@ -147,7 +147,7 @@ public final class PackageUtils {
              * icon  = context.getPackageManager().getApplicationIcon(info);
              * lable = context.getPackageManager().getApplicationLabel(info);
              */
-            return new IconResult(icon, StringUtils.trim(label));
+            return new PackageItemIcon(icon, StringUtils.trim(label));
         } finally {
             // Close the assets to avoid ProcessKiller
             // kill my process after unmounting usb disk.
@@ -173,9 +173,9 @@ public final class PackageUtils {
     }
 
     /**
-     * Class <tt>IconResult</tt> used to store the package item's icon and label.
+     * Class <tt>PackageItemIcon</tt> used to store the package item's icon and label.
      */
-    public static final class IconResult {
+    public static class PackageItemIcon {
         /**
          * The package item's icon.
          */
@@ -189,12 +189,12 @@ public final class PackageUtils {
         /**
          * Constructor
          */
-        public IconResult(Drawable icon, CharSequence label) {
+        public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
             this.label = label;
         }
 
-        public final StringBuilder dump(StringBuilder out) {
+        public StringBuilder dump(StringBuilder out) {
             return out.append(getClass().getSimpleName() + " { lable = ").append(label).append(", icon = ").append(icon).append(" }");
         }
     }

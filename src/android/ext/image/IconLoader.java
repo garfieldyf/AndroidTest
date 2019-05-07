@@ -11,7 +11,7 @@ import android.ext.cache.LruCache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader;
 import android.ext.util.DebugUtils;
-import android.ext.util.PackageUtils.IconResult;
+import android.ext.util.PackageUtils.PackageItemIcon;
 import android.util.Printer;
 
 /**
@@ -19,7 +19,7 @@ import android.util.Printer;
  * and label on a background thread and bind it to target on the UI thread.
  * @author Garfield
  */
-public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult> {
+public class IconLoader extends AsyncLoader<String, PackageItemInfo, PackageItemIcon> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -33,7 +33,7 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult>
      * @see #IconLoader(Context, Executor, Cache)
      */
     public IconLoader(Context context, Executor executor, int maxSize) {
-        this(context, executor, new LruCache<String, IconResult>(maxSize));
+        this(context, executor, new LruCache<String, PackageItemIcon>(maxSize));
     }
 
     /**
@@ -43,7 +43,7 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult>
      * @param cache The {@link Cache} to store the loaded icons.
      * @see #IconLoader(Context, Executor, int)
      */
-    public IconLoader(Context context, Executor executor, Cache<String, IconResult> cache) {
+    public IconLoader(Context context, Executor executor, Cache<String, PackageItemIcon> cache) {
         super(executor, cache);
         mContext = context.getApplicationContext();
     }
@@ -52,7 +52,7 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult>
      * Equivalent to calling <tt>load(info.name, target, 0, binder, info)</tt>.
      * @see AsyncLoader#load(Key, Object, int, Binder, Params[])
      */
-    public final void loadIcon(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, IconResult> binder) {
+    public final void loadIcon(PackageItemInfo info, Object target, Binder<String, PackageItemInfo, PackageItemIcon> binder) {
         load(info.name, target, 0, binder, info);
     }
 
@@ -67,11 +67,11 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult>
     @Override
     public void dump(Context context, Printer printer) {
         super.dump(context, printer);
-        dumpIconCache(context, getCache(), printer);
+        dumpCache(context, getCache(), printer);
     }
 
-    public static void dumpIconCache(Context context, Cache<String, IconResult> cache, Printer printer) {
-        final Set<Entry<String, IconResult>> entries = cache.entries().entrySet();
+    public static void dumpCache(Context context, Cache<String, PackageItemIcon> cache, Printer printer) {
+        final Set<Entry<String, PackageItemIcon>> entries = cache.entries().entrySet();
         final StringBuilder result = new StringBuilder(256);
         if (cache instanceof SimpleLruCache) {
             DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", cache.getClass().getSimpleName(), entries.size(), ((SimpleLruCache<?, ?>)cache).maxSize());
@@ -79,16 +79,16 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, IconResult>
             DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", cache.getClass().getSimpleName(), entries.size());
         }
 
-        for (Entry<String, IconResult> entry : entries) {
+        for (Entry<String, PackageItemIcon> entry : entries) {
             result.setLength(0);
             printer.println(entry.getValue().dump(result.append("  ").append(entry.getKey()).append(" ==> ")).toString());
         }
     }
 
     @Override
-    protected IconResult loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
+    protected PackageItemIcon loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
         final PackageItemInfo info = params[0];
         final PackageManager pm = mContext.getPackageManager();
-        return new IconResult(info.loadIcon(pm), info.loadLabel(pm));
+        return new PackageItemIcon(info.loadIcon(pm), info.loadLabel(pm));
     }
 }

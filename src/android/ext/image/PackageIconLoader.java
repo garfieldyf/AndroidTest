@@ -7,12 +7,12 @@ import android.content.pm.PackageItemInfo;
 import android.ext.cache.Cache;
 import android.ext.content.AsyncLoader;
 import android.ext.util.PackageUtils;
-import android.ext.util.PackageUtils.IconResult;
+import android.ext.util.PackageUtils.PackageItemIcon;
 
 /**
  * Class <tt>PackageIconLoader</tt> allows to load a package archive file's application
  * icon and label on a background thread and bind it to target on the UI thread.
- * @see PackageUtils#loadPackageIcon(Context, ApplicationInfo)
+ * @see PackageUtils#loadPackageItemIcon(Context, ApplicationInfo)
  * @author Garfield
  */
 public class PackageIconLoader extends IconLoader {
@@ -34,7 +34,7 @@ public class PackageIconLoader extends IconLoader {
      * @param cache The {@link Cache} to store the loaded icons.
      * @see #PackageIconLoader(Context, Executor, int)
      */
-    public PackageIconLoader(Context context, Executor executor, Cache<String, IconResult> cache) {
+    public PackageIconLoader(Context context, Executor executor, Cache<String, PackageItemIcon> cache) {
         super(context, executor, cache);
     }
 
@@ -42,12 +42,12 @@ public class PackageIconLoader extends IconLoader {
      * Equivalent to calling <tt>load(info.packageName, target, 0, binder, info)</tt>.
      * @see AsyncLoader#load(Key, Object, int, Binder, Params[])
      */
-    public final void loadIcon(ApplicationInfo info, Object target, Binder<String, PackageItemInfo, IconResult> binder) {
+    public final void loadIcon(ApplicationInfo info, Object target, Binder<String, PackageItemInfo, PackageItemIcon> binder) {
         load(info.packageName, target, 0, binder, info);
     }
 
     @Override
-    protected IconResult loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
-        return PackageUtils.loadPackageIcon(mContext, (ApplicationInfo)params[0]);
+    protected PackageItemIcon loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
+        return PackageUtils.loadPackageItemIcon(mContext, (ApplicationInfo)params[0]);
     }
 }

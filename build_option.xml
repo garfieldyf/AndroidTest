@@ -17,11 +17,9 @@
         <replaceregexp file="${manifest.abs.file}" match="\bandroid:versionCode=&quot;.*&quot;" replace="android:versionCode=&quot;${version.code}&quot;" byline="false" encoding="utf-8" />
         <replaceregexp file="${manifest.abs.file}" match="\bandroid:versionName=&quot;.*&quot;" replace="android:versionName=&quot;${version.name}&quot;" byline="false" encoding="utf-8" />
 
-        <!-- modify DEBUG, BRAND in DeviceInfo.java
-        <property name="build.debug" value="DEBUG = true;" />
-        <property name="build.brand" value="BRAND = &quot;xiaomi&quot;;" />
-        <replaceregexp file="${source.dir}/com/xxx/test/DeviceInfo.java" match="\bDEBUG\s*=.*;" replace="${build.debug}" byline="false" encoding="utf-8" />
-        <replaceregexp file="${source.dir}/com/xxx/test/DeviceInfo.java" match="\bBRAND\s*=.*;" replace="${build.brand}" byline="false" encoding="utf-8" />
+        <!-- modify Version.java VERSION_CODE, VERSION_NAME
+        <replaceregexp file="${src.dir}/com/xxx/Version.java" match="\bVERSION_CODE\s*=.*;" replace="VERSION_CODE = ${version.code};" byline="false" encoding="utf-8" />
+        <replaceregexp file="${src.dir}/com/xxx/Version.java" match="\bVERSION_NAME\s*=.*;" replace="VERSION_NAME = &quot;${version.name}&quot;;" byline="false" encoding="utf-8" />
         -->
     </target>
 

@@ -43,7 +43,6 @@ public class DownloadRequest {
      */
     public DownloadRequest(URL url) throws IOException {
         mConnection = url.openConnection();
-        redirects(true);
     }
 
     /**

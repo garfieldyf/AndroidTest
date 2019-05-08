@@ -293,6 +293,16 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
         }
 
         /**
+         * Sets the {@link ImageLoader} subclass to create.
+         * @param clazz The <tt>ImageLoader</tt> subclass.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setClass(Class<? extends ImageLoader<URI, Image>> clazz) {
+            mClass = clazz;
+            return this;
+        }
+
+        /**
          * Sets the <tt>ImageDecoder</tt> to decode the image data.
          * @param decoder The <tt>ImageDecoder</tt>.
          * @return This builder.
@@ -311,16 +321,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
          */
         public final Builder<URI, Image> setImageDecoder(Class<? extends ImageLoader.ImageDecoder> clazz) {
             mDecoder = clazz;
-            return this;
-        }
-
-        /**
-         * Sets the {@link ImageLoader} subclass to create.
-         * @param clazz The <tt>ImageLoader</tt> subclass.
-         * @return This builder.
-         */
-        public final Builder<URI, Image> setClass(Class<? extends ImageLoader<URI, Image>> clazz) {
-            mClass = clazz;
             return this;
         }
 

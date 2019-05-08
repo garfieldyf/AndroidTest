@@ -48,20 +48,20 @@ public class InvertedBitmapDrawable extends AbsBitmapDrawable<InvertedBitmapDraw
     /**
      * Changes this drawable's content with the specified <em>view</em>.
      * @param view The {@link View} to rebuild the content.
-     * @see #setBitmap(Bitmap)
+     * @see #refresh(Bitmap)
      */
-    public final void setView(View view) {
-        mState.setSource(view, view.getWidth(), view.getHeight());
+    public final void refresh(View view) {
+        mState.refresh(view, view.getWidth(), view.getHeight());
         invalidateSelf();
     }
 
     /**
      * Changes this drawable's content with the specified <em>bitmap</em>.
      * @param bitmap The {@link Bitmap} to rebuild the content.
-     * @see #setView(View)
+     * @see #refresh(View)
      */
-    public final void setBitmap(Bitmap bitmap) {
-        mState.setSource(bitmap, bitmap.getWidth(), bitmap.getHeight());
+    public final void refresh(Bitmap bitmap) {
+        mState.refresh(bitmap, bitmap.getWidth(), bitmap.getHeight());
         invalidateSelf();
     }
 
@@ -157,7 +157,7 @@ public class InvertedBitmapDrawable extends AbsBitmapDrawable<InvertedBitmapDraw
             throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
         }
 
-        /* package */ final void setSource(Object source, int width, int height) {
+        /* package */ final void refresh(Object source, int width, int height) {
             final Canvas canvas = new Canvas(mBitmap);
             mBitmap.eraseColor(Color.TRANSPARENT);
             DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);

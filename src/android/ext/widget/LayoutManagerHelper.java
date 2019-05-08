@@ -136,7 +136,7 @@ public final class LayoutManagerHelper {
             }
         }
 
-        ViewAnimatorUtils.animate(view, resId).start();
+        ViewAnimationUtils.animate(view, resId).start();
     }
 
     /**

@@ -94,7 +94,6 @@ public class SizeParameters extends Parameters {
             height = minHeight;
         }
 
-        DebugUtils.__checkDebug(true, getClass().getSimpleName(), DebugUtils.toString(target, new StringBuilder("target = ")).append(", width = ").append(width).append(", height = ").append(height).toString());
         opts.inSampleSize = 1;
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);

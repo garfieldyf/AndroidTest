@@ -82,7 +82,7 @@ __STATIC_INLINE__ jint computeStringImpl(JNIEnv* env, jstring str, jbyteArray re
     assert(offset >= 0);
 
     TMessageDigest digest;
-    JNI::_jstring_t<2048> jstr(env, str);
+    JNI::_jstring_t<1024> jstr(env, str);
     digest.update((const u_char*)jstr.str(), jstr.length);
 
     return digestImpl(digest, env, result, offset);

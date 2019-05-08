@@ -80,8 +80,7 @@
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
             android:name="EncodeActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/TranslucentTheme" />
+            android:screenOrientation="portrait" />
         <activity
             android:name="ContactsActivity"
             android:screenOrientation="portrait" />

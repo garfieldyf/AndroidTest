@@ -25,8 +25,9 @@ public final class BarcodeBuilder {
     private Config config;
     private int white;
     private int black;
-    private int gravity;
     private Drawable logo;
+    private int logoWidth;
+    private int logoHeight;
     private int leftMargin;
     private int topMargin;
     private int rightMargin;
@@ -104,15 +105,12 @@ public final class BarcodeBuilder {
     /**
      * Sets the logo will be draw into the barcode image.
      * @param logo The <tt>Drawable</tt> to set.
-     * @param gravity The gravity used to position/stretch
-     * the <em>logo</em> within its bounds.
      * @return This builder.
-     * @see #logo(Resources, int, int)
-     * @see Gravity
+     * @see #logo(Resources, int)
+     * @see #size(int, int)
      */
-    public final BarcodeBuilder logo(Drawable logo, int gravity) {
+    public final BarcodeBuilder logo(Drawable logo) {
         this.logo = logo;
-        this.gravity = gravity;
         return this;
     }
 
@@ -120,16 +118,25 @@ public final class BarcodeBuilder {
      * Sets the logo will be draw into the barcode image.
      * @param res The <tt>Resources</tt>.
      * @param id The resource id of the logo.
-     * @param gravity The gravity used to position/stretch
-     * the logo within its bounds.
      * @return This builder.
-     * @see #logo(Drawable, int)
-     * @see Gravity
+     * @see #logo(Drawable)
+     * @see #size(int, int)
      */
     @SuppressWarnings("deprecation")
-    public final BarcodeBuilder logo(Resources res, int id, int gravity) {
+    public final BarcodeBuilder logo(Resources res, int id) {
         this.logo = res.getDrawable(id);
-        this.gravity = gravity;
+        return this;
+    }
+
+    /**
+     * Sets the width and height to draw the {@link #logo} <tt>Drawable</tt>.
+     * @param width The width to draw in pixels.
+     * @param height The height to draw in pixels.
+     * @return This builder.
+     */
+    public final BarcodeBuilder size(int width, int height) {
+        this.logoWidth  = width;
+        this.logoHeight = height;
         return this;
     }
 
@@ -220,19 +227,25 @@ public final class BarcodeBuilder {
         return result;
     }
 
-    private void drawLogo(Canvas canvas, int width, int height) {
-        final int size = (int)(width * 0.25f);
-        final Rect bounds = new Rect();
-        final Rect container = new Rect(0, 0, width, height);
-        Gravity.apply(Gravity.CENTER, size, size, container, 0, 0, bounds);
-
-        final int logoWidth  = logo.getIntrinsicWidth();
-        final int logoHeight = logo.getIntrinsicHeight();
+    private void drawLogo(Canvas canvas, int canvasWidth, int canvasHeight) {
+        final int width, height;
         if (logoWidth > 0 && logoHeight > 0) {
-            container.set(bounds);
-            Gravity.apply(gravity, logoWidth, logoHeight, container, 0, 0, bounds);
+            width  = logoWidth;
+            height = logoHeight;
+        } else {
+            final int incWidth  = logo.getIntrinsicWidth();
+            final int incHeight = logo.getIntrinsicHeight();
+            if (incWidth > 0 && incHeight > 0) {
+                width  = incWidth;
+                height = incHeight;
+            } else {
+                height = width = (int)(canvasWidth * 0.25f);
+            }
         }
 
+        final Rect bounds = new Rect();
+        final Rect container = new Rect(0, 0, canvasWidth, canvasHeight);
+        Gravity.apply(Gravity.CENTER, width, height, container, 0, 0, bounds);
         logo.setBounds(bounds);
         logo.draw(canvas);
     }

@@ -183,7 +183,8 @@
         </delete>
 
         <echo level="info">Install: ${file.out.dir}/${jar.file.name}</echo>
-        <echo level="info">Install: ${out.dir}/attrs_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/attrs_barcode_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/attrs_${ndk.module}_widget.xml</echo>
         <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
     </target>
 

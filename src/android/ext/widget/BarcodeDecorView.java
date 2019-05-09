@@ -197,24 +197,11 @@ public class BarcodeDecorView extends View {
     }
 
     /**
-     * Returns the scanning bounds of the barcode preview area. Note that this
-     * is not a copy, you should not change the object returned by this method.
-     * @return The barcode preview scanning bounds in pixels.
-     * @see #computeScanningBounds(float, int)
-     * @see #computeScanningBounds(int, int, int)
-     */
-    public final Rect getScanningBounds() {
-        return mScanningBounds;
-    }
-
-    /**
-     * Computes the scanning bounds of the barcode preview area. Note that this
-     * is not a copy, you should not change the object returned by this method.
+     * Computes the coordinates of the scanning bounds on the screen.
      * @param percent The percent, expressed as a percentage of this
      * <em>view's</em> width.
      * @param topOffset The top offset of the scanning bounds in pixels.
-     * @return The barcode preview scanning bounds in pixels.
-     * @see #getScanningBounds()
+     * @return The coordinates of the scanning bounds in pixels.
      * @see #computeScanningBounds(int, int, int)
      */
     public final Rect computeScanningBounds(float percent, int topOffset) {
@@ -223,13 +210,11 @@ public class BarcodeDecorView extends View {
     }
 
     /**
-     * Computes the scanning bounds of the barcode preview area. Note that this
-     * is not a copy, you should not change the object returned by this method.
+     * Computes the coordinates of the scanning bounds on the screen.
      * @param width The width of the scanning bounds in pixels.
      * @param height The height of the scanning bounds in pixels.
      * @param topOffset The top offset of the scanning bounds in pixels.
-     * @return The barcode preview scanning bounds in pixels.
-     * @see #getScanningBounds()
+     * @return The coordinates of the scanning bounds in pixels.
      * @see #computeScanningBounds(float, int)
      */
     public Rect computeScanningBounds(int width, int height, int topOffset) {
@@ -239,7 +224,13 @@ public class BarcodeDecorView extends View {
         mScanningBounds.set(left, top, left + width, top + height);
         invalidate();
 
-        return mScanningBounds;
+        // Computes the coordinates of the mScanningBounds on the screen.
+        final Rect scanningBounds = new Rect(mScanningBounds);
+        final int[] location = new int[2];
+        getLocationOnScreen(location);
+        scanningBounds.offset(location[0], location[1]);
+
+        return scanningBounds;
     }
 
     /**

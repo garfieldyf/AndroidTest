@@ -73,7 +73,7 @@
         <activity
             android:name="DecodeActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/TranslucentTheme" />
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
             android:name="android.ext.temp.DecodeActivity"
             android:screenOrientation="portrait"

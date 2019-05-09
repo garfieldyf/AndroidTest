@@ -169,10 +169,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
-     * Returns the bounds of the barcode clip area on the screen. Note that this
-     * is not a copy, you should not change the rectangle returned by this method.
-     * <p>Note: The returned rectangle's coordinates relative to the camera preview
-     * orientation (The default camera preview orientation is landscape).</p>
+     * Returns the bounds of the barcode clip area. The returned rectangle is
+     * not a copy, you should not change the rectangle. <p>Note: The returned
+     * rectangle's coordinates relative to the camera preview orientation (The
+     * default camera preview orientation is landscape).</p>
      * @return The barcode clip bounds in pixels.
      * @see #computeBarcodeClipBounds(Rect)
      */
@@ -181,30 +181,20 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
-     * Computes the bounds of the barcode clip area on the screen. Note that this
-     * is not a copy, you should not change the rectangle returned by this method.
-     * <p>Note: The returned rectangle's coordinates relative to the camera preview
-     * orientation (The default camera preview orientation is landscape).</p>
-     * @param scanningBounds The barcode preview scanning bounds in pixels.
-     * @return The barcode clip bounds in pixels.
+     * Computes the bounds of the barcode clip area. <p>Note: This method recommended call
+     * in the {@link OnBarcodeCameraListener#onPreviewSizeChanged(Camera, int, int)}.</p>
+     * @param scanningBounds The coordinates of the scanning bounds on the screen in pixels.
      * @see #getBarcodeClipBounds()
      */
-    public Rect computeBarcodeClipBounds(Rect scanningBounds) {
-        // Computes the coordinates of this view on the screen.
-        final int[] location = new int[2];
-        getLocationOnScreen(location);
-
+    public void computeBarcodeClipBounds(Rect scanningBounds) {
         final Point screenSize = new Point();
         getDisplay().getRealSize(screenSize);
 
-        // Computes the bounds of the barcode clip area on the screen.
-        // The clip bounds equals the scanning bounds rotate 90 degrees on the screen.
-        mClipBounds.left   = (scanningBounds.top + location[1]) * mPreviewWidth / screenSize.y;
-        mClipBounds.top    = mPreviewHeight - (scanningBounds.right + location[0]) * mPreviewHeight / screenSize.x;
-        mClipBounds.right  = (scanningBounds.bottom + location[1]) * mPreviewWidth / screenSize.y;
-        mClipBounds.bottom = mPreviewHeight - (scanningBounds.left  + location[0]) * mPreviewHeight / screenSize.x;
-
-        return mClipBounds;
+        // Computes the bounds of the barcode clip area.
+        mClipBounds.left   = scanningBounds.top    * mPreviewWidth  / screenSize.y;
+        mClipBounds.top    = scanningBounds.left   * mPreviewHeight / screenSize.x;
+        mClipBounds.right  = scanningBounds.bottom * mPreviewWidth  / screenSize.y;
+        mClipBounds.bottom = scanningBounds.right  * mPreviewHeight / screenSize.x;
     }
 
     public final void setOnBarcodeCameraListener(OnBarcodeCameraListener listener) {

@@ -154,7 +154,7 @@ public final class ProcessUtils {
          * @param context The <tt>Context</tt>.
          */
         public CrashDatabase(Context context) {
-            super(context.getApplicationContext(), "crash.db", null, 1);
+            super(context, "crash.db", null, 1);
         }
 
         /**
@@ -260,7 +260,7 @@ public final class ProcessUtils {
         private final UncaughtExceptionHandler mDefaultHandler;
 
         public UncaughtHandler(Context context) {
-            mContext = context.getApplicationContext();
+            mContext = context;
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
         }

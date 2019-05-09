@@ -32,7 +32,7 @@ public abstract class SQLiteDatabaseHelper extends SQLiteOpenHelper {
      * {@link SQLiteOpenHelper#onUpgrade onUpgrade} will be used to upgrade the database.
      */
     public SQLiteDatabaseHelper(Context context, String name, CursorFactory factory, int version) {
-        super(context.getApplicationContext(), name, factory, version);
+        super(context, name, factory, version);
         mObservables = new ArrayMap<String, List<ContentObserver>>();
     }
 

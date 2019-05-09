@@ -51,7 +51,9 @@
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/TransitionsTheme" />
-        <activity android:name="AndroidTestActivity" />
+        <activity android:name="AndroidTestActivity"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
             android:name="DrawActivity"
             android:screenOrientation="portrait" />
@@ -73,7 +75,7 @@
         <activity
             android:name="DecodeActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+            android:theme="@android:style/Theme.DeviceDefault" />
         <activity
             android:name="android.ext.temp.DecodeActivity"
             android:screenOrientation="portrait"

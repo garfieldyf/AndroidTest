@@ -479,7 +479,7 @@ public final class DatabaseUtils {
             }
         }
 
-        DatabaseUtils.__checkDumpFields(result);
+        DatabaseUtils.__checkDumpCursorFields(result);
         return result;
     }
 
@@ -541,7 +541,7 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static void __checkDumpFields(List<Pair<Field, String>> fields) {
+    private static void __checkDumpCursorFields(List<Pair<Field, String>> fields) {
         final Printer printer = new LogPrinter(Log.DEBUG, DatabaseUtils.class.getSimpleName());
         final StringBuilder result = new StringBuilder(100);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fields.size());

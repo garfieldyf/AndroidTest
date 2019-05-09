@@ -58,6 +58,14 @@ public final class Pools {
         return new SynchronizedPool<T>(pool);
     }
 
+    public static void dumpPool(Pool<?> pool, Printer printer) {
+        if (pool instanceof SynchronizedPool) {
+            ((SynchronizedPool<?>)pool).dump(printer);
+        } else if (pool instanceof ArrayPool) {
+            ((ArrayPool<?>)pool).dump(printer, pool.getClass().getSimpleName());
+        }
+    }
+
     /**
      * The <tt>Pool</tt> interface for managing a pool of objects.
      */
@@ -333,14 +341,6 @@ public final class Pools {
             if (pool instanceof ArrayPool) {
                 ((ArrayPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
-        }
-    }
-
-    public static void dumpPool(Pool<?> pool, Printer printer) {
-        if (pool instanceof SynchronizedPool) {
-            ((SynchronizedPool<?>)pool).dump(printer);
-        } else if (pool instanceof ArrayPool) {
-            ((ArrayPool<?>)pool).dump(printer, pool.getClass().getSimpleName());
         }
     }
 

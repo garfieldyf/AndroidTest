@@ -71,7 +71,7 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     return (path.empty() ? EINVAL : __NS::createDirectory(path.data, path.size));
 }
 
-__STATIC_INLINE__ jint getType(const char* path, const struct dirent* entry)
+__STATIC_INLINE__ jint resolveType(const char* path, const struct dirent* entry)
 {
     jint type = entry->d_type;
     if (type == DT_LNK)
@@ -174,7 +174,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getType(filePath, entry), cookie);
+                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry), cookie);
                 if (result == SC_STOP) {
                     dirPaths.clear();
                     break;
@@ -210,7 +210,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*f
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getType(filePath, entry), cookie);
+            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry), cookie);
             if (result == SC_BREAK) {
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
@@ -292,7 +292,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, getType(filePath, entry), cookie) != SC_CONTINUE)
+                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry), cookie) != SC_CONTINUE)
                     break;
             }
         }

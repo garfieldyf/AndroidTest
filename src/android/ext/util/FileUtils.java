@@ -1036,7 +1036,7 @@ public final class FileUtils {
         public Dirent(String path) {
             DebugUtils.__checkError(StringUtils.getLength(path) > 0, "path == null || path.length() == 0");
             this.path = path;
-            this.type = (getFileType(path) >> 12);
+            this.type = resolveType(path);
             Dirent.__checkType(type);
         }
 
@@ -1218,6 +1218,16 @@ public final class FileUtils {
             }
 
             return path.compareToIgnoreCase(another.path);
+        }
+
+        /**
+         * Returns the file type of the specified <em>path</em>. If <em>path</em>
+         * refers to a symbolic link return the symbolic link references the file type.
+         * @param path The file or directory path, must be absolute file path.
+         * @return The file type, one of <tt>DT_XXX</tt> constants.
+         */
+        public static int resolveType(String path) {
+            return (getFileType(path) >> 12);
         }
 
         /**

@@ -86,12 +86,24 @@ public final class Pages {
      * @param maxPages The maximum number of pages to allow in the page cache. Pass
      * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link Page} {@link Cache} instance.
-     * @see SimpleLruCache
+     * @see #newResourcePageCache(int)
      * @see ArrayMapCache
-     * @see ResourcePageCache
+     * @see SimpleLruCache
      */
     public static <E> Cache<Integer, Page<E>> newPageCache(int maxPages) {
         return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new ArrayMapCache<Integer, Page<E>>(8));
+    }
+
+    /**
+     * Returns a new resource page cache instance.
+     * @param maxPages The maximum number of pages to allow in the page cache. Pass
+     * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
+     * @return A new {@link ResourcePage} {@link Cache} instance.
+     * @see ResourcePage
+     * @see #newPageCache(int)
+     */
+    public static <E> Cache<Integer, ResourcePage<E>> newResourcePageCache(int maxPages) {
+        return (maxPages > 0 ? new LruResourcePageCache<E>(maxPages) : new ResourcePageCache<E>(8));
     }
 
     /**
@@ -174,6 +186,76 @@ public final class Pages {
         @Override
         public Cursor getItem(int position) {
             return (mCursor.moveToPosition(position) ? mCursor : null);
+        }
+    }
+
+    /**
+     * Class <tt>LruResourcePageCache</tt> is an implementation of a {@link Cache}.
+     */
+    private static final class LruResourcePageCache<E> extends SimpleLruCache<Integer, ResourcePage<E>> {
+        /**
+         * Constructor
+         * @param maxSize The maximum number of pages to allow in this cache.
+         */
+        public LruResourcePageCache(int maxSize) {
+            super(maxSize);
+        }
+
+        @Override
+        public void clear() {
+            trimToSize(-1);
+        }
+
+        @Override
+        protected void entryRemoved(boolean evicted, Integer key, ResourcePage<E> oldPage, ResourcePage<E> newPage) {
+            if (evicted || oldPage != newPage) {
+                oldPage.close();
+            }
+        }
+    }
+
+    /**
+     * Class <tt>ResourcePageCache</tt> is an implementation of a {@link Cache}.
+     */
+    private static final class ResourcePageCache<E> extends ArrayMapCache<Integer, ResourcePage<E>> {
+        /**
+         * Constructor
+         * @param capacity The initial capacity of this cache.
+         */
+        public ResourcePageCache(int capacity) {
+            super(capacity);
+        }
+
+        @Override
+        public void clear() {
+            final int size = map.size();
+            if (size > 0) {
+                for (int i = 0; i < size; ++i) {
+                    map.valueAt(i).close();
+                }
+
+                map.clear();
+            }
+        }
+
+        @Override
+        public ResourcePage<E> remove(Integer key) {
+            final ResourcePage<E> result = map.remove(key);
+            if (result != null) {
+                result.close();
+            }
+
+            return result;
+        }
+
+        @Override
+        public ResourcePage<E> put(Integer key, ResourcePage<E> value) {
+            final ResourcePage<E> result = map.put(key, value);
+            if (result != null) {
+                result.close();
+            }
+
+            return result;
         }
     }
 

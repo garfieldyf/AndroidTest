@@ -6,8 +6,6 @@
 // Version : 1.0
 // Creation Date : 2012/4/16
 
-#include "main.h"
-
 #ifdef __BUILD_GIFIMAGE__
 #pragma message "Compiling " PACKAGE_GRAPHICS "GIFImage native methods."
 #include "gifimage.h"
@@ -31,23 +29,6 @@
 #ifdef __BUILD_PROCUTILS__
 #pragma message "Compiling " PACKAGE_UTILITIES "ProcessUtils native methods."
 #include "procutils.h"
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
-// Global variables
-//
-
-#ifdef __BUILD_GIFIMAGE__
-// Class FileDescriptor field IDs.
-__LIBC_HIDDEN__ jfieldID _descriptorID;
-#endif
-
-#ifdef __BUILD_FILEUTILS__
-// Class FileUtils method IDs.
-__LIBC_HIDDEN__ jmethodID _setStatID;
-
-// Class ScanCallback method IDs.
-__LIBC_HIDDEN__ jmethodID _onScanFileID;
 #endif
 
 __BEGIN_DECLS

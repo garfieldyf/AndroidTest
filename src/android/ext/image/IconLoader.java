@@ -56,14 +56,6 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, PackageItem
         load(info.name, target, 0, binder, info);
     }
 
-    /**
-     * Removes the icon from the specified <em>key</em>.
-     * @param key The key to find.
-     */
-    public final void remove(String key) {
-        getCache().remove(key);
-    }
-
     @Override
     public void dump(Context context, Printer printer) {
         super.dump(context, printer);

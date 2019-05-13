@@ -115,21 +115,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Removes the image from this loader's memory cache and file cache.
-     * @param uri The uri to remove.
-     */
-    public final void remove(URI uri) {
-        final Cache<URI, Image> cache = getCache();
-        if (cache != null) {
-            cache.remove(uri);
-        }
-
-        if (matchScheme(uri)) {
-            mLoader.remove(uri.toString());
-        }
-    }
-
-    /**
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
@@ -151,6 +136,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public final Drawable getDefaultImage() {
         return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).getDefaultImage() : null);
+    }
+
+    /**
+     * Removes the image from this loader's memory cache and file cache.
+     * @param uri The uri to remove.
+     */
+    @Override
+    public void remove(URI uri) {
+        super.remove(uri);
+        if (matchScheme(uri)) {
+            mLoader.remove(uri.toString());
+        }
     }
 
     @Override

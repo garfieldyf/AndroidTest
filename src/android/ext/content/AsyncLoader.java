@@ -135,6 +135,16 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     }
 
     /**
+     * Removes the value for the specified <em>key</em>.
+     * @param key The key to remove.
+     */
+    public void remove(Key key) {
+        if (mCache != null) {
+            mCache.remove(key);
+        }
+    }
+
+    /**
      * Returns the {@link Cache} associated with this loader.
      * @return The <tt>Cache</tt> or <tt>null</tt>.
      */

@@ -57,7 +57,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * that executes tasks one at a time in serial order.
      * @return A newly serial <tt>Executor</tt>.
      */
-    public final Executor newSerialExecutor() {
+    public final Executor createSerialExecutor() {
         return new SerialExecutor(this);
     }
 

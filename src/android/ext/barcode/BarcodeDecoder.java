@@ -371,7 +371,7 @@ public class BarcodeDecoder {
      */
     public static interface OnDecodeListener {
         /**
-         * Callback method to be invoked when the barcode image was decoded.
+         * Called on the UI thread when the barcode image was decoded.
          * @param source The {@link LuminanceSource} to decode.
          * @param result The contents of the image if succeeded,
          * <tt>null</tt> otherwise.

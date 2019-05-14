@@ -44,6 +44,12 @@ public final class FileUtils {
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;
 
     /**
+     * This flag use with {@link #scanFiles}. If path refers to a
+     * symbolic link return the file type is {@link Dirent#DT_LNK}.
+     */
+    public static final int FLAG_SCAN_SYMLINK_NOFOLLOW = 0x04;
+
+    /**
      * Returns the absolute path to the directory in which the application can place
      * its own files on the filesystem. <p>If the external storage mounted the result
      * path such as <tt>"/storage/emulated/0/Android/data/packagename/files/name"</tt>,
@@ -196,7 +202,7 @@ public final class FileUtils {
      * @param dirPath The directory path, must be absolute file path.
      * @param callback The {@link ScanCallback} used to scan.
      * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
      * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      */
@@ -206,7 +212,7 @@ public final class FileUtils {
      * Equivalent to calling <tt>listFiles(dirPath, flags, new ArrayList())</tt>.
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
      * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
      * @see #listFiles(String, int, List)
      */
@@ -221,7 +227,7 @@ public final class FileUtils {
      * part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
      * @param outDirents A <tt>List</tt> to store the {@link Dirent} objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      * @see #listFiles(String, int)
@@ -326,12 +332,10 @@ public final class FileUtils {
     /**
      * Returns the file type of the specified <em>path</em>.
      * @param path The file or directory path, must be absolute file path.
-     * @return The file type, one of <tt>Stat.S_IFXXX</tt> constants if the
-     * operation succeeded, <tt>0</tt> otherwise.
-     * @see #getFileMode(String)
+     * @return The file type, one of <tt>Dirent.DT_XXX</tt> constants.
      */
     public static int getFileType(String path) {
-        return (getFileMode(path) & Stat.S_IFMT);
+        return ((getFileMode(path) & Stat.S_IFMT) >> 12);
     }
 
     /**
@@ -339,7 +343,6 @@ public final class FileUtils {
      * returned value corresponds to the linux structure <tt>stat.st_mode</tt>.
      * @param path The file or directory path, must be absolute file path.
      * @return The file protection if the operation succeeded, <tt>0</tt> otherwise.
-     * @see #getFileType(String)
      */
     public static native int getFileMode(String path);
 
@@ -1034,9 +1037,9 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path) {
-            DebugUtils.__checkError(StringUtils.getLength(path) > 0, "path == null || path.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(path) <= 0, "path == null || path.length() == 0");
             this.path = path;
-            this.type = resolveType(path);
+            this.type = getFileType(path);
             Dirent.__checkType(type);
         }
 
@@ -1048,7 +1051,7 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(path) > 0, "path == null || path.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(path) <= 0, "path == null || path.length() == 0");
             Dirent.__checkType(type);
             this.path = path;
             this.type = type;
@@ -1063,7 +1066,7 @@ public final class FileUtils {
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(dir) > 0, "dir == null || dir.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(dir) <= 0, "dir == null || dir.length() == 0");
             Dirent.__checkType(type);
             this.path = new File(dir, name).getPath();
             this.type = type;
@@ -1148,10 +1151,6 @@ public final class FileUtils {
 
         /**
          * Equivalent to calling <tt>FileUtils.listFiles(path, flags)</tt>.
-         * @param flags The flags. May be <tt>0</tt> or any combination of
-         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-         * @return A <tt>List</tt> of {@link Dirent} objects if the operation
-         * succeeded, <tt>null</tt> otherwise.
          * @see FileUtils#listFiles(String, int)
          */
         public final List<Dirent> listFiles(int flags) {
@@ -1218,16 +1217,6 @@ public final class FileUtils {
             }
 
             return path.compareToIgnoreCase(another.path);
-        }
-
-        /**
-         * Returns the file type of the specified <em>path</em>. If <em>path</em>
-         * refers to a symbolic link return the symbolic link references the file type.
-         * @param path The file or directory path, must be absolute file path.
-         * @return The file type, one of <tt>DT_XXX</tt> constants.
-         */
-        public static int resolveType(String path) {
-            return (getFileType(path) >> 12);
         }
 
         /**

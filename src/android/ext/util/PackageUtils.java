@@ -227,7 +227,8 @@ public final class PackageUtils {
         /**
          * Adds the scan flags to scan the package archive files.
          * @param flags The scan flags. May be <tt>0</tt> or any combination of
-         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}
+         * and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
          * @return This parser.
          * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */

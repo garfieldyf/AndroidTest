@@ -1,6 +1,5 @@
 package android.ext.page;
 
-import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
@@ -49,6 +48,7 @@ public final class Pages {
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
      * @param data A {@link List} of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
+     * @see ListPage
      */
     public static <E> Page<E> newPage(List<E> data) {
         return (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null);
@@ -58,15 +58,17 @@ public final class Pages {
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
      * @param data An array of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
+     * @see ArrayPage
      */
     public static <E> Page<E> newPage(E... data) {
-        return (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(Arrays.asList(data)) : null);
+        return (ArrayUtils.getSize(data) > 0 ? new ArrayPage<E>(data) : null);
     }
 
     /**
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
      * @param data A {@link JSONArray} of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
+     * @see JSONPage
      */
     public static <E> Page<E> newPage(JSONArray data) {
         return (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null);
@@ -76,6 +78,7 @@ public final class Pages {
      * Returns a new {@link ResourcePage} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
      * @param cursor A {@link Cursor} of the page data.
      * @return A new <tt>ResourcePage</tt> or <tt>null</tt>.
+     * @see CursorPage
      */
     public static ResourcePage<Cursor> newPage(Cursor cursor) {
         return (DatabaseUtils.getCount(cursor) > 0 ? new CursorPage(cursor) : null);
@@ -109,12 +112,15 @@ public final class Pages {
     /**
      * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
      */
-    private static final class ListPage<E> implements Page<E> {
-        private final List<E> mData;
+    public static class ListPage<E> implements Page<E> {
+        /**
+         * The {@link List} of the page data.
+         */
+        protected final List<E> mData;
 
         /**
          * Constructor
-         * @param data A {@link List} of this page data.
+         * @param data A {@link List} of the page data.
          */
         public ListPage(List<E> data) {
             DebugUtils.__checkError(ArrayUtils.getSize(data) <= 0, "data == null || data.size() == 0");
@@ -128,19 +134,51 @@ public final class Pages {
 
         @Override
         public E getItem(int position) {
-            return (position >= 0 && position < mData.size() ? mData.get(position) : null);
+            return mData.get(position);
+        }
+    }
+
+    /**
+     * Class <tt>ArrayPage</tt> is an implementation of a {@link Page}.
+     */
+    public static class ArrayPage<E> implements Page<E> {
+        /**
+         * The array of the page data.
+         */
+        protected final E[] mData;
+
+        /**
+         * Constructor
+         * @param data An array of the page data.
+         */
+        public ArrayPage(E[] data) {
+            DebugUtils.__checkError(ArrayUtils.getSize(data) <= 0, "data == null || data.length == 0");
+            mData = data;
+        }
+
+        @Override
+        public int getCount() {
+            return mData.length;
+        }
+
+        @Override
+        public E getItem(int position) {
+            return mData[position];
         }
     }
 
     /**
      * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
      */
-    private static final class JSONPage<E> implements Page<E> {
-        private final JSONArray mData;
+    public static class JSONPage<E> implements Page<E> {
+        /**
+         * The {@link JSONArray} of the page data.
+         */
+        protected final JSONArray mData;
 
         /**
          * Constructor
-         * @param data A {@link JSONArray} of this page data.
+         * @param data A {@link JSONArray} of the page data.
          */
         public JSONPage(JSONArray data) {
             DebugUtils.__checkError(JsonUtils.getSize(data) <= 0, "data == null || data.length() == 0");
@@ -161,12 +199,15 @@ public final class Pages {
     /**
      * Class <tt>CursorPage</tt> is an implementation of a {@link ResourcePage}.
      */
-    private static final class CursorPage implements ResourcePage<Cursor> {
-        private final Cursor mCursor;
+    public static class CursorPage implements ResourcePage<Cursor> {
+        /**
+         * The {@link Cursor} of the page data.
+         */
+        protected final Cursor mCursor;
 
         /**
          * Constructor
-         * @param cursor A {@link Cursor} of this page data.
+         * @param cursor A {@link Cursor} of the page data.
          */
         public CursorPage(Cursor cursor) {
             DebugUtils.__checkError(DatabaseUtils.getCount(cursor) <= 0, "cursor == null || cursor.getCount() == 0");
@@ -186,31 +227,6 @@ public final class Pages {
         @Override
         public Cursor getItem(int position) {
             return (mCursor.moveToPosition(position) ? mCursor : null);
-        }
-    }
-
-    /**
-     * Class <tt>LruResourcePageCache</tt> is an implementation of a {@link Cache}.
-     */
-    private static final class LruResourcePageCache<E> extends SimpleLruCache<Integer, ResourcePage<E>> {
-        /**
-         * Constructor
-         * @param maxSize The maximum number of pages to allow in this cache.
-         */
-        public LruResourcePageCache(int maxSize) {
-            super(maxSize);
-        }
-
-        @Override
-        public void clear() {
-            trimToSize(-1);
-        }
-
-        @Override
-        protected void entryRemoved(boolean evicted, Integer key, ResourcePage<E> oldPage, ResourcePage<E> newPage) {
-            if (evicted || oldPage != newPage) {
-                oldPage.close();
-            }
         }
     }
 
@@ -256,6 +272,31 @@ public final class Pages {
             }
 
             return result;
+        }
+    }
+
+    /**
+     * Class <tt>LruResourcePageCache</tt> is an implementation of a {@link Cache}.
+     */
+    private static final class LruResourcePageCache<E> extends SimpleLruCache<Integer, ResourcePage<E>> {
+        /**
+         * Constructor
+         * @param maxSize The maximum number of pages to allow in this cache.
+         */
+        public LruResourcePageCache(int maxSize) {
+            super(maxSize);
+        }
+
+        @Override
+        public void clear() {
+            trimToSize(-1);
+        }
+
+        @Override
+        protected void entryRemoved(boolean evicted, Integer key, ResourcePage<E> oldPage, ResourcePage<E> newPage) {
+            if (evicted || oldPage != newPage) {
+                oldPage.close();
+            }
         }
     }
 

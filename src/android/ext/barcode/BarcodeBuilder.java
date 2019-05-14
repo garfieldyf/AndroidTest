@@ -133,10 +133,23 @@ public final class BarcodeBuilder {
      * @param width The width to draw in pixels.
      * @param height The height to draw in pixels.
      * @return This builder.
+     * @see #size(Resources, int)
      */
     public final BarcodeBuilder size(int width, int height) {
         this.logoWidth  = width;
         this.logoHeight = height;
+        return this;
+    }
+
+    /**
+     * Sets the size to draw the {@link #logo} <tt>Drawable</tt>.
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the size dimension.
+     * @return This builder.
+     * @see #size(int, int)
+     */
+    public final BarcodeBuilder size(Resources res, int id) {
+        this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(id);
         return this;
     }
 
@@ -179,7 +192,8 @@ public final class BarcodeBuilder {
      * @see #margins(int, int, int, int)
      */
     public final BarcodeBuilder margins(Resources res, int id) {
-        return margins(res.getDimensionPixelOffset(id));
+        this.leftMargin = this.topMargin = this.rightMargin = this.bottomMargin = res.getDimensionPixelOffset(id);
+        return this;
     }
 
     /**

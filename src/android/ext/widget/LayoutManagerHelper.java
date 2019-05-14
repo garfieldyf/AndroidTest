@@ -165,9 +165,6 @@ public final class LayoutManagerHelper {
 
         /**
          * Constructor
-         * @see #MarginItemDecoration(Resources, int)
-         * @see #MarginItemDecoration(int, int, int, int)
-         * @see #MarginItemDecoration(MarginItemDecoration)
          */
         public MarginItemDecoration() {
         }
@@ -175,9 +172,6 @@ public final class LayoutManagerHelper {
         /**
          * Copy constructor
          * @param from The decoration to copy.
-         * @see #MarginItemDecoration()
-         * @see #MarginItemDecoration(Resources, int)
-         * @see #MarginItemDecoration(int, int, int, int)
          */
         public MarginItemDecoration(MarginItemDecoration from) {
             this.leftMargin   = from.leftMargin;
@@ -188,14 +182,19 @@ public final class LayoutManagerHelper {
 
         /**
          * Constructor
+         * @param margin The margin in pixels of the children.
+         */
+        public MarginItemDecoration(int margin) {
+            this.leftMargin = this.topMargin = this.rightMargin = this.bottomMargin = margin;
+        }
+
+        /**
+         * Constructor
          * @param res The <tt>Resources</tt>.
          * @param id The resource id of the margin dimension.
-         * @see #MarginItemDecoration()
-         * @see #MarginItemDecoration(int, int, int, int)
-         * @see #MarginItemDecoration(MarginItemDecoration)
          */
         public MarginItemDecoration(Resources res, int id) {
-            leftMargin = topMargin = rightMargin = bottomMargin = res.getDimensionPixelSize(id);
+            this.leftMargin = this.topMargin = this.rightMargin = this.bottomMargin = res.getDimensionPixelSize(id);
         }
 
         /**
@@ -204,9 +203,6 @@ public final class LayoutManagerHelper {
          * @param topMargin The top margin in pixels of the children.
          * @param rightMargin The right margin in pixels of the children.
          * @param bottomMargin The bottom margin in pixels of the children.
-         * @see #MarginItemDecoration()
-         * @see #MarginItemDecoration(Resources, int)
-         * @see #MarginItemDecoration(MarginItemDecoration)
          */
         public MarginItemDecoration(int leftMargin, int topMargin, int rightMargin, int bottomMargin) {
             this.leftMargin   = leftMargin;

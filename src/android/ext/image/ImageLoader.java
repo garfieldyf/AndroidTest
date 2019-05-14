@@ -145,8 +145,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     @Override
     public void remove(URI uri) {
         super.remove(uri);
-        if (matchScheme(uri)) {
-            mLoader.remove(uri.toString());
+        if (mLoader instanceof ImageLoader.FileCacheLoader && matchScheme(uri)) {
+            ((FileCacheLoader)mLoader).remove(uri.toString());
         }
     }
 
@@ -228,12 +228,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     private static interface Loader<Image> {
         /**
-         * Removes the cache file for the specified <em>url</em>.
-         * @param url The url to remove.
-         */
-        void remove(String url);
-
-        /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
@@ -242,8 +236,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        @SuppressWarnings("rawtypes")
-        Image load(Task task, String url, Object[] params, int flags, byte[] buffer);
+        Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer);
     }
 
     /**
@@ -261,12 +254,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public void remove(String url) {
-        }
-
-        @Override
-        @SuppressWarnings("rawtypes")
-        public Image load(Task task, String url, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
                 return loadImage(task, url, imageFile, params, flags, buffer);
@@ -290,14 +278,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             mCache = cache;
         }
 
-        @Override
-        public void remove(String url) {
+        /**
+         * Removes the cache file for the specified <em>url</em>.
+         * @param url The url to remove.
+         */
+        public final void remove(String url) {
             mCache.remove(StringUtils.toHexString(MessageDigests.computeString(url, Algorithm.SHA1)));
         }
 
         @Override
-        @SuppressWarnings("rawtypes")
-        public Image load(Task task, String url, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
             Image result = null;

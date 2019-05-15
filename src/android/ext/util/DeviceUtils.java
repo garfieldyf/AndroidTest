@@ -12,6 +12,7 @@ import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
+import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
@@ -163,7 +164,8 @@ public final class DeviceUtils {
              .append("\n  availMemory = ").append(Formatter.formatFileSize(context, info.availMem))
              .append("\n  lowMemory = ").append(info.lowMemory)
              .append("\n  availThreshold = ").append(Formatter.formatFileSize(context, info.threshold))
-             .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()));
+             .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()))
+             .append("\n  appLargeHeap = ").append(getAppLargeHeap(context));
         printer.println(infos.toString());
 
         // Dumps the system storage infos.
@@ -212,6 +214,11 @@ public final class DeviceUtils {
         default:
             return "DENSITY_" + densityDpi;
         }
+    }
+
+    private static String getAppLargeHeap(Context context) {
+        final long largeHeap = SystemProperties.getLong("dalvik.vm.heapsize", 0);
+        return (largeHeap != 0 ? Formatter.formatFileSize(context, largeHeap << 20) : "N/A");
     }
 
     private static StringBuilder dumpStorageInfo(Context context, StatFs statFs, StringBuilder out) {

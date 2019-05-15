@@ -112,7 +112,7 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     @Override
     @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) <= 0, "Invalid parameter - The params is null or 0-length");
+        DebugUtils.__checkError(ArrayUtils.getSize(params) == 0, "Invalid parameter - The params is null or 0-length");
         final byte[] tempBuffer = ByteArrayPool.sInstance.obtain();
         final Object[] results  = new Object[params.length];
         try {

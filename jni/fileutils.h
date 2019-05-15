@@ -226,11 +226,11 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint fl
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
                 break;
-            }
-
-            // Scans the sub directory.
-            if (entry->d_type == DT_DIR && ((errnum = scanDescendentFiles(env, filePath, flags, filter, callback, cookie, result)) != 0 || result == SC_STOP)) {
-                break;
+            } else if (entry->d_type == DT_DIR) {
+                // Scans the sub directory.
+                errnum = scanDescendentFiles(env, filePath, flags, filter, callback, cookie, result);
+                if (errnum != 0 || result == SC_STOP)
+                    break;
             }
         }
     }

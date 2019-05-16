@@ -265,7 +265,7 @@ public final class PackageUtils {
          * @param dirPaths An array of the directory paths, must be absolute file path.
          * @return If the parse succeeded return a {@link List} of {@link PackageInfo}
          * objects, <tt>null</tt> otherwise.
-         * @see #parse(List, String[])
+         * @see #parse(Collection, String[])
          */
         public final List<PackageInfo> parse(String... dirPaths) {
             final List<PackageInfo> result = new ArrayList<PackageInfo>();
@@ -275,12 +275,12 @@ public final class PackageUtils {
         /**
          * Parses the package archive files with the specified <em>dirPaths</em>.
          * @param dirPaths An array of the directory paths, must be absolute file path.
-         * @param outResult A <tt>List</tt> to store the {@link PackageInfo} objects.
+         * @param outResult A <tt>Collection</tt> to store the {@link PackageInfo} objects.
          * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an
          * error code. See {@link ErrnoException}.
          * @see #parse(String[])
          */
-        public final int parse(List<PackageInfo> outResult, String... dirPaths) {
+        public final int parse(Collection<PackageInfo> outResult, String... dirPaths) {
             DebugUtils.__checkError(dirPaths == null, "Invalid parameter - The dirPaths is null");
             this.__checkParseStatus();
             int result = 0;
@@ -301,7 +301,7 @@ public final class PackageUtils {
                 final PackageInfo packageInfo = mPackageManager.getPackageArchiveInfo(path, mParseFlags);
                 if (packageInfo != null) {
                     packageInfo.applicationInfo.publicSourceDir = path;
-                    ((List<PackageInfo>)cookie).add(packageInfo);
+                    ((Collection<PackageInfo>)cookie).add(packageInfo);
                 }
             }
 

@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
@@ -209,12 +210,14 @@ public final class FileUtils {
     public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
 
     /**
-     * Equivalent to calling <tt>listFiles(dirPath, flags, new ArrayList())</tt>.
+     * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
+     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
+     * part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
      * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
      * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #listFiles(String, int, List)
+     * @see #listFiles(String, int, Collection)
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
         final List<Dirent> result = new ArrayList<Dirent>();
@@ -222,17 +225,17 @@ public final class FileUtils {
     }
 
     /**
-     * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
-     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
-     * part of the list.</p>
+     * Returns a <tt>Collection</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
+     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as part
+     * of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
      * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
-     * @param outDirents A <tt>List</tt> to store the {@link Dirent} objects.
+     * @param outDirents A <tt>Collection</tt> to store the {@link Dirent} objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      * @see #listFiles(String, int)
      */
-    public static int listFiles(String dirPath, int flags, List<Dirent> outDirents) {
+    public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
         return scanFiles(dirPath, ListCallback.sInstance, flags, outDirents);
     }
 
@@ -1312,7 +1315,7 @@ public final class FileUtils {
         @Override
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public int onScanFile(String path, int type, Object result) {
-            ((List)result).add(new Dirent(path, type));
+            ((Collection)result).add(new Dirent(path, type));
             return SC_CONTINUE;
         }
     }

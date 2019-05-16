@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.CRC32;
@@ -93,7 +94,7 @@ public final class ZipUtils {
      * If the operation was cancelled before it completed normally the <em>zipFile's</em> contents is undefined.
      * @param files An array of pathnames to compress, must be absolute file path.
      * @throws IOException if an error occurs while compressing <em>files</em> contents.
-     * @see #compress(String, int, List, Cancelable)
+     * @see #compress(String, int, Collection, Cancelable)
      * @see #uncompress(String, String, Cancelable)
      */
     public static void compress(String zipFile, int compressionLevel, Cancelable cancelable, String... files) throws IOException {
@@ -106,7 +107,7 @@ public final class ZipUtils {
      * @param zipFile The ZIP filename, must be absolute file path.
      * @param compressionLevel The compression level to be used for writing entry data.
      * See {@link ZipOutputStream#setLevel(int)}.
-     * @param files A <tt>List</tt> of pathnames to compress, must be absolute file path.
+     * @param files A <tt>Collection</tt> of the files to compress, must be absolute file path.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or
      * <tt>null</tt> if none. If the operation was cancelled before it completed normally
      * the <em>zipFile's</em> contents is undefined.
@@ -114,7 +115,7 @@ public final class ZipUtils {
      * @see #compress(String, int, Cancelable, String[])
      * @see #uncompress(String, String, Cancelable)
      */
-    public static void compress(String zipFile, int compressionLevel, List<String> files, Cancelable cancelable) throws IOException {
+    public static void compress(String zipFile, int compressionLevel, Collection<String> files, Cancelable cancelable) throws IOException {
         DebugUtils.__checkError(files == null, "Invalid parameter - The files is null");
         // Creates the necessary directories.
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
@@ -127,9 +128,8 @@ public final class ZipUtils {
         final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             // Compresses the files.
-            final int size = ArrayUtils.getSize(files);
-            for (int i = 0; i < size && !cancelable.isCancelled(); ++i) {
-                final Dirent dirent = new Dirent(files.get(i));
+            for (String file : files) {
+                final Dirent dirent = new Dirent(file);
                 compress(os, dirent, dirent.getName(), cancelable, buffer);
             }
         } finally {
@@ -146,7 +146,7 @@ public final class ZipUtils {
      * if none. If the operation was cancelled before it completed normally the uncompressed files in
      * <em>outPath</em> is undefined.
      * @throws IOException if an error occurs while uncompressing ZIP file.
-     * @see #compress(String, int, List, Cancelable)
+     * @see #compress(String, int, Collection, Cancelable)
      * @see #compress(String, int, Cancelable, String[])
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {

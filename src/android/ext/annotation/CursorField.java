@@ -21,8 +21,8 @@ import java.lang.annotation.Target;
  *     ...
  * }
  *
- * final List&lt;User&gt; users = DatabaseUtils.parse(cursor, User.class);</pre>
- * @see DatabaseUtils#parse(Cursor, Class)
+ * final List&lt;User&gt; users = DatabaseUtils.toList(cursor, User.class);</pre>
+ * @see DatabaseUtils#toList(Cursor, Class)
  * @author Garfield
  */
 @Target(ElementType.FIELD)

@@ -229,13 +229,13 @@ public final class DatabaseUtils {
      * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
      * <em>(String[])null</em> instead of allocating an empty array.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #parse(Cursor, Class)
+     * @see #toList(Cursor, Class)
      */
     public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? parse(cursor, componentType) : null);
+            return (cursor != null ? toList(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
@@ -257,13 +257,13 @@ public final class DatabaseUtils {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #parse(Cursor, Class)
+     * @see #toList(Cursor, Class)
      */
     public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-            return (cursor != null ? parse(cursor, componentType) : null);
+            return (cursor != null ? toList(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
             return null;
@@ -349,18 +349,18 @@ public final class DatabaseUtils {
      * @return A new <tt>List</tt>.
      * @throws ReflectiveOperationException if the elements cannot be created.
      */
-    public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
+    public static <T> List<T> toList(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || componentType == null, "cursor == null || componentType == null");
         DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
         final int count = cursor.getCount();
         final List<T> result = new ArrayList<T>(count);
         if (count > 0) {
             cursor.moveToPosition(-1);
-            final List<Pair<Field, String>> fields = getCursorFields(componentType);
+            final List<Pair<Field, String>> fieldInfos = getCursorFields(componentType);
             final Constructor<? extends T> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
             while (cursor.moveToNext()) {
                 final T object = constructor.newInstance((Object[])null);
-                setCursorFields(cursor, object, fields);
+                setCursorFields(cursor, object, fieldInfos);
                 result.add(object);
             }
         }
@@ -483,12 +483,12 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> fields) throws ReflectiveOperationException {
-        for (int i = 0, size = fields.size(); i < size; ++i) {
-            final Pair<Field, String> info = fields.get(i);
-            final Field field = info.first;
-            DebugUtils.__checkError(cursor.getColumnIndex(info.second) == -1, "The column '" + info.second + "' does not exist");
-            final int columnIndex = cursor.getColumnIndexOrThrow(info.second);
+    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> fieldInfos) throws ReflectiveOperationException {
+        for (int i = 0, size = fieldInfos.size(); i < size; ++i) {
+            final Pair<Field, String> fieldInfo = fieldInfos.get(i);
+            final Field field = fieldInfo.first;
+            DebugUtils.__checkError(cursor.getColumnIndex(fieldInfo.second) == -1, "The column '" + fieldInfo.second + "' does not exist");
+            final int columnIndex = cursor.getColumnIndexOrThrow(fieldInfo.second);
             final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(object, cursor.getInt(columnIndex));
@@ -541,13 +541,13 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static void __checkDumpCursorFields(List<Pair<Field, String>> fields) {
+    private static void __checkDumpCursorFields(List<Pair<Field, String>> fieldInfos) {
         final Printer printer = new LogPrinter(Log.DEBUG, DatabaseUtils.class.getSimpleName());
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fields.size());
-        for (Pair<Field, String> field : fields) {
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fieldInfos.size());
+        for (Pair<Field, String> fieldInfo : fieldInfos) {
             result.setLength(0);
-            printer.println(result.append("  ").append(field.first).append(" { @CursorField = ").append(field.second).append(" }").toString());
+            printer.println(result.append("  ").append(fieldInfo.first).append(" { @CursorField = ").append(fieldInfo.second).append(" }").toString());
         }
     }
 

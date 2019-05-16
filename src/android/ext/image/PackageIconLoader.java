@@ -12,7 +12,7 @@ import android.ext.util.PackageUtils.PackageItemIcon;
 /**
  * Class <tt>PackageIconLoader</tt> allows to load a package archive file's application
  * icon and label on a background thread and bind it to target on the UI thread.
- * @see PackageUtils#loadPackageItemIcon(Context, ApplicationInfo)
+ * @see PackageUtils#loadPackageArchiveIcon(Context, ApplicationInfo)
  * @author Garfield
  */
 public class PackageIconLoader extends IconLoader {
@@ -48,6 +48,6 @@ public class PackageIconLoader extends IconLoader {
 
     @Override
     protected PackageItemIcon loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
-        return PackageUtils.loadPackageItemIcon(mContext, (ApplicationInfo)params[0]);
+        return PackageUtils.loadPackageArchiveIcon(mContext, (ApplicationInfo)params[0]);
     }
 }

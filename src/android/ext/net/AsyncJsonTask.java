@@ -197,6 +197,7 @@ public abstract class AsyncJsonTask<Params, Result> extends AbsAsyncTask<Params,
             final Result result = JsonUtils.parse(null, tempFile, this);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parse");
             if (!isCancelled() && validateResult(params, result)) {
+                // Saves the cache file.
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }

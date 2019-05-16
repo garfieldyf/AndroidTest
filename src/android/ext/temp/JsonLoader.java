@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AsyncJsonLoader;
 import android.ext.net.DownloadRequest;
+import android.ext.util.Cancelable;
 import android.ext.util.JsonUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
@@ -82,10 +83,10 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
 
         @Override
-        public JSONObject loadFromCache(Task<?, ?, ?> task, String key, File cacheFile) throws Exception {
+        public JSONObject loadFromCache(String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
             Log.i("abc", uri.toString());
-            return JsonUtils.parse(MainApplication.sInstance, uri, task);
+            return JsonUtils.parse(MainApplication.sInstance, uri, cancelable);
         }
     }
 }

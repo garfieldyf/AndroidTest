@@ -144,7 +144,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         boolean hitCache = false;
         try {
             DebugUtils.__checkStartMethodTracing();
-            final Result result = params.loadFromCache(task, key, cacheFile);
+            final Result result = params.loadFromCache(key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
             if (hitCache = params.validateResult(key, result)) {
                 // If the task was cancelled then invoking setProgress has no effect.
@@ -173,6 +173,7 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
             final Result result = JsonUtils.parse(null, tempFile, task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parse");
             if (!isTaskCancelled(task) && params.validateResult(key, result)) {
+                // Saves the cache file.
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }
@@ -241,15 +242,15 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
         /**
          * Called on a background thread to load the JSON data from the cache file.
-         * @param task The current {@link Task} whose executing this method.
          * @param key The key, passed earlier by {@link #load}.
          * @param cacheFile The JSON cache file to load.
+         * @param cancelable A {@link Cancelable} can be check the load was cancelled.
          * @return A result, defined by the subclass of this <tt>LoadParams</tt>.
          * @throws Exception if JSON data can not be load.
          * @see JsonUtils#parse(Context, Object, Cancelable)
          */
-        public Result loadFromCache(Task<?, ?, ?> task, Key key, File cacheFile) throws Exception {
-            return JsonUtils.parse(null, cacheFile, task);
+        public Result loadFromCache(Key key, File cacheFile, Cancelable cancelable) throws Exception {
+            return JsonUtils.parse(null, cacheFile, cancelable);
         }
     }
 }

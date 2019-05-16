@@ -177,7 +177,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     protected Image loadInBackground(Task<?, ?, ?> task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mBufferPool.obtain();
         try {
-            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, getTarget(task), params, flags, buffer));
+            final Object target = getTarget(task);
+            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
             mBufferPool.recycle(buffer);
         }
@@ -199,16 +200,17 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param task The current {@link Task} whose executing this method.
      * @param url The url to load.
      * @param imageFile The image file to store the image data.
+     * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param flags Loading flags, passed earlier by {@link #load}.
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?, ?> task, String url, File imageFile, Object[] params, int flags, byte[] buffer) {
+    protected Image loadImage(Task<?, ?, ?> task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
-            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, getTarget(task), params, flags, buffer) : null);
+            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, target, params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
             return null;
@@ -231,12 +233,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
+         * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
          * @param params The parameters, passed earlier by {@link #load}.
          * @param flags Loading flags, passed earlier by {@link #load}.
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer);
+        Image load(Task<?, ?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer);
     }
 
     /**
@@ -254,10 +257,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task<?, ?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
-                return loadImage(task, url, imageFile, params, flags, buffer);
+                return loadImage(task, url, imageFile, target, params, flags, buffer);
             } finally {
                 imageFile.delete();
             }
@@ -287,14 +290,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         @Override
-        public Image load(Task<?, ?, ?> task, String url, Object[] params, int flags, byte[] buffer) {
+        @SuppressWarnings("synthetic-access")
+        public Image load(Task<?, ?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
             Image result = null;
 
             if (imageFile.exists()) {
                 // Decodes the image file, If file cache hit.
-                if ((result = mDecoder.decodeImage(imageFile, getTarget(task), params, flags, buffer)) != null) {
+                if ((result = mDecoder.decodeImage(imageFile, target, params, flags, buffer)) != null) {
                     return result;
                 }
 
@@ -305,7 +309,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             if (!isTaskCancelled(task)) {
                 // Loads the image from url, If the image file is not exists or decode failed.
                 final File tempFile = new File(imageFile.getPath() + "." + Thread.currentThread().hashCode());
-                if ((result = loadImage(task, url, tempFile, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
+                if ((result = loadImage(task, url, tempFile, target, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
                     // Saves the image file to file cache, If load succeeded.
                     mCache.put(hashKey, imageFile);
                 } else {

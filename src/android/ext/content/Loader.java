@@ -89,20 +89,6 @@ public abstract class Loader implements Factory<Task> {
     }
 
     /**
-     * Returns <tt>true</tt> if the <em>task</em> was cancelled before it
-     * completed normally. To ensure that the <em>task</em> is cancelled
-     * as quickly as possible, you should always check the return value
-     * of this method, if possible (inside a loop for instance.)
-     * @param task May be <tt>null</tt>. The {@link Task} to test.
-     * @return <tt>true</tt> if the <em>task</em> was cancelled or this
-     * loader has been shut down, <tt>false</tt> otherwise.
-     * @see #cancelTask(Object, boolean)
-     */
-    public final boolean isTaskCancelled(Task task) {
-        return (mState == SHUTDOWN || (task != null && task.isCancelled()));
-    }
-
-    /**
      * Attempts to stop execution of the specified task. After invoking this
      * method, you should check the value returned by {@link #isTaskCancelled(Task)}
      * periodically from the background thread to finish the task as soon as
@@ -131,6 +117,20 @@ public abstract class Loader implements Factory<Task> {
             result.setLength(0);
             printer.println(DebugUtils.toSimpleString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
         }
+    }
+
+    /**
+     * Returns <tt>true</tt> if the <em>task</em> was cancelled before it
+     * completed normally. To ensure that the <em>task</em> is cancelled
+     * as quickly as possible, you should always check the return value
+     * of this method, if possible (inside a loop for instance.)
+     * @param task May be <tt>null</tt>. The {@link Task} to test.
+     * @return <tt>true</tt> if the <em>task</em> was cancelled or this
+     * loader has been shut down, <tt>false</tt> otherwise.
+     * @see #cancelTask(Object, boolean)
+     */
+    protected final boolean isTaskCancelled(Task task) {
+        return (mState == SHUTDOWN || (task != null && task.isCancelled()));
     }
 
     /**

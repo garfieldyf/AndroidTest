@@ -152,15 +152,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         return mCache;
     }
 
-    /**
-     * Returns the target associated with the <em>task</em>.
-     * @param task The {@link Task} or <tt>null</tt>.
-     * @return The <tt>Object</tt> target or <tt>null</tt>.
-     */
-    public final Object getTarget(Task task) {
-        return (task != null ? ((LoadTask)task).mTarget : null);
-    }
-
     @Override
     public final Task newInstance() {
         return new LoadTask();
@@ -174,6 +165,15 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      */
     public static <Key, Params, Value> Binder<Key, Params, Value> emptyBinder() {
         return EmptyBinder.sInstance;
+    }
+
+    /**
+     * Returns the target associated with the <em>task</em>.
+     * @param task The {@link Task} or <tt>null</tt>.
+     * @return The <tt>Object</tt> target or <tt>null</tt>.
+     */
+    protected final Object getTarget(Task task) {
+        return (task != null ? ((LoadTask)task).mTarget : null);
     }
 
     /**

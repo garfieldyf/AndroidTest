@@ -26,7 +26,7 @@
     <!-- debug output filename -->
     <target name="-rename-debug-out-file">
         <property name="out.file.dir" value="debug" />
-        <property name="out.file.name" value="${ant.project.name}_v${version.name}_debug.apk" />
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/debug" />
     </target>
@@ -36,7 +36,7 @@
     <!-- release output filename -->
     <target name="-rename-release-out-file">
         <property name="out.file.dir" value="release" />
-        <property name="out.file.name" value="${ant.project.name}_v${version.name}_release.apk" />
+        <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/release" />
     </target>
@@ -105,16 +105,19 @@
 
     <!-- post-build target -->
     <target name="-post-build">
-        <property name="mapping.file.name" value="${ant.project.name}_${version.name}_mapping.txt" />
+        <property name="out.final.dir" value="${basedir}/outputs/${version.name}" />
 
-        <!-- copy mapping file -->
-        <echo level="info">Copy mapping file : ${mapping.file.name}</echo>
-        <copy file="${out.absolute.dir}/proguard/mapping.txt" tofile="${out.absolute.dir}/${mapping.file.name}" failonerror="false" />
+        <!-- copy mapping files -->
+        <echo level="info">Copy mapping files...</echo>
+        <mkdir dir="${out.final.dir}/mapping" />
+        <copy todir="${out.final.dir}/mapping" failonerror="false">
+            <fileset dir="${out.absolute.dir}/proguard" includes="*.txt" />
+        </copy>
 
         <!-- clean temp files -->
-        <echo level="info">Deletes temp file...</echo>
+        <echo level="info">Deletes temp files...</echo>
         <delete includeEmptyDirs="true" verbose="${verbose}">
-            <fileset dir="${out.absolute.dir}" excludes="${out.file.name} ${mapping.file.name}" />
+            <fileset dir="${out.absolute.dir}" excludes="${out.file.name}" />
         </delete>
 
         <!-- build channel apk files -->
@@ -124,9 +127,8 @@
         </exec>
 
         <!-- copy the build apk files -->
-        <property name="out.final.dir" value="${basedir}/outputs/${version.name}/${out.file.dir}" />
-        <mkdir dir="${out.final.dir}" />
-        <copy todir="${out.final.dir}" overwrite="true">
+        <mkdir dir="${out.final.dir}/${out.file.dir}" />
+        <copy todir="${out.final.dir}/${out.file.dir}" overwrite="true">
             <fileset dir="${out.absolute.dir}" />
         </copy>
     </target>

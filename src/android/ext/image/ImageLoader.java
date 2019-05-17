@@ -34,7 +34,9 @@ import android.widget.ImageView;
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
- * final ImageLoader&lt;String, Bitmap&gt; mImageLoader = module.createImageLoader()
+ * private ImageLoader&lt;String, Bitmap&gt; mImageLoader;
+ *
+ * mImageLoader = module.createImageLoader()
  *     .setParameters(R.xml.decode_params)
  *     .setBinder(R.xml.image_binder)
  *     .create();

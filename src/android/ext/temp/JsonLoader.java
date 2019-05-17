@@ -5,7 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AsyncJsonLoader;
+import android.ext.content.AsyncCacheLoader;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.JsonUtils;
@@ -16,7 +16,7 @@ import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
-public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
+public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
     public JsonLoader(Activity ownerActivity) {
         super(MainApplication.sInstance.getExecutor(), ownerActivity);
     }
@@ -56,11 +56,6 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
 
     public static class URLLoadParams extends LoadParams<String, JSONObject> {
         @Override
-        public boolean validateResult(String key, JSONObject result) {
-            return (result != null && result.optInt("retCode") == 200);
-        }
-
-        @Override
         public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
         }
@@ -83,10 +78,15 @@ public final class JsonLoader extends AsyncJsonLoader<String, JSONObject> {
         }
 
         @Override
-        public JSONObject loadFromCache(String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public JSONObject parseResult(String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
-            Log.i("abc", uri.toString());
-            return JsonUtils.parse(MainApplication.sInstance, uri, cancelable);
+            final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, cancelable);
+            if (JsonUtils.optInt(result, "retCode", 0) == 200) {
+                return result;
+            } else {
+                Log.e("abc", "Couldn't load JSON data from  - " + cacheFile.getPath());
+                return null;
+            }
         }
     }
 }

@@ -4,8 +4,8 @@ import java.io.File;
 import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import android.content.Context;
-import android.ext.content.AsyncJsonLoader.LoadParams;
-import android.ext.content.AsyncJsonLoader.LoadResult;
+import android.ext.content.AsyncCacheLoader.LoadParams;
+import android.ext.content.AsyncCacheLoader.LoadResult;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
@@ -14,12 +14,12 @@ import android.ext.util.JsonUtils;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncJsonLoader</tt> allows to load the JSON data on a background thread and publish
- * results on the UI thread. This class can be support the JSON cache file.
- * <h3>AsyncJsonLoader's generic types</h3>
- * <p>The two types used by a JSON loader are the following:</p>
+ * Class <tt>AsyncCacheLoader</tt> allows to load the data on a background thread
+ * and publish results on the UI thread. This class can be support the cache file.
+ * <h3>AsyncCacheLoader's generic types</h3>
+ * <p>The two types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
- * <li><tt>Result</tt>, The load result type, must be <tt>JSONObject</tt> or <tt>JSONArray</tt>.</li></ol>
+ * <li><tt>Result</tt>, The load result type.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * public static class JsonLoadParams extends LoadParams&lt;String, JSONObject&gt; {
@@ -30,17 +30,30 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     public boolean validateResult(String url, JSONObject result) {
- *         return (result != null && result.optInt("retCode") == 200);
- *     }
- *
- *     {@code @Override}
  *     public DownloadRequest newDownloadRequest(String url) throws Exception {
  *         return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
  *     }
+ *
+ *     {@code @Override}
+ *     public JSONObject parseResult(String url, File cacheFile, Cancelable cancelable) throws Exception {
+ *         if (!cacheFile.exists()) {
+ *             // If the cache file not exists, return null or parse the JSON data from the "assets" file.
+ *             return null;
+ *         }
+ *
+ *         // Parse the JSON data ... ...
+ *         final JSONObject result = JsonUtils.parse(context, cacheFile, cancelable);
+ *
+ *         // Check the result is valid.
+ *         if (result != null && result.optInt("retCode") == 200) {
+ *             return result;
+ *         }
+ *
+ *         return null;
+ *     }
  * }
  *
- * private static class JsonLoader extends AsyncJsonLoader&lt;String, JSONObject&gt; {
+ * private static class JsonLoader extends AsyncCacheLoader&lt;String, JSONObject&gt; {
  *     public JsonLoader(Executor executor, Activity ownerActivity) {
  *         super(executor, ownerActivity);
  *     }
@@ -64,24 +77,29 @@ import android.util.Log;
  *         // Hide loading UI, if need.
  *         if (result.result != null) {
  *             // Loading succeeded (may be file cache hit or download succeeded), update UI.
- *         } else if (!result.hitCache) {
- *             // Loading failed and file cache not hit, show error or empty UI.
+ *         } else {
+ *             if (result.hitCache) {
+ *                 // Loading succeeded, but the cache file's contents are equal the loaded file's contents, do nothing.
+ *             } else {
+ *                 // Loading failed and file cache not hit, show error or empty UI.
+ *             }
  *         }
  *     }
  * }
  *
- * final JsonLoader mLoader = new JsonLoader(executor, activity);
+ * private JsonLoader mLoader;
+ *
+ * mLoader = new JsonLoader(executor, activity);
  * mLoader.load(url, new JsonLoadParams());</pre>
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, LoadResult<Result>> {
+public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, LoadResult<Result>> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #AsyncJsonLoader(Executor, Object)
+     * @see #AsyncCacheLoader(Executor, Object)
      */
-    public AsyncJsonLoader(Executor executor) {
+    public AsyncCacheLoader(Executor executor) {
         super(executor);
     }
 
@@ -89,20 +107,20 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncJsonLoader(Executor)
+     * @see #AsyncCacheLoader(Executor)
      */
-    public AsyncJsonLoader(Executor executor, Object owner) {
+    public AsyncCacheLoader(Executor executor, Object owner) {
         super(executor, owner);
     }
 
     /**
-     * Called on a background thread to download the JSON data.
+     * Called on a background thread to download the data.
      * @param task The {@link Task} whose executing this method.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
-     * @param cacheFile The JSON cache file to store the JSON data, or <tt>null</tt> if no cache file.
+     * @param cacheFile The cache file to store the download data, or <tt>null</tt> if no cache file.
      * @return If the <em>cacheFile</em> is <tt>null</tt> returns the HTTP response code (<tt>Integer</tt>),
-     * Otherwise returns the JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).
+     * Otherwise returns the result, defined by the subclass.
      * @throws Exception if an error occurs while downloading to the resource.
      */
     protected Object onDownload(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
@@ -111,22 +129,21 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
         onLoadComplete(key, params, new LoadResult<Result>((Result)values[0], false));
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected LoadResult<Result> loadInBackground(Task<?, ?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
         try {
-            final LoadParams params = loadParams[0];
+            final LoadParams<Key, Result> params = loadParams[0];
             final File cacheFile = params.getCacheFile(key);
             if (cacheFile == null) {
-                final Result value = (Result)onDownload(task, key, params, null);
-                if (params.validateResult(key, value)) {
-                    result = value;
-                }
+                result = (Result)onDownload(task, key, params, null);
             } else {
                 hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -140,24 +157,24 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         return new LoadResult<Result>(result, hitCache);
     }
 
-    private boolean loadFromCache(Task task, Key key, LoadParams<Key, Result> params, File cacheFile) {
-        boolean hitCache = false;
+    private boolean loadFromCache(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, File cacheFile) {
         try {
             DebugUtils.__checkStartMethodTracing();
-            final Result result = params.loadFromCache(key, cacheFile, task);
+            final Result result = params.parseResult(key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
-            if (hitCache = params.validateResult(key, result)) {
+            if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
+                return true;
             }
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile);
+            Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile.getPath());
         }
 
-        return hitCache;
+        return false;
     }
 
-    private Result download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
+    private Result download(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = (int)onDownload(task, key, params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
@@ -170,9 +187,9 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
 
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
-            final Result result = JsonUtils.parse(null, tempFile, task);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parse");
-            if (!isTaskCancelled(task) && params.validateResult(key, result)) {
+            final Result result = params.parseResult(key, new File(tempFile), task);
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parseResult");
+            if (!isTaskCancelled(task)) {
                 // Saves the cache file.
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -207,29 +224,18 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link AsyncJsonLoader} to load JSON data.
+     * Class <tt>LoadParams</tt> used to {@link AsyncCacheLoader} to load data.
      */
     public static abstract class LoadParams<Key, Result> {
         /**
-         * Returns the absolute path of the JSON cache file on the filesystem.
+         * Returns the absolute path of the cache file on the filesystem.
          * <p>Subclasses should override this method to returns the cache file
          * path. The default implementation returns <tt>null</tt>.</p>
          * @param key The key, passed earlier by {@link #load}.
-         * @return The path of the JSON cache file, or <tt>null</tt> if no cache file.
+         * @return The path of the cache file, or <tt>null</tt> if no cache file.
          */
         public File getCacheFile(Key key) {
             return null;
-        }
-
-        /**
-         * Tests if the <em>result</em> is valid. Subclasses should override this method
-         * to validate the <em>result</em>.
-         * @param key The key, passed earlier by {@link #load}.
-         * @param result The result or <tt>null</tt>.
-         * @return <tt>true</tt> if the <em>result</em> is valid, <tt>false</tt> otherwise.
-         */
-        public boolean validateResult(Key key, Result result) {
-            return (result != null);
         }
 
         /**
@@ -241,15 +247,17 @@ public abstract class AsyncJsonLoader<Key, Result> extends AsyncTaskLoader<Key, 
         public abstract DownloadRequest newDownloadRequest(Key key) throws Exception;
 
         /**
-         * Called on a background thread to load the JSON data from the cache file.
+         * Called on a background thread to parse the data from the cache file. Subclasses
+         * should override this method to parse their results. <p>The default implementation
+         * parse the cache file to a JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).</p>
          * @param key The key, passed earlier by {@link #load}.
-         * @param cacheFile The JSON cache file to load.
-         * @param cancelable A {@link Cancelable} can be check the load was cancelled.
-         * @return A result, defined by the subclass of this <tt>LoadParams</tt>.
-         * @throws Exception if JSON data can not be load.
+         * @param cacheFile The cache file to parse.
+         * @param cancelable A {@link Cancelable} can be check the parse was cancelled.
+         * @return A result, defined by the subclass.
+         * @throws Exception if the data can not be parse.
          * @see JsonUtils#parse(Context, Object, Cancelable)
          */
-        public Result loadFromCache(Key key, File cacheFile, Cancelable cancelable) throws Exception {
+        public Result parseResult(Key key, File cacheFile, Cancelable cancelable) throws Exception {
             return JsonUtils.parse(null, cacheFile, cancelable);
         }
     }

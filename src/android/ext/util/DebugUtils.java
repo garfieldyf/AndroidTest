@@ -109,11 +109,19 @@ public final class DebugUtils {
     }
 
     public static StringBuilder toString(Object object, StringBuilder result) {
-        return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+        if (object == null) {
+            return result.append("null");
+        } else {
+            return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+        }
     }
 
     public static StringBuilder toSimpleString(Object object, StringBuilder result) {
-        return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+        if (object == null) {
+            return result.append("null");
+        } else {
+            return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+        }
     }
 
     public static void __checkStartMethodTracing() {

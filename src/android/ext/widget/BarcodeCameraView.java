@@ -277,10 +277,6 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     private boolean setCameraParameters() {
-        // Gets the camera device orientation.
-        final CameraInfo info = new CameraInfo();
-        Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
-
         // Sets the camera zoom value.
         final Parameters params = mCamera.getParameters();
         if (params.isZoomSupported()) {
@@ -300,7 +296,6 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         final Size previewSize = computePreviewSize(params);
         mPreviewWidth  = previewSize.width;
         mPreviewHeight = previewSize.height;
-        this.__checkDumpCameraInfo(params, info);
         params.setPreviewFormat(ImageFormat.NV21);
         params.setPreviewSize(mPreviewWidth, mPreviewHeight);
         if (mListener != null) {
@@ -314,6 +309,11 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         if (contains(params.getSupportedSceneModes(), Parameters.SCENE_MODE_BARCODE)) {
             params.setSceneMode(Parameters.SCENE_MODE_BARCODE);
         }
+
+        // Gets the camera device orientation.
+        final CameraInfo info = new CameraInfo();
+        Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
+        this.__checkDumpCameraInfo(params, info);
 
         // Sets the camera parameters.
         mCamera.setParameters(params);
@@ -368,11 +368,12 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     private void __checkDumpCameraInfo(Parameters params, CameraInfo info) {
         final Point screenSize = getScreenSize();
         final List<Size> supportedSizes = params.getSupportedPreviewSizes();
-        final StringBuilder result = new StringBuilder(512)
-            .append("Orientation = ").append(info.orientation).append('\n')
-            .append("ScreenSize  = { ").append(screenSize.x).append('x').append(screenSize.y).append(" }\n")
-            .append("PreviewSize = { ").append(mPreviewWidth).append('x').append(mPreviewHeight).append(" }\n")
-            .append("SupportedPreviewSizes = { ");
+        final StringBuilder result = new StringBuilder(512).append("BarcodeCameraView\n{")
+            .append("\n  screenSize  = ").append(screenSize.x).append('x').append(screenSize.y).append(" (").append((float)screenSize.x / screenSize.y).append(')')
+            .append("\n  previewSize = ").append(mPreviewWidth).append('x').append(mPreviewHeight).append(" (").append((float)mPreviewWidth / mPreviewHeight).append(')')
+            .append("\n  orientation = ").append(info.orientation).append("\n  zoom = ").append(mZoom).append("\n  maxZoom = ").append(mMaxZoom).append("\n  flashMode = ").append(mFlashMode)
+            .append("\n  clipBounds = (").append(mClipBounds.left).append(", ").append(mClipBounds.top).append(" - ").append(mClipBounds.right).append(", ").append(mClipBounds.bottom).append(')')
+            .append("\n  supportedPreviewSizes = [ ");
 
         for (int i = 0, count = ArrayUtils.getSize(supportedSizes); i < count; ++i) {
             final Size size = supportedSizes.get(i);
@@ -380,10 +381,10 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
                 result.append(", ");
             }
 
-            result.append(size.width).append('x').append(size.height);
+            result.append(size.width).append('x').append(size.height).append(" (").append((float)size.width / size.height).append(')');
         }
 
-        Log.d(getClass().getSimpleName(), result.append(" }").toString());
+        Log.d(getClass().getSimpleName(), result.append(" ]\n}").toString());
     }
 
     private static boolean contains(List<String> supportedModes, String mode) {

@@ -227,8 +227,7 @@ public final class PackageUtils {
         /**
          * Adds the scan flags to scan the package archive files.
          * @param flags The scan flags. May be <tt>0</tt> or any combination of
-         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}
-         * and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
+         * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
          * @return This parser.
          * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */
@@ -275,18 +274,18 @@ public final class PackageUtils {
         /**
          * Parses the package archive files with the specified <em>dirPaths</em>.
          * @param dirPaths An array of the directory paths, must be absolute file path.
-         * @param outResult A <tt>Collection</tt> to store the {@link PackageInfo} objects.
+         * @param outInfos A <tt>Collection</tt> to store the {@link PackageInfo} objects.
          * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an
          * error code. See {@link ErrnoException}.
          * @see #parse(String[])
          */
-        public final int parse(Collection<PackageInfo> outResult, String... dirPaths) {
+        public final int parse(Collection<PackageInfo> outInfos, String... dirPaths) {
             DebugUtils.__checkError(dirPaths == null, "Invalid parameter - The dirPaths is null");
             this.__checkParseStatus();
-            int result = 0;
+            int result  = 0;
             mCancelable = FileUtils.wrap(mCancelable);
             for (int i = 0; i < dirPaths.length; ++i) {
-                if ((result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outResult)) != 0) {
+                if ((result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outInfos)) != 0) {
                     break;
                 }
             }

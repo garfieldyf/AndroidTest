@@ -112,7 +112,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
      * parse the cache file to a JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).</p>
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @param cacheFile The cache file to parse.
-     * @return A result, defined by the subclass of this task.
+     * @return A result or <tt>null</tt>, defined by the subclass of this task.
      * @throws Exception if the data can not be parse.
      * @see JsonUtils#parse(Context, Object, Cancelable)
      */
@@ -200,9 +200,8 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parseResult");
-            if (!isCancelled()) {
-                // Saves the cache file.
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
+            if (result != null && !isCancelled()) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }

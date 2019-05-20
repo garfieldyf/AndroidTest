@@ -163,7 +163,6 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
             final Result result = params.parseResult(key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
             if (result != null) {
-                // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
                 return true;
             }
@@ -188,9 +187,8 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Result result = params.parseResult(key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download - parseResult");
-            if (!isTaskCancelled(task)) {
-                // Saves the cache file.
+            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
+            if (result != null && !isTaskCancelled(task)) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }
@@ -253,7 +251,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
          * @param key The key, passed earlier by {@link #load}.
          * @param cacheFile The cache file to parse.
          * @param cancelable A {@link Cancelable} can be check the parse was cancelled.
-         * @return A result, defined by the subclass.
+         * @return A result or <tt>null</tt>, defined by the subclass.
          * @throws Exception if the data can not be parse.
          * @see JsonUtils#parse(Context, Object, Cancelable)
          */

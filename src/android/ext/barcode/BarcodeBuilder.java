@@ -108,6 +108,7 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #logo(Resources, int)
      * @see #size(int, int)
+     * @see #size(Resources, int)
      */
     public final BarcodeBuilder logo(Drawable logo) {
         this.logo = logo;
@@ -121,6 +122,7 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #logo(Drawable)
      * @see #size(int, int)
+     * @see #size(Resources, int)
      */
     @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int id) {
@@ -142,7 +144,7 @@ public final class BarcodeBuilder {
     }
 
     /**
-     * Sets the size to draw the {@link #logo} <tt>Drawable</tt>.
+     * Sets the width and height to draw the {@link #logo} <tt>Drawable</tt>.
      * @param res The <tt>Resources</tt>.
      * @param id The resource id of the size dimension.
      * @return This builder.

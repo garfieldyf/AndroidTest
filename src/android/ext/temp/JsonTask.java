@@ -34,12 +34,7 @@ public class JsonTask extends AsyncCacheTask<String, JSONObject> {
     protected JSONObject parseResult(String[] params, File cacheFile) throws Exception {
         final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/title"));
         final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, this);
-        if (JsonUtils.optInt(result, "retCode", 0) == 200) {
-            return result;
-        } else {
-            Log.e("abc", "Couldn't load JSON data from  - " + cacheFile.getPath());
-            return null;
-        }
+        return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
     }
 
     @Override

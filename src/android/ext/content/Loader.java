@@ -196,7 +196,8 @@ public abstract class Loader implements Factory<Task> {
         }
 
         /**
-         * This method can be invoked to publish progress values to update UI.
+         * This method can be invoked to publish progress values to update UI.<p>
+         * If this task was cancelled then invoking this method has no effect.</p>
          * @param values The progress values to update.
          */
         public final void setProgress(Object... values) {

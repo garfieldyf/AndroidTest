@@ -20,7 +20,6 @@ import android.util.Printer;
  * Class Pages
  * @author Garfield
  */
-@SuppressWarnings({ "unchecked", "resource" })
 public final class Pages {
     /**
      * Returns the index of the page with the given the <em>combinedPosition</em>.
@@ -60,6 +59,7 @@ public final class Pages {
      * @return A new <tt>Page</tt> or <tt>null</tt>.
      * @see ArrayPage
      */
+    @SuppressWarnings("unchecked")
     public static <E> Page<E> newPage(E... data) {
         return (ArrayUtils.getSize(data) > 0 ? new ArrayPage<E>(data) : null);
     }
@@ -191,6 +191,7 @@ public final class Pages {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public E getItem(int position) {
             return (E)mData.opt(position);
         }
@@ -320,6 +321,7 @@ public final class Pages {
         /* package */ final PageLoader<E> mPageLoader;
         /* package */ final Cache<Integer, Page<E>> mPageCache;
 
+        @SuppressWarnings("unchecked")
         /* package */ PageAdapterImpl(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance, PageLoader<E> loader) {
             DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
             DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
@@ -413,6 +415,7 @@ public final class Pages {
             return (page > 0 ? (page - 1) * mPageSize + mInitialSize + position : position);
         }
 
+        @SuppressWarnings("resource")
         /* package */ final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(128);
             final Formatter formatter  = new Formatter(result);

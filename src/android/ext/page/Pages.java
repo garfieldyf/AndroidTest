@@ -334,6 +334,7 @@ public final class Pages {
         }
 
         /* package */ final void setItemCount(int count) {
+            DebugUtils.__checkError(count < 0, "count < 0");
             mItemCount = count;
             mPageCache.clear();
             mPageStates.clear();

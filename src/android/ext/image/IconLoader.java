@@ -78,7 +78,7 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, PackageItem
     }
 
     @Override
-    protected PackageItemIcon loadInBackground(Task<?, ?, ?> task, String key, PackageItemInfo[] params, int flags) {
+    protected PackageItemIcon loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
         final PackageItemInfo info = params[0];
         final PackageManager pm = mContext.getPackageManager();
         return new PackageItemIcon(info.loadIcon(pm), info.loadLabel(pm));

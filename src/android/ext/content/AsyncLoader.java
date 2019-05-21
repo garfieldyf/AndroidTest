@@ -187,7 +187,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #loadSync(Key, int, Params[])
      * @see #load(Key, Object, int, Binder, Params[])
      */
-    protected abstract Value loadInBackground(Task<?, ?, ?> task, Key key, Params[] params, int flags);
+    protected abstract Value loadInBackground(Task<?, ?> task, Key key, Params[] params, int flags);
 
     /**
      * Tests if the {@link mCache} is valid.
@@ -237,17 +237,18 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Key, Params, Value> {
+    /* package */ final class LoadTask extends Task<Params, Value> {
+        /* package */ Key mKey;
         /* package */ int mFlags;
         /* package */ Object mTarget;
         /* package */ Binder mBinder;
 
         @Override
-        public Value doInBackground(Key key, Params[] params) {
+        public Value doInBackground(Params[] params) {
             waitResumeIfPaused();
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
-                value = loadInBackground(this, key, params, mFlags);
+                value = loadInBackground(this, mKey, params, mFlags);
                 if (value != null && isCacheValid(mFlags)) {
                     mCache.put(mKey, value);
                 }
@@ -265,6 +266,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
             clearForRecycle();
+            mKey = null;
             mTarget = null;
             mBinder = null;
             mTaskPool.recycle(this);

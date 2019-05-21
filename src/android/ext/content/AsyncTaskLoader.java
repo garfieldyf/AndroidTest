@@ -168,7 +168,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #onStartLoading(Key, Params[])
      * @see #onLoadComplete(Key, Params[], Result)
      */
-    protected abstract Result loadInBackground(Task<?, ?, ?> task, Key key, Params[] params);
+    protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
 
     /**
      * Retrieves a new {@link Task} from the task pool.
@@ -184,7 +184,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Key, Params, Result> {
+    /* package */ final class LoadTask extends Task<Params, Result> {
+        /* package */ Key mKey;
+
         @Override
         public void onProgress(Object[] values) {
             if (mState != SHUTDOWN) {
@@ -193,9 +195,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
         }
 
         @Override
-        public Result doInBackground(Key key, Params[] params) {
+        public Result doInBackground(Params[] params) {
             waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, key, params) : null);
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, params) : null);
         }
 
         @Override
@@ -217,6 +219,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
             clearForRecycle();
+            mKey = null;
             mTaskPool.recycle(this);
         }
     }

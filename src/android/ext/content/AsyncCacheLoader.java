@@ -123,7 +123,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
      * Otherwise returns the result, defined by the subclass.
      * @throws Exception if an error occurs while downloading to the resource.
      */
-    protected Object onDownload(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
+    protected Object onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
         final DownloadRequest request = params.newDownloadRequest(key);
         return (cacheFile != null ? request.download(cacheFile, task, null) : request.download(task));
     }
@@ -136,7 +136,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
 
     @Override
     @SuppressWarnings("unchecked")
-    protected LoadResult<Result> loadInBackground(Task<?, ?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
+    protected LoadResult<Result> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
         try {
@@ -157,7 +157,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
         return new LoadResult<Result>(result, hitCache);
     }
 
-    private boolean loadFromCache(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, File cacheFile) {
+    private boolean loadFromCache(Task<?, ?> task, Key key, LoadParams<Key, Result> params, File cacheFile) {
         try {
             DebugUtils.__checkStartMethodTracing();
             final Result result = params.parseResult(key, cacheFile, task);
@@ -173,7 +173,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
         return false;
     }
 
-    private Result download(Task<?, ?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile, boolean hitCache) throws Exception {
+    private Result download(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = (int)onDownload(task, key, params, tempFile);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {

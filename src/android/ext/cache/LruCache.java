@@ -53,22 +53,15 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
     @Override
     public void trimToSize(int maxSize) {
-        K key;
-        V value;
         while (true) {
-            synchronized (this) {
-                DebugUtils.__checkError(size < 0 || (map.isEmpty() && size != 0), getClass().getName() + ".sizeOf() is reporting inconsistent results!");
-                if (size <= maxSize || map.isEmpty()) {
-                    break;
-                }
-
-                final Entry<K, V> toEvict = map.entrySet().iterator().next();
-                key = toEvict.getKey();
-                value = toEvict.getValue();
-                map.remove(key);
-                size -= sizeOf(key, value);
+            final Entry<K, V> toEvict = evict(maxSize);
+            if (toEvict == null) {
+                break;
             }
 
+            final K key = toEvict.getKey();
+            final V value = toEvict.getValue();
+            DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
             entryRemoved(true, key, value, null);
         }
     }
@@ -113,5 +106,18 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         }
 
         return previous;
+    }
+
+    private synchronized Entry<K, V> evict(int maxSize) {
+        if (size <= maxSize || map.isEmpty()) {
+            return null;
+        }
+
+        final Entry<K, V> toEvict = map.entrySet().iterator().next();
+        final K key = toEvict.getKey();
+        final V value = toEvict.getValue();
+        map.remove(key);
+        size -= sizeOf(key, value);
+        return toEvict;
     }
 }

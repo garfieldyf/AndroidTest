@@ -133,8 +133,10 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
         while (itor.hasNext() && map.size() > maxSize) {
             final Entry<K, V> toEvict = itor.next();
+            final K key = toEvict.getKey();
+            final V value = toEvict.getValue();
             itor.remove();
-            entryRemoved(true, toEvict.getKey(), toEvict.getValue(), null);
+            entryRemoved(true, key, value, null);
         }
     }
 

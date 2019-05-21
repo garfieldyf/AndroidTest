@@ -176,7 +176,7 @@ public class ThreadPoolManager extends ThreadPool {
         public final void run() {
             if (mState.get() == RUNNING) {
                 try {
-                    onExecute(mRunner = Thread.currentThread());
+                    doInBackground(mRunner = Thread.currentThread());
                 } finally {
                     mRunner = null;
                     if (mState.compareAndSet(RUNNING, COMPLETED)) {
@@ -190,27 +190,27 @@ public class ThreadPoolManager extends ThreadPool {
          * Returns a unique identifier associated with this task.
          * @return This task's identifier.
          */
-        public abstract long getId();
+        protected abstract long getId();
 
         /**
          * Callback method to be invoked when this task was cancelled.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCancelled()</tt>
-         * @see #onExecute(Thread)
          * @see #onCompletion()
+         * @see #doInBackground(Thread)
          */
-        public void onCancelled() {
+        protected void onCancelled() {
         }
 
         /**
-         * Runs on a background thread after {@link #onExecute(Thread)}.
+         * Runs on a background thread after {@link #doInBackground(Thread)}.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCompletion()</tt>
          * <p>This method won't be invoked if this task was cancelled.</p>
-         * @see #onExecute(Thread)
          * @see #onCancelled()
+         * @see #doInBackground(Thread)
          */
-        public void onCompletion() {
+        protected void onCompletion() {
         }
 
         /**
@@ -220,7 +220,7 @@ public class ThreadPoolManager extends ThreadPool {
          * @see #onCancelled()
          * @see #onCompletion()
          */
-        protected abstract void onExecute(Thread thread);
+        protected abstract void doInBackground(Thread thread);
 
         /**
          * Attempts to stop execution of this task. This attempt will fail

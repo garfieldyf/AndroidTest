@@ -129,18 +129,10 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
     /**
-     * Called on a background thread to download the data.
-     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param cacheFile The cache file to store the download data, or <tt>null</tt> if no cache file.
-     * @return If the <em>cacheFile</em> is <tt>null</tt> returns the HTTP response code (<tt>Integer</tt>),
-     * Otherwise returns the result, defined by the subclass of this task.
-     * @throws Exception if an error occurs while downloading to the resource.
+     * Runs on the UI thread after {@link #publishProgress} is invoked. <p>The
+     * default implementation invoking {@link #onPostExecute} to update UI.</p>
+     * @param values The result load from the cache file.
      */
-    protected Object onDownload(Params[] params, String cacheFile) throws Exception {
-        final DownloadRequest request = newDownloadRequest(params);
-        return (cacheFile != null ? request.download(cacheFile, this, null) : request.download(this));
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Object... values) {
@@ -155,7 +147,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
-                result = (Result)onDownload(params, null);
+                result = newDownloadRequest(params).download(this);
             } else {
                 hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
@@ -188,7 +180,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
 
     private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = (int)onDownload(params, tempFile);
+        final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isCancelled()) {
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.

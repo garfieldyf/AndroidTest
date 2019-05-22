@@ -114,20 +114,12 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
     }
 
     /**
-     * Called on a background thread to download the data.
-     * @param task The {@link Task} whose executing this method.
+     * Called on the UI thread after {@link Task#setProgress(Object[])}. <p>The
+     * default implementation invoking {@link #onLoadComplete} to update UI.</p>
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
-     * @param cacheFile The cache file to store the download data, or <tt>null</tt> if no cache file.
-     * @return If the <em>cacheFile</em> is <tt>null</tt> returns the HTTP response code (<tt>Integer</tt>),
-     * Otherwise returns the result, defined by the subclass.
-     * @throws Exception if an error occurs while downloading to the resource.
+     * @param values The result load from the cache file.
      */
-    protected Object onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile) throws Exception {
-        final DownloadRequest request = params.newDownloadRequest(key);
-        return (cacheFile != null ? request.download(cacheFile, task, null) : request.download(task));
-    }
-
     @Override
     @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
@@ -135,7 +127,6 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     protected LoadResult<Result> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
@@ -143,7 +134,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
             final LoadParams<Key, Result> params = loadParams[0];
             final File cacheFile = params.getCacheFile(key);
             if (cacheFile == null) {
-                result = (Result)onDownload(task, key, params, null);
+                result = params.newDownloadRequest(key).download(task);
             } else {
                 hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -175,7 +166,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
 
     private Result download(Task<?, ?> task, Key key, LoadParams<Key, Result> params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = (int)onDownload(task, key, params, tempFile);
+        final int statusCode  = params.newDownloadRequest(key).download(tempFile, task, null);
         if (statusCode == HttpURLConnection.HTTP_OK && !isTaskCancelled(task)) {
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.

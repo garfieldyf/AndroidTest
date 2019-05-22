@@ -51,6 +51,15 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     /**
+     * Clears this cache, calling {@link #entryRemoved} on each removed entry.
+     * @see #clear()
+     * @see #trimToSize(int)
+     */
+    public final void evictAll() {
+        trimToSize(-1);
+    }
+
+    /**
      * Clears this cache, but do not call {@link #entryRemoved} on each removed entry.
      * @see #evictAll()
      * @see #trimToSize(int)
@@ -110,15 +119,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     @Override
     public Map<K, V> entries() {
         return Collections.unmodifiableMap(map);
-    }
-
-    /**
-     * Clears this cache, calling {@link #entryRemoved} on each removed entry.
-     * @see #clear()
-     * @see #trimToSize(int)
-     */
-    public void evictAll() {
-        trimToSize(-1);
     }
 
     /**

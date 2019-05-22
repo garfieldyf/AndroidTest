@@ -65,7 +65,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     protected File buildCacheFile(String key) {
         final File result = new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
         if (result.exists()) {
-            super.put(key, result);
+            put(key, result);
         }
 
         return result;

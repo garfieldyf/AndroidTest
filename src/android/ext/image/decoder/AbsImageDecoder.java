@@ -33,7 +33,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      */
     public AbsImageDecoder(Context context) {
         mContext = context.getApplicationContext();
-        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, 12));
+        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, 8));
     }
 
     /**

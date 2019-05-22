@@ -38,7 +38,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ Loader(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
-        mTaskPool = Pools.newPool(this, 64);
+        mTaskPool = Pools.newPool(this, 32);
         mRunningTasks = new HashMap<Object, Task>();
     }
 

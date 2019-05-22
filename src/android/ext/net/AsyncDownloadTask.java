@@ -5,8 +5,6 @@ import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLConnection;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import android.ext.content.AbsAsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.util.Log;
@@ -77,7 +75,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     /**
      * Override this method to downloads the resource from the remote server on a background thread.
      * <p>The default implementation downloads the JSON data from the remote server and returns a
-     * {@link JSONObject} or {@link JSONArray} object.</p>
+     * <tt>JSONObject</tt> or <tt>JSONArray</tt> object.</p>
      * @param conn The {@link URLConnection} whose connecting the remote server.
      * @param statusCode The response code returned by the remote server.
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
@@ -90,6 +88,14 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     public Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
         return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
+
+    /**
+     * Returns a new download request with the specified <em>params</em>.
+     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
+     * @return The instance of {@link DownloadRequest}.
+     * @throws Exception if an error occurs while opening the connection.
+     */
+    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
     /**
      * Downloads the resource from the remote server write to the specified <em>out</em>.
@@ -117,12 +123,4 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
             mRequest.downloadImpl(filename, this, tempBuffer, httpPartial);
         }
     }
-
-    /**
-     * Returns a new download request with the specified <em>params</em>.
-     * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
-     * @return The instance of {@link DownloadRequest}.
-     * @throws Exception if an error occurs while opening the connection.
-     */
-    protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 }

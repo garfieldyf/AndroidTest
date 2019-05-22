@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 import android.content.Context;
 import android.content.pm.PackageItemInfo;
-import android.content.pm.PackageManager;
 import android.ext.cache.Cache;
 import android.ext.cache.LruCache;
 import android.ext.cache.SimpleLruCache;
@@ -79,8 +78,6 @@ public class IconLoader extends AsyncLoader<String, PackageItemInfo, PackageItem
 
     @Override
     protected PackageItemIcon loadInBackground(Task<?, ?> task, String key, PackageItemInfo[] params, int flags) {
-        final PackageItemInfo info = params[0];
-        final PackageManager pm = mContext.getPackageManager();
-        return new PackageItemIcon(info.loadIcon(pm), info.loadLabel(pm));
+        return new PackageItemIcon(mContext.getPackageManager(), params[0]);
     }
 }

@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -192,6 +193,14 @@ public final class PackageUtils {
         public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
             this.label = label;
+        }
+
+        /**
+         * Constructor
+         */
+        public PackageItemIcon(PackageManager pm, PackageItemInfo info) {
+            this.icon  = info.loadIcon(pm);
+            this.label = info.loadLabel(pm);
         }
 
         public StringBuilder dump(StringBuilder out) {

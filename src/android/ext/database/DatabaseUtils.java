@@ -356,11 +356,11 @@ public final class DatabaseUtils {
         final List<T> result = new ArrayList<T>(count);
         if (count > 0) {
             cursor.moveToPosition(-1);
-            final List<Pair<Field, String>> fieldInfos = getCursorFields(componentType);
+            final List<Pair<Field, String>> cursorFields = getCursorFields(componentType);
             final Constructor<? extends T> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
             while (cursor.moveToNext()) {
                 final T object = constructor.newInstance((Object[])null);
-                setCursorFields(cursor, object, fieldInfos);
+                setCursorFields(cursor, object, cursorFields);
                 result.add(object);
             }
         }
@@ -466,7 +466,7 @@ public final class DatabaseUtils {
     }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
-        final List<Pair<Field, String>> result = new ArrayList<Pair<Field, String>>();
+        final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();
         for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
@@ -474,21 +474,20 @@ public final class DatabaseUtils {
                 if (cursorField != null) {
                     DebugUtils.__checkError((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0, "Unsupported static or final field - " + field.toString());
                     field.setAccessible(true);
-                    result.add(new Pair<Field, String>(field, cursorField.value()));
+                    cursorFields.add(new Pair<Field, String>(field, cursorField.value()));
                 }
             }
         }
 
-        DatabaseUtils.__checkDumpCursorFields(result);
-        return result;
+        DatabaseUtils.__checkDumpCursorFields(cursorFields);
+        return cursorFields;
     }
 
-    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> fieldInfos) throws ReflectiveOperationException {
-        for (int i = 0, size = fieldInfos.size(); i < size; ++i) {
-            final Pair<Field, String> fieldInfo = fieldInfos.get(i);
-            final Field field = fieldInfo.first;
-            DebugUtils.__checkError(cursor.getColumnIndex(fieldInfo.second) == -1, "The column '" + fieldInfo.second + "' does not exist");
-            final int columnIndex = cursor.getColumnIndexOrThrow(fieldInfo.second);
+    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> cursorFields) throws ReflectiveOperationException {
+        for (int i = 0, size = cursorFields.size(); i < size; ++i) {
+            final Pair<Field, String> cursorField = cursorFields.get(i);
+            final Field field = cursorField.first;
+            final int columnIndex = cursor.getColumnIndexOrThrow(cursorField.second);
             final Class<?> type = field.getType();
             if (type == int.class) {
                 field.setInt(object, cursor.getInt(columnIndex));
@@ -541,13 +540,13 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static void __checkDumpCursorFields(List<Pair<Field, String>> fieldInfos) {
+    private static void __checkDumpCursorFields(List<Pair<Field, String>> cursorFields) {
         final Printer printer = new LogPrinter(Log.DEBUG, DatabaseUtils.class.getSimpleName());
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", fieldInfos.size());
-        for (Pair<Field, String> fieldInfo : fieldInfos) {
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", cursorFields.size());
+        for (Pair<Field, String> cursorField : cursorFields) {
             result.setLength(0);
-            printer.println(result.append("  ").append(fieldInfo.first).append(" { @CursorField = ").append(fieldInfo.second).append(" }").toString());
+            printer.println(result.append("  ").append(cursorField.first).append(" { @CursorField = ").append(cursorField.second).append(" }").toString());
         }
     }
 

@@ -186,7 +186,6 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
     @Override
     public void stop() {
         if (isRunning()) {
-            mFrameIndex = 0;
             unscheduleSelf();
         }
     }
@@ -230,12 +229,13 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        final boolean changed = super.setVisible(visible, restart);
-        if (changed && !visible) {
-            unscheduleSelf();
+        if (visible) {
+            start();
+        } else {
+            stop();
         }
 
-        return changed;
+        return super.setVisible(visible, restart);
     }
 
     @Override

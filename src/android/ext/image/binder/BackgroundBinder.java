@@ -3,7 +3,6 @@ package android.ext.image.binder;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.image.transformer.Transformer;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
@@ -55,11 +54,7 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
         if (value == null) {
             view.setBackground(mDefaultImage);
         } else {
-            final Drawable drawable = mTransformer.transform(uri, value);
-            view.setBackground(drawable);
-            if (drawable instanceof Animatable) {
-                ((Animatable)drawable).start();
-            }
+            view.setBackground(mTransformer.transform(uri, value));
         }
     }
 }

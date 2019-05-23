@@ -14,7 +14,6 @@ import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.ImageTransformer;
 import android.ext.image.transformer.Transformer;
 import android.ext.util.ClassUtils;
-import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -151,11 +150,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         if (value == null) {
             view.setImageDrawable(mDefaultImage);
         } else {
-            final Drawable drawable = mTransformer.transform(uri, value);
-            view.setImageDrawable(drawable);
-            if (drawable instanceof Animatable) {
-                ((Animatable)drawable).start();
-            }
+            view.setImageDrawable(mTransformer.transform(uri, value));
         }
     }
 

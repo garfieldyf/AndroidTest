@@ -1153,6 +1153,23 @@ public final class FileUtils {
         }
 
         /**
+         * Equivalent to calling <tt>FileUtils.mkdirs(path, flags)</tt>.
+         * @see FileUtils#mkdirs(String, int)
+         */
+        public final int mkdirs(int flags) {
+            return FileUtils.mkdirs(path, flags);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.stat(path)</tt>.
+         * @see FileUtils#stat(String)
+         */
+        public final Stat stat() {
+            final Stat stat = new Stat();
+            return (FileUtils.stat(path, stat) == 0 ? stat : null);
+        }
+
+        /**
          * Equivalent to calling <tt>FileUtils.listFiles(path, flags)</tt>.
          * @see FileUtils#listFiles(String, int)
          */

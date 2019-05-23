@@ -22,30 +22,18 @@ public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
     }
 
     @Override
-    protected void onStartLoading(String url, LoadParams<String, JSONObject>[] params) {
-        final File cacheFile = params[0].getCacheFile(url);
-        if (cacheFile == null || !cacheFile.exists()) {
-            // Show loading UI.
-            Log.i("abc", "JsonLoader - Show loading UI.");
-        }
-    }
-
-    @Override
-    protected void onLoadComplete(String url, LoadParams<String, JSONObject>[] params, LoadResult<JSONObject> result) {
+    protected void onLoadComplete(String key, LoadParams<String, JSONObject> params, JSONObject result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
             return;
         }
 
-        // Hide loading UI, if need.
-        if (result.result != null) {
-            // Loading succeeded, update UI.
-            Log.i("abc", "JsonLoader - Load Succeeded Update UI. - " + getName(result.result));
-            // Toast.makeText(activity, "JsonLoader - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
-        } else if (!result.hitCache) {
-            // Loading failed and file cache not hit, show error UI.
-            Log.i("abc", "JsonLoader - Show error UI.");
+        if (result != null) {
+            Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName(result));
+            // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.i("abc", "JsonLoader - Load Failed, Show error UI.");
         }
     }
 

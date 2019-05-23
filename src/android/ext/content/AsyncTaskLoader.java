@@ -148,8 +148,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     }
 
     /**
-     * Called on the UI thread when a load is complete. This method
-     * won't be invoked if the task was cancelled.
+     * Called on the UI thread when a load is complete. <p>This method won't be
+     * invoked if the task was cancelled.</p>
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param result The result, returned earlier by {@link #loadInBackground}.

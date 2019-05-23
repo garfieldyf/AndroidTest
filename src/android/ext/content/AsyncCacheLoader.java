@@ -5,13 +5,13 @@ import java.net.HttpURLConnection;
 import java.util.concurrent.Executor;
 import android.content.Context;
 import android.ext.content.AsyncCacheLoader.LoadParams;
-import android.ext.content.AsyncCacheLoader.LoadResult;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
+import android.util.Pair;
 
 /**
  * Class <tt>AsyncCacheLoader</tt> allows to load the data on a background thread
@@ -58,6 +58,7 @@ import android.util.Log;
  *         super(executor, ownerActivity);
  *     }
  *
+ *     // Optional override.
  *     {@code @Override}
  *     protected void onStartLoading(String url, LoadParams&lt;String, JSONObject&gt;[] params) {
  *         final File cacheFile = params[0].getCacheFile(url);
@@ -67,7 +68,7 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected void onLoadComplete(String url, LoadParams&lt;String, JSONObject&gt;[] params, LoadResult&lt;JSONObject&gt result) {
+ *     protected void onLoadComplete(String url, LoadParams&lt;String, JSONObject&gt; params, Result result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
@@ -75,14 +76,10 @@ import android.util.Log;
  *         }
  *
  *         // Hide loading UI, if need.
- *         if (result.result != null) {
- *             // Loading succeeded (may be file cache hit or download succeeded), update UI.
+ *         if (result != null) {
+ *             // Loading succeeded, update UI.
  *         } else {
- *             if (result.hitCache) {
- *                 // Loading succeeded, but the cache file's contents are equal the loaded file's contents, do nothing.
- *             } else {
- *                 // Loading failed and file cache not hit, show error or empty UI.
- *             }
+ *             // Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -93,7 +90,7 @@ import android.util.Log;
  * mLoader.load(url, new JsonLoadParams());</pre>
  * @author Garfield
  */
-public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, LoadResult<Result>> {
+public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key, LoadParams<Key, Result>, Pair<Result, Boolean>> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -114,20 +111,35 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
     }
 
     /**
-     * Called on the UI thread after {@link Task#setProgress(Object[])}. <p>The
-     * default implementation invoking {@link #onLoadComplete} to update UI.</p>
+     * Called on the UI thread when a load is complete. <p>This method won't be
+     * invoked if the task was cancelled.<p>
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
-     * @param values The result load from the cache file.
+     * @param result The result, returned earlier by {@link #loadInBackground}.
      */
-    @Override
-    @SuppressWarnings("unchecked")
-    protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
-        onLoadComplete(key, params, new LoadResult<Result>((Result)values[0], false));
+    protected void onLoadComplete(Key key, LoadParams<Key, Result> params, Result result) {
+        throw new RuntimeException("No Implementation, Subclass must be implementation!");
     }
 
     @Override
-    protected LoadResult<Result> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
+    @SuppressWarnings("unchecked")
+    protected void onProgressUpdate(Key key, LoadParams<Key, Result>[] params, Object[] values) {
+        onLoadComplete(key, params[0], (Result)values[0]);
+    }
+
+    @Override
+    protected void onLoadComplete(Key key, LoadParams<Key, Result>[] params, Pair<Result, Boolean> result) {
+        if (result.first != null) {
+            // Loading succeeded.
+            onLoadComplete(key, params[0], result.first);
+        } else if (!result.second) {
+            // Loading failed and the file cache not hit.
+            onLoadComplete(key, params[0], null);
+        }
+    }
+
+    @Override
+    protected Pair<Result, Boolean> loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result>[] loadParams) {
         boolean hitCache = false;
         Result result = null;
         try {
@@ -145,7 +157,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
             Log.e(getClass().getName(), "Couldn't load JSON data - key = " + key + "\n" + e);
         }
 
-        return new LoadResult<Result>(result, hitCache);
+        return new Pair<Result, Boolean>(result, hitCache);
     }
 
     private boolean loadFromCache(Task<?, ?> task, Key key, LoadParams<Key, Result> params, File cacheFile) {
@@ -154,6 +166,7 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
             final Result result = params.parseResult(key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
             if (result != null) {
+                // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
                 return true;
             }
@@ -186,30 +199,6 @@ public abstract class AsyncCacheLoader<Key, Result> extends AsyncTaskLoader<Key,
         }
 
         return null;
-    }
-
-    /**
-     * Class <tt>LoadResult</tt> used to store the load result.
-     */
-    public static final class LoadResult<Result> {
-        /**
-         * The result of the load. If the result is <tt>null</tt> indicates the load failed
-         * or the cache file is hit and it's contents are equal the loaded file's contents.
-         */
-        public final Result result;
-
-        /**
-         * If <tt>true</tt> indicates the cache file has successfully loaded, <tt>false</tt> otherwise.
-         */
-        public final boolean hitCache;
-
-        /**
-         * Constructor
-         */
-        public LoadResult(Result result, boolean hitCache) {
-            this.result = result;
-            this.hitCache = hitCache;
-        }
     }
 
     /**

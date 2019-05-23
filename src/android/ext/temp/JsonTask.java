@@ -4,7 +4,6 @@ import java.io.File;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.content.AsyncCacheLoader.LoadParams;
-import android.ext.content.AsyncCacheLoader.LoadResult;
 import android.ext.net.AsyncCacheTask;
 import android.ext.net.DownloadRequest;
 import android.ext.util.JsonUtils;
@@ -38,21 +37,18 @@ public class JsonTask extends AsyncCacheTask<String, JSONObject> {
     }
 
     @Override
-    protected void onPostExecute(LoadResult<JSONObject> result) {
+    protected void onExecuteComplete(JSONObject result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
             return;
         }
 
-        // Hide loading UI, if need.
-        if (result.result != null) {
-            // Loading succeeded, update UI.
-            Log.i("abc", "JsonTask - Load Succeeded Update UI.");
-            // Toast.makeText(activity, "JsonTask - Load Succeeded Update UI.", Toast.LENGTH_SHORT).show();
-        } else if (!result.hitCache) {
-            // Loading failed and file cache not hit, show error UI.
-            Log.i("abc", "JsonTask - Show error UI.");
+        if (result != null) {
+            Log.i("abc", "JsonTask - Load Succeeded, Update UI.");
+            // Toast.makeText(activity, "JsonTask - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.i("abc", "JsonTask - Load Failed, Show error UI.");
         }
     }
 }

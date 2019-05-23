@@ -5,12 +5,12 @@ import java.net.HttpURLConnection;
 import java.util.Arrays;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
-import android.ext.content.AsyncCacheLoader.LoadResult;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.JsonUtils;
 import android.util.Log;
+import android.util.Pair;
 
 /**
  * Class <tt>AsyncCacheTask</tt> allows to load the data on a background thread
@@ -56,21 +56,17 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected void onPostExecute(LoadResult&lt;JSONObject&gt result) {
+ *     protected void onExecuteComplete(Result result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
  *             return;
  *         }
  *
- *         if (result.result != null) {
- *             // Loading succeeded (may be file cache hit or download succeeded), update UI.
+ *         if (result != null) {
+ *             // Loading succeeded, update UI.
  *         } else {
- *             if (result.hitCache) {
- *                 // Loading succeeded, but the cache file's contents are equal the loaded file's contents, do nothing.
- *             } else {
- *                 // Loading failed and file cache not hit, show error or empty UI.
- *             }
+ *             // Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -78,7 +74,7 @@ import android.util.Log;
  * new JsonTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params, Object, LoadResult<Result>> {
+public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params, Object, Pair<Result, Boolean>> {
     /**
      * Constructor
      * @see #AsyncCacheTask(Object)
@@ -107,6 +103,15 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     }
 
     /**
+     * Called on the UI thread after {@link #doInBackground}. <p>This method
+     * won't be invoked if this task was cancelled.</p>
+     * @param result The result, returned earlier by {@link #doInBackground}.
+     */
+    protected void onExecuteComplete(Result result) {
+        throw new RuntimeException("No Implementation, Subclass must be implementation!");
+    }
+
+    /**
      * Called on a background thread to parse the data from the cache file. Subclasses
      * should override this method to parse their results. <p>The default implementation
      * parse the cache file to a JSON data (<tt>JSONObject</tt> or <tt>JSONArray</tt>).</p>
@@ -128,20 +133,26 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
      */
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
-    /**
-     * Runs on the UI thread after {@link #publishProgress} is invoked. <p>The
-     * default implementation invoking {@link #onPostExecute} to update UI.</p>
-     * @param values The result load from the cache file.
-     */
     @Override
     @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Object... values) {
-        onPostExecute(new LoadResult<Result>((Result)values[0], false));
+        onExecuteComplete((Result)values[0]);
+    }
+
+    @Override
+    protected void onPostExecute(Pair<Result, Boolean> result) {
+        if (result.first != null) {
+            // Loading succeeded.
+            onExecuteComplete(result.first);
+        } else if (!result.second) {
+            // Loading failed and the file cache not hit.
+            onExecuteComplete(null);
+        }
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected LoadResult<Result> doInBackground(Params... params) {
+    protected Pair<Result, Boolean> doInBackground(Params... params) {
         boolean hitCache = false;
         Result result = null;
         try {
@@ -158,7 +169,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             Log.e(getClass().getName(), "Couldn't load JSON data - params = " + Arrays.toString(params) + "\n" + e);
         }
 
-        return new LoadResult<Result>(result, hitCache);
+        return new Pair<Result, Boolean>(result, hitCache);
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {

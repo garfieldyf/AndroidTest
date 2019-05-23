@@ -39,12 +39,12 @@ public final class ClassUtils {
     }
 
     /**
-     * Retrieves the R.styleable.<em>name</em> attribute value.
+     * Returns the <em>package</em>.R.styleable.<em>name</em> field value.
      * @param context The <tt>Context</tt>.
-     * @param name The name of styleable to retrieve.
-     * @return The value of the attribute field.
+     * @param name The name of field.
+     * @return The value of the <em>name</em> field.
      */
-    public static Object getAttributeValue(Context context, String name) {
+    public static Object getFieldValue(Context context, String name) {
         try {
             return Class.forName(context.getPackageName() + ".R$styleable").getField(name).get(null);
         } catch (Throwable e) {

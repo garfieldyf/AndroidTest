@@ -36,7 +36,7 @@ public class ScaleParameters extends Parameters {
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "ScaleParameters"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "ScaleParameters"));
         this.value = context.getResources().getDisplayMetrics().densityDpi;
         this.scale = a.getFloat(0 /* R.styleable.ScaleParameters_scale */, 0);
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");

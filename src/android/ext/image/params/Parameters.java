@@ -63,10 +63,10 @@ public class Parameters {
      * @see #Parameters(Config, int, boolean)
      */
     public Parameters(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "Parameters"));
-        this.value   = fixSampleSize(a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_sampleSize"), 1));
-        this.config  = a.getInt((int)ClassUtils.getAttributeValue(context, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
-        this.mutable = a.getBoolean((int)ClassUtils.getAttributeValue(context, "Parameters_mutable"), false);
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "Parameters"));
+        this.value   = fixSampleSize(a.getInt((int)ClassUtils.getFieldValue(context, "Parameters_sampleSize"), 1));
+        this.config  = a.getInt((int)ClassUtils.getFieldValue(context, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
+        this.mutable = a.getBoolean((int)ClassUtils.getFieldValue(context, "Parameters_mutable"), false);
         a.recycle();
     }
 

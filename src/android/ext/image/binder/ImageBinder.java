@@ -87,9 +87,9 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     public ImageBinder(Context context, AttributeSet attrs) {
         inflateAttributes(context, attrs);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getAttributeValue(context, "ImageBinder"));
-        final int maxSize  = a.getInt((int)ClassUtils.getAttributeValue(context, "ImageBinder_maxCacheSize"), 0);
-        mDefaultImage = a.getDrawable((int)ClassUtils.getAttributeValue(context, "ImageBinder_defaultImage"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "ImageBinder"));
+        final int maxSize  = a.getInt((int)ClassUtils.getFieldValue(context, "ImageBinder_maxCacheSize"), 0);
+        mDefaultImage = a.getDrawable((int)ClassUtils.getFieldValue(context, "ImageBinder_defaultImage"));
         a.recycle();
 
         final Transformer transformer = inflateTransformer(context, (XmlPullParser)attrs);

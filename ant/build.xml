@@ -7,7 +7,7 @@
     <property name="ndk.module" value="funshion" />
     <property name="ndk.package" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
-    <property name="jar.file.name" value="${ndk.module}.jar" />
+    <property name="out.file.name" value="${ndk.module}.jar" />
     <property name="source.file.name" value="${ndk.module}-sources.jar" />
     <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" />
     <!-- <property name="ndk.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" /> -->
@@ -67,18 +67,18 @@
         <delete file="${src.dir}/${ndk.package}/widget/BarcodeCameraView.java" />
     </target>
 
-    <!-- target -pre-compile-debug -->
-    <target name="-pre-compile-debug">
+    <!-- target -set-debug-mode -->
+    <target name="-set-debug-mode">
         <property name="ndk.debug" value="1" />
-        <property name="file.out.dir" value="${out.dir}/debug" />
-        <echo level="info">Builds the ${ndk.module} module in DEBUG mode.</echo>
+        <property name="out.file.dir" value="${out.dir}/debug" />
+        <echo level="info">Build the ${out.file.name} in DEBUG mode.</echo>
     </target>
 
-    <!-- target -pre-compile-release -->
-    <target name="-pre-compile-release">
+    <!-- target -set-release-mode -->
+    <target name="-set-release-mode">
         <property name="ndk.debug" value="0" />
-        <property name="file.out.dir" value="${out.dir}/release" />
-        <echo level="info">Builds the ${ndk.module} module in RELEASE mode.</echo>
+        <property name="out.file.dir" value="${out.dir}/release" />
+        <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
 
         <!-- delete call the __checkXXX methods -->
         <echo level="info">Delete __checkXXX() methods</echo>
@@ -99,7 +99,7 @@
             classpath="${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
-        <jar destfile="${file.out.dir}/${jar.file.name}" basedir="${class.dir}">
+        <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
             <manifest>
                 <attribute name="Built-By" value="${author}" />
                 <attribute name="Version" value="${version}" />
@@ -108,7 +108,7 @@
         </jar>
 
         <!-- build source jar file -->
-        <jar destfile="${file.out.dir}/${source.file.name}" basedir="${src.dir}">
+        <jar destfile="${out.file.dir}/${source.file.name}" basedir="${src.dir}">
             <manifest>
                 <attribute name="Built-By" value="${author}" />
                 <attribute name="Version" value="${version}" />
@@ -127,7 +127,7 @@
         </exec>
 
         <!-- copy so file -->
-        <copy todir="${file.out.dir}" overwrite="true">
+        <copy todir="${out.file.dir}" overwrite="true">
             <fileset dir="${basedir}/../libs" includes="**/*.so" />
         </copy>
 
@@ -145,13 +145,13 @@
 
         <proguard>
             -include        "${basedir}/../proguard.txt"
-            -injars         ${file.out.dir}/${jar.file.name}
-            -outjars        "${file.out.dir}/${jar.file.name}"
+            -injars         ${out.file.dir}/${out.file.name}
+            -outjars        "${out.file.dir}/${out.file.name}"
             -libraryjars    ${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
-            -dump           "${file.out.dir}/dump.txt"
-            -printseeds     "${file.out.dir}/seeds.txt"
-            -printusage     "${file.out.dir}/usage.txt"
-            -printmapping   "${file.out.dir}/mapping.txt"
+            -dump           "${out.file.dir}/dump.txt"
+            -printseeds     "${out.file.dir}/seeds.txt"
+            -printusage     "${out.file.dir}/usage.txt"
+            -printmapping   "${out.file.dir}/mapping.txt"
         </proguard>
     </target>
 
@@ -161,11 +161,11 @@
         <property name="dex.file.name" value="${ndk.module}-dex.jar" />
 
         <!-- compile dex file -->
-        <echo level="info">dx --dex --output=${ndk.module}-dex.jar ${jar.file.name}</echo>
+        <echo level="info">dx --dex --output=${ndk.module}-dex.jar ${out.file.name}</echo>
         <exec executable="cmd.exe">
-            <arg line="/C ${dx.dir}/dx.bat --dex --output=${file.out.dir}/${dex.file.name} ${file.out.dir}/${jar.file.name}" />
+            <arg line="/C ${dx.dir}/dx.bat --dex --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
         </exec>
-        <echo level="info">Install: ${file.out.dir}/${dex.file.name}</echo>
+        <echo level="info">Install: ${out.file.dir}/${dex.file.name}</echo>
     </target>
     <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
 
@@ -182,7 +182,7 @@
             </fileset>
         </delete>
 
-        <echo level="info">Install: ${file.out.dir}/${jar.file.name}</echo>
+        <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
         <echo level="info">Install: ${out.dir}/attrs_barcode_widget.xml</echo>
         <echo level="info">Install: ${out.dir}/attrs_${ndk.module}_widget.xml</echo>
         <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
@@ -191,7 +191,7 @@
     <!-- target -clean -->
     <target name="-clean">
         <echo level="info">Deletes output files...</echo>
-        <delete dir="${file.out.dir}"/>
+        <delete dir="${out.file.dir}"/>
     </target>
 
     <!-- target compile-so -->
@@ -200,16 +200,16 @@
     </target>
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -post-compile" />
+    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -set-debug-mode, -compile-jar, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -post-compile" />
+    <target name="release" depends="-clean, -copy, -remove-barcode-if, -set-release-mode, -compile-jar, -post-compile" />
 
     <!-- target compile-debug -->
-    <target name="compile-debug" depends="-clean, -copy, -remove-barcode-if, -pre-compile-debug, -compile-jar, -compile-so, -post-compile" />
+    <target name="compile-debug" depends="-clean, -copy, -remove-barcode-if, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target compile-release -->
-    <target name="compile-release" depends="-clean, -copy, -remove-barcode-if, -pre-compile-release, -compile-jar, -compile-so, -post-compile" />
+    <target name="compile-release" depends="-clean, -copy, -remove-barcode-if, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all -->
     <target name="all">

@@ -5,6 +5,12 @@
     <property name="java.target" value="1.7" />
     <property name="libs.jar.dir" value="E:/Include/java" />
 
+    <!-- properties for signing -->
+    <property name="key.store" value="${basedir}/AuroraKS.keystore" />
+    <property name="key.alias" value="aurora" />
+    <property name="key.store.password" value="QEDdfx@!34" />
+    <property name="key.alias.password" value="lk#$AA78YG" />
+
     <!-- pre-build target -->
     <target name="-pre-build">
         <!-- clean bin and gen dir -->
@@ -23,34 +29,39 @@
         -->
     </target>
 
-    <!-- debug output filename -->
-    <target name="-rename-debug-out-file">
+    <!-- -pre-build-debug-mode target -->
+    <target name="-pre-build-debug-mode">
+        <!-- debug output filename -->
+        <echo level="info">Build the ${ant.project.name} in DEBUG mode.</echo>
         <property name="out.file.dir" value="debug" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_debug.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/debug" />
     </target>
 
-    <target name="-set-debug-files" depends="-rename-debug-out-file, android_rules.-set-debug-files" />
+    <target name="-set-debug-files" depends="-pre-build-debug-mode, android_rules.-set-debug-files" />
 
-    <!-- release output filename -->
-    <target name="-rename-release-out-file">
+    <!-- -pre-build-release-mode target -->
+    <target name="-pre-build-release-mode">
+        <!-- release output filename -->
+        <echo level="info">Build the ${ant.project.name} in RELEASE mode.</echo>
         <property name="out.file.dir" value="release" />
         <property name="out.file.name" value="${ant.project.name}_${version.name}_release.apk" />
         <property name="out.final.file" location="${out.absolute.dir}/${out.file.name}" />
         <property name="funshion.libs.dir" value="${basedir}/funshion/release" />
     </target>
 
-    <target name="-set-release-mode" depends="-rename-release-out-file, android_rules.-set-release-mode" />
+    <target name="-set-release-mode" depends="-pre-build-release-mode, android_rules.-set-release-mode" />
 
-    <!-- include jars -->
-    <target name="-pre-compile"> 
+    <!-- -pre-compile target -->
+    <target name="-pre-compile">
         <!-- copy so files -->
         <echo message="Copy libs from ${funshion.libs.dir} to ${jar.libs.dir}" />
         <copy todir="${jar.libs.dir}" overwrite="true">
             <fileset dir="${funshion.libs.dir}" excludes="**/*.jar" />
         </copy>
 
+        <!-- include jars -->
         <path id="zxing.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${libs.jar.dir}/zxing/zxing.jar" />
@@ -97,12 +108,6 @@
         <echo message="program jars : ${toString:project.all.jars.path}" />
     </target>
 
-    <!-- properties for signing -->
-    <property name="key.store" value="${basedir}/AuroraKS.keystore" />
-    <property name="key.alias" value="aurora" />
-    <property name="key.store.password" value="QEDdfx@!34" />
-    <property name="key.alias.password" value="lk#$AA78YG" />
-
     <!-- post-build target -->
     <target name="-post-build">
         <property name="out.final.dir" value="${basedir}/outputs/${version.name}" />
@@ -126,10 +131,17 @@
             <arg line="/C java -jar ${vasdolly.jar.path} put -c ${basedir}/channel.txt ${out.final.file} ${out.absolute.dir} " />
         </exec>
 
-        <!-- copy the build apk files -->
+        <!-- copy the apk files to out directory -->
         <mkdir dir="${out.final.dir}/${out.file.dir}" />
         <copy todir="${out.final.dir}/${out.file.dir}" overwrite="true">
             <fileset dir="${out.absolute.dir}" />
         </copy>
     </target>
+
+    <!-- target all -->
+    <target name="all">
+        <antcall target="debug" inheritAll="false" inheritRefs="false" />
+        <antcall target="release" inheritAll="false" inheritRefs="false" />
+    </target>
+
 </project>

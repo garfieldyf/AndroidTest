@@ -261,7 +261,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param context The <tt>Context</tt>.
          */
         public URLLoader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, "._simple_image_cache");
+            mCacheDir = FileUtils.getCacheDir(context, null);
         }
 
         @Override
@@ -270,7 +270,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
         @Override
         public Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer) {
-            final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
+            final File imageFile = new File(mCacheDir, "._iul-" + Thread.currentThread().hashCode());
             try {
                 return loadImage(task, url, imageFile, target, params, flags, buffer);
             } finally {

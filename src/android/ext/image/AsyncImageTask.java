@@ -186,7 +186,7 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
             return decodeImage(uri, tempBuffer);
         }
 
-        final File imageFile = new File(FileUtils.getCacheDir(mContext, "._simple_image_cache"), Integer.toString(Thread.currentThread().hashCode()));
+        final File imageFile = new File(FileUtils.getCacheDir(mContext, null), "._ait-" + Thread.currentThread().hashCode());
         try {
             final int statusCode = newDownloadRequest(uri).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);

@@ -11,10 +11,10 @@ import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
-public class JsonTask extends AsyncCacheTask<String, JSONObject> {
-    private final LoadParams<String, JSONObject> mLoadParams;
+public class JsonTask extends AsyncCacheTask<String> {
+    private final LoadParams<String> mLoadParams;
 
-    public JsonTask(Activity ownerActivity, LoadParams<String, JSONObject> params) {
+    public JsonTask(Activity ownerActivity, LoadParams<String> params) {
         super(ownerActivity);
         mLoadParams = params;
     }
@@ -30,17 +30,22 @@ public class JsonTask extends AsyncCacheTask<String, JSONObject> {
     }
 
     @Override
-    protected JSONObject parseResult(String[] params, File cacheFile) throws Exception {
+    protected Object parseResult(String[] params, File cacheFile) throws Exception {
         final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/title"));
         final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, this);
         return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
     }
 
     @Override
-    protected void onExecuteComplete(JSONObject result) {
+    protected void onPostExecute(Object result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
+            return;
+        }
+
+        if (result == EMPTY_RESULT) {
+            //Log.i("abc", "JsonTask - Load EMPTY_RESULT, do not update UI.");
             return;
         }
 

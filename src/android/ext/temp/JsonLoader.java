@@ -16,21 +16,26 @@ import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
-public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
+public final class JsonLoader extends AsyncCacheLoader<String> {
     public JsonLoader(Activity ownerActivity) {
         super(MainApplication.sInstance.getExecutor(), ownerActivity);
     }
 
     @Override
-    protected void onLoadComplete(String key, LoadParams<String, JSONObject> params, JSONObject result) {
+    protected void onLoadComplete(String key, LoadParams<String>[] params, Object result) {
         final Activity activity = getOwnerActivity();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
             return;
         }
 
+        if (result == EMPTY_RESULT) {
+            //Log.i("abc", "JsonLoader - Load EMPTY_RESULT, do not update UI.");
+            return;
+        }
+
         if (result != null) {
-            Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName(result));
+            Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName((JSONObject)result));
             // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
         } else {
             Log.i("abc", "JsonLoader - Load Failed, Show error UI.");
@@ -42,7 +47,7 @@ public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
 
-    public static class URLLoadParams extends LoadParams<String, JSONObject> {
+    public static class URLLoadParams extends LoadParams<String> {
         @Override
         public DownloadRequest newDownloadRequest(String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
@@ -65,7 +70,7 @@ public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
         }
 
         @Override
-        public JSONObject parseResult(String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public Object parseResult(String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
             final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
@@ -73,6 +78,11 @@ public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
     }
 
     public static class AppLoadParams extends JsonLoadParams {
+//        @Override
+//        public File getCacheFile(String url) {
+//            return null;
+//        }
+
         @Override
         public DownloadRequest newDownloadRequest(String url) throws Exception {
             String s = "{\"channelId\": 5001,    \"cpuType\": \"638_cvte\",  \"deviceCode\": \"cvte\",   \"mac\": \"28:76:cd:01:d9:ea\",     \"packages\": [\"com.jrm.localmm\", \"com.tencent.qqmusictv\", \"com.ocj.tv\"],     \"requestId\": \"07d83d68-9cfe-4746-b172-f02b7eacc99f\",    \"romVersion\": \"5.0.0_2019-04-10_11-41\",     \"version\": \"4.1.1.1\" }";
@@ -84,7 +94,7 @@ public final class JsonLoader extends AsyncCacheLoader<String, JSONObject> {
         }
 
         @Override
-        public JSONObject parseResult(String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public Object parseResult(String key, File cacheFile, Cancelable cancelable) throws Exception {
             final JSONObject result = JsonUtils.parse(MainApplication.sInstance, cacheFile, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }

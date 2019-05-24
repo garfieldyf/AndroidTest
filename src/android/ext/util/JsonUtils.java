@@ -423,7 +423,7 @@ public final class JsonUtils {
         return true;
     }
 
-    private static Number readNumber(JsonReader reader) throws IOException {
+    private static Number parseNumber(JsonReader reader) throws IOException {
         final String string = reader.nextString();
         if (string.indexOf('.') == -1) {
             try {
@@ -450,7 +450,7 @@ public final class JsonUtils {
                 break;
 
             case NUMBER:
-                result.put(readNumber(reader));
+                result.put(parseNumber(reader));
                 break;
 
             case BOOLEAN:
@@ -490,7 +490,7 @@ public final class JsonUtils {
                 break;
 
             case NUMBER:
-                result.put(name, readNumber(reader));
+                result.put(name, parseNumber(reader));
                 break;
 
             case BOOLEAN:

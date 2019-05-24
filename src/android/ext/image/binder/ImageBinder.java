@@ -149,6 +149,8 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         final ImageView view = (ImageView)target;
         if (value == null) {
             view.setImageDrawable(mDefaultImage);
+        } else if (value instanceof Drawable) {
+            view.setImageDrawable((Drawable)value);
         } else {
             view.setImageDrawable(mTransformer.transform(uri, value));
         }
@@ -240,10 +242,8 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
         @Override
         public Drawable transform(Object uri, Object image) {
-            Drawable drawable;
-            if (image instanceof Drawable) {
-                drawable = (Drawable)image;
-            } else if ((drawable = mImageCache.get(uri)) == null) {
+            Drawable drawable = mImageCache.get(uri);
+            if (drawable == null) {
                 mImageCache.put(uri, drawable = mTransformer.transform(uri, image));
             }
 

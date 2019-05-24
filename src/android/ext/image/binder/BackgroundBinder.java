@@ -53,6 +53,8 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
         final View view = (View)target;
         if (value == null) {
             view.setBackground(mDefaultImage);
+        } else if (value instanceof Drawable) {
+            view.setBackground((Drawable)value);
         } else {
             view.setBackground(mTransformer.transform(uri, value));
         }

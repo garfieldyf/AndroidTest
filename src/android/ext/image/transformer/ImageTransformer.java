@@ -32,9 +32,7 @@ public final class ImageTransformer implements Transformer {
 
     @Override
     public Drawable transform(Object uri, Object image) {
-        if (image instanceof Drawable) {
-            return (Drawable)image;
-        } else if (image instanceof Bitmap) {
+        if (image instanceof Bitmap) {
             return mBitmapTransformer.transform(uri, image);
         } else {
             return mImageTransformer.transform(uri, image);

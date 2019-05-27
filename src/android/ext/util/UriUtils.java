@@ -18,6 +18,7 @@ public final class UriUtils {
     public static final String SCHEME_FTP   = "ftp";
     public static final String SCHEME_HTTP  = "http";
     public static final String SCHEME_HTTPS = "https";
+    public static final String SCHEME_ANDROID_ASSET = "android.asset";
 
     /**
      * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
@@ -25,27 +26,36 @@ public final class UriUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
+     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to open.
      * @return The <tt>InputStream</tt>.
      * @throws IOException if the <em>uri</em> could not be opened.
+     * @see #getFileUri(String)
+     * @see #getAssetUri(String)
+     * @see #getResourceUri(String, Object)
      */
     public static InputStream openInputStream(Context context, Object uri) throws IOException {
         DebugUtils.__checkError(uri == null, "uri == null");
         if (uri instanceof File) {
             return new FileInputStream((File)uri);
+        }
+
+        // The uri may be a String, Uri or Object.
+        final String uriString = uri.toString();
+        if (FileUtils.isAbsolutePath(uriString)) {
+            return new FileInputStream(uriString);
+        } else if (SCHEME_FILE.regionMatches(true, 0, uriString, 0, 4)) {
+            // Skips the prefix 'file://'
+            DebugUtils.__checkError(uriString.length() <= 7, "Invalid uri - " + uriString);
+            return new FileInputStream(uriString.substring(7));
+        } else if (SCHEME_ANDROID_ASSET.regionMatches(true, 0, uriString, 0, 13)) {
+            // Skips the prefix 'android.asset://'
+            DebugUtils.__checkError(uriString.length() <= 16, "Invalid uri - " + uriString);
+            return context.getAssets().open(uriString.substring(16), AssetManager.ACCESS_STREAMING);
         } else {
-            // The uri may be a String, Uri or Object.
-            final String uriString = uri.toString();
-            if (FileUtils.isAbsolutePath(uriString)) {
-                return new FileInputStream(uriString);
-            } else if (SCHEME_FILE.regionMatches(true, 0, uriString, 0, 4)) {
-                return openInputStream(context, uriString);
-            } else {
-                return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
-            }
+            return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
         }
     }
 
@@ -53,6 +63,9 @@ public final class UriUtils {
      * Returns the scheme with the specified <em>uri</em>. Example: "http".
      * @param uri The uri to parse.
      * @return The scheme or <tt>null</tt> if the <em>uri</em> has no scheme.
+     * @see #getFileUri(String)
+     * @see #getAssetUri(String)
+     * @see #getResourceUri(String, Object)
      */
     public static String parseScheme(Object uri) {
         DebugUtils.__checkError(uri == null, "uri == null");
@@ -78,7 +91,8 @@ public final class UriUtils {
     }
 
     /**
-     * Constructs a scheme is "file" uri string.
+     * Constructs a scheme is "file" uri string. The returned
+     * string such as <tt>"file:///sdcard/docs/home.html"</tt>.
      * @param path The file path, must be absolute file path.
      * @return The uri string.
      */
@@ -88,14 +102,14 @@ public final class UriUtils {
     }
 
     /**
-     * Constructs a scheme is "file" and authority is "android_asset" uri string.
-     * The returned string such as <tt>"file:///android_asset/docs/home.html"</tt>.
+     * Constructs a scheme is "android.asset" uri string. The returned string such as
+     * <tt>"android.asset://docs/home.html"</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
      * @return The uri string.
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "filename == null");
-        return (SCHEME_FILE + SCHEME_SEPARATOR + DIR_ANDROID_ASSET + filename);
+        return (SCHEME_ANDROID_ASSET + SCHEME_SEPARATOR + filename);
     }
 
     /**
@@ -111,7 +125,8 @@ public final class UriUtils {
     }
 
     /**
-     * Constructs a scheme is "android.resource" uri string.
+     * Constructs a scheme is "android.resource" uri string. The returned string such as
+     * <tt>"android.resource://<em>packageName</em>/drawable/ic_launcher"</tt>.
      * @param packageName The application's package name.
      * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
@@ -124,20 +139,7 @@ public final class UriUtils {
         return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
     }
 
-    private static InputStream openInputStream(Context context, String uri) throws IOException {
-        DebugUtils.__checkError(uri.length() <= 7, "Invalid uri - " + uri);
-        if (uri.indexOf(DIR_ANDROID_ASSET, 7) == -1) {
-            // Skips the prefix 'file://'
-            return new FileInputStream(uri.substring(7));
-        } else {
-            // Skips the prefix 'file:///android_asset/'
-            DebugUtils.__checkError(uri.length() <= 22, "Invalid uri - " + uri);
-            return context.getAssets().open(uri.substring(22), AssetManager.ACCESS_STREAMING);
-        }
-    }
-
-    private static final String SCHEME_SEPARATOR  = "://";
-    private static final String DIR_ANDROID_ASSET = "/android_asset/";
+    private static final String SCHEME_SEPARATOR = "://";
 
     /**
      * This utility class cannot be instantiated.

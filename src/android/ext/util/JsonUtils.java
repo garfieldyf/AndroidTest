@@ -318,7 +318,7 @@ public final class JsonUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
+     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to read the data.
@@ -328,6 +328,7 @@ public final class JsonUtils {
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
      * @see #parse(JsonReader, Cancelable)
+     * @see UriUtils#openInputStream(Context, Object)
      */
     public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException, JSONException {
         final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri)));

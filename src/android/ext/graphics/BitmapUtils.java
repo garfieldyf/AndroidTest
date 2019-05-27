@@ -126,13 +126,14 @@ public final class BitmapUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
+     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
      * @param opts The {@link Options} to use for decoding.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @throws IOException if an error occurs while decode from <em>uri</em>.
+     * @see UriUtils#openInputStream(Context, Object)
      */
     public static Bitmap decodeBitmap(Context context, Object uri, Options opts) throws IOException {
         final InputStream is = UriUtils.openInputStream(context, uri);
@@ -190,7 +191,7 @@ public final class BitmapUtils {
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android_asset ({@link #SCHEME_FILE})</li>
+     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.

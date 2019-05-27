@@ -259,7 +259,7 @@ public final class PackageUtils {
 
         /**
          * Sets a {@link Cancelable} to be check the operation is cancelled.
-         * @param cancelable A {@link Cancelable}. If the operation was cancelled
+         * @param cancelable A {@link Cancelable}. If the operation is cancelled
          * before it completed normally the parsed result is undefined.
          * @return This parser.
          */

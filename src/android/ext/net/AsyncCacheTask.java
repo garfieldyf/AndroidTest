@@ -3,9 +3,9 @@ package android.ext.net;
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
 import java.util.Arrays;
+import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
-import android.ext.content.AsyncCacheLoader;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -25,7 +25,7 @@ import android.util.Log;
  *     {@code @Override}
  *     protected File getCacheFile(String[] urls) {
  *         // Builds the cache file, For example:
- *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
+ *         return new File(mContext.getFilesDir(), "xxx/cacheFile.json");
  *     }
  *
  *     {@code @Override}
@@ -41,7 +41,7 @@ import android.util.Log;
  *         }
  *
  *         // Parse the JSON data ... ...
- *         final JSONObject result = JsonUtils.parse(context, cacheFile, this);
+ *         final JSONObject result = JsonUtils.parse(mContext, cacheFile, this);
  *
  *         // Check the result is valid.
  *         if (result != null && result.optInt("retCode") == 200) {
@@ -59,7 +59,7 @@ import android.util.Log;
  *             return;
  *         }
  *
- *         if (result == EMPTY_RESULT) {
+ *         if (result == this) {
  *             // The cache file's contents are equal the downloaded file's contents, do not update UI.
  *             return;
  *         }
@@ -76,22 +76,28 @@ import android.util.Log;
  * @author Garfield
  */
 public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object, Object> {
-    public static final Object EMPTY_RESULT = AsyncCacheLoader.EMPTY_RESULT;
+    /**
+     * The application <tt>Context</tt>.
+     */
+    public final Context mContext;
 
     /**
      * Constructor
-     * @see #AsyncCacheTask(Object)
+     * @param context The <tt>Context</tt>.
+     * @see #AsyncCacheTask(Activity)
      */
-    public AsyncCacheTask() {
+    public AsyncCacheTask(Context context) {
+        mContext = context.getApplicationContext();
     }
 
     /**
      * Constructor
-     * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncCacheTask()
+     * @param activity The <tt>Activity</tt>.
+     * @see #AsyncCacheTask(Context)
      */
-    public AsyncCacheTask(Object owner) {
-        super(owner);
+    public AsyncCacheTask(Activity activity) {
+        super(activity);
+        mContext = activity.getApplicationContext();
     }
 
     /**
@@ -116,7 +122,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
      * @see JsonUtils#parse(Context, Object, Cancelable)
      */
     protected Object parseResult(Params[] params, File cacheFile) throws Exception {
-        return JsonUtils.parse(null, cacheFile, this);
+        return JsonUtils.parse(mContext, cacheFile, this);
     }
 
     /**
@@ -139,7 +145,9 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
+                DebugUtils.__checkStartMethodTracing();
                 result = download(params);
+                DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download");
             } else {
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
@@ -154,12 +162,11 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
     }
 
     private Object download(Params[] params) throws Exception {
-        final File tempFile = File.createTempFile("._act-" + Thread.currentThread().hashCode(), null, null);
-        DebugUtils.__checkDebug(true, getClass().getSimpleName(), tempFile.getPath());
+        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._act-" + Thread.currentThread().hashCode());
         try {
             final int statusCode = newDownloadRequest(params).download(tempFile.getPath(), this, null);
-            final Object result = (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
-            DebugUtils.__checkError(result == EMPTY_RESULT, "Invalid parse - result == EMPTY_RESULT");
+            final Object result  = (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
+            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             return result;
         } finally {
             tempFile.delete();
@@ -171,7 +178,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, cacheFile);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
-            DebugUtils.__checkError(result == EMPTY_RESULT, "Invalid parse - result == EMPTY_RESULT");
+            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -188,18 +195,18 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HTTP_OK && !isCancelled()) {
-            // If the cache file is hit and the cache file's contents are equal the temp file's
-            // contents. Deletes the temp file and returns EMPTY_RESULT, do not update UI.
+            // If the cache file is hit and the cache file's contents are equal the temp
+            // file's contents. Deletes the temp file and returns this, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 FileUtils.deleteFiles(tempFile, false);
-                return EMPTY_RESULT;
+                return this;
             }
 
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, new File(tempFile));
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
-            DebugUtils.__checkError(result == EMPTY_RESULT, "Invalid parse - result == EMPTY_RESULT");
+            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null && !isCancelled()) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

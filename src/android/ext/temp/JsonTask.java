@@ -21,12 +21,12 @@ public class JsonTask extends AsyncCacheTask<String> {
 
     @Override
     protected File getCacheFile(String[] params) {
-        return mLoadParams.getCacheFile(params[0]);
+        return mLoadParams.getCacheFile(mContext, params[0]);
     }
 
     @Override
     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
-        return mLoadParams.newDownloadRequest(params[0]);
+        return mLoadParams.newDownloadRequest(mContext, params[0]);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class JsonTask extends AsyncCacheTask<String> {
             return;
         }
 
-        if (result == EMPTY_RESULT) {
+        if (result == this) {
             //Log.i("abc", "JsonTask - Load EMPTY_RESULT, do not update UI.");
             return;
         }

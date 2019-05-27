@@ -165,7 +165,7 @@ public final class DeviceUtils {
              .append("\n  lowMemory = ").append(info.lowMemory)
              .append("\n  availThreshold = ").append(Formatter.formatFileSize(context, info.threshold))
              .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()))
-             .append("\n  appLargeHeap = ").append(getAppLargeHeap(context));
+             .append("\n  appLargeHeap = ").append(getAppHeapSize(context, "dalvik.vm.heapsize"));
         printer.println(infos.toString());
 
         // Dumps the system storage infos.
@@ -216,9 +216,9 @@ public final class DeviceUtils {
         }
     }
 
-    private static String getAppLargeHeap(Context context) {
-        final long largeHeap = SystemProperties.getLong("dalvik.vm.heapsize", 0);
-        return (largeHeap != 0 ? Formatter.formatFileSize(context, largeHeap << 20) : "N/A");
+    private static String getAppHeapSize(Context context, String key) {
+        final long heapSize = SystemProperties.getLong(key, 0);
+        return (heapSize != 0 ? Formatter.formatFileSize(context, heapSize << 20) : "N/A");
     }
 
     private static StringBuilder dumpStorageInfo(Context context, StatFs statFs, StringBuilder out) {

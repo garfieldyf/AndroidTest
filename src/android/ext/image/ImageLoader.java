@@ -117,6 +117,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
+     * Returns the {@link FileCache} associated with this loader.
+     * @return The <tt>FileCache</tt> or <tt>null</tt>.
+     */
+    public final FileCache getFileCache() {
+        return mLoader.getFileCache();
+    }
+
+    /**
      * Returns the {@link Binder} associated with this loader.
      * @return The <tt>Binder</tt>.
      */
@@ -148,7 +156,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public void remove(URI uri) {
         super.remove(uri);
         if (matchScheme(uri)) {
-            mLoader.remove(uri.toString());
+            mLoader.remove(uri);
         }
     }
 
@@ -228,14 +236,23 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Interface <tt>Loader</tt> used to load image from the specified url.
+     * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private static interface Loader<Image> {
+    /* package */ static abstract class Loader<Image> {
         /**
-         * Removes the cache file for the specified <em>url</em>.
-         * @param url The url to remove.
+         * Returns the {@link FileCache} associated with this loader.
+         * @return The <tt>FileCache</tt> or <tt>null</tt>.
          */
-        void remove(String url);
+        public FileCache getFileCache() {
+            return null;
+        }
+
+        /**
+         * Removes the cache file for the specified <em>uri</em>.
+         * @param uri The uri to remove.
+         */
+        public void remove(Object uri) {
+        }
 
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
@@ -247,13 +264,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer);
+        public abstract Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader implements Loader<Image> {
+    private final class URLLoader extends Loader<Image> {
         private final File mCacheDir;
 
         /**
@@ -262,10 +279,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          */
         public URLLoader(Context context) {
             mCacheDir = FileUtils.getCacheDir(context, null);
-        }
-
-        @Override
-        public void remove(String url) {
         }
 
         @Override
@@ -282,7 +295,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader<Image> {
+    private final class FileCacheLoader extends Loader<Image> {
         private final FileCache mCache;
 
         /**
@@ -293,13 +306,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             mCache = cache;
         }
 
-        /**
-         * Removes the cache file for the specified <em>url</em>.
-         * @param url The url to remove.
-         */
         @Override
-        public void remove(String url) {
-            mCache.remove(StringUtils.toHexString(MessageDigests.computeString(url, Algorithm.SHA1)));
+        public FileCache getFileCache() {
+            return mCache;
+        }
+
+        @Override
+        public void remove(Object uri) {
+            mCache.remove(StringUtils.toHexString(MessageDigests.computeString(uri.toString(), Algorithm.SHA1)));
         }
 
         @Override

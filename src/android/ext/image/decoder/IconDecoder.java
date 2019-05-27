@@ -7,7 +7,7 @@ import android.ext.image.ImageLoader;
 import android.ext.util.PackageUtils.PackageItemIcon;
 
 /**
- * Class <tt>IconDecoder</tt> used to load the {@link PackageItemInfo} icon and label.
+ * Class <tt>IconDecoder</tt> used to decode the {@link PackageItemInfo} icon and label.
  * @author Garfield
  */
 public final class IconDecoder implements ImageLoader.ImageDecoder<PackageItemIcon> {

@@ -95,14 +95,12 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
     @Override
     /* package */ synchronized V putImpl(K key, V value) {
-        int result = sizeOf(key, value);
+        final int result = sizeOf(key, value);
         DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + value);
         size += result;
         final V previous = map.put(key, value);
         if (previous != null) {
-            result = sizeOf(key, previous);
-            DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + previous);
-            size -= result;
+            size -= sizeOf(key, previous);
         }
 
         return previous;
@@ -117,7 +115,9 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
         final K key = toEvict.getKey();
         final V value = toEvict.getValue();
         map.remove(key);
-        size -= sizeOf(key, value);
+        final int result = sizeOf(key, value);
+        DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + value);
+        size -= result;
         return toEvict;
     }
 }

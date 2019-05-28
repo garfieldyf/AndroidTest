@@ -1,16 +1,11 @@
 package android.ext.cache;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import android.content.Context;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
-import android.text.format.Formatter;
 import android.util.ArrayMap;
-import android.util.Pair;
 import android.util.Printer;
 
 /**
@@ -63,49 +58,6 @@ public final class Caches {
         } else if (cache instanceof SynchronizedCache) {
             ((SynchronizedCache<?, ?>)cache).dump(context, printer);
         }
-    }
-
-    /* package */ static void dumpCacheFiles(Context context, Printer printer, File cacheDir, StringBuilder result, String className) {
-        final File[] files = cacheDir.listFiles();
-        final int size = ArrayUtils.getSize(files);
-        result.setLength(0);
-        if (size > 0) {
-            Arrays.sort(files);
-        }
-
-        long fileCount = 0, fileLength = 0;
-        for (int i = 0, index = 0; i < size; ++i) {
-            final File file = files[i];
-            if (file.isDirectory()) {
-                ++index;
-                final Pair<Integer, Long> pair = getFileCount(file);
-                result.append("  ").append(file.getName()).append(" { files = ").append(pair.first).append(", size = ").append(Formatter.formatFileSize(context, pair.second)).append(" }");
-
-                fileCount  += pair.first;
-                fileLength += pair.second;
-            }
-
-            if ((index % 4) == 0) {
-                result.append('\n');
-            }
-        }
-
-        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", className, size, fileCount, Formatter.formatFileSize(context, fileLength));
-        if (result.length() > 0) {
-            printer.println(result.toString());
-        }
-    }
-
-    private static Pair<Integer, Long> getFileCount(File dir) {
-        final File[] files  = dir.listFiles();
-        final int fileCount = ArrayUtils.getSize(files);
-
-        long fileLength = 0;
-        for (int i = 0; i < fileCount; ++i) {
-            fileLength += files[i].length();
-        }
-
-        return new Pair<Integer, Long>(fileCount, fileLength);
     }
 
     /**

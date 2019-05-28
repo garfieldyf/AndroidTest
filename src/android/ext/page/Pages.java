@@ -423,13 +423,15 @@ public final class Pages {
             final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
             DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
-            DebugUtils.dumpSummary(printer, result, 100, " PageCache [ %s, size = %d ] ", DebugUtils.toString(mPageCache), entries.size());
+            result.setLength(0);
+            printer.println(result.append("  PageCache [ ").append(DebugUtils.toString(mPageCache)).append(", size = ").append(entries.size()).append(" ]").toString());
+
             for (Entry<Integer, Page<E>> entry : entries) {
                 final Page<E> page = entry.getValue();
                 result.setLength(0);
 
-                formatter.format("  Page %-2d ==> ", entry.getKey());
-                printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+                formatter.format("    Page %-2d ==> ", entry.getKey());
+                printer.println(DebugUtils.toString(page, result).append(" { itemCount = ").append(page.getCount()).append(" }").toString());
             }
         }
 

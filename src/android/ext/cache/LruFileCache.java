@@ -1,8 +1,10 @@
 package android.ext.cache;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import android.content.Context;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.text.format.Formatter;
@@ -82,10 +84,55 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, file.length())).append(" }").toString());
         }
 
-        Caches.dumpCacheFiles(context, printer, mCacheDir, result, getClass().getSimpleName());
+        dumpCacheFiles(context, printer, result);
     }
 
     /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), count, maxSize());
+    }
+
+    private void dumpCacheFiles(Context context, Printer printer, StringBuilder result) {
+        final File[] files = mCacheDir.listFiles();
+        final int size = ArrayUtils.getSize(files);
+        result.setLength(0);
+        if (size > 0) {
+            Arrays.sort(files);
+        }
+
+        long fileCount = 0, fileLength = 0;
+        final long[] fileCounts = new long[2];
+        for (int i = 0, index = 0; i < size; ++i) {
+            final File file = files[i];
+            if (file.isDirectory()) {
+                ++index;
+                getFileCount(file, fileCounts);
+                result.append("  ").append(file.getName()).append(" { files = ").append(fileCounts[0]).append(", size = ").append(Formatter.formatFileSize(context, fileCounts[1])).append(" }");
+
+                fileCount  += fileCounts[0];
+                fileLength += fileCounts[1];
+            }
+
+            if ((index % 4) == 0) {
+                result.append('\n');
+            }
+        }
+
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", getClass().getSimpleName(), size, fileCount, Formatter.formatFileSize(context, fileLength));
+        if (result.length() > 0) {
+            printer.println(result.toString());
+        }
+    }
+
+    private static void getFileCount(File directory, long[] outCounts) {
+        final File[] files  = directory.listFiles();
+        final int fileCount = ArrayUtils.getSize(files);
+
+        long fileLength = 0;
+        for (int i = 0; i < fileCount; ++i) {
+            fileLength += files[i].length();
+        }
+
+        outCounts[0] = fileCount;
+        outCounts[1] = fileLength;
     }
 }

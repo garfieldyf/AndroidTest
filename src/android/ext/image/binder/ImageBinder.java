@@ -79,7 +79,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The base set of attribute values.
-     * @see #ImageBinder(ImageBinder, Drawable)
      * @see #ImageBinder(Cache, Transformer, Drawable)
      * @see #inflateAttributes(Context, AttributeSet)
      */
@@ -96,26 +95,11 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
-     * Copy constructor
-     * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will be
-     * share the drawable cache and transformer with the <em>binder</em>.</p>
-     * @param binder The <tt>ImageBinder</tt> to copy.
-     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
-     * @see #ImageBinder(Context, AttributeSet)
-     * @see #ImageBinder(Cache, Transformer, Drawable)
-     */
-    public ImageBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
-        mDefaultImage = defaultImage;
-        mTransformer  = binder.mTransformer;
-    }
-
-    /**
      * Constructor
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the drawables.
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @see #ImageBinder(Context, AttributeSet)
-     * @see #ImageBinder(ImageBinder, Drawable)
      */
     public ImageBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
         mDefaultImage = defaultImage;
@@ -136,6 +120,14 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      */
     public final Transformer<URI, Image> getTransformer() {
         return mTransformer;
+    }
+
+    /**
+     * Returns the image cache associated with this binder.
+     * @return The {@link Cache} or <tt>null</tt>.
+     */
+    public final Cache<URI, Drawable> getImageCache() {
+        return (mTransformer instanceof CacheTransformer ? ((CacheTransformer)mTransformer).mImageCache : null);
     }
 
     public void dump(Context context, Printer printer) {
@@ -226,9 +218,9 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     /**
      * Class <tt>CacheTransformer</tt> is an implementation of a {@link Transformer}.
      */
-    private static final class CacheTransformer implements Transformer {
-        private final Transformer mTransformer;
-        private final Cache<Object, Drawable> mImageCache;
+    private static final class CacheTransformer<URI> implements Transformer<URI, Object> {
+        /* package */ final Transformer mTransformer;
+        /* package */ final Cache<URI, Drawable> mImageCache;
 
         /**
          * Constructor
@@ -241,7 +233,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         }
 
         @Override
-        public Drawable transform(Object uri, Object image) {
+        public Drawable transform(URI uri, Object image) {
             Drawable drawable = mImageCache.get(uri);
             if (drawable == null) {
                 mImageCache.put(uri, drawable = mTransformer.transform(uri, image));

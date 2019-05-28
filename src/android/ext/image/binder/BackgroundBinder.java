@@ -16,24 +16,10 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The base set of attribute values.
-     * @see #BackgroundBinder(ImageBinder, Drawable)
      * @see #BackgroundBinder(Cache, Transformer, Drawable)
      */
     public BackgroundBinder(Context context, AttributeSet attrs) {
         super(context, attrs);
-    }
-
-    /**
-     * Copy constructor
-     * <p>Creates a new {@link BackgroundBinder} from the specified <em>binder</em>. The returned binder will
-     * be share the drawable cache and transformer with the <em>binder</em>.</p>
-     * @param binder The <tt>ImageBinder</tt> to copy.
-     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
-     * @see #BackgroundBinder(Context, AttributeSet)
-     * @see #BackgroundBinder(Cache, Transformer, Drawable)
-     */
-    public BackgroundBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
-        super(binder, defaultImage);
     }
 
     /**
@@ -42,7 +28,6 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
      * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
      * @see #BackgroundBinder(Context, AttributeSet)
-     * @see #BackgroundBinder(ImageBinder, Drawable)
      */
     public BackgroundBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
         super(imageCache, transformer, defaultImage);

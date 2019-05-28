@@ -14,7 +14,7 @@ import android.ext.util.JsonUtils;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncCacheLoader</tt> allows to load the data on a background thread
+ * Class <tt>AsyncCacheLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
@@ -141,7 +141,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
                 }
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load JSON data - key = " + key + "\n" + e);
+            Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
         return result;
@@ -171,7 +171,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
                 return true;
             }
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile.getPath());
+            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
         }
 
         return false;
@@ -193,7 +193,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             final Object result = params.parseResult(mContext, key, new File(tempFile), task);
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
-            if (result != null && !isTaskCancelled(task)) {
+            if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }
@@ -203,7 +203,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link AsyncCacheLoader} to load data.
+     * Class <tt>LoadParams</tt> used to {@link AsyncCacheLoader} to load resource.
      */
     public static abstract class LoadParams<Key> {
         /**

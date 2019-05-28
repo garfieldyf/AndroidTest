@@ -48,6 +48,7 @@ public abstract class Loader implements Factory<Task> {
      * @see #isShutdown()
      */
     public synchronized void shutdown() {
+        DebugUtils.__checkUIThread("shutdown");
         mState = SHUTDOWN;
         cancelAll();
         notifyAll();

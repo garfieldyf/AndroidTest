@@ -136,7 +136,7 @@ public final class UriUtils {
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null, "packageName == null");
         DebugUtils.__checkError(resource == null, "resource == null");
-        return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + '/' + resource);
+        return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + "/" + resource);
     }
 
     private static final String SCHEME_SEPARATOR = "://";

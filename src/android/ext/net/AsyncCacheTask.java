@@ -13,7 +13,7 @@ import android.ext.util.JsonUtils;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncCacheTask</tt> allows to load the data on a background thread
+ * Class <tt>AsyncCacheTask</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
@@ -155,7 +155,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
                 }
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load JSON data - params = " + Arrays.toString(params) + "\n" + e);
+            Log.e(getClass().getName(), "Couldn't load resource - params = " + Arrays.toString(params) + "\n" + e);
         }
 
         return result;
@@ -185,7 +185,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
                 return true;
             }
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load JSON data from the cache - " + cacheFile.getPath());
+            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
         }
 
         return false;
@@ -207,7 +207,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             final Object result = parseResult(params, new File(tempFile));
             DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
-            if (result != null && !isCancelled()) {
+            if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
             }

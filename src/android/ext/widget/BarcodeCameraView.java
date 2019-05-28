@@ -342,7 +342,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         final int minHeight = screenSize.y / 3;
         final float screenRatio = (float)screenSize.x / screenSize.y;
 
-        Size previewSize = null;
+        Size previewSize = defaultSize;
         float minDiff = Float.POSITIVE_INFINITY;
         for (int i = 0; i < count; ++i) {
             final Size size = supportedSizes.get(i);
@@ -362,7 +362,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
             }
         }
 
-        return (previewSize != null ? previewSize : defaultSize);
+        return previewSize;
     }
 
     private void __checkDumpCameraInfo(Parameters params, CameraInfo info) {

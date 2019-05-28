@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module" basedir="." default="compile-all">
+<project name="funshion" basedir="." default="compile-all">
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
     <property name="version" value="1.7.6" />
-    <property name="ndk.module" value="funshion" />
-    <property name="ndk.package" value="com/funshion" />
+    <property name="ndk.dir" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
-    <property name="out.file.name" value="${ndk.module}.jar" />
-    <property name="source.file.name" value="${ndk.module}-sources.jar" />
-    <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" />
-    <!-- <property name="ndk.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${ndk.module} PACKAGE_GRAPHICS=${ndk.package}/graphics/ PACKAGE_UTILITIES=${ndk.package}/util/" /> -->
+    <property name="out.file.name" value="${ant.project.name}.jar" />
+    <property name="source.file.name" value="${ant.project.name}-sources.jar" />
+    <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" />
+    <!-- <property name="ndk.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" /> -->
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
@@ -22,7 +21,7 @@
     <property name="libs.jar.dir" value="E:\Include\java" />
     <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
-    <property name="android.internal.jar.path" value="${libs.jar.dir}/android/android-sdk-internal.jar" />
+    <property name="android.jar.stubs.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
     <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
@@ -33,7 +32,7 @@
     <!-- target -copy -->
     <target name="-copy">
         <!-- copy the java files -->
-        <copy todir="${src.dir}/${ndk.package}" overwrite="true">
+        <copy todir="${src.dir}/${ndk.dir}" overwrite="true">
             <fileset dir="${basedir}/../src/android/ext">
                 <exclude name="**/temp/**" />
                 <exclude name="**/focus/**" />
@@ -62,9 +61,9 @@
     <!-- target -remove-barcode-if -->
     <target name="-remove-barcode-if" unless="compile.barcode">
         <echo level="info">Remove barcode source files...</echo>
-        <delete dir="${src.dir}/${ndk.package}/barcode" />
-        <delete file="${src.dir}/${ndk.package}/widget/BarcodeDecorView.java" />
-        <delete file="${src.dir}/${ndk.package}/widget/BarcodeCameraView.java" />
+        <delete dir="${src.dir}/${ndk.dir}/barcode" />
+        <delete file="${src.dir}/${ndk.dir}/widget/BarcodeDecorView.java" />
+        <delete file="${src.dir}/${ndk.dir}/widget/BarcodeCameraView.java" />
     </target>
 
     <!-- target -set-debug-mode -->
@@ -88,7 +87,7 @@
 
         <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
         <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
-        <replace file="${src.dir}/${ndk.package}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
+        <replace file="${src.dir}/${ndk.dir}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
     </target>
 
     <!-- target -compile-jar -->
@@ -96,7 +95,7 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
+            classpath="${android.jar.stubs.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
@@ -147,7 +146,7 @@
             -include        "${basedir}/../proguard.txt"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.internal.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.jar.stubs.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
             -dump           "${out.file.dir}/dump.txt"
             -printseeds     "${out.file.dir}/seeds.txt"
             -printusage     "${out.file.dir}/usage.txt"
@@ -158,10 +157,10 @@
     <!-- target -compile-dex -->
     <target name="-compile-dex">
         <property name="dx.dir" value="${sdk.dir}/build-tools/25.0.3" />
-        <property name="dex.file.name" value="${ndk.module}-dex.jar" />
+        <property name="dex.file.name" value="${ant.project.name}-dex.jar" />
 
         <!-- compile dex file -->
-        <echo level="info">dx --dex --output=${ndk.module}-dex.jar ${out.file.name}</echo>
+        <echo level="info">dx --dex --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
         <exec executable="cmd.exe">
             <arg line="/C ${dx.dir}/dx.bat --dex --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
         </exec>
@@ -171,9 +170,9 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ndk.module}_widget.xml" />
+        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ant.project.name}_widget.xml" />
         <copy file="${basedir}/../res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
-        <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${ndk.module}-proguard.txt" />
+        <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${ant.project.name}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
@@ -184,8 +183,8 @@
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
         <echo level="info">Install: ${out.dir}/attrs_barcode_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/attrs_${ndk.module}_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/${ndk.module}-proguard.txt</echo>
+        <echo level="info">Install: ${out.dir}/attrs_${ant.project.name}_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/${ant.project.name}-proguard.txt</echo>
     </target>
 
     <!-- target -clean -->

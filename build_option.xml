@@ -77,14 +77,14 @@
             <pathelement location="${funshion.libs.dir}/funshion.jar" />
         </path>
 
+        <path id="android.sdk.stubs.jar.path">
+            <path path="${toString:project.target.class.path}" />
+            <pathelement location="${libs.jar.dir}/android/android-sdk-stubs.jar" />
+        </path>
+
         <path id="recyclerview.jar.path">
             <path path="${toString:project.all.jars.path}" />
             <pathelement location="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
-        </path>
-
-        <path id="android.internal.sdk.jar.path">
-            <path path="${toString:project.target.class.path}" />
-            <pathelement location="${libs.jar.dir}/android/android-sdk-internal.jar" />
         </path>
 
         <path id="support.v4.jar.path">
@@ -101,7 +101,7 @@
         </path>
 
         <path id="project.target.class.path">
-            <path refid="android.internal.sdk.jar.path" />
+            <path refid="android.sdk.stubs.jar.path" />
         </path>
 
         <echo message="library jars : ${toString:project.target.class.path}" />

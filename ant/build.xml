@@ -193,6 +193,12 @@
         <delete dir="${out.file.dir}"/>
     </target>
 
+    <!-- target clean -->
+    <target name="clean">
+        <echo level="info">Deletes output files...</echo>
+        <delete dir="${out.dir}"/>
+    </target>
+
     <!-- target compile-so -->
     <target name="compile-so">
         <ant antfile="${basedir}/../jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />

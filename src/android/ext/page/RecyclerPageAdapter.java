@@ -16,7 +16,7 @@ import android.view.View;
  * <h3>RecyclerPageAdapter's generic types</h3>
  * <p>The two types used by a page adapter are the following:</p>
  * <ol><li><tt>E</tt>, The item data type of the adapter.</li>
- * <li><tt>VH</tt>, A class that extends <tt>ViewHolder</tt> that will
+ * <li><tt>VH</tt>, A class that extends {@link ViewHolder} that will
  * be used by the adapter.</li></ol>
  * @author Garfield
  */
@@ -192,7 +192,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
      * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
-     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged(int, int, Object)}.
+     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
      * @see #setPage(int, Page)
      * @see Pages#newPage(java.util.List)
      */

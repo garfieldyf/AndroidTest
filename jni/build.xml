@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="module" basedir="." default="debug">
+<project name="androidext" basedir="." default="debug">
     <!-- properties -->
     <property name="out.dir" value="${basedir}/../libs" />
     <property name="obj.dir" value="${basedir}/../obj" />
-    <property name="ndk.args" value="-B all=1" />
-    <!-- <property name="ndk.args" value="-B all=1 NDK_STL=1" /> -->
+    <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name}" />
+    <!-- <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name} NDK_STL=1" /> -->
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">

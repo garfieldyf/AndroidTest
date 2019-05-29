@@ -185,7 +185,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint f
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry, flags), cookie);
+                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie);
                 if (result == SC_STOP) {
                     dirPaths.clear();
                     break;
@@ -221,7 +221,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint fl
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry, flags), cookie);
+            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie);
             if (result == SC_BREAK) {
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
@@ -303,7 +303,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef(env, filePath).str, resolveType(filePath, entry, flags), cookie) != SC_CONTINUE)
+                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie) != SC_CONTINUE)
                     break;
             }
         }

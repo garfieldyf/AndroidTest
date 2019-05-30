@@ -11,6 +11,7 @@ import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Process;
 import android.os.StatFs;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
@@ -91,6 +92,14 @@ public final class DeviceUtils {
     }
 
     /**
+     * Tests the current device in a low memory situation. If the total
+     * memory size of the current device less 800 MB return <tt>true</tt>.
+     */
+    public static boolean isLowMemory() {
+        return (Process.getTotalMemory() < 838860800L /* 800 MB */);
+    }
+
+    /**
      * Returns an array of ABIs supported by this device.
      */
     @SuppressWarnings("deprecation")
@@ -137,15 +146,15 @@ public final class DeviceUtils {
         infos.append("  sdk = ").append(Build.VERSION.SDK_INT)
              .append("\n  version = ").append(Build.VERSION.RELEASE)
              .append("\n  wlan = ").append(NetworkUtils.getMacAddress(NetworkUtils.WLAN, "N/A"))
-             .append("\n  ethernet = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
+             .append("\n  eth0 = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
         printer.println(infos.toString());
 
         // Dumps display infos.
         infos.setLength(0);
         infos.append("  realWidth  = ").append(size.x)
              .append("\n  realHeight = ").append(size.y)
-             .append("\n  width  = ").append(dm.widthPixels)
-             .append("\n  height = ").append(dm.heightPixels)
+             .append("\n  width   = ").append(dm.widthPixels)
+             .append("\n  height  = ").append(dm.heightPixels)
              .append("\n  density = ").append(dm.density)
              .append("\n  densityDpi = [ ").append(toDensity(dm.densityDpi)).append(", ").append(dm.densityDpi).append(" ]")
              .append("\n  scaledDensity = ").append(dm.scaledDensity)
@@ -159,11 +168,11 @@ public final class DeviceUtils {
         am.getMemoryInfo(info);
 
         infos.setLength(0);
-        infos.append("  totalMemory = ").append(Formatter.formatFileSize(context, info.totalMem))
-             .append("\n  usedMemory  = ").append(Formatter.formatFileSize(context, info.totalMem - info.availMem))
-             .append("\n  availMemory = ").append(Formatter.formatFileSize(context, info.availMem))
-             .append("\n  lowMemory = ").append(info.lowMemory)
-             .append("\n  availThreshold = ").append(Formatter.formatFileSize(context, info.threshold))
+        infos.append("  totalMemory  = ").append(Formatter.formatFileSize(context, info.totalMem))
+             .append("\n  usedMemory   = ").append(Formatter.formatFileSize(context, info.totalMem - info.availMem))
+             .append("\n  availMemory  = ").append(Formatter.formatFileSize(context, info.availMem))
+             .append("\n  lowMemory    = ").append(info.lowMemory)
+             .append("\n  threshold    = ").append(Formatter.formatFileSize(context, info.threshold))
              .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()))
              .append("\n  appLargeHeap = ").append(getAppHeapSize(context, "dalvik.vm.heapsize"));
         printer.println(infos.toString());

@@ -80,7 +80,7 @@
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
 
         <!-- delete call the __checkXXX methods -->
-        <echo level="info">Delete __checkXXX() methods</echo>
+        <echo level="info">Delete __checkXXX() methods.</echo>
         <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>

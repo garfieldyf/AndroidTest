@@ -46,8 +46,8 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     }
 
     @Override
-    public File get(String key) {
-        final File result = super.get(key);
+    public synchronized File get(String key) {
+        final File result = map.get(key);
         return (result != null ? result : buildCacheFile(key));
     }
 
@@ -59,8 +59,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     }
 
     /**
-     * Builds the cache file with the specified <em>key</em>. <p>The method is called without
-     * synchronization: other threads may access the cache while this method is executing.</p>
+     * Builds the cache file with the specified <em>key</em>.
      * @param key The key.
      * @return The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
      */

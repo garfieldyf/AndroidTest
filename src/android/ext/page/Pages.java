@@ -422,9 +422,9 @@ public final class Pages {
             final Formatter formatter  = new Formatter(result);
             final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
-            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
+            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, totalCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
             result.setLength(0);
-            printer.println(result.append("  PageCache [ ").append(DebugUtils.toString(mPageCache)).append(", size = ").append(entries.size()).append(" ]").toString());
+            printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
 
             for (Entry<Integer, Page<E>> entry : entries) {
                 final Page<E> page = entry.getValue();

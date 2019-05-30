@@ -14,9 +14,9 @@ import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.ImageTransformer;
 import android.ext.image.transformer.Transformer;
 import android.ext.util.ClassUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.util.Printer;
 import android.util.Xml;
 import android.widget.ImageView;
@@ -102,6 +102,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * @see #ImageBinder(Context, AttributeSet)
      */
     public ImageBinder(Cache<URI, Drawable> imageCache, Transformer<URI, Image> transformer, Drawable defaultImage) {
+        DebugUtils.__checkError(imageCache != null && transformer instanceof CacheTransformer, "Cannot create: the transformer has an image cache (an ImageBinder only has one image cache)");
         mDefaultImage = defaultImage;
         mTransformer  = (imageCache != null ? new CacheTransformer(imageCache, transformer) : transformer);
     }
@@ -131,6 +132,9 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     public void dump(Context context, Printer printer) {
+        DebugUtils.dumpSummary(printer, new StringBuilder(120), 120, " Dumping Transformer ", (Object[])null);
+        printer.println("  " + mTransformer.getClass().getName());
+
         if (mTransformer instanceof CacheTransformer) {
             ((CacheTransformer)mTransformer).dump(context, printer);
         }
@@ -209,10 +213,15 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     /**
      * Called on the <tt>ImageLoader</tt> internal, do not call this method directly.
      */
-    public static void __checkTransformer(Class<?> clazz, Cache<?, ?> imageCache, Binder<?, ?, ?> binder) {
-        if (imageCache == null && binder instanceof ImageBinder && ((ImageBinder<?, ?>)binder).mTransformer instanceof CacheTransformer) {
-            Log.e(clazz.getName(), "WARNING: The " + clazz.getSimpleName() + " has no memory cache, The binder should be no drawable cache!!!");
+    public static Binder createImageBinder(Cache imageCache, Binder binder) {
+        if (imageCache == null && binder instanceof ImageBinder) {
+            final ImageBinder imageBinder = (ImageBinder)binder;
+            if (imageBinder.mTransformer instanceof CacheTransformer) {
+                binder = new ImageBinder(null, ((CacheTransformer)imageBinder.mTransformer).mTransformer, imageBinder.mDefaultImage);
+            }
         }
+
+        return binder;
     }
 
     /**

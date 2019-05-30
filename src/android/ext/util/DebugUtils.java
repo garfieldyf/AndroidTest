@@ -104,10 +104,6 @@ public final class DebugUtils {
         printer.println(result.toString());
     }
 
-    public static String toString(Object object) {
-        return toString(object, new StringBuilder(48)).toString();
-    }
-
     public static StringBuilder toString(Object object, StringBuilder result) {
         if (object == null) {
             return result.append("null");

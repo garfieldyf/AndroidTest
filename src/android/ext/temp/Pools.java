@@ -1,11 +1,15 @@
 package android.ext.temp;
 
+import java.lang.reflect.Array;
 import java.util.concurrent.atomic.AtomicReference;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.AnimatorInflater;
 import android.content.Context;
 import android.ext.util.DebugUtils;
+import android.graphics.Matrix;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Printer;
 
 /**
@@ -20,19 +24,8 @@ public final class Pools {
      * @return An newly created <tt>Pool</tt>.
      */
     public static <T> Pool<T> newSimplePool(Factory<T> factory) {
+        DebugUtils.__checkError(factory == null, "factory == null");
         return new SimplePool<T>(factory);
-    }
-
-    /**
-     * Creates a new <b>fixed-size</b> byte array {@link Pool}.
-     * @param maxSize The maximum number of byte arrays to allow in the pool.
-     * @param bufferSize The maximum number of bytes in the each byte array.
-     * Suggest 8K, 16K, etc.
-     * @return An newly byte array <tt>Pool</tt>.
-     * @see #synchronizedPool(Pool)
-     */
-    public static Pool<byte[]> newPool(int maxSize, int bufferSize) {
-        return new ByteArrayPool(maxSize, bufferSize);
     }
 
     /**
@@ -44,7 +37,20 @@ public final class Pools {
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
-        return new ArrayPool<T>(factory, maxSize);
+        DebugUtils.__checkError(factory == null, "factory == null");
+        return new ObjectPool<T>(factory, maxSize);
+    }
+
+    /**
+     * Creates a new <b>fixed-size</b> array {@link Pool}.
+     * @param maxSize The maximum number of arrays to allow in this pool.
+     * @param length The maximum number of elements in the each array.
+     * @param componentType The array's component type.
+     * @return An newly array <tt>Pool</tt>.
+     * @see #synchronizedPool(Pool)
+     */
+    public static <T> Pool<T> newPool(int maxSize, int length, Class<?> componentType) {
+        return new ArrayPool<T>(maxSize, length, componentType);
     }
 
     /**
@@ -78,6 +84,14 @@ public final class Pools {
      */
     public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
         return new SynchronizedPool<T>(pool);
+    }
+
+    public static void dumpPool(Pool<?> pool, Printer printer) {
+        if (pool instanceof SynchronizedPool) {
+            ((SynchronizedPool<?>)pool).dump(printer);
+        } else if (pool instanceof ObjectPool) {
+            ((ObjectPool<?>)pool).dump(printer, (pool instanceof AnimatorPool ? pool.getClass().getSimpleName() : null));
+        }
     }
 
     /**
@@ -114,9 +128,95 @@ public final class Pools {
     }
 
     /**
+     * Class <tt>RectPool</tt> is an <b>one-size</b> {@link Rect} pool.
+     */
+    public static final class RectPool extends SimplePool<Rect> {
+        public static final Pool<Rect> sInstance = new RectPool();
+
+        /**
+         * Constructor
+         */
+        private RectPool() {
+            super(null);
+        }
+
+        @Override
+        public Rect newInstance() {
+            return new Rect();
+        }
+
+        /**
+         * Equivalent to calling<pre>
+         * final Rect rect = RectPool.sInstance.obtain();
+         * rect.set(left, top, right, bottom);</pre>
+         */
+        public static Rect obtain(int left, int top, int right, int bottom) {
+            final Rect result = sInstance.obtain();
+            result.set(left, top, right, bottom);
+            return result;
+        }
+    }
+
+    /**
+     * Class <tt>RectFPool</tt> is an <b>one-size</b> {@link RectF} pool.
+     */
+    public static final class RectFPool extends SimplePool<RectF> {
+        public static final Pool<RectF> sInstance = new RectFPool();
+
+        /**
+         * Constructor
+         */
+        private RectFPool() {
+            super(null);
+        }
+
+        @Override
+        public RectF newInstance() {
+            return new RectF();
+        }
+
+        /**
+         * Equivalent to calling<pre>
+         * final RectF rect = RectFPool.sInstance.obtain();
+         * rect.set(left, top, right, bottom);</pre>
+         */
+        public static RectF obtain(float left, float top, float right, float bottom) {
+            final RectF result = sInstance.obtain();
+            result.set(left, top, right, bottom);
+            return result;
+        }
+    }
+
+    /**
+     * Class <tt>MatrixPool</tt> is an <b>one-size</b> {@link Matrix} pool.
+     */
+    public static final class MatrixPool extends SimplePool<Matrix> {
+        public static final Pool<Matrix> sInstance = new MatrixPool();
+
+        /**
+         * Constructor
+         */
+        private MatrixPool() {
+            super(null);
+        }
+
+        @Override
+        public Matrix newInstance() {
+            return new Matrix();
+        }
+    }
+
+    /**
+     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
+     */
+    public static final class ByteArrayPool {
+        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(2, 8192, byte.class));
+    }
+
+    /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class SimplePool<T> implements Pool<T> {
+    private static class SimplePool<T> implements Pool<T>, Factory<T> {
         private final Factory<T> factory;
         private final AtomicReference<T> referent;
 
@@ -127,8 +227,13 @@ public final class Pools {
          * a new element when this pool is empty.
          */
         public SimplePool(Factory<T> factory) {
-            this.factory  = factory;
             this.referent = new AtomicReference<T>();
+            this.factory  = (factory != null ? factory : this);
+        }
+
+        @Override
+        public T newInstance() {
+            throw new RuntimeException("Must be implementation!");
         }
 
         @Override
@@ -144,9 +249,9 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ObjectPool</tt> is an implementation of a {@link Pool}.
      */
-    private static class ArrayPool<T> implements Pool<T>, Factory<T> {
+    private static class ObjectPool<T> implements Pool<T>, Factory<T> {
         /* package */ int size;
         /* package */ final Object[] elements;
         /* package */ final Factory<T> factory;
@@ -159,7 +264,7 @@ public final class Pools {
          * @param maxSize The maximum number of elements
          * to allow in this pool.
          */
-        public ArrayPool(Factory<T> factory, int maxSize) {
+        public ObjectPool(Factory<T> factory, int maxSize) {
             DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.elements = new Object[maxSize];
             this.factory  = (factory != null ? factory : this);
@@ -167,7 +272,7 @@ public final class Pools {
 
         @Override
         public T newInstance() {
-            throw new IllegalStateException("Must be implementation!");
+            throw new RuntimeException("Must be implementation!");
         }
 
         @Override
@@ -193,49 +298,58 @@ public final class Pools {
 
         public final void dump(Printer printer, String className) {
             final StringBuilder result = new StringBuilder(96);
-            DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
             for (int i = 0; i < size; ++i) {
-                result.setLength(0);
-                printer.println(dump(result, elements[i]));
-            }
-        }
+                final Object element = elements[i];
+                if (i == 0) {
+                    if (className == null) {
+                        className = element.getClass().getSimpleName() + "Pool";
+                    }
 
-        /* package */ String dump(StringBuilder result, Object element) {
-            return result.append("  ").append(element).toString();
+                    DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
+                }
+
+                result.setLength(0);
+                DebugUtils.toString(element, result.append("  "));
+                if (element.getClass().isArray()) {
+                    result.append(" { length = ").append(Array.getLength(element)).append(" }");
+                }
+
+                printer.println(result.toString());
+            }
         }
     }
 
     /**
-     * Class <tt>ByteArrayPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ByteArrayPool extends ArrayPool<byte[]> {
-        private final int bufferSize;
+    private static final class ArrayPool<T> extends ObjectPool<T> {
+        private final int length;
+        private final Class<?> componentType;
 
         /**
          * Constructor
-         * @param maxSize The maximum number of byte arrays to allow in this pool.
-         * @param bufferSize The maximum number of bytes in the each byte array.
+         * @param maxSize The maximum number of arrays to allow in this pool.
+         * @param length The maximum number of elements in the each array.
+         * @param componentType The array's component type.
          */
-        public ByteArrayPool(int maxSize, int bufferSize) {
+        public ArrayPool(int maxSize, int length, Class<?> componentType) {
             super(null, maxSize);
-            this.bufferSize = bufferSize;
+            this.length = length;
+            this.componentType = componentType;
+            DebugUtils.__checkError(length <= 0, "length <= 0");
         }
 
         @Override
-        public byte[] newInstance() {
-            return new byte[bufferSize];
-        }
-
-        @Override
-        /* package */ String dump(StringBuilder result, Object element) {
-            return result.append("  ").append(element).append(" { length = ").append(((byte[])element).length).append(" }").toString();
+        @SuppressWarnings("unchecked")
+        public T newInstance() {
+            return (T)Array.newInstance(componentType, length);
         }
     }
 
     /**
      * Class <tt>AnimatorPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class AnimatorPool extends ArrayPool<Animator> implements AnimatorListener {
+    private static final class AnimatorPool extends ObjectPool<Animator> implements AnimatorListener {
         private final Animator animation;
 
         /**
@@ -278,11 +392,6 @@ public final class Pools {
         @Override
         public void onAnimationRepeat(Animator animation) {
         }
-
-        @Override
-        /* package */ String dump(StringBuilder result, Object element) {
-            return DebugUtils.toString(element, result.append("  ")).toString();
-        }
     }
 
     /**
@@ -311,17 +420,9 @@ public final class Pools {
         }
 
         public synchronized final void dump(Printer printer) {
-            if (pool instanceof ArrayPool) {
-                ((ArrayPool<?>)pool).dump(printer, "SynchronizedPool");
+            if (pool instanceof ObjectPool) {
+                ((ObjectPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
-        }
-    }
-
-    public static void dumpPool(Pool<?> pool, Printer printer) {
-        if (pool instanceof SynchronizedPool) {
-            ((SynchronizedPool<?>)pool).dump(printer);
-        } else if (pool instanceof ArrayPool) {
-            ((ArrayPool<?>)pool).dump(printer, pool.getClass().getSimpleName());
         }
     }
 

@@ -314,7 +314,7 @@ public final class Pages {
      * A <tt>PageLoader</tt> used to load page data.
      */
     /* package */ static interface PageLoader<E> {
-        Page<E> loadPage(int page, int startPosition, int itemCount);
+        Page<E> loadPage(int page, int startPosition, int count);
     }
 
     /**
@@ -375,19 +375,19 @@ public final class Pages {
             DebugUtils.__checkError(page < 0, "page < 0");
             Page<E> result = mPageCache.get(page);
             if (result == null && !mPageStates.get(page)) {
-                // Computes the startPosition and itemCount to load.
-                final int startPosition, itemCount;
+                // Computes the startPosition and count to load.
+                final int startPosition, count;
                 if (page == 0) {
-                    itemCount = mInitialSize;
+                    count = mInitialSize;
                     startPosition = 0;
                 } else {
-                    itemCount = mPageSize;
+                    count = mPageSize;
                     startPosition = (page - 1) * mPageSize + mInitialSize;
                 }
 
                 // Loads the page data and marks the page loading state.
                 mPageStates.set(page);
-                result = mPageLoader.loadPage(page, startPosition, itemCount);
+                result = mPageLoader.loadPage(page, startPosition, count);
                 if (getCount(result) > 0) {
                     // If the page is load successful.
                     // 1. Adds the page to page cache.

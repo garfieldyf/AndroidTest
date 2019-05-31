@@ -179,7 +179,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
     /**
      * Equivalent to calling <tt>setPage(page, data, null)</tt>.
      * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @see #setPage(int, Page, Object)
      * @see Pages#newPage(java.util.List)
      */
@@ -189,20 +189,41 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
 
     /**
      * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
-     * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
+     * This method will be call {@link #notifyItemRangeChanged(int, int, Object)}
+     * when the <em>page</em> has added. <p>This is useful when asynchronously
+     * loading to prevent blocking the UI.</p>
      * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> to set.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
      * @see #setPage(int, Page)
      * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data, Object payload) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        final int itemCount = mImpl.setPage(page, data);
-        if (itemCount > 0) {
-            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), itemCount, payload);
+        final int count = mImpl.setPage(page, data);
+        if (count > 0) {
+            UIHandler.notifyItemRangeChanged(mRecyclerView, mImpl.getPositionForPage(page, 0), count, payload);
         }
     }
+
+/*
+     * Adds the {@link Page} at the specified index <em>page</em> in this adapter.
+     * This method will be call {@link #notifyItemRangeInserted(int, int)} when
+     * the <em>page</em> has added. <p>This is useful when asynchronously loading
+     * to prevent blocking the UI.</p>
+     * @param page The index of the page.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> to add.
+     * @see Pages#newPage(java.util.List)
+    public void addPage(int page, Page<E> data) {
+        DebugUtils.__checkError(mImpl.mPrefetchDistance > 0, "The addPage cannot support prefetch data, disable it.");
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int count = mImpl.setPage(page, data);
+        if (count > 0) {
+            mImpl.mItemCount += count;
+            UIHandler.notifyItemRangeInserted(mRecyclerView, mImpl.getPositionForPage(page, 0), count);
+        }
+    }
+*/
 
     /**
      * Returns the {@link RecyclerView} associated with this adapter.
@@ -266,8 +287,8 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * {@link #setPage(int, Page, Object)}.<p>
      * @param page The index of the page whose data should be returned.
      * @param startPosition The position of the first item to load.
-     * @param itemCount The number of items to load.
+     * @param count The number of items to load.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
-    public abstract Page<E> loadPage(int page, int startPosition, int itemCount);
+    public abstract Page<E> loadPage(int page, int startPosition, int count);
 }

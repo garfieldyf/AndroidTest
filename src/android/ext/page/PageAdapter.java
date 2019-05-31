@@ -138,7 +138,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * Sets the {@link Page} at the specified index <em>page</em> in this adapter.
      * <p>This is useful when asynchronously loading to prevent blocking the UI.</p>
      * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The <tt>Page</tt> object.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> to set.
      * @see Pages#newPage(java.util.List)
      */
     public void setPage(int page, Page<E> data) {
@@ -213,8 +213,8 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * {@link #setPage(int, Page)}.<p>
      * @param page The index of the page whose data should be returned.
      * @param startPosition The position of the first item to load.
-     * @param itemCount The number of items to load.
+     * @param count The number of items to load.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
-    public abstract Page<E> loadPage(int page, int startPosition, int itemCount);
+    public abstract Page<E> loadPage(int page, int startPosition, int count);
 }

@@ -21,6 +21,11 @@ import android.util.Log;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public final class ArrayUtils {
     /**
+     * The <tt>0-length</tt> int array.
+     */
+    public static final int[] EMPTY_INT_ARRAY = new int[0];
+
+    /**
      * The <tt>0-length</tt> byte array.
      */
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];

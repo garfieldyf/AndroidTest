@@ -22,6 +22,15 @@ import android.util.Printer;
  */
 public final class Pages {
     /**
+     * Returns the numbers of items in the <em>page</em>, handling <tt>null Page</tt>.
+     * @param page The {@link Page}.
+     * @return The numbers of items in the <em>page</em>.
+     */
+    public static int getCount(Page<?> page) {
+        return (page != null ? page.getCount() : 0);
+    }
+
+    /**
      * Returns the index of the page with the given the <em>combinedPosition</em>.
      * @param combinedPosition The combined position, returned earlier by <tt>getPageForPosition</tt>.
      * @return The index of the page.
@@ -422,7 +431,7 @@ public final class Pages {
             final Formatter formatter  = new Formatter(result);
             final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
 
-            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, totalCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
+            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", className, mInitialSize, mPageSize, mItemCount);
             result.setLength(0);
             printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
 
@@ -431,12 +440,8 @@ public final class Pages {
                 result.setLength(0);
 
                 formatter.format("    Page %-2d ==> ", entry.getKey());
-                printer.println(DebugUtils.toString(page, result).append(" { itemCount = ").append(page.getCount()).append(" }").toString());
+                printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
             }
-        }
-
-        private static int getCount(Page<?> page) {
-            return (page != null ? page.getCount() : 0);
         }
 
         private void prefetchPage(int currentPage, int position) {

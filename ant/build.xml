@@ -3,7 +3,7 @@
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
-    <property name="version" value="1.7.6" />
+    <property name="version" value="1.7.8" />
     <property name="ndk.dir" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
     <property name="out.file.name" value="${ant.project.name}.jar" />

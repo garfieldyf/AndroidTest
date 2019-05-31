@@ -85,6 +85,10 @@ public class ArraySectionIndexer<T> implements SectionIndexer {
         this(sections, toIntArray(countsOrIndexes), count);
     }
 
+    public final int getItemCount() {
+        return mCount;
+    }
+
     /**
      * Returns the number of sections.
      * @return The number of sections.
@@ -125,6 +129,15 @@ public class ArraySectionIndexer<T> implements SectionIndexer {
 
         final int index = Arrays.binarySearch(mPositions, position);
         return (index >= 0 ? index : -index - 2);
+    }
+
+    public int getSectionPositionForPosition(int position) {
+        final int section = getSectionForPosition(position);
+        if (section >= 0) {
+            position -= mPositions[section];
+        }
+
+        return position;
     }
 
     private int computeCount(int count) {

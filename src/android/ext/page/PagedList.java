@@ -1,7 +1,7 @@
 package android.ext.page;
 
 import static android.ext.util.ArrayUtils.EMPTY_INT_ARRAY;
-import java.util.ArrayList;
+import static android.ext.util.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
@@ -13,28 +13,13 @@ import android.util.Printer;
  * Class <tt>PagedList</tt> allows to loading data by page.
  * @author Garfield
  */
+@SuppressWarnings("unchecked")
 public class PagedList<E> {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
-
-    /**
-     * The number of valid positions in the mPositions array.
-     */
-    private int mSize;
-
-    /**
-     * The number of items in this <tt>PagedList</tt>.
-     */
-    private int mCount;
-
-    /**
-     * The page start positions in this <tt>PagedList</tt>.
-     */
+    private int mPageCount;
+    private int mItemCount;
+    private Object[] mPages;
     private int[] mPositions;
-
-    /**
-     * The {@link Page} <tt>List</tt>.
-     */
-    private final List<Page<? extends E>> mPagedList;
 
     /**
      * Constructor
@@ -53,8 +38,13 @@ public class PagedList<E> {
      */
     public PagedList(int capacity) {
         DebugUtils.__checkError(capacity < 0, "capacity < 0");
-        mPagedList = new ArrayList<Page<? extends E>>(capacity);
-        mPositions = (capacity > 0 ? new int[capacity] : EMPTY_INT_ARRAY);
+        if (capacity == 0) {
+            mPages = EMPTY_OBJECT_ARRAY;
+            mPositions = EMPTY_INT_ARRAY;
+        } else {
+            mPages = new Object[capacity];
+            mPositions = new int[capacity];
+        }
     }
 
     /**
@@ -73,9 +63,10 @@ public class PagedList<E> {
      * @see #getItemCount()
      */
     public void clear() {
-        if (mCount > 0) {
-            mPagedList.clear();
-            mCount = mSize = 0;
+        if (mItemCount > 0) {
+            Arrays.fill(mPages, 0, mPageCount, null);
+            mPageCount = 0;
+            mItemCount = 0;
         }
     }
 
@@ -85,7 +76,7 @@ public class PagedList<E> {
      * @see #getItem(int)
      */
     public int getItemCount() {
-        return mCount;
+        return mItemCount;
     }
 
     /**
@@ -97,7 +88,7 @@ public class PagedList<E> {
     public E getItem(int position) {
         final long combinedPosition = getPageForPosition(position);
         final int page = Pages.getOriginalPage(combinedPosition);
-        return mPagedList.get(page).getItem((int)combinedPosition);
+        return ((Page<E>)mPages[page]).getItem((int)combinedPosition);
     }
 
     /**
@@ -106,7 +97,7 @@ public class PagedList<E> {
      * @see #getPage(int)
      */
     public int getPageCount() {
-        return mPagedList.size();
+        return mPageCount;
     }
 
     /**
@@ -114,10 +105,11 @@ public class PagedList<E> {
      * @param page The index of the page.
      * @return The {@link Page} at the specified <em>page</em>.
      * @see #getPageCount()
+     * @see #getPageForPosition(int)
      */
-    public Page<? extends E> getPage(int page) {
-        DebugUtils.__checkError(page < 0 || page >= mPagedList.size(), "Index out of bounds - page = " + page + ", count = " + mPagedList.size());
-        return mPagedList.get(page);
+    public Page<E> getPage(int page) {
+        DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
+        return (Page<E>)mPages[page];
     }
 
     /**
@@ -130,9 +122,19 @@ public class PagedList<E> {
     public int addPage(Page<? extends E> page) {
         final int count = Pages.getCount(page);
         if (count > 0) {
-            addPosition(mCount);
-            mPagedList.add(page);
-            mCount += count;
+            if (mPageCount >= mPages.length) {
+                final int[] newPositions = new int[mPageCount + ARRAY_CAPACITY_INCREMENT];
+                System.arraycopy(mPositions, 0, newPositions, 0, mPageCount);
+                mPositions = newPositions;
+
+                final Object[] newPages = new Object[mPageCount + ARRAY_CAPACITY_INCREMENT];
+                System.arraycopy(mPages, 0, newPages, 0, mPageCount);
+                mPages = newPages;
+            }
+
+            mPages[mPageCount] = page;
+            mPositions[mPageCount++] = mItemCount;
+            mItemCount += count;
         }
 
         return count;
@@ -156,6 +158,27 @@ public class PagedList<E> {
     }
 
     /**
+     * Removes the page at the specified <em>page</em> from this <tt>PagedList</tt>.
+     * @param page The index of the page to remove.
+     * @return The removed page's first item position in this <tt>PagedList</tt>.
+     * @see #getPageForPosition(int)
+     */
+    public int removePage(int page) {
+        DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
+        mItemCount -= ((Page<?>)mPages[page]).getCount();
+        System.arraycopy(mPages, page + 1, mPages, page, --mPageCount - page);
+        mPages[mPageCount] = null;  // Prevent memory leak.
+
+        final int result = mPositions[page];
+        for (int i = page, startPosition = result; i < mPageCount; ++i) {
+            mPositions[i]  = startPosition;
+            startPosition += ((Page<?>)mPages[i]).getCount();
+        }
+
+        return result;
+    }
+
+    /**
      * Returns the combined position of the page with the given the <em>position</em>.
      * <p>The returned combined position:
      * <li>bit &nbsp;&nbsp;0-31 : Lower 32 bits of the index of the item in the page.
@@ -166,8 +189,8 @@ public class PagedList<E> {
      * @see Pages#getOriginalPosition(long)
      */
     public long getPageForPosition(int position) {
-        DebugUtils.__checkError(position < 0 || position >= mCount, "Index out of bounds - position = " + position + ", itemCount = " + mCount);
-        int page = Arrays.binarySearch(mPositions, 0, mSize, position);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+        int page = Arrays.binarySearch(mPositions, 0, mPageCount, position);
         if (page < 0) {
             page = -page - 2;
         }
@@ -178,42 +201,15 @@ public class PagedList<E> {
 
     @SuppressWarnings("resource")
     public final void dump(Printer printer) {
-        final int pageCount = mPagedList.size();
-        final StringBuilder result = new StringBuilder(80);
+        final StringBuilder result = new StringBuilder(90);
         final Formatter formatter  = new Formatter(result);
+        DebugUtils.dumpSummary(printer, result, 90, " Dumping %s [ itemCount = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
 
-        DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ itemCount = %d, pageCount = %d ] ", getClass().getSimpleName(), mCount, pageCount);
-        result.setLength(0);
-        printer.println(toString(result.append("  Positions = ")));
-
-        for (int i = 0; i < pageCount; ++i) {
-            final Page<? extends E> page = mPagedList.get(i);
+        for (int i = 0; i < mPageCount; ++i) {
+            final Page<?> page = (Page<?>)mPages[i];
             result.setLength(0);
             formatter.format("  Page %-2d ==> ", i);
-            printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+            printer.println(DebugUtils.toString(page, result).append(" { position = ").append(mPositions[i]).append(", count = ").append(page.getCount()).append(" }").toString());
         }
-    }
-
-    private void addPosition(int position) {
-        if (mSize >= mPositions.length) {
-            final int[] newPositions = new int[mSize + ARRAY_CAPACITY_INCREMENT];
-            System.arraycopy(mPositions, 0, newPositions, 0, mSize);
-            mPositions = newPositions;
-        }
-
-        mPositions[mSize++] = position;
-    }
-
-    private String toString(StringBuilder result) {
-        result.append('[');
-        for (int i = 0; i < mSize; ++i) {
-            if (i != 0) {
-                result.append(", ");
-            }
-
-            result.append(mPositions[i]);
-        }
-
-        return result.append(']').toString();
     }
 }

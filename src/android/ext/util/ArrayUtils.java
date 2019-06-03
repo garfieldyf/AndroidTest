@@ -31,6 +31,11 @@ public final class ArrayUtils {
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     /**
+     * The <tt>0-length</tt> <tt>Object</tt> array.
+     */
+    public static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
+    /**
      * Returns the number of elements in the <em>array</em>,
      * handling <tt>null Array</tt>.
      * @param array The <tt>Array</tt>.

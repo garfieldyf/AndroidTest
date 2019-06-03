@@ -165,7 +165,7 @@ public class BarcodeEncoder {
         @Override
         protected void onPostExecute(Pair<BitMatrix, Bitmap> result) {
             mListener.onEncodeComplete(result.first, result.second);
-            mListener = null;   // Clears the listener to avoid potential memory leaks.
+            mListener = null;   // Prevent memory leak.
         }
     }
 

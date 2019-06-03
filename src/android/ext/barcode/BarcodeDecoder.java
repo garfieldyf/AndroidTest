@@ -246,7 +246,7 @@ public class BarcodeDecoder {
         @Override
         protected void onPostExecute(Pair<LuminanceSource, Result> result) {
             mListener.onDecodeComplete(result.first, result.second);
-            mListener = null;   // Clears the listener to avoid potential memory leaks.
+            mListener = null;   // Prevent memory leak.
         }
     }
 

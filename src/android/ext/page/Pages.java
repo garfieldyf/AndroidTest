@@ -400,7 +400,8 @@ public final class Pages {
             return result;
         }
 
-        /* package */ final int setPage(int page, Page<E> data) {
+        @SuppressWarnings("unchecked")
+        /* package */ final int setPage(int page, Page<? extends E> data) {
             DebugUtils.__checkUIThread("setPage");
             DebugUtils.__checkError(page < 0, "page < 0");
 
@@ -408,7 +409,7 @@ public final class Pages {
             mPageStates.clear(page);
             final int count = getCount(data);
             if (count > 0) {
-                mPageCache.put(page, data);
+                mPageCache.put(page, (Page<E>)data);
             }
 
             return count;

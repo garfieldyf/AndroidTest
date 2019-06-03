@@ -141,7 +141,7 @@ public abstract class PageAdapter<E> extends BaseAdapter implements PageLoader<E
      * @param data May be <tt>null</tt>. The <tt>Page</tt> to set.
      * @see Pages#newPage(java.util.List)
      */
-    public void setPage(int page, Page<E> data) {
+    public void setPage(int page, Page<? extends E> data) {
         if (mImpl.setPage(page, data) > 0) {
             notifyDataSetChanged();
         }

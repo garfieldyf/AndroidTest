@@ -215,7 +215,7 @@ public abstract class RecyclerPageAdapter<E, VH extends ViewHolder> extends Adap
      * @param data May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @see Pages#newPage(java.util.List)
     public void addPage(int page, Page<? extends E> data) {
-        DebugUtils.__checkError(mImpl.mPrefetchDistance > 0, "The addPage cannot support prefetch data, disable it.");
+        DebugUtils.__checkError(mImpl.mPrefetchDistance > 0, "The addPage cannot support prefetch data, disable the prefetch data.");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int count = mImpl.setPage(page, data);
         if (count > 0) {

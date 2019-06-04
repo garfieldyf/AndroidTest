@@ -16,8 +16,8 @@ import android.util.Printer;
 @SuppressWarnings("unchecked")
 public class PagedList<E> {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
-    private int mPageCount;
     private int mItemCount;
+    private int mPageCount;
     private Object[] mPages;
     private int[] mPositions;
 
@@ -84,6 +84,7 @@ public class PagedList<E> {
      * @param position The index of the item.
      * @return The item at the specified <em>position</em>.
      * @see #getItemCount()
+     * @see #getPageForPosition(int)
      */
     public E getItem(int position) {
         final long combinedPosition = getPageForPosition(position);
@@ -123,13 +124,13 @@ public class PagedList<E> {
         final int count = Pages.getCount(page);
         if (count > 0) {
             if (mPageCount >= mPages.length) {
-                final int[] newPositions = new int[mPageCount + ARRAY_CAPACITY_INCREMENT];
-                System.arraycopy(mPositions, 0, newPositions, 0, mPageCount);
-                mPositions = newPositions;
-
                 final Object[] newPages = new Object[mPageCount + ARRAY_CAPACITY_INCREMENT];
                 System.arraycopy(mPages, 0, newPages, 0, mPageCount);
                 mPages = newPages;
+
+                final int[] newPositions = new int[mPageCount + ARRAY_CAPACITY_INCREMENT];
+                System.arraycopy(mPositions, 0, newPositions, 0, mPageCount);
+                mPositions = newPositions;
             }
 
             mPages[mPageCount] = page;
@@ -157,12 +158,11 @@ public class PagedList<E> {
         return count;
     }
 
-    /**
+/*
      * Removes the page at the specified <em>page</em> from this <tt>PagedList</tt>.
      * @param page The index of the page to remove.
      * @return The removed page's first item position in this <tt>PagedList</tt>.
      * @see #getPageForPosition(int)
-     */
     public int removePage(int page) {
         DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
         mItemCount -= ((Page<?>)mPages[page]).getCount();
@@ -177,6 +177,7 @@ public class PagedList<E> {
 
         return result;
     }
+*/
 
     /**
      * Returns the combined position of the page with the given the <em>position</em>.

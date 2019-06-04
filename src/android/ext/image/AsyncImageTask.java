@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
+import java.nio.ByteBuffer;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
@@ -14,7 +15,7 @@ import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -113,14 +114,15 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) == 0, "Invalid parameter - The params is null or 0-length");
-        final byte[] tempBuffer = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         final Object[] results  = new Object[params.length];
         try {
+            final byte[] array = buffer.array();
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
-                results[i] = decodeImageInternal(params[i], tempBuffer);
+                results[i] = decodeImageInternal(params[i], array);
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(tempBuffer);
+            ByteBufferPool.sInstance.recycle(buffer);
         }
 
         return results;

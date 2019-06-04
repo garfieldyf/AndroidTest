@@ -3,12 +3,13 @@ package android.ext.graphics;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -199,11 +200,11 @@ public final class GIFImage {
     }
 
     private static long decodeStreamInternal(InputStream is) {
-        final byte[] tempStorage = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
-            return nativeDecodeStream(is, tempStorage);
+            return nativeDecodeStream(is, buffer.array());
         } finally {
-            ByteArrayPool.sInstance.recycle(tempStorage);
+            ByteBufferPool.sInstance.recycle(buffer);
         }
     }
 

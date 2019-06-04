@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import java.lang.reflect.Array;
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -33,19 +34,18 @@ public final class Pools {
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
         DebugUtils.__checkError(factory == null, "factory == null");
-        return new ObjectPool<T>(factory, maxSize);
+        return new ArrayPool<T>(factory, maxSize);
     }
 
     /**
-     * Creates a new <b>fixed-size</b> array {@link Pool}.
-     * @param maxSize The maximum number of arrays to allow in this pool.
-     * @param length The maximum number of elements in the each array.
-     * @param componentType The array's component type.
-     * @return An newly array <tt>Pool</tt>.
+     * Creates a new <b>fixed-size</b> direct byte buffer {@link Pool}.
+     * @param maxSize The maximum number of <tt>ByteBuffer</tt>s to allow in this pool.
+     * @param capacity The maximum number of bytes in the each <tt>ByteBuffer</tt>.
+     * @return An newly {@link ByteBuffer} <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
-    public static <T> Pool<T> newPool(int maxSize, int length, Class<?> componentType) {
-        return new ArrayPool<T>(maxSize, length, componentType);
+    public static Pool<ByteBuffer> newPool(int maxSize, int capacity) {
+        return new DirectByteBufferPool(maxSize, capacity);
     }
 
     /**
@@ -61,8 +61,8 @@ public final class Pools {
     public static void dumpPool(Pool<?> pool, Printer printer) {
         if (pool instanceof SynchronizedPool) {
             ((SynchronizedPool<?>)pool).dump(printer);
-        } else if (pool instanceof ObjectPool) {
-            ((ObjectPool<?>)pool).dump(printer, null);
+        } else if (pool instanceof ArrayPool) {
+            ((ArrayPool<?>)pool).dump(printer, null);
         }
     }
 
@@ -179,10 +179,10 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
+     * Class <tt>ByteBufferPool</tt> for managing a pool of the dirent {@link ByteBuffer}s.
      */
-    public static final class ByteArrayPool {
-        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(2, 8192, byte.class));
+    public static final class ByteBufferPool {
+        public static final Pool<ByteBuffer> sInstance = new SynchronizedPool<ByteBuffer>(new DirectByteBufferPool(2, 8192));
     }
 
     /**
@@ -221,9 +221,9 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ObjectPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static class ObjectPool<T> implements Pool<T>, Factory<T> {
+    private static class ArrayPool<T> implements Pool<T>, Factory<T> {
         /* package */ int size;
         /* package */ final Object[] elements;
         /* package */ final Factory<T> factory;
@@ -236,7 +236,7 @@ public final class Pools {
          * @param maxSize The maximum number of elements
          * to allow in this pool.
          */
-        public ObjectPool(Factory<T> factory, int maxSize) {
+        public ArrayPool(Factory<T> factory, int maxSize) {
             DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.elements = new Object[maxSize];
             this.factory  = (factory != null ? factory : this);
@@ -292,29 +292,27 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>DirectByteBufferPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ArrayPool<T> extends ObjectPool<T> {
-        private final int length;
-        private final Class<?> componentType;
+    private static final class DirectByteBufferPool extends ArrayPool<ByteBuffer> {
+        private final int capacity;
 
         /**
          * Constructor
-         * @param maxSize The maximum number of arrays to allow in this pool.
-         * @param length The maximum number of elements in the each array.
-         * @param componentType The array's component type.
+         * @param maxSize The maximum number of <tt>ByteBuffer</tt>s to allow in this pool.
+         * @param capacity The maximum number of bytes in the each <tt>ByteBuffer</tt>.
          */
-        public ArrayPool(int maxSize, int length, Class<?> componentType) {
+        public DirectByteBufferPool(int maxSize, int capacity) {
             super(null, maxSize);
-            this.length = length;
-            this.componentType = componentType;
-            DebugUtils.__checkError(length <= 0, "length <= 0");
+            this.capacity = capacity;
+            DebugUtils.__checkError(capacity <= 0, "capacity <= 0");
         }
 
         @Override
-        @SuppressWarnings("unchecked")
-        public T newInstance() {
-            return (T)Array.newInstance(componentType, length);
+        public ByteBuffer newInstance() {
+            final ByteBuffer result = ByteBuffer.allocateDirect(capacity);
+            DebugUtils.__checkError(!result.hasArray(), DebugUtils.toString(result, new StringBuilder("The ")).append(" has no array.").toString());
+            return result;
         }
     }
 
@@ -344,8 +342,8 @@ public final class Pools {
         }
 
         public synchronized final void dump(Printer printer) {
-            if (pool instanceof ObjectPool) {
-                ((ObjectPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
+            if (pool instanceof ArrayPool) {
+                ((ArrayPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
         }
     }

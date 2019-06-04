@@ -2,6 +2,7 @@ package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import android.content.Context;
@@ -54,7 +55,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public static final int FLAG_CUSTOM_PARAMETERS = 0x00400000;
 
     private final Loader<Image> mLoader;
-    private final Pool<byte[]> mBufferPool;
+    private final Pool<ByteBuffer> mBufferPool;
     private final LoadRequest<URI, Image> mRequest;
 
     protected final ImageDecoder<Image> mDecoder;
@@ -76,7 +77,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mDecoder = decoder;
         mBinder  = ImageBinder.createImageBinder(imageCache, binder);
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.<byte[]>newPool(computeBufferPoolMaxSize(executor), 16384, byte.class));
+        mBufferPool = Pools.synchronizedPool(Pools.newPool(computeBufferPoolMaxSize(executor), 16384));
     }
 
     /**
@@ -184,10 +185,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     @Override
     protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
-        final byte[] buffer = mBufferPool.obtain();
+        final ByteBuffer buffer = mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
-            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
+            final byte[] array  = buffer.array();
+            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, array) : mDecoder.decodeImage(uri, target, params, flags, array));
         } finally {
             mBufferPool.recycle(buffer);
         }

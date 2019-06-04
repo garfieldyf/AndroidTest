@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -17,7 +18,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import android.ext.util.FileUtils.Dirent;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 
 /**
  * Class ZipUtils
@@ -125,15 +126,15 @@ public final class ZipUtils {
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
         os.setLevel(compressionLevel);
 
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
             // Compresses the files.
             for (String file : files) {
                 final Dirent dirent = new Dirent(file);
-                compress(os, dirent, dirent.getName(), cancelable, buffer);
+                compress(os, dirent, dirent.getName(), cancelable, buffer.array());
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteBufferPool.sInstance.recycle(buffer);
             os.close();
         }
     }
@@ -150,8 +151,8 @@ public final class ZipUtils {
      * @see #compress(String, int, Cancelable, String[])
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
-        final ZipFile file  = new ZipFile(zipFile);
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final ZipFile file = new ZipFile(zipFile);
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
@@ -168,11 +169,11 @@ public final class ZipUtils {
                 if (entry.isDirectory()) {
                     FileUtils.mkdirs(pathName.getPath(), 0);
                 } else {
-                    uncompress(file, entry, pathName, crc, cancelable, buffer);
+                    uncompress(file, entry, pathName, crc, cancelable, buffer.array());
                 }
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteBufferPool.sInstance.recycle(buffer);
             file.close();
         }
     }

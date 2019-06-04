@@ -448,7 +448,7 @@ public final class Pages {
         private void prefetchPage(int currentPage, int position) {
             // Prefetch the previous page data.
             if (currentPage > 0 && position == mPrefetchDistance - 1) {
-                DebugUtils.__checkDebug(true, getClass().getSimpleName(), "prefetchPage = " + (currentPage - 1) + ", position = " + position);
+                DebugUtils.__checkDebug(true, "Pages", "prefetchPage = " + (currentPage - 1) + ", position = " + position);
                 getPage(currentPage - 1);
             }
 
@@ -457,7 +457,7 @@ public final class Pages {
                 // Prefetch the next page data.
                 final int pageSize = (currentPage > 0 ? mPageSize : mInitialSize);
                 if (position == pageSize - mPrefetchDistance) {
-                    DebugUtils.__checkDebug(true, getClass().getSimpleName(), "prefetchPage = " + (currentPage + 1) + ", position = " + position);
+                    DebugUtils.__checkDebug(true, "Pages", "prefetchPage = " + (currentPage + 1) + ", position = " + position);
                     getPage(currentPage + 1);
                 }
             }

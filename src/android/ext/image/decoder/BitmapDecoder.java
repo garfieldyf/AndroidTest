@@ -109,7 +109,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         // Retrieves the bitmap from bitmap pool to reuse it.
         if (mBitmapPool != null) {
             opts.inBitmap = mBitmapPool.get(parameters.computeByteCount(mContext, opts));
-            DebugUtils.__checkDebug(opts.inBitmap != null, getClass().getSimpleName(), "opts.inBitmap = " + opts.inBitmap);
+            DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "opts.inBitmap = " + opts.inBitmap);
         }
 
         // Decodes the image pixels.
@@ -144,7 +144,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     private static void __checkDumpOptions(Options opts, int flags) {
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
-            BitmapUtils.dumpOptions(BitmapDecoder.class.getSimpleName(), opts);
+            BitmapUtils.dumpOptions("BitmapDecoder", opts);
         }
     }
 }

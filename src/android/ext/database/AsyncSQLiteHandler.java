@@ -282,7 +282,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 cursor.getCount();
             }
 
-            DebugUtils.__checkStopMethodTracing(AsyncSQLiteHandler.this.getClass().getSimpleName(), "execQuery");
+            DebugUtils.__checkStopMethodTracing("AsyncSQLiteHandler", "execQuery");
             return cursor;
         }
     }

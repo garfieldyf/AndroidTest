@@ -147,7 +147,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(params);
-                DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download");
+                DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "download");
             } else {
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
@@ -177,7 +177,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         try {
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "loadFromCache");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
@@ -205,7 +205,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
+            DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "parseResult");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);

@@ -145,7 +145,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
         Parameters parameters = mParamsCache.get(id, null);
         if (parameters == null) {
-            DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
             mParamsCache.append(id, parameters = XmlResources.loadParameters(mContext, id));
         }
 
@@ -177,13 +177,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     @Override
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
-        DebugUtils.__checkDebug(true, getClass().getSimpleName(), "onTrimMemory " + this + " level = " + level);
+        DebugUtils.__checkDebug(true, "ImageModule", "onTrimMemory " + this + " level = " + level);
         if (mImageCache != null) {
             mImageCache.clear();
         }
 
         if (mParamsCache != null) {
-            DebugUtils.__checkDebug(true, getClass().getSimpleName(), "Clears the Parameters cache - size = " + mParamsCache.size());
+            DebugUtils.__checkDebug(true, "ImageModule", "Clears the Parameters cache - size = " + mParamsCache.size());
             mParamsCache.clear();
         }
     }

@@ -541,7 +541,7 @@ public final class DatabaseUtils {
     }
 
     private static void __checkDumpCursorFields(List<Pair<Field, String>> cursorFields) {
-        final Printer printer = new LogPrinter(Log.DEBUG, DatabaseUtils.class.getSimpleName());
+        final Printer printer = new LogPrinter(Log.DEBUG, "DatabaseUtils");
         final StringBuilder result = new StringBuilder(100);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", cursorFields.size());
         for (Pair<Field, String> cursorField : cursorFields) {

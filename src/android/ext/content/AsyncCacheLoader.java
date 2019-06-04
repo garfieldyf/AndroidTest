@@ -133,7 +133,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(task, key, params);
-                DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "download");
+                DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "download");
             } else {
                 final boolean hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -163,7 +163,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
         try {
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "loadFromCache");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
@@ -191,7 +191,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing(getClass().getSimpleName(), "parseResult");
+            DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "parseResult");
             DebugUtils.__checkError(result == this, "Invalid parse - result == this");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);

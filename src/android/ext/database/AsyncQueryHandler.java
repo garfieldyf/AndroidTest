@@ -322,7 +322,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 Log.e(getClass().getName(), "Couldn't query from - " + uri, e);
             }
 
-            DebugUtils.__checkStopMethodTracing(AsyncQueryHandler.this.getClass().getSimpleName(), "execQuery");
+            DebugUtils.__checkStopMethodTracing("AsyncQueryHandler", "execQuery");
             return cursor;
         }
 

@@ -153,7 +153,7 @@ public final class UIHandler extends Handler implements Executor {
             final LinearLayoutManager layoutManager = (LinearLayoutManager)manager;
             final int firstPos = layoutManager.findFirstVisibleItemPosition();
             final int lastPos  = layoutManager.findLastVisibleItemPosition();
-            DebugUtils.__checkDebug(true, UIHandler.class.getSimpleName(), "firstVisiblePosition = " + firstPos + "lastVisiblePosition = " + lastPos);
+            DebugUtils.__checkDebug(true, "UIHandler", "firstVisiblePosition = " + firstPos + "lastVisiblePosition = " + lastPos);
             if (firstPos != RecyclerView.NO_POSITION && lastPos != RecyclerView.NO_POSITION) {
                 notifyItemRangeChanged(recyclerView, firstPos, lastPos - firstPos + 1, payload);
             }

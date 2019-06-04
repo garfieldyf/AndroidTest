@@ -384,7 +384,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
             result.append(size.width).append('x').append(size.height).append(" (").append((float)size.width / size.height).append(')');
         }
 
-        Log.d(getClass().getSimpleName(), result.append(" ]\n}").toString());
+        Log.d("BarcodeCameraView", result.append(" ]\n}").toString());
     }
 
     private static boolean contains(List<String> supportedModes, String mode) {

@@ -52,7 +52,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
     @Override
     public synchronized void put(Bitmap bitmap) {
         DebugUtils.__checkError(bitmap == null, "bitmap == null");
-        DebugUtils.__checkWarning(!bitmap.isMutable(), getClass().getSimpleName(), "The bitmap is immutable, couldn't recycle to reused.");
+        DebugUtils.__checkWarning(!bitmap.isMutable(), "LinkedBitmapPool", "The bitmap is immutable, couldn't recycle to reused.");
         if (bitmap.isMutable() && !bitmap.isRecycled()) {
             // Inserts the bitmap into the mBitmaps at the appropriate position.
             ArrayUtils.insert(mBitmaps, bitmap, this);

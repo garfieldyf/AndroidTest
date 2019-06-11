@@ -205,10 +205,7 @@ public final class ProcessUtils {
          *   "model": "MODEL",
          *   "sdk": 19,
          *   "version": "4.4.4",
-         *   "abis": [
-         *     "armeabi-v7a",
-         *     "armeabi"
-         *   ],
+         *   "abis": "armeabi-v7a, armeabi",
          *   "package": "com.xxxx",
          *   "crashes": [{
          *     "_date": 1537852558991,
@@ -235,7 +232,13 @@ public final class ProcessUtils {
 
         /**
          * Writes the device info (e.g. brand, mode, version, abis and package name)
-         * to the <em>writer</em>.
+         * to the <em>writer</em>.<p>The device info such as the following:</p><pre>
+         * "brand": "BRAND",
+         * "model": "MODEL",
+         * "sdk": 19,
+         * "version": "4.4.4",
+         * "abis": "armeabi-v7a, armeabi",
+         * "package": "com.xxxx"</pre>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.
          * @return The <em>writer</em>.
@@ -243,12 +246,22 @@ public final class ProcessUtils {
          * @see #writeTo(Context, JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
-            return JsonUtils.writeObject(writer.name("brand").value(Build.BRAND)
+            return writer.name("brand").value(Build.BRAND)
                 .name("model").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
-                .name("abis"), DeviceUtils.getSupportedABIs())
+                .name("abis").value(getSupportedABIs())
                 .name("package").value(context.getPackageName());
+        }
+
+        private static String getSupportedABIs() {
+            final String[] abis = DeviceUtils.getSupportedABIs();
+            final StringBuilder result = new StringBuilder(48).append(abis[0]);
+            for (int i = 1; i < abis.length; ++i) {
+                result.append(", ").append(abis[i]);
+            }
+
+            return result.toString();
         }
     }
 

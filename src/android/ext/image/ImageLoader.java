@@ -185,13 +185,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     @Override
     protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
-        final ByteBuffer buffer = mBufferPool.obtain();
+        final ByteBuffer byteBuffer = mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
-            final byte[] array  = buffer.array();
-            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, array) : mDecoder.decodeImage(uri, target, params, flags, array));
+            final byte[] buffer = byteBuffer.array();
+            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
-            mBufferPool.recycle(buffer);
+            mBufferPool.recycle(byteBuffer);
         }
     }
 

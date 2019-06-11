@@ -2,6 +2,7 @@ package android.ext.page;
 
 import static android.ext.util.ArrayUtils.EMPTY_INT_ARRAY;
 import static android.ext.util.ArrayUtils.EMPTY_OBJECT_ARRAY;
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
@@ -124,13 +125,8 @@ public class PagedList<E> {
         final int count = Pages.getCount(page);
         if (count > 0) {
             if (mPageCount >= mPages.length) {
-                final Object[] newPages = new Object[mPageCount + ARRAY_CAPACITY_INCREMENT];
-                System.arraycopy(mPages, 0, newPages, 0, mPageCount);
-                mPages = newPages;
-
-                final int[] newPositions = new int[mPageCount + ARRAY_CAPACITY_INCREMENT];
-                System.arraycopy(mPositions, 0, newPositions, 0, mPageCount);
-                mPositions = newPositions;
+                mPages = newArray(mPages, Object.class);
+                mPositions = newArray(mPositions, int.class);
             }
 
             mPages[mPageCount] = page;
@@ -158,17 +154,19 @@ public class PagedList<E> {
         return count;
     }
 
-/*
+    /**
      * Removes the page at the specified <em>page</em> from this <tt>PagedList</tt>.
      * @param page The index of the page to remove.
      * @return The removed page's first item position in this <tt>PagedList</tt>.
      * @see #getPageForPosition(int)
+     */
     public int removePage(int page) {
         DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
         mItemCount -= ((Page<?>)mPages[page]).getCount();
         System.arraycopy(mPages, page + 1, mPages, page, --mPageCount - page);
         mPages[mPageCount] = null;  // Prevent memory leak.
 
+        // Computes all pages start position from the removed page index.
         final int result = mPositions[page];
         for (int i = page, startPosition = result; i < mPageCount; ++i) {
             mPositions[i]  = startPosition;
@@ -177,7 +175,6 @@ public class PagedList<E> {
 
         return result;
     }
-*/
 
     /**
      * Returns the combined position of the page with the given the <em>position</em>.
@@ -212,5 +209,10 @@ public class PagedList<E> {
             formatter.format("  Page %-2d ==> ", i);
             printer.println(DebugUtils.toString(page, result).append(" { position = ").append(mPositions[i]).append(", count = ").append(page.getCount()).append(" }").toString());
         }
+    }
+    private <T> T newArray(Object srcArray, Class<?> componentType) {
+        final Object newArray = Array.newInstance(componentType, mPageCount + ARRAY_CAPACITY_INCREMENT);
+        System.arraycopy(srcArray, 0, newArray, 0, mPageCount);
+        return (T)newArray;
     }
 }

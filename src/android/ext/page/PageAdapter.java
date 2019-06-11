@@ -375,7 +375,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Prefetch the {@link Page} with the given <em>page</em> and <em>position</em>.
-     * The default implementation prefetch the next page data from the current page.
+     * The default implementation load the next page data from the current page.
      * @param page The index of the current page.
      * @param position The index of the item in the <em>page</em>.
      * @param adapterPosition The adapter position of the item in this adapter.

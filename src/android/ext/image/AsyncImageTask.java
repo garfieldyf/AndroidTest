@@ -117,9 +117,9 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
         final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         final Object[] results  = new Object[params.length];
         try {
-            final byte[] array = buffer.array();
+            final byte[] tempBuffer = buffer.array();
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
-                results[i] = decodeImageInternal(params[i], array);
+                results[i] = decodeImageInternal(params[i], tempBuffer);
             }
         } finally {
             ByteBufferPool.sInstance.recycle(buffer);

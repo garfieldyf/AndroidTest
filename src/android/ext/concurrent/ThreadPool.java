@@ -26,7 +26,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, new PriorityThreadFactory());
+        this(maxThreads, 60, TimeUnit.SECONDS, null);
     }
 
     /**
@@ -41,7 +41,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        this(maxThreads, keepAliveTime, unit, new PriorityThreadFactory());
+        this(maxThreads, keepAliveTime, unit, null);
     }
 
     /**
@@ -78,14 +78,14 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return A {@link ThreadPool} instance.
      */
     public static ThreadPool createImageThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        return new ThreadPool(maxThreads, keepAliveTime, unit, new ImageThreadFactory());
+        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-thread-");
     }
 
     /**
      * Constructor
      */
-    private ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, ThreadFactory factory) {
-        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), factory);
+    private ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix) {
+        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix));
         allowCoreThreadTimeOut(true);
     }
 
@@ -164,30 +164,14 @@ public class ThreadPool extends ThreadPoolExecutor {
         private final String namePrefix;
         private final AtomicInteger nameSuffix;
 
-        public PriorityThreadFactory() {
+        public PriorityThreadFactory(String namePrefix) {
             this.nameSuffix = new AtomicInteger();
-            this.namePrefix = "Pool-" + (++sequence) + "-thread-";
+            this.namePrefix = (namePrefix != null ? namePrefix : "Pool-" + (++sequence) + "-thread-");
         }
 
         @Override
         public Thread newThread(Runnable runnable) {
             return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet());
-        }
-    }
-
-    /**
-     * Class <tt>ImageThreadFactory</tt> is an implementation of a {@link ThreadFactory}.
-     */
-    private static final class ImageThreadFactory implements ThreadFactory {
-        private final AtomicInteger nameSuffix;
-
-        public ImageThreadFactory() {
-            this.nameSuffix = new AtomicInteger();
-        }
-
-        @Override
-        public Thread newThread(Runnable runnable) {
-            return new PriorityThread(runnable, "ImagePool-thread-" + nameSuffix.incrementAndGet());
         }
     }
 }

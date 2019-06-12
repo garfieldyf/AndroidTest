@@ -89,8 +89,8 @@ public class PagedList<E> {
      */
     public E getItem(int position) {
         final long combinedPosition = getPageForPosition(position);
-        final int page = Pages.getOriginalPage(combinedPosition);
-        return ((Page<E>)mPages[page]).getItem((int)combinedPosition);
+        final int index = Pages.getOriginalPage(combinedPosition);
+        return ((Page<E>)mPages[index]).getItem((int)combinedPosition);
     }
 
     /**
@@ -103,15 +103,15 @@ public class PagedList<E> {
     }
 
     /**
-     * Returns the page at the specified <em>page</em> in this <tt>PagedList</tt>.
-     * @param page The index of the page.
-     * @return The {@link Page} at the specified <em>page</em>.
+     * Returns the page at the specified <em>index</em> in this <tt>PagedList</tt>.
+     * @param index The index of the page.
+     * @return The {@link Page} at the specified <em>index</em>.
      * @see #getPageCount()
      * @see #getPageForPosition(int)
      */
-    public Page<E> getPage(int page) {
-        DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
-        return (Page<E>)mPages[page];
+    public Page<E> getPage(int index) {
+        DebugUtils.__checkError(index < 0 || index >= mPageCount, "Index out of bounds - pageIndex = " + index + ", pageCount = " + mPageCount);
+        return (Page<E>)mPages[index];
     }
 
     /**
@@ -125,8 +125,8 @@ public class PagedList<E> {
         final int count = Pages.getCount(page);
         if (count > 0) {
             if (mPageCount >= mPages.length) {
-                mPages = newArray(mPages, Object.class);
-                mPositions = newArray(mPositions, int.class);
+                mPages = newArray(mPages);
+                mPositions = newArray(mPositions);
             }
 
             mPages[mPageCount] = page;
@@ -155,20 +155,20 @@ public class PagedList<E> {
     }
 
     /**
-     * Removes the page at the specified <em>page</em> from this <tt>PagedList</tt>.
-     * @param page The index of the page to remove.
+     * Removes the page at the specified <em>index</em> from this <tt>PagedList</tt>.
+     * @param index The index of the page to remove.
      * @return The removed page's first item position in this <tt>PagedList</tt>.
      * @see #getPageForPosition(int)
      */
-    public int removePage(int page) {
-        DebugUtils.__checkError(page < 0 || page >= mPageCount, "Index out of bounds - pageIndex = " + page + ", pageCount = " + mPageCount);
-        mItemCount -= ((Page<?>)mPages[page]).getCount();
-        System.arraycopy(mPages, page + 1, mPages, page, --mPageCount - page);
+    public int removePage(int index) {
+        DebugUtils.__checkError(index < 0 || index >= mPageCount, "Index out of bounds - pageIndex = " + index + ", pageCount = " + mPageCount);
+        mItemCount -= ((Page<?>)mPages[index]).getCount();
+        System.arraycopy(mPages, index + 1, mPages, index, --mPageCount - index);
         mPages[mPageCount] = null;  // Prevent memory leak.
 
         // Computes all pages start position from the removed page index.
-        final int result = mPositions[page];
-        for (int i = page, startPosition = result; i < mPageCount; ++i) {
+        final int result = mPositions[index];
+        for (int i = index, startPosition = result; i < mPageCount; ++i) {
             mPositions[i]  = startPosition;
             startPosition += ((Page<?>)mPages[i]).getCount();
         }
@@ -188,13 +188,13 @@ public class PagedList<E> {
      */
     public long getPageForPosition(int position) {
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
-        int page = Arrays.binarySearch(mPositions, 0, mPageCount, position);
-        if (page < 0) {
-            page = -page - 2;
+        int index = Arrays.binarySearch(mPositions, 0, mPageCount, position);
+        if (index < 0) {
+            index = -index - 2;
         }
 
-        DebugUtils.__checkError(page < 0, "Invalid page index - " + page);
-        return (((long)page << 32) | ((position - mPositions[page]) & 0xFFFFFFFFL));
+        DebugUtils.__checkError(index < 0, "Invalid page index - " + index);
+        return (((long)index << 32) | ((position - mPositions[index]) & 0xFFFFFFFFL));
     }
 
     @SuppressWarnings("resource")
@@ -210,8 +210,8 @@ public class PagedList<E> {
             printer.println(DebugUtils.toString(page, result).append(" { position = ").append(mPositions[i]).append(", count = ").append(page.getCount()).append(" }").toString());
         }
     }
-    private <T> T newArray(Object srcArray, Class<?> componentType) {
-        final Object newArray = Array.newInstance(componentType, mPageCount + ARRAY_CAPACITY_INCREMENT);
+    private <T> T newArray(Object srcArray) {
+        final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), mPageCount + ARRAY_CAPACITY_INCREMENT);
         System.arraycopy(srcArray, 0, newArray, 0, mPageCount);
         return (T)newArray;
     }

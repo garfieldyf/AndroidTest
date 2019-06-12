@@ -4,7 +4,6 @@ import java.io.File;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.text.format.Formatter;
 import android.util.Printer;
 
 /**
@@ -40,7 +39,7 @@ public class LruFileCache2 extends LruFileCache {
     }
 
     @Override
-    /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", getClass().getSimpleName(), count, Formatter.formatFileSize(context, size()), Formatter.formatFileSize(context, maxSize()));
+    /* package */ void dumpSummary(Printer printer, StringBuilder result, int count) {
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", getClass().getSimpleName(), count, FileUtils.formatFileSize(size()), FileUtils.formatFileSize(maxSize()));
     }
 }

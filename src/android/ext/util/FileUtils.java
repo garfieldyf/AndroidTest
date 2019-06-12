@@ -17,7 +17,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
 import android.text.format.DateFormat;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.util.Printer;
 
@@ -238,6 +237,51 @@ public final class FileUtils {
      */
     public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
         return scanFiles(dirPath, ListCallback.sInstance, flags, outDirents);
+    }
+
+    /**
+     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
+     * @param sizeBytes The size value to be formatted, in bytes.
+     * @return A formatted string with the <em>sizeBytes</em>.
+     */
+    public static String formatFileSize(long sizeBytes) {
+        double result = sizeBytes;
+        char suffix = 'B';
+        if (result > 900) {
+            suffix = 'K';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'M';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'G';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'T';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'P';
+            result = result / 1024;
+        }
+
+        final StringBuilder format = new StringBuilder(8).append("%.0f %c");
+        if (suffix != 'B') {
+            format.append('B');
+        }
+
+        if (result < 100) {
+            format.setCharAt(2, '2');
+        }
+
+        return String.format(format.toString(), result, suffix);
     }
 
     /**
@@ -876,16 +920,16 @@ public final class FileUtils {
          * @return A formatted string with the {@link #size}.
          */
         public final String formatSize(Context context, int resId) {
-            return context.getString(resId, Formatter.formatFileSize(context, size));
+            return context.getString(resId, formatFileSize(size));
         }
 
-        public final void dump(Context context, Printer printer) {
+        public final void dump(Printer printer) {
             printer.println(new StringBuilder(256)
                 .append("Stat { mode = ").append(Integer.toOctalString(mode))
                 .append(", user = ").append(getUserName()).append('(').append(uid).append(')')
                 .append(", group = ").append(getGroupName()).append('(').append(gid).append(')')
                 .append(", type = ").append(Integer.toOctalString(mode & S_IFMT))
-                .append(", size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
+                .append(", size = ").append(size).append('(').append(formatFileSize(size)).append(')')
                 .append(", perm = ").append(toCharType(mode & S_IFMT))
                 .append((mode & S_IRUSR) == S_IRUSR ? 'r' : '-')
                 .append((mode & S_IWUSR) == S_IWUSR ? 'w' : '-')

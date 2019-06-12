@@ -7,7 +7,6 @@ import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.text.format.Formatter;
 import android.util.Printer;
 
 /**
@@ -76,21 +75,21 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     /* package */ void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
         final Collection<File> files = entries().values();
-        dumpSummary(context, printer, result, files.size());
+        dumpSummary(printer, result, files.size());
 
         for (File file : files) {
             result.setLength(0);
-            printer.println(result.append("  ").append(file).append(" { size = ").append(Formatter.formatFileSize(context, file.length())).append(" }").toString());
+            printer.println(result.append("  ").append(file).append(" { size = ").append(FileUtils.formatFileSize(file.length())).append(" }").toString());
         }
 
-        dumpCacheFiles(context, printer, result);
+        dumpCacheFiles(printer, result);
     }
 
-    /* package */ void dumpSummary(Context context, Printer printer, StringBuilder result, int count) {
+    /* package */ void dumpSummary(Printer printer, StringBuilder result, int count) {
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), count, maxSize());
     }
 
-    private void dumpCacheFiles(Context context, Printer printer, StringBuilder result) {
+    private void dumpCacheFiles(Printer printer, StringBuilder result) {
         final File[] files = mCacheDir.listFiles();
         final int size = ArrayUtils.getSize(files);
         result.setLength(0);
@@ -105,7 +104,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             if (file.isDirectory()) {
                 ++index;
                 getFileCount(file, fileCounts);
-                result.append("  ").append(file.getName()).append(" { files = ").append(fileCounts[0]).append(", size = ").append(Formatter.formatFileSize(context, fileCounts[1])).append(" }");
+                result.append("  ").append(file.getName()).append(" { files = ").append(fileCounts[0]).append(", size = ").append(FileUtils.formatFileSize(fileCounts[1])).append(" }");
 
                 fileCount  += fileCounts[0];
                 fileLength += fileCounts[1];
@@ -116,7 +115,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             }
         }
 
-        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", getClass().getSimpleName(), size, fileCount, Formatter.formatFileSize(context, fileLength));
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", getClass().getSimpleName(), size, fileCount, FileUtils.formatFileSize(fileLength));
         if (result.length() > 0) {
             printer.println(result.toString());
         }

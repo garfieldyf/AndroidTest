@@ -8,6 +8,7 @@ import android.ext.content.res.XmlResources;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.ext.util.FileUtils;
 import android.ext.util.Pools.MatrixPool;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.UriUtils;
@@ -24,7 +25,6 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
-import android.text.format.Formatter;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -399,8 +399,8 @@ public final class BitmapUtils {
               .append(", config = ").append(config != null ? config.name() : "UNKNOWN")
               .append(", density = ").append(density).append('(').append(DeviceUtils.toDensity(density)).append(')')
               .append(", targetDensity = ").append(targetDensity).append('(').append(DeviceUtils.toDensity(targetDensity)).append(')')
-              .append(", size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
-              .append(", allocSize = ").append(allocSize).append('(').append(Formatter.formatFileSize(context, allocSize)).append(')')
+              .append(", size = ").append(size).append('(').append(FileUtils.formatFileSize(size)).append(')')
+              .append(", allocSize = ").append(allocSize).append('(').append(FileUtils.formatFileSize(allocSize)).append(')')
               .append(", mutable = ").append(bitmap.isMutable())
               .append(", recycle = ").append(bitmap.isRecycled())
               .append(" }");

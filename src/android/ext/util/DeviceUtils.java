@@ -17,7 +17,6 @@ import android.os.SystemProperties;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.text.TextUtils;
-import android.text.format.Formatter;
 import android.util.DisplayMetrics;
 import android.util.Printer;
 import android.view.Display;
@@ -68,7 +67,7 @@ public final class DeviceUtils {
     /**
      * Formats the cpu frequency to be in the form of KHz, MHz, GHz, etc.
      * @param freq The cpu frequency in KHz.
-     * @return The formatted string with the <em>freq</em> or <tt>fallback</tt>.
+     * @return A formatted string with the <em>freq</em> or <tt>fallback</tt>.
      */
     public static String formatCpuFreq(int freq, String fallback) {
         if (freq <= 0) {
@@ -76,7 +75,7 @@ public final class DeviceUtils {
         }
 
         float result = freq;
-        final StringBuilder format = new StringBuilder("%.0f KHz");
+        final StringBuilder format = new StringBuilder(8).append("%.0f KHz");
         if (result >= 1000) {
             result /= 1000;
             format.setCharAt(5, 'M');
@@ -168,23 +167,23 @@ public final class DeviceUtils {
         am.getMemoryInfo(info);
 
         infos.setLength(0);
-        infos.append("  totalMemory  = ").append(Formatter.formatFileSize(context, info.totalMem))
-             .append("\n  usedMemory   = ").append(Formatter.formatFileSize(context, info.totalMem - info.availMem))
-             .append("\n  availMemory  = ").append(Formatter.formatFileSize(context, info.availMem))
+        infos.append("  totalMemory  = ").append(FileUtils.formatFileSize(info.totalMem))
+             .append("\n  usedMemory   = ").append(FileUtils.formatFileSize(info.totalMem - info.availMem))
+             .append("\n  availMemory  = ").append(FileUtils.formatFileSize(info.availMem))
              .append("\n  lowMemory    = ").append(info.lowMemory)
-             .append("\n  threshold    = ").append(Formatter.formatFileSize(context, info.threshold))
-             .append("\n  appMaxMemory = ").append(Formatter.formatFileSize(context, Runtime.getRuntime().maxMemory()))
-             .append("\n  appLargeHeap = ").append(getAppHeapSize(context, "dalvik.vm.heapsize"));
+             .append("\n  threshold    = ").append(FileUtils.formatFileSize(info.threshold))
+             .append("\n  appMaxMemory = ").append(FileUtils.formatFileSize(Runtime.getRuntime().maxMemory()))
+             .append("\n  appLargeHeap = ").append(getAppHeapSize("dalvik.vm.heapsize"));
         printer.println(infos.toString());
 
         // Dumps the system storage infos.
         infos.setLength(0);
         final StatFs statFs = new StatFs(Environment.getRootDirectory().getPath());
-        dumpStorageInfo(context, statFs, infos.append("  system ["));
+        dumpStorageInfo(statFs, infos.append("  system ["));
 
         // Dumps the data storage infos.
         statFs.restat(Environment.getDataDirectory().getPath());
-        printer.println(dumpStorageInfo(context, statFs, infos.append("\n  data [")).toString());
+        printer.println(dumpStorageInfo(statFs, infos.append("\n  data [")).toString());
 
         // Dumps the external storage infos.
         infos.setLength(0);
@@ -225,15 +224,15 @@ public final class DeviceUtils {
         }
     }
 
-    private static String getAppHeapSize(Context context, String key) {
+    private static String getAppHeapSize(String key) {
         final long heapSize = SystemProperties.getLong(key, 0);
-        return (heapSize != 0 ? Formatter.formatFileSize(context, heapSize << 20) : "N/A");
+        return (heapSize != 0 ? FileUtils.formatFileSize(heapSize << 20) : "N/A");
     }
 
-    private static StringBuilder dumpStorageInfo(Context context, StatFs statFs, StringBuilder out) {
-        return out.append(" total = ").append(Formatter.formatFileSize(context, statFs.getTotalBytes()))
-                  .append(", used = ").append(Formatter.formatFileSize(context, (statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
-                  .append(", avail = ").append(Formatter.formatFileSize(context, statFs.getAvailableBytes()))
+    private static StringBuilder dumpStorageInfo(StatFs statFs, StringBuilder out) {
+        return out.append(" total = ").append(FileUtils.formatFileSize(statFs.getTotalBytes()))
+                  .append(", used = ").append(FileUtils.formatFileSize((statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
+                  .append(", avail = ").append(FileUtils.formatFileSize(statFs.getAvailableBytes()))
                   .append(" ]");
     }
 
@@ -250,7 +249,7 @@ public final class DeviceUtils {
                 continue;
             }
 
-            dumpStorageInfo(context, statFs, dumpWhiteSpace(out, i)
+            dumpStorageInfo(statFs, dumpWhiteSpace(out, i)
                 .append(getUserLabel(context, volume))
                 .append(" [ path = ").append(path)
                 .append(", primary = ").append(volume.isPrimary())

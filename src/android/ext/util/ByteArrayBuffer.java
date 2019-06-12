@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import android.content.Context;
-import android.text.format.Formatter;
 import android.util.Printer;
 
 /**
@@ -217,11 +215,11 @@ public final class ByteArrayBuffer extends OutputStream {
         out.write(data, 0, size);
     }
 
-    public final void dump(Context context, Printer printer) {
+    public final void dump(Printer printer) {
         printer.println(new StringBuilder(128)
-               .append("ByteArrayBuffer [ size = ").append(size).append('(').append(Formatter.formatFileSize(context, size)).append(')')
-               .append(", capacity = ").append(data.length).append('(').append(Formatter.formatFileSize(context, data.length)).append(')')
-               .append(", remaining = ").append(data.length - size).append('(').append(Formatter.formatFileSize(context, data.length - size)).append(')')
+               .append("ByteArrayBuffer [ size = ").append(size).append('(').append(FileUtils.formatFileSize(size)).append(')')
+               .append(", capacity = ").append(data.length).append('(').append(FileUtils.formatFileSize(data.length)).append(')')
+               .append(", remaining = ").append(data.length - size).append('(').append(FileUtils.formatFileSize(data.length - size)).append(')')
                .append(" ]").toString());
     }
 

@@ -59,8 +59,8 @@ import android.util.Log;
  *             return;
  *         }
  *
- *         if (result == this) {
- *             // The cache file's contents are equal the downloaded file's contents, do not update UI.
+ *         if (isInvalidResult(result)) {
+ *             // The result is invalid, do not update UI.
  *             return;
  *         }
  *
@@ -109,6 +109,15 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
      */
     protected File getCacheFile(Params[] params) {
         return null;
+    }
+
+    /**
+     * Tests if the <em>result</em> is invalid.
+     * @param result The result to test.
+     * @return <tt>true</tt> if the <em>result</em> is invalid, <tt>false</tt> otherwise.
+     */
+    protected final boolean isInvalidResult(Object result) {
+        return (result == this);
     }
 
     /**
@@ -166,7 +175,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         try {
             final int statusCode = newDownloadRequest(params).download(tempFile.getPath(), this, null);
             final Object result  = (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             return result;
         } finally {
             tempFile.delete();
@@ -178,7 +187,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, cacheFile);
             DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "loadFromCache");
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -206,7 +215,7 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
             DebugUtils.__checkStartMethodTracing();
             final Object result = parseResult(params, new File(tempFile));
             DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "parseResult");
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

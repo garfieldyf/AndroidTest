@@ -71,8 +71,8 @@ import android.util.Log;
  *             return;
  *         }
  *
- *         if (result == this) {
- *             // The cache file's contents are equal the downloaded file's contents, do not update UI.
+ *         if (isInvalidResult(result)) {
+ *             // The result is invalid, do not update UI.
  *             return;
  *         }
  *
@@ -119,6 +119,15 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
         mContext = activity.getApplicationContext();
     }
 
+    /**
+     * Tests if the <em>result</em> is invalid.
+     * @param result The result to test.
+     * @return <tt>true</tt> if the <em>result</em> is invalid, <tt>false</tt> otherwise.
+     */
+    protected final boolean isInvalidResult(Object result) {
+        return (result == this);
+    }
+
     @Override
     protected void onProgressUpdate(Key key, LoadParams<Key>[] params, Object[] values) {
         onLoadComplete(key, params, values[0]);
@@ -152,7 +161,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
         try {
             final int statusCode = params.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
             final Object result  = (statusCode == HTTP_OK && !isTaskCancelled(task) ? params.parseResult(mContext, key, tempFile, task) : null);
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             return result;
         } finally {
             tempFile.delete();
@@ -164,7 +173,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "loadFromCache");
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -192,7 +201,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, new File(tempFile), task);
             DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "parseResult");
-            DebugUtils.__checkError(result == this, "Invalid parse - result == this");
+            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

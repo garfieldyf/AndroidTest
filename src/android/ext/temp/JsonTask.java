@@ -44,8 +44,8 @@ public class JsonTask extends AsyncCacheTask<String> {
             return;
         }
 
-        if (result == this) {
-            //Log.i("abc", "JsonTask - Load EMPTY_RESULT, do not update UI.");
+        if (isInvalidResult(result)) {
+            Log.i("abc", "JsonTask - Load invalid result, do not update UI.");
             return;
         }
 

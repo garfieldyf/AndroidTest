@@ -30,8 +30,8 @@ public final class JsonLoader extends AsyncCacheLoader<String> {
             return;
         }
 
-        if (result == this) {
-            //Log.i("abc", "JsonLoader - Load EMPTY_RESULT, do not update UI.");
+        if (isInvalidResult(result)) {
+            Log.i("abc", "JsonLoader - Load invalid result, do not update UI.");
             return;
         }
 

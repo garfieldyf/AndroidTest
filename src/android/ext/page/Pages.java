@@ -249,14 +249,11 @@ public final class Pages {
 
         @Override
         public void clear() {
-            final int size = map.size();
-            if (size > 0) {
-                for (int i = 0; i < size; ++i) {
-                    map.valueAt(i).close();
-                }
-
-                map.clear();
+            for (int i = map.size() - 1; i >= 0; --i) {
+                map.valueAt(i).close();
             }
+
+            map.clear();
         }
 
         @Override

@@ -245,7 +245,7 @@ public final class FileUtils {
      * @return A formatted string with the <em>sizeBytes</em>.
      */
     public static String formatFileSize(long sizeBytes) {
-        double result = sizeBytes;
+        float result = sizeBytes;
         char suffix = 'B';
         if (result > 900) {
             suffix = 'K';

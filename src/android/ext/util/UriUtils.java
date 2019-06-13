@@ -91,9 +91,18 @@ public final class UriUtils {
     }
 
     /**
+     * Constructs a scheme is "file" uri from a <em>path</em>.
+     * @param path The file path.
+     * @return A {@link Uri} for the given <em>path</em>.
+     */
+    public static Uri fromPath(String path) {
+        return new Uri.Builder().scheme(SCHEME_FILE).authority("").path(path).build();
+    }
+
+    /**
      * Constructs a scheme is "file" uri string. The returned
      * string such as <tt>"file:///sdcard/docs/home.html"</tt>.
-     * @param path The file path, must be absolute file path.
+     * @param path The file path.
      * @return The uri string.
      */
     public static String getFileUri(String path) {

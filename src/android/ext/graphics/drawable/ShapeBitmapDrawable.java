@@ -8,13 +8,9 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.DrawUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.Pools.MatrixPool;
-import android.ext.util.Pools.RectFPool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
@@ -137,7 +133,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
             DrawUtils.applyGravity(mState.mGravity, width, height, getBounds(), outBounds);
 
             // Sets the shader's scale matrix.
-            setShaderMatrix(width, height, outBounds);
+            setShaderMatrix(mState.mShader, width, height, outBounds);
         }
 
         // Builds the convex path.
@@ -184,22 +180,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         if (mState.mPaint.getShader() != null) {
             mFlags |= FLAG_PATH;
         }
-    }
-
-    /**
-     * Sets the {@link Shader}'s local matrix.
-     */
-    private void setShaderMatrix(int width, int height, RectF bounds) {
-        // Computes the scale value that map the source
-        // rectangle to the destination rectangle.
-        final RectF src = RectFPool.obtain(0, 0, width, height);
-        final Matrix matrix = MatrixPool.sInstance.obtain();
-        matrix.setRectToRect(src, bounds, ScaleToFit.FILL);
-
-        // Sets the shader scale matrix.
-        mState.mShader.setLocalMatrix(matrix);
-        RectFPool.sInstance.recycle(src);
-        MatrixPool.sInstance.recycle(matrix);
     }
 
     /**

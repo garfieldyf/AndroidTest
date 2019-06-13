@@ -121,6 +121,11 @@ public class InvertedBitmapDrawable extends AbsBitmapDrawable<InvertedBitmapDraw
     }
 
     @Override
+    public ConstantState getConstantState() {
+        return null;
+    }
+
+    @Override
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
         canvas.drawBitmap(mState.mBitmap, null, bounds, paint);
     }

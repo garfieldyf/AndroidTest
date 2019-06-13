@@ -116,8 +116,13 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     }
 
     @Override
-    protected RoundedBitmapState copyConstantState() {
-        return new RoundedBitmapState(mState);
+    public Drawable mutate() {
+        if ((mFlags & FLAG_MUTATED) == 0) {
+            mFlags |= FLAG_MUTATED;
+            mState = new RoundedBitmapState(mState);
+        }
+
+        return this;
     }
 
     @Override
@@ -153,22 +158,6 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      */
     /* package */ RoundedBitmapDrawable(RoundedBitmapState state) {
         super(state);
-    }
-
-    /**
-     * Compares the specified <em>radius</em> to equals
-     * the each element in the <em>radii</em> array.
-     */
-    private static boolean radiusEquals(float[] radii, int start, float radius) {
-        if (radii != null && radii.length >= 8) {
-            for (; start < 8; ++start) {
-                if (Float.compare(radii[start], radius) != 0) {
-                    return false;
-                }
-            }
-        }
-
-        return true;
     }
 
     /**

@@ -239,15 +239,20 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
     }
 
     @Override
-    protected GIFImageState copyConstantState() {
-        return new GIFImageState(mState);
+    public Drawable mutate() {
+        if ((mFlags & FLAG_MUTATED) == 0) {
+            mFlags |= FLAG_MUTATED;
+            mState = new GIFImageState(mState);
+        }
+
+        return this;
     }
 
     @Override
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
         if (mState.mImage.draw(mState.mCanvas, mFrameIndex)) {
             // Draws the GIF image current frame.
-            canvas.drawBitmap(mState.mCanvas, null, bounds, paint);
+            drawFrame(canvas, mFrameIndex, mState.mCanvas, bounds, paint);
 
             // Schedules the GIF image next frame.
             if (isRunning()) {
@@ -271,6 +276,18 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
         mState.setImage(GIFImage.decode(res, id));
         DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
         a.recycle();
+    }
+
+    /**
+     * Draws the current frame of this GIF drawable in the <em>bounds</em>.
+     * @param canvas The canvas to draw into.
+     * @param frameIndex The current frame index.
+     * @param frame The current frame to be drawn.
+     * @param bounds The frame bounds of this drawable.
+     * @param paint The paint used to draw the frame of this drawable.
+     */
+    protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
+        canvas.drawBitmap(frame, null, bounds, paint);
     }
 
     private void unscheduleSelf() {

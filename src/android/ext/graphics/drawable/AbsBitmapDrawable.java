@@ -8,12 +8,17 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.ext.graphics.DrawUtils;
+import android.ext.util.Pools.MatrixPool;
+import android.ext.util.Pools.RectFPool;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
+import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -40,21 +45,21 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
      */
     public static final int VERTICAL_MIRRORED = 0x80000000;
 
-    /* --------------------- mFlags --------------------- */
-    /**
-     * If set the drawable gravity has been changed.
-     */
-    /* package */ static final int FLAG_GRAVITY = 0x80000000;
-
-    /**
-     * If set the drawable is mutated.
-     */
-    private static final int FLAG_MUTATED = 0x40000000;
-
     /**
      * The binary mask to get the auto mirrored of a mirror.
      */
     private static final int MIRRORED_MASK = 0xC0000000;
+
+    /* --------------------- mFlags --------------------- */
+    /**
+     * If set the drawable gravity has been changed.
+     */
+    protected static final int FLAG_GRAVITY = 0x40000000;
+
+    /**
+     * If set the drawable is mutated.
+     */
+    protected static final int FLAG_MUTATED = 0x80000000;
 
     /**
      * The bitmap drawable attributes.
@@ -145,11 +150,6 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     }
 
     @Override
-    public ConstantState getConstantState() {
-        return mState;
-    }
-
-    @Override
     public int getAlpha() {
         return mState.mPaint.getAlpha();
     }
@@ -225,13 +225,8 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = copyConstantState();
-        }
-
-        return this;
+    public ConstantState getConstantState() {
+        return mState;
     }
 
     @Override
@@ -276,15 +271,6 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     @Override
     protected void onBoundsChange(Rect bounds) {
         mFlags |= FLAG_GRAVITY;
-    }
-
-    /**
-     * Returns a copy of this drawable's {@link ConstantState}. The constant state
-     * specify where this will mutate when its {@link #mutate()} method is called.
-     * @return A copy of this drawable's <tt>ConstantState</tt>.
-     */
-    protected T copyConstantState() {
-        return mState;
     }
 
     /**
@@ -337,6 +323,38 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
         canvas.scale(scale, -scale);
         draw(canvas, mBounds, mState.mPaint);
         canvas.restoreToCount(saveCount);
+    }
+
+    /**
+     * Compares the specified <em>radius</em> to equals
+     * the each element in the <em>radii</em> array.
+     */
+    /* package */ static boolean radiusEquals(float[] radii, int start, float radius) {
+        if (radii != null && radii.length >= 8) {
+            for (; start < 8; ++start) {
+                if (Float.compare(radii[start], radius) != 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Sets the {@link Shader}'s local matrix.
+     */
+    /* package */ static void setShaderMatrix(Shader shader, int width, int height, RectF bounds) {
+        // Computes the scale value that map the source
+        // rectangle to the destination rectangle.
+        final RectF src = RectFPool.obtain(0, 0, width, height);
+        final Matrix matrix = MatrixPool.sInstance.obtain();
+        matrix.setRectToRect(src, bounds, ScaleToFit.FILL);
+
+        // Sets the shader scale matrix.
+        shader.setLocalMatrix(matrix);
+        RectFPool.sInstance.recycle(src);
+        MatrixPool.sInstance.recycle(matrix);
     }
 
     /**

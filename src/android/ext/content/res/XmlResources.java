@@ -18,6 +18,7 @@ import android.ext.image.params.SizeParameters;
 import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.GIFTransformer;
 import android.ext.image.transformer.OvalTransformer;
+import android.ext.image.transformer.RoundedGIFTransformer;
 import android.ext.image.transformer.RoundedRectTransformer;
 import android.ext.image.transformer.Transformer;
 import android.ext.util.ClassUtils;
@@ -244,6 +245,9 @@ public final class XmlResources {
 
             case "OvalTransformer":
                 return OvalTransformer.getInstance();
+
+            case "RoundedGIFTransformer":
+                return new RoundedGIFTransformer(context, Xml.asAttributeSet(parser));
 
             case "RoundedRectTransformer":
                 return new RoundedRectTransformer(context, Xml.asAttributeSet(parser));

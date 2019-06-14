@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths>
-    <external-path name="re_apk" path=""/>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Context.getFilesDir() -->
+    <files-path name="downloads" path="downloads" />
+
+    <!-- Context.getCacheDir() -->
+    <cache-path name="images" path="images" />
+
+    <!-- Environment.getExternalStorageDirectory() -->
+    <external-path name="docs" path="docs" />
 </paths>

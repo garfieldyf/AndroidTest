@@ -103,24 +103,6 @@ public final class BitmapUtils {
     public static native boolean mirrorBitmap(Bitmap bitmap, boolean horizontal);
 
     /**
-     * Blurs the given the <em>bitmap</em>.
-     * @param context The <tt>Context</tt>.
-     * @param bitmap A mutable bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
-     * @param radius The radius of the blur, Supported range 0 < radius <= 25.
-     */
-    public static void blurBitmap(Context context, Bitmap bitmap, float radius) {
-        final RenderScript rs = RenderScript.create(context);
-        final ScriptIntrinsicBlur blur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-
-        try {
-            blurBitmap(rs, blur, bitmap, radius);
-        } finally {
-            rs.destroy();
-            blur.destroy();
-        }
-    }
-
-    /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>.
      * <h3>Accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
@@ -408,23 +390,6 @@ public final class BitmapUtils {
         return result;
     }
 
-    /* package */ static void blurBitmap(RenderScript rs, ScriptIntrinsicBlur blur, Bitmap bitmap, float radius) {
-        DebugUtils.__checkError(bitmap == null, "bitmap == null");
-        DebugUtils.__checkError(bitmap.getConfig() != Config.ARGB_8888, "The bitmap must be ARGB_8888 pixel format.");
-        final Allocation input  = Allocation.createFromBitmap(rs, bitmap);
-        final Allocation output = Allocation.createTyped(rs, input.getType());
-
-        try {
-            blur.setInput(input);
-            blur.setRadius(radius);
-            blur.forEach(output);
-            output.copyTo(bitmap);
-        } finally {
-            input.destroy();
-            output.destroy();
-        }
-    }
-
     private static Bitmap createBitmap(Bitmap source, Matrix matrix, Config config, Paint paint) {
         final RectF src = new RectF(0, 0, source.getWidth(), source.getHeight());
         final RectF dst = RectFPool.sInstance.obtain();
@@ -449,22 +414,38 @@ public final class BitmapUtils {
      * Class <tt>RenderScriptBlur</tt> used to blur the <tt>Bitmap</tt>.
      */
     public static final class RenderScriptBlur implements Closeable {
+        private boolean mDestroy;
         private RenderScript mRS;
-        private final ScriptIntrinsicBlur mBlur;
+        private ScriptIntrinsicBlur mBlur;
 
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
+         * @see #RenderScriptBlur(RenderScript)
          */
         public RenderScriptBlur(Context context) {
-            mRS = RenderScript.create(context);
-            mBlur = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
+            this(RenderScript.create(context));
+            mDestroy = true;
+        }
+
+        /**
+         * Constructor
+         * @param rs The {@link RenderScript}.
+         * @see #RenderScriptBlur(Context)
+         */
+        public RenderScriptBlur(RenderScript rs) {
+            mRS = rs;
+            mBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
         }
 
         @Override
-        public synchronized final void close() {
-            if (mRS != null) {
+        public final void close() {
+            if (mBlur != null) {
                 mBlur.destroy();
+                mBlur = null;
+            }
+
+            if (mDestroy && mRS != null) {
                 mRS.destroy();
                 mRS = null;
             }
@@ -475,9 +456,22 @@ public final class BitmapUtils {
          * @param bitmap The bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
          * @param radius The radius of the blur, Supported range <tt>0 &lt; radius &lt;= 25</tt>.
          */
-        public synchronized final void blur(Bitmap bitmap, float radius) {
-            if (mRS != null) {
-                blurBitmap(mRS, mBlur, bitmap, radius);
+        public final void blur(Bitmap bitmap, float radius) {
+            DebugUtils.__checkError(bitmap == null, "bitmap == null");
+            DebugUtils.__checkError(bitmap.getConfig() != Config.ARGB_8888, "The bitmap must be ARGB_8888 pixel format.");
+            if (mBlur != null) {
+                final Allocation input  = Allocation.createFromBitmap(mRS, bitmap);
+                final Allocation output = Allocation.createTyped(mRS, input.getType());
+
+                try {
+                    mBlur.setInput(input);
+                    mBlur.setRadius(radius);
+                    mBlur.forEach(output);
+                    output.copyTo(bitmap);
+                } finally {
+                    input.destroy();
+                    output.destroy();
+                }
             }
         }
     }

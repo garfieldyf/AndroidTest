@@ -1,11 +1,11 @@
-package android.ext.net;
+package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
 import java.util.Arrays;
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AbsAsyncTask;
+import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;

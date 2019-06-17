@@ -1,7 +1,7 @@
 package android.ext.util;
 
 import java.lang.reflect.Array;
-import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -38,14 +38,15 @@ public final class Pools {
     }
 
     /**
-     * Creates a new <b>fixed-size</b> direct byte buffer {@link Pool}.
-     * @param maxSize The maximum number of <tt>ByteBuffer</tt>s to allow in this pool.
-     * @param capacity The maximum number of bytes in the each <tt>ByteBuffer</tt>.
-     * @return An newly {@link ByteBuffer} <tt>Pool</tt>.
+     * Creates a new <b>fixed-size</b> array {@link Pool}.
+     * @param maxSize The maximum number of arrays to allow in this pool.
+     * @param length The maximum number of elements in the each array.
+     * @param componentType The array's component type.
+     * @return An newly array <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
-    public static Pool<ByteBuffer> newPool(int maxSize, int capacity) {
-        return new DirectByteBufferPool(maxSize, capacity);
+    public static <T> Pool<T> newPool(int maxSize, int length, Class<?> componentType) {
+        return new ObjectArrayPool<T>(maxSize, length, componentType);
     }
 
     /**
@@ -70,6 +71,11 @@ public final class Pools {
      * The <tt>Pool</tt> interface for managing a pool of objects.
      */
     public static interface Pool<T> {
+        /**
+         * Removes all elements from this <tt>Pool</tt>, leaving it empty.
+         */
+        void clear();
+
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
@@ -179,10 +185,10 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ByteBufferPool</tt> for managing a pool of the dirent {@link ByteBuffer}s.
+     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
      */
-    public static final class ByteBufferPool {
-        public static final Pool<ByteBuffer> sInstance = new SynchronizedPool<ByteBuffer>(new DirectByteBufferPool(2, 8192));
+    public static final class ByteArrayPool {
+        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ObjectArrayPool<byte[]>(2, 8192, byte.class));
     }
 
     /**
@@ -201,6 +207,11 @@ public final class Pools {
         public SimplePool(Factory<T> factory) {
             this.referent = new AtomicReference<T>();
             this.factory  = (factory != null ? factory : this);
+        }
+
+        @Override
+        public void clear() {
+            referent.set(null);
         }
 
         @Override
@@ -240,6 +251,14 @@ public final class Pools {
             DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.elements = new Object[maxSize];
             this.factory  = (factory != null ? factory : this);
+        }
+
+        @Override
+        public void clear() {
+            if (size > 0) {
+                Arrays.fill(elements, 0, size, null);
+                size = 0;
+            }
         }
 
         @Override
@@ -292,27 +311,28 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>DirectByteBufferPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ObjectArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class DirectByteBufferPool extends ArrayPool<ByteBuffer> {
-        private final int capacity;
+    private static final class ObjectArrayPool<T> extends ArrayPool<T> {
+        private final int length;
+        private final Class<?> componentType;
 
         /**
          * Constructor
-         * @param maxSize The maximum number of <tt>ByteBuffer</tt>s to allow in this pool.
-         * @param capacity The maximum number of bytes in the each <tt>ByteBuffer</tt>.
+         * @param maxSize The maximum number of arrays to allow in this pool.
+         * @param length The maximum number of elements in the each array.
+         * @param componentType The array's component type.
          */
-        public DirectByteBufferPool(int maxSize, int capacity) {
+        public ObjectArrayPool(int maxSize, int length, Class<?> componentType) {
             super(null, maxSize);
-            this.capacity = capacity;
-            DebugUtils.__checkError(capacity <= 0, "capacity <= 0");
+            this.length = length;
+            this.componentType = componentType;
         }
 
         @Override
-        public ByteBuffer newInstance() {
-            final ByteBuffer result = ByteBuffer.allocateDirect(capacity);
-            DebugUtils.__checkError(!result.hasArray(), DebugUtils.toString(result, new StringBuilder("The ")).append(" has no array.").toString());
-            return result;
+        @SuppressWarnings("unchecked")
+        public T newInstance() {
+            return (T)Array.newInstance(componentType, length);
         }
     }
 
@@ -329,6 +349,11 @@ public final class Pools {
          */
         public SynchronizedPool(Pool<T> pool) {
             this.pool = pool;
+        }
+
+        @Override
+        public synchronized void clear() {
+            pool.clear();
         }
 
         @Override

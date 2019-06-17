@@ -215,13 +215,12 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
                 } else {
                     onLoadComplete(mKey, mParams, result);
                 }
-            }
 
-            // Recycles this task to avoid potential memory
-            // leaks, Even the loader has been shut down.
-            clearForRecycle();
-            mKey = null;
-            mTaskPool.recycle(this);
+                // Recycles this task.
+                clearForRecycle();
+                mKey = null;
+                mTaskPool.recycle(this);
+            }
         }
     }
 }

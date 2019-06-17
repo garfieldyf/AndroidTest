@@ -392,6 +392,21 @@ public final class ArrayUtils {
     }
 
     /**
+     * Checks that the range described by <tt>offset</tt> and <tt>length</tt>
+     * doesn't exceed <tt>arrayLength</tt>.
+     * @param offset The start position to check.
+     * @param length The desired length to check.
+     * @param arrayLength The array length to check.
+     * @throws IndexOutOfBoundsException if {@code offset < 0} or {@code length < 0},
+     * or if {@code offset + length} is bigger than the {@code arrayLength}.
+     */
+    public static void checkRange(int offset, int length, int arrayLength) {
+        if ((offset | length) < 0 || arrayLength - offset < length) {
+            throw new IndexOutOfBoundsException("Index out of bounds - [ offset = " + offset + ", length = " + length + ", array length = " + arrayLength + " ]");
+        }
+    }
+
+    /**
      * Returns a mutable {@link List} from the specified <em>array</em>,
      * handling <tt>null</tt> <em>array</em>.
      * @param array The array.

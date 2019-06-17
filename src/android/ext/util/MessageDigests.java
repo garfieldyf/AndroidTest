@@ -56,7 +56,10 @@ public final class MessageDigests {
      * @see #computeFile(String, byte[], int, Algorithm)
      */
     public static byte[] computeFile(String filename, Algorithm algorithm) {
-        DebugUtils.__checkError(StringUtils.getLength(filename) == 0, "Invalid parameter - The filename is null or 0-length");
+        if (StringUtils.getLength(filename) == 0) {
+            throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
+        }
+
         final byte[] result = new byte[algorithm.digestLength];
         return (computeFile(filename, result, 0, algorithm.ordinal()) > 0 ? result : null);
     }
@@ -73,8 +76,11 @@ public final class MessageDigests {
      * @see #computeFile(String, Algorithm)
      */
     public static int computeFile(String filename, byte[] result, int offset, Algorithm algorithm) {
-        DebugUtils.__checkError(StringUtils.getLength(filename) == 0, "Invalid parameter - The filename is null or 0-length");
-        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
+        if (StringUtils.getLength(filename) == 0) {
+            throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
+        }
+
+        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
         return computeFile(filename, result, offset, algorithm.ordinal());
     }
 
@@ -87,7 +93,10 @@ public final class MessageDigests {
      * @see #computeString(String, byte[], int, Algorithm)
      */
     public static byte[] computeString(String string, Algorithm algorithm) {
-        DebugUtils.__checkError(string == null, "Invalid parameter - The string is null");
+        if (string == null) {
+            throw new NullPointerException("string == null");
+        }
+
         final byte[] result = new byte[algorithm.digestLength];
         computeString(string, result, 0, algorithm.ordinal());
         return result;
@@ -105,8 +114,11 @@ public final class MessageDigests {
      * @see #computeString(String, Algorithm)
      */
     public static int computeString(String string, byte[] result, int offset, Algorithm algorithm) {
-        DebugUtils.__checkError(string == null, "Invalid parameter - The string is null");
-        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
+        if (string == null) {
+            throw new NullPointerException("string == null");
+        }
+
+        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
         return computeString(string, result, offset, algorithm.ordinal());
     }
 
@@ -119,7 +131,10 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, Algorithm algorithm) {
-        DebugUtils.__checkError(data == null, "data == null");
+        if (data == null) {
+            throw new NullPointerException("data == null");
+        }
+
         final byte[] result = new byte[algorithm.digestLength];
         computeByteArray(data, 0, data.length, result, 0, algorithm.ordinal());
         return result;
@@ -137,7 +152,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, int offset, int count, Algorithm algorithm) {
-        DebugUtils.__checkRange(offset, count, data.length);
+        ArrayUtils.checkRange(offset, count, data.length);
         final byte[] result = new byte[algorithm.digestLength];
         computeByteArray(data, offset, count, result, 0, algorithm.ordinal());
         return result;
@@ -158,8 +173,8 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, Algorithm)
      */
     public static int computeByteArray(byte[] data, int dataOffset, int dataCount, byte[] result, int offset, Algorithm algorithm) {
-        DebugUtils.__checkRange(dataOffset, dataCount, data.length);
-        DebugUtils.__checkRange(offset, algorithm.digestLength, result.length);
+        ArrayUtils.checkRange(dataOffset, dataCount, data.length);
+        ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
         return computeByteArray(data, dataOffset, dataCount, result, offset, algorithm.ordinal());
     }
 

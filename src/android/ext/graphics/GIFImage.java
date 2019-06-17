@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools.ByteBufferPool;
@@ -79,7 +80,7 @@ public final class GIFImage {
      * @see #decode(Context, Object, byte[])
      */
     public static GIFImage decode(byte[] data, int offset, int length) {
-        DebugUtils.__checkRange(offset, length, data.length);
+        ArrayUtils.checkRange(offset, length, data.length);
         final long nativeImage = nativeDecodeArray(data, offset, length);
         return (nativeImage != 0 ? new GIFImage(nativeImage) : null);
     }

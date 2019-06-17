@@ -17,6 +17,7 @@ import android.ext.util.DebugUtils;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
+    private static final int MAX_POOL_SIZE = 8;
     private WeakReference<Object> mOwner;
 
     /**
@@ -25,7 +26,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #AsyncTaskLoader(Executor, Object)
      */
     public AsyncTaskLoader(Executor executor) {
-        super(executor);
+        super(executor, MAX_POOL_SIZE);
     }
 
     /**
@@ -35,7 +36,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
      * @see #AsyncTaskLoader(Executor)
      */
     public AsyncTaskLoader(Executor executor, Object owner) {
-        super(executor);
+        super(executor, MAX_POOL_SIZE);
         mOwner = new WeakReference<Object>(owner);
     }
 

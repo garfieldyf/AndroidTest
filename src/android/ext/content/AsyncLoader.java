@@ -38,7 +38,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * the loaded values.
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
-        super(executor);
+        super(executor, 48);
         mCache = cache;
     }
 

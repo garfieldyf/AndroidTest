@@ -33,12 +33,11 @@ public abstract class Loader implements Factory<Task> {
 
     /**
      * Constructor
-     * @param executor The <tt>Executor</tt> to executing load task.
      */
-    /* package */ Loader(Executor executor) {
+    /* package */ Loader(Executor executor, int maxPoolSize) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
-        mTaskPool = Pools.newPool(this, 48);
+        mTaskPool = Pools.newPool(this, maxPoolSize);
         mRunningTasks = new HashMap<Object, Task>();
     }
 
@@ -68,8 +67,10 @@ public abstract class Loader implements Factory<Task> {
      * Temporarily stops all actively running tasks.
      * @see #resume()
      */
-    public final void pause() {
-        mState = PAUSED;
+    public synchronized final void pause() {
+        if (mState != SHUTDOWN) {
+            mState = PAUSED;
+        }
     }
 
     /**
@@ -77,8 +78,10 @@ public abstract class Loader implements Factory<Task> {
      * @see #pause()
      */
     public synchronized final void resume() {
-        mState = RUNNING;
-        notifyAll();
+        if (mState != SHUTDOWN) {
+            mState = RUNNING;
+            notifyAll();
+        }
     }
 
     /**

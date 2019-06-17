@@ -1,10 +1,12 @@
 package android.ext.graphics.drawable;
 
+import android.annotation.SuppressLint;
 import android.ext.graphics.DrawUtils;
 import android.ext.graphics.GIFImage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
@@ -57,6 +59,12 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
     }
 
     @Override
+    @SuppressLint("NewApi")
+    protected void getOutline(Outline outline, RectF bounds) {
+        outline.setConvexPath(mPath);
+    }
+
+    @Override
     protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
         if (paint.getShader() != null) {
             canvas.drawPath(mPath, paint);
@@ -84,14 +92,6 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
             mPath.rewind();
             getConvexPath(outBounds, mPath);
         }
-    }
-
-    /**
-     * Returns the {@link Path} used by this drawable to render.
-     * @return The {@link Path}.
-     */
-    /* package */ final Path getPath() {
-        return mPath;
     }
 
     /**

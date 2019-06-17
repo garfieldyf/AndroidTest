@@ -115,7 +115,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
                 // Round rect all corner radii are equals, for efficiency, and to enable clipping.
                 outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
             } else {
-                outline.setConvexPath(getPath());
+                super.getOutline(outline, bounds);
             }
         }
     }

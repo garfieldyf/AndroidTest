@@ -73,7 +73,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     /**
      * The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
      */
-    protected final Transformer<URI, Image> mTransformer;
+    protected Transformer<URI, Image> mTransformer;
 
     /**
      * Constructor
@@ -217,7 +217,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         if (imageCache == null && binder instanceof ImageBinder) {
             final ImageBinder imageBinder = (ImageBinder)binder;
             if (imageBinder.mTransformer instanceof CacheTransformer) {
-                binder = new ImageBinder(null, ((CacheTransformer)imageBinder.mTransformer).mTransformer, imageBinder.mDefaultImage);
+                imageBinder.mTransformer = ((CacheTransformer)imageBinder.mTransformer).mTransformer;
             }
         }
 

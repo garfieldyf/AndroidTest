@@ -1,6 +1,7 @@
 package android.ext.image;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
@@ -22,7 +23,11 @@ import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools;
+import android.ext.util.Pools.Factory;
+import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -31,15 +36,19 @@ import android.util.TypedValue;
  * Class ImageModule
  * @author Garfield
  */
-public class ImageModule<URI, Image> implements ComponentCallbacks2 {
+public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options> {
     /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
+
     protected final Executor mExecutor;
     protected final FileCache mFileCache;
     protected final Cache<URI, Image> mImageCache;
-    protected SparseArray<Parameters> mParamsCache;
+
+    /* package */ final Pool<byte[]> mBufferPool;
+    /* package */ final Pool<Options> mOptionsPool;
+    /* package */ SparseArray<Parameters> mParamsCache;
 
     /**
      * Constructor
@@ -62,10 +71,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      * @see ThreadPool#createImageThreadPool(int, long, TimeUnit)
      */
     public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+        final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
-        mFileCache  = fileCache;
-        mImageCache = imageCache;
+        mFileCache   = fileCache;
+        mImageCache  = imageCache;
+        mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
+        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mContext.registerComponentCallbacks(this);
     }
 
@@ -153,6 +165,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     }
 
     public final void dump(Printer printer) {
+        Pools.dumpPool(mBufferPool, printer);
+        Pools.dumpPool(mOptionsPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 
@@ -170,6 +184,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     }
 
     @Override
+    public Options newInstance() {
+        return new Options();
+    }
+
+    @Override
     public void onLowMemory() {
         onTrimMemory(TRIM_MEMORY_COMPLETE);
     }
@@ -178,6 +197,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkDebug(true, "ImageModule", "onTrimMemory " + this + " level = " + level);
+        mBufferPool.clear();
+        mOptionsPool.clear();
+
         if (mImageCache != null) {
             mImageCache.clear();
         }
@@ -197,6 +219,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
      */
     private static FileCache createFileCache(Context context, int maxSize) {
         return (maxSize > 0 ? new LruFileCache(context, "._image_module_image_cache", maxSize) : null);
+    }
+
+    /**
+     * Computes the maximum buffer pool size of the image module.
+     */
+    private static int computeBufferPoolMaxSize(Executor executor) {
+        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4);
+        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize + 1);
     }
 
     /**
@@ -346,9 +376,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
             // Creates the image loader.
             final ImageLoader.ImageDecoder decoder = (ImageLoader.ImageDecoder)createImageDecoder(imageCache);
             if (mClass == null) {
-                return new ImageLoader(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
+                return new ImageLoader(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder, mModule.mBufferPool);
             } else {
-                return (ImageLoader)newInstance(mClass, new Class[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder);
+                return (ImageLoader)newInstance(mClass, new Class[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class, Pool.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder, mModule.mBufferPool);
             }
         }
 
@@ -368,11 +398,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2 {
 
             final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
             if (mDecoder instanceof Class) {
-                return newInstance((Class)mDecoder, new Class[] { Context.class, Parameters.class, BitmapPool.class }, mModule.mContext, parameters, bitmapPool);
+                return newInstance((Class)mDecoder, new Class[] { Context.class, Parameters.class, Pool.class, BitmapPool.class }, mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
             } else if (imageCache instanceof LruImageCache) {
-                return new ImageDecoder(mModule.mContext, parameters, bitmapPool);
+                return new ImageDecoder(mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
             } else {
-                return new BitmapDecoder(mModule.mContext, parameters, bitmapPool);
+                return new BitmapDecoder(mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
             }
         }
 

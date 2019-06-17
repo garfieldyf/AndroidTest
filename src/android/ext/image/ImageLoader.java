@@ -2,21 +2,18 @@ package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.image.binder.ImageBinder;
-import android.ext.image.decoder.AbsImageDecoder;
+import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
-import android.ext.util.Pools;
 import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
@@ -55,7 +52,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     public static final int FLAG_CUSTOM_PARAMETERS = 0x00400000;
 
     private final Loader<Image> mLoader;
-    private final Pool<ByteBuffer> mBufferPool;
+    private final Pool<byte[]> mBufferPool;
     private final LoadRequest<URI, Image> mRequest;
 
     protected final ImageDecoder<Image> mDecoder;
@@ -69,15 +66,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      * @param binder The {@link Binder} to bind the image to target.
+     * @param bufferPool The byte array {@link Pool}.
      */
-    public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
+    public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder, Pool<byte[]> bufferPool) {
         super(executor, imageCache);
 
+        mBufferPool = bufferPool;
         mRequest = new LoadRequest<URI, Image>(this);
         mDecoder = decoder;
         mBinder  = ImageBinder.createImageBinder(imageCache, binder);
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
-        mBufferPool = Pools.synchronizedPool(Pools.newPool(computeBufferPoolMaxSize(executor), 16384));
     }
 
     /**
@@ -163,10 +161,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     @Override
     public void dump(Context context, Printer printer) {
         super.dump(context, printer);
-        Pools.dumpPool(mBufferPool, printer);
-
-        if (mDecoder instanceof AbsImageDecoder) {
-            ((AbsImageDecoder<?>)mDecoder).dump(printer);
+        if (mDecoder instanceof BitmapDecoder) {
+            ((BitmapDecoder<?>)mDecoder).dump(printer);
         }
 
         if (mBinder instanceof ImageBinder) {
@@ -185,13 +181,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     @Override
     protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
-        final ByteBuffer byteBuffer = mBufferPool.obtain();
+        final byte[] buffer = mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
-            final byte[] buffer = byteBuffer.array();
             return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
-            mBufferPool.recycle(byteBuffer);
+            mBufferPool.recycle(buffer);
         }
     }
 
@@ -226,14 +221,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
             return null;
         }
-    }
-
-    /**
-     * Computes the maximum buffer pool size of the image loader.
-     */
-    private static int computeBufferPoolMaxSize(Executor executor) {
-        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4);
-        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize + 1);
     }
 
     /**

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.GIFImage;
 import android.ext.image.params.Parameters;
+import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
 
 /**
@@ -19,27 +20,14 @@ public class ImageDecoder extends BitmapDecoder<Object> {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param id The resource id of the {@link Parameters} to load.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
-     * @see #ImageDecoder(BitmapDecoder, Parameters)
-     * @see #ImageDecoder(Context, Parameters, BitmapPool)
-     */
-    public ImageDecoder(Context context, int id, BitmapPool bitmapPool) {
-        super(context, id, bitmapPool);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
+     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode image.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
-     * @see #ImageDecoder(Context, int, BitmapPool)
      * @see #ImageDecoder(BitmapDecoder, Parameters)
      */
-    public ImageDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
-        super(context, parameters, bitmapPool);
+    public ImageDecoder(Context context, Parameters parameters, Pool<Options> optionsPool, BitmapPool bitmapPool) {
+        super(context, parameters, optionsPool, bitmapPool);
     }
 
     /**
@@ -48,8 +36,7 @@ public class ImageDecoder extends BitmapDecoder<Object> {
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
      * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @see #ImageDecoder(Context, int, BitmapPool)
-     * @see #ImageDecoder(Context, Parameters, BitmapPool)
+     * @see #ImageDecoder(Context, Parameters, Pool, BitmapPool)
      */
     public ImageDecoder(BitmapDecoder<Object> decoder, Parameters parameters) {
         super(decoder, parameters);

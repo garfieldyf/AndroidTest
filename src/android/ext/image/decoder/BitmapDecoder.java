@@ -3,10 +3,10 @@ package android.ext.image.decoder;
 import static android.ext.image.ImageLoader.FLAG_CUSTOM_PARAMETERS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
-import android.ext.content.res.XmlResources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -38,29 +38,14 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param id The resource id of the {@link Parameters} to load.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
-     * @see #BitmapDecoder(BitmapDecoder, Parameters)
-     * @see #BitmapDecoder(Context, Parameters, BitmapPool)
-     */
-    public BitmapDecoder(Context context, int id, BitmapPool bitmapPool) {
-        super(context);
-        mBitmapPool = bitmapPool;
-        mParameters = XmlResources.loadParameters(mContext, id);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
+     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
      * to reuse the bitmap when decoding bitmap.
-     * @see #BitmapDecoder(Context, int, BitmapPool)
      * @see #BitmapDecoder(BitmapDecoder, Parameters)
      */
-    public BitmapDecoder(Context context, Parameters parameters, BitmapPool bitmapPool) {
-        super(context);
+    public BitmapDecoder(Context context, Parameters parameters, Pool<Options> optionsPool, BitmapPool bitmapPool) {
+        super(context, optionsPool);
         mBitmapPool = bitmapPool;
         mParameters = parameters;
         DebugUtils.__checkError(parameters == null, "parameters == null");
@@ -72,8 +57,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
      * @param decoder The <tt>BitmapDecoder</tt> to copy.
      * @param parameters The {@link Parameters} to decode bitmap.
-     * @see #BitmapDecoder(Context, int, BitmapPool)
-     * @see #BitmapDecoder(Context, Parameters, BitmapPool)
+     * @see #BitmapDecoder(Context, Parameters, Pool, BitmapPool)
      */
     public BitmapDecoder(BitmapDecoder<Image> decoder, Parameters parameters) {
         super(decoder);
@@ -90,9 +74,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         return mParameters;
     }
 
-    @Override
     public void dump(Printer printer) {
-        super.dump(printer);
         DebugUtils.dumpSummary(printer, new StringBuilder(120), 120, " Dumping Parameters ", (Object[])null);
         mParameters.dump(printer, "  ");
     }

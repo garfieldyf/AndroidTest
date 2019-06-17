@@ -3,19 +3,16 @@ package android.ext.image.decoder;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
-import android.ext.util.Pools;
-import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
-import android.util.Printer;
 
 /**
  * Abstract class <tt>AbsImageDecoder</tt>
  * @author Garfield
  */
-public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image>, Factory<Options> {
+public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -29,25 +26,21 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode image.
      * @see #AbsImageDecoder(AbsImageDecoder)
      */
-    public AbsImageDecoder(Context context) {
+    public AbsImageDecoder(Context context, Pool<Options> optionsPool) {
+        mOptionsPool = optionsPool;
         mContext = context.getApplicationContext();
-        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, 8));
     }
 
     /**
      * Copy constructor
-     * @see #AbsImageDecoder(Context)
+     * @see #AbsImageDecoder(Context, Pool)
      */
     public AbsImageDecoder(AbsImageDecoder<Image> decoder) {
         mContext = decoder.mContext;
         mOptionsPool = decoder.mOptionsPool;
-    }
-
-    @Override
-    public Options newInstance() {
-        return new Options();
     }
 
     /**
@@ -82,10 +75,6 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         } finally {
             recycleOptions(opts);
         }
-    }
-
-    public void dump(Printer printer) {
-        Pools.dumpPool(mOptionsPool, printer);
     }
 
     /**

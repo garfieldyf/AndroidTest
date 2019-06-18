@@ -259,18 +259,17 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
 
         @Override
         public void onPostExecute(Value value) {
-            if (mState != SHUTDOWN) {
-                if (mRunningTasks.remove(mTarget) == this && !isCancelled()) {
-                    mBinder.bindValue(mKey, mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
-                }
-
-                // Recycles this task.
-                clearForRecycle();
-                mKey = null;
-                mTarget = null;
-                mBinder = null;
-                mTaskPool.recycle(this);
+            if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
+                mBinder.bindValue(mKey, mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
+
+            // Recycles this task to avoid potential memory
+            // leaks, Even the loader has been shut down.
+            clearForRecycle();
+            mKey = null;
+            mTarget = null;
+            mBinder = null;
+            mTaskPool.recycle(this);
         }
     }
 

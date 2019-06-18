@@ -49,7 +49,6 @@ public abstract class Loader implements Factory<Task> {
     public synchronized void shutdown() {
         DebugUtils.__checkUIThread("shutdown");
         mState = SHUTDOWN;
-        mTaskPool.clear();
         cancelAll();
         notifyAll();
     }
@@ -114,6 +113,7 @@ public abstract class Loader implements Factory<Task> {
 
     public void dump(Context context, Printer printer) {
         DebugUtils.__checkUIThread("dump");
+        Pools.dumpPool(mTaskPool, printer);
         final int size = mRunningTasks.size();
         if (size > 0) {
             final StringBuilder result = new StringBuilder(130);

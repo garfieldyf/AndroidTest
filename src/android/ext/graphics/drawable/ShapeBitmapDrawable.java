@@ -11,6 +11,7 @@ import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
+import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
@@ -104,6 +105,12 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     @Override
     protected void onBoundsChange(Rect bounds) {
         applyGravity();
+    }
+
+    @Override
+    @SuppressLint("NewApi")
+    protected void getOutline(Outline outline, RectF bounds) {
+        outline.setConvexPath(mState.mPath);
     }
 
     @Override

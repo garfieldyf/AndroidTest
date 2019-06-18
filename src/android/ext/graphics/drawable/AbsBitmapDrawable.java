@@ -216,10 +216,11 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     @Override
     public void getOutline(Outline outline) {
         if (getBounds().isEmpty()) {
-            super.getOutline(outline);
+            outline.setEmpty();
+            outline.setAlpha(0);
         } else {
             computeDrawingBounds(mBounds);
-            outline.setAlpha(1.0f);
+            outline.setAlpha(getAlpha() / 255.0f);
             getOutline(outline, mBounds);
         }
     }

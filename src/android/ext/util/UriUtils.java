@@ -94,6 +94,7 @@ public final class UriUtils {
      * Constructs a scheme is "file" uri from a <em>path</em>.
      * @param path The file path.
      * @return A {@link Uri} for the given <em>path</em>.
+     * @see Uri#fromFile(File)
      */
     public static Uri fromPath(String path) {
         return new Uri.Builder().scheme(SCHEME_FILE).authority("").path(path).build();

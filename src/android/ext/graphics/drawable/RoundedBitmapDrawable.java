@@ -141,7 +141,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
                 // Round rect all corner radii are equals, for efficiency, and to enable clipping.
                 outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
             } else {
-                outline.setConvexPath(mState.mPath);
+                super.getOutline(outline, bounds);
             }
         }
     }

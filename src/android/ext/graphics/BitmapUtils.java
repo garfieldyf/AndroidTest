@@ -4,11 +4,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
-import android.ext.content.res.XmlResources;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.MatrixPool;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.UriUtils;
@@ -127,44 +127,34 @@ public final class BitmapUtils {
     }
 
     /**
-     * Equivalent to calling <tt>decodeBitmap(context, UriUtils.getResourceUri(context, resId), null, null)</tt>.
+     * Equivalent to calling <tt>decodeBitmap(context, UriUtils.getResourceUri(context, resId), null)</tt>.
      * @param context The <tt>Context</tt>.
      * @param resId The resource id of the image data.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeBitmap(Context, int, int)
-     * @see #decodeBitmap(Context, Object, int)
+     * @see #decodeBitmap(Context, Object, Parameters)
      * @see #decodeBitmap(Context, Object, Parameters, byte[])
      */
     public static Bitmap decodeBitmap(Context context, int resId) {
-        return decodeBitmap(context, UriUtils.getResourceUri(context, resId), null, null);
+        return decodeBitmap(context, UriUtils.getResourceUri(context, resId), (Parameters)null);
     }
 
     /**
-     * Equivalent to calling <tt>decodeBitmap(context, UriUtils.getResourceUri(context, resId), id)</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param resId The resource id of the image data.
-     * @param id The xml resource id of the {@link Parameters}.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeBitmap(Context, int)
-     * @see #decodeBitmap(Context, Object, int)
-     * @see #decodeBitmap(Context, Object, Parameters, byte[])
-     */
-    public static Bitmap decodeBitmap(Context context, int resId, int id) {
-        return decodeBitmap(context, UriUtils.getResourceUri(context, resId), XmlResources.loadParameters(context, id), null);
-    }
-
-    /**
-     * Equivalent to calling <tt>decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null)</tt>.
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
-     * @param id The xml resource id of the {@link Parameters}.
+     * @param parameters May be <tt>null</tt>. The {@link Parameters} to use for decoding.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeBitmap(Context, int)
-     * @see #decodeBitmap(Context, int, int)
      * @see #decodeBitmap(Context, Object, Parameters, byte[])
+     * @see UriUtils#openInputStream(Context, Object)
      */
-    public static Bitmap decodeBitmap(Context context, Object uri, int id) {
-        return decodeBitmap(context, uri, XmlResources.loadParameters(context, id), null);
+    public static Bitmap decodeBitmap(Context context, Object uri, Parameters parameters) {
+        final byte[] tempStorage = ByteArrayPool.sInstance.obtain();
+        try {
+            return decodeBitmap(context, uri, parameters, tempStorage);
+        } finally {
+            ByteArrayPool.sInstance.recycle(tempStorage);
+        }
     }
 
     /**
@@ -181,8 +171,7 @@ public final class BitmapUtils {
      * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeBitmap(Context, int)
-     * @see #decodeBitmap(Context, int, int)
-     * @see #decodeBitmap(Context, Object, int)
+     * @see #decodeBitmap(Context, Object, Parameters)
      */
     public static Bitmap decodeBitmap(Context context, Object uri, Parameters parameters, byte[] tempStorage) {
         DebugUtils.__checkError(uri == null, "uri == null");
@@ -414,9 +403,9 @@ public final class BitmapUtils {
      * Class <tt>RenderScriptBlur</tt> used to blur the <tt>Bitmap</tt>.
      */
     public static final class RenderScriptBlur implements Closeable {
-        private boolean mDestroy;
         private RenderScript mRS;
         private ScriptIntrinsicBlur mBlur;
+        private final boolean mShouldClose;
 
         /**
          * Constructor
@@ -424,8 +413,7 @@ public final class BitmapUtils {
          * @see #RenderScriptBlur(RenderScript)
          */
         public RenderScriptBlur(Context context) {
-            this(RenderScript.create(context));
-            mDestroy = true;
+            this(RenderScript.create(context), true);
         }
 
         /**
@@ -434,7 +422,15 @@ public final class BitmapUtils {
          * @see #RenderScriptBlur(Context)
          */
         public RenderScriptBlur(RenderScript rs) {
+            this(rs, false);
+        }
+
+        /**
+         * Constructor
+         */
+        private RenderScriptBlur(RenderScript rs, boolean shouldClose) {
             mRS = rs;
+            mShouldClose = shouldClose;
             mBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
         }
 
@@ -445,7 +441,7 @@ public final class BitmapUtils {
                 mBlur = null;
             }
 
-            if (mDestroy && mRS != null) {
+            if (mShouldClose && mRS != null) {
                 mRS.destroy();
                 mRS = null;
             }

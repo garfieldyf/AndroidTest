@@ -1,7 +1,5 @@
 package android.ext.temp;
 
-import static android.ext.util.ArrayUtils.EMPTY_INT_ARRAY;
-import static android.ext.util.ArrayUtils.EMPTY_OBJECT_ARRAY;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +17,9 @@ import android.util.Printer;
 @SuppressWarnings("unchecked")
 public class PagedList<E> {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
+    private static final int[] EMPTY_INT_ARRAY = new int[0];
+    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+
     private int mItemCount;
     private int mPageCount;
     private Object[] mPages;

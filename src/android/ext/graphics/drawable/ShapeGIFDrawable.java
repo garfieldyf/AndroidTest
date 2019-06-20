@@ -20,7 +20,7 @@ import android.graphics.drawable.Drawable;
  * @author Garfield
  */
 public abstract class ShapeGIFDrawable extends GIFDrawable {
-    private static final int FLAG_PATH = 0x04;
+    private static final int FLAG_PATH = 0x00800000;  // mFlags
     private final Path mPath;
     private final Shader mShader;
 

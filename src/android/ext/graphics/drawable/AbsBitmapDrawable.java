@@ -77,7 +77,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     protected T mState;
 
     /**
-     * The flags, can be user-defined (must be range of [0 - 0xFFFFFF]).
+     * The flags, can be user-defined (must be range of [0 - 0xFFFF]).
      */
     protected int mFlags;
 

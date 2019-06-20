@@ -30,9 +30,9 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
         android.R.attr.oneshot,
     };
 
-    private static final int FLAG_RUNNING = 0x01;   // mFlags
-    private static final int FLAG_SCHED   = 0x02;   // mFlags
-    private static final int FLAG_ONESHOT = 0x01;   // mState.mFlags
+    private static final int FLAG_RUNNING = 0x04000000;   // mFlags
+    private static final int FLAG_SCHED   = 0x08000000;   // mFlags
+    private static final int FLAG_ONESHOT = 0x08000000;   // mState.mFlags
 
     /**
      * The current frame index to draw.

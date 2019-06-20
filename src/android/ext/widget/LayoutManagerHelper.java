@@ -18,11 +18,52 @@ import android.view.ViewGroup;
  */
 public final class LayoutManagerHelper {
     /**
-     * Requests that the given child of the RecyclerView be positioned onto the screen. <p>Note: This method recommended
-     * call in the {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * Equivalent to calling <tt>recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView))</tt>.
+     * @param recyclerView The {@link RecyclerView} to set.
+     * @see RecyclerView#setChildDrawingOrderCallback(ChildDrawingOrderCallback)
+     */
+    public static void setChildDrawingOrderCallback(RecyclerView recyclerView) {
+        recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView));
+    }
+
+    /**
+     * Called when the focus state of a view has changed.
+     * @param view The view whose state has changed.
+     * @param resId The resource id of the property animation.
+     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
+     */
+    public static void onFocusChange(View view, int resId, boolean invalidateParent) {
+        if (invalidateParent) {
+            final View parent = (View)view.getParent();
+            if (parent != null) {
+                parent.invalidate();
+            }
+        }
+
+        ViewUtils.animate(view, resId).start();
+    }
+
+    /**
+     * Called when searching for a focusable view in the given direction
+     * has failed for the current content of the <tt>RecyclerView</tt>.
+     */
+    public static View onFocusSearchFailed(View focused, int focusDirection, Recycler recycler, State state) {
+        // Returns the currently focused view when searching for a focusable view has failed.
+        // This operation can be supported the RecyclerView has a fixed item count.
+        return focused;
+    }
+
+    /**
+     * Scroll horizontally on the screen. <p>Note: This method recommended call in the
+     * {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * @param parent The {@link RecyclerView}.
+     * @param child The child making the request.
+     * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
+     * @param immediate <tt>true</tt> to forbid animated or delayed scrolling, <tt>false</tt> otherwise.
+     * @return Whether the group scrolled to handle the operation.
      * @see LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)
      */
-    public static boolean requestChildRectHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate) {
+    public static boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate) {
         // Gets the parent left and right.
         final int parentLeft  = parent.getPaddingLeft();
         final int parentRight = parent.getWidth() - parent.getPaddingRight();
@@ -50,11 +91,16 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Requests that the given child of the RecyclerView be positioned onto the screen. <p>Note: This method recommended
-     * call in the {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * Scroll vertically on the screen. <p>Note: This method recommended call in the
+     * {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * @param parent The {@link RecyclerView}.
+     * @param child The child making the request.
+     * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
+     * @param immediate <tt>true</tt> to forbid animated or delayed scrolling, <tt>false</tt> otherwise.
+     * @return Whether the group scrolled to handle the operation.
      * @see LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)
      */
-    public static boolean requestChildRectVertically(RecyclerView parent, View child, Rect rect, boolean immediate) {
+    public static boolean scrollVertically(RecyclerView parent, View child, Rect rect, boolean immediate) {
         // Gets the parent top and bottom.
         final int parentTop    = parent.getPaddingTop();
         final int parentBottom = parent.getHeight() - parent.getPaddingBottom();
@@ -79,42 +125,6 @@ public final class LayoutManagerHelper {
             // no scroll.
             return false;
         }
-    }
-
-    /**
-     * Called when searching for a focusable view in the given direction
-     * has failed for the current content of the <tt>RecyclerView</tt>.
-     */
-    public static View onFocusSearchFailed(View focused, int focusDirection, Recycler recycler, State state) {
-        // Returns the currently focused view when searching for a focusable view has failed.
-        // This operation can be supported the RecyclerView has a fixed item count.
-        return focused;
-    }
-
-    /**
-     * Equivalent to calling <tt>recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView))</tt>.
-     * @param recyclerView The {@link RecyclerView} to set.
-     * @see RecyclerView#setChildDrawingOrderCallback(ChildDrawingOrderCallback)
-     */
-    public static void setChildDrawingOrderCallback(RecyclerView recyclerView) {
-        recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView));
-    }
-
-    /**
-     * Called when the focus state of a view has changed.
-     * @param view The view whose state has changed.
-     * @param resId The resource id of the property animation.
-     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
-     */
-    public static void onFocusChange(View view, int resId, boolean invalidateParent) {
-        if (invalidateParent) {
-            final View parent = (View)view.getParent();
-            if (parent != null) {
-                parent.invalidate();
-            }
-        }
-
-        ViewUtils.animate(view, resId).start();
     }
 
     /**

@@ -1,6 +1,7 @@
 package android.ext.temp;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
@@ -18,17 +19,6 @@ import android.util.Printer;
  */
 public final class Pools {
     /**
-     * Creates a new <b>one-size</b> {@link Pool}.
-     * @param factory The {@link Factory} to create
-     * a new element when the pool is empty.
-     * @return An newly created <tt>Pool</tt>.
-     */
-    public static <T> Pool<T> newSimplePool(Factory<T> factory) {
-        DebugUtils.__checkError(factory == null, "factory == null");
-        return new SimplePool<T>(factory);
-    }
-
-    /**
      * Creates a new <b>fixed-size</b> {@link Pool}.
      * @param factory The {@link Factory} to create a new element
      * when the pool is empty.
@@ -38,7 +28,7 @@ public final class Pools {
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
         DebugUtils.__checkError(factory == null, "factory == null");
-        return new ObjectPool<T>(factory, maxSize);
+        return new SimplePool<T>(factory, maxSize);
     }
 
     /**
@@ -89,8 +79,8 @@ public final class Pools {
     public static void dumpPool(Pool<?> pool, Printer printer) {
         if (pool instanceof SynchronizedPool) {
             ((SynchronizedPool<?>)pool).dump(printer);
-        } else if (pool instanceof ObjectPool) {
-            ((ObjectPool<?>)pool).dump(printer, (pool instanceof AnimatorPool ? pool.getClass().getSimpleName() : null));
+        } else if (pool instanceof SimplePool) {
+            ((SimplePool<?>)pool).dump(printer, null);
         }
     }
 
@@ -98,6 +88,11 @@ public final class Pools {
      * The <tt>Pool</tt> interface for managing a pool of objects.
      */
     public static interface Pool<T> {
+        /**
+         * Removes all elements from this <tt>Pool</tt>, leaving it empty.
+         */
+        void clear();
+
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
@@ -130,27 +125,35 @@ public final class Pools {
     /**
      * Class <tt>RectPool</tt> is an <b>one-size</b> {@link Rect} pool.
      */
-    public static final class RectPool extends SimplePool<Rect> {
-        public static final Pool<Rect> sInstance = new RectPool();
+    public static final class RectPool extends AbstractPool<Rect> {
+        public static final RectPool sInstance = new RectPool();
 
         /**
          * Constructor
          */
         private RectPool() {
-            super(null);
         }
 
-        @Override
-        public Rect newInstance() {
-            return new Rect();
+        /**
+         * Retrieves a {@link Rect} from this <tt>Pool</tt>. Allows us to avoid
+         * allocating new <tt>Rect</tt> in many cases. When the <tt>Rect</tt>
+         * can no longer be used, The caller should be call {@link #recycle(Rect)}
+         * to recycles the <tt>Rect</tt>.
+         * @return The <tt>Rect</tt> object.
+         * @see #obtain(int, int, int, int)
+         */
+        public final Rect obtain() {
+            final Rect result = referent.getAndSet(null);
+            return (result != null ? result : new Rect());
         }
 
         /**
          * Equivalent to calling<pre>
-         * final Rect rect = RectPool.sInstance.obtain();
+         * final Rect rect = obtain();
          * rect.set(left, top, right, bottom);</pre>
+         * @see #obtain()
          */
-        public static Rect obtain(int left, int top, int right, int bottom) {
+        public final Rect obtain(int left, int top, int right, int bottom) {
             final Rect result = sInstance.obtain();
             result.set(left, top, right, bottom);
             return result;
@@ -160,27 +163,35 @@ public final class Pools {
     /**
      * Class <tt>RectFPool</tt> is an <b>one-size</b> {@link RectF} pool.
      */
-    public static final class RectFPool extends SimplePool<RectF> {
-        public static final Pool<RectF> sInstance = new RectFPool();
+    public static final class RectFPool extends AbstractPool<RectF> {
+        public static final RectFPool sInstance = new RectFPool();
 
         /**
          * Constructor
          */
         private RectFPool() {
-            super(null);
         }
 
-        @Override
-        public RectF newInstance() {
-            return new RectF();
+        /**
+         * Retrieves a {@link RectF} from this <tt>Pool</tt>. Allows us to avoid
+         * allocating new <tt>RectF</tt> in many cases. When the <tt>RectF</tt>
+         * can no longer be used, The caller should be call {@link #recycle(RectF)}
+         * to recycles the <tt>RectF</tt>.
+         * @return The <tt>RectF</tt> object.
+         * @see #obtain(float, float, float, float)
+         */
+        public final RectF obtain() {
+            final RectF result = referent.getAndSet(null);
+            return (result != null ? result : new RectF());
         }
 
         /**
          * Equivalent to calling<pre>
-         * final RectF rect = RectFPool.sInstance.obtain();
+         * final RectF rect = obtain();
          * rect.set(left, top, right, bottom);</pre>
+         * @see #obtain()
          */
-        public static RectF obtain(float left, float top, float right, float bottom) {
+        public final RectF obtain(float left, float top, float right, float bottom) {
             final RectF result = sInstance.obtain();
             result.set(left, top, right, bottom);
             return result;
@@ -190,19 +201,25 @@ public final class Pools {
     /**
      * Class <tt>MatrixPool</tt> is an <b>one-size</b> {@link Matrix} pool.
      */
-    public static final class MatrixPool extends SimplePool<Matrix> {
-        public static final Pool<Matrix> sInstance = new MatrixPool();
+    public static final class MatrixPool extends AbstractPool<Matrix> {
+        public static final MatrixPool sInstance = new MatrixPool();
 
         /**
          * Constructor
          */
         private MatrixPool() {
-            super(null);
         }
 
-        @Override
-        public Matrix newInstance() {
-            return new Matrix();
+        /**
+         * Retrieves a {@link Matrix} from this <tt>Pool</tt>. Allows us to avoid
+         * allocating new <tt>Matrix</tt> in many cases. When the <tt>Matrix</tt>
+         * can no longer be used, The caller should be call {@link #recycle(Matrix)}
+         * to recycles the <tt>Matrix</tt>.
+         * @return The <tt>Matrix</tt> object.
+         */
+        public final Matrix obtain() {
+            final Matrix result = referent.getAndSet(null);
+            return (result != null ? result : new Matrix());
         }
     }
 
@@ -214,60 +231,55 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>AbstractPool</tt> is an implementation of a {@link Pool}.
      */
-    private static class SimplePool<T> implements Pool<T>, Factory<T> {
-        private final Factory<T> factory;
-        private final AtomicReference<T> referent;
+    private static abstract class AbstractPool<T> {
+        /* package */ final AtomicReference<T> referent;
 
         /**
          * Constructor
-         * <p>Creates a new <b>one</b> size pool.</p>
-         * @param factory The {@link Factory} to create
-         * a new element when this pool is empty.
          */
-        public SimplePool(Factory<T> factory) {
+        public AbstractPool() {
             this.referent = new AtomicReference<T>();
-            this.factory  = (factory != null ? factory : this);
         }
 
-        @Override
-        public T newInstance() {
-            throw new RuntimeException("Must be implementation!");
-        }
-
-        @Override
-        public T obtain() {
-            final T element = referent.getAndSet(null);
-            return (element != null ? element : factory.newInstance());
-        }
-
-        @Override
-        public void recycle(T element) {
+        /**
+         * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
+         * calling this function you must not ever touch the <em>element</em> again.
+         * @param element The element to recycle.
+         */
+        public final void recycle(T element) {
             referent.compareAndSet(null, element);
         }
     }
 
     /**
-     * Class <tt>ObjectPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static class ObjectPool<T> implements Pool<T>, Factory<T> {
+    private static class SimplePool<T> implements Pool<T>, Factory<T> {
         /* package */ int size;
         /* package */ final Object[] elements;
         /* package */ final Factory<T> factory;
 
         /**
          * Constructor
-         * <p>Creates a new pool.</p>
          * @param factory The {@link Factory} to create
          * a new element when this pool is empty.
          * @param maxSize The maximum number of elements
          * to allow in this pool.
          */
-        public ObjectPool(Factory<T> factory, int maxSize) {
+        public SimplePool(Factory<T> factory, int maxSize) {
             DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
             this.elements = new Object[maxSize];
             this.factory  = (factory != null ? factory : this);
+        }
+
+        @Override
+        public void clear() {
+            if (size > 0) {
+                Arrays.fill(elements, 0, size, null);
+                size = 0;
+            }
         }
 
         @Override
@@ -322,7 +334,7 @@ public final class Pools {
     /**
      * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ArrayPool<T> extends ObjectPool<T> {
+    private static final class ArrayPool<T> extends SimplePool<T> {
         private final int length;
         private final Class<?> componentType;
 
@@ -349,7 +361,7 @@ public final class Pools {
     /**
      * Class <tt>AnimatorPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class AnimatorPool extends ObjectPool<Animator> implements AnimatorListener {
+    private static final class AnimatorPool extends SimplePool<Animator> implements AnimatorListener {
         private final Animator animation;
 
         /**
@@ -410,6 +422,11 @@ public final class Pools {
         }
 
         @Override
+        public synchronized void clear() {
+            pool.clear();
+        }
+
+        @Override
         public synchronized T obtain() {
             return pool.obtain();
         }
@@ -420,8 +437,8 @@ public final class Pools {
         }
 
         public synchronized final void dump(Printer printer) {
-            if (pool instanceof ObjectPool) {
-                ((ObjectPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
+            if (pool instanceof SimplePool) {
+                ((SimplePool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
         }
     }

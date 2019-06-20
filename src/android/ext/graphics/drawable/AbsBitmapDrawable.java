@@ -348,7 +348,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     /* package */ static void setShaderMatrix(Shader shader, int width, int height, RectF bounds) {
         // Computes the scale value that map the source
         // rectangle to the destination rectangle.
-        final RectF src = RectFPool.obtain(0, 0, width, height);
+        final RectF src = RectFPool.sInstance.obtain(0, 0, width, height);
         final Matrix matrix = MatrixPool.sInstance.obtain();
         matrix.setRectToRect(src, bounds, ScaleToFit.FILL);
 

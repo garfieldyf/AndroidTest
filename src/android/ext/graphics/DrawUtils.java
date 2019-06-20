@@ -1,9 +1,7 @@
 package android.ext.graphics;
 
+import java.util.concurrent.atomic.AtomicReference;
 import android.ext.util.DebugUtils;
-import android.ext.util.Pools;
-import android.ext.util.Pools.Factory;
-import android.ext.util.Pools.Pool;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.Pools.RectPool;
 import android.graphics.Bitmap;
@@ -191,7 +189,7 @@ public final class DrawUtils {
      * @see #drawMirroredBitmap(Canvas, Bitmap, RectF, boolean, Paint)
      */
     public static void drawMirroredBitmap(Canvas canvas, Bitmap bitmap, float left, float top, float right, float bottom, boolean horizontal, Paint paint) {
-        final RectF rect = RectFPool.obtain(left, top, right, bottom);
+        final RectF rect = RectFPool.sInstance.obtain(left, top, right, bottom);
         drawMirroredBitmap(canvas, bitmap, rect, horizontal, paint);
         RectFPool.sInstance.recycle(rect);
     }
@@ -380,37 +378,25 @@ public final class DrawUtils {
             outRect.top = top - fm.ascent;
         }
 
-        FontMetricsPool.recycle(fm);
+        FontMetricsPool.sInstance.compareAndSet(null, fm);
         return textAlign;
     }
 
     /**
      * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
-    private static final class FontMetricsPool implements Factory<FontMetrics> {
-        private static final FontMetricsPool sInstance = new FontMetricsPool();
-        private final Pool<FontMetrics> mPool;
-
-        /**
-         * Constructor
-         */
-        private FontMetricsPool() {
-            mPool = Pools.newSimplePool(this);
-        }
-
-        @Override
-        public FontMetrics newInstance() {
-            return new FontMetrics();
-        }
+    @SuppressWarnings("serial")
+    private static final class FontMetricsPool extends AtomicReference<FontMetrics> {
+        public static final FontMetricsPool sInstance = new FontMetricsPool();
 
         public static FontMetrics obtain(Paint paint) {
-            final FontMetrics result = sInstance.mPool.obtain();
+            FontMetrics result = sInstance.getAndSet(null);
+            if (result == null) {
+                result = new FontMetrics();
+            }
+
             paint.getFontMetrics(result);
             return result;
-        }
-
-        public static void recycle(FontMetrics metrics) {
-            sInstance.mPool.recycle(metrics);
         }
     }
 

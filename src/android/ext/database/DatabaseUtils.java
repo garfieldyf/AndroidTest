@@ -465,9 +465,9 @@ public final class DatabaseUtils {
         writer.endArray();
     }
 
-    private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
+    private static List<Pair<Field, String>> getCursorFields(Class<?> objectClass) {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();
-        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
+        for (Class<?> clazz = objectClass; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 final CursorField cursorField = field.getAnnotation(CursorField.class);
@@ -479,7 +479,7 @@ public final class DatabaseUtils {
             }
         }
 
-        DatabaseUtils.__checkDumpCursorFields(cursorFields);
+        DatabaseUtils.__checkDumpCursorFields(objectClass, cursorFields);
         return cursorFields;
     }
 
@@ -540,13 +540,21 @@ public final class DatabaseUtils {
         return result;
     }
 
-    private static void __checkDumpCursorFields(List<Pair<Field, String>> cursorFields) {
+    private static void __checkDumpCursorFields(Class<?> clazz, List<Pair<Field, String>> cursorFields) {
         final Printer printer = new LogPrinter(Log.DEBUG, "DatabaseUtils");
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping cursor fields [ size = %d ] ", cursorFields.size());
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s cursor fields [ size = %d ] ", clazz.getName(), cursorFields.size());
         for (Pair<Field, String> cursorField : cursorFields) {
+            final String modifier = Modifier.toString(cursorField.first.getModifiers());
             result.setLength(0);
-            printer.println(result.append("  ").append(cursorField.first).append(" { @CursorField = ").append(cursorField.second).append(" }").toString());
+            result.append("  ");
+            if (modifier.length() != 0) {
+                result.append(modifier).append(' ');
+            }
+
+            printer.println(result.append(cursorField.first.getType().getSimpleName())
+                   .append(' ').append(cursorField.first.getName())
+                   .append(" { columnName = ").append(cursorField.second).append(" }").toString());
         }
     }
 

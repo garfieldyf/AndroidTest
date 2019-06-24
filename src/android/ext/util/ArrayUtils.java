@@ -542,6 +542,7 @@ public final class ArrayUtils {
                 }
             }
 
+            DebugUtils.__checkWarning(true, "ArrayUtils", "Couldn't find ArrayList internal array");
             return null;
         }
     }

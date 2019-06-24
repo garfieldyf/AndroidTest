@@ -53,8 +53,8 @@ public final class Caches {
             ((SimpleLruCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof LruImageCache) {
             ((LruImageCache<?>)cache).dump(context, printer);
-        } else if (cache instanceof ArrayMapCache) {
-            ((ArrayMapCache<?, ?>)cache).dump(context, printer);
+        } else if (cache instanceof MapCache) {
+            ((MapCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof SynchronizedCache) {
             ((SynchronizedCache<?, ?>)cache).dump(context, printer);
         }

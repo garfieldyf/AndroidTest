@@ -3,13 +3,14 @@ package android.ext.page;
 import java.util.List;
 import org.json.JSONArray;
 import android.database.Cursor;
-import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
+import android.ext.cache.MapCache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.database.DatabaseUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.JsonUtils;
+import android.util.ArrayMap;
 
 /**
  * Class Pages
@@ -94,11 +95,11 @@ public final class Pages {
      * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link Page} {@link Cache} instance.
      * @see #newResourcePageCache(int)
-     * @see ArrayMapCache
+     * @see MapCache
      * @see SimpleLruCache
      */
     public static <E> Cache<Integer, Page<E>> newPageCache(int maxPages) {
-        return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new ArrayMapCache<Integer, Page<E>>(8));
+        return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)));
     }
 
     /**
@@ -238,22 +239,24 @@ public final class Pages {
     /**
      * Class <tt>ResourcePageCache</tt> is an implementation of a {@link Cache}.
      */
-    private static final class ResourcePageCache<E> extends ArrayMapCache<Integer, ResourcePage<E>> {
+    private static final class ResourcePageCache<E> extends MapCache<Integer, ResourcePage<E>> {
         /**
          * Constructor
          * @param capacity The initial capacity of this cache.
          */
         public ResourcePageCache(int capacity) {
-            super(capacity);
+            super(new ArrayMap<Integer, ResourcePage<E>>(capacity));
         }
 
         @Override
         public void clear() {
-            for (int i = map.size() - 1; i >= 0; --i) {
-                map.valueAt(i).close();
-            }
+            if (map.size() > 0) {
+                for (ResourcePage<E> page : map.values()) {
+                    page.close();
+                }
 
-            map.clear();
+                map.clear();
+            }
         }
 
         @Override

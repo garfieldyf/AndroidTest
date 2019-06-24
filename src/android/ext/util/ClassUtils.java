@@ -35,7 +35,9 @@ public final class ClassUtils {
      * @see #getConstructor(Class, Class[])
      */
     public static Constructor<?> getConstructor(String className, Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException {
-        return getConstructor(Class.forName(className), parameterTypes);
+        final Constructor<?> result = Class.forName(className).getDeclaredConstructor(parameterTypes);
+        result.setAccessible(true);
+        return result;
     }
 
     /**

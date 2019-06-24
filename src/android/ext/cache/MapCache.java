@@ -2,34 +2,26 @@ package android.ext.cache;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 import android.content.Context;
 import android.ext.util.DebugUtils;
-import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
- * Class <tt>ArrayMapCache</tt> is an implementation of a {@link Cache}.
- * This cache is the <b>unlimited-size</b> and <b>not</b> thread-safely.
+ * Class <tt>MapCache</tt> is an implementation of a {@link Cache}.
+ * This cache is the <b>unlimited-size</b>.
  * @author Garfield
  */
-public class ArrayMapCache<K, V> implements Cache<K, V> {
-    protected final ArrayMap<K, V> map;
+public class MapCache<K, V> implements Cache<K, V> {
+    protected final Map<K, V> map;
 
     /**
      * Constructor
-     * @see #ArrayMapCache(int)
+     * @param map The {@link Map}.
      */
-    public ArrayMapCache() {
-        map = new ArrayMap<K, V>();
-    }
-
-    /**
-     * Constructor
-     * @param capacity The initial capacity of this cache.
-     * @see #ArrayMapCache()
-     */
-    public ArrayMapCache(int capacity) {
-        map = new ArrayMap<K, V>(capacity);
+    public MapCache(Map<K, V> map) {
+        DebugUtils.__checkError(map == null, "map == null");
+        this.map = map;
     }
 
     @Override
@@ -60,10 +52,10 @@ public class ArrayMapCache<K, V> implements Cache<K, V> {
     /* package */ final void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
         final int size = map.size();
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
-        for (int i = 0; i < size; ++i) {
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping %sCache [ size = %d ] ", map.getClass().getSimpleName(), size);
+        for (Entry<K, V> entry : map.entrySet()) {
             result.setLength(0);
-            printer.println(result.append("  ").append(map.keyAt(i)).append(" ==> ").append(map.valueAt(i)).toString());
+            printer.println(result.append("  ").append(entry.getKey()).append(" ==> ").append(entry.getValue()).toString());
         }
     }
 }

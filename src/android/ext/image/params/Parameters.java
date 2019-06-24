@@ -51,9 +51,7 @@ public class Parameters {
      * @see #Parameters(Context, AttributeSet)
      */
     public Parameters(Config config, int sampleSize, boolean mutable) {
-        this.mutable = mutable;
-        this.value   = fixSampleSize(sampleSize);
-        this.config  = (config != null ? config : Config.ARGB_8888);
+        this(fixSampleSize(sampleSize), config, mutable);
     }
 
     /**

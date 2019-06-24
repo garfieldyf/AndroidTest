@@ -29,7 +29,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     private final int mInitialSize;
     private final int mPrefetchDistance;
 
-    private final BitSet mPageStates;
+    private final BitSet mLoadStates;
     private RecyclerView mRecyclerView;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -63,8 +63,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
         DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
         mInitialSize = initialSize;
+        mLoadStates  = new BitSet();
         mPageSize    = pageSize;
-        mPageStates  = new BitSet();
         mPageCache   = (Cache<Integer, Page<E>>)pageCache;
         mPrefetchDistance = prefetchDistance;
     }
@@ -89,7 +89,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         if (mItemCount != count) {
             mItemCount = count;
             mPageCache.clear();
-            mPageStates.clear();
+            mLoadStates.clear();
             UIHandler.notifyDataSetChanged(mRecyclerView);
         }
     }
@@ -197,7 +197,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkUIThread("getPage");
         DebugUtils.__checkError(page < 0, "page < 0");
         Page<E> result = mPageCache.get(page);
-        if (result == null && !mPageStates.get(page)) {
+        if (result == null && !mLoadStates.get(page)) {
             // Computes the startPosition and itemCount to load.
             final int startPosition, itemCount;
             if (page == 0) {
@@ -209,7 +209,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             }
 
             // Loads the page data and marks the page loading state.
-            mPageStates.set(page);
+            mLoadStates.set(page);
             loadPage(page, startPosition, itemCount);
         }
 
@@ -257,7 +257,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
 
         // Clears the page loading state when the page is load complete.
-        mPageStates.clear(page);
+        mLoadStates.clear(page);
         final int itemCount = Pages.getCount(data);
         if (itemCount > 0) {
             mPageCache.put(page, (Page<E>)data);
@@ -279,7 +279,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
 
         // Clears the page loading state when the page is load complete.
-        mPageStates.clear(page);
+        mLoadStates.clear(page);
         final int itemCount = Pages.getCount(data);
         if (itemCount > 0) {
             mItemCount += itemCount;

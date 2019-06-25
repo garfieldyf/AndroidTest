@@ -36,7 +36,7 @@ import android.widget.ImageView;
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
- * new AsyncImageTask&lt;String&gt;(activity)
+ * new AsyncImageTask&lt;String&gt;(context)
  *    .setTarget(imageView)
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
@@ -128,9 +128,11 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
 
     @Override
     protected void onPostExecute(Object[] result) {
-        final ImageView target = getTarget();
-        if (target != null) {
-            target.setImageBitmap((Bitmap)result[0]);
+        if (mTarget != null) {
+            final ImageView target = (ImageView)mTarget.get();
+            if (target != null) {
+                target.setImageBitmap((Bitmap)result[0]);
+            }
         }
     }
 
@@ -141,7 +143,8 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
      */
     @SuppressWarnings("unchecked")
     protected final <T> T getTarget() {
-        return (mTarget != null ? (T)mTarget.get() : null);
+        DebugUtils.__checkError(mTarget == null, "The " + getClass().getName() + " did not call setTarget()");
+        return (T)mTarget.get();
     }
 
     /**

@@ -229,13 +229,13 @@ public final class DatabaseUtils {
      * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
      * <em>(String[])null</em> instead of allocating an empty array.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #toList(Cursor, Class)
+     * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
         Cursor cursor = null;
         try {
             cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? toList(cursor, componentType) : null);
+            return (cursor != null ? parse(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
@@ -257,13 +257,13 @@ public final class DatabaseUtils {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #toList(Cursor, Class)
+     * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor = null;
         try {
             cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
-            return (cursor != null ? toList(cursor, componentType) : null);
+            return (cursor != null ? parse(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
             return null;
@@ -343,13 +343,13 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Returns a new <tt>List</tt> with the specified <em>cursor</em> and <em>componentType</em>.
+     * Parses a <tt>Cursor</tt>'s data to a <tt>List</tt> from the specified <em>cursor</em>.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @return A new <tt>List</tt>.
      * @throws ReflectiveOperationException if the elements cannot be created.
      */
-    public static <T> List<T> toList(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
+    public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || componentType == null, "cursor == null || componentType == null");
         DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
         final int count = cursor.getCount();

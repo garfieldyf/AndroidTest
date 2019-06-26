@@ -432,7 +432,7 @@ public final class ProcessUtils {
         private final UncaughtExceptionHandler mDefaultHandler;
 
         public UncaughtHandler(Context context) {
-            mContext = context;
+            mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
         }

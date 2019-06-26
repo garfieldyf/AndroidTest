@@ -144,10 +144,10 @@ public final class ProcessUtils {
         public static final int CLASS = 5;
 
         /**
-         * The exception stack trace column index of the table.
+         * The stack trace column index of the table.
          * <P>Type: TEXT</P>
          */
-        public static final int STACK = 6;
+        public static final int STACK_TRACE = 6;
 
         /**
          * Constructor
@@ -273,7 +273,7 @@ public final class ProcessUtils {
         private final UncaughtExceptionHandler mDefaultHandler;
 
         public UncaughtHandler(Context context) {
-            mContext = context;
+            mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
         }

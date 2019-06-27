@@ -55,7 +55,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @param target The target, passed earlier by {@link ImageLoader#load}.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @param flags The flags, passed earlier by {@link ImageLoader#load}.
-     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
+     * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeImage(Object, Object, Object[], int, Options)
      */

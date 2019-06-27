@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
@@ -40,6 +41,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @param url The url to connect the remote HTTP server.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(String)
+     * @see #DownloadPostRequest(URL, Proxy)
      */
     public DownloadPostRequest(URL url) throws IOException {
         super(url);
@@ -50,9 +52,22 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @param url The url to connect the remote HTTP server.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(URL)
+     * @see #DownloadPostRequest(URL, Proxy)
      */
     public DownloadPostRequest(String url) throws IOException {
-        super(new URL(url));
+        super(url);
+    }
+
+    /**
+     * Constructor
+     * @param url The url to connect the remote server.
+     * @param proxy The proxy through which the connection will be established.
+     * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadPostRequest(URL)
+     * @see #DownloadPostRequest(String)
+     */
+    public DownloadPostRequest(URL url, Proxy proxy) throws IOException {
+        super(url, proxy);
     }
 
     /**

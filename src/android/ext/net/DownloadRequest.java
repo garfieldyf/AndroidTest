@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class DownloadRequest {
      * @param url The url to connect the remote server.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadRequest(String)
+     * @see #DownloadRequest(URL, Proxy)
      */
     public DownloadRequest(URL url) throws IOException {
         mConnection = url.openConnection();
@@ -50,9 +52,22 @@ public class DownloadRequest {
      * @param url The url to connect the remote server.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadRequest(URL)
+     * @see #DownloadRequest(URL, Proxy)
      */
     public DownloadRequest(String url) throws IOException {
-        this(new URL(url));
+        mConnection = new URL(url).openConnection();
+    }
+
+    /**
+     * Constructor
+     * @param url The url to connect the remote server.
+     * @param proxy The proxy through which the connection will be established.
+     * @throws IOException if an error occurs while opening the connection.
+     * @see #DownloadRequest(URL)
+     * @see #DownloadRequest(String)
+     */
+    public DownloadRequest(URL url, Proxy proxy) throws IOException {
+        mConnection = url.openConnection(proxy);
     }
 
     /**

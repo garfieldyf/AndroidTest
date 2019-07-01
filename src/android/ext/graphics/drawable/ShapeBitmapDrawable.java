@@ -3,7 +3,7 @@ package android.ext.graphics.drawable;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.DrawUtils;
@@ -21,6 +21,7 @@ import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 
 /**
@@ -108,7 +109,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     @Override
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
         outline.setConvexPath(mState.mPath);
     }
@@ -123,7 +124,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     @Override
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         final Drawable drawable = res.getDrawable(id, theme);
         DebugUtils.__checkError(!(drawable instanceof BitmapDrawable), parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");

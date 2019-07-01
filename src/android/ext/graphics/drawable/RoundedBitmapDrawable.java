@@ -3,7 +3,7 @@ package android.ext.graphics.drawable;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
 
@@ -131,7 +132,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     }
 
     @Override
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
         if (mState.mRadii == null) {
             outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);

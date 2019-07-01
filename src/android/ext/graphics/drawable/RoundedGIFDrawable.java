@@ -1,11 +1,12 @@
 package android.ext.graphics.drawable;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.ext.graphics.GIFImage;
 import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
+import android.os.Build;
 
 /**
  * Class RoundedGIFDrawable
@@ -105,7 +106,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
     }
 
     @Override
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
         if (mRadii == null) {
             outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);

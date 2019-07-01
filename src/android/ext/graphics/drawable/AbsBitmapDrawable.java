@@ -4,6 +4,7 @@ import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -20,6 +21,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 
@@ -27,7 +29,6 @@ import android.view.Gravity;
  * Abstract class AbsBitmapDrawable
  * @author Garfield
  */
-@SuppressLint({ "Override", "NewApi" })
 public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstantState> extends Drawable {
     /* ------------------ mState.mFlags ------------------ */
     /**
@@ -190,6 +191,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
      * @return <tt>true</tt> if this drawable filters its
      * bitmap, <tt>false</tt> otherwise.
      */
+    @SuppressLint("Override")
     public boolean isFilterBitmap() {
         return ((mState.mPaint.getFlags() & Paint.FILTER_BITMAP_FLAG) != 0);
     }
@@ -214,6 +216,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void getOutline(Outline outline) {
         if (getBounds().isEmpty()) {
             outline.setEmpty();
@@ -248,6 +251,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
         final TypedArray a = res.obtainAttributes(attrs, BITMAP_DRAWABLE_ATTRS);
         inflateAttributes(res, parser, attrs, theme, a.getResourceId(1 /* android.R.attr.src */, 0));
@@ -287,6 +291,7 @@ public abstract class AbsBitmapDrawable<T extends AbsBitmapDrawable.BaseConstant
      * @param outline The empty <tt>Outline</tt> to be populated.
      * @param bounds The frame of the contents of this drawable.
      */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
         outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
     }

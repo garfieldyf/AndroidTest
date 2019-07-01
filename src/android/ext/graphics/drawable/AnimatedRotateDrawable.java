@@ -1,17 +1,19 @@
 package android.ext.graphics.drawable;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RotateDrawable;
+import android.os.Build;
 
 /**
  * Class AnimatedRotateDrawable
  * @author Garfield
  */
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class AnimatedRotateDrawable extends RotateDrawable {
-    private static final int DEFAULT_INCREMENT = 100;
+    private static final int DEFAULT_INCREMENT = 120;
     private int mIncrement;
 
     /**
@@ -34,7 +36,6 @@ public class AnimatedRotateDrawable extends RotateDrawable {
      * @param drawable The drawable to rotate.
      * @param increment The level increment.
      */
-    @SuppressLint("NewApi")
     public AnimatedRotateDrawable(Drawable drawable, int increment) {
         setDrawable(drawable);
         mIncrement = increment;

@@ -16,7 +16,7 @@ import com.google.zxing.common.BitMatrix;
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
- *     .logo(logo, Gravity.FILL)
+ *     .logo(logo)
  *     .margins(30, 30, 30, 30)
  *     .build();</pre>
  * @author Garfield

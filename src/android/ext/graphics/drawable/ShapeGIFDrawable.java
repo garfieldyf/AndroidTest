@@ -1,6 +1,6 @@
 package android.ext.graphics.drawable;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.ext.graphics.DrawUtils;
 import android.ext.graphics.GIFImage;
 import android.graphics.Bitmap;
@@ -14,6 +14,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 
 /**
  * Abstract class ShapeGIFDrawable
@@ -59,7 +60,7 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
     }
 
     @Override
-    @SuppressLint("NewApi")
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
         outline.setConvexPath(mPath);
     }

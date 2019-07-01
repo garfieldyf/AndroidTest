@@ -27,20 +27,10 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param optionsPool The <tt>Options</tt> {@link Pool} to decode image.
-     * @see #AbsImageDecoder(AbsImageDecoder)
      */
     public AbsImageDecoder(Context context, Pool<Options> optionsPool) {
         mOptionsPool = optionsPool;
         mContext = context.getApplicationContext();
-    }
-
-    /**
-     * Copy constructor
-     * @see #AbsImageDecoder(Context, Pool)
-     */
-    public AbsImageDecoder(AbsImageDecoder<Image> decoder) {
-        mContext = decoder.mContext;
-        mOptionsPool = decoder.mOptionsPool;
     }
 
     /**

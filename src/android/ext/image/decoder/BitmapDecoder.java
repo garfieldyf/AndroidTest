@@ -40,29 +40,13 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * @param context The <tt>Context</tt>.
      * @param parameters The {@link Parameters} to decode bitmap.
      * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
-     * @see #BitmapDecoder(BitmapDecoder, Parameters)
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to
+     * reuse the bitmap when decoding bitmap.
      */
     public BitmapDecoder(Context context, Parameters parameters, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool);
         mBitmapPool = bitmapPool;
         mParameters = parameters;
-        DebugUtils.__checkError(parameters == null, "parameters == null");
-    }
-
-    /**
-     * Copy constructor
-     * <p>Creates a new {@link BitmapDecoder} from the specified <em>decoder</em>. The
-     * returned decoder will be share the internal cache with the <em>decoder</em>.</p>
-     * @param decoder The <tt>BitmapDecoder</tt> to copy.
-     * @param parameters The {@link Parameters} to decode bitmap.
-     * @see #BitmapDecoder(Context, Parameters, Pool, BitmapPool)
-     */
-    public BitmapDecoder(BitmapDecoder<Image> decoder, Parameters parameters) {
-        super(decoder);
-        mParameters = parameters;
-        mBitmapPool = decoder.mBitmapPool;
         DebugUtils.__checkError(parameters == null, "parameters == null");
     }
 

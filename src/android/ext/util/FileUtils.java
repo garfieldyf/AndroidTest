@@ -659,7 +659,7 @@ public final class FileUtils {
     /**
      * Class <tt>Stat</tt> is wrapper for linux structure <tt>stat</tt>.
      */
-    public static final class Stat implements Parcelable {
+    public static class Stat implements Parcelable {
         /**
          * The permission of read, write and execute by all users.
          * Same as <em>S_IRWXU | S_IRWXG | S_IRWXO</em>.
@@ -1023,7 +1023,7 @@ public final class FileUtils {
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static final class Dirent implements Comparable<Dirent> {
+    public static class Dirent implements Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */

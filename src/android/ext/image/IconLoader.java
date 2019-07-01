@@ -20,7 +20,7 @@ import android.util.Printer;
  * @author Garfield
  */
 public class IconLoader extends AsyncLoader<String, ResolveInfo, PackageItemIcon> {
-    private final PackageManager mPackageManager;
+    protected final PackageManager mPackageManager;
 
     /**
      * Constructor

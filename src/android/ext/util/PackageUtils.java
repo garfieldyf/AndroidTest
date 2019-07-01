@@ -115,10 +115,27 @@ public final class PackageUtils {
      * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
      * file full path.
      * @return A {@link PackageItemIcon} containing the application's icon and label.
+     * @see #loadPackageArchiveIcon(Context, ApplicationInfo, PackageItemIcon)
+     * @see PackageManager#getPackageArchiveInfo(String, int)
+     */
+    public static PackageItemIcon loadPackageArchiveIcon(Context context, ApplicationInfo info) {
+        final PackageItemIcon result = new PackageItemIcon();
+        loadPackageArchiveIcon(context, info, result);
+        return result;
+    }
+
+    /**
+     * Retrieve the application's icon and label associated with the specified <em>info</em>.
+     * @param context The <tt>Context</tt>.
+     * @param info The {@link ApplicationInfo} must be a package archive file's application info
+     * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
+     * file full path.
+     * @param outResult The {@link PackageItemIcon} to store the application's icon and label.
+     * @see #loadPackageArchiveIcon(Context, ApplicationInfo)
      * @see PackageManager#getPackageArchiveInfo(String, int)
      */
     @SuppressWarnings("deprecation")
-    public static PackageItemIcon loadPackageArchiveIcon(Context context, ApplicationInfo info) {
+    public static void loadPackageArchiveIcon(Context context, ApplicationInfo info, PackageItemIcon outResult) {
         DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
         final AssetManager assets = new AssetManager();
         try {
@@ -127,11 +144,10 @@ public final class PackageUtils {
 
             // Loads the application's icon.
             final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
-            final Drawable icon;
             if (info.icon != 0) {
-                icon = res.getDrawable(info.icon);
+                outResult.icon = res.getDrawable(info.icon);
             } else {
-                icon = context.getPackageManager().getDefaultActivityIcon();
+                outResult.icon = context.getPackageManager().getDefaultActivityIcon();
             }
 
             // Loads the application's label.
@@ -144,10 +160,10 @@ public final class PackageUtils {
 
             /*
              * May be kill my process after unmounting usb disk.
-             * icon  = context.getPackageManager().getApplicationIcon(info);
-             * lable = context.getPackageManager().getApplicationLabel(info);
+             * outResult.icon  = context.getPackageManager().getApplicationIcon(info);
+             * outResult.lable = context.getPackageManager().getApplicationLabel(info);
              */
-            return new PackageItemIcon(icon, StringUtils.trim(label));
+            outResult.label = StringUtils.trim(label);
         } finally {
             // Close the assets to avoid ProcessKiller
             // kill my process after unmounting usb disk.
@@ -179,15 +195,25 @@ public final class PackageUtils {
         /**
          * The package item's icon.
          */
-        public final Drawable icon;
+        public Drawable icon;
 
         /**
          * The package item's label.
          */
-        public final CharSequence label;
+        public CharSequence label;
 
         /**
          * Constructor
+         * @see #PackageItemIcon(Drawable, CharSequence)
+         * @see #PackageItemIcon(PackageManager, ResolveInfo)
+         */
+        public PackageItemIcon() {
+        }
+
+        /**
+         * Constructor
+         * @see #PackageItemIcon()
+         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
@@ -196,6 +222,8 @@ public final class PackageUtils {
 
         /**
          * Constructor
+         * @see #PackageItemIcon()
+         * @see #PackageItemIcon(Drawable, CharSequence)
          */
         public PackageItemIcon(PackageManager pm, ResolveInfo info) {
             this.icon  = info.loadIcon(pm);

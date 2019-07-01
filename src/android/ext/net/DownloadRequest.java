@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
@@ -50,11 +51,12 @@ public class DownloadRequest {
     /**
      * Constructor
      * @param url The url to connect the remote server.
+     * @throws MalformedURLException if <em>url</em> could not be parsed as a {@link URL}.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadRequest(URL)
      * @see #DownloadRequest(URL, Proxy)
      */
-    public DownloadRequest(String url) throws IOException {
+    public DownloadRequest(String url) throws MalformedURLException, IOException {
         mConnection = new URL(url).openConnection();
     }
 

@@ -160,7 +160,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         printer.println("  " + mTransformer.getClass().getName());
 
         if (mTransformer instanceof CacheTransformer) {
-            ((CacheTransformer)mTransformer).dump(context, printer);
+            Caches.dumpCache(((CacheTransformer)mTransformer).mImageCache, context, printer);
         }
     }
 
@@ -273,10 +273,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             }
 
             return drawable;
-        }
-
-        public final void dump(Context context, Printer printer) {
-            Caches.dumpCache(mImageCache, context, printer);
         }
     }
 }

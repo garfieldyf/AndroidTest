@@ -108,6 +108,30 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will be
+     * share the internal drawable cache and the transformer with the <em>binder</em>.</p>
+     * @param binder The <tt>ImageBinder</tt> to copy.
+     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
+     * @see #ImageBinder(ImageBinder, Transformer)
+     */
+    public ImageBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
+        this(null, binder.mTransformer, defaultImage);
+    }
+
+    /**
+     * Copy constructor
+     * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will
+     * be share the internal drawable cache and the default image with the <em>binder</em>.</p>
+     * @param binder The <tt>ImageBinder</tt> to copy.
+     * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
+     * @see #ImageBinder(ImageBinder, Drawable)
+     */
+    public ImageBinder(ImageBinder<URI, Image> binder, Transformer<URI, Image> transformer) {
+        this(binder.getImageCache(), transformer, binder.mDefaultImage);
+    }
+
+    /**
      * Returns the default image associated with this binder.
      * @return The <tt>Drawable</tt> or <tt>null</tt>.
      */

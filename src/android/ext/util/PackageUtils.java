@@ -96,6 +96,20 @@ public final class PackageUtils {
     }
 
     /**
+     * Retrieve all top-level launcher activities.
+     * @param pm The <tt>PackageManager</tt>.
+     * @param flags Additional option flags. See {@link PackageManager#queryIntentActivities}.
+     * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the activities.
+     * @return A <tt>List</tt> of {@link ResolveInfo} containing one entry for each matching Activity.
+     */
+    public static List<ResolveInfo> queryLauncherActivities(PackageManager pm, int flags, Filter<ResolveInfo> filter) {
+        final Intent intent = new Intent(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_LAUNCHER);
+        final List<ResolveInfo> result = pm.queryIntentActivities(intent, flags);
+        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+    }
+
+    /**
      * Retrieve all activities that can be performed for the given intent.
      * @param pm The <tt>PackageManager</tt>.
      * @param intent The desired intent as per resolveActivity().

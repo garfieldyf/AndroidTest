@@ -413,10 +413,10 @@ public final class JsonUtils {
             return false;
         }
 
-        final Iterator<String> names = a.keys();
-        while (names.hasNext()) {
-            final String name = names.next();
-            if (!b.has(name) || !equals(a.opt(name), b.opt(name))) {
+        final Iterator<String> keys = a.keys();
+        while (keys.hasNext()) {
+            final String key = keys.next();
+            if (!b.has(key) || !equals(a.opt(key), b.opt(key))) {
                 return false;
             }
         }

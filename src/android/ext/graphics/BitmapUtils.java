@@ -1,6 +1,5 @@
 package android.ext.graphics;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import android.content.Context;
@@ -21,10 +20,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicBlur;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -397,79 +392,6 @@ public final class BitmapUtils {
         RectFPool.sInstance.recycle(dst);
 
         return bitmap;
-    }
-
-    /**
-     * Class <tt>RenderScriptBlur</tt> used to blur the <tt>Bitmap</tt>.
-     */
-    public static final class RenderScriptBlur implements Closeable {
-        private RenderScript mRS;
-        private ScriptIntrinsicBlur mBlur;
-        private final boolean mShouldClose;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         * @see #RenderScriptBlur(RenderScript)
-         */
-        public RenderScriptBlur(Context context) {
-            this(RenderScript.create(context), true);
-        }
-
-        /**
-         * Constructor
-         * @param rs The {@link RenderScript}.
-         * @see #RenderScriptBlur(Context)
-         */
-        public RenderScriptBlur(RenderScript rs) {
-            this(rs, false);
-        }
-
-        /**
-         * Constructor
-         */
-        private RenderScriptBlur(RenderScript rs, boolean shouldClose) {
-            mRS = rs;
-            mShouldClose = shouldClose;
-            mBlur = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-        }
-
-        @Override
-        public final void close() {
-            if (mBlur != null) {
-                mBlur.destroy();
-                mBlur = null;
-            }
-
-            if (mShouldClose && mRS != null) {
-                mRS.destroy();
-                mRS = null;
-            }
-        }
-
-        /**
-         * Blurs the given the <em>bitmap</em>.
-         * @param bitmap The bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
-         * @param radius The radius of the blur, Supported range <tt>0 &lt; radius &lt;= 25</tt>.
-         */
-        public final void blur(Bitmap bitmap, float radius) {
-            DebugUtils.__checkError(bitmap == null, "bitmap == null");
-            DebugUtils.__checkError(bitmap.getConfig() != Config.ARGB_8888, "The bitmap must be ARGB_8888 pixel format.");
-            if (mBlur != null) {
-                final Allocation input  = Allocation.createFromBitmap(mRS, bitmap);
-                final Allocation output = Allocation.createTyped(mRS, input.getType());
-
-                try {
-                    mBlur.setInput(input);
-                    mBlur.setRadius(radius);
-                    mBlur.forEach(output);
-                    output.copyTo(bitmap);
-                } finally {
-                    input.destroy();
-                    output.destroy();
-                }
-            }
-        }
     }
 
     /**

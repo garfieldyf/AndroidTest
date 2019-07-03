@@ -5,12 +5,15 @@ import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools;
+import android.ext.util.Pools.Factory;
+import android.ext.util.Pools.Pool;
 
 /**
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
-public abstract class DatabaseHandler implements Runnable {
+public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -22,8 +25,9 @@ public abstract class DatabaseHandler implements Runnable {
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
-    /* package */ final Executor mExecutor;
     /* package */ WeakReference<Object> mOwner;
+    /* package */ final Executor mExecutor;
+    /* package */ final Pool<Runnable> mTaskPool;
 
     /**
      * Constructor
@@ -33,6 +37,7 @@ public abstract class DatabaseHandler implements Runnable {
     /* package */ DatabaseHandler(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
+        mTaskPool = Pools.synchronizedPool(Pools.newPool(this, 8));
     }
 
     /**
@@ -42,8 +47,7 @@ public abstract class DatabaseHandler implements Runnable {
      * @see #DatabaseHandler(Executor)
      */
     /* package */ DatabaseHandler(Executor executor, Object owner) {
-        DebugUtils.__checkMemoryLeaks(getClass());
-        mExecutor = executor;
+        this(executor);
         mOwner = new WeakReference<Object>(owner);
     }
 
@@ -82,7 +86,7 @@ public abstract class DatabaseHandler implements Runnable {
     }
 
     @Override
-    public void run() {
+    public final void run() {
         throw new RuntimeException("No Implementation, This method is a stub!");
     }
 

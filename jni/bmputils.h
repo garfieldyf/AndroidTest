@@ -97,12 +97,12 @@ JNIEXPORT_METHOD(jboolean) blurBitmap(JNIEnv* env, jclass /*clazz*/, jobject bit
 // Method:    binaryBitmap
 // Signature: (Landroid/graphics/Bitmap;Z)Z
 
-JNIEXPORT_METHOD(jboolean) binaryBitmap(JNIEnv* env, jclass /*clazz*/, jobject bitmap, jboolean gray)
+JNIEXPORT_METHOD(jboolean) binaryBitmap(JNIEnv* env, jclass /*clazz*/, jobject bitmap, jboolean grayscale)
 {
     assert(env);
     AssertThrowErrnoException(env, bitmap == NULL, "bitmap == null", JNI_FALSE);
 
-    return handleBitmap(env, bitmap, [gray](void* pixels, uint32_t width, uint32_t height) { ::Android_binaryBitmap(pixels, width, height, gray); });
+    return handleBitmap(env, bitmap, [grayscale](void* pixels, uint32_t width, uint32_t height) { ::Android_binaryBitmap(pixels, width, height, grayscale); });
 }
 
 ///////////////////////////////////////////////////////////////////////////////

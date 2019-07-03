@@ -9,6 +9,7 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.ComponentInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -47,14 +48,21 @@ public final class PackageUtils {
      * @return The package name.
      */
     public static String getPackageName(ResolveInfo info) {
-        if (info.resolvePackageName != null) {
-            return info.resolvePackageName;
-        } else if (info.activityInfo != null) {
-            return info.activityInfo.packageName;
+        return (info.resolvePackageName != null ? info.resolvePackageName : getComponentInfo(info).packageName);
+    }
+
+    /**
+     * Returns the {@link ComponentInfo} associated with the specified <em>info</em>.
+     * @param info The {@link ResolveInfo}.
+     * @return The <tt>ComponentInfo</tt>.
+     */
+    public static ComponentInfo getComponentInfo(ResolveInfo info) {
+        if (info.activityInfo != null) {
+            return info.activityInfo;
         } else if (info.serviceInfo != null) {
-            return info.serviceInfo.packageName;
+            return info.serviceInfo;
         } else if (info.providerInfo != null) {
-            return info.providerInfo.packageName;
+            return info.providerInfo;
         } else {
             throw new IllegalStateException("Missing ComponentInfo!");
         }

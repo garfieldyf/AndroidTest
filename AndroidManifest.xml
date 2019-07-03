@@ -92,7 +92,7 @@
             android:name="BlurActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name="WebViewActivity"
+            android:name="com.tencent.test.ui.WebViewActivity"
             android:screenOrientation="landscape" >
         </activity>
         <activity android:name="PrinterActivity" />

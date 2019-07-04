@@ -35,23 +35,10 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
 
     /**
      * Copy constructor
-     * <p>Creates a new {@link BackgroundBinder} from the specified <em>binder</em>. The returned binder will
-     * be share the internal drawable cache and the transformer with the <em>binder</em>.</p>
-     * @param binder The <tt>ImageBinder</tt> to copy.
-     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
-     * @see #BackgroundBinder(ImageBinder, Transformer)
-     */
-    public BackgroundBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
-        super(null, binder.mTransformer, defaultImage);
-    }
-
-    /**
-     * Copy constructor
      * <p>Creates a new {@link BackgroundBinder} from the specified <em>binder</em>. The returned binder
      * will be share the internal drawable cache and the default image with the <em>binder</em>.</p>
      * @param binder The <tt>ImageBinder</tt> to copy.
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
-     * @see #BackgroundBinder(ImageBinder, Drawable)
      */
     public BackgroundBinder(ImageBinder<URI, Image> binder, Transformer<URI, Image> transformer) {
         super(binder.getImageCache(), transformer, binder.mDefaultImage);
@@ -61,7 +48,7 @@ public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final View view = (View)target;
         if (value == null) {
-            view.setBackground(mDefaultImage);
+            view.setBackground(getDefaultImage(params, state));
         } else if (value instanceof Drawable) {
             view.setBackground((Drawable)value);
         } else {

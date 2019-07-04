@@ -1,5 +1,6 @@
 package android.ext.image.binder;
 
+import static android.ext.image.ImageLoader.FLAG_CUSTOM_DEFAULT_IMAGE;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -109,23 +110,10 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
 
     /**
      * Copy constructor
-     * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will be
-     * share the internal drawable cache and the transformer with the <em>binder</em>.</p>
-     * @param binder The <tt>ImageBinder</tt> to copy.
-     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
-     * @see #ImageBinder(ImageBinder, Transformer)
-     */
-    public ImageBinder(ImageBinder<URI, Image> binder, Drawable defaultImage) {
-        this(null, binder.mTransformer, defaultImage);
-    }
-
-    /**
-     * Copy constructor
      * <p>Creates a new {@link ImageBinder} from the specified <em>binder</em>. The returned binder will
      * be share the internal drawable cache and the default image with the <em>binder</em>.</p>
      * @param binder The <tt>ImageBinder</tt> to copy.
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
-     * @see #ImageBinder(ImageBinder, Drawable)
      */
     public ImageBinder(ImageBinder<URI, Image> binder, Transformer<URI, Image> transformer) {
         this(binder.getImageCache(), transformer, binder.mDefaultImage);
@@ -168,12 +156,22 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
         if (value == null) {
-            view.setImageDrawable(mDefaultImage);
+            view.setImageDrawable(getDefaultImage(params, state));
         } else if (value instanceof Drawable) {
             view.setImageDrawable((Drawable)value);
         } else {
             view.setImageDrawable(mTransformer.transform(uri, value));
         }
+    }
+
+    /**
+     * Returns the default image when the image is loading.
+     * @param params The parameters, passed earlier by {@link #bindValue}.
+     * @param state The state, passed earlier by {@link #bindValue}.
+     * @return The <tt>Drawable</tt>.
+     */
+    protected final Drawable getDefaultImage(Object[] params, int state) {
+        return ((state & FLAG_CUSTOM_DEFAULT_IMAGE) != 0 ? (Drawable)params[1] : mDefaultImage);
     }
 
     /**

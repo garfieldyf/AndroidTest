@@ -4,6 +4,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
 import java.util.concurrent.Executor;
 import android.content.Context;
+import android.content.res.Resources;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
@@ -11,6 +12,8 @@ import android.ext.image.binder.ImageBinder;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
+import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
@@ -47,9 +50,21 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     /**
      * If set the image decoder will be use the custom {@link Parameters}
      * to decode the image and ignore the internal decode <tt>Parameters</tt>.
-     * @see LoadRequest#setParameters(Parameters)
+     * The custom <tt>Parameters</tt> must be at <b>index = 0</b> of the
+     * params array.
+     * @see LoadRequest#parameters(Parameters)
+     * @see #FLAG_CUSTOM_DEFAULT_IMAGE
      */
     public static final int FLAG_CUSTOM_PARAMETERS = 0x00400000;
+
+    /**
+     * If set the image binder will be use the custom default image when the
+     * image is loading and ignore the internal default image. The custom
+     * default image must be at <b>index = 1</b> of the params array.
+     * @see LoadRequest#defaultImage(Drawable)
+     * @see #FLAG_CUSTOM_PARAMETERS
+     */
+    public static final int FLAG_CUSTOM_DEFAULT_IMAGE = 0x00200000;
 
     private final Loader<Image> mLoader;
     private final Pool<byte[]> mBufferPool;
@@ -95,6 +110,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @return The {@link LoadRequest}.
      */
     public final LoadRequest<URI, Image> load(URI uri) {
+        DebugUtils.__checkUIThread("load");
         mRequest.mUri = uri;
         mRequest.mBinder = mBinder;
         return mRequest;
@@ -102,8 +118,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * Equivalent to calling<pre>
-     * load(uri).setParameters(Parameters.defaultParameters())
-     *     .setBinder(ImageLoader.defaultBinder())
+     * load(uri).parameters(Parameters.defaultParameters())
+     *     .binder(ImageLoader.defaultBinder())
      *     .into(view);</pre>
      * @param uri The uri to load.
      * @param view The {@link ImageView} to bind.
@@ -378,6 +394,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
+            __checkLoadParams();
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
             mFlags  = 0;
             mParams = null;
@@ -389,43 +406,71 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * <tt>FLAG_XXX</tt> constants.
          * @return This request.
          */
-        public final LoadRequest<URI, Image> addFlags(int flags) {
+        public final LoadRequest<URI, Image> flags(int flags) {
             mFlags |= flags;
             return this;
         }
 
         /**
-         * Equivalent to calling <tt>addFlags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
+         * Equivalent to calling <tt>flags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
          * @return This request.
-         * @see #addFlags(int)
+         * @see #flags(int)
          * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE FLAG_IGNORE_MEMORY_CACHE
          */
-        public final LoadRequest<URI, Image> skipMemoryCache() {
+        public final LoadRequest<URI, Image> skipMemory() {
             mFlags |= FLAG_IGNORE_MEMORY_CACHE;
             return this;
         }
 
         /**
-         * Sets the parameters to load image.
+         * Sets the parameters to load image. <p>Here is an example to add custom
+         * {@link Parameters}, custom default image and others parameters:</p><pre>
+         * request.flags(FLAG_CUSTOM_PARAMETERS | FLAG_CUSTOM_DEFAULT_IMAGE)
+         *        .params(parameters, defaultImage, ...);</pre>
          * @param params The parameters of the load task.
          * @return This request.
          */
-        public final LoadRequest<URI, Image> setParams(Object... params) {
+        public final LoadRequest<URI, Image> params(Object... params) {
+            DebugUtils.__checkWarning(mParams != null, "ImageLoader", "The params is already exists. Do you want overrides it.");
             mParams = params;
             return this;
         }
 
         /**
-         * Sets the custom {@link Parameters} to decode image. Equivalent to calling
-         * <pre>request.addFlags(FLAG_CUSTOM_PARAMETERS).setParams(parameters);</pre>
+         * Sets the custom {@link Parameters} to decode image. Equivalent to calling<pre>
+         * request.flags(FLAG_CUSTOM_PARAMETERS)
+         *        .params(parameters);   // index == 0</pre>
          * @param parameters The <tt>Parameters</tt> to decode.
          * @return This request.
          * @see ImageLoader#FLAG_CUSTOM_PARAMETERS FLAG_CUSTOM_PARAMETERS
+         * @see #params(Object[])
          */
-        public final LoadRequest<URI, Image> setParameters(Parameters parameters) {
-            mFlags |= FLAG_CUSTOM_PARAMETERS;
-            mParams = new Object[] { parameters };
-            return this;
+        public final LoadRequest<URI, Image> parameters(Parameters parameters) {
+            return setParam(0, FLAG_CUSTOM_PARAMETERS, parameters);
+        }
+
+        /**
+         * Sets the custom default image when the image is loading. Equivalent to calling<pre>
+         * request.flags(FLAG_CUSTOM_DEFAULT_IMAGE)
+         *        .params(null, defaultImage);   // index == 1</pre>
+         * @param defaultImage The <tt>Drawable</tt> to be used when the image is loading.
+         * @return This request.
+         * @see ImageLoader#FLAG_CUSTOM_DEFAULT_IMAGE FLAG_CUSTOM_DEFAULT_IMAGE
+         * @see #params(Object[])
+         */
+        public final LoadRequest<URI, Image> defaultImage(Drawable defaultImage) {
+            return setParam(1, FLAG_CUSTOM_DEFAULT_IMAGE, defaultImage);
+        }
+
+        /**
+         * Equivalent to calling <tt>defaultImage(res.getDrawable(id))</tt>.
+         * @param res The <tt>Resources</tt>.
+         * @param id The resource id of the {@link Drawable}.
+         * @see #defaultImage(Drawable)
+         */
+        @SuppressWarnings("deprecation")
+        public final LoadRequest<URI, Image> defaultImage(Resources res, int id) {
+            return setParam(1, FLAG_CUSTOM_DEFAULT_IMAGE, res.getDrawable(id));
         }
 
         /**
@@ -433,9 +478,45 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param binder The <tt>Binder</tt> to bind.
          * @return This request.
          */
-        public final LoadRequest<URI, Image> setBinder(Binder<URI, Object, Image> binder) {
+        public final LoadRequest<URI, Image> binder(Binder<URI, Object, Image> binder) {
             mBinder = binder;
             return this;
+        }
+
+        /**
+         * Sets the custom parameter to the params array.
+         */
+        private LoadRequest<URI, Image> setParam(int index, int flag, Object param) {
+            if (mParams == null) {
+                mParams = new Object[2];
+            }
+
+            DebugUtils.__checkError(mParams.length < 2, "The params array length must be >= 2.");
+            mFlags |= flag;
+            mParams[index] = param;
+            return this;
+        }
+
+        private void __checkLoadParams() {
+            if ((mFlags & FLAG_CUSTOM_PARAMETERS) != 0) {
+                if (ArrayUtils.getSize(mParams) == 0) {
+                    throw new AssertionError("No custom Parameters in the params array.");
+                }
+
+                if (!(mParams[0] instanceof Parameters)) {
+                    throw new AssertionError("The custom Parameters must be at index = 0 of the params array.");
+                }
+            }
+
+            if ((mFlags & FLAG_CUSTOM_DEFAULT_IMAGE) != 0) {
+                if (ArrayUtils.getSize(mParams) < 2) {
+                    throw new AssertionError("No custom default image in the params array.");
+                }
+
+                if (mParams[1] != null && !(mParams[1] instanceof Drawable)) {
+                    throw new AssertionError("The custom default image must be at index = 1 of the params array.");
+                }
+            }
         }
     }
 

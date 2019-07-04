@@ -22,9 +22,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;
 
     /**
-     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_DUMP_OPTIONS);
+     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_CUSTOM_DEFAULT_IMAGE | FLAG_DUMP_OPTIONS);
      */
-    private static final int FLAG_MASK = 0xFF1FFFFF;
+    private static final int FLAG_MASK = 0xFF0FFFFF;
 
     /**
      * The {@link Cache} to store the loaded values.
@@ -69,7 +69,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null, "target == null");
         DebugUtils.__checkError(binder == null, "binder == null");
-        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
+        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");
         if (mState != SHUTDOWN) {
             if (key == null) {
                 bindValue(binder, key, params, target, null, flags);
@@ -116,7 +116,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
      * @see #loadSync(Key)
      */
     public final Value loadSync(Key key, int flags, Params... params) {
-        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The flags must be range of [0 - 0xFFFF] - 0x" + Integer.toHexString(flags & FLAG_MASK));
+        DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");
         if (key == null || mState == SHUTDOWN) {
             return null;
         }

@@ -23,7 +23,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * If set the image decoder will be dump the {@link Options} when
      * it will be decode image. <p>This flag can be used DEBUG mode.</p>
      */
-    public static final int FLAG_DUMP_OPTIONS = 0x00100000;
+    public static final int FLAG_DUMP_OPTIONS = 0x00200000;
 
     /**
      * The {@link Parameters} to decode bitmap.

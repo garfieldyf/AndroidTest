@@ -22,9 +22,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;
 
     /**
-     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_CUSTOM_DEFAULT_IMAGE | FLAG_DUMP_OPTIONS);
+     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_DUMP_OPTIONS);
      */
-    private static final int FLAG_MASK = 0xFF0FFFFF;
+    private static final int FLAG_MASK = 0xFF1FFFFF;
 
     /**
      * The {@link Cache} to store the loaded values.
@@ -179,7 +179,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader {
     /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
-     * or <tt>null</tt> if the value load synchronously.
+     * or <tt>null</tt> if the load synchronously.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param flags Loading flags, passed earlier by {@link #load}.

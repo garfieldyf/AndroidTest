@@ -47,11 +47,25 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
 
     /**
      * Copy constructor
+     * <p>Creates a new {@link TransitionBinder} from the specified <em>binder</em>. The returned binder will
+     * be share the internal drawable cache and the transformer with the <em>binder</em>.</p>
+     * @param binder The <tt>ImageBinder</tt> to copy.
+     * @param defaultImage May be <tt>null</tt>. The <tt>Drawable</tt> to be used when the image is loading.
+     * @param durationMillis The length of the transition in milliseconds.
+     * @see #TransitionBinder(ImageBinder, Transformer, int)
+     */
+    public TransitionBinder(ImageBinder<URI, Image> binder, Drawable defaultImage, int durationMillis) {
+        this(null, binder.mTransformer, defaultImage, durationMillis);
+    }
+
+    /**
+     * Copy constructor
      * <p>Creates a new {@link TransitionBinder} from the specified <em>binder</em>. The returned binder
      * will be share the internal drawable cache and the default image with the <em>binder</em>.</p>
      * @param binder The <tt>ImageBinder</tt> to copy.
      * @param transformer The {@link Transformer} to be used transforms an image to a <tt>Drawable</tt>.
      * @param durationMillis The length of the transition in milliseconds.
+     * @see #TransitionBinder(ImageBinder, Drawable, int)
      */
     public TransitionBinder(ImageBinder<URI, Image> binder, Transformer<URI, Image> transformer, int durationMillis) {
         this(binder.getImageCache(), transformer, binder.mDefaultImage, durationMillis);
@@ -76,19 +90,19 @@ public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
         if (value == null) {
-            view.setImageDrawable(getDefaultImage(params, state));
+            view.setImageDrawable(mDefaultImage);
         } else if (value instanceof Drawable) {
-            setViewImage(view, params, (Drawable)value, state);
+            setViewImage(view, (Drawable)value, state);
         } else {
-            setViewImage(view, params, mTransformer.transform(uri, value), state);
+            setViewImage(view, mTransformer.transform(uri, value), state);
         }
     }
 
-    private void setViewImage(ImageView view, Object[] params, Drawable value, int state) {
+    private void setViewImage(ImageView view, Drawable value, int state) {
         if ((state & STATE_LOAD_FROM_CACHE) != 0) {
             view.setImageDrawable(value);
         } else {
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { getDefaultImage(params, state), value });
+            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { mDefaultImage, value });
             view.setImageDrawable(drawable);
             drawable.setCrossFadeEnabled(true);
             drawable.startTransition(mDuration);

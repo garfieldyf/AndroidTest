@@ -162,7 +162,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
     /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
-     * or <tt>null</tt> if the value load synchronously.
+     * or <tt>null</tt> if the load synchronously.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @return A result, defined by the subclass of this loader.

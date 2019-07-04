@@ -51,9 +51,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
     public final void startExecute(int token, Object... params) {
-        final SQLiteTask task = obtainTask(token, MESSAGE_EXECUTE, null, null, null);
-        task.values = params;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, null, null, null, params));
     }
 
     /**
@@ -65,7 +63,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[], String, String[], String)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
-        mExecutor.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs));
+        mExecutor.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
     }
 
     /**
@@ -82,8 +80,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[])
      */
     public final void startQuery(int token, String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs);
-        task.values = projection;
+        final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
         mExecutor.execute(task);
     }
@@ -101,9 +98,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * names and the values the column values.
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
-        final SQLiteTask task = obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
     }
 
     /**
@@ -118,9 +113,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * translated to NULL.
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
-        final SQLiteTask task = obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
     }
 
     /**
@@ -134,9 +127,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
-        final SQLiteTask task = obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
     }
 
     /**
@@ -149,7 +140,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
-        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs));
+        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
     }
 
     /**
@@ -223,10 +214,11 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Retrieves a new {@link SQLiteTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
-    private SQLiteTask obtainTask(int token, int message, String table, String selection, String[] selectionArgs) {
+    private SQLiteTask obtainTask(int token, int message, String table, String selection, String[] selectionArgs, Object values) {
         final SQLiteTask task = (SQLiteTask)mTaskPool.obtain();
         task.token = token;
         task.table = table;
+        task.values  = values;
         task.message = message;
         task.selection = selection;
         task.selectionArgs = selectionArgs;

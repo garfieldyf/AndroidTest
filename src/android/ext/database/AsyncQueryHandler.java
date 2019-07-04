@@ -60,9 +60,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
     public final void startExecute(int token, Object... params) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, null, null, null);
-        task.values = params;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, null, null, null, params));
     }
 
     /**
@@ -78,8 +76,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      */
     public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_QUERY, uri, selection, selectionArgs);
-        task.values = projection;
+        final AsyncQueryTask task = obtainTask(token, MESSAGE_QUERY, uri, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
         mExecutor.execute(task);
     }
@@ -94,8 +91,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param extras The provider-defined <tt>Bundle</tt> argument. May be <tt>null</tt>.
      */
     public final void startCall(int token, Uri uri, String method, String arg, Bundle extras) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_CALL, uri, method, null);
-        task.values = extras;
+        final AsyncQueryTask task = obtainTask(token, MESSAGE_CALL, uri, method, null, extras);
         task.sortOrder = arg;
         mExecutor.execute(task);
     }
@@ -108,9 +104,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * column names and the values the column values. Passing an empty ContentValues will create an empty row.
      */
     public final void startInsert(int token, Uri uri, ContentValues values) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_INSERT, uri, null, null);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_INSERT, uri, null, null, values));
     }
 
     /**
@@ -124,9 +118,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs, values));
     }
 
     /**
@@ -139,7 +131,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
-        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs));
+        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs, null));
     }
 
     /**
@@ -151,9 +143,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * keys should be the column names and the values the column values.
      */
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_INSERTS, uri, null, null);
-        task.values = values;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_INSERTS, uri, null, null, values));
     }
 
     /**
@@ -164,9 +154,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param operations The operations to apply.
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_BATCH, null, authority, null);
-        task.values = operations;
-        mExecutor.execute(task);
+        mExecutor.execute(obtainTask(token, MESSAGE_BATCH, null, authority, null, operations));
     }
 
     /**
@@ -264,10 +252,11 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Retrieves a new {@link AsyncQueryTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
-    private AsyncQueryTask obtainTask(int token, int message, Uri uri, String selection, String[] selectionArgs) {
+    private AsyncQueryTask obtainTask(int token, int message, Uri uri, String selection, String[] selectionArgs, Object values) {
         final AsyncQueryTask task = (AsyncQueryTask)mTaskPool.obtain();
         task.uri = uri;
         task.token = token;
+        task.values  = values;
         task.message = message;
         task.selection = selection;
         task.selectionArgs = selectionArgs;

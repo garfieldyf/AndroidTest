@@ -20,6 +20,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @param image The {@link GIFImage}. Never <tt>null</tt>.
      * @see #RoundedGIFDrawable(GIFImage, float)
      * @see #RoundedGIFDrawable(GIFImage, float[])
+     * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image) {
         super(image);
@@ -31,10 +32,11 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @param cornerRadius The corner radius.
      * @see #RoundedGIFDrawable(GIFImage)
      * @see #RoundedGIFDrawable(GIFImage, float[])
+     * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image, float cornerRadius) {
         super(image);
-        setCornerRadius(cornerRadius);
+        setCornerRadii(cornerRadius);
     }
 
     /**
@@ -45,6 +47,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      * @see #RoundedGIFDrawable(GIFImage)
      * @see #RoundedGIFDrawable(GIFImage, float)
+     * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image, float[] radii) {
         super(image);
@@ -52,24 +55,19 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
     }
 
     /**
-     * Sets the corner radius to be applied when drawing this GIF drawable.
-     * @param cornerRadius The corner radius.
-     * @see #setCornerRadius(float, float, float, float)
-     */
-    public final void setCornerRadius(float cornerRadius) {
-        setCornerRadii(new float[] { cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius });
-    }
-
-    /**
-     * Sets the corner radius to be applied when drawing this GIF drawable.
+     * Constructor
+     * @param image The {@link GIFImage}. Never <tt>null</tt>.
      * @param topLeftRadius The top-left corner radius.
      * @param topRightRadius The top-right corner radius.
      * @param bottomLeftRadius The bottom-left corner radius.
      * @param bottomRightRadius The bottom-right corner radius.
-     * @see #setCornerRadius(float)
+     * @see #RoundedGIFDrawable(GIFImage)
+     * @see #RoundedGIFDrawable(GIFImage, float)
+     * @see #RoundedGIFDrawable(GIFImage, float[])
      */
-    public final void setCornerRadius(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
-        setCornerRadii(new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius });
+    public RoundedGIFDrawable(GIFImage image, float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
+        super(image);
+        setCornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
     }
 
     /**
@@ -77,10 +75,32 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * returned by this method as it may be the same object stored in this drawable.
      * @return The corner radii of this drawable, array of 8 values, 4 pairs of [X,Y]
      * radii, or <tt>null</tt> if none set.
-     * @see #setCornerRadii(float[])
      */
     public float[] getCornerRadii() {
         return mRadii;
+    }
+
+    /**
+     * Sets the corner radii to be applied when drawing this GIF drawable.
+     * @param cornerRadius The corner radius.
+     * @see #setCornerRadii(float[])
+     * @see #setCornerRadii(float, float, float, float)
+     */
+    public final void setCornerRadii(float cornerRadius) {
+        setCornerRadii(new float[] { cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius });
+    }
+
+    /**
+     * Sets the corner radii to be applied when drawing this GIF drawable.
+     * @param topLeftRadius The top-left corner radius.
+     * @param topRightRadius The top-right corner radius.
+     * @param bottomLeftRadius The bottom-left corner radius.
+     * @param bottomRightRadius The bottom-right corner radius.
+     * @see #setCornerRadii(float)
+     * @see #setCornerRadii(float[])
+     */
+    public final void setCornerRadii(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
+        setCornerRadii(new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius });
     }
 
     /**
@@ -88,7 +108,8 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * two radius values [X, Y]. The corners are ordered <tt>top-left</tt>, <tt>top-right</tt>,
      * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      * @param radii An array of 8 values, 4 pairs of [X,Y] radii, or <tt>null</tt> to clear.
-     * @see #getCornerRadii()
+     * @see #setCornerRadii(float)
+     * @see #setCornerRadii(float, float, float, float)
      */
     public void setCornerRadii(float[] radii) {
         if (radiusEquals(radii, 0, +0.0f)) {

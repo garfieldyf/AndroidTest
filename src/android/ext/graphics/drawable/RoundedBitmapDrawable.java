@@ -36,6 +36,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
      * @see #RoundedBitmapDrawable(Bitmap, float)
      * @see #RoundedBitmapDrawable(Bitmap, float[])
+     * @see #RoundedBitmapDrawable(Bitmap, float, float, float, float)
      */
     public RoundedBitmapDrawable(Bitmap bitmap) {
         super(new RoundedBitmapState(bitmap));
@@ -47,10 +48,11 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * @param cornerRadius The corner radius.
      * @see #RoundedBitmapDrawable(Bitmap)
      * @see #RoundedBitmapDrawable(Bitmap, float[])
+     * @see #RoundedBitmapDrawable(Bitmap, float, float, float, float)
      */
     public RoundedBitmapDrawable(Bitmap bitmap, float cornerRadius) {
         super(new RoundedBitmapState(bitmap));
-        setCornerRadius(cornerRadius);
+        setCornerRadii(cornerRadius);
     }
 
     /**
@@ -61,6 +63,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      * @see #RoundedBitmapDrawable(Bitmap)
      * @see #RoundedBitmapDrawable(Bitmap, float)
+     * @see #RoundedBitmapDrawable(Bitmap, float, float, float, float)
      */
     public RoundedBitmapDrawable(Bitmap bitmap, float[] radii) {
         super(new RoundedBitmapState(bitmap));
@@ -68,24 +71,19 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     }
 
     /**
-     * Sets the corner radius to be applied when drawing the bitmap.
-     * @param cornerRadius The corner radius.
-     * @see #setCornerRadius(float, float, float, float)
-     */
-    public final void setCornerRadius(float cornerRadius) {
-        setCornerRadii(new float[] { cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius });
-    }
-
-    /**
-     * Sets the corner radius to be applied when drawing the bitmap.
+     * Constructor
+     * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
      * @param topLeftRadius The top-left corner radius.
      * @param topRightRadius The top-right corner radius.
      * @param bottomLeftRadius The bottom-left corner radius.
      * @param bottomRightRadius The bottom-right corner radius.
-     * @see #setCornerRadius(float)
+     * @see #RoundedBitmapDrawable(Bitmap)
+     * @see #RoundedBitmapDrawable(Bitmap, float)
+     * @see #RoundedBitmapDrawable(Bitmap, float[])
      */
-    public final void setCornerRadius(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
-        setCornerRadii(new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius });
+    public RoundedBitmapDrawable(Bitmap bitmap, float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
+        super(new RoundedBitmapState(bitmap));
+        setCornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
     }
 
     /**
@@ -93,10 +91,32 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * returned by this method as it may be the same object stored in this drawable.
      * @return The corner radii of this drawable, array of 8 values, 4 pairs of [X,Y]
      * radii, or <tt>null</tt> if none set.
-     * @see #setCornerRadii(float[])
      */
     public float[] getCornerRadii() {
         return mState.mRadii;
+    }
+
+    /**
+     * Sets the corner radii to be applied when drawing the bitmap.
+     * @param cornerRadius The corner radius.
+     * @see #setCornerRadii(float[])
+     * @see #setCornerRadii(float, float, float, float)
+     */
+    public final void setCornerRadii(float cornerRadius) {
+        setCornerRadii(new float[] { cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius, cornerRadius });
+    }
+
+    /**
+     * Sets the corner radii to be applied when drawing the bitmap.
+     * @param topLeftRadius The top-left corner radius.
+     * @param topRightRadius The top-right corner radius.
+     * @param bottomLeftRadius The bottom-left corner radius.
+     * @param bottomRightRadius The bottom-right corner radius.
+     * @see #setCornerRadii(float)
+     * @see #setCornerRadii(float[])
+     */
+    public final void setCornerRadii(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
+        setCornerRadii(new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius });
     }
 
     /**
@@ -104,7 +124,8 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * radius values [X, Y]. The corners are ordered <tt>top-left</tt>, <tt>top-right</tt>,
      * <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      * @param radii An array of 8 values, 4 pairs of [X,Y] radii, or <tt>null</tt> to clear.
-     * @see #getCornerRadii()
+     * @see #setCornerRadii(float)
+     * @see #setCornerRadii(float, float, float, float)
      */
     public void setCornerRadii(float[] radii) {
         if (radiusEquals(radii, 0, +0.0f)) {

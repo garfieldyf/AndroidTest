@@ -8,6 +8,12 @@
 }
 
 # For native methods, including not being called methods.
+-keep class **.GIFImage
+-keep class **.FileUtils
+-keep class **.BitmapUtils
+-keep class **.ProcessUtils
+-keep class **.MessageDigests
+
 -keepclassmembers class * {
     native <methods>;
 }

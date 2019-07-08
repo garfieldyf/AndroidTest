@@ -1,6 +1,5 @@
 package android.ext.cache;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -117,8 +116,8 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Map<K, V> entries() {
-        return Collections.unmodifiableMap(map);
+    public Map<K, V> snapshot() {
+        return new LinkedHashMap<K, V>(map);
     }
 
     /**
@@ -170,7 +169,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     /* package */ void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
-        final Set<Entry<K, V>> entries = entries().entrySet();
+        final Set<Entry<K, V>> entries = snapshot().entrySet();
 
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), entries.size(), size(), maxSize());
         for (Entry<?, ?> entry : entries) {

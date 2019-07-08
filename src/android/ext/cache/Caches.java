@@ -5,7 +5,6 @@ import java.util.Map;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
-import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
@@ -22,17 +21,6 @@ public final class Caches {
     @SuppressWarnings("unchecked")
     public static <K, V> Cache<K, V> emptyCache() {
         return (Cache<K, V>)EmptyCache.sInstance;
-    }
-
-    /**
-     * Returns a wrapper on the specified <em>cache</em> which synchronizes
-     * all access to the cache.
-     * @param cache The {@link Cache} to wrap in a synchronized cache.
-     * @return A synchronized <tt>Cache</tt>.
-     */
-    public static <K, V> Cache<K, V> synchronizedCache(Cache<K, V> cache) {
-        DebugUtils.__checkError(cache == null, "cache == null");
-        return new SynchronizedCache<K, V>(cache);
     }
 
     /**
@@ -55,8 +43,6 @@ public final class Caches {
             ((LruImageCache<?>)cache).dump(context, printer);
         } else if (cache instanceof MapCache) {
             ((MapCache<?, ?>)cache).dump(context, printer);
-        } else if (cache instanceof SynchronizedCache) {
-            ((SynchronizedCache<?, ?>)cache).dump(context, printer);
         }
     }
 
@@ -70,8 +56,12 @@ public final class Caches {
         public void clear() {
         }
 
+        /**
+         * Always returns an empty (<tt>0-size</tt>), immutable {@link Map}.
+         * @return An immutable <tt>Map</tt>.
+         */
         @Override
-        public Map<Object, Object> entries() {
+        public Map<Object, Object> snapshot() {
             return Collections.emptyMap();
         }
 
@@ -91,49 +81,6 @@ public final class Caches {
         public Object put(Object key, Object value) {
             DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
             return null;
-        }
-    }
-
-    /**
-     * Class <tt>SynchronizedCache</tt> is an implementation of a {@link Cache}.
-     */
-    private static final class SynchronizedCache<K, V> implements Cache<K, V> {
-        private final Cache<K, V> mCache;
-
-        public SynchronizedCache(Cache<K, V> cache) {
-            DebugUtils.__checkError(cache == null, "cache == null");
-            mCache = cache;
-        }
-
-        @Override
-        public synchronized void clear() {
-            mCache.clear();
-        }
-
-        @Override
-        public synchronized V remove(K key) {
-            return mCache.remove(key);
-        }
-
-        @Override
-        public synchronized V get(K key) {
-            return mCache.get(key);
-        }
-
-        @Override
-        public synchronized V put(K key, V value) {
-            return mCache.put(key, value);
-        }
-
-        @Override
-        public synchronized Map<K, V> entries() {
-            final Map<K, V> result = new ArrayMap<K, V>();
-            result.putAll(mCache.entries());
-            return Collections.unmodifiableMap(result);
-        }
-
-        public synchronized void dump(Context context, Printer printer) {
-            dumpCache(mCache, context, printer);
         }
     }
 

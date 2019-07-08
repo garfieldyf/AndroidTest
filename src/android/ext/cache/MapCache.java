@@ -1,10 +1,10 @@
 package android.ext.cache;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import android.content.Context;
 import android.ext.util.DebugUtils;
+import android.util.ArrayMap;
 import android.util.Printer;
 
 /**
@@ -45,8 +45,10 @@ public class MapCache<K, V> implements Cache<K, V> {
     }
 
     @Override
-    public Map<K, V> entries() {
-        return Collections.unmodifiableMap(map);
+    public Map<K, V> snapshot() {
+        final Map<K, V> result = new ArrayMap<K, V>(map.size());
+        result.putAll(map);
+        return result;
     }
 
     /* package */ final void dump(Context context, Printer printer) {

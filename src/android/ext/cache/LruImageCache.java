@@ -1,6 +1,5 @@
 package android.ext.cache;
 
-import java.util.Collections;
 import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -63,11 +62,11 @@ public final class LruImageCache<K> implements ImageCache<K, Object> {
     }
 
     @Override
-    public Map<K, Object> entries() {
+    public Map<K, Object> snapshot() {
         final Map<K, Object> result = new ArrayMap<K, Object>();
-        result.putAll(mBitmapCache.entries());
-        result.putAll(mImageCache.entries());
-        return Collections.unmodifiableMap(result);
+        result.putAll(mBitmapCache.snapshot());
+        result.putAll(mImageCache.snapshot());
+        return result;
     }
 
     @Override

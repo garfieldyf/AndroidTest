@@ -74,7 +74,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     @Override
     /* package */ void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
-        final Collection<File> files = entries().values();
+        final Collection<File> files = snapshot().values();
         dumpSummary(printer, result, files.size());
 
         for (File file : files) {

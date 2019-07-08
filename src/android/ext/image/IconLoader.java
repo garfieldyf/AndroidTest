@@ -57,7 +57,7 @@ public class IconLoader extends AsyncLoader<String, ResolveInfo, PackageItemIcon
     }
 
     /* package */ static void dumpCache(Context context, Cache<String, PackageItemIcon> cache, Printer printer) {
-        final Set<Entry<String, PackageItemIcon>> entries = cache.entries().entrySet();
+        final Set<Entry<String, PackageItemIcon>> entries = cache.snapshot().entrySet();
         final StringBuilder result = new StringBuilder(256);
         if (cache instanceof SimpleLruCache) {
             DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", cache.getClass().getSimpleName(), entries.size(), ((SimpleLruCache<?, ?>)cache).maxSize());

@@ -341,7 +341,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkUIThread("dump");
         final StringBuilder result = new StringBuilder(128);
         final Formatter formatter  = new Formatter(result);
-        final Set<Entry<Integer, Page<E>>> entries = mPageCache.entries().entrySet();
+        final Set<Entry<Integer, Page<E>>> entries = mPageCache.snapshot().entrySet();
 
         DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
         result.setLength(0);

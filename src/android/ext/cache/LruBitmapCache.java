@@ -41,7 +41,7 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
 
     @Override
     /* package */ void dump(Context context, Printer printer) {
-        final Set<Entry<K, Bitmap>> entries = entries().entrySet();
+        final Set<Entry<K, Bitmap>> entries = snapshot().entrySet();
         final StringBuilder result = new StringBuilder(384);
 
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %s, maxSize = %s, appMaxSize = %s ] ", getClass().getSimpleName(), entries.size(), FileUtils.formatFileSize(size()), FileUtils.formatFileSize(maxSize()), FileUtils.formatFileSize(Runtime.getRuntime().maxMemory()));

@@ -107,7 +107,8 @@
         <activity android:name="PackageActivity" />
         <activity android:name="RecyclerViewActivity" />
         <activity android:name="PackageArchiveActivity" />
-
+        <activity android:name="com.tencent.test.ui.VideoActivity" />
+        
         <service
             android:name="CrashService"
             android:process=":crash" />

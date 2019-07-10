@@ -1,8 +1,7 @@
 package android.ext.util;
 
 import java.util.concurrent.Executor;
-import android.ext.concurrent.ThreadPoolManager;
-import android.ext.content.Loader;
+import android.ext.content.Loader.Task;
 import android.ext.database.DatabaseHandler;
 import android.os.Handler;
 import android.os.Looper;
@@ -180,35 +179,17 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * Called on the {@link Loader.Task} internal, do not call this method directly.
+     * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void finish(Loader.Task task, Object result) {
-        final Message msg = obtain(MESSAGE_FINISHED, task);
-        msg.obj = result;
-        sendMessage(msg);
+    public final void finish(Task task, Object result) {
+        sendMessage(task, MESSAGE_FINISHED, result);
     }
 
     /**
-     * Called on the {@link Loader.Task} internal, do not call this method directly.
+     * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void setProgress(Loader.Task task, Object... values) {
-        final Message msg = obtain(MESSAGE_PROGRESS, task);
-        msg.obj = values;
-        sendMessage(msg);
-    }
-
-    /**
-     * Called on the {@link ThreadPoolManager.Task} internal, do not call this method directly.
-     */
-    public final void cancel(ThreadPoolManager.Task task) {
-        sendMessage(obtain(MESSAGE_CANCELLED, task));
-    }
-
-    /**
-     * Called on the {@link ThreadPoolManager.Task} internal, do not call this method directly.
-     */
-    public final void completion(ThreadPoolManager.Task task) {
-        sendMessage(obtain(MESSAGE_COMPLETED, task));
+    public final void setProgress(Task task, Object... values) {
+        sendMessage(task, MESSAGE_PROGRESS, values);
     }
 
     /**
@@ -235,22 +216,13 @@ public final class UIHandler extends Handler implements Executor {
     @Override
     public void dispatchMessage(Message msg) {
         switch (msg.what) {
-        // Dispatch the Loader.Task messages.
+        // Dispatch the Task messages.
         case MESSAGE_PROGRESS:
-            ((Loader.Task)msg.getCallback()).onProgress((Object[])msg.obj);
+            ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
             break;
 
         case MESSAGE_FINISHED:
-            ((Loader.Task)msg.getCallback()).onPostExecute(msg.obj);
-            break;
-
-        // Dispatch the ThreadPoolManager.Task messages.
-        case MESSAGE_CANCELLED:
-            ((ThreadPoolManager.Task)msg.getCallback()).onCancelled();
-            break;
-
-        case MESSAGE_COMPLETED:
-            ((ThreadPoolManager.Task)msg.getCallback()).onCompletion();
+            ((Task)msg.getCallback()).onPostExecute(msg.obj);
             break;
 
         // Dispatch the RecyclerView messages.
@@ -293,10 +265,11 @@ public final class UIHandler extends Handler implements Executor {
         }
     }
 
-    private Message obtain(int what, Runnable callback) {
-        final Message msg = Message.obtain(this, callback);
+    private void sendMessage(Task task, int what, Object obj) {
+        final Message msg = Message.obtain(this, task);
         msg.what = what;
-        return msg;
+        msg.obj  = obj;
+        sendMessage(msg);
     }
 
     private static void dispatchItemChanged(Message msg) {
@@ -318,13 +291,9 @@ public final class UIHandler extends Handler implements Executor {
         }
     }
 
-    // The Loader.Task messages
-    private static final int MESSAGE_PROGRESS = 0xCECECECE;
-    private static final int MESSAGE_FINISHED = 0xCFCFCFCF;
-
-    // The ThreadPoolManager.Task messages
-    private static final int MESSAGE_CANCELLED = 0xDEDEDEDE;
-    private static final int MESSAGE_COMPLETED = 0xDFDFDFDF;
+    // The Task messages
+    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
+    private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
     // The RecyclerView messages
     private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;

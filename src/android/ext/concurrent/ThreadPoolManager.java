@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.UIHandler;
+import android.os.Looper;
 import android.util.Printer;
 
 /**
@@ -180,7 +182,7 @@ public class ThreadPoolManager extends ThreadPool {
                 } finally {
                     mRunner = null;
                     if (mState.compareAndSet(RUNNING, COMPLETED)) {
-                        onCompletion();
+                        UIHandler.sInstance.completion(this);
                     }
                 }
             }
@@ -190,28 +192,25 @@ public class ThreadPoolManager extends ThreadPool {
          * Returns a unique identifier associated with this task.
          * @return This task's identifier.
          */
-        protected abstract long getId();
+        public abstract long getId();
 
         /**
-         * Callback method to be invoked when this task was cancelled.
+         * Runs on the UI thread when this task was cancelled.
          * The default implementation do nothing. If you write your
          * own implementation, do not call <tt>super.onCancelled()</tt>
          * @see #onCompletion()
          * @see #doInBackground(Thread)
          */
-        protected void onCancelled() {
+        public void onCancelled() {
         }
 
         /**
-         * Runs on a background thread after {@link #doInBackground(Thread)}.
-         * The default implementation do nothing. If you write your
-         * own implementation, do not call <tt>super.onCompletion()</tt>
+         * Runs on the UI thread after {@link #doInBackground(Thread)}.
          * <p>This method won't be invoked if this task was cancelled.</p>
          * @see #onCancelled()
          * @see #doInBackground(Thread)
          */
-        protected void onCompletion() {
-        }
+        public abstract void onCompletion();
 
         /**
          * Runs on a background thread when this task is executing. <p>This method
@@ -235,7 +234,11 @@ public class ThreadPoolManager extends ThreadPool {
 
                 // Notify the callback method.
                 if (mayNotifyIfCancelled) {
-                    onCancelled();
+                    if (Looper.getMainLooper() == Looper.myLooper()) {
+                        onCancelled();
+                    } else {
+                        UIHandler.sInstance.cancel(this);
+                    }
                 }
             }
 

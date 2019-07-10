@@ -26,7 +26,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, null);
+        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-");
     }
 
     /**
@@ -41,7 +41,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        this(maxThreads, keepAliveTime, unit, null);
+        this(maxThreads, keepAliveTime, unit, "Pool-thread-");
     }
 
     /**
@@ -84,7 +84,7 @@ public class ThreadPool extends ThreadPoolExecutor {
     /**
      * Constructor
      */
-    private ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix) {
+    /* package */ ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix) {
         super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix));
         allowCoreThreadTimeOut(true);
     }
@@ -160,13 +160,12 @@ public class ThreadPool extends ThreadPoolExecutor {
      * Class <tt>PriorityThreadFactory</tt> is an implementation of a {@link ThreadFactory}.
      */
     private static final class PriorityThreadFactory implements ThreadFactory {
-        private static int sequence;
         private final String namePrefix;
         private final AtomicInteger nameSuffix;
 
         public PriorityThreadFactory(String namePrefix) {
+            this.namePrefix = namePrefix;
             this.nameSuffix = new AtomicInteger();
-            this.namePrefix = (namePrefix != null ? namePrefix : "Pool-" + (++sequence) + "-thread-");
         }
 
         @Override

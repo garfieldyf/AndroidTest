@@ -43,7 +43,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @see #ThreadPoolManager(int)
      */
     public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        super(maxThreads, keepAliveTime, unit);
+        super(maxThreads, keepAliveTime, unit, "PoolM-thread-");
         mRunningTasks = new ConcurrentLinkedQueue<Task>();
     }
 

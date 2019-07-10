@@ -210,7 +210,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
             // Loads the page data and marks the page loading state.
             mLoadStates.set(page);
-            loadPage(page, startPosition, itemCount);
+            result = loadPage(page, startPosition, itemCount);
+            if (Pages.getCount(result) > 0) {
+                // Clears the page loading state.
+                mLoadStates.clear(page);
+                mPageCache.put(page, result);
+            }
         }
 
         return result;
@@ -362,32 +367,39 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Loads the {@link Page} at the given page index <em>page</em>. Subclasses
-     * must implement this method to load the data for a particular page. <p>If
-     * you want to asynchronously load the page data to prevent blocking the UI,
-     * it is possible to load the data on a background thread and at a later time
-     * call {@link #setPage(int, Page, Object)}.<p>
-     * @param page The index of the page whose data should be load.
+     * Returns the {@link Page} at the given index <em>page</em>. Subclasses
+     * must implement this method to return <tt>Page</tt> for a particular page.
+     * <p>If you want to asynchronously load the page data to prevent blocking
+     * the UI, it is possible to return <tt>null</tt> and at a later time call
+     * {@link #setPage(int, Page, Object)}.<p>
+     * @param page The index of the page whose data should be returned.
      * @param startPosition The position of the first item to load.
      * @param itemCount The number of items to load.
+     * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
-    protected abstract void loadPage(int page, int startPosition, int itemCount);
+    protected abstract Page<E> loadPage(int page, int startPosition, int itemCount);
 
     /**
-     * Prefetch the {@link Page} with the given <em>page</em> and <em>position</em>.
-     * The default implementation load the next page data from the current page.
+     * Prefetch the {@link Page} with the given <em>page</em> and <em>position</em>. The
+     * default implementation load the previous and next page data from the current page.
      * @param page The index of the current page.
      * @param position The index of the item in the <em>page</em>.
      * @param adapterPosition The adapter position of the item in this adapter.
      * @param prefetchDistance Defines how far to the first or last item in the page.
      */
     protected void prefetchPage(int page, int position, int adapterPosition, int prefetchDistance) {
+        // Prefetch the previous page data.
+        if (page > 0 && position == mPrefetchDistance - 1) {
+            DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page - 1) + ", position = " + position + ", adapterPosition = " + adapterPosition);
+            getPage(page - 1);
+        }
+
         final int lastPage = (mItemCount - mInitialSize - 1) / mPageSize + 1;
         if (page < lastPage) {
             // Prefetch the next page data.
             final int pageSize = (page > 0 ? mPageSize : mInitialSize);
             if (position == pageSize - prefetchDistance) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page + 1) + ", position = " + position);
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page + 1) + ", position = " + position + ", adapterPosition = " + adapterPosition);
                 getPage(page + 1);
             }
         }

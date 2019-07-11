@@ -30,11 +30,6 @@ public final class JsonLoader extends AsyncCacheLoader<String> {
             return;
         }
 
-        if (isInvalidResult(result)) {
-            Log.i("abc", "JsonLoader - Load invalid result, do not update UI.");
-            return;
-        }
-
         if (result != null) {
             Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName((JSONObject)result));
             // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
@@ -48,10 +43,20 @@ public final class JsonLoader extends AsyncCacheLoader<String> {
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
 
-    public static class URLLoadParams extends LoadParams<String> {
+    public static class URLLoadParams implements LoadParams<String> {
+        @Override
+        public File getCacheFile(Context context, String key) {
+            return null;
+        }
+
         @Override
         public DownloadRequest newDownloadRequest(Context context, String url) throws Exception {
             return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+        }
+
+        @Override
+        public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
+            return JsonUtils.parse(context, cacheFile, cancelable);
         }
     }
 

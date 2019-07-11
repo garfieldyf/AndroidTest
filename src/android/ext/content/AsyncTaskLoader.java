@@ -47,7 +47,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * @param key The identifier of the load task.
      * @param params The parameters of the load task. If the task no parameters,
      * you can pass <em>(Params[])null</em> instead of allocating an empty array.
-     * @see #loadSync(Key, Params[])
      */
     public final void load(Key key, Params... params) {
         DebugUtils.__checkUIThread("load");
@@ -55,26 +54,11 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
-                onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
                 mRunningTasks.put(key, newTask);
                 mExecutor.execute(newTask);
             }
         }
-    }
-
-    /**
-     * Loads the value synchronously. Call this method, Pass the {@link #loadInBackground}
-     * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
-     * the calling thread until it was returned.</b></p>
-     * @param key The key passed to the {@link #loadInBackground}.
-     * @param params The parameters passed to the {@link #loadInBackground}. If no parameters,
-     * you can pass <em>(Params[])null</em> instead of allocating an empty array.
-     * @return The result, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #load(Key, Params[])
-     */
-    public final Result loadSync(Key key, Params... params) {
-        return (mState != SHUTDOWN ? loadInBackground(null, key, params) : null);
     }
 
     /**
@@ -115,18 +99,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     }
 
     /**
-     * Called on the UI thread before {@link #loadInBackground}. <p>The default
-     * implementation do nothing. If you write your own implementation, do not
-     * call <tt>super.onStartLoading()</tt>.</p>
-     * @param key The key, passed earlier by {@link #load}.
-     * @param params The parameters, passed earlier by {@link #load}.
-     * @see #onLoadComplete(Key, Params[], Result)
-     * @see #loadInBackground(Task, Key, Params[])
-     */
-    protected void onStartLoading(Key key, Params[] params) {
-    }
-
-    /**
      * Called on the UI thread when a load was cancelled.<p>The default
      * implementation do nothing. If you write your own implementation,
      * do not call <tt>super.onLoadCancelled()</tt>.</p>
@@ -154,7 +126,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param result The result, returned earlier by {@link #loadInBackground}.
-     * @see #onStartLoading(Key, Params[])
      * @see #loadInBackground(Task, Key, Params[])
      */
     protected abstract void onLoadComplete(Key key, Params[] params, Result result);
@@ -166,7 +137,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @return A result, defined by the subclass of this loader.
-     * @see #onStartLoading(Key, Params[])
      * @see #onLoadComplete(Key, Params[], Result)
      */
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);

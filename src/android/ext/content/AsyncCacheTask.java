@@ -6,18 +6,21 @@ import java.util.Arrays;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
-import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.JsonUtils;
+import android.os.Process;
 import android.util.Log;
 
 /**
  * Class <tt>AsyncCacheTask</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
+ * <h3>AsyncCacheTask's generic types</h3>
+ * <p>The two types used by a task are the following:</p>
+ * <ol><li><tt>Params</tt>, The type of the parameters sent to the task.</li>
+ * <li><tt>Result</tt>, The type of the result of the task.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * private static class JsonTask extends AsyncCacheTask&lt;String&gt; {
+ * private static class JsonTask extends AsyncCacheTask&lt;String, JSONObject&gt; {
  *     public JsonTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
@@ -34,7 +37,7 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected Object parseResult(String[] urls, File cacheFile) throws Exception {
+ *     protected JSONObject parseResult(String[] urls, File cacheFile) throws Exception {
  *         if (!cacheFile.exists()) {
  *             // If the cache file not exists, return null or parse the JSON data from the "assets" file.
  *             return null;
@@ -52,15 +55,10 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected void onPostExecute(Object result) {
+ *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
  *             // The owner activity has been destroyed or release by the GC.
- *             return;
- *         }
- *
- *         if (isInvalidResult(result)) {
- *             // The result is invalid, do not update UI.
  *             return;
  *         }
  *
@@ -75,11 +73,12 @@ import android.util.Log;
  * new JsonTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object, Object> {
+public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
+    private volatile boolean __checkCancelled;
 
     /**
      * Constructor
@@ -92,12 +91,12 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
 
     /**
      * Constructor
-     * @param activity The <tt>Activity</tt>.
+     * @param activity The owner <tt>Activity</tt>.
      * @see #AsyncCacheTask(Context)
      */
-    public AsyncCacheTask(Activity activity) {
-        super(activity);
-        mContext = activity.getApplicationContext();
+    public AsyncCacheTask(Activity ownerActivity) {
+        super(ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**
@@ -112,29 +111,6 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
     }
 
     /**
-     * Tests if the <em>result</em> is invalid.
-     * @param result The result to test.
-     * @return <tt>true</tt> if the <em>result</em> is invalid, <tt>false</tt> otherwise.
-     */
-    protected final boolean isInvalidResult(Object result) {
-        return (result == this);
-    }
-
-    /**
-     * Called on a background thread to parse the data from the cache file. Subclasses
-     * should override this method to parse their result. <p>The default implementation
-     * parse the cache file's contents to a <tt>JSONObject</tt> or <tt>JSONArray</tt>.</p>
-     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param cacheFile The cache file to parse.
-     * @return A result or <tt>null</tt>, defined by the subclass of this task.
-     * @throws Exception if the data can not be parse.
-     * @see JsonUtils#parse(Context, Object, Cancelable)
-     */
-    protected Object parseResult(Params[] params, File cacheFile) throws Exception {
-        return JsonUtils.parse(mContext, cacheFile, this);
-    }
-
-    /**
      * Returns a new download request with the specified <em>params</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @return The instance of {@link DownloadRequest}.
@@ -142,15 +118,25 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
      */
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
+    /**
+     * Called on a background thread to parse the data from the cache file.
+     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
+     * @param cacheFile The cache file to parse.
+     * @return A result or <tt>null</tt>, defined by the subclass of this task.
+     * @throws Exception if the data can not be parse.
+     */
+    protected abstract Result parseResult(Params[] params, File cacheFile) throws Exception;
+
     @Override
+    @SuppressWarnings("unchecked")
     protected void onProgressUpdate(Object... values) {
-        onPostExecute(values[0]);
+        onPostExecute((Result)values[0]);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Object doInBackground(Params... params) {
-        Object result = null;
+    protected Result doInBackground(Params... params) {
+        Result result = null;
         try {
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
@@ -170,52 +156,56 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         return result;
     }
 
-    private Object download(Params[] params) throws Exception {
+    private Result download(Params[] params) throws Exception {
         final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._act-" + Thread.currentThread().hashCode());
         try {
             final int statusCode = newDownloadRequest(params).download(tempFile.getPath(), this, null);
-            final Object result  = (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
-            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
-            return result;
+            return (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
         } finally {
             tempFile.delete();
         }
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {
+        final int priority = Process.getThreadPriority(Process.myTid());
         try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
-            final Object result = parseResult(params, cacheFile);
+            final Result result = parseResult(params, cacheFile);
             DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "loadFromCache");
-            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
+                this.__checkIsCancelled();
                 publishProgress(result);
                 return true;
             }
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
+        } finally {
+            Process.setThreadPriority(priority);
         }
 
         return false;
     }
 
-    private Object download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
+    private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HTTP_OK && !isCancelled()) {
             // If the cache file is hit and the cache file's contents are equal the temp
-            // file's contents. Deletes the temp file and returns this, do not update UI.
+            // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
+                DebugUtils.__checkDebug(true, "AsyncCacheTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
-                return this;
+                cancel(false);
+                this.__checkCancel();
+                return null;
             }
 
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
-            final Object result = parseResult(params, new File(tempFile));
+            final Result result = parseResult(params, new File(tempFile));
             DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "parseResult");
-            DebugUtils.__checkError(isInvalidResult(result), "Invalid result = " + result);
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -223,5 +213,17 @@ public abstract class AsyncCacheTask<Params> extends AbsAsyncTask<Params, Object
         }
 
         return null;
+    }
+
+    private void __checkCancel() {
+        this.__checkCancelled = true;
+    }
+
+    private void __checkIsCancelled() {
+        boolean cancelled = false;
+        cancelled = this.__checkCancelled;
+        if (cancelled) {
+            throw new AssertionError("The task was cancelled publishProgress has no effect.");
+        }
     }
 }

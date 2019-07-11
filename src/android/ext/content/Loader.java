@@ -20,7 +20,7 @@ import android.util.Printer;
  * @author Garfield
  */
 @SuppressWarnings("rawtypes")
-public abstract class Loader implements Factory<Task> {
+public abstract class Loader<Key> implements Factory<Task> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
     /* package */ static final int SHUTDOWN = 2;
@@ -29,7 +29,7 @@ public abstract class Loader implements Factory<Task> {
     /* package */ final Executor mExecutor;
 
     /* package */ final Pool<Task> mTaskPool;
-    /* package */ final Map<Object, Task> mRunningTasks;
+    /* package */ final Map<Key, Task> mRunningTasks;
 
     /**
      * Constructor
@@ -38,7 +38,7 @@ public abstract class Loader implements Factory<Task> {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, maxPoolSize);
-        mRunningTasks = new HashMap<Object, Task>();
+        mRunningTasks = new HashMap<Key, Task>();
     }
 
     /**
@@ -105,7 +105,7 @@ public abstract class Loader implements Factory<Task> {
      * @see #shutdown()
      * @see #isTaskCancelled(Task)
      */
-    public final boolean cancelTask(Object key, boolean mayInterruptIfRunning) {
+    public final boolean cancelTask(Key key, boolean mayInterruptIfRunning) {
         DebugUtils.__checkUIThread("cancelTask");
         final Task task = mRunningTasks.remove(key);
         return (task != null && task.cancel(mayInterruptIfRunning));
@@ -118,7 +118,7 @@ public abstract class Loader implements Factory<Task> {
         if (size > 0) {
             final StringBuilder result = new StringBuilder(130);
             DebugUtils.dumpSummary(printer, result, 130, " Dumping Running Tasks [ size = %d ] ", size);
-            for (Entry<Object, Task> entry : mRunningTasks.entrySet()) {
+            for (Entry<Key, Task> entry : mRunningTasks.entrySet()) {
                 result.setLength(0);
                 printer.println(DebugUtils.toSimpleString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
             }

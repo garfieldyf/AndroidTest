@@ -15,7 +15,7 @@ import android.ext.util.DebugUtils;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AsyncLoader<Key, Params, Value> extends Loader {
+public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * If set the loader will be ignored the memory cache when it will be load value.
      */

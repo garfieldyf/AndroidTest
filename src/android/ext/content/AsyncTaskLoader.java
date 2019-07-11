@@ -16,7 +16,7 @@ import android.ext.util.DebugUtils;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader {
+public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     private static final int MAX_POOL_SIZE = 8;
     private WeakReference<Object> mOwner;
 

@@ -275,6 +275,7 @@ public final class Pools {
 
         @Override
         public void recycle(T element) {
+            __checkInPool(element);
             if (size < elements.length) {
                 elements[size++] = element;
             }
@@ -299,6 +300,14 @@ public final class Pools {
                 }
 
                 printer.println(result.toString());
+            }
+        }
+
+        private void __checkInPool(Object element) {
+            for (int i = 0; i < size; ++i) {
+                if (elements[i] == element) {
+                    throw new AssertionError("The " + element + " is already in the pool!");
+                }
             }
         }
     }

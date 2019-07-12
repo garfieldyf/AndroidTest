@@ -159,7 +159,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     }
 
     private Result download(Params[] params) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._act-" + Thread.currentThread().hashCode());
+        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
             final int statusCode = newDownloadRequest(params).download(tempFile.getPath(), this, null);
             return (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);

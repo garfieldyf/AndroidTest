@@ -134,7 +134,7 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
     }
 
     private Object download(Task task, Key key, LoadParams params) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._cl-" + Thread.currentThread().hashCode());
+        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
             final int statusCode = params.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
             return (statusCode == HTTP_OK && !isTaskCancelled(task) ? params.parseResult(mContext, key, tempFile, task) : null);

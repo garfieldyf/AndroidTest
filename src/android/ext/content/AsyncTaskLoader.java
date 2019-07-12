@@ -142,6 +142,29 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
 
     /**
+     * Checks the owner object is valid.
+     */
+    /* package */ final boolean checkOwner() {
+        // This loader has no owner, check OK.
+        if (mOwner == null) {
+            return true;
+        }
+
+        final Object owner = mOwner.get();
+        if (owner == null) {
+            // The owner released by the GC.
+            DebugUtils.__checkDebug(true, "AsyncTaskLoader", "The " + owner + " released by the GC, do not update UI.");
+            return false;
+        } else if (owner instanceof Activity) {
+            final Activity activity = (Activity)owner;
+            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "AsyncTaskLoader", "The " + activity + " has been destroyed, do not update UI.");
+            return (!activity.isFinishing() && !activity.isDestroyed());
+        } else {
+            return true;
+        }
+    }
+
+    /**
      * Retrieves a new {@link Task} from the task pool.
      * Allows us to avoid allocating new tasks in many cases.
      */

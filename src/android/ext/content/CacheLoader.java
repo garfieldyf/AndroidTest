@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AsyncCacheLoader.LoadParams;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
@@ -15,11 +14,11 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncCacheLoader</tt> allows to load the resource on a background thread
+ * Class <tt>CacheLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * public static class JsonLoadParams extends LoadParams&lt;String&gt; {
+ * public static class JsonLoadParams implements LoadParams&lt;String&gt; {
  *     {@code @Override}
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
@@ -50,49 +49,27 @@ import android.util.Log;
  *     }
  * }
  *
- * private static class JsonLoader extends AsyncCacheLoader&lt;String&gt; {
- *     public JsonLoader(Activity ownerActivity, Executor executor) {
- *         super(ownerActivity, executor);
- *     }
+ * private CacheLoader&lt;String&gt; mLoader;
  *
- *     {@code @Override}
- *     protected void onLoadComplete(String url, LoadParams&lt;String&gt;[] params, Object result) {
- *         final Activity activity = getOwnerActivity();
- *         if (activity == null) {
- *             // The owner activity has been destroyed or release by the GC.
- *             return;
- *         }
- *
- *         // Hide loading UI, if need.
- *         if (result != null) {
- *             // Loading succeeded, update UI.
- *         } else {
- *             // Loading failed, show error or empty UI.
- *         }
- *     }
- * }
- *
- * private JsonLoader mLoader;
- *
- * mLoader = new JsonLoader(activity, executor);
- * mLoader.load(url, new JsonLoadParams());</pre>
+ * mLoader = new CacheLoader&lt;String&gt;(activity, executor);
+ * mLoader.load(url, new JsonLoadParams(), listener);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadParams<Key>, Object> {
+public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
     /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
-    private final ConcurrentHashMap<Task, Boolean> __checkMap = new ConcurrentHashMap<Task, Boolean>();
+    private final ConcurrentHashMap<Task, Boolean> __checkTasks = new ConcurrentHashMap<Task, Boolean>();
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #AsyncCacheLoader(Activity, Executor)
+     * @see #CacheLoader(Activity, Executor)
      */
-    public AsyncCacheLoader(Context context, Executor executor) {
+    public CacheLoader(Context context, Executor executor) {
         super(executor);
         mContext = context.getApplicationContext();
     }
@@ -101,28 +78,33 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
      * Constructor
      * @param ownerActivity The owner <tt>Activity</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #AsyncCacheLoader(Context, Executor)
+     * @see #CacheLoader(Context, Executor)
      */
-    public AsyncCacheLoader(Activity ownerActivity, Executor executor) {
+    public CacheLoader(Activity ownerActivity, Executor executor) {
         super(executor, ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
 
-    @Override
-    protected void onProgressUpdate(Key key, LoadParams<Key>[] params, Object[] values) {
-        onLoadComplete(key, params, values[0]);
+    /**
+     * Equivalent to calling <tt>load(key, new Object[] { params, listener })</tt>.
+     * @param key The identifier of the load task.
+     * @param params The parameters of the load task.
+     * @param listener The {@link OnLoadCompleteListener} to receive the load is complete.
+     */
+    public final void load(Key key, LoadParams<Key> params, OnLoadCompleteListener<Key> listener) {
+        load(key, new Object[] { params, listener });
     }
 
     @Override
-    protected Object loadInBackground(Task<?, ?> task, Key key, LoadParams<Key>[] loadParams) {
+    protected Object loadInBackground(Task<?, ?> task, Key key, Object[] loadParams) {
         Object result = null;
         try {
-            final LoadParams params = loadParams[0];
+            final LoadParams params = (LoadParams)loadParams[0];
             final File cacheFile = params.getCacheFile(mContext, key);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(task, key, params);
-                DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "download");
+                DebugUtils.__checkStopMethodTracing("CacheLoader", "download");
             } else {
                 final boolean hitCache = loadFromCache(task, key, params, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -133,12 +115,26 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
-        this.__checkMap.remove(task);
+        this.__checkTasks.remove(task);
         return result;
     }
 
+    @Override
+    protected void onLoadComplete(Key key, Object[] params, Object result) {
+        if (checkOwner()) {
+            ((OnLoadCompleteListener<Key>)params[1]).onLoadComplete(key, params, result);
+        }
+    }
+
+    @Override
+    protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
+        if (checkOwner()) {
+            ((OnLoadCompleteListener<Key>)params[1]).onLoadComplete(key, params, values[0]);
+        }
+    }
+
     private Object download(Task task, Key key, LoadParams params) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._acl-" + Thread.currentThread().hashCode());
+        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), "._cl-" + Thread.currentThread().hashCode());
         try {
             final int statusCode = params.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
             return (statusCode == HTTP_OK && !isTaskCancelled(task) ? params.parseResult(mContext, key, tempFile, task) : null);
@@ -153,7 +149,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("CacheLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 this.__checkIsCancelled(task);
@@ -176,7 +172,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and returns null, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "AsyncCacheLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "CacheLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
                 this.__checkCancel(task);
@@ -186,7 +182,7 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = params.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("AsyncCacheLoader", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CacheLoader", "parseResult");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -197,23 +193,24 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
     }
 
     private void __checkCancel(Task task) {
-        this.__checkMap.put(task, true);
+        this.__checkTasks.put(task, true);
     }
 
     private void __checkIsCancelled(Task task) {
         Boolean cancelled = null;
-        cancelled = this.__checkMap.get(task);
+        cancelled = this.__checkTasks.get(task);
         if (cancelled != null && cancelled.booleanValue()) {
-            throw new AssertionError("The task was cancelled setProgress has no effect.");
+            throw new AssertionError("The task was cancelled, call setProgress has no effect.");
         }
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link AsyncCacheLoader} to load resource.
+     * Class <tt>LoadParams</tt> used to {@link CacheLoader} to load resource.
      */
     public static interface LoadParams<Key> {
         /**
-         * Returns the absolute path of the cache file on the filesystem.
+         * Called on a background thread to returns the absolute path of the
+         * cache file on the filesystem.
          * @param context The <tt>Context</tt>.
          * @param key The key, passed earlier by {@link #load}.
          * @return The path of the cache file, or <tt>null</tt> if no cache file.
@@ -221,7 +218,8 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
         File getCacheFile(Context context, Key key);
 
         /**
-         * Returns a new download request with the specified <em>key</em>.
+         * Called on a background thread to returns a new download request
+         * with the specified <em>key</em>.
          * @param context The <tt>Context</tt>.
          * @param key The key, passed earlier by {@link #load}.
          * @return The {@link DownloadRequest} object.
@@ -239,5 +237,18 @@ public abstract class AsyncCacheLoader<Key> extends AsyncTaskLoader<Key, LoadPar
          * @throws Exception if the data can not be parse.
          */
         Object parseResult(Context context, Key key, File cacheFile, Cancelable cancelable) throws Exception;
+    }
+
+    /**
+     * Callback interface when a {@link CacheLoader} has finished loading its data.
+     */
+    public static interface OnLoadCompleteListener<Key> {
+        /**
+         * Called on the thread when the load is complete.
+         * @param key The key, passed earlier by {@link #load}.
+         * @param params The parameters, passed earlier by {@link #load}.
+         * @param result A result or <tt>null</tt> of the load.
+         */
+        void onLoadComplete(Key key, Object[] params, Object result);
     }
 }

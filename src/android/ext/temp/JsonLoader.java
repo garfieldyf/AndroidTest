@@ -3,9 +3,9 @@ package android.ext.temp;
 import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AsyncCacheLoader;
+import android.ext.content.CacheLoader.LoadParams;
+import android.ext.content.CacheLoader.OnLoadCompleteListener;
 import android.ext.net.DownloadPostRequest;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
@@ -17,31 +17,24 @@ import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
-public final class JsonLoader extends AsyncCacheLoader<String> {
-    public JsonLoader(Activity ownerActivity) {
-        super(ownerActivity, MainApplication.sInstance.getExecutor());
-    }
+public final class JsonLoader {
 
-    @Override
-    protected void onLoadComplete(String key, LoadParams<String>[] params, Object result) {
-        final Activity activity = getOwnerActivity();
-        if (activity == null) {
-            // The owner activity has been destroyed or release by the GC.
-            return;
-        }
-
-        if (result != null) {
-            Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName((JSONObject)result));
-            // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
-        } else {
-            Log.i("abc", "JsonLoader - Load Failed, Show error UI.");
-        }
-    }
-
-    private static String getName(JSONObject result) {
+    static String getName(JSONObject result) {
         final JSONArray rows = JsonUtils.optJSONArray(JsonUtils.optJSONObject(result, "data"), "rows");
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
+
+    public static final OnLoadCompleteListener<String> sListener = new OnLoadCompleteListener<String>() {
+        @Override
+        public void onLoadComplete(String url, Object[] params, Object result) {
+            if (result != null) {
+                Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName((JSONObject)result));
+                // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
+            } else {
+                Log.i("abc", "JsonLoader - Load Failed, Show error UI.");
+            }
+        }
+    };
 
     public static class URLLoadParams implements LoadParams<String> {
         @Override
@@ -78,7 +71,7 @@ public final class JsonLoader extends AsyncCacheLoader<String> {
         @Override
         public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
-            final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, cancelable);
+            final JSONObject result = JsonUtils.parse(context, uri, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }
     }
@@ -101,7 +94,7 @@ public final class JsonLoader extends AsyncCacheLoader<String> {
 
         @Override
         public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
-            final JSONObject result = JsonUtils.parse(MainApplication.sInstance, cacheFile, cancelable);
+            final JSONObject result = JsonUtils.parse(context, cacheFile, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }
     }

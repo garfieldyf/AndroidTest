@@ -100,7 +100,8 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     }
 
     /**
-     * Returns the absolute path of the cache file on the filesystem.
+     * Called on a background thread to returns the absolute path of the cache
+     * file on the filesystem.
      * <p>Subclasses should override this method to returns the cache
      * file path. The default implementation returns <tt>null</tt>.</p>
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
@@ -111,7 +112,8 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     }
 
     /**
-     * Returns a new download request with the specified <em>params</em>.
+     * Called on a background thread to returns a new download request with the
+     * specified <em>params</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @return The instance of {@link DownloadRequest}.
      * @throws Exception if an error occurs while opening the connection.
@@ -223,7 +225,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
         boolean cancelled = false;
         cancelled = this.__checkCancelled;
         if (cancelled) {
-            throw new AssertionError("The task was cancelled publishProgress has no effect.");
+            throw new AssertionError("The task was cancelled, call publishProgress has no effect.");
         }
     }
 }

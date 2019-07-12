@@ -91,27 +91,27 @@ public final class Pages {
 
     /**
      * Returns a new page cache instance.
-     * @param maxPages The maximum number of pages to allow in the page cache. Pass
-     * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
+     * @param maxPageCount The maximum number of pages to allow in the page cache.
+     * Pass <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link Page} {@link Cache} instance.
      * @see #newResourcePageCache(int)
      * @see MapCache
      * @see SimpleLruCache
      */
-    public static <E> Cache<Integer, Page<E>> newPageCache(int maxPages) {
-        return (maxPages > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPages) : new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)));
+    public static <E> Cache<Integer, Page<E>> newPageCache(int maxPageCount) {
+        return (maxPageCount > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPageCount) : new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)));
     }
 
     /**
      * Returns a new resource page cache instance.
-     * @param maxPages The maximum number of pages to allow in the page cache. Pass
-     * <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
+     * @param maxPageCount The maximum number of pages to allow in the page cache.
+     * Pass <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
      * @return A new {@link ResourcePage} {@link Cache} instance.
      * @see ResourcePage
      * @see #newPageCache(int)
      */
-    public static <E> Cache<Integer, ResourcePage<E>> newResourcePageCache(int maxPages) {
-        return (maxPages > 0 ? new LruResourcePageCache<E>(maxPages) : new ResourcePageCache<E>(8));
+    public static <E> Cache<Integer, ResourcePage<E>> newResourcePageCache(int maxPageCount) {
+        return (maxPageCount > 0 ? new LruResourcePageCache<E>(maxPageCount) : new ResourcePageCache<E>(8));
     }
 
     /**

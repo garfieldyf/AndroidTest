@@ -16,6 +16,10 @@ import android.util.Log;
 /**
  * Class <tt>CacheLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
+ * <h3>CacheLoader's generic types</h3>
+ * <p>The two types used by a loader are the following:</p>
+ * <ol><li><tt>Key</tt>, The loader's key type.</li>
+ * <li><tt>Result</tt>, The load result type.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * public static class JsonLoadParams implements LoadParams&lt;String&gt; {
@@ -31,14 +35,14 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     public Object parseResult(Context context, String url, File cacheFile, Cancelable cancelable) throws Exception {
- *         if (!cacheFile.exists()) {
- *             // If the cache file not exists, return null or parse the JSON data from the "assets" file.
+ *     public Object parseResult(Context context, String url, File file, Cancelable cancelable) throws Exception {
+ *         if (!file.exists()) {
+ *             // If the file not exists, return null or parse the JSON data from the "assets" file.
  *             return null;
  *         }
  *
- *         // Parse the JSON data ... ...
- *         final JSONObject result = JsonUtils.parse(context, cacheFile, cancelable);
+ *         // Parse the file's content to a JSON object.
+ *         final JSONObject result = JsonUtils.parse(context, file, cancelable);
  *
  *         // Check the result is valid.
  *         if (result != null && result.optInt("retCode") == 200) {
@@ -56,7 +60,7 @@ import android.util.Log;
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
+public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -91,12 +95,12 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
      * @param params The parameters of the load task.
      * @param listener The {@link OnLoadCompleteListener} to receive the load is complete.
      */
-    public final void load(Key key, LoadParams<Key> params, OnLoadCompleteListener<Key> listener) {
+    public final void load(Key key, LoadParams<Key, Result> params, OnLoadCompleteListener<Key, Result> listener) {
         load(key, new Object[] { params, listener });
     }
 
     @Override
-    protected Object loadInBackground(Task<?, ?> task, Key key, Object[] loadParams) {
+    protected Result loadInBackground(Task<?, ?> task, Key key, Object[] loadParams) {
         Object result = null;
         try {
             final LoadParams params = (LoadParams)loadParams[0];
@@ -116,24 +120,24 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
         }
 
         this.__checkTasks.remove(task);
-        return result;
+        return (Result)result;
     }
 
     @Override
-    protected void onLoadComplete(Key key, Object[] params, Object result) {
+    protected void onLoadComplete(Key key, Object[] params, Result result) {
         if (checkOwner()) {
-            ((OnLoadCompleteListener<Key>)params[1]).onLoadComplete(key, params, result);
+            ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
         }
     }
 
     @Override
     protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
         if (checkOwner()) {
-            ((OnLoadCompleteListener<Key>)params[1]).onLoadComplete(key, params, values[0]);
+            ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
         }
     }
 
-    private Object download(Task task, Key key, LoadParams params) throws Exception {
+    private Object download(Task task, Object key, LoadParams params) throws Exception {
         final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
             final int statusCode = params.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
@@ -143,7 +147,7 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
         }
     }
 
-    private boolean loadFromCache(Task task, Key key, LoadParams params, File cacheFile) {
+    private boolean loadFromCache(Task task, Object key, LoadParams params, File cacheFile) {
         final int priority = Process.getThreadPriority(Process.myTid());
         try {
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
@@ -165,7 +169,7 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
         return false;
     }
 
-    private Object download(Task task, Key key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
+    private Object download(Task task, Object key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = params.newDownloadRequest(mContext, key).download(tempFile, task, null);
         if (statusCode == HTTP_OK && !isTaskCancelled(task)) {
@@ -207,7 +211,7 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
     /**
      * Class <tt>LoadParams</tt> used to {@link CacheLoader} to load resource.
      */
-    public static interface LoadParams<Key> {
+    public static interface LoadParams<Key, Result> {
         /**
          * Called on a background thread to returns the absolute path of the
          * cache file on the filesystem.
@@ -231,24 +235,24 @@ public class CacheLoader<Key> extends AsyncTaskLoader<Key, Object, Object> {
          * Called on a background thread to parse the data from the cache file.
          * @param context The <tt>Context</tt>.
          * @param key The key, passed earlier by {@link #load}.
-         * @param cacheFile The cache file to parse.
+         * @param file The file's content to parse.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled.
          * @return A result or <tt>null</tt>, defined by the subclass.
          * @throws Exception if the data can not be parse.
          */
-        Object parseResult(Context context, Key key, File cacheFile, Cancelable cancelable) throws Exception;
+        Result parseResult(Context context, Key key, File file, Cancelable cancelable) throws Exception;
     }
 
     /**
      * Callback interface when a {@link CacheLoader} has finished loading its data.
      */
-    public static interface OnLoadCompleteListener<Key> {
+    public static interface OnLoadCompleteListener<Key, Result> {
         /**
          * Called on the thread when the load is complete.
          * @param key The key, passed earlier by {@link #load}.
          * @param params The parameters, passed earlier by {@link #load}.
          * @param result A result or <tt>null</tt> of the load.
          */
-        void onLoadComplete(Key key, Object[] params, Object result);
+        void onLoadComplete(Key key, Object[] params, Result result);
     }
 }

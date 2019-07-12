@@ -37,14 +37,14 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected JSONObject parseResult(String[] urls, File cacheFile) throws Exception {
- *         if (!cacheFile.exists()) {
- *             // If the cache file not exists, return null or parse the JSON data from the "assets" file.
+ *     protected JSONObject parseResult(String[] urls, File file) throws Exception {
+ *         if (!file.exists()) {
+ *             // If the file not exists, return null or parse the JSON data from the "assets" file.
  *             return null;
  *         }
  *
- *         // Parse the JSON data ... ...
- *         final JSONObject result = JsonUtils.parse(mContext, cacheFile, this);
+ *         // Parse the file's content to a JSON object.
+ *         final JSONObject result = JsonUtils.parse(mContext, file, this);
  *
  *         // Check the result is valid.
  *         if (result != null && result.optInt("retCode") == 200) {
@@ -112,6 +112,15 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     }
 
     /**
+     * Called on a background thread to parse the data from the cache file.
+     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
+     * @param file The file's content to parse.
+     * @return A result or <tt>null</tt>, defined by the subclass of this task.
+     * @throws Exception if the data can not be parse.
+     */
+    protected abstract Result parseResult(Params[] params, File file) throws Exception;
+
+    /**
      * Called on a background thread to returns a new download request with the
      * specified <em>params</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
@@ -119,15 +128,6 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
      * @throws Exception if an error occurs while opening the connection.
      */
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
-
-    /**
-     * Called on a background thread to parse the data from the cache file.
-     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param cacheFile The cache file to parse.
-     * @return A result or <tt>null</tt>, defined by the subclass of this task.
-     * @throws Exception if the data can not be parse.
-     */
-    protected abstract Result parseResult(Params[] params, File cacheFile) throws Exception;
 
     @Override
     @SuppressWarnings("unchecked")

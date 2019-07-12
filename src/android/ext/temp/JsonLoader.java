@@ -24,11 +24,11 @@ public final class JsonLoader {
         return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
     }
 
-    public static final OnLoadCompleteListener<String> sListener = new OnLoadCompleteListener<String>() {
+    public static final OnLoadCompleteListener<String, JSONObject> sListener = new OnLoadCompleteListener<String, JSONObject>() {
         @Override
-        public void onLoadComplete(String url, Object[] params, Object result) {
+        public void onLoadComplete(String url, Object[] params, JSONObject result) {
             if (result != null) {
-                Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName((JSONObject)result));
+                Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName(result));
                 // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();
             } else {
                 Log.i("abc", "JsonLoader - Load Failed, Show error UI.");
@@ -36,7 +36,7 @@ public final class JsonLoader {
         }
     };
 
-    public static class URLLoadParams implements LoadParams<String> {
+    public static class URLLoadParams implements LoadParams<String, JSONObject> {
         @Override
         public File getCacheFile(Context context, String key) {
             return null;
@@ -48,7 +48,7 @@ public final class JsonLoader {
         }
 
         @Override
-        public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
             return JsonUtils.parse(context, cacheFile, cancelable);
         }
     }
@@ -69,7 +69,7 @@ public final class JsonLoader {
         }
 
         @Override
-        public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
             final JSONObject result = JsonUtils.parse(context, uri, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
@@ -93,7 +93,7 @@ public final class JsonLoader {
         }
 
         @Override
-        public Object parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
             final JSONObject result = JsonUtils.parse(context, cacheFile, cancelable);
             return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }

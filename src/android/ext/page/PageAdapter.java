@@ -35,7 +35,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Constructor
-     * @param maxPages The maximum number of pages to allow in the page cache.
+     * @param maxPageCount The maximum number of pages to allow in the page cache.
      * Pass <tt>0</tt> indicates the page cache is the <b>unlimited-size</b> cache.
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
@@ -45,8 +45,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #PageAdapter(Cache, int, int, int)
      * @see Pages#newPageCache(int)
      */
-    public PageAdapter(int maxPages, int initialSize, int pageSize, int prefetchDistance) {
-        this(Pages.<E>newPageCache(maxPages), initialSize, pageSize, prefetchDistance);
+    public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
+        this(Pages.<E>newPageCache(maxPageCount), initialSize, pageSize, prefetchDistance);
     }
 
     /**

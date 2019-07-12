@@ -12,9 +12,9 @@ import android.util.Log;
 import com.tencent.test.MainApplication;
 
 public class JsonTask extends AsyncCacheTask<String, JSONObject> {
-    private final LoadParams<String> mLoadParams;
+    private final LoadParams<String, JSONObject> mLoadParams;
 
-    public JsonTask(Activity ownerActivity, LoadParams<String> params) {
+    public JsonTask(Activity ownerActivity, LoadParams<String, JSONObject> params) {
         super(ownerActivity);
         mLoadParams = params;
     }

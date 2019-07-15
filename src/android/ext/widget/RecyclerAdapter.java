@@ -19,18 +19,8 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
      */
     public static final int FLAG_ITEM_FOCUSABLE = 0x001;
 
-    /**
-     * Indicates the <tt>RecyclerView</tt> can receive the focus.
-     */
-    public static final int FLAG_VIEW_FOCUSABLE = FocusManager.FLAG_VIEW_FOCUSABLE;
-
-    /**
-     * Indicates the <tt>RecyclerView</tt> has the drawing order flag.
-     */
-    public static final int FLAG_CHILD_DRAWING_ORDER = FocusManager.FLAG_CHILD_DRAWING_ORDER;
-
+    /* package */ final FocusManager mFocusManager;
     /* package */ final AnimatorManager mAnimatorManager;
-    /* package */ final FocusManager<RecyclerView> mFocusManager;
 
     /**
      * Constructor
@@ -53,7 +43,7 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
      */
     public RecyclerAdapter(RecyclerView view, AnimatorManager animatorManager, int flags) {
         mAnimatorManager = animatorManager;
-        mFocusManager = new FocusManager<RecyclerView>(view, flags);
+        mFocusManager = new FocusManager(view);
     }
 
     /**
@@ -61,14 +51,14 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
      * @return The <tt>RecyclerView</tt>.
      */
     public final RecyclerView getRecyclerView() {
-        return mFocusManager.mRootView;
+        return mFocusManager.getRootView();
     }
 
     /**
      * Returns the {@link FocusManager} associated with this adapter.
      * @return The <tt>FocusManager</tt>.
      */
-    public final FocusManager<RecyclerView> getFocusManager() {
+    public final FocusManager getFocusManager() {
         return mFocusManager;
     }
 
@@ -90,10 +80,10 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         final VH viewHolder = onCreateViewHolder(LayoutInflater.from(parent.getContext()), parent, viewType);
-        if ((mFocusManager.mFlags & FLAG_ITEM_FOCUSABLE) != 0) {
+        //if ((mFocusManager.mFlags & FLAG_ITEM_FOCUSABLE) != 0) {
             viewHolder.itemView.setFocusable(true);
             viewHolder.itemView.setOnFocusChangeListener(this);
-        }
+        //}
 
         return viewHolder;
     }
@@ -101,8 +91,12 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
     @Override
     @SuppressWarnings("unchecked")
     public void onFocusChange(View view, boolean hasFocus) {
-        mFocusManager.onChildFocusChange(view, hasFocus, mAnimatorManager);
-        onItemFocusChange((VH)mFocusManager.mRootView.getChildViewHolder(view), hasFocus);
+        if (hasFocus) {
+            mFocusManager.setFocusedChild(view);
+        }
+
+        final RecyclerView rootView = mFocusManager.getRootView();
+        onItemFocusChange((VH)rootView.getChildViewHolder(view), hasFocus);
     }
 
     /**

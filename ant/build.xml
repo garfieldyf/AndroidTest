@@ -37,7 +37,6 @@
                 <exclude name="**/temp/**" />
                 <exclude name="**/focus/**" />
                 <exclude name="**/reference/**" />
-                <exclude name="**/widget/FocusManager.java" />
                 <exclude name="**/widget/RecyclerAdapter.java" />
                 <exclude name="**/widget/ExpandableCursorAdapter.java" />
                 <exclude name="**/widget/ExpandableCursorTreeAdapter.java" />

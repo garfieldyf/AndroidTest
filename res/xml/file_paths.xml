@@ -7,5 +7,5 @@
     <cache-path name="images" path="images" />
 
     <!-- Environment.getExternalStorageDirectory() -->
-    <external-path name="docs" path="docs" />
+    <external-path name="apks" path="apks" />
 </paths>

@@ -2,7 +2,6 @@ package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.content.Context;
@@ -65,7 +64,6 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
-    private final ConcurrentHashMap<Task, Boolean> __checkTasks = new ConcurrentHashMap<Task, Boolean>();
 
     /**
      * Constructor
@@ -119,20 +117,19 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
-        this.__checkTasks.remove(task);
         return (Result)result;
     }
 
     @Override
     protected void onLoadComplete(Key key, Object[] params, Result result) {
-        if (isOwnerValid()) {
+        if (canNotifyCallback()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
         }
     }
 
     @Override
     protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
-        if (isOwnerValid()) {
+        if (canNotifyCallback()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
         }
     }
@@ -156,7 +153,6 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             DebugUtils.__checkStopMethodTracing("CacheLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
-                this.__checkIsCancelled(task);
                 task.setProgress(result);
                 return true;
             }
@@ -179,7 +175,6 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
                 DebugUtils.__checkDebug(true, "CacheLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
-                this.__checkCancel(task);
                 return null;
             }
 
@@ -194,18 +189,6 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
         }
 
         return null;
-    }
-
-    private void __checkCancel(Task task) {
-        this.__checkTasks.put(task, true);
-    }
-
-    private void __checkIsCancelled(Task task) {
-        Boolean cancelled = null;
-        cancelled = this.__checkTasks.get(task);
-        if (cancelled != null && cancelled.booleanValue()) {
-            throw new AssertionError("The task was cancelled, call setProgress has no effect.");
-        }
     }
 
     /**

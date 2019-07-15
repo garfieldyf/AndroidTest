@@ -78,7 +78,6 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
-    private volatile boolean __checkCancelled;
 
     /**
      * Constructor
@@ -177,7 +176,6 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "loadFromCache");
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
-                this.__checkIsCancelled();
                 publishProgress(result);
                 return true;
             }
@@ -200,7 +198,6 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
                 DebugUtils.__checkDebug(true, "AsyncCacheTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 cancel(false);
-                this.__checkCancel();
                 return null;
             }
 
@@ -215,17 +212,5 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
         }
 
         return null;
-    }
-
-    private void __checkCancel() {
-        this.__checkCancelled = true;
-    }
-
-    private void __checkIsCancelled() {
-        boolean cancelled = false;
-        cancelled = this.__checkCancelled;
-        if (cancelled) {
-            throw new AssertionError("The task was cancelled, call publishProgress has no effect.");
-        }
     }
 }

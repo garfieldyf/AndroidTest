@@ -155,29 +155,6 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
 
     /**
-     * Checks the owner object is valid.
-     */
-    /* package */ final boolean isOwnerValid() {
-        // This loader has no owner, validate OK.
-        if (mOwner == null) {
-            return true;
-        }
-
-        final Object owner = mOwner.get();
-        if (owner == null) {
-            // The owner released by the GC.
-            DebugUtils.__checkDebug(true, "AsyncTaskLoader", "The " + owner + " released by the GC.");
-            return false;
-        } else if (owner instanceof Activity) {
-            final Activity activity = (Activity)owner;
-            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "AsyncTaskLoader", "The " + activity + " has been destroyed.");
-            return (!activity.isFinishing() && !activity.isDestroyed());
-        } else {
-            return true;
-        }
-    }
-
-    /**
      * Retrieves a new {@link Task} from the task pool.
      * Allows us to avoid allocating new tasks in many cases.
      */
@@ -186,6 +163,25 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
         task.mKey = key;
         task.mParams = params;
         return task;
+    }
+
+    /**
+     * Returns whether this loader can notify the callback.
+     */
+    /* package */ final boolean canNotifyCallback() {
+        if (mOwner != null) {
+            final Object owner = mOwner.get();
+            if (owner == null) {
+                DebugUtils.__checkDebug(true, "AsyncTaskLoader", "The " + owner + " released by the GC.");
+                return false;
+            } else if (owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "AsyncTaskLoader", "The " + activity + " has been destroyed.");
+                return (!activity.isFinishing() && !activity.isDestroyed());
+            }
+        }
+
+        return true;
     }
 
     /**

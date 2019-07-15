@@ -2,6 +2,7 @@ package android.ext.graphics.drawable;
 
 import android.annotation.TargetApi;
 import android.content.res.Resources;
+import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.RotateDrawable;
@@ -83,6 +84,8 @@ public class AnimatedRotateDrawable extends RotateDrawable {
     @Override
     public void draw(Canvas canvas) {
         super.draw(canvas);
-        setLevel((getLevel() + mIncrement) % 10000);
+        final int level = (getLevel() + mIncrement) % 10000;
+        DebugUtils.__checkDebug(true, "AnimatedRotateDrawable", "The current level = " + level);
+        setLevel(level);
     }
 }

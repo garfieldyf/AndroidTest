@@ -54,6 +54,7 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
+                onStartLoading(key, params);
                 final LoadTask newTask = obtain(key, params);
                 mRunningTasks.put(key, newTask);
                 mExecutor.execute(newTask);
@@ -96,6 +97,18 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     @Override
     public final Task newInstance() {
         return new LoadTask();
+    }
+
+    /**
+     * Called on the UI thread before {@link #loadInBackground}. <p>The default
+     * implementation do nothing. If you write your own implementation, do not
+     * call <tt>super.onStartLoading()</tt>.</p>
+     * @param key The key, passed earlier by {@link #load}.
+     * @param params The parameters, passed earlier by {@link #load}.
+     * @see #onLoadComplete(Key, Params[], Result)
+     * @see #loadInBackground(Task, Key, Params[])
+     */
+    protected void onStartLoading(Key key, Params[] params) {
     }
 
     /**
@@ -144,8 +157,8 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     /**
      * Checks the owner object is valid.
      */
-    /* package */ final boolean checkOwner() {
-        // This loader has no owner, check OK.
+    /* package */ final boolean isOwnerValid() {
+        // This loader has no owner, validate OK.
         if (mOwner == null) {
             return true;
         }
@@ -153,11 +166,11 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
         final Object owner = mOwner.get();
         if (owner == null) {
             // The owner released by the GC.
-            DebugUtils.__checkDebug(true, "AsyncTaskLoader", "The " + owner + " released by the GC, do not update UI.");
+            DebugUtils.__checkDebug(true, "AsyncTaskLoader", "The " + owner + " released by the GC.");
             return false;
         } else if (owner instanceof Activity) {
             final Activity activity = (Activity)owner;
-            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "AsyncTaskLoader", "The " + activity + " has been destroyed, do not update UI.");
+            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "AsyncTaskLoader", "The " + activity + " has been destroyed.");
             return (!activity.isFinishing() && !activity.isDestroyed());
         } else {
             return true;

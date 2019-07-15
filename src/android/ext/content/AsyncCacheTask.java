@@ -195,7 +195,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HTTP_OK && !isCancelled()) {
             // If the cache file is hit and the cache file's contents are equal the temp
-            // file's contents. Deletes the temp file and returns null, do not update UI.
+            // file's contents. Deletes the temp file and cancel this task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 DebugUtils.__checkDebug(true, "AsyncCacheTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);

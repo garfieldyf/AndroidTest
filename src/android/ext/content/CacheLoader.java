@@ -125,14 +125,14 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
 
     @Override
     protected void onLoadComplete(Key key, Object[] params, Result result) {
-        if (checkOwner()) {
+        if (isOwnerValid()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
         }
     }
 
     @Override
     protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
-        if (checkOwner()) {
+        if (isOwnerValid()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
         }
     }
@@ -174,7 +174,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
         final int statusCode  = params.newDownloadRequest(mContext, key).download(tempFile, task, null);
         if (statusCode == HTTP_OK && !isTaskCancelled(task)) {
             // If the cache file is hit and the cache file's contents are equal the temp
-            // file's contents. Deletes the temp file and returns null, do not update UI.
+            // file's contents. Deletes the temp file and cancel the task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
                 DebugUtils.__checkDebug(true, "CacheLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);

@@ -88,29 +88,29 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
     }
 
     /**
-     * Equivalent to calling <tt>load(key, new Object[] { params, listener })</tt>.
+     * Equivalent to calling <tt>load(key, new Object[] { loadParams, listener })</tt>.
      * @param key The identifier of the load task.
-     * @param params The parameters of the load task.
+     * @param loadParams The parameters of the load task.
      * @param listener The {@link OnLoadCompleteListener} to receive the load is complete.
      */
-    public final void load(Key key, LoadParams<Key, Result> params, OnLoadCompleteListener<Key, Result> listener) {
-        load(key, new Object[] { params, listener });
+    public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener) {
+        load(key, new Object[] { loadParams, listener });
     }
 
     @Override
-    protected Result loadInBackground(Task<?, ?> task, Key key, Object[] loadParams) {
+    protected Result loadInBackground(Task<?, ?> task, Key key, Object[] params) {
         Object result = null;
         try {
-            final LoadParams params = (LoadParams)loadParams[0];
-            final File cacheFile = params.getCacheFile(mContext, key);
+            final LoadParams loadParams = (LoadParams)params[0];
+            final File cacheFile = loadParams.getCacheFile(mContext, key);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
-                result = download(task, key, params);
+                result = download(task, key, loadParams);
                 DebugUtils.__checkStopMethodTracing("CacheLoader", "download");
             } else {
-                final boolean hitCache = loadFromCache(task, key, params, cacheFile);
+                final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
-                    result = download(task, key, params, cacheFile.getPath(), hitCache);
+                    result = download(task, key, loadParams, cacheFile.getPath(), hitCache);
                 }
             }
         } catch (Exception e) {
@@ -134,22 +134,22 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
         }
     }
 
-    private Object download(Task task, Object key, LoadParams params) throws Exception {
+    private Object download(Task task, Object key, LoadParams loadParams) throws Exception {
         final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
-            final int statusCode = params.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
-            return (statusCode == HTTP_OK && !isTaskCancelled(task) ? params.parseResult(mContext, key, tempFile, task) : null);
+            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
+            return (statusCode == HTTP_OK && !isTaskCancelled(task) ? loadParams.parseResult(mContext, key, tempFile, task) : null);
         } finally {
             tempFile.delete();
         }
     }
 
-    private boolean loadFromCache(Task task, Object key, LoadParams params, File cacheFile) {
+    private boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {
         final int priority = Process.getThreadPriority(Process.myTid());
         try {
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
-            final Object result = params.parseResult(mContext, key, cacheFile, task);
+            final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing("CacheLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
@@ -165,9 +165,9 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
         return false;
     }
 
-    private Object download(Task task, Object key, LoadParams params, String cacheFile, boolean hitCache) throws Exception {
+    private Object download(Task task, Object key, LoadParams loadParams, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = params.newDownloadRequest(mContext, key).download(tempFile, task, null);
+        final int statusCode  = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
         if (statusCode == HTTP_OK && !isTaskCancelled(task)) {
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and cancel the task, do not update UI.
@@ -180,7 +180,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
 
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
-            final Object result = params.parseResult(mContext, key, new File(tempFile), task);
+            final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
             DebugUtils.__checkStopMethodTracing("CacheLoader", "parseResult");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);

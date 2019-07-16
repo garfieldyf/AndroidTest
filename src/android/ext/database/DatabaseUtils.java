@@ -36,10 +36,10 @@ import android.util.Printer;
  */
 public final class DatabaseUtils {
     /**
-     * Returns the numbers of rows in the <tt>Cursor</tt>,
+     * Returns the number of rows in the <tt>Cursor</tt>,
      * handling <tt>null Cursor</tt>.
      * @param cursor The <tt>Cursor</tt>.
-     * @return The numbers of rows in the <tt>Cursor</tt>.
+     * @return The number of rows in the <tt>Cursor</tt>.
      */
     public static int getCount(Cursor cursor) {
         return (cursor != null ? cursor.getCount() : 0);

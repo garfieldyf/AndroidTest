@@ -158,6 +158,14 @@ public final class ProcessUtils {
         }
 
         /**
+         * Returns the number of the crash infos in the table.
+         * @return The number of the crash infos.
+         */
+        public final int getCount() {
+            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(_date) FROM crashes", (Object[])null).intValue();
+        }
+
+        /**
          * Returns the crash infos from table which the crash time before the specified <em>date</em>.
          * @param date The date to query in milliseconds.
          * @return The {@link Cursor}.

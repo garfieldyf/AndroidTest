@@ -313,9 +313,14 @@ public class DownloadRequest {
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
             final int statusCode = connect(tempBuffer);
-            final boolean httpPartial = (statusCode == HTTP_PARTIAL);
-            if (statusCode == HTTP_OK || httpPartial) {
-                downloadImpl(filename, cancelable, tempBuffer, httpPartial);
+            switch (statusCode) {
+            case HTTP_OK:
+                downloadImpl(filename, cancelable, tempBuffer, false);
+                break;
+
+            case HTTP_PARTIAL:
+                downloadImpl(filename, cancelable, tempBuffer, true);
+                break;
             }
 
             return statusCode;

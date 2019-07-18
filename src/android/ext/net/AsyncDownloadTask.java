@@ -118,9 +118,14 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @see #onDownload(URLConnection, int, Params[])
      */
     protected final void download(String filename, int statusCode, byte[] tempBuffer) throws IOException {
-        final boolean httpPartial = (statusCode == HTTP_PARTIAL);
-        if (statusCode == HTTP_OK || httpPartial) {
-            mRequest.downloadImpl(filename, this, tempBuffer, httpPartial);
+        switch (statusCode) {
+        case HTTP_OK:
+            mRequest.downloadImpl(filename, this, tempBuffer, false);
+            break;
+
+        case HTTP_PARTIAL:
+            mRequest.downloadImpl(filename, this, tempBuffer, true);
+            break;
         }
     }
 }

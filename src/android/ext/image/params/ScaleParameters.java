@@ -18,7 +18,7 @@ import android.util.Printer;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      app:config="[ argb_8888 | rgb_565 ]"
  *      app:mutable="true"
- *      app:scale="0.7" /&gt;</pre>
+ *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */
 public class ScaleParameters extends Parameters {
@@ -38,7 +38,7 @@ public class ScaleParameters extends Parameters {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "ScaleParameters"));
         this.value = context.getResources().getDisplayMetrics().densityDpi;
-        this.scale = a.getFloat(0 /* R.styleable.ScaleParameters_scale */, 0);
+        this.scale = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
         a.recycle();
     }
@@ -71,9 +71,9 @@ public class ScaleParameters extends Parameters {
         DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity and opts.inTargetDensity uninitialized");
         opts.inSampleSize = 1;
         if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
-            final int targetDensity = (int)value;
-            opts.inTargetDensity = targetDensity;
-            opts.inDensity = (int)(targetDensity * (opts.outWidth / (opts.outWidth * scale)));
+            final int screenDensity = (int)value;
+            opts.inTargetDensity = screenDensity;
+            opts.inDensity = (int)(screenDensity * (opts.outWidth / (opts.outWidth * scale)));
         }
     }
 
@@ -83,7 +83,7 @@ public class ScaleParameters extends Parameters {
             .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(scale)
-            .append(", density = ").append(DeviceUtils.toDensity((int)value))
+            .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

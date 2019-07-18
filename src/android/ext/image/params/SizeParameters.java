@@ -97,9 +97,9 @@ public class SizeParameters extends Parameters {
         opts.inSampleSize = 1;
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
-            final int targetDensity = (int)value;
-            opts.inTargetDensity = targetDensity;
-            opts.inDensity = (int)(targetDensity * scale + 0.5f);
+            final int screenDensity = (int)value;
+            opts.inTargetDensity = screenDensity;
+            opts.inDensity = (int)(screenDensity * scale + 0.5f);
         }
     }
 
@@ -110,7 +110,7 @@ public class SizeParameters extends Parameters {
             .append(" { config = ").append(config.name())
             .append(", minWidth = ").append(minWidth)
             .append(", minHeight = ").append(minHeight)
-            .append(", density = ").append(DeviceUtils.toDensity((int)value))
+            .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

@@ -21,7 +21,7 @@
 
     <!-- ScaleParameters styleable -->
     <declare-styleable name="ScaleParameters">
-        <attr name="scale" format="float" />
+        <attr name="scale" format="fraction" />
     </declare-styleable>
 
     <!-- ImageBinder styleable -->

@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -332,7 +333,7 @@ public final class ProcessUtils {
             Formatter formatter = null;
             try {
                 // Creates the log file.
-                final PrintStream ps = new PrintStream(new FileOutputStream(FileUtils.getFilesDir(mContext, null).getPath() + "/crashes.log", true));
+                final PrintStream ps = new PrintStream(new FileOutputStream(new File(FileUtils.getFilesDir(mContext, null), "crashes.log"), true));
                 formatter = new Formatter(ps);
 
                 // Writes the uncaught exception to log file.

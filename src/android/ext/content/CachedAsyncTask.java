@@ -12,16 +12,16 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncCacheTask</tt> allows to load the resource on a background thread
+ * Class <tt>CachedAsyncTask</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>AsyncCacheTask's generic types</h3>
+ * <h3>CachedAsyncTask's generic types</h3>
  * <p>The two types used by a task are the following:</p>
  * <ol><li><tt>Params</tt>, The type of the parameters sent to the task.</li>
  * <li><tt>Result</tt>, The type of the result of the task.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * private static class JsonTask extends AsyncCacheTask&lt;String, JSONObject&gt; {
- *     public JsonTask(Activity ownerActivity) {
+ * private static class JSONTask extends CachedAsyncTask&lt;String, JSONObject&gt; {
+ *     public JSONTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
  *
@@ -70,10 +70,10 @@ import android.util.Log;
  *     }
  * }
  *
- * new JsonTask(activity).execute(url);</pre>
+ * new JSONTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
+public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -82,18 +82,18 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @see #AsyncCacheTask(Activity)
+     * @see #CachedAsyncTask(Activity)
      */
-    public AsyncCacheTask(Context context) {
+    public CachedAsyncTask(Context context) {
         mContext = context.getApplicationContext();
     }
 
     /**
      * Constructor
      * @param activity The owner <tt>Activity</tt>.
-     * @see #AsyncCacheTask(Context)
+     * @see #CachedAsyncTask(Context)
      */
-    public AsyncCacheTask(Activity ownerActivity) {
+    public CachedAsyncTask(Activity ownerActivity) {
         super(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
@@ -143,7 +143,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(params);
-                DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "download");
+                DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "download");
             } else {
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
@@ -173,7 +173,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "loadFromCache");
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -195,7 +195,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and cancel this task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "AsyncCacheTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "CachedAsyncTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 cancel(false);
                 return null;
@@ -204,7 +204,7 @@ public abstract class AsyncCacheTask<Params, Result> extends AbsAsyncTask<Params
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing("AsyncCacheTask", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "parseResult");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

@@ -13,15 +13,15 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>CacheLoader</tt> allows to load the resource on a background thread
+ * Class <tt>CachedResourceLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>CacheLoader's generic types</h3>
+ * <h3>CachedResourceLoader's generic types</h3>
  * <p>The two types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * public static class JsonLoadParams implements LoadParams&lt;String&gt; {
+ * public static class JSONLoadParams implements LoadParams&lt;String, JSONObject&gt; {
  *     {@code @Override}
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
@@ -34,7 +34,7 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     public Object parseResult(Context context, String url, File file, Cancelable cancelable) throws Exception {
+ *     public JSONObject parseResult(Context context, String url, File file, Cancelable cancelable) throws Exception {
  *         if (!file.exists()) {
  *             // If the file not exists, return null or parse the JSON data from the "assets" file.
  *             return null;
@@ -52,14 +52,14 @@ import android.util.Log;
  *     }
  * }
  *
- * private CacheLoader&lt;String&gt; mLoader;
+ * private CachedResourceLoader&lt;String, JSONObject&gt; mLoader;
  *
- * mLoader = new CacheLoader&lt;String&gt;(activity, executor);
- * mLoader.load(url, new JsonLoadParams(), listener);</pre>
+ * mLoader = new CachedResourceLoader&lt;String, JSONObject&gt;(activity, executor);
+ * mLoader.load(url, new JSONLoadParams(), listener);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Result> {
+public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -69,9 +69,9 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CacheLoader(Activity, Executor)
+     * @see #CachedResourceLoader(Activity, Executor)
      */
-    public CacheLoader(Context context, Executor executor) {
+    public CachedResourceLoader(Context context, Executor executor) {
         super(executor);
         mContext = context.getApplicationContext();
     }
@@ -80,9 +80,9 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
      * Constructor
      * @param ownerActivity The owner <tt>Activity</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CacheLoader(Context, Executor)
+     * @see #CachedResourceLoader(Context, Executor)
      */
-    public CacheLoader(Activity ownerActivity, Executor executor) {
+    public CachedResourceLoader(Activity ownerActivity, Executor executor) {
         super(executor, ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
@@ -106,7 +106,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(task, key, loadParams);
-                DebugUtils.__checkStopMethodTracing("CacheLoader", "download");
+                DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "download");
             } else {
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -150,7 +150,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("CacheLoader", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -172,7 +172,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and cancel the task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "CacheLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "CachedResourceLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
                 return null;
@@ -181,7 +181,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("CacheLoader", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "parseResult");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -192,7 +192,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link CacheLoader} to load resource.
+     * Class <tt>LoadParams</tt> used to {@link CachedResourceLoader} to load resource.
      */
     public static interface LoadParams<Key, Result> {
         /**
@@ -227,7 +227,7 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
     }
 
     /**
-     * Callback interface when a {@link CacheLoader} has finished loading its data.
+     * Callback interface when a {@link CachedResourceLoader} has finished loading its data.
      */
     public static interface OnLoadCompleteListener<Key, Result> {
         /**

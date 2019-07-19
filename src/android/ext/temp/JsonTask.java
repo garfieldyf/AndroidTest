@@ -3,15 +3,15 @@ package android.ext.temp;
 import java.io.File;
 import org.json.JSONObject;
 import android.app.Activity;
-import android.ext.content.AsyncCacheTask;
-import android.ext.content.CacheLoader.LoadParams;
+import android.ext.content.CachedAsyncTask;
+import android.ext.content.CachedResourceLoader.LoadParams;
 import android.ext.net.DownloadRequest;
 import android.ext.util.JsonUtils;
 import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 
-public class JsonTask extends AsyncCacheTask<String, JSONObject> {
+public class JsonTask extends CachedAsyncTask<String, JSONObject> {
     private final LoadParams<String, JSONObject> mLoadParams;
 
     public JsonTask(Activity ownerActivity, LoadParams<String, JSONObject> params) {

@@ -12,6 +12,24 @@ import android.widget.ImageView;
 /**
  * Class <tt>TransitionBinder</tt> allows to play transition
  * animation while the image first bind to the {@link ImageView}.
+ * <h3>Usage</h3>
+ * <p>Here is a xml resource example:</p><pre>
+ * &lt;TransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     app:defaultImage="@drawable/ic_placeholder"
+ *     app:maxCacheSize="128"
+ *     android:duration="@android:integer/config_longAnimTime"&gt;
+ *
+ *     &lt;!--
+ *         The bitmap transformer (Optional), See transformer class
+ *         Example: &lt;BitmapTransformer /&gt;
+ *     --&gt;
+ *
+ *     &lt;!--
+ *         The image transformer (Optional), See transformer class
+ *         Example: &lt;GIFTransformer /&gt;
+ *     --&gt;
+ * &lt;/TransitionBinder&gt;</pre>
  * @author Garfield
  */
 public class TransitionBinder<URI, Image> extends ImageBinder<URI, Image> {

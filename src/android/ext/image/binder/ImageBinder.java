@@ -25,38 +25,26 @@ import android.widget.ImageView;
  * Class <tt>ImageBinder</tt> allows to bind the image to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
- * &lt;[ ImageBinder | TransitionBinder | BackgroundBinder | binder ]
+ * &lt;[ ImageBinder | binder ]
  *     xmlns:android="http://schemas.android.com/apk/res/android"
  *     xmlns:app="http://schemas.android.com/apk/res-auto"
  *     class="classFullName"
- *     android:duration="@android:integer/config_longAnimTime"
  *     app:defaultImage="@drawable/ic_placeholder"
  *     app:maxCacheSize="128"
  *     app:attribute1="value1"
  *     app:attribute2="value2"
  *     ... ... &gt;
  *
- *     &lt;!-- Bitmap Transformer --&gt;
- *     &lt;[ BitmapTransformer | OvalTransformer | RoundedRectTransformer | transformer ]
- *         class="classFullName"
- *         android:src="@xml/transformer1"
- *         android:radius="20dp"
- *         android:topLeftRadius="20dp"
- *         android:topRightRadius="20dp"
- *         android:bottomLeftRadius="20dp"
- *         android:bottomRightRadius="20dp"
- *         app:attribute1="value1"
- *         app:attribute2="value2"
- *         ... ... /&gt;
+ *     &lt;!--
+ *         The bitmap transformer (Optional), See transformer class
+ *         Example: &lt;BitmapTransformer /&gt;
+ *     --&gt;
  *
- *     &lt;!-- Image Transformer (Optional) --&gt;
- *     &lt;[ GIFTransformer | transformer ]
- *         class="classFullName"
- *         android:src="@xml/transformer2"
- *         app:attribute1="value1"
- *         app:attribute2="value2"
- *         ... ... /&gt;
- * &lt;/[ ImageBinder | TransitionBinder | BackgroundBinder | binder ]&gt;</pre>
+ *     &lt;!--
+ *         The image transformer (Optional), See transformer class
+ *         Example: &lt;GIFTransformer /&gt;
+ *     --&gt;
+ * &lt;/[ ImageBinder | binder ]&gt;</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })

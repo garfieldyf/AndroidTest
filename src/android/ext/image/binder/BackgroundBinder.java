@@ -9,6 +9,22 @@ import android.view.View;
 
 /**
  * Class <tt>BackgroundBinder</tt> allows to bind the image to the <tt>View</tt>'s background.
+ * <h3>Usage</h3>
+ * <p>Here is a xml resource example:</p><pre>
+ * &lt;BackgroundBinder xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     app:defaultImage="@drawable/ic_placeholder"
+ *     app:maxCacheSize="128"&gt;
+ *
+ *     &lt;!--
+ *         The bitmap transformer (Optional), See transformer class
+ *         Example: &lt;BitmapTransformer /&gt;
+ *     --&gt;
+ *
+ *     &lt;!--
+ *         The image transformer (Optional), See transformer class
+ *         Example: &lt;GIFTransformer /&gt;
+ *     --&gt;
+ * &lt;/BackgroundBinder&gt;</pre>
  * @author Garfield
  */
 public class BackgroundBinder<URI, Image> extends ImageBinder<URI, Image> {

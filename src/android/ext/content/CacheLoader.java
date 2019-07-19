@@ -122,14 +122,14 @@ public class CacheLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Resul
 
     @Override
     protected void onLoadComplete(Key key, Object[] params, Result result) {
-        if (canNotifyCallback()) {
+        if (canUpdateUI()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
         }
     }
 
     @Override
     protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
-        if (canNotifyCallback()) {
+        if (canUpdateUI()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
         }
     }

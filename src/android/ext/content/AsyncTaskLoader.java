@@ -155,20 +155,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
 
     /**
-     * Retrieves a new {@link Task} from the task pool.
-     * Allows us to avoid allocating new tasks in many cases.
+     * Returns whether this loader can update UI.
      */
-    private LoadTask obtain(Key key, Params[] params) {
-        final LoadTask task = (LoadTask)mTaskPool.obtain();
-        task.mKey = key;
-        task.mParams = params;
-        return task;
-    }
-
-    /**
-     * Returns whether this loader can notify the callback.
-     */
-    /* package */ final boolean canNotifyCallback() {
+    /* package */ final boolean canUpdateUI() {
         if (mOwner != null) {
             final Object owner = mOwner.get();
             if (owner == null) {
@@ -182,6 +171,17 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
         }
 
         return true;
+    }
+
+    /**
+     * Retrieves a new {@link Task} from the task pool.
+     * Allows us to avoid allocating new tasks in many cases.
+     */
+    private LoadTask obtain(Key key, Params[] params) {
+        final LoadTask task = (LoadTask)mTaskPool.obtain();
+        task.mKey = key;
+        task.mParams = params;
+        return task;
     }
 
     /**

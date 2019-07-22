@@ -122,14 +122,14 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
 
     @Override
     protected void onLoadComplete(Key key, Object[] params, Result result) {
-        if (canUpdateUI()) {
+        if (validateOwner()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
         }
     }
 
     @Override
     protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
-        if (canUpdateUI()) {
+        if (validateOwner()) {
             ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
         }
     }

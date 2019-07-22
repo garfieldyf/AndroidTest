@@ -155,9 +155,9 @@ public abstract class AsyncTaskLoader<Key, Params, Result> extends Loader<Key> {
     protected abstract Result loadInBackground(Task<?, ?> task, Key key, Params[] params);
 
     /**
-     * Returns whether this loader can update UI.
+     * Returns whether the owner is valid.
      */
-    /* package */ final boolean canUpdateUI() {
+    /* package */ final boolean validateOwner() {
         if (mOwner != null) {
             final Object owner = mOwner.get();
             if (owner == null) {

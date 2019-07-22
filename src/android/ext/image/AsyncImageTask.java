@@ -69,12 +69,12 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
 
     /**
      * Constructor
-     * @param activity The <tt>Activity</tt>.
+     * @param ownerActivity The owner <tt>Activity</tt>.
      * @see #AsyncImageTask(Context)
      */
-    public AsyncImageTask(Activity activity) {
-        super(activity);
-        mContext = activity.getApplicationContext();
+    public AsyncImageTask(Activity ownerActivity) {
+        super(ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**

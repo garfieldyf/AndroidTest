@@ -4,9 +4,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -173,6 +175,21 @@ public final class JsonUtils {
      */
     public static boolean optBoolean(JSONObject object, String name, boolean fallback) {
         return (object != null ? object.optBoolean(name, fallback) : fallback);
+    }
+
+    /**
+     * Inserts the specified <em>value</em> into the <tt>JSONArray</tt> at the
+     * specified <em>index</em>.
+     * @param array The <tt>JSONArray</tt> to insert to.
+     * @param index The index at which to insert.
+     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
+     * {@link JSONObject#NULL}, or <tt>null</tt>.
+     * @return The <em>array</em>.
+     * @throws IndexOutOfBoundsException if <tt>index < 0 || index > array.length()</tt>
+     */
+    public static JSONArray add(JSONArray array, int index, Object value) {
+        JSONArrayImpl.add(array, index, value);
+        return array;
     }
 
     /**
@@ -668,6 +685,31 @@ public final class JsonUtils {
         @Override
         public JSONObject accumulate(String name, Object value) throws JSONException {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Class <tt>JSONArrayImpl</tt> used to inserts a value into a <tt>JSONArray</tt>.
+     */
+    private static final class JSONArrayImpl {
+        private static final Field sField;
+
+        @SuppressWarnings("rawtypes")
+        public static void add(JSONArray array, int index, Object value) {
+            try {
+                ((List)sField.get(array)).add(index, value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        static {
+            try {
+                sField = JSONArray.class.getDeclaredField("values");
+                sField.setAccessible(true);
+            } catch (Exception e) {
+                throw new AssertionError(e);
+            }
         }
     }
 

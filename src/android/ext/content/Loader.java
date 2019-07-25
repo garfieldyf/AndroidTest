@@ -173,9 +173,9 @@ public abstract class Loader<Key> implements Factory<Task> {
         private static final int COMPLETED = 2;
 
         /**
-         * The parameters of this task.
+         * The parameter of this task.
          */
-        /* package */ Params[] mParams;
+        /* package */ Params mParams;
 
         /**
          * The thread running this task.
@@ -271,10 +271,10 @@ public abstract class Loader<Key> implements Factory<Task> {
 
         /**
          * Overrides this method to perform a computation on a background thread.
-         * @param params The parameters of this task.
+         * @param params The parameter of this task.
          * @return A result, defined by the subclass of this task.
          * @see #onPostExecute(Result)
          */
-        public abstract Result doInBackground(Params[] params);
+        public abstract Result doInBackground(Params params);
     }
 }

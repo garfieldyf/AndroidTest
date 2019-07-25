@@ -4,8 +4,8 @@ import java.io.File;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import android.content.Context;
-import android.ext.content.CachedResourceLoader.LoadParams;
-import android.ext.content.CachedResourceLoader.OnLoadCompleteListener;
+import android.ext.content.CachedTaskLoader.LoadParams;
+import android.ext.content.CachedTaskLoader.OnLoadCompleteListener;
 import android.ext.net.DownloadPostRequest;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
@@ -26,7 +26,7 @@ public final class JsonLoader {
 
     public static final OnLoadCompleteListener<String, JSONObject> sListener = new OnLoadCompleteListener<String, JSONObject>() {
         @Override
-        public void onLoadComplete(String url, Object[] params, JSONObject result) {
+        public void onLoadComplete(String key, LoadParams<String, JSONObject> loadParams, Object cookie, JSONObject result) {
             if (result != null) {
                 Log.i("abc", "JsonLoader - Load Succeeded, Update UI - " + getName(result));
                 // Toast.makeText(activity, "JsonLoader - Load Succeeded, Update UI.", Toast.LENGTH_SHORT).show();

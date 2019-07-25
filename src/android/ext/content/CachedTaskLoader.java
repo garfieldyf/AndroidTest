@@ -2,6 +2,7 @@ package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.content.Context;
@@ -13,9 +14,9 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>CachedResourceLoader</tt> allows to load the resource on a background thread
+ * Class <tt>CachedTaskLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>CachedResourceLoader's generic types</h3>
+ * <h3>CachedTaskLoader's generic types</h3>
  * <p>The two types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type.</li></ol>
@@ -52,27 +53,34 @@ import android.util.Log;
  *     }
  * }
  *
- * private CachedResourceLoader&lt;String, JSONObject&gt; mLoader;
+ * private CachedTaskLoader&lt;String, JSONObject&gt; mLoader;
  *
- * mLoader = new CachedResourceLoader&lt;String, JSONObject&gt;(activity, executor);
- * mLoader.load(url, new JSONLoadParams(), listener);</pre>
+ * mLoader = new CachedTaskLoader&lt;String, JSONObject&gt;(activity, executor);
+ * mLoader.load(url, new JSONLoadParams(), listener, cookie);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Object, Result> {
+public class CachedTaskLoader<Key, Result> extends Loader<Key> {
+    private static final int MAX_POOL_SIZE = 8;
+
     /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
 
     /**
+     * The owner of this loader.
+     */
+    private WeakReference<Object> mOwner;
+
+    /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CachedResourceLoader(Activity, Executor)
+     * @see #CachedTaskLoader(Activity, Executor)
      */
-    public CachedResourceLoader(Context context, Executor executor) {
-        super(executor);
+    public CachedTaskLoader(Context context, Executor executor) {
+        super(executor, MAX_POOL_SIZE);
         mContext = context.getApplicationContext();
     }
 
@@ -80,33 +88,88 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
      * Constructor
      * @param ownerActivity The owner <tt>Activity</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CachedResourceLoader(Context, Executor)
+     * @see #CachedTaskLoader(Context, Executor)
      */
-    public CachedResourceLoader(Activity ownerActivity, Executor executor) {
-        super(executor, ownerActivity);
+    public CachedTaskLoader(Activity ownerActivity, Executor executor) {
+        super(executor, MAX_POOL_SIZE);
+        mOwner = new WeakReference<Object>(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
 
     /**
-     * Equivalent to calling <tt>load(key, new Object[] { loadParams, listener })</tt>.
+     * Executes the load task on a background thread. If the <em>key</em> is mapped to the task is running then
+     * invoking this method has no effect.<p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param key The identifier of the load task.
-     * @param loadParams The parameters of the load task.
-     * @param listener The {@link OnLoadCompleteListener} to receive the load is complete.
+     * @param loadParams The {@link LoadParams} to passed to load task.
+     * @param listener An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
+     * @param cookie An object by user-defined that gets passed into {@link OnLoadCompleteListener#onLoadComplete}.
      */
-    public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener) {
-        load(key, new Object[] { loadParams, listener });
+    public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener, Object cookie) {
+        DebugUtils.__checkUIThread("load");
+        DebugUtils.__checkError(key == null, "key == null");
+        if (mState != SHUTDOWN) {
+            final Task task = mRunningTasks.get(key);
+            if (task == null || task.isCancelled()) {
+                final LoadTask newTask = obtain(key, loadParams, cookie, listener);
+                mRunningTasks.put(key, newTask);
+                mExecutor.execute(newTask);
+            }
+        }
+    }
+
+    /**
+     * Sets the object that owns this loader.
+     * @param owner The owner object.
+     * @see #getOwner()
+     */
+    public final void setOwner(Object owner) {
+        mOwner = new WeakReference<Object>(owner);
+    }
+
+    /**
+     * Returns the object that owns this loader.
+     * @return The owner object or <tt>null</tt>
+     * if the owner released by the GC.
+     * @see #setOwner(Object)
+     */
+    public final <T> T getOwner() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        return (T)mOwner.get();
+    }
+
+    /**
+     * Alias of {@link #getOwner()}.
+     * @return The <tt>Activity</tt> that owns this loader or <tt>null</tt> if
+     * the owner activity has been finished or destroyed or release by the GC.
+     * @see #setOwner(Object)
+     */
+    public final <T extends Activity> T getOwnerActivity() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final T activity = (T)mOwner.get();
+        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
 
     @Override
-    protected Result loadInBackground(Task<?, ?> task, Key key, Object[] params) {
+    public final Task newInstance() {
+        return new LoadTask();
+    }
+
+    /**
+     * Called on a background thread to load the resource.
+     * @param task The current {@link Task} whose executing this method.
+     * @param key The key, passed earlier by {@link #load}.
+     * @param loadParams The parameters, passed earlier by {@link #load}.
+     * @param cookie An object, passed earlier by {@link #load}.
+     * @return A result or <tt>null</tt> of the load.
+     */
+    protected Result loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result> loadParams, Object cookie) {
         Object result = null;
         try {
-            final LoadParams loadParams = (LoadParams)params[0];
             final File cacheFile = loadParams.getCacheFile(mContext, key);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = download(task, key, loadParams);
-                DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "download");
+                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "download");
             } else {
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -120,18 +183,29 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
         return (Result)result;
     }
 
-    @Override
-    protected void onLoadComplete(Key key, Object[] params, Result result) {
-        if (validateOwner()) {
-            ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, result);
+    /* package */ final boolean validateOwner() {
+        if (mOwner != null) {
+            final Object owner = mOwner.get();
+            if (owner == null) {
+                DebugUtils.__checkDebug(true, "CachedTaskLoader", "The " + owner + " released by the GC.");
+                return false;
+            } else if (owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "CachedTaskLoader", "The " + activity + " has been destroyed.");
+                return (!activity.isFinishing() && !activity.isDestroyed());
+            }
         }
+
+        return true;
     }
 
-    @Override
-    protected void onProgressUpdate(Key key, Object[] params, Object[] values) {
-        if (validateOwner()) {
-            ((OnLoadCompleteListener)params[1]).onLoadComplete(key, params, values[0]);
-        }
+    private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
+        final LoadTask task = (LoadTask)mTaskPool.obtain();
+        task.mKey = key;
+        task.mParams = cookie;
+        task.mListener = listener;
+        task.mLoadParams = loadParams;
+        return task;
     }
 
     private Object download(Task task, Object key, LoadParams loadParams) throws Exception {
@@ -150,7 +224,7 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -172,7 +246,7 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and cancel the task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "CachedResourceLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "CachedTaskLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
                 return null;
@@ -181,7 +255,7 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("CachedResourceLoader", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "parseResult");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -192,7 +266,52 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link CachedResourceLoader} to load resource.
+     * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
+     */
+    /* package */ final class LoadTask extends Task {
+        /* package */ Key mKey;
+        /* package */ LoadParams mLoadParams;
+        /* package */ OnLoadCompleteListener mListener;
+
+        @Override
+        public void onProgress(Object[] values) {
+            if (validateOwner()) {
+                mListener.onLoadComplete(mKey, mLoadParams, mParams, values[0]);
+            }
+        }
+
+        @Override
+        public Object doInBackground(Object params) {
+            waitResumeIfPaused();
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mLoadParams, mParams) : null);
+        }
+
+        @Override
+        public void onPostExecute(Object result) {
+            if (mState != SHUTDOWN) {
+                // Removes the finished task from running
+                // tasks, excluding the cancelled task.
+                if (mRunningTasks.get(mKey) == this) {
+                    mRunningTasks.remove(mKey);
+                }
+
+                if (!isCancelled() && validateOwner()) {
+                    mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
+                }
+            }
+
+            // Recycles this task to avoid potential memory
+            // leaks, Even the loader has been shut down.
+            clearForRecycle();
+            mKey = null;
+            mListener   = null;
+            mLoadParams = null;
+            mTaskPool.recycle(this);
+        }
+    }
+
+    /**
+     * Class <tt>LoadParams</tt> used to {@link CachedTaskLoader} to load resource.
      */
     public static interface LoadParams<Key, Result> {
         /**
@@ -227,15 +346,16 @@ public class CachedResourceLoader<Key, Result> extends AsyncTaskLoader<Key, Obje
     }
 
     /**
-     * Callback interface when a {@link CachedResourceLoader} has finished loading its data.
+     * Callback interface when a {@link CachedTaskLoader} has finished loading its data.
      */
     public static interface OnLoadCompleteListener<Key, Result> {
         /**
-         * Called on the thread when the load is complete.
-         * @param key The key, passed earlier by {@link #load}.
-         * @param params The parameters, passed earlier by {@link #load}.
+         * Called on the UI thread when the load is complete.
+         * @param key The key, passed earlier by {@link CachedTaskLoader#load}.
+         * @param loadParams The parameters, passed earlier by {@link CachedTaskLoader#load}.
+         * @param cookie An object, passed earlier by {@link CachedTaskLoader#load}.
          * @param result A result or <tt>null</tt> of the load.
          */
-        void onLoadComplete(Key key, Object[] params, Result result);
+        void onLoadComplete(Key key, LoadParams<Key, Result> loadParams, Object cookie, Result result);
     }
 }

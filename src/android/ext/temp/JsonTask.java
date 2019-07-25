@@ -4,7 +4,7 @@ import java.io.File;
 import org.json.JSONObject;
 import android.app.Activity;
 import android.ext.content.CachedAsyncTask;
-import android.ext.content.CachedResourceLoader.LoadParams;
+import android.ext.content.CachedTaskLoader.LoadParams;
 import android.ext.net.DownloadRequest;
 import android.ext.util.JsonUtils;
 import android.ext.util.UriUtils;

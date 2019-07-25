@@ -1,18 +1,15 @@
 package android.ext.util;
 
-import static java.lang.reflect.Modifier.FINAL;
-import static java.lang.reflect.Modifier.STATIC;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
-import android.util.Log;
 
 /**
  * Class ArrayUtils
@@ -285,15 +282,11 @@ public final class ArrayUtils {
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         DebugUtils.__checkRange(start, end - start, list.size());
-        if (list instanceof ArrayList) {
-            try {
-                sortArray((Object[])ArrayField.sInstance.get(list), start, end, comparator);
-            } catch (Exception e) {
-                Log.w(ArrayUtils.class.getName(), "Couldn't sort ArrayList internal array\n" + e);
-                sortList(list, start, end, comparator);
-            }
+        final List<T> subList = list.subList(start, end);
+        if (comparator != null) {
+            Collections.sort(subList, comparator);
         } else {
-            sortList(list, start, end, comparator);
+            Collections.sort((List<Comparable>)subList);
         }
     }
 
@@ -495,24 +488,6 @@ public final class ArrayUtils {
         return (end - start) >> 1;
     }
 
-    private static void sortList(List list, int start, int end, Comparator comparator) {
-        final Object[] array = list.toArray();
-        sortArray(array, start, end, comparator);
-        final ListIterator itor = list.listIterator(start);
-        for (; start < end; ++start) {
-            itor.next();
-            itor.set(array[start]);
-        }
-    }
-
-    private static void sortArray(Object[] array, int start, int end, Comparator comparator) {
-        if (comparator == null) {
-            Arrays.sort(array, start, end);
-        } else {
-            Arrays.sort(array, start, end, comparator);
-        }
-    }
-
     /**
      * An interface for filtering objects based on their informations.
      * @see Filter#accept(T)
@@ -525,26 +500,6 @@ public final class ArrayUtils {
          * <tt>false</tt> otherwise.
          */
         public boolean accept(T value);
-    }
-
-    /**
-     * The {@link ArrayList#array} field.
-     */
-    private static final class ArrayField {
-        public static final Field sInstance = getArrayField();
-
-        private static Field getArrayField() {
-            final Field[] fields = ArrayList.class.getDeclaredFields();
-            for (Field field : fields) {
-                if ((field.getModifiers() & (STATIC | FINAL)) == 0 && field.getType() == Object[].class) {
-                    field.setAccessible(true);
-                    return field;
-                }
-            }
-
-            DebugUtils.__checkWarning(true, "ArrayUtils", "Couldn't find ArrayList internal array");
-            return null;
-        }
     }
 
     /**

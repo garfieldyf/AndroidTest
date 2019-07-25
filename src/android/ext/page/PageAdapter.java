@@ -86,12 +86,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(count < 0, "count < 0");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mItemCount != count) {
-            mItemCount = count;
-            mPageCache.clear();
-            mLoadStates.clear();
-            UIHandler.notifyDataSetChanged(mRecyclerView);
-        }
+        mItemCount = count;
+        mPageCache.clear();
+        mLoadStates.clear();
+        UIHandler.notifyDataSetChanged(mRecyclerView);
     }
 
     /**

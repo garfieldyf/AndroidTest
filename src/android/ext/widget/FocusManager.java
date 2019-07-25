@@ -10,7 +10,7 @@ import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
  * Class FocusManager
  * @author Garfield
  */
-public final class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeListener {
+public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeListener {
     private View mFocused;
     private boolean mBlockDescendants;
     private final ViewGroup mRootView;
@@ -72,7 +72,7 @@ public final class FocusManager implements OnFocusChangeListener, OnGlobalFocusC
      * add default focusables after this method returns.
      */
     public boolean onAddFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        return (mBlockDescendants && mRootView.isFocusable() && views.add(mRootView));
+        return (mBlockDescendants && views.add(mRootView));
     }
 
     @Override

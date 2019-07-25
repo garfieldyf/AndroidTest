@@ -171,7 +171,11 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     @Override
-    public void dispatchMessage(int message, int token, Object result) {
+    public final void dispatchMessage(int message, int token, Object result) {
+        if (!validateOwner()) {
+            return;
+        }
+
         switch (message) {
         case MESSAGE_CALL:
             onCallComplete(token, (Bundle)result);

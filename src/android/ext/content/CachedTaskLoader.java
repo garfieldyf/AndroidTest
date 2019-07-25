@@ -106,7 +106,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
      */
     public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener, Object cookie) {
         DebugUtils.__checkUIThread("load");
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null || loadParams == null || listener == null, "key == null || loadParams == null || listener == null");
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
             if (task == null || task.isCancelled()) {
@@ -135,18 +135,6 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
-    }
-
-    /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this loader or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
-     * @see #setOwner(Object)
-     */
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
 
     @Override

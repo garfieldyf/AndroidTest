@@ -72,19 +72,6 @@ public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
         return (T)mOwner.get();
     }
 
-    /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this handler or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
-    }
-
     @Override
     public final void run() {
         throw new RuntimeException("No Implementation, This method is a stub!");
@@ -151,5 +138,24 @@ public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
      * @param rowsAffected The number of rows affected.
      */
     protected void onDeleteComplete(int token, int rowsAffected) {
+    }
+
+    /**
+     * Validates the owner <tt>Object</tt> is valid.
+     */
+    /* package */ final boolean validateOwner() {
+        if (mOwner != null) {
+            final Object owner = mOwner.get();
+            if (owner == null) {
+                DebugUtils.__checkDebug(true, getClass().getSimpleName(), "The " + owner + " released by the GC.");
+                return false;
+            } else if (owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getSimpleName(), "The " + activity + " has been destroyed.");
+                return (!activity.isFinishing() && !activity.isDestroyed());
+            }
+        }
+
+        return true;
     }
 }

@@ -262,9 +262,9 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
         /* package */ OnLoadCompleteListener mListener;
 
         @Override
-        public void onProgress(Object[] values) {
+        public void onProgress(Object value) {
             if (validateOwner()) {
-                mListener.onLoadComplete(mKey, mLoadParams, mParams, values[0]);
+                mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
             }
         }
 

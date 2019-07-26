@@ -197,21 +197,10 @@ public abstract class Loader<Key> implements Factory<Task> {
         }
 
         /**
-         * This method can be invoked to publish progress values to update UI.<p>
-         * If this task was cancelled then invoking this method has no effect.</p>
-         * @param values The progress values to update.
-         */
-        public final void setProgress(Object... values) {
-            if (mState.get() == RUNNING) {
-                UIHandler.sInstance.setProgress(this, values);
-            }
-        }
-
-        /**
-         * Attempts to stop execution of this task. This attempt will fail if
-         * this task has already completed, or already been cancelled.
-         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing
-         * this task should be interrupted, <tt>false</tt> otherwise.
+         * Attempts to stop execution of this task. This attempt will fail if this task
+         * has already completed, or already been cancelled.
+         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this task
+         * should be interrupted, <tt>false</tt> otherwise.
          * @return <tt>true</tt> if this task has been cancelled, <tt>false</tt> otherwise.
          */
         public final boolean cancel(boolean mayInterruptIfRunning) {
@@ -254,12 +243,20 @@ public abstract class Loader<Key> implements Factory<Task> {
         }
 
         /**
-         * Runs on the UI thread after {@link #setProgress(Object[])} is
-         * invoked. The default implementation do nothing. If you write
-         * your own implementation, do not call <tt>super.onProgress()</tt>
-         * @param values The progress values, passed earlier by {@link #setProgress}.
+         * This method can be invoked to publish progress value to update UI.
+         * @param value The progress value to update.
          */
-        public void onProgress(Object[] values) {
+        /* package */ final void setProgress(Object value) {
+            if (mState.get() == RUNNING) {
+                UIHandler.sInstance.setProgress(this, value);
+            }
+        }
+
+        /**
+         * Runs on the UI thread after {@link #setProgress(Object[])} is invoked.
+         * @param value The progress value to update.
+         */
+        public void onProgress(Object value) {
         }
 
         /**

@@ -188,8 +188,8 @@ public final class UIHandler extends Handler implements Executor {
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      */
-    public final void setProgress(Task task, Object... values) {
-        sendMessage(task, MESSAGE_PROGRESS, values);
+    public final void setProgress(Task task, Object value) {
+        sendMessage(task, MESSAGE_PROGRESS, value);
     }
 
     /**
@@ -218,7 +218,7 @@ public final class UIHandler extends Handler implements Executor {
         switch (msg.what) {
         // Dispatch the Task messages.
         case MESSAGE_PROGRESS:
-            ((Task)msg.getCallback()).onProgress((Object[])msg.obj);
+            ((Task)msg.getCallback()).onProgress(msg.obj);
             break;
 
         case MESSAGE_FINISHED:

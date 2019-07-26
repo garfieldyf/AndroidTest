@@ -147,11 +147,9 @@ public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
         if (mOwner != null) {
             final Object owner = mOwner.get();
             if (owner == null) {
-                DebugUtils.__checkDebug(true, getClass().getSimpleName(), "The " + owner + " released by the GC.");
                 return false;
             } else if (owner instanceof Activity) {
                 final Activity activity = (Activity)owner;
-                DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getSimpleName(), "The " + activity + " has been destroyed.");
                 return (!activity.isFinishing() && !activity.isDestroyed());
             }
         }

@@ -1,7 +1,6 @@
 package android.ext.image;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import android.app.Activity;
@@ -117,7 +116,8 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
         final Object[] results  = new Object[params.length];
         try {
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
-                results[i] = decodeImageInternal(params[i], tempBuffer);
+                final URI uri = params[i];
+                results[i] = (matchScheme(uri) ? downloadImage(uri, tempBuffer) : decodeImage(uri, tempBuffer));
             }
         } finally {
             ByteArrayPool.sInstance.recycle(tempBuffer);
@@ -127,11 +127,11 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     }
 
     @Override
-    protected void onPostExecute(Object[] result) {
+    protected void onPostExecute(Object[] results) {
         if (mTarget != null) {
             final ImageView target = (ImageView)mTarget.get();
             if (target != null) {
-                target.setImageBitmap((Bitmap)result[0]);
+                target.setImageBitmap((Bitmap)results[0]);
             }
         }
     }
@@ -159,20 +159,8 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     }
 
     /**
-     * Returns a new download request with the specified <em>url</em>. Subclasses should
-     * override this method to create the download request. The default implementation
-     * returns a new {@link DownloadRequest} object.
-     * @param uri The uri to create.
-     * @return The <tt>DownloadRequest</tt> object.
-     * @throws IOException if an error occurs while creating the download request.
-     */
-    protected DownloadRequest newDownloadRequest(URI uri) throws IOException {
-        return new DownloadRequest(uri.toString()).connectTimeout(30000).readTimeout(30000);
-    }
-
-    /**
-     * Decodes an image from the specified <em>uri</em>. Subclasses should override this method
-     * to decode image. The default implementation returns a new {@link Bitmap} object.
+     * Decodes an image from the specified <em>uri</em>. Subclasses should override this
+     * method to decode image. The default implementation returns a new {@link Bitmap} object.
      * @param uri The uri to decode.
      * @param tempBuffer The temporary storage to use for decoding.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
@@ -182,16 +170,15 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     }
 
     /**
-     * Decodes an image from the specified <em>uri</em>.
+     * Downloads the image from the specified <em>uri</em>.
+     * @param uri The uri to decode.
+     * @param tempBuffer The temporary storage to use for downloading.
+     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
-    private Object decodeImageInternal(URI uri, byte[] tempBuffer) {
-        if (!matchScheme(uri)) {
-            return decodeImage(uri, tempBuffer);
-        }
-
+    protected Object downloadImage(URI uri, byte[] tempBuffer) {
         final File imageFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
-            final int statusCode = newDownloadRequest(uri).download(imageFile.getPath(), this, tempBuffer);
+            final int statusCode = new DownloadRequest(uri.toString()).connectTimeout(30000).readTimeout(30000).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load image data from - '" + uri + "'\n" + e);

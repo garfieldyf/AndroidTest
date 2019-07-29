@@ -697,9 +697,19 @@ public final class JsonUtils {
         @SuppressWarnings("rawtypes")
         public static void add(JSONArray array, int index, Object value) {
             try {
+                JSONArrayImpl.__checkDouble(value);
                 ((List)sField.get(array)).add(index, value);
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        private static void __checkDouble(Object value) {
+            if (value instanceof Number) {
+                final double d = ((Number)value).doubleValue();
+                if (Double.isInfinite(d) || Double.isNaN(d)) {
+                    throw new AssertionError("Forbidden numeric value: " + d);
+                }
             }
         }
 

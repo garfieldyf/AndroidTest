@@ -387,7 +387,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     protected void prefetchPage(int page, int position, int adapterPosition, int prefetchDistance) {
         // Prefetch the previous page data.
-        if (page > 0 && position == mPrefetchDistance - 1) {
+        if (page > 0 && position == prefetchDistance - 1) {
             DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page - 1) + ", position = " + position + ", adapterPosition = " + adapterPosition);
             getPage(page - 1);
         }

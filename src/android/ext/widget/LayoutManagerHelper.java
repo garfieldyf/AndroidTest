@@ -1,14 +1,11 @@
 package android.ext.widget;
 
 import android.content.res.Resources;
-import android.ext.image.ImageLoader;
-import android.ext.util.DebugUtils;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.LayoutManager;
-import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.support.v7.widget.RecyclerView.Recycler;
 import android.support.v7.widget.RecyclerView.State;
 import android.util.Printer;
@@ -44,14 +41,6 @@ public final class LayoutManagerHelper {
         }
 
         ViewUtils.animate(view, resId).start();
-    }
-
-    /**
-     * Adds a listener that will be notified of any changes in scroll state or position.
-     */
-    public static void addOnScrollListener(RecyclerView recyclerView, ImageLoader<?, ?> imageLoader) {
-        DebugUtils.__checkError(imageLoader == null, "imageLoader == null");
-        recyclerView.addOnScrollListener(new SimpleOnScrollListener(imageLoader));
     }
 
     /**
@@ -242,28 +231,6 @@ public final class LayoutManagerHelper {
         @Override
         public int onGetChildDrawingOrder(int childCount, int i) {
             return ViewUtils.getChildDrawingOrder(mContainer, childCount, i);
-        }
-    }
-
-    /**
-     * Class <tt>SimpleOnScrollListener</tt> is an implementation of an {@link OnScrollListener}.
-     */
-    private static final class SimpleOnScrollListener extends OnScrollListener {
-        private final ImageLoader<?, ?> mImageLoader;
-
-        public SimpleOnScrollListener(ImageLoader<?, ?> imageLoader) {
-            mImageLoader = imageLoader;
-        }
-
-        @Override
-        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-                DebugUtils.__checkDebug(true, "LayoutManagerHelper", mImageLoader + " pause.");
-                mImageLoader.pause();
-            } else {
-                DebugUtils.__checkDebug(true, "LayoutManagerHelper", mImageLoader + " resume.");
-                mImageLoader.resume();
-            }
         }
     }
 

@@ -97,17 +97,17 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             Arrays.sort(files);
         }
 
-        long fileCount = 0, fileLength = 0;
-        final long[] fileCounts = new long[2];
+        long fileCounts = 0, fileLengths = 0;
+        final long[] results = new long[2];
         for (int i = 0, index = 0; i < size; ++i) {
             final File file = files[i];
             if (file.isDirectory()) {
                 ++index;
-                getFileCount(file, fileCounts);
-                result.append("  ").append(file.getName()).append(" { files = ").append(fileCounts[0]).append(", size = ").append(FileUtils.formatFileSize(fileCounts[1])).append(" }");
+                getFileCount(file, results);
+                result.append("  ").append(file.getName()).append(" { files = ").append(results[0]).append(", size = ").append(FileUtils.formatFileSize(results[1])).append(" }");
 
-                fileCount  += fileCounts[0];
-                fileLength += fileCounts[1];
+                fileCounts  += results[0];
+                fileLengths += results[1];
             }
 
             if ((index % 4) == 0) {
@@ -115,13 +115,13 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             }
         }
 
-        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", getClass().getSimpleName(), size, fileCount, FileUtils.formatFileSize(fileLength));
+        DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping %s disk cache [ dirs = %d, files = %d, size = %s ] ", getClass().getSimpleName(), size, fileCounts, FileUtils.formatFileSize(fileLengths));
         if (result.length() > 0) {
             printer.println(result.toString());
         }
     }
 
-    private static void getFileCount(File directory, long[] outCounts) {
+    private static void getFileCount(File directory, long[] outResults) {
         final File[] files  = directory.listFiles();
         final int fileCount = ArrayUtils.getSize(files);
 
@@ -130,7 +130,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             fileLength += files[i].length();
         }
 
-        outCounts[0] = fileCount;
-        outCounts[1] = fileLength;
+        outResults[0] = fileCount;
+        outResults[1] = fileLength;
     }
 }

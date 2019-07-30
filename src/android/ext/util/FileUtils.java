@@ -519,6 +519,14 @@ public final class FileUtils {
     }
 
     /**
+     * Computes all file's sizes with specified <em>path</em>. if <em>path</em>
+     * is a directory, all sub files will be computed.
+     * @param path The file or directory to compute, must be absolute file path.
+     * @return The number of bytes or <tt>0</tt> if the file does not exist.
+     */
+    public static native long computeFileSizes(String path);
+
+    /**
      * Compares the two specified file's contents are equal.
      * @param file1 The first file to compare, must be absolute file path.
      * @param file2 The second file to compare, must be absolute file path.

@@ -305,7 +305,7 @@ public class DownloadRequest {
      * none. If the download was cancelled before it completed normally the file's contents is undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
-     * @throws IOException if an error occurs while downloading to the resource.
+     * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])

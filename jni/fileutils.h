@@ -29,6 +29,7 @@
 // getFileStatus()
 // createFile()
 // createUniqueFile()
+// computeFileSizes()
 
 namespace FileUtils {
 
@@ -159,6 +160,41 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
 }
 
 #ifdef __NDK_STLP__
+__STATIC_INLINE__ jlong computeDescendentFiles(const char* path)
+{
+    assert(path);
+
+    std::list<std::string> dirPaths;
+    dirPaths.push_back(path);
+
+    jlong result = 0;
+    do
+    {
+        std::string dirPath(std::move(dirPaths.front()));
+        dirPaths.pop_front();
+
+        __NS::Directory<> dir(__NS::defaultFilter);
+        if (dir.open(dirPath.c_str()) == 0)
+        {
+            struct stat buf;
+            char filePath[MAX_PATH];
+            const int length = buildPath(filePath, dirPath.c_str(), dirPath.size());
+
+            for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
+            {
+                ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+                if (entry->d_type == DT_DIR) {
+                    dirPaths.push_back(filePath);
+                } else if (::stat(filePath, &buf) == 0) {
+                    result += buf.st_size;
+                }
+            }
+        }
+    } while (!dirPaths.empty());
+
+    return result;
+}
+
 __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint flags, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
@@ -204,6 +240,32 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint f
     return errnum;
 }
 #else
+static inline jlong computeDescendentFiles(const char* dirPath)
+{
+    assert(dirPath);
+
+    jlong result = 0;
+    __NS::Directory<> dir(__NS::defaultFilter);
+    if (dir.open(dirPath) == 0)
+    {
+        struct stat buf;
+        char filePath[MAX_PATH];
+        const int length = buildPath(filePath, dirPath);
+
+        for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
+        {
+            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            if (entry->d_type == DT_DIR) {
+                result += computeDescendentFiles(filePath);
+            } else if (::stat(filePath, &buf) == 0) {
+                result += buf.st_size;
+            }
+        }
+    }
+
+    return result;
+}
+
 static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint flags, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
@@ -463,6 +525,21 @@ JNIEXPORT_METHOD(jstring) createUniqueFile(JNIEnv* env, jclass /*clazz*/, jstrin
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
+// Method:    computeFileSizes
+// Signature: (Ljava/lang/String;)J
+
+JNIEXPORT_METHOD(jlong) computeFileSizes(JNIEnv* env, jclass /*clazz*/, jstring path)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", 0);
+
+    struct stat buf;
+    const JNI::jstring_t jpath(env, path);
+    return (::stat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? computeDescendentFiles(jpath) : buf.st_size) : 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Register native methods functions
 //
 
@@ -487,6 +564,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "getFileMode", "(Ljava/lang/String;)I", (void*)getFileMode },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
+        { "computeFileSizes", "(Ljava/lang/String;)J", (void*)computeFileSizes },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

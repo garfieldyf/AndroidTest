@@ -107,28 +107,20 @@ public final class Pools {
         }
 
         /**
-         * Retrieves a {@link Rect} from this <tt>Pool</tt>. Allows us to avoid
-         * allocating new <tt>Rect</tt> in many cases. When the <tt>Rect</tt>
-         * can no longer be used, The caller should be call {@link #recycle(Rect)}
-         * to recycles the <tt>Rect</tt>.
-         * @return The <tt>Rect</tt> object.
-         * @see #obtain(int, int, int, int)
-         */
-        public final Rect obtain() {
-            final Rect result = referent.getAndSet(null);
-            return (result != null ? result : new Rect());
-        }
-
-        /**
          * Equivalent to calling<pre>
          * final Rect rect = obtain();
          * rect.set(left, top, right, bottom);</pre>
          * @see #obtain()
          */
         public final Rect obtain(int left, int top, int right, int bottom) {
-            final Rect result = sInstance.obtain();
+            final Rect result = obtain();
             result.set(left, top, right, bottom);
             return result;
+        }
+
+        @Override
+        /* package */ Rect newInstance() {
+            return new Rect();
         }
     }
 
@@ -145,28 +137,20 @@ public final class Pools {
         }
 
         /**
-         * Retrieves a {@link RectF} from this <tt>Pool</tt>. Allows us to avoid
-         * allocating new <tt>RectF</tt> in many cases. When the <tt>RectF</tt>
-         * can no longer be used, The caller should be call {@link #recycle(RectF)}
-         * to recycles the <tt>RectF</tt>.
-         * @return The <tt>RectF</tt> object.
-         * @see #obtain(float, float, float, float)
-         */
-        public final RectF obtain() {
-            final RectF result = referent.getAndSet(null);
-            return (result != null ? result : new RectF());
-        }
-
-        /**
          * Equivalent to calling<pre>
          * final RectF rect = obtain();
          * rect.set(left, top, right, bottom);</pre>
          * @see #obtain()
          */
         public final RectF obtain(float left, float top, float right, float bottom) {
-            final RectF result = sInstance.obtain();
+            final RectF result = obtain();
             result.set(left, top, right, bottom);
             return result;
+        }
+
+        @Override
+        /* package */ RectF newInstance() {
+            return new RectF();
         }
     }
 
@@ -182,16 +166,9 @@ public final class Pools {
         private MatrixPool() {
         }
 
-        /**
-         * Retrieves a {@link Matrix} from this <tt>Pool</tt>. Allows us to avoid
-         * allocating new <tt>Matrix</tt> in many cases. When the <tt>Matrix</tt>
-         * can no longer be used, The caller should be call {@link #recycle(Matrix)}
-         * to recycles the <tt>Matrix</tt>.
-         * @return The <tt>Matrix</tt> object.
-         */
-        public final Matrix obtain() {
-            final Matrix result = referent.getAndSet(null);
-            return (result != null ? result : new Matrix());
+        @Override
+        /* package */ Matrix newInstance() {
+            return new Matrix();
         }
     }
 
@@ -206,7 +183,7 @@ public final class Pools {
      * Class <tt>AbstractPool</tt> is an implementation of a {@link Pool}.
      */
     private static abstract class AbstractPool<T> {
-        /* package */ final AtomicReference<T> referent;
+        private final AtomicReference<T> referent;
 
         /**
          * Constructor
@@ -216,13 +193,33 @@ public final class Pools {
         }
 
         /**
+         * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
+         * allocating new elements in many cases. When the element can no
+         * longer be used, The caller should be call {@link #recycle(T)} to
+         * recycles the element.
+         * @return The element.
+         * @see #recycle(T)
+         */
+        public final T obtain() {
+            final T result = referent.getAndSet(null);
+            return (result != null ? result : newInstance());
+        }
+
+        /**
          * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
          * calling this function you must not ever touch the <em>element</em> again.
          * @param element The element to recycle.
+         * @see #obtain()
          */
         public final void recycle(T element) {
             referent.compareAndSet(null, element);
         }
+
+        /**
+         * Creates a new instance.
+         * @return A new instance.
+         */
+        /* package */ abstract T newInstance();
     }
 
     /**

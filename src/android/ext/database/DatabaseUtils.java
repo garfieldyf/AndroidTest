@@ -145,7 +145,7 @@ public final class DatabaseUtils {
             bindArgs(prog, bindArgs);
             final ParcelFileDescriptor fd = prog.simpleQueryForBlobFileDescriptor();
             if (fd != null) {
-                // Don't close the fd, The AutoCloseInputStream take care of close the fd.
+                // Don't close the fd, The AutoCloseInputStream take care of close it.
                 result = new AutoCloseInputStream(fd);
             }
         } catch (SQLiteException e) {

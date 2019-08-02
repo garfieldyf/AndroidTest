@@ -2,6 +2,7 @@ package android.ext.page;
 
 import java.util.BitSet;
 import java.util.Formatter;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import android.ext.cache.Cache;
@@ -289,6 +290,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             mPageCache.put(page, (Page<E>)data);
             UIHandler.notifyItemRangeInserted(mRecyclerView, getPositionForPage(page, 0), itemCount);
         }
+    }
+
+    /**
+     * Returns a copy of the current page cache of this adapter.
+     * @return A copy of the page cache.
+     */
+    public final Map<Integer, Page<E>> snapshot() {
+        return mPageCache.snapshot();
     }
 
     /**

@@ -1,7 +1,6 @@
 package android.ext.image;
 
 import java.io.File;
-import java.lang.ref.WeakReference;
 import java.net.HttpURLConnection;
 import android.app.Activity;
 import android.content.Context;
@@ -17,11 +16,10 @@ import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.util.Log;
-import android.widget.ImageView;
 
 /**
- * Class <tt>AsyncImageTask</tt> allows to load an image from the specified URI
- * on a background thread and publish result on the UI thread.
+ * Class <tt>AsyncImageTask</tt> allows to load the images from the specified
+ * URI on a background thread and publish results on the UI thread.
  * <h3>AsyncImageTask's generic types</h3>
  * <p>The one type used by an image task are the following:</p>
  * <tt>URI</tt>, The URI type of the task, accepts the following URI schemes:
@@ -34,14 +32,34 @@ import android.widget.ImageView;
  * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
  * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
  * <h3>Usage</h3>
- * <p>Here is an example:</p><pre>
- * new AsyncImageTask&lt;String&gt;(context)
- *    .setTarget(imageView)
+ * <p>Here is an example of subclassing:</p><pre>
+ * private static final class ImageTask extends AsyncImageTask&lt;String&gt; {
+ *     public ImageTask(Activity ownerActivity) {
+ *         super(ownerActivity);
+ *     }
+ *
+ *     {@code @Override}
+ *     protected void onPostExecute(Object[] results) {
+ *         final Activity activity = getOwnerActivity();
+ *         if (activity == null) {
+ *             // The owner activity has been destroyed or release by the GC.
+ *             return;
+ *         }
+ *
+ *         if (results[0] != null) {
+ *             // Loading succeeded, update UI.
+ *         } else {
+ *             // Loading failed, show error or empty UI.
+ *         }
+ *     }
+ * }
+ *
+ * new ImageTask(ownerActivity)
  *    .setParameters(R.xml.params)
  *    .execute(url);</pre>
  * @author Garfield
  */
-public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
+public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -51,11 +69,6 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
      * The {@link Parameters} to decode bitmap.
      */
     protected Parameters mParameters;
-
-    /**
-     * The <tt>Object</tt> to bind an image.
-     */
-    private WeakReference<Object> mTarget;
 
     /**
      * Constructor
@@ -74,16 +87,6 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     public AsyncImageTask(Activity ownerActivity) {
         super(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
-    }
-
-    /**
-     * Sets the target used to bind the image.
-     * @param target The <tt>Object</tt> to bind.
-     * @return This task.
-     */
-    public final AsyncImageTask<URI> setTarget(Object target) {
-        mTarget = new WeakReference<Object>(target);
-        return this;
     }
 
     /**
@@ -117,34 +120,13 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
         try {
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
                 final URI uri = params[i];
-                results[i] = (matchScheme(uri) ? downloadImage(uri, tempBuffer) : decodeImage(uri, tempBuffer));
+                results[i] = (matchScheme(uri) ? downloadImage(uri.toString(), tempBuffer) : decodeImage(uri, tempBuffer));
             }
         } finally {
             ByteArrayPool.sInstance.recycle(tempBuffer);
         }
 
         return results;
-    }
-
-    @Override
-    protected void onPostExecute(Object[] results) {
-        if (mTarget != null) {
-            final ImageView target = (ImageView)mTarget.get();
-            if (target != null) {
-                target.setImageBitmap((Bitmap)results[0]);
-            }
-        }
-    }
-
-    /**
-     * Returns the target associated with this task.
-     * @return The target or <tt>null</tt> if the target released by the GC.
-     * @see #setTarget(Object)
-     */
-    @SuppressWarnings("unchecked")
-    protected final <T> T getTarget() {
-        DebugUtils.__checkError(mTarget == null, "The " + getClass().getName() + " did not call setTarget()");
-        return (T)mTarget.get();
     }
 
     /**
@@ -170,18 +152,18 @@ public class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
     }
 
     /**
-     * Downloads the image from the specified <em>uri</em>.
-     * @param uri The uri to decode.
+     * Decodes an image from the specified <em>url</em>
+     * @param url The url to download.
      * @param tempBuffer The temporary storage to use for downloading.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
-    protected Object downloadImage(URI uri, byte[] tempBuffer) {
+    protected Object downloadImage(String url, byte[] tempBuffer) {
         final File imageFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
-            final int statusCode = new DownloadRequest(uri.toString()).connectTimeout(30000).readTimeout(30000).download(imageFile.getPath(), this, tempBuffer);
+            final int statusCode = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load image data from - '" + uri + "'\n" + e);
+            Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
             return null;
         } finally {
             imageFile.delete();

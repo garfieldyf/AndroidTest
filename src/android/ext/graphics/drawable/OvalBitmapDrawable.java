@@ -7,7 +7,9 @@ import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Outline;
+import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
@@ -52,6 +54,11 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     @Override
     protected void getConvexPath(RectF bounds, Path outPath) {
         outPath.addOval(bounds, Direction.CW);
+    }
+
+    @Override
+    protected void draw(Canvas canvas, RectF bounds, Paint paint) {
+        canvas.drawPath(mState.mPath, paint);
     }
 
     @Override

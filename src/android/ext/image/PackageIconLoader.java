@@ -6,14 +6,12 @@ import android.content.pm.ApplicationInfo;
 import android.ext.cache.Cache;
 import android.ext.cache.LruCache;
 import android.ext.content.AsyncLoader;
-import android.ext.util.PackageUtils;
 import android.ext.util.PackageUtils.PackageItemIcon;
 import android.util.Printer;
 
 /**
  * Class <tt>PackageIconLoader</tt> allows to load a package archive file's
  * icon and label on a background thread and bind it to target on the UI thread.
- * @see PackageUtils#loadPackageArchiveIcon(Context, ApplicationInfo)
  * @author Garfield
  */
 public class PackageIconLoader extends AsyncLoader<String, ApplicationInfo, PackageItemIcon> {
@@ -61,6 +59,6 @@ public class PackageIconLoader extends AsyncLoader<String, ApplicationInfo, Pack
 
     @Override
     protected PackageItemIcon loadInBackground(Task<?, ?> task, String key, ApplicationInfo[] params, int flags) {
-        return PackageUtils.loadPackageArchiveIcon(mContext, params[0]);
+        return new PackageItemIcon(mContext, params[0]);
     }
 }

@@ -158,69 +158,6 @@ public final class PackageUtils {
         return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
     }
 
-    /**
-     * Retrieve the application's icon and label associated with the specified <em>info</em>.
-     * @param context The <tt>Context</tt>.
-     * @param info The {@link ApplicationInfo} must be a package archive file's application info
-     * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
-     * file full path.
-     * @return A {@link PackageItemIcon} containing the application's icon and label.
-     * @see #loadPackageArchiveIcon(Context, ApplicationInfo, PackageItemIcon)
-     * @see PackageManager#getPackageArchiveInfo(String, int)
-     */
-    public static PackageItemIcon loadPackageArchiveIcon(Context context, ApplicationInfo info) {
-        final PackageItemIcon result = new PackageItemIcon();
-        loadPackageArchiveIcon(context, info, result);
-        return result;
-    }
-
-    /**
-     * Retrieve the application's icon and label associated with the specified <em>info</em>.
-     * @param context The <tt>Context</tt>.
-     * @param info The {@link ApplicationInfo} must be a package archive file's application info
-     * and {@link ApplicationInfo#publicSourceDir publicSourceDir} must be contains the archive
-     * file full path.
-     * @param outResult The {@link PackageItemIcon} to store the application's icon and label.
-     * @see #loadPackageArchiveIcon(Context, ApplicationInfo)
-     * @see PackageManager#getPackageArchiveInfo(String, int)
-     */
-    @SuppressWarnings("deprecation")
-    public static void loadPackageArchiveIcon(Context context, ApplicationInfo info, PackageItemIcon outResult) {
-        DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
-        final AssetManager assets = new AssetManager();
-        try {
-            // Adds an additional archive file to the assets.
-            assets.addAssetPath(info.publicSourceDir);
-
-            // Loads the application's icon.
-            final Resources res = new Resources(assets, context.getResources().getDisplayMetrics(), null);
-            if (info.icon != 0) {
-                outResult.icon = res.getDrawable(info.icon);
-            } else {
-                outResult.icon = context.getPackageManager().getDefaultActivityIcon();
-            }
-
-            // Loads the application's label.
-            final CharSequence label;
-            if (info.nonLocalizedLabel != null) {
-                label = info.nonLocalizedLabel;
-            } else {
-                label = res.getText(info.labelRes, info.packageName);
-            }
-
-            /*
-             * May be kill my process after unmounting usb disk.
-             * outResult.icon  = context.getPackageManager().getApplicationIcon(info);
-             * outResult.lable = context.getPackageManager().getApplicationLabel(info);
-             */
-            outResult.label = StringUtils.trim(label);
-        } finally {
-            // Close the assets to avoid ProcessKiller
-            // kill my process after unmounting usb disk.
-            assets.close();
-        }
-    }
-
     public static void dumpPackageInfos(Printer printer, Collection<PackageInfo> infos) {
         final StringBuilder result = new StringBuilder(384);
         final int size = ArrayUtils.getSize(infos);
@@ -254,16 +191,12 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @see #PackageItemIcon(Drawable, CharSequence)
-         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon() {
         }
 
         /**
          * Constructor
-         * @see #PackageItemIcon()
-         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
@@ -272,16 +205,54 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @see #PackageItemIcon()
-         * @see #PackageItemIcon(Drawable, CharSequence)
          */
         public PackageItemIcon(PackageManager pm, ResolveInfo info) {
             this.icon  = info.loadIcon(pm);
             this.label = info.loadLabel(pm);
         }
 
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         * @param info The {@link ApplicationInfo} must be a package archive file's
+         * application info and {@link ApplicationInfo#publicSourceDir publicSourceDir}
+         * must be contains the archive file full path.
+         * @see PackageManager#getPackageArchiveInfo(String, int)
+         */
+        public PackageItemIcon(Context context, ApplicationInfo info) {
+            DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
+            final AssetManager assets = new AssetManager();
+            try {
+                // Adds an additional archive file to the assets.
+                assets.addAssetPath(info.publicSourceDir);
+
+                /*
+                 * May be kill my process after unmounting usb disk.
+                 * icon  = context.getPackageManager().getApplicationIcon(info);
+                 * lable = context.getPackageManager().getApplicationLabel(info);
+                 */
+                initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), info);
+            } finally {
+                // Close the assets to avoid ProcessKiller
+                // kill my process after unmounting usb disk.
+                assets.close();
+            }
+        }
+
         public StringBuilder dump(StringBuilder out) {
             return out.append(getClass().getSimpleName() + " { lable = ").append(label).append(", icon = ").append(icon).append(" }");
+        }
+
+        /**
+         * Initializes this object with the specified <em>info</em>.
+         * @param context The <tt>Context</tt>.
+         * @param res The package archive file's <tt>Resources</tt>.
+         * @param info The package archive file's {@link ApplicationInfo}.
+         */
+        @SuppressWarnings("deprecation")
+        protected void initialize(Context context, Resources res, ApplicationInfo info) {
+            this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : context.getPackageManager().getDefaultActivityIcon());
+            this.label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
         }
     }
 

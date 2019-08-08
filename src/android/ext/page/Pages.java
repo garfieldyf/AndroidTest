@@ -2,15 +2,9 @@ package android.ext.page;
 
 import java.util.List;
 import org.json.JSONArray;
-import android.database.Cursor;
-import android.ext.cache.Cache;
-import android.ext.cache.MapCache;
-import android.ext.cache.SimpleLruCache;
-import android.ext.database.DatabaseUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.JsonUtils;
-import android.util.ArrayMap;
 
 /**
  * Class Pages
@@ -77,41 +71,6 @@ public final class Pages {
      */
     public static <E> Page<E> newPage(JSONArray data) {
         return (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null);
-    }
-
-    /**
-     * Returns a new {@link ResourcePage} to hold the <tt>cursor</tt>, handling <tt>null</tt> <em>cursor</em>.
-     * @param cursor A {@link Cursor} of the page data.
-     * @return A new <tt>ResourcePage</tt> or <tt>null</tt>.
-     * @see CursorPage
-     */
-    public static ResourcePage<Cursor> newPage(Cursor cursor) {
-        return (DatabaseUtils.getCount(cursor) > 0 ? new CursorPage(cursor) : null);
-    }
-
-    /**
-     * Returns a new page cache instance.
-     * @param maxPageCount The maximum number of pages to allow in the page cache.
-     * Pass <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
-     * @return A new {@link Page} {@link Cache} instance.
-     * @see #newResourcePageCache(int)
-     * @see MapCache
-     * @see SimpleLruCache
-     */
-    public static <E> Cache<Integer, Page<E>> newPageCache(int maxPageCount) {
-        return (maxPageCount > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPageCount) : new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)));
-    }
-
-    /**
-     * Returns a new resource page cache instance.
-     * @param maxPageCount The maximum number of pages to allow in the page cache.
-     * Pass <tt>0</tt> that the returned page cache is the <b>unlimited-size</b> cache.
-     * @return A new {@link ResourcePage} {@link Cache} instance.
-     * @see ResourcePage
-     * @see #newPageCache(int)
-     */
-    public static <E> Cache<Integer, ResourcePage<E>> newResourcePageCache(int maxPageCount) {
-        return (maxPageCount > 0 ? new LruResourcePageCache<E>(maxPageCount) : new ResourcePageCache<E>(8));
     }
 
     /**
@@ -199,109 +158,6 @@ public final class Pages {
         @SuppressWarnings("unchecked")
         public E getItem(int position) {
             return (E)mData.opt(position);
-        }
-    }
-
-    /**
-     * Class <tt>CursorPage</tt> is an implementation of a {@link ResourcePage}.
-     */
-    public static class CursorPage implements ResourcePage<Cursor> {
-        /**
-         * The {@link Cursor} of the page data.
-         */
-        protected final Cursor mCursor;
-
-        /**
-         * Constructor
-         * @param cursor A {@link Cursor} of the page data.
-         */
-        public CursorPage(Cursor cursor) {
-            DebugUtils.__checkError(DatabaseUtils.getCount(cursor) == 0, "cursor == null || cursor.getCount() == 0");
-            mCursor = cursor;
-        }
-
-        @Override
-        public void close() {
-            mCursor.close();
-        }
-
-        @Override
-        public int getCount() {
-            return mCursor.getCount();
-        }
-
-        @Override
-        public Cursor getItem(int position) {
-            return (mCursor.moveToPosition(position) ? mCursor : null);
-        }
-    }
-
-    /**
-     * Class <tt>ResourcePageCache</tt> is an implementation of a {@link Cache}.
-     */
-    private static final class ResourcePageCache<E> extends MapCache<Integer, ResourcePage<E>> {
-        /**
-         * Constructor
-         * @param capacity The initial capacity of this cache.
-         */
-        public ResourcePageCache(int capacity) {
-            super(new ArrayMap<Integer, ResourcePage<E>>(capacity));
-        }
-
-        @Override
-        public void clear() {
-            if (map.size() > 0) {
-                for (ResourcePage<E> page : map.values()) {
-                    page.close();
-                }
-
-                map.clear();
-            }
-        }
-
-        @Override
-        public ResourcePage<E> remove(Integer key) {
-            final ResourcePage<E> result = map.remove(key);
-            if (result != null) {
-                result.close();
-            }
-
-            return result;
-        }
-
-        @Override
-        public ResourcePage<E> put(Integer key, ResourcePage<E> value) {
-            final ResourcePage<E> result = map.put(key, value);
-            if (result != null) {
-                result.close();
-            }
-
-            return result;
-        }
-    }
-
-    /**
-     * Class <tt>LruResourcePageCache</tt> is an implementation of a {@link Cache}.
-     */
-    private static final class LruResourcePageCache<E> extends SimpleLruCache<Integer, ResourcePage<E>> {
-        /**
-         * Constructor
-         * @param maxSize The maximum number of pages to allow in this cache.
-         */
-        public LruResourcePageCache(int maxSize) {
-            super(maxSize);
-        }
-
-        @Override
-        public void clear() {
-            trimToSize(-1);
-        }
-
-        @Override
-        protected void entryRemoved(boolean evicted, Integer key, ResourcePage<E> oldPage, ResourcePage<E> newPage) {
-            if (evicted || oldPage != newPage) {
-                oldPage.close();
-            }
         }
     }
 

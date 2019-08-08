@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import android.ext.cache.Cache;
+import android.ext.cache.MapCache;
 import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.util.ArrayMap;
 import android.util.Printer;
 import android.view.View;
 
@@ -32,22 +34,19 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     private final BitSet mLoadStates;
     private RecyclerView mRecyclerView;
-    private final Cache<Integer, Page<E>> mPageCache;
+    private Cache<Integer, Page<E>> mPageCache;
 
     /**
      * Constructor
-     * @param maxPageCount The maximum number of pages to allow in the page cache.
-     * Pass <tt>0</tt> indicates the page cache is the <b>unlimited-size</b> cache.
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
      * @param prefetchDistance Defines how far to the first or last item in the
      * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
      * this adapter will not prefetch data.
      * @see #PageAdapter(Cache, int, int, int)
-     * @see Pages#newPageCache(int)
      */
-    public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
-        this(Pages.<E>newPageCache(maxPageCount), initialSize, pageSize, prefetchDistance);
+    public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
+        this(new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)), initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -58,7 +57,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @param prefetchDistance Defines how far to the first or last item in the
      * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
      * this adapter will not prefetch data.
-     * @see #PageAdapter(int, int, int, int)
+     * @see #PageAdapter(int, int, int)
      */
     public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
@@ -410,5 +409,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
                 getPage(page + 1);
             }
         }
+    }
+
+    /**
+     * Sets the {@link Page} {@link Cache} to store the pages.
+     */
+    /* package */ final void setPageCache(Cache<Integer, Page<E>> pageCache) {
+        mPageCache = pageCache;
     }
 }

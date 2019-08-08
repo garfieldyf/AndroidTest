@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import android.content.res.Resources;
+import android.ext.util.UIHandler;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;
@@ -17,6 +18,15 @@ import android.view.ViewGroup;
  * @author Garfield
  */
 public final class LayoutManagerHelper {
+    /**
+     * Called when an item in the data set of the adapter wants focus.
+     * @param layoutManager The {@link LayoutManager}.
+     * @param position The position of the item in the data set of the adapter.
+     */
+    public static void requestChildFocus(LayoutManager layoutManager, int position) {
+        UIHandler.sInstance.post(new FocusFinder(layoutManager, position));
+    }
+
     /**
      * Equivalent to calling <tt>recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView))</tt>.
      * @param recyclerView The {@link RecyclerView} to set.
@@ -215,6 +225,43 @@ public final class LayoutManagerHelper {
     }
 
     /**
+     * Class <tt>ItemViewFinder</tt> used to find the specified child view from the {@link RecyclerView}.
+     */
+    public static abstract class ItemViewFinder implements Runnable {
+        private int mRetryCount;
+        private final int mPosition;
+        private final LayoutManager mLayoutManager;
+
+        /**
+         * @param layoutManager The {@link LayoutManager}.
+         * @param position The adapter position of the item to find.
+         */
+        public ItemViewFinder(LayoutManager layoutManager, int position) {
+            mRetryCount = 3;
+            mPosition = position;
+            mLayoutManager = layoutManager;
+        }
+
+        @Override
+        public void run() {
+            final View itemView = mLayoutManager.findViewByPosition(mPosition);
+            if (itemView != null) {
+                onItemViewFound(mLayoutManager, mPosition, itemView);
+            } else if (--mRetryCount > 0) {
+                UIHandler.sInstance.post(this);
+            }
+        }
+
+        /**
+         * Called when an item in the data set of the adapter has been found.
+         * @param layoutManager The {@link LayoutManager}.
+         * @param position The adapter position of the item.
+         * @param itemView The item {@link View} has been found.
+         */
+        protected abstract void onItemViewFound(LayoutManager layoutManager, int position, View itemView);
+    }
+
+    /**
      * Class <tt>ChildDrawingOrder</tt> is an implementation of a {@link ChildDrawingOrderCallback}.
      */
     public static final class ChildDrawingOrder implements ChildDrawingOrderCallback {
@@ -231,6 +278,20 @@ public final class LayoutManagerHelper {
         @Override
         public int onGetChildDrawingOrder(int childCount, int i) {
             return ViewUtils.getChildDrawingOrder(mContainer, childCount, i);
+        }
+    }
+
+    /**
+     * Class <tt>FocusFinder</tt> is an implementation of an {@link ItemViewFinder}.
+     */
+    private static final class FocusFinder extends ItemViewFinder {
+        public FocusFinder(LayoutManager layoutManager, int position) {
+            super(layoutManager, position);
+        }
+
+        @Override
+        protected void onItemViewFound(LayoutManager layoutManager, int position, View itemView) {
+            itemView.requestFocus();
         }
     }
 

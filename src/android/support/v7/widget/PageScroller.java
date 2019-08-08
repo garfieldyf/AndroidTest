@@ -1,6 +1,6 @@
 package android.support.v7.widget;
 
-import android.ext.util.UIHandler;
+import android.ext.widget.LayoutManagerHelper;
 import android.graphics.Rect;
 import android.view.View;
 
@@ -120,7 +120,7 @@ public class PageScroller {
                 }
             }
 
-            UIHandler.requestChildFocus(mLayoutManager, position);
+            LayoutManagerHelper.requestChildFocus(mLayoutManager, position);
         }
     }
 

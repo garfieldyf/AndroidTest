@@ -11,7 +11,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.util.Pair;
-import android.view.View;
 
 /**
  * Class UIHandler
@@ -33,15 +32,6 @@ public final class UIHandler extends Handler implements Executor {
      */
     public static void runOnUIThread(Runnable action) {
         sInstance.execute(action);
-    }
-
-    /**
-     * Called when an item in the data set of the adapter wants focus.
-     * @param layoutManager The {@link LayoutManager}.
-     * @param position The position of the item in the data set of the adapter.
-     */
-    public static void requestChildFocus(LayoutManager layoutManager, int position) {
-        sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, position, 2, layoutManager));
     }
 
     /**
@@ -226,10 +216,6 @@ public final class UIHandler extends Handler implements Executor {
             break;
 
         // Dispatch the RecyclerView messages.
-        case MESSAGE_CHILD_FOCUS:
-            requestChildFocus(msg);
-            break;
-
         case MESSAGE_ITEM_CHANGED:
             dispatchItemChanged(msg);
             break;
@@ -277,26 +263,11 @@ public final class UIHandler extends Handler implements Executor {
         ((Adapter)params.first).notifyItemRangeChanged(msg.arg1, msg.arg2, params.second);
     }
 
-    private static void requestChildFocus(Message msg) {
-        /*
-         * msg.arg1 = position;
-         * msg.arg2 = retryCount;
-         * msg.obj  = layoutManager;
-         */
-        final View child = ((LayoutManager)msg.obj).findViewByPosition(msg.arg1);
-        if (child != null) {
-            child.requestFocus();
-        } else if (msg.arg2 > 0) {
-            sInstance.sendMessage(Message.obtain(sInstance, MESSAGE_CHILD_FOCUS, msg.arg1, msg.arg2 - 1, msg.obj));
-        }
-    }
-
     // The Task messages
     private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
     private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
     // The RecyclerView messages
-    private static final int MESSAGE_CHILD_FOCUS   = 0xEAEAEAEA;
     private static final int MESSAGE_ITEM_MOVED    = 0xEBEBEBEB;
     private static final int MESSAGE_DATA_CHANGED  = 0xECECECEC;
     private static final int MESSAGE_ITEM_REMOVED  = 0xEDEDEDED;

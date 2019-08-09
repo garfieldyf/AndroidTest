@@ -70,13 +70,6 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
         return mAnimatorManager;
     }
 
-    /**
-     * Called when this adapter is no longer used.
-     */
-    public void onDestroy() {
-        mFocusManager.onDestroy();
-    }
-
     @Override
     public VH onCreateViewHolder(ViewGroup parent, int viewType) {
         final VH viewHolder = onCreateViewHolder(LayoutInflater.from(parent.getContext()), parent, viewType);

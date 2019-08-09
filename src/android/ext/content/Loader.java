@@ -262,7 +262,7 @@ public abstract class Loader<Key> implements Factory<Task> {
         /**
          * Runs on the UI thread after {@link #doInBackground}.
          * @param result The result, returned earlier by {@link #doInBackground}.
-         * @see #doInBackground(Params[])
+         * @see #doInBackground(Params)
          */
         public abstract void onPostExecute(Result result);
 

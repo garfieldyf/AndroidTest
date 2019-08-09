@@ -4,15 +4,13 @@ import java.util.ArrayList;
 import android.view.View;
 import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver.OnGlobalFocusChangeListener;
 
 /**
  * Class FocusManager
  * @author Garfield
  */
-public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeListener {
+public class FocusManager implements OnFocusChangeListener {
     private View mFocused;
-    private boolean mBlockDescendants;
     private final ViewGroup mRootView;
 
     /**
@@ -23,7 +21,6 @@ public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeL
         mRootView = rootView;
         rootView.setFocusable(true);
         rootView.setOnFocusChangeListener(this);
-        rootView.getViewTreeObserver().addOnGlobalFocusChangeListener(this);
     }
 
     /**
@@ -54,15 +51,6 @@ public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeL
     }
 
     /**
-     * Called when this manager is no longer attached to the root view.
-     * <p>Note: This method recommended call in view <tt>onDetachedFromWindow()</tt>
-     * or activity <tt>onDestroy()</tt>.</p>
-     */
-    public void onDestroy() {
-        mRootView.getViewTreeObserver().removeOnGlobalFocusChangeListener(this);
-    }
-
-    /**
      * Called to populate focusable views within the root view. <p>Note: This method
      * recommended call in {@link View#addFocusables(ArrayList, int, int)}.</p>
      * @param views The <tt>List</tt> of output views.
@@ -72,7 +60,7 @@ public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeL
      * add default focusables after this method returns.
      */
     public boolean onAddFocusables(ArrayList<View> views, int direction, int focusableMode) {
-        return (mBlockDescendants && views.add(mRootView));
+        return (mRootView.getFocusedChild() == null && views.add(mRootView));
     }
 
     @Override
@@ -86,10 +74,5 @@ public class FocusManager implements OnFocusChangeListener, OnGlobalFocusChangeL
                 mFocused.requestFocus();
             }
         }
-    }
-
-    @Override
-    public void onGlobalFocusChanged(View oldFocus, View newFocus) {
-        mBlockDescendants = (mRootView.getFocusedChild() == null);
     }
 }

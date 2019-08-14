@@ -4,7 +4,8 @@ import android.ext.cache.SimpleLruCache;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 
 /**
- * Class LruPageAdapter
+ * Like as {@link PageAdapter}, but this adapter will be call {@link #onPageRemoved}
+ * when a {@link Page} removed by this adapter.
  * @author Garfield
  */
 public abstract class LruPageAdapter<E, VH extends ViewHolder> extends PageAdapter<E, VH> {

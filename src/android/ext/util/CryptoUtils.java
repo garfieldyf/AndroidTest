@@ -29,7 +29,7 @@ public final class CryptoUtils {
      * @see #RSAEncrypt(BigInteger, BigInteger, byte[], int, int)
      */
     public static byte[] RSAEncrypt(Key publicKey, byte[] data, int offset, int length) throws GeneralSecurityException {
-        return transfer("RSA", Cipher.ENCRYPT_MODE, publicKey, data, offset, length);
+        return transform("RSA", Cipher.ENCRYPT_MODE, publicKey, data, offset, length);
     }
 
     /**
@@ -45,7 +45,7 @@ public final class CryptoUtils {
      */
     public static byte[] RSAEncrypt(BigInteger modulus, BigInteger publicExponent, byte[] data, int offset, int length) throws GeneralSecurityException {
         final Key key = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
-        return transfer("RSA", Cipher.ENCRYPT_MODE, key, data, 0, data.length);
+        return transform("RSA", Cipher.ENCRYPT_MODE, key, data, 0, data.length);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class CryptoUtils {
      * @see #RSAEncrypt(BigInteger, BigInteger, InputStream)
      */
     public static byte[] RSAEncrypt(Key publicKey, InputStream source) throws IOException, GeneralSecurityException {
-        return transfer("RSA", Cipher.ENCRYPT_MODE, publicKey, source);
+        return transform("RSA", Cipher.ENCRYPT_MODE, publicKey, source);
     }
 
     /**
@@ -73,7 +73,7 @@ public final class CryptoUtils {
      */
     public static byte[] RSAEncrypt(BigInteger modulus, BigInteger publicExponent, InputStream source) throws IOException, GeneralSecurityException {
         final Key key = KeyFactory.getInstance("RSA").generatePublic(new RSAPublicKeySpec(modulus, publicExponent));
-        return transfer("RSA", Cipher.ENCRYPT_MODE, key, source);
+        return transform("RSA", Cipher.ENCRYPT_MODE, key, source);
     }
 
     /**
@@ -87,7 +87,8 @@ public final class CryptoUtils {
      * @see #DESEncrypt(byte[], byte[], int, int)
      */
     public static byte[] DESEncrypt(byte[] password, InputStream source) throws IOException, GeneralSecurityException {
-        return DESTransfer(Cipher.ENCRYPT_MODE, password, source);
+        final Key key = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(password));
+        return transform("DES", Cipher.ENCRYPT_MODE, key, source);
     }
 
     /**
@@ -102,7 +103,8 @@ public final class CryptoUtils {
      * @see #DESEncrypt(byte[], String, String)
      */
     public static byte[] DESEncrypt(byte[] password, byte[] data, int offset, int length) throws GeneralSecurityException {
-        return DESTransfer(Cipher.ENCRYPT_MODE, password, data, offset, length);
+        final Key key = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(password));
+        return transform("DES", Cipher.ENCRYPT_MODE, key, data, offset, length);
     }
 
     /**
@@ -117,7 +119,7 @@ public final class CryptoUtils {
      */
     public static byte[] DESEncrypt(byte[] password, String data, String charsetName) throws GeneralSecurityException {
         final byte[] codePoints = data.getBytes(charsetName != null ? Charset.forName(charsetName) : Charset.defaultCharset());
-        return DESTransfer(Cipher.ENCRYPT_MODE, password, codePoints, 0, codePoints.length);
+        return DESEncrypt(password, codePoints, 0, codePoints.length);
     }
 
     /**
@@ -131,7 +133,8 @@ public final class CryptoUtils {
      * @see #DESDecrypt(byte[], InputStream)
      */
     public static byte[] DESDecrypt(byte[] password, byte[] data, int offset, int length) throws GeneralSecurityException {
-        return DESTransfer(Cipher.DECRYPT_MODE, password, data, offset, length);
+        final Key key = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(password));
+        return transform("DES", Cipher.DECRYPT_MODE, key, data, offset, length);
     }
 
     /**
@@ -144,20 +147,11 @@ public final class CryptoUtils {
      * @see #DESDecrypt(byte[], byte[], int, int)
      */
     public static byte[] DESDecrypt(byte[] password, InputStream source) throws IOException, GeneralSecurityException {
-        return DESTransfer(Cipher.DECRYPT_MODE, password, source);
-    }
-
-    private static byte[] DESTransfer(int opmode, byte[] password, InputStream source) throws IOException, GeneralSecurityException {
         final Key key = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(password));
-        return transfer("DES", opmode, key, source);
+        return transform("DES", Cipher.DECRYPT_MODE, key, source);
     }
 
-    private static byte[] DESTransfer(int opmode, byte[] password, byte[] data, int offset, int length) throws GeneralSecurityException {
-        final Key key = SecretKeyFactory.getInstance("DES").generateSecret(new DESKeySpec(password));
-        return transfer("DES", opmode, key, data, offset, length);
-    }
-
-    private static byte[] transfer(String transformation, int opmode, Key key, InputStream source) throws IOException, GeneralSecurityException {
+    private static byte[] transform(String transformation, int opmode, Key key, InputStream source) throws IOException, GeneralSecurityException {
         final Cipher cipher = Cipher.getInstance(transformation);
         cipher.init(opmode, key);
 
@@ -174,7 +168,7 @@ public final class CryptoUtils {
         }
     }
 
-    private static byte[] transfer(String transformation, int opmode, Key key, byte[] data, int offset, int length) throws GeneralSecurityException {
+    private static byte[] transform(String transformation, int opmode, Key key, byte[] data, int offset, int length) throws GeneralSecurityException {
         final Cipher cipher = Cipher.getInstance(transformation);
         cipher.init(opmode, key);
         return cipher.doFinal(data, offset, length);

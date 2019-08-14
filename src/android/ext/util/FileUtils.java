@@ -519,12 +519,15 @@ public final class FileUtils {
     }
 
     /**
-     * Computes all file's sizes with specified <em>path</em>. if <em>path</em>
+     * Computes all file's sizes with specified <em>file</em>. if <em>file</em>
      * is a directory, all sub files will be computed.
-     * @param path The file or directory to compute, must be absolute file path.
+     * @param file The file or directory to compute, must be absolute file path.
      * @return The number of bytes or <tt>0</tt> if the file does not exist.
      */
-    public static native long computeFileSizes(String path);
+    public static long computeFileSizes(File file) {
+        DebugUtils.__checkError(file == null, "file == null");
+        return (file.isDirectory() ? computeFileSizesImpl(file) : file.length());
+    }
 
     /**
      * Compares the two specified file's contents are equal.
@@ -596,6 +599,20 @@ public final class FileUtils {
                 out.write(buffer, 0, buffer.length);
             }
         }
+    }
+
+    /**
+     * Computes all file's sizes with specified <em>dir</em>.
+     */
+    private static long computeFileSizesImpl(File dir) {
+        long result = 0;
+        final File[] files = dir.listFiles();
+        for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
+            final File file = files[i];
+            result += (file.isDirectory() ? computeFileSizesImpl(file) : file.length());
+        }
+
+        return result;
     }
 
     /**

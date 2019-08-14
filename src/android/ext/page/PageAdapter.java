@@ -8,7 +8,7 @@ import java.util.Set;
 import android.ext.cache.Cache;
 import android.ext.cache.MapCache;
 import android.ext.util.DebugUtils;
-import android.ext.util.UIHandler;
+import android.ext.widget.LayoutManagerHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -89,7 +89,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         mItemCount = count;
         mPageCache.clear();
         mLoadStates.clear();
-        UIHandler.notifyDataSetChanged(mRecyclerView);
+        LayoutManagerHelper.notifyDataSetChanged(mRecyclerView);
     }
 
     /**
@@ -264,7 +264,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         final int itemCount = Pages.getCount(data);
         if (itemCount > 0) {
             mPageCache.put(page, (Page<E>)data);
-            UIHandler.notifyItemRangeChanged(mRecyclerView, getPositionForPage(page, 0), itemCount, payload);
+            LayoutManagerHelper.notifyItemRangeChanged(mRecyclerView, getPositionForPage(page, 0), itemCount, payload);
         }
     }
 
@@ -287,7 +287,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         if (itemCount > 0) {
             mItemCount += itemCount;
             mPageCache.put(page, (Page<E>)data);
-            UIHandler.notifyItemRangeInserted(mRecyclerView, getPositionForPage(page, 0), itemCount);
+            LayoutManagerHelper.notifyItemRangeInserted(mRecyclerView, getPositionForPage(page, 0), itemCount);
         }
     }
 

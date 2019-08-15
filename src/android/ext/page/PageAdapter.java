@@ -6,13 +6,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import android.ext.cache.Cache;
-import android.ext.cache.MapCache;
 import android.ext.util.DebugUtils;
 import android.ext.widget.LayoutManagerHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.ArrayMap;
 import android.util.Printer;
 import android.view.View;
 
@@ -46,7 +44,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
-        this(new MapCache<Integer, Page<E>>(new ArrayMap<Integer, Page<E>>(8)), initialSize, pageSize, prefetchDistance);
+        this(new Pages.ArrayMapCache<E>(), initialSize, pageSize, prefetchDistance);
     }
 
     /**

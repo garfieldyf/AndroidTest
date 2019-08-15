@@ -41,8 +41,6 @@ public final class Caches {
             ((SimpleLruCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof LruImageCache) {
             ((LruImageCache<?>)cache).dump(context, printer);
-        } else if (cache instanceof MapCache) {
-            ((MapCache<?, ?>)cache).dump(context, printer);
         }
     }
 
@@ -52,10 +50,6 @@ public final class Caches {
     private static final class EmptyCache implements Cache<Object, Object> {
         public static final EmptyCache sInstance = new EmptyCache();
 
-        @Override
-        public void clear() {
-        }
-
         /**
          * Always returns an empty (<tt>0-size</tt>), immutable {@link Map}.
          * @return An immutable <tt>Map</tt>.
@@ -63,6 +57,10 @@ public final class Caches {
         @Override
         public Map<Object, Object> snapshot() {
             return Collections.emptyMap();
+        }
+
+        @Override
+        public void clear() {
         }
 
         @Override

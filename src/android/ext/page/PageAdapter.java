@@ -69,6 +69,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * @see #setItemCount(int)
+     * @see #setItemCount(int, Page)
      */
     @Override
     public int getItemCount() {
@@ -77,16 +78,32 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 
     /**
      * Sets total number of items in this adapter.
-     * @param count The total number of items in this adapter.
-     * @see #getItemCount()
+     * @param itemCount The total number of items in this adapter.
+     * @see #setItemCount(int, Page)
      */
-    public void setItemCount(int count) {
+    public final void setItemCount(int itemCount) {
+        setItemCount(itemCount, null);
+    }
+
+    /**
+     * Sets total number of items in this adapter.
+     * @param itemCount The total number of items in this adapter.
+     * @param initialPage The first (index == 0) {@link Page} to add.
+     * @see #setItemCount(int)
+     */
+    public void setItemCount(int itemCount, Page<? extends E> initialPage) {
         DebugUtils.__checkUIThread("setItemCount");
-        DebugUtils.__checkError(count < 0, "count < 0");
+        DebugUtils.__checkError(itemCount < 0, "itemCount < 0");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        mItemCount = count;
         mPageCache.clear();
         mLoadStates.clear();
+        mItemCount = itemCount;
+
+        // Adds the first page to mPageCache.
+        if (Pages.getCount(initialPage) > 0) {
+            mPageCache.put(0, (Page<E>)initialPage);
+        }
+
         LayoutManagerHelper.notifyDataSetChanged(mRecyclerView);
     }
 
@@ -247,7 +264,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * when the <em>page</em> has added. <p>This is useful when asynchronously
      * loading to prevent blocking the UI.</p>
      * @param page The index of the page.
-     * @param data May be <tt>null</tt>. The <tt>Page</tt> to set.
+     * @param data May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
      * @see #setPage(int, Page)
      * @see Pages#newPage(java.util.List)
@@ -275,6 +292,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      * @param data May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @see Pages#newPage(java.util.List)
      */
+/*
     public void addPage(int page, Page<? extends E> data) {
         DebugUtils.__checkUIThread("addPage");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
@@ -288,6 +306,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             LayoutManagerHelper.notifyItemRangeInserted(mRecyclerView, getPositionForPage(page, 0), itemCount);
         }
     }
+*/
 
     /**
      * Returns a copy of the current page cache of this adapter.

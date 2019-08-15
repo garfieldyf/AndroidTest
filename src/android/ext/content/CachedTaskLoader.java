@@ -156,8 +156,8 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             final File cacheFile = loadParams.getCacheFile(mContext, key);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
-                result = download(task, key, loadParams);
-                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "download");
+                result = onDownload(task, key, loadParams, cookie);
+                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "onDownload");
             } else {
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -169,6 +169,25 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
         }
 
         return (Result)result;
+    }
+
+    /**
+     * Called on a background thread to load the resource when the <em>loadParams</em> has no cache file.
+     * @param task The current {@link Task} whose executing this method.
+     * @param key The key, passed earlier by {@link #load}.
+     * @param loadParams The parameters, passed earlier by {@link #load}.
+     * @param cookie An object, passed earlier by {@link #load}.
+     * @throws Exception if an error occurs while loading the resource.
+     * @return A result or <tt>null</tt> of the load.
+     */
+    protected Result onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> loadParams, Object cookie) throws Exception {
+        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
+        try {
+            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
+            return (statusCode == HTTP_OK && !isTaskCancelled(task) ? loadParams.parseResult(mContext, key, tempFile, task) : null);
+        } finally {
+            tempFile.delete();
+        }
     }
 
     /* package */ final boolean validateOwner() {
@@ -192,16 +211,6 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
         task.mListener = listener;
         task.mLoadParams = loadParams;
         return task;
-    }
-
-    private Object download(Task task, Object key, LoadParams loadParams) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
-        try {
-            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
-            return (statusCode == HTTP_OK && !isTaskCancelled(task) ? loadParams.parseResult(mContext, key, tempFile, task) : null);
-        } finally {
-            tempFile.delete();
-        }
     }
 
     private boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {

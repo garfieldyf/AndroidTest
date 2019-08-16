@@ -167,39 +167,49 @@ public final class Pages {
     /**
      * Class <tt>ArrayMapCache</tt> is an implementation of a {@link Cache}.
      */
-    /* package */ static final class ArrayMapCache<E> implements Cache<Integer, Page<E>> {
-        private final ArrayMap<Integer, Page<E>> map;
+    public static class ArrayMapCache<E> implements Cache<Integer, Page<E>> {
+        protected final ArrayMap<Integer, Page<E>> mPages;
 
         /**
          * Constructor
+         * @see #ArrayMapCache(int)
          */
         public ArrayMapCache() {
-            map = new ArrayMap<Integer, Page<E>>(8);
+            mPages = new ArrayMap<Integer, Page<E>>(8);
+        }
+
+        /**
+         * Constructor
+         * @param capacity The initial capacity of this cache.
+         * @see #ArrayMapCache()
+         */
+        public ArrayMapCache(int capacity) {
+            mPages = new ArrayMap<Integer, Page<E>>(capacity);
         }
 
         @Override
         public void clear() {
-            map.clear();
+            mPages.clear();
         }
 
         @Override
         public Page<E> remove(Integer page) {
-            return map.remove(page);
+            return mPages.remove(page);
         }
 
         @Override
         public Page<E> get(Integer page) {
-            return map.get(page);
+            return mPages.get(page);
         }
 
         @Override
         public Page<E> put(Integer page, Page<E> value) {
-            return map.put(page, value);
+            return mPages.put(page, value);
         }
 
         @Override
         public Map<Integer, Page<E>> snapshot() {
-            return new ArrayMap<Integer, Page<E>>(map);
+            return new ArrayMap<Integer, Page<E>>(mPages);
         }
     }
 

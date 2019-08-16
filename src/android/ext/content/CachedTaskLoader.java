@@ -35,14 +35,20 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     public JSONObject parseResult(Context context, String url, File file, Cancelable cancelable) throws Exception {
- *         if (!file.exists()) {
- *             // If the file not exists, return null or parse the JSON data from the "assets" file.
+ *     public JSONObject parseResult(Context context, String url, File cacheFile, Cancelable cancelable) throws Exception {
+ *         final JSONObject result;
+ *         if (cacheFile == null) {
+ *             // If no cache file, parse the JSON data from the network.
+ *             result = newDownloadRequest(context, url).download(cancelable);
+ *         } else if (cacheFile.exists()) {
+ *             // Parse the JSON data from the cache file.
+ *             result = JsonUtils.parse(context, cacheFile, cancelable);
+ *         } else {
+ *             // If the cache file not exists, parse the JSON data from the "assets" file.
+ *             result = JsonUtils.parse(context, UriUtils.getAssetUri("cacheFile.json"), cancelable);
+ *             // or return null
  *             return null;
  *         }
- *
- *         // Parse the file's content to a JSON object.
- *         final JSONObject result = JsonUtils.parse(context, file, cancelable);
  *
  *         // Check the result is valid.
  *         if (result != null && result.optInt("retCode") == 200) {
@@ -156,8 +162,8 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             final File cacheFile = loadParams.getCacheFile(mContext, key);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
-                result = onDownload(task, key, loadParams, cookie);
-                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "onDownload");
+                result = loadParams.parseResult(mContext, key, null, task);
+                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "parseResult");
             } else {
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
@@ -169,25 +175,6 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
         }
 
         return (Result)result;
-    }
-
-    /**
-     * Called on a background thread to load the resource when the <em>loadParams</em> has no cache file.
-     * @param task The current {@link Task} whose executing this method.
-     * @param key The key, passed earlier by {@link #load}.
-     * @param loadParams The parameters, passed earlier by {@link #load}.
-     * @param cookie An object, passed earlier by {@link #load}.
-     * @throws Exception if an error occurs while loading the resource.
-     * @return A result or <tt>null</tt> of the load.
-     */
-    protected Result onDownload(Task<?, ?> task, Key key, LoadParams<Key, Result> loadParams, Object cookie) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
-        try {
-            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile.getPath(), task, null);
-            return (statusCode == HTTP_OK && !isTaskCancelled(task) ? loadParams.parseResult(mContext, key, tempFile, task) : null);
-        } finally {
-            tempFile.delete();
-        }
     }
 
     /* package */ final boolean validateOwner() {
@@ -250,7 +237,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "download");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -332,12 +319,12 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
          * Called on a background thread to parse the data from the cache file.
          * @param context The <tt>Context</tt>.
          * @param key The key, passed earlier by {@link #load}.
-         * @param file The file's content to parse.
+         * @param cacheFile The cache file's content to parse, or <tt>null</tt> if no cache file.
          * @param cancelable A {@link Cancelable} can be check the parse is cancelled.
          * @return A result or <tt>null</tt>, defined by the subclass.
          * @throws Exception if the data can not be parse.
          */
-        Result parseResult(Context context, Key key, File file, Cancelable cancelable) throws Exception;
+        Result parseResult(Context context, Key key, File cacheFile, Cancelable cancelable) throws Exception;
     }
 
     /**

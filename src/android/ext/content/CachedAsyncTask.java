@@ -37,14 +37,20 @@ import android.util.Log;
  *     }
  *
  *     {@code @Override}
- *     protected JSONObject parseResult(String[] urls, File file) throws Exception {
- *         if (!file.exists()) {
- *             // If the file not exists, return null or parse the JSON data from the "assets" file.
+ *     protected JSONObject parseResult(String[] urls, File cacheFile) throws Exception {
+ *         final JSONObject result;
+ *         if (cacheFile == null) {
+ *             // If no cache file, parse the JSON data from the network.
+ *             result = newDownloadRequest(urls).download(this);
+ *         } else if (cacheFile.exists()) {
+ *             // Parse the JSON data from the cache file.
+ *             result = JsonUtils.parse(mContext, cacheFile, this);
+ *         } else {
+ *             // If the cache file not exists, parse the JSON data from the "assets" file.
+ *             result = JsonUtils.parse(mContext, UriUtils.getAssetUri("cacheFile.json"), this);
+ *             // or return null
  *             return null;
  *         }
- *
- *         // Parse the file's content to a JSON object.
- *         final JSONObject result = JsonUtils.parse(mContext, file, this);
  *
  *         // Check the result is valid.
  *         if (result != null && result.optInt("retCode") == 200) {
@@ -99,34 +105,28 @@ public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Param
     }
 
     /**
-     * Called on a background thread to returns the absolute path of the cache
-     * file on the filesystem.
-     * <p>Subclasses should override this method to returns the cache
-     * file path. The default implementation returns <tt>null</tt>.</p>
+     * Called on a background thread to returns the absolute path of the cache file on the filesystem.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @return The path of the cache file, or <tt>null</tt> if no cache file.
      */
-    protected File getCacheFile(Params[] params) {
-        return null;
-    }
+    protected abstract File getCacheFile(Params[] params);
 
     /**
-     * Called on a background thread to parse the data from the cache file.
-     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
-     * @param file The file's content to parse.
-     * @return A result or <tt>null</tt>, defined by the subclass of this task.
-     * @throws Exception if the data can not be parse.
-     */
-    protected abstract Result parseResult(Params[] params, File file) throws Exception;
-
-    /**
-     * Called on a background thread to returns a new download request with the
-     * specified <em>params</em>.
+     * Called on a background thread to returns a new download request with the specified <em>params</em>.
      * @param params The parameters, passed earlier by {@link #execute(Params[])}.
      * @return The instance of {@link DownloadRequest}.
      * @throws Exception if an error occurs while opening the connection.
      */
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
+
+    /**
+     * Called on a background thread to parse the data from the cache file.
+     * @param params The parameters, passed earlier by {@link #execute(Params[])}.
+     * @param cacheFile The cache file's content to parse, or <tt>null</tt> if no cache file.
+     * @return A result or <tt>null</tt>, defined by the subclass of this task.
+     * @throws Exception if the data can not be parse.
+     */
+    protected abstract Result parseResult(Params[] params, File cacheFile) throws Exception;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -142,8 +142,8 @@ public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Param
             final File cacheFile = getCacheFile(params);
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
-                result = download(params);
-                DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "download");
+                result = parseResult(params, null);
+                DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "parseResult");
             } else {
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
@@ -155,16 +155,6 @@ public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Param
         }
 
         return result;
-    }
-
-    private Result download(Params[] params) throws Exception {
-        final File tempFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
-        try {
-            final int statusCode = newDownloadRequest(params).download(tempFile.getPath(), this, null);
-            return (statusCode == HTTP_OK && !isCancelled() ? parseResult(params, tempFile) : null);
-        } finally {
-            tempFile.delete();
-        }
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {
@@ -204,7 +194,7 @@ public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Param
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "parseResult");
+            DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "download");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

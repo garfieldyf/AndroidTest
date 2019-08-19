@@ -1,10 +1,10 @@
 package android.ext.image.decoder;
 
-import static android.ext.image.ImageLoader.FLAG_CUSTOM_PARAMETERS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
@@ -23,7 +23,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * If set the image decoder will be dump the {@link Options} when
      * it will be decode image. <p>This flag can be used DEBUG mode.</p>
      */
-    public static final int FLAG_DUMP_OPTIONS = 0x00200000;
+    public static final int FLAG_DUMP_OPTIONS = 0x00400000;
 
     /**
      * The {@link Parameters} to decode bitmap.
@@ -67,8 +67,8 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     @SuppressWarnings("unchecked")
     protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
-        final Parameters parameters = ((flags & FLAG_CUSTOM_PARAMETERS) != 0 ? (Parameters)params[0] : mParameters);
-        DebugUtils.__checkError(parameters == null, "The custom Parameters must be not null");
+        final Parameters parameters = getParameters(params);
+        DebugUtils.__checkError(parameters == null, "parameters == null");
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(mContext, target, opts);
@@ -107,6 +107,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         }
 
         return bitmap;
+    }
+
+    private Parameters getParameters(Object[] params) {
+        return (ArrayUtils.getSize(params) > 0 && params[0] instanceof Parameters ? (Parameters)params[0] : mParameters);
     }
 
     private static void __checkDumpOptions(Options opts, int flags) {

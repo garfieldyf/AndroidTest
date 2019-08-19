@@ -17,6 +17,7 @@ import android.ext.image.params.ScaleParameters;
 import android.ext.image.params.SizeParameters;
 import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.GIFTransformer;
+import android.ext.image.transformer.ImageTransformer;
 import android.ext.image.transformer.OvalTransformer;
 import android.ext.image.transformer.RoundedGIFTransformer;
 import android.ext.image.transformer.RoundedRectTransformer;
@@ -30,7 +31,7 @@ import android.util.Xml;
  * Class XmlResources
  * @author Garfield
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
+@SuppressWarnings("unchecked")
 public final class XmlResources {
     /**
      * Loads a {@link Parameters} object from a xml resource.
@@ -50,8 +51,8 @@ public final class XmlResources {
      * @return The <tt>Transformer</tt> object.
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
-    public static <URI, Image> Transformer<URI, Image> loadTransformer(Context context, int id) throws NotFoundException {
-        return (Transformer<URI, Image>)load(context, id, XmlTransformerInflater.sInstance);
+    public static <Image> Transformer<Image> loadTransformer(Context context, int id) throws NotFoundException {
+        return (Transformer<Image>)load(context, id, XmlTransformerInflater.sInstance);
     }
 
     /**
@@ -73,8 +74,8 @@ public final class XmlResources {
      * @throws XmlPullParserException if the XML data cannot be parsed.
      * @throws ReflectiveOperationException if the constructor cannot be invoked.
      */
-    public static <URI, Image> Transformer<URI, Image> inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-        return (Transformer<URI, Image>)XmlTransformerInflater.sInstance.inflate(context, parser);
+    public static <Image> Transformer<Image> inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+        return (Transformer<Image>)XmlTransformerInflater.sInstance.inflate(context, parser);
     }
 
     /**
@@ -206,19 +207,18 @@ public final class XmlResources {
                 throw new XmlPullParserException(parser.getPositionDescription() + ": The <binder> tag requires a valid 'class' attribute");
             }
 
-            final AttributeSet attrs = Xml.asAttributeSet(parser);
             switch (name) {
             case "ImageBinder":
-                return new ImageBinder(context, attrs);
-
-            case "TransitionBinder":
-                return new TransitionBinder(context, attrs);
+                return ImageBinder.getInstance();
 
             case "BackgroundBinder":
-                return new BackgroundBinder(context, attrs);
+                return BackgroundBinder.getInstance();
+
+            case "TransitionBinder":
+                return new TransitionBinder(context, Xml.asAttributeSet(parser));
 
             default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
+                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, Xml.asAttributeSet(parser));
             }
         }
     }
@@ -237,14 +237,17 @@ public final class XmlResources {
             }
 
             switch (name) {
+            case "GIFTransformer":
+                return GIFTransformer.sInstance;
+
+            case "OvalTransformer":
+                return OvalTransformer.sInstance;
+
             case "BitmapTransformer":
                 return BitmapTransformer.getInstance(context);
 
-            case "GIFTransformer":
-                return GIFTransformer.getInstance();
-
-            case "OvalTransformer":
-                return OvalTransformer.getInstance();
+            case "ImageTransformer":
+                return new ImageTransformer(context, Xml.asAttributeSet(parser));
 
             case "RoundedGIFTransformer":
                 return new RoundedGIFTransformer(context, Xml.asAttributeSet(parser));

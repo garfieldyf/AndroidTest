@@ -1,12 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <TransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
-    android:duration="@android:integer/config_longAnimTime"
-    tencent:defaultImage="@drawable/ic_placeholder"
-    tencent:maxCacheSize="64" >
-
-    <com.tencent.test.CircleConverter
-        android:gravity="fill"
-        tencent:autoMirrored="horizontal" />
-
-</TransitionBinder>
+    android:duration="@android:integer/config_longAnimTime" />

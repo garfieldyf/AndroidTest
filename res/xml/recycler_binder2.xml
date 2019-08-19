@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<TransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
-    tencent:defaultImage="@drawable/ic_placeholder" >
-
-    <RoundedRectTransformer android:radius="8px" />
-
-</TransitionBinder>

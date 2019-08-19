@@ -8,11 +8,11 @@ import android.graphics.drawable.Drawable;
 /**
  * Class <tt>BitmapTransformer</tt> used to transforms a {@link Bitmap} to a {@link BitmapDrawable}.
  * <h3>Usage</h3>
- * <p>Here is a xml resource example:</p><pre>
- * &lt;BitmapTransformer /&gt;</pre>
+ * <p>Here is a xml resource example:</p>
+ * <pre>&lt;BitmapTransformer /&gt;</pre>
  * @author Garfield
  */
-public final class BitmapTransformer implements Transformer<Object, Bitmap> {
+public final class BitmapTransformer implements Transformer<Bitmap> {
     private static BitmapTransformer sInstance;
     private final Context mContext;
 
@@ -25,21 +25,20 @@ public final class BitmapTransformer implements Transformer<Object, Bitmap> {
     }
 
     /**
-     * Returns a type-safe {@link Transformer} to transforms a {@link Bitmap} to a {@link BitmapDrawable}.
+     * Returns a {@link Transformer} to transforms a {@link Bitmap} to a {@link BitmapDrawable}.
      * @param context The <tt>Context</tt>.
      * @return The <tt>Transformer</tt>.
      */
-    @SuppressWarnings("unchecked")
-    public static synchronized <URI> Transformer<URI, Bitmap> getInstance(Context context) {
+    public static synchronized Transformer<Bitmap> getInstance(Context context) {
         if (sInstance == null) {
             sInstance = new BitmapTransformer(context);
         }
 
-        return (Transformer<URI, Bitmap>)sInstance;
+        return sInstance;
     }
 
     @Override
-    public Drawable transform(Object uri, Bitmap bitmap) {
+    public Drawable transform(Bitmap bitmap) {
         return new BitmapDrawable(mContext.getResources(), bitmap);
     }
 }

@@ -7,12 +7,12 @@ import android.graphics.drawable.Drawable;
 /**
  * Class <tt>GIFTransformer</tt> used to transforms a {@link GIFImage} to a {@link GIFDrawable}.
  * <h3>Usage</h3>
- * <p>Here is a xml resource example:</p><pre>
- * &lt;GIFTransformer /&gt;</pre>
+ * <p>Here is a xml resource example:</p>
+ * <pre>&lt;GIFTransformer /&gt;</pre>
  * @author Garfield
  */
-public final class GIFTransformer implements Transformer<Object, GIFImage> {
-    private static final GIFTransformer sInstance = new GIFTransformer();
+public final class GIFTransformer implements Transformer<GIFImage> {
+    public static final Transformer<GIFImage> sInstance = new GIFTransformer();
 
     /**
      * Constructor
@@ -20,17 +20,8 @@ public final class GIFTransformer implements Transformer<Object, GIFImage> {
     private GIFTransformer() {
     }
 
-    /**
-     * Returns a type-safe {@link Transformer} to transforms a {@link GIFImage} to a {@link GIFDrawable}.
-     * @return The <tt>Transformer</tt>.
-     */
-    @SuppressWarnings("unchecked")
-    public static <URI> Transformer<URI, GIFImage> getInstance() {
-        return (Transformer<URI, GIFImage>)sInstance;
-    }
-
     @Override
-    public Drawable transform(Object uri, GIFImage image) {
+    public Drawable transform(GIFImage image) {
         return new GIFDrawable(image);
     }
 }

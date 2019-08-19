@@ -21,6 +21,7 @@ import android.ext.content.res.XmlResources;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
+import android.ext.image.transformer.Transformer;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -48,7 +49,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Options> mOptionsPool;
-    /* package */ SparseArray<Parameters> mParamsCache;
+
+    private final SparseArray<Parameters> mParameters;
+    private final SparseArray<Transformer<Image>> mTransformers;
 
     /**
      * Constructor
@@ -74,10 +77,12 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
-        mFileCache   = fileCache;
-        mImageCache  = imageCache;
-        mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
-        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
+        mFileCache    = fileCache;
+        mImageCache   = imageCache;
+        mParameters   = new SparseArray<Parameters>(2);
+        mTransformers = new SparseArray<Transformer<Image>>(4);
+        mOptionsPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
+        mBufferPool   = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);
     }
 
@@ -142,43 +147,28 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         return mImageCache;
     }
 
-    /**
-     * Return a {@link Parameters} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>Parameters</tt>.
-     * @return The <tt>Parameters</tt> object.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    public final Parameters getParameters(int id) {
-        DebugUtils.__checkUIThread("getParameters");
-        if (mParamsCache == null) {
-            mParamsCache = new SparseArray<Parameters>(8);
-        }
-
-        Parameters parameters = mParamsCache.get(id, null);
-        if (parameters == null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
-            mParamsCache.append(id, parameters = XmlResources.loadParameters(mContext, id));
-        }
-
-        return parameters;
-    }
-
     public final void dump(Printer printer) {
         Pools.dumpPool(mBufferPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 
-        if (mParamsCache != null) {
-            final int size = mParamsCache.size();
-            final TypedValue value = new TypedValue();
-            final Resources res = mContext.getResources();
-
+        final TypedValue value = new TypedValue();
+        final Resources res = mContext.getResources();
+        int size = mParameters.size();
+        if (size > 0) {
             DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Parameters cache [ size = %d ] ", size);
             for (int i = 0; i < size; ++i) {
-                res.getValue(mParamsCache.keyAt(i), value, true);
-                mParamsCache.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
+                res.getValue(mParameters.keyAt(i), value, true);
+                mParameters.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
+            }
+        }
+
+        if ((size = mTransformers.size()) > 0) {
+            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Transformer cache [ size = %d ] ", size);
+            for (int i = 0; i < size; ++i) {
+                res.getValue(mTransformers.keyAt(i), value, true);
+                printer.println("  " + value.string.toString() + " ==> " + mTransformers.valueAt(i));
             }
         }
     }
@@ -199,14 +189,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         DebugUtils.__checkDebug(true, "ImageModule", "onTrimMemory " + this + " level = " + level);
         mBufferPool.clear();
         mOptionsPool.clear();
+        mParameters.clear();
+        mTransformers.clear();
 
         if (mImageCache != null) {
             mImageCache.clear();
-        }
-
-        if (mParamsCache != null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Clears the Parameters cache - size = " + mParamsCache.size());
-            mParamsCache.clear();
         }
     }
 
@@ -215,10 +202,46 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     /**
+     * Return a {@link Parameters} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>Parameters</tt>.
+     * @return The <tt>Parameters</tt> object.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    /* package */ final Parameters getParameters(int id) {
+        DebugUtils.__checkUIThread("getParameters");
+        Parameters parameters = mParameters.get(id, null);
+        if (parameters == null) {
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
+            mParameters.append(id, parameters = XmlResources.loadParameters(mContext, id));
+        }
+
+        return parameters;
+    }
+
+    /**
+     * Return a {@link Transformer} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>Transformer</tt>.
+     * @return The <tt>Transformer</tt> object.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    /* package */ final Transformer<Image> getTransformer(int id) {
+        DebugUtils.__checkUIThread("getTransformer");
+        Transformer<Image> transformer = mTransformers.get(id, null);
+        if (transformer == null) {
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Transformer - ID #0x = " + Integer.toHexString(id));
+            mTransformers.append(id, transformer = XmlResources.loadTransformer(mContext, id));
+        }
+
+        return transformer;
+    }
+
+    /**
      * Creates a new {@link FileCache} instance.
      */
     private static FileCache createFileCache(Context context, int maxSize) {
-        return (maxSize > 0 ? new LruFileCache(context, "._image_module_image_cache", maxSize) : null);
+        return (maxSize > 0 ? new LruFileCache(context, "._img_module_cache", maxSize) : null);
     }
 
     /**
@@ -376,9 +399,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             // Creates the image loader.
             final ImageLoader.ImageDecoder decoder = (ImageLoader.ImageDecoder)createImageDecoder(imageCache);
             if (mClass == null) {
-                return new ImageLoader(mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder, mModule.mBufferPool);
+                return new ImageLoader(mModule, imageCache, fileCache, decoder, binder);
             } else {
-                return (ImageLoader)newInstance(mClass, new Class[] { Context.class, Executor.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class, Pool.class }, mModule.mContext, mModule.mExecutor, imageCache, fileCache, decoder, binder, mModule.mBufferPool);
+                return (ImageLoader)newInstance(mClass, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class, Binder.class }, mModule, imageCache, fileCache, decoder, binder);
             }
         }
 

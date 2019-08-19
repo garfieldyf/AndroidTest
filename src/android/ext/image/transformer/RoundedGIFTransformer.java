@@ -19,13 +19,13 @@ import android.util.AttributeSet;
  *      android:bottomRightRadius="20dp" /&gt;</pre>
  * @author Garfield
  */
-public class RoundedGIFTransformer<URI> implements Transformer<URI, GIFImage> {
+public class RoundedGIFTransformer implements Transformer<GIFImage> {
     /**
      * The corner radii, array of 8 values. Each corner receives two
      * radius values [X, Y]. The corners are ordered <tt>top-left</tt>,
      * <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      */
-    protected final float[] mRadii;
+    private final float[] mRadii;
 
     /**
      * Constructor
@@ -63,7 +63,7 @@ public class RoundedGIFTransformer<URI> implements Transformer<URI, GIFImage> {
     }
 
     @Override
-    public Drawable transform(URI uri, GIFImage image) {
+    public Drawable transform(GIFImage image) {
         return new RoundedGIFDrawable(image, mRadii);
     }
 }

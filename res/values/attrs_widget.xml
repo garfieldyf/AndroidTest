@@ -24,10 +24,4 @@
         <attr name="scale" format="fraction" />
     </declare-styleable>
 
-    <!-- ImageBinder styleable -->
-    <declare-styleable name="ImageBinder">
-        <attr name="maxCacheSize" format="integer" />
-        <attr name="defaultImage" format="reference|color" />
-    </declare-styleable>
-
 </resources>

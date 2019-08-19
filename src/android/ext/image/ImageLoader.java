@@ -2,21 +2,19 @@ package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
-import java.util.concurrent.Executor;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
-import android.ext.image.binder.ImageBinder;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.params.Parameters;
+import android.ext.image.transformer.BitmapTransformer;
+import android.ext.image.transformer.Transformer;
 import android.ext.net.DownloadRequest;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
-import android.ext.util.Pools.Pool;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
@@ -32,52 +30,33 @@ import android.widget.ImageView;
  * <p>The two types used by an image loader are the following:</p>
  * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
- * <h3>Usage</h3>
- * <p>Here is an example:</p><pre>
- * private ImageLoader&lt;String, Bitmap&gt; mImageLoader;
- *
- * mImageLoader = module.createImageLoader()
- *     .setParameters(R.xml.decode_params)
- *     .setBinder(R.xml.image_binder)
- *     .create();
- *
- * mImageLoader.load(uri).into(imageView);</pre>
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
-    /**
-     * If set the image decoder will be use the custom {@link Parameters}
-     * to decode the image and ignore the internal decode <tt>Parameters</tt>.
-     * @see LoadRequest#parameters(Parameters)
-     */
-    public static final int FLAG_CUSTOM_PARAMETERS = 0x00400000;
-
     private final Loader<Image> mLoader;
-    private final Pool<byte[]> mBufferPool;
     private final LoadRequest<URI, Image> mRequest;
 
     protected final ImageDecoder<Image> mDecoder;
+    protected final ImageModule<URI, Image> mModule;
     protected final Binder<URI, Object, Image> mBinder;
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param executor The {@link Executor} to execute load task.
+     * @param module The {@link ImageModule}.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      * @param binder The {@link Binder} to bind the image to target.
-     * @param bufferPool The byte array {@link Pool}.
      */
-    public ImageLoader(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder, Pool<byte[]> bufferPool) {
-        super(executor, imageCache);
+    public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
+        super(module.mExecutor, imageCache);
 
-        mBufferPool = bufferPool;
         mRequest = new LoadRequest<URI, Image>(this);
         mDecoder = decoder;
-        mBinder  = ImageBinder.createImageBinder(imageCache, binder);
-        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(context));
+        mModule  = module;
+        mBinder  = binder;
+        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(module.mContext));
     }
 
     /**
@@ -100,6 +79,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = uri;
         mRequest.mBinder = mBinder;
+        mRequest.mParams = new Object[3];
         return mRequest;
     }
 
@@ -114,7 +94,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see LoadRequest
      */
     public final void load(URI uri, ImageView view) {
-        load(uri, view, FLAG_CUSTOM_PARAMETERS, (Binder<URI, Object, Image>)DefaultBinder.sInstance, Parameters.defaultParameters());
+        load(uri, view, 0, (Binder<URI, Object, Image>)DefaultBinder.sInstance, Parameters.defaultParameters());
     }
 
     /**
@@ -142,14 +122,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Returns the default image associated with this loader.
-     * @return The {@link Drawable} of the default image or <tt>null</tt>.
-     */
-    public final Drawable getDefaultImage() {
-        return (mBinder instanceof ImageBinder ? ((ImageBinder<?, ?>)mBinder).getDefaultImage() : null);
-    }
-
-    /**
      * Removes the image from this loader's memory cache and file cache.
      * @param uri The uri to remove.
      */
@@ -167,16 +139,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         if (mDecoder instanceof BitmapDecoder) {
             ((BitmapDecoder<?>)mDecoder).dump(printer);
         }
-
-        if (mBinder instanceof ImageBinder) {
-            ((ImageBinder<?, ?>)mBinder).dump(context, printer);
-        }
     }
 
     /**
      * Returns the default {@link Binder} associated with this class.
-     * The default binder has no default image, no drawable cache and
-     * can only bind the {@link Bitmap} to {@link ImageView}.
+     * The default binder has no default image can only bind the
+     * {@link Bitmap} to {@link ImageView}.
      */
     public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
         return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
@@ -184,12 +152,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     @Override
     protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
-        final byte[] buffer = mBufferPool.obtain();
+        final byte[] buffer = mModule.mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
             return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
-            mBufferPool.recycle(buffer);
+            mModule.mBufferPool.recycle(buffer);
         }
     }
 
@@ -342,7 +310,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * Class <tt>DefaultBinder</tt> used to bind the <tt>Bitmap</tt> to <tt>ImageView</tt>.
-     * The <tt>DefaultBinder</tt> has no image cache, no default image.
+     * The <tt>DefaultBinder</tt> has no image cache.
      */
     private static final class DefaultBinder implements Binder<Object, Object, Bitmap> {
         public static final DefaultBinder sInstance = new DefaultBinder();
@@ -360,6 +328,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
 
     /**
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
+     * <h3>Usage</h3>
+     * <p>Here is an example:</p><pre>
+     * mImageLoader.load(uri)
+     *     .defaultImage(R.drawable.ic_placeholder)
+     *     .transformer(R.xml.round_rect_transformer)
+     *     .into(imageView);</pre>
      */
     public static final class LoadRequest<URI, Image> {
         /* package */ URI mUri;
@@ -381,7 +355,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            __checkLoadParams();
+            if (mParams[1] == null) {
+                mParams[1] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
+            }
+
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
             mFlags  = 0;
             mParams = null;
@@ -410,27 +387,69 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         }
 
         /**
-         * Sets the parameters to load image.
-         * @param params The parameters of the load task.
+         * Sets the {@link Parameters} to decode image.
+         * @param id The xml resource id of the <tt>Parameters</tt>.
          * @return This request.
+         * @see #parameters(Parameters)
          */
-        public final LoadRequest<URI, Image> params(Object... params) {
-            DebugUtils.__checkWarning(mParams != null, "ImageLoader", "The params is already exists. Do you want overrides it.");
-            mParams = params;
+        public final LoadRequest<URI, Image> parameters(int id) {
+            mParams[0] = mLoader.mModule.getParameters(id);
             return this;
         }
 
         /**
-         * Sets the custom {@link Parameters} to decode image. Equivalent to calling
-         * <pre>request.flags(FLAG_CUSTOM_PARAMETERS).params(parameters);</pre>
+         * Sets the {@link Parameters} to decode image.
          * @param parameters The <tt>Parameters</tt> to decode.
          * @return This request.
-         * @see ImageLoader#FLAG_CUSTOM_PARAMETERS FLAG_CUSTOM_PARAMETERS
-         * @see #params(Object[])
+         * @see #parameters(int)
          */
         public final LoadRequest<URI, Image> parameters(Parameters parameters) {
-            mFlags |= FLAG_CUSTOM_PARAMETERS;
-            mParams = new Object[] { parameters };
+            mParams[0] = parameters;
+            return this;
+        }
+
+        /**
+         * Sets the {@link Transformer} to bind image.
+         * @param id The xml resource id of the <tt>Transformer</tt>.
+         * @return This request.
+         * @see #transformer(Transformer)
+         */
+        public final LoadRequest<URI, Image> transformer(int id) {
+            mParams[1] = mLoader.mModule.getTransformer(id);
+            return this;
+        }
+
+        /**
+         * Sets the {@link Transformer} to bind image.
+         * @param transformer The <tt>Transformer</tt>.
+         * @return This request.
+         * @see #transformer(int)
+         */
+        public final LoadRequest<URI, Image> transformer(Transformer<Image> transformer) {
+            mParams[1] = transformer;
+            return this;
+        }
+
+        /**
+         * Sets the <tt>Drawable</tt> to be used when the image is loading.
+         * @param id The resource id of the <tt>Drawable</tt>.
+         * @return This request.
+         * @see #defaultImage(Drawable)
+         */
+        @SuppressWarnings("deprecation")
+        public final LoadRequest<URI, Image> defaultImage(int id) {
+            mParams[2] = mLoader.mModule.mContext.getResources().getDrawable(id);
+            return this;
+        }
+
+        /**
+         * Sets the <tt>Drawable</tt> to be used when the image is loading.
+         * @param defaultImage The <tt>Drawable</tt>.
+         * @return This request.
+         * @see #defaultImage(int)
+         */
+        public final LoadRequest<URI, Image> defaultImage(Drawable defaultImage) {
+            mParams[2] = defaultImage;
             return this;
         }
 
@@ -442,18 +461,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         public final LoadRequest<URI, Image> binder(Binder<URI, Object, Image> binder) {
             mBinder = binder;
             return this;
-        }
-
-        private void __checkLoadParams() {
-            if ((mFlags & FLAG_CUSTOM_PARAMETERS) != 0) {
-                if (ArrayUtils.getSize(mParams) == 0) {
-                    throw new AssertionError("No custom Parameters in the params array.");
-                }
-
-                if (!(mParams[0] instanceof Parameters)) {
-                    throw new AssertionError("The custom Parameters must be at index = 0 in the params array.");
-                }
-            }
         }
     }
 

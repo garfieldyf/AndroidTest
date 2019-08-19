@@ -175,7 +175,7 @@ public final class Pages {
          * @see #ArrayMapCache(int)
          */
         public ArrayMapCache() {
-            mPages = new ArrayMap<Integer, Page<E>>(8);
+            this(8);
         }
 
         /**

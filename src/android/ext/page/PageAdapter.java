@@ -429,9 +429,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Sets the {@link Page} {@link Cache} to store the pages.
+     * Initializes the {@link Page} {@link Cache} to store the pages.
      */
-    /* package */ final void setPageCache(Cache<Integer, Page<E>> pageCache) {
+    /* package */ final void initPageCache(Cache<Integer, Page<E>> pageCache) {
         mPageCache = pageCache;
     }
 }

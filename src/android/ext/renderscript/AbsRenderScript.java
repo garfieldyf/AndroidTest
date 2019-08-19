@@ -16,7 +16,7 @@ import android.renderscript.Script;
     /**
      * Constructor
      */
-    public AbsRenderScript(RenderScript rs, T script, boolean shouldDestroy) {
+    /* package */ AbsRenderScript(RenderScript rs, T script, boolean shouldDestroy) {
         mRS = rs;
         mScript = script;
         mShouldDestroy = shouldDestroy;

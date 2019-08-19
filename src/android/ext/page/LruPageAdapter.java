@@ -20,7 +20,7 @@ public abstract class LruPageAdapter<E, VH extends ViewHolder> extends PageAdapt
      */
     public LruPageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
         super(null, initialSize, pageSize, prefetchDistance);
-        setPageCache(new LruPageCache(maxPageCount));
+        initPageCache(new LruPageCache(maxPageCount));
     }
 
     /**

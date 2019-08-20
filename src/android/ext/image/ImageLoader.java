@@ -331,7 +331,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * mImageLoader.load(uri)
-     *     .defaultImage(R.drawable.ic_placeholder)
+     *     .placeholder(R.drawable.ic_placeholder)
      *     .transformer(R.xml.round_rect_transformer)
      *     .into(imageView);</pre>
      */
@@ -434,22 +434,22 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * Sets the <tt>Drawable</tt> to be used when the image is loading.
          * @param id The resource id of the <tt>Drawable</tt>.
          * @return This request.
-         * @see #defaultImage(Drawable)
+         * @see #placeholder(Drawable)
          */
         @SuppressWarnings("deprecation")
-        public final LoadRequest<URI, Image> defaultImage(int id) {
+        public final LoadRequest<URI, Image> placeholder(int id) {
             mParams[2] = mLoader.mModule.mContext.getResources().getDrawable(id);
             return this;
         }
 
         /**
          * Sets the <tt>Drawable</tt> to be used when the image is loading.
-         * @param defaultImage The <tt>Drawable</tt>.
+         * @param drawable The <tt>Drawable</tt>.
          * @return This request.
-         * @see #defaultImage(int)
+         * @see #placeholder(int)
          */
-        public final LoadRequest<URI, Image> defaultImage(Drawable defaultImage) {
-            mParams[2] = defaultImage;
+        public final LoadRequest<URI, Image> placeholder(Drawable drawable) {
+            mParams[2] = drawable;
             return this;
         }
 

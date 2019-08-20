@@ -29,15 +29,19 @@ public final class ImageBinder implements Binder<Object, Object, Object> {
 
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        final Drawable drawable;
-        if (value == null) {
-            drawable = (Drawable)params[2];
-        } else if (value instanceof Drawable) {
-            drawable = (Drawable)value;
-        } else {
-            drawable = ((Transformer)params[1]).transform(value);
-        }
+        ((ImageView)target).setImageDrawable(getImage(params, value));
+    }
 
-        ((ImageView)target).setImageDrawable(drawable);
+    /**
+     * Returns a <tt>Drawable</tt> with the specified <em>params</em> and <em>value</em>.
+     */
+    /* package */ static Drawable getImage(Object[] params, Object value) {
+        if (value == null) {
+            return (Drawable)params[2];
+        } else if (value instanceof Drawable) {
+            return (Drawable)value;
+        } else {
+            return ((Transformer)params[1]).transform(value);
+        }
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.transformer.Transformer;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
@@ -19,7 +20,9 @@ import android.widget.ImageView;
  * @author Garfield
  */
 public final class TransitionBinder implements Binder<Object, Object, Object> {
-    private static final int[] TRANSITION_BINDER_ATTRS = { android.R.attr.duration };
+    private static final int[] TRANSITION_BINDER_ATTRS = {
+        android.R.attr.duration
+    };
 
     /**
      * The length of the transition in milliseconds.
@@ -50,22 +53,22 @@ public final class TransitionBinder implements Binder<Object, Object, Object> {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
+        DebugUtils.__checkError(params[2] == null, "The placeholder drawable is null");
         final ImageView view = (ImageView)target;
-        final Drawable defaultImage = (Drawable)params[2];
         if (value == null) {
-            view.setImageDrawable(defaultImage);
+            view.setImageDrawable((Drawable)params[2]);
         } else if (value instanceof Drawable) {
-            setViewImage(view, (Drawable)value, defaultImage, state);
+            setViewImage(view, (Drawable)value, params, state);
         } else {
-            setViewImage(view, ((Transformer)params[1]).transform(value), defaultImage, state);
+            setViewImage(view, ((Transformer)params[1]).transform(value), params, state);
         }
     }
 
-    private void setViewImage(ImageView view, Drawable value, Drawable defaultImage, int state) {
+    private void setViewImage(ImageView view, Drawable image, Object[] params, int state) {
         if ((state & STATE_LOAD_FROM_CACHE) != 0) {
-            view.setImageDrawable(value);
+            view.setImageDrawable(image);
         } else {
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { defaultImage, value });
+            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[2], image });
             view.setImageDrawable(drawable);
             drawable.setCrossFadeEnabled(true);
             drawable.startTransition(mDuration);

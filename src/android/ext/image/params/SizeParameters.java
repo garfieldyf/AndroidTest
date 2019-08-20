@@ -17,27 +17,27 @@ import android.view.View;
  * &lt;SizeParameters
  *      xmlns:android="http://schemas.android.com/apk/res/android"
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      android:minWidth="200dp"
- *      android:minHeight="300dp"
+ *      android:width="200dp"
+ *      android:height="300dp"
  *      app:mutable="true"
  *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
 public class SizeParameters extends Parameters {
     private static final int[] SIZE_PARAMETERS_ATTRS = {
-        android.R.attr.minWidth,
-        android.R.attr.minHeight,
+        android.R.attr.height,
+        android.R.attr.width,
     };
 
     /**
-     * The minimum width to decode, in pixels.
+     * The width to decode, in pixels.
      */
-    public final int minWidth;
+    public final int width;
 
     /**
-     * The minimum height to decode, in pixels.
+     * The height to decode, in pixels.
      */
-    public final int minHeight;
+    public final int height;
 
     /**
      * Constructor
@@ -49,9 +49,9 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.value = context.getResources().getDisplayMetrics().densityDpi;
-        this.minWidth  = a.getDimensionPixelOffset(0 /* android.R.attr.minWidth */, 0);
-        this.minHeight = a.getDimensionPixelOffset(1 /* android.R.attr.minHeight */, 0);
+        this.value  = context.getResources().getDisplayMetrics().densityDpi;
+        this.width  = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
+        this.height = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
         a.recycle();
     }
 
@@ -59,15 +59,15 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
-     * @param minWidth The minimum width to decode, in pixels.
-     * @param minHeight The minimum height to decode, in pixels.
+     * @param width The width to decode, in pixels.
+     * @param height The height to decode, in pixels.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Context context, Config config, int minWidth, int minHeight, boolean mutable) {
+    public SizeParameters(Context context, Config config, int width, int height, boolean mutable) {
         super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
-        this.minWidth  = minWidth;
-        this.minHeight = minHeight;
+        this.width  = width;
+        this.height = height;
     }
 
     @Override
@@ -84,14 +84,15 @@ public class SizeParameters extends Parameters {
          *      scale  = max(scaleX, scaleY);
          */
         DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity and opts.inTargetDensity uninitialized");
-        final int width, height;
+        int width = this.width, height = this.height;
         if (target instanceof View) {
             final View view = (View)target;
-            width  = Math.max(view.getWidth(),  minWidth);
-            height = Math.max(view.getHeight(), minHeight);
-        } else {
-            width  = minWidth;
-            height = minHeight;
+            final int viewWidth  = view.getWidth();
+            final int viewHeight = view.getHeight();
+            if (viewWidth > 0 && viewHeight > 0) {
+                width  = viewWidth;
+                height = viewHeight;
+            }
         }
 
         opts.inSampleSize = 1;
@@ -108,8 +109,8 @@ public class SizeParameters extends Parameters {
         printer.println(new StringBuilder(128).append(prefix)
             .append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", minWidth = ").append(minWidth)
-            .append(", minHeight = ").append(minHeight)
+            .append(", width = ").append(width)
+            .append(", height = ").append(height)
             .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());

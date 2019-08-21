@@ -369,29 +369,15 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Equivalent to calling <tt>writeCursor(writer, cursor, cursor.getColumnNames())</tt>.
-     * @param writer The {@link JsonWriter}.
-     * @param cursor The {@link Cursor} from which to get the data.
-     * @return The <em>writer</em>.
-     * @throws IOException if an error occurs while writing to the <em>writer</em>.
-     * @see #writeCursor(JsonWriter, Cursor, String[])
-     * @see #writeCursorRow(JsonWriter, Cursor, int[], String[])
-     */
-    public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor) throws IOException {
-        return writeCursor(writer, cursor, cursor.getColumnNames());
-    }
-
-    /**
      * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param columnNames The name of the columns which the values to write.
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
-     * @see #writeCursor(JsonWriter, Cursor)
      * @see #writeCursorRow(JsonWriter, Cursor, int[], String[])
      */
-    public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String... columnNames) throws IOException {
+    public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String[] columnNames) throws IOException {
         writer.beginArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -420,7 +406,6 @@ public final class DatabaseUtils {
      * <em>names</em> length must be equals the <em>columnIndexes</em> length.
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
-     * @see #writeCursor(JsonWriter, Cursor)
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String... names) throws IOException {

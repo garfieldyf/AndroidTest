@@ -233,10 +233,10 @@ public final class ProcessUtils {
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          * @see #writeDeviceInfo(Context, JsonWriter)
-         * @see DatabaseUtils#writeCursor(JsonWriter, Cursor)
+         * @see DatabaseUtils#writeCursor(JsonWriter, Cursor, String[])
          */
         public static JsonWriter writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            return DatabaseUtils.writeCursor(writeDeviceInfo(context, writer.beginObject()).name("crashes"), cursor).endObject();
+            return DatabaseUtils.writeCursor(writeDeviceInfo(context, writer.beginObject()).name("crashes"), cursor, cursor.getColumnNames()).endObject();
         }
 
         /**

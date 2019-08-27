@@ -1,8 +1,9 @@
-package android.ext.widget;
+package android.ext.temp;
 
 import java.util.Collections;
 import java.util.List;
 import android.content.Context;
+import android.ext.widget.CursorObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.ext.widget.Filters.ListFilter;
 import android.ext.widget.Filters.ListFilterClient;

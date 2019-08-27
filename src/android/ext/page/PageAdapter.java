@@ -413,7 +413,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     protected void prefetchPage(int page, int position, int adapterPosition, int prefetchDistance) {
         // Prefetch the previous page data.
         if (page > 0 && position == prefetchDistance - 1) {
-            DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page - 1) + ", position = " + position + ", adapterPosition = " + adapterPosition);
             getPage(page - 1);
         }
 
@@ -422,7 +421,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             // Prefetch the next page data.
             final int pageSize = (page > 0 ? mPageSize : mInitialSize);
             if (position == pageSize - prefetchDistance) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetchPage = " + (page + 1) + ", position = " + position + ", adapterPosition = " + adapterPosition);
                 getPage(page + 1);
             }
         }

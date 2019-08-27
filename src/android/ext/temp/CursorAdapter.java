@@ -1,20 +1,24 @@
-package android.ext.widget;
+package android.ext.temp;
 
-import static android.support.v7.widget.RecyclerView.NO_ID;
 import android.database.Cursor;
 import android.ext.util.FileUtils;
+import android.ext.widget.CursorObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
+import android.ext.widget.Filters.CursorFilter;
+import android.ext.widget.Filters.CursorFilterClient;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
-import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 
 /**
  * Abstract class CursorAdapter
  * @author Garfield
  */
-public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> implements CursorObserverClient {
+public abstract class CursorAdapter extends BaseAdapter implements Filterable, CursorObserverClient, CursorFilterClient {
     /**
      * If set the adapter will register a content observer on the
      * cursor and will call {@link #onContentChanged(boolean, Uri)}
@@ -22,8 +26,10 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      */
     public static final int FLAG_REGISTER_CONTENT_OBSERVER = 0x01;
 
-    private Cursor mCursor;
-    private int mRowIDColumn;
+    /* package */ Cursor mCursor;
+    /* package */ Filter mFilter;
+
+    private int mRowIDColumn = -1;
     private final CursorObserver mObserver;
 
     /**
@@ -34,7 +40,16 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      */
     public CursorAdapter(Cursor cursor, int flags) {
         mObserver = ((flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
-        mRowIDColumn = -1;
+        swapCursor(cursor);
+    }
+
+    /**
+     * Constructor
+     * @param cursor The cursor from which to get the data. May be <tt>null</tt>.
+     * @param observer The {@link CursorObserver}.
+     */
+    /* package */ CursorAdapter(Cursor cursor, CursorObserver observer) {
+        mObserver = observer;
         swapCursor(cursor);
     }
 
@@ -50,36 +65,10 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
     }
 
     /**
-     * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
-     * @param viewHolder The {@link ViewHolder} to query its adapter position.
-     * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not present
-     * or can not move to the specified <em>position</em>.
-     * @see #getItem(int)
-     */
-    public final Cursor getItem(ViewHolder viewHolder) {
-        final int position = viewHolder.getAdapterPosition();
-        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
-    }
-
-    /**
-     * Returns the cursor associated with this adapter. The returned
-     * cursor is already moved to the specified <em>position</em>.
-     * @param position The position of the cursor.
-     * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not
-     * present or can not move to the specified <em>position</em>.
-     * @see #getItem(ViewHolder)
-     */
-    public Cursor getItem(int position) {
-        return (mCursor != null && mCursor.moveToPosition(position) ? mCursor : null);
-    }
-
-    /**
-     * Changes the underlying cursor to a new cursor.
-     * If there is an existing cursor it will be closed.
-     * @param cursor The new cursor to be used.
      * @see #swapCursor(Cursor)
      * @see #getCursor()
      */
+    @Override
     public void changeCursor(Cursor cursor) {
         FileUtils.close(swapCursor(cursor));
     }
@@ -88,9 +77,9 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      * Swap in a new cursor, returning the old cursor. Unlike {@link #changeCursor(Cursor)},
      * the returned old cursor is <b>not</b> closed.
      * @param newCursor The new cursor to be used.
-     * @return Returns the previously set cursor, or <tt>null</tt> if there was a not one. If
-     * the given new cursor is the same instance is the previously set cursor, <tt>null</tt>
-     * is also returned.
+     * @return Returns the previously set cursor, or <tt>null</tt> if there was a not
+     * one. If the given new cursor is the same instance is the previously set cursor,
+     * <tt>null</tt> is also returned.
      * @see #changeCursor(Cursor)
      * @see #getCursor()
      */
@@ -113,12 +102,13 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
             // Notifies the attached observers that the underlying data has been
             // changed and any View reflecting the data set should refresh itself.
             mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
+            notifyDataSetChanged();
         } else {
             // Notifies the attached observers that the underlying data is no longer valid.
             mRowIDColumn = -1;
+            notifyDataSetInvalidated();
         }
 
-        notifyDataSetChanged();
         return oldCursor;
     }
 
@@ -147,16 +137,80 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
     }
 
     @Override
-    public int getItemCount() {
+    public int getCount() {
         return (mCursor != null ? mCursor.getCount() : 0);
     }
 
     @Override
+    public Cursor getItem(int position) {
+        return (mCursor != null && mCursor.moveToPosition(position) ? mCursor : null);
+    }
+
+    @Override
     public long getItemId(int position) {
-        return (mCursor != null && mRowIDColumn != -1 && mCursor.moveToPosition(position) ? mCursor.getLong(mRowIDColumn) : NO_ID);
+        return (mCursor != null && mRowIDColumn != -1 && mCursor.moveToPosition(position) ? mCursor.getLong(mRowIDColumn) : -1);
+    }
+
+    @Override
+    public View getView(int position, View view, ViewGroup parent) {
+        if (!mCursor.moveToPosition(position)) {
+            throw new IllegalStateException("Couldn't move cursor to position : " + position);
+        }
+
+        if (view == null) {
+            view = newView(position, parent);
+        }
+
+        bindView(mCursor, position, view);
+        return view;
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (mFilter == null) {
+            mFilter = new CursorFilter(this);
+        }
+
+        return mFilter;
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
+
+    @Override
+    public CharSequence convertToString(Cursor cursor) {
+        return null;
+    }
+
+    @Override
+    public Cursor onPerformFiltering(CharSequence constraint) {
+        return mCursor;
     }
 
     @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
     }
+
+    /**
+     * Returns a new {@link View} to hold the data pointed to by cursor.
+     * @param position The position of the item within the adapter's data
+     * set of the item whose view we want.
+     * @param parent The parent to which the new view is attached to.
+     * @return The newly created view.
+     * @see #bindView(Cursor, int, View)
+     */
+    protected abstract View newView(int position, ViewGroup parent);
+
+    /**
+     * Binds an existing {@link View} to the data pointed to by cursor.
+     * @param cursor The cursor from which to get the data. The cursor
+     * is already moved to the correct position.
+     * @param position The position of the item within the adapter's
+     * data set of the item whose view we want.
+     * @param view Existing view, returned earlier by {@link #newView}.
+     * @see #newView(int, ViewGroup)
+     */
+    protected abstract void bindView(Cursor cursor, int position, View view);
 }

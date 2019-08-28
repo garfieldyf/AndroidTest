@@ -1,11 +1,13 @@
 package android.ext.image.transformer;
 
+import java.util.Arrays;
 import android.content.Context;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Printer;
 
 /**
  * Class <tt>RoundedRectTransformer</tt> used to transforms a {@link Bitmap} to a {@link RoundedBitmapDrawable}.
@@ -65,5 +67,11 @@ public class RoundedRectTransformer implements Transformer<Bitmap> {
     @Override
     public Drawable transform(Bitmap bitmap) {
         return new RoundedBitmapDrawable(bitmap, mRadii);
+    }
+
+    /* package */ final void dump(Printer printer, StringBuilder result) {
+        printer.println(result.append(getClass().getSimpleName())
+            .append(" { radii = ").append(Arrays.toString(mRadii))
+            .append(" }").toString());
     }
 }

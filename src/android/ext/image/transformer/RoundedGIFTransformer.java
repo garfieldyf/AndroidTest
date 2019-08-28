@@ -1,11 +1,13 @@
 package android.ext.image.transformer;
 
+import java.util.Arrays;
 import android.content.Context;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.RoundedGIFDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
+import android.util.Printer;
 
 /**
  * Class <tt>RoundedGIFTransformer</tt> used to transforms a {@link GIFImage} to a {@link RoundedGIFDrawable}.
@@ -65,5 +67,11 @@ public class RoundedGIFTransformer implements Transformer<GIFImage> {
     @Override
     public Drawable transform(GIFImage image) {
         return new RoundedGIFDrawable(image, mRadii);
+    }
+
+    /* package */ final void dump(Printer printer, StringBuilder result) {
+        printer.println(result.append(getClass().getSimpleName())
+            .append(" { radii = ").append(Arrays.toString(mRadii))
+            .append(" }").toString());
     }
 }

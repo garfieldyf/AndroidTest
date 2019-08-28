@@ -22,6 +22,7 @@ import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.transformer.Transformer;
+import android.ext.image.transformer.Transformers;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -29,7 +30,6 @@ import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.drawable.Drawable;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -79,7 +79,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mExecutor = executor;
         mFileCache   = fileCache;
         mImageCache  = imageCache;
-        mResources   = new SparseArray<Object>(12);
+        mResources   = new SparseArray<Object>(8);
         mParamsPool  = Pools.newPool(48, 3, Object.class);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
@@ -158,14 +158,18 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         if (size > 0) {
             final TypedValue value = new TypedValue();
             final Resources res = mContext.getResources();
-            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Resource cache [ size = %d ] ", size);
+            final StringBuilder result = new StringBuilder(130);
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping Resource cache [ size = %d ] ", size);
             for (int i = 0; i < size; ++i) {
                 res.getValue(mResources.keyAt(i), value, true);
-                final Object object = mResources.valueAt(i);
-                if (object instanceof Parameters) {
-                    ((Parameters)object).dump(printer, "  " + value.string.toString() + " ==> ");
-                } else {
-                    printer.println("  " + value.string.toString() + " ==> " + object);
+                final Object resource = mResources.valueAt(i);
+
+                result.setLength(0);
+                result.append("  ").append(value.string).append(" ==> ");
+                if (resource instanceof Parameters) {
+                    ((Parameters)resource).dump(printer, result);
+                } else if (resource instanceof Transformer) {
+                    Transformers.dump(printer, result, ((Transformer<?>)resource));
                 }
             }
         }
@@ -215,25 +219,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         }
 
         return (Parameters)result;
-    }
-
-    /**
-     * Return a {@link Drawable} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The resource id of the <tt>Drawable</tt>.
-     * @return The <tt>Drawable</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    @SuppressWarnings("deprecation")
-    /* package */ final Drawable getPlaceholder(int id) {
-        DebugUtils.__checkUIThread("getPlaceholder");
-        Object result = mResources.get(id, null);
-        if (result == null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Drawable - ID #0x" + Integer.toHexString(id));
-            mResources.append(id, mContext.getResources().getDrawable(id));
-        }
-
-        return (Drawable)result;
     }
 
     /**

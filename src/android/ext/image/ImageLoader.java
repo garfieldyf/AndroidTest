@@ -440,8 +440,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @return This request.
          * @see #placeholder(Drawable)
          */
+        @SuppressWarnings("deprecation")
         public final LoadRequest<URI, Image> placeholder(int id) {
-            mParams[2] = mLoader.mModule.getPlaceholder(id);
+            mParams[2] = mLoader.mModule.mContext.getResources().getDrawable(id);
             return this;
         }
 

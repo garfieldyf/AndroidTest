@@ -88,9 +88,8 @@ public class Parameters {
         opts.inSampleSize = (int)value;
     }
 
-    public void dump(Printer printer, String prefix) {
-        printer.println(new StringBuilder(128).append(prefix)
-            .append(getClass().getSimpleName())
+    public void dump(Printer printer, StringBuilder result) {
+        printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", sampleSize = ").append(value)
             .append(", mutable = ").append(mutable)

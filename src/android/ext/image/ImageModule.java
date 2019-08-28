@@ -50,6 +50,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Options> mOptionsPool;
+    /* package */ final Pool<Object[]> mParamsPool;
     /* package */ final SparseArray<Object> mResources;
 
     /**
@@ -79,6 +80,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mFileCache   = fileCache;
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(12);
+        mParamsPool  = Pools.newPool(48, 3, Object.class);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);
@@ -146,6 +148,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     public final void dump(Printer printer) {
+        Pools.dumpPool(mParamsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
@@ -183,6 +186,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkDebug(true, "ImageModule", "onTrimMemory " + this + " level = " + level);
         mResources.clear();
+        mParamsPool.clear();
         mBufferPool.clear();
         mOptionsPool.clear();
 
@@ -206,7 +210,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         DebugUtils.__checkUIThread("getParameters");
         Object result = mResources.get(id, null);
         if (result == null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x" + Integer.toHexString(id));
             mResources.append(id, result = XmlResources.loadParameters(mContext, id));
         }
 
@@ -225,7 +229,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         DebugUtils.__checkUIThread("getPlaceholder");
         Object result = mResources.get(id, null);
         if (result == null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Drawable - ID #0x = " + Integer.toHexString(id));
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Drawable - ID #0x" + Integer.toHexString(id));
             mResources.append(id, mContext.getResources().getDrawable(id));
         }
 
@@ -244,7 +248,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         DebugUtils.__checkUIThread("getTransformer");
         Object result = mResources.get(id, null);
         if (result == null) {
-            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Transformer - ID #0x = " + Integer.toHexString(id));
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Transformer - ID #0x" + Integer.toHexString(id));
             mResources.append(id, result = XmlResources.loadTransformer(mContext, id));
         }
 

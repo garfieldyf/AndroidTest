@@ -2,6 +2,7 @@ package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import java.io.File;
+import java.util.Arrays;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
@@ -77,7 +78,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = uri;
         mRequest.mBinder = mBinder;
-        mRequest.mParams = new Object[3];
+        mRequest.mParams = mModule.mParamsPool.obtain();
         return mRequest;
     }
 
@@ -92,7 +93,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @see LoadRequest
      */
     public final void load(URI uri, ImageView view) {
-        load(uri, view, 0, (Binder<URI, Object, Image>)DefaultBinder.sInstance, Parameters.defaultParameters());
+        final Object[] params = mModule.mParamsPool.obtain();
+        params[0] = Parameters.defaultParameters();
+        load(uri, view, 0, (Binder<URI, Object, Image>)DefaultBinder.sInstance, params);
     }
 
     /**
@@ -138,6 +141,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      */
     public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
         return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
+    }
+
+    @Override
+    protected void onRecycle(Object[] params) {
+        Arrays.fill(params, null);
+        mModule.mParamsPool.recycle(params);
     }
 
     @Override

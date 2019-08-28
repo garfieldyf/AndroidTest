@@ -177,6 +177,13 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
+     * Called on the UI thread to recycle the <em>params</em>.
+     * @param params The parameters to recycle, passed earlier by {@link #load}.
+     */
+    protected void onRecycle(Params[] params) {
+    }
+
+    /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
      * or <tt>null</tt> if the load synchronously.
@@ -232,6 +239,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         // Cancel the task associated with the target.
         cancelTask(target, false);
         binder.bindValue(key, params, target, value, state);
+        onRecycle(params);
     }
 
     /**
@@ -265,6 +273,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
 
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
+            onRecycle(mParams);
             clearForRecycle();
             mKey = null;
             mTarget = null;

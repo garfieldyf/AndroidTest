@@ -29,6 +29,7 @@ import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.drawable.Drawable;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -49,9 +50,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Options> mOptionsPool;
-
-    private final SparseArray<Parameters> mParameters;
-    private final SparseArray<Transformer<Image>> mTransformers;
+    /* package */ final SparseArray<Object> mResources;
 
     /**
      * Constructor
@@ -77,12 +76,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
-        mFileCache    = fileCache;
-        mImageCache   = imageCache;
-        mParameters   = new SparseArray<Parameters>(2);
-        mTransformers = new SparseArray<Transformer<Image>>(4);
-        mOptionsPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
-        mBufferPool   = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
+        mFileCache   = fileCache;
+        mImageCache  = imageCache;
+        mResources   = new SparseArray<Object>(12);
+        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
+        mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);
     }
 
@@ -153,22 +151,19 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 
-        final TypedValue value = new TypedValue();
-        final Resources res = mContext.getResources();
-        int size = mParameters.size();
+        final int size = mResources.size();
         if (size > 0) {
-            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Parameters cache [ size = %d ] ", size);
+            final TypedValue value = new TypedValue();
+            final Resources res = mContext.getResources();
+            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Resource cache [ size = %d ] ", size);
             for (int i = 0; i < size; ++i) {
-                res.getValue(mParameters.keyAt(i), value, true);
-                mParameters.valueAt(i).dump(printer, "  " + value.string.toString() + " ==> ");
-            }
-        }
-
-        if ((size = mTransformers.size()) > 0) {
-            DebugUtils.dumpSummary(printer, new StringBuilder(130), 130, " Dumping Transformer cache [ size = %d ] ", size);
-            for (int i = 0; i < size; ++i) {
-                res.getValue(mTransformers.keyAt(i), value, true);
-                printer.println("  " + value.string.toString() + " ==> " + mTransformers.valueAt(i));
+                res.getValue(mResources.keyAt(i), value, true);
+                final Object object = mResources.valueAt(i);
+                if (object instanceof Parameters) {
+                    ((Parameters)object).dump(printer, "  " + value.string.toString() + " ==> ");
+                } else {
+                    printer.println("  " + value.string.toString() + " ==> " + object);
+                }
             }
         }
     }
@@ -187,10 +182,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkDebug(true, "ImageModule", "onTrimMemory " + this + " level = " + level);
+        mResources.clear();
         mBufferPool.clear();
         mOptionsPool.clear();
-        mParameters.clear();
-        mTransformers.clear();
 
         if (mImageCache != null) {
             mImageCache.clear();
@@ -205,36 +199,56 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * Return a {@link Parameters} object associated with a resource id.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>Parameters</tt>.
-     * @return The <tt>Parameters</tt> object.
+     * @return The <tt>Parameters</tt>.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
     /* package */ final Parameters getParameters(int id) {
         DebugUtils.__checkUIThread("getParameters");
-        Parameters parameters = mParameters.get(id, null);
-        if (parameters == null) {
+        Object result = mResources.get(id, null);
+        if (result == null) {
             DebugUtils.__checkDebug(true, "ImageModule", "Loads the Parameters - ID #0x = " + Integer.toHexString(id));
-            mParameters.append(id, parameters = XmlResources.loadParameters(mContext, id));
+            mResources.append(id, result = XmlResources.loadParameters(mContext, id));
         }
 
-        return parameters;
+        return (Parameters)result;
+    }
+
+    /**
+     * Return a {@link Drawable} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The resource id of the <tt>Drawable</tt>.
+     * @return The <tt>Drawable</tt>.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    @SuppressWarnings("deprecation")
+    /* package */ final Drawable getPlaceholder(int id) {
+        DebugUtils.__checkUIThread("getPlaceholder");
+        Object result = mResources.get(id, null);
+        if (result == null) {
+            DebugUtils.__checkDebug(true, "ImageModule", "Loads the Drawable - ID #0x = " + Integer.toHexString(id));
+            mResources.append(id, mContext.getResources().getDrawable(id));
+        }
+
+        return (Drawable)result;
     }
 
     /**
      * Return a {@link Transformer} object associated with a resource id.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>Transformer</tt>.
-     * @return The <tt>Transformer</tt> object.
+     * @return The <tt>Transformer</tt>.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
+    @SuppressWarnings("unchecked")
     /* package */ final Transformer<Image> getTransformer(int id) {
         DebugUtils.__checkUIThread("getTransformer");
-        Transformer<Image> transformer = mTransformers.get(id, null);
-        if (transformer == null) {
+        Object result = mResources.get(id, null);
+        if (result == null) {
             DebugUtils.__checkDebug(true, "ImageModule", "Loads the Transformer - ID #0x = " + Integer.toHexString(id));
-            mTransformers.append(id, transformer = XmlResources.loadTransformer(mContext, id));
+            mResources.append(id, result = XmlResources.loadTransformer(mContext, id));
         }
 
-        return transformer;
+        return (Transformer<Image>)result;
     }
 
     /**
@@ -257,7 +271,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * final ImageLoader&lt;String, Bitmap&gt; mImageLoader = module.createImageLoader()
-     *     .setParameters(R.xml.decode_params)
      *     .setBinder(R.xml.image_binder)
      *     .create();</pre>
      */
@@ -270,7 +283,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         private Class mClass;
         private Object mBinder;
         private Object mDecoder;
-        private Object mParameters;
         private final ImageModule mModule;
 
         /**
@@ -298,28 +310,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
          */
         public final Builder<URI, Image> noMemoryCache() {
             mFlags |= FLAG_NO_MEMORY_CACHE;
-            return this;
-        }
-
-        /**
-         * Sets the {@link Parameters} used to decode the image.
-         * @param id The xml resource id of the <tt>Parameters</tt>.
-         * @return This builder.
-         * @see #setParameters(Parameters)
-         */
-        public final Builder<URI, Image> setParameters(int id) {
-            mParameters = id;
-            return this;
-        }
-
-        /**
-         * Sets the {@link Parameters} used to decode the image.
-         * @param parameters The <tt>Parameters</tt>.
-         * @return This builder.
-         * @see #setParameters(int)
-         */
-        public final Builder<URI, Image> setParameters(Parameters parameters) {
-            mParameters = parameters;
             return this;
         }
 
@@ -410,22 +400,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
                 return mDecoder;
             }
 
-            final Parameters parameters;
-            if (mParameters instanceof Parameters) {
-                parameters = (Parameters)mParameters;
-            } else if (mParameters instanceof Integer) {
-                parameters = XmlResources.loadParameters(mModule.mContext, (int)mParameters);
-            } else {
-                parameters = Parameters.defaultParameters();
-            }
-
             final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
             if (mDecoder instanceof Class) {
-                return newInstance((Class)mDecoder, new Class[] { Context.class, Parameters.class, Pool.class, BitmapPool.class }, mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
+                return newInstance((Class)mDecoder, new Class[] { Context.class, Pool.class, BitmapPool.class }, mModule.mContext, mModule.mOptionsPool, bitmapPool);
             } else if (imageCache instanceof LruImageCache) {
-                return new ImageDecoder(mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
+                return new ImageDecoder(mModule.mContext, mModule.mOptionsPool, bitmapPool);
             } else {
-                return new BitmapDecoder(mModule.mContext, parameters, mModule.mOptionsPool, bitmapPool);
+                return new BitmapDecoder(mModule.mContext, mModule.mOptionsPool, bitmapPool);
             }
         }
 

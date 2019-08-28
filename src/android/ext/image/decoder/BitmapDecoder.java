@@ -4,13 +4,11 @@ import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
-import android.util.Printer;
 
 /**
  * Class <tt>BitmapDecoder</tt> used to decode the image data to a {@link Bitmap}.
@@ -26,11 +24,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     public static final int FLAG_DUMP_OPTIONS = 0x00400000;
 
     /**
-     * The {@link Parameters} to decode bitmap.
-     */
-    protected final Parameters mParameters;
-
-    /**
      * The {@link BitmapPool} used to decode the bitmap.
      */
     protected final BitmapPool mBitmapPool;
@@ -38,36 +31,20 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param parameters The {@link Parameters} to decode bitmap.
      * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to
      * reuse the bitmap when decoding bitmap.
      */
-    public BitmapDecoder(Context context, Parameters parameters, Pool<Options> optionsPool, BitmapPool bitmapPool) {
+    public BitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool);
         mBitmapPool = bitmapPool;
-        mParameters = parameters;
-        DebugUtils.__checkError(parameters == null, "parameters == null");
-    }
-
-    /**
-     * Returns the {@link Parameters} associated with this decoder.
-     * @return The <tt>Parameters</tt>.
-     */
-    public final Parameters getParameters() {
-        return mParameters;
-    }
-
-    public void dump(Printer printer) {
-        DebugUtils.dumpSummary(printer, new StringBuilder(120), 120, " Dumping Parameters ", (Object[])null);
-        mParameters.dump(printer, "  ");
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
-        final Parameters parameters = getParameters(params);
+        final Parameters parameters = (Parameters)params[0];
         DebugUtils.__checkError(parameters == null, "parameters == null");
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
@@ -107,10 +84,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         }
 
         return bitmap;
-    }
-
-    private Parameters getParameters(Object[] params) {
-        return (ArrayUtils.getSize(params) > 0 && params[0] instanceof Parameters ? (Parameters)params[0] : mParameters);
     }
 
     private static void __checkDumpOptions(Options opts, int flags) {

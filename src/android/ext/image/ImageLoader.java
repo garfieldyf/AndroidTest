@@ -6,7 +6,6 @@ import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
-import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.Transformer;
@@ -20,7 +19,6 @@ import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.util.Printer;
 import android.widget.ImageView;
 
 /**
@@ -130,14 +128,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         super.remove(uri);
         if (matchScheme(uri)) {
             mLoader.remove(uri);
-        }
-    }
-
-    @Override
-    public void dump(Context context, Printer printer) {
-        super.dump(context, printer);
-        if (mDecoder instanceof BitmapDecoder) {
-            ((BitmapDecoder<?>)mDecoder).dump(printer);
         }
     }
 
@@ -331,6 +321,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * mImageLoader.load(uri)
+     *     .parameters(R.xml.decode_params)
      *     .placeholder(R.drawable.ic_placeholder)
      *     .transformer(R.xml.round_rect_transformer)
      *     .into(imageView);</pre>
@@ -355,6 +346,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
+            if (mParams[0] == null) {
+                mParams[0] = Parameters.defaultParameters();
+            }
+
             if (mParams[1] == null) {
                 mParams[1] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
             }
@@ -436,9 +431,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
          * @return This request.
          * @see #placeholder(Drawable)
          */
-        @SuppressWarnings("deprecation")
         public final LoadRequest<URI, Image> placeholder(int id) {
-            mParams[2] = mLoader.mModule.mContext.getResources().getDrawable(id);
+            mParams[2] = mLoader.mModule.getPlaceholder(id);
             return this;
         }
 

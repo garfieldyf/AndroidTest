@@ -27,15 +27,13 @@ public final class ImageBinder implements Binder<Object, Object, Object> {
         return (Binder<URI, Object, Image>)sInstance;
     }
 
-    @Override
-    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        ((ImageView)target).setImageDrawable(getImage(params, value));
-    }
-
     /**
      * Returns a <tt>Drawable</tt> with the specified <em>params</em> and <em>value</em>.
+     * @param params The parameters, passed earlier by {@link #bindValue}.
+     * @param value The image value, passed earlier by {@link #bindValue}.
+     * @return The <tt>Drawable</tt> to bind to target.
      */
-    /* package */ static Drawable getImage(Object[] params, Object value) {
+    public static Drawable getImageValue(Object[] params, Object value) {
         if (value == null) {
             return (Drawable)params[2];
         } else if (value instanceof Drawable) {
@@ -43,5 +41,10 @@ public final class ImageBinder implements Binder<Object, Object, Object> {
         } else {
             return ((Transformer)params[1]).transform(value);
         }
+    }
+
+    @Override
+    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
+        ((ImageView)target).setImageDrawable(getImageValue(params, value));
     }
 }

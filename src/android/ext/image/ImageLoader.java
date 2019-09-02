@@ -123,6 +123,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
+     * Returns the default {@link Binder} associated with this class.
+     * The default binder has no default image can only bind the
+     * {@link Bitmap} to {@link ImageView}.
+     */
+    public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
+        return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
+    }
+
+    /**
      * Removes the image from this loader's memory cache and file cache.
      * @param uri The uri to remove.
      */
@@ -132,15 +141,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         if (matchScheme(uri)) {
             mLoader.remove(uri);
         }
-    }
-
-    /**
-     * Returns the default {@link Binder} associated with this class.
-     * The default binder has no default image can only bind the
-     * {@link Bitmap} to {@link ImageView}.
-     */
-    public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
-        return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
     }
 
     @Override

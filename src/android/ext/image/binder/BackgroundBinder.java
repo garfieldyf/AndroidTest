@@ -27,6 +27,6 @@ public final class BackgroundBinder implements Binder<Object, Object, Object> {
 
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        ((View)target).setBackground(ImageBinder.getImage(params, value));
+        ((View)target).setBackground(ImageBinder.getImageValue(params, value));
     }
 }

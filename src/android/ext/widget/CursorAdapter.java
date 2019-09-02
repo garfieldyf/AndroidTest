@@ -1,7 +1,11 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_ID;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.ext.database.DatabaseReceiver;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.net.Uri;
@@ -24,6 +28,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
 
     private Cursor mCursor;
     private int mRowIDColumn;
+    private CursorReceiver mReceiver;
     private final CursorObserver mObserver;
 
     /**
@@ -146,6 +151,33 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
         }
     }
 
+    /**
+     * Register a receiver for any local broadcasts that match the given <em>scheme</em>.
+     * @param context The <tt>Context</tt>.
+     * @param scheme The <tt>Intent</tt> data scheme to match. May be <tt>"databasename.tablename"</tt>
+     * @see #unregisterReceiver(Context)
+     */
+    public final void registerReceiver(Context context, String scheme) {
+        DebugUtils.__checkUIThread("registerReceiver");
+        if (mReceiver == null) {
+            mReceiver = new CursorReceiver();
+            mReceiver.register(context, scheme, null);
+        }
+    }
+
+    /**
+     * Unregister a receiver that has previously been registered with this adapter.
+     * @param context The <tt>Context</tt>.
+     * @see #registerReceiver(Context, String)
+     */
+    public final void unregisterReceiver(Context context) {
+        DebugUtils.__checkUIThread("unregisterReceiver");
+        if (mReceiver != null) {
+            mReceiver.unregister(context);
+            mReceiver = null;
+        }
+    }
+
     @Override
     public int getItemCount() {
         return (mCursor != null ? mCursor.getCount() : 0);
@@ -158,5 +190,15 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
 
     @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
+    }
+
+    /**
+     * Class <tt>CursorReceiver</tt> is an implementation of a {@link DatabaseReceiver}.
+     */
+    /* package */ final class CursorReceiver extends DatabaseReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            onContentChanged(false, null);
+        }
     }
 }

@@ -1,11 +1,17 @@
 package android.ext.image.decoder;
 
+import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
+import android.content.ContentResolver.OpenResourceIdResult;
 import android.content.Context;
+import android.content.res.Resources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
 import android.ext.util.Pools.Pool;
+import android.ext.util.DebugUtils;
+import android.ext.util.UriUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -58,10 +64,11 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             decodeImageBounds(uri, params, flags, opts);
 
             // Decodes the image pixels.
-            return decodeImage(uri, target, params, flags, opts);
+            final Image result = decodeImage(uri, target, params, flags, opts);
+            return (result != null ? result : decodeResource(uri));
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - '" + uri + "'\n" + e);
-            return null;
+            return decodeResource(uri);
         } finally {
             recycleOptions(opts);
         }
@@ -87,6 +94,26 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.inJustDecodeBounds = false;
         opts.inPreferredConfig  = Config.ARGB_8888;
         mOptionsPool.recycle(opts);
+    }
+
+    /**
+     * Decodes an image from the {@link Resources} and a resource id.
+     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
+     */
+    @SuppressWarnings({ "unchecked", "deprecation" })
+    private Image decodeResource(Object uri) {
+        if (!SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
+            return null;
+        }
+
+        try {
+            final Uri imageUri = (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString()));
+            final OpenResourceIdResult res = mContext.getContentResolver().getResourceId(imageUri);
+            DebugUtils.__checkDebug(true, "AbsImageDecoder", "load resource - ID #0x" + Integer.toHexString(res.id));
+            return (Image)res.r.getDrawable(res.id);
+        } catch (Exception ignored) {
+            return null;
+        }
     }
 
     /**

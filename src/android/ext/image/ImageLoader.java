@@ -7,6 +7,7 @@ import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
+import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.params.Parameters;
 import android.ext.image.transformer.BitmapTransformer;
 import android.ext.image.transformer.Transformer;
@@ -17,7 +18,6 @@ import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
@@ -32,7 +32,7 @@ import android.widget.ImageView;
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
+public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
     private final Loader<Image> mLoader;
     private final LoadRequest<URI, Image> mRequest;
 
@@ -46,7 +46,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
-     * @param binder The {@link Binder} to bind the image to target.
+     * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
      */
     public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(module.mExecutor, imageCache);
@@ -54,7 +54,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
         mRequest = new LoadRequest<URI, Image>(this);
         mDecoder = decoder;
         mModule  = module;
-        mBinder  = binder;
+        mBinder  = (binder != null ? binder : (Binder<URI, Object, Image>)this);
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(module.mContext));
     }
 
@@ -83,22 +83,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Equivalent to calling<pre>
-     * load(uri).parameters(Parameters.defaultParameters())
-     *     .binder(ImageLoader.defaultBinder())
-     *     .into(view);</pre>
-     * @param uri The uri to load.
-     * @param view The {@link ImageView} to bind.
-     * @see #load(URI)
-     * @see LoadRequest
-     */
-    public final void load(URI uri, ImageView view) {
-        final Object[] params = mModule.mParamsPool.obtain();
-        params[0] = Parameters.defaultParameters();
-        load(uri, view, 0, (Binder<URI, Object, Image>)DefaultBinder.sInstance, params);
-    }
-
-    /**
      * Returns the {@link FileCache} associated with this loader.
      * @return The <tt>FileCache</tt> or <tt>null</tt>.
      */
@@ -107,28 +91,24 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
     }
 
     /**
-     * Returns the {@link Binder} associated with this loader.
-     * @return The <tt>Binder</tt>.
+     * Returns a <tt>Drawable</tt> with the specified <em>params</em> and <em>value</em>.
+     * @param params The parameters, passed earlier by {@link Binder#bindValue}.
+     * @param value The image value, passed earlier by {@link Binder#bindValue}.
+     * @return The <tt>Drawable</tt> to bind to target.
      */
-    public final <T extends Binder<URI, Object, Image>> T getBinder() {
-        return (T)mBinder;
+    public static Drawable getImageValue(Object[] params, Object value) {
+        if (value == null) {
+            return (Drawable)params[2];
+        } else if (value instanceof Drawable) {
+            return (Drawable)value;
+        } else {
+            return ((Transformer<Object>)params[1]).transform(value);
+        }
     }
 
-    /**
-     * Returns the {@link ImageDecoder} associated with this loader.
-     * @return The <tt>ImageDecoder</tt>.
-     */
-    public final <T extends ImageDecoder<Image>> T getImageDecoder() {
-        return (T)mDecoder;
-    }
-
-    /**
-     * Returns the default {@link Binder} associated with this class.
-     * The default binder has no default image can only bind the
-     * {@link Bitmap} to {@link ImageView}.
-     */
-    public static <URI> Binder<URI, Object, Bitmap> defaultBinder() {
-        return (Binder<URI, Object, Bitmap>)DefaultBinder.sInstance;
+    @Override
+    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
+        ((ImageView)target).setImageDrawable(getImageValue(params, value));
     }
 
     /**
@@ -304,24 +284,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> {
             }
 
             return result;
-        }
-    }
-
-    /**
-     * Class <tt>DefaultBinder</tt> used to bind the <tt>Bitmap</tt> to <tt>ImageView</tt>.
-     * The <tt>DefaultBinder</tt> has no image cache.
-     */
-    private static final class DefaultBinder implements Binder<Object, Object, Bitmap> {
-        public static final DefaultBinder sInstance = new DefaultBinder();
-
-        @Override
-        public void bindValue(Object key, Object[] params, Object target, Bitmap value, int state) {
-            final ImageView view = (ImageView)target;
-            if (value != null) {
-                view.setImageBitmap(value);
-            } else {
-                view.setImageDrawable(null);
-            }
         }
     }
 

@@ -156,6 +156,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match. May be <tt>"databasename.tablename"</tt>
      * @see #unregisterReceiver(Context)
+     * @see DatabaseReceiver
      */
     public final void registerReceiver(Context context, String scheme) {
         DebugUtils.__checkUIThread("registerReceiver");
@@ -169,6 +170,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      * Unregister a receiver that has previously been registered with this adapter.
      * @param context The <tt>Context</tt>.
      * @see #registerReceiver(Context, String)
+     * @see DatabaseReceiver
      */
     public final void unregisterReceiver(Context context) {
         DebugUtils.__checkUIThread("unregisterReceiver");

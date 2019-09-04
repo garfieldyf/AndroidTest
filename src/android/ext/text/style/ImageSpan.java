@@ -18,6 +18,7 @@ public class ImageSpan extends ReplacementSpan {
     /**
      * Constructor
      * @param drawable The {@link Drawable}.
+     * @see #ImageSpan(Drawable, int)
      */
     public ImageSpan(Drawable drawable) {
         this(drawable, 0);
@@ -27,6 +28,7 @@ public class ImageSpan extends ReplacementSpan {
      * Constructor
      * @param drawable The {@link Drawable}.
      * @param padding The padding of the <em>drawable</em> in pixels.
+     * @see #ImageSpan(Drawable)
      */
     public ImageSpan(Drawable drawable, int padding) {
         mPadding  = padding;
@@ -37,10 +39,23 @@ public class ImageSpan extends ReplacementSpan {
      * Constructor
      * @param res The <tt>Resources</tt>.
      * @param id The resource id of the image.
+     * @see #ImageSpan(Resources, int, int)
      */
     @SuppressWarnings("deprecation")
     public ImageSpan(Resources res, int id) {
         this(res.getDrawable(id), 0);
+    }
+
+    /**
+     * Constructor
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the image.
+     * @param resId The resource id of the padding.
+     * @see #ImageSpan(Resources, int)
+     */
+    @SuppressWarnings("deprecation")
+    public ImageSpan(Resources res, int id, int resId) {
+        this(res.getDrawable(id), res.getDimensionPixelOffset(resId));
     }
 
     public final void setPadding(int padding) {

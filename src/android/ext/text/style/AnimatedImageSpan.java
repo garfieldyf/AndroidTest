@@ -1,7 +1,6 @@
 package android.ext.text.style;
 
 import java.lang.ref.WeakReference;
-import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.AnimationDrawable;
@@ -20,11 +19,38 @@ public class AnimatedImageSpan extends ImageSpan implements Runnable {
      * Constructor
      * @param view The {@link View}.
      * @param id The resource id of the {@link AnimationDrawable}.
+     * @see #AnimatedImageSpan(View, int, int)
+     * @see #AnimatedImageSpan(View, AnimationDrawable, int)
      */
+    @SuppressWarnings("deprecation")
     public AnimatedImageSpan(View view, int id) {
-        super(view.getResources(), id);
+        this(view, (AnimationDrawable)view.getResources().getDrawable(id), 0);
+    }
+
+    /**
+     * Constructor
+     * @param view The {@link View}.
+     * @param id The resource id of the {@link AnimationDrawable}.
+     * @param resId The resource id of the padding.
+     * @see #AnimatedImageSpan(View, int)
+     * @see #AnimatedImageSpan(View, AnimationDrawable, int)
+     */
+    @SuppressWarnings("deprecation")
+    public AnimatedImageSpan(View view, int id, int resId) {
+        this(view, (AnimationDrawable)view.getResources().getDrawable(id), view.getResources().getDimensionPixelOffset(resId));
+    }
+
+    /**
+     * Constructor
+     * @param view The {@link View}.
+     * @param drawable The {@link AnimationDrawable}.
+     * @param padding The padding of the <em>drawable</em> in pixels.
+     * @see #AnimatedImageSpan(View, int)
+     * @see #AnimatedImageSpan(View, int, int)
+     */
+    public AnimatedImageSpan(View view, AnimationDrawable drawable, int padding) {
+        super(drawable, padding);
         mViewRef = new WeakReference<View>(view);
-        DebugUtils.__checkError(!(mDrawable instanceof AnimationDrawable), "The drawable must be an AnimationDrawable");
     }
 
     @Override

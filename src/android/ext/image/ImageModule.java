@@ -372,7 +372,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             } else if (mBinder instanceof Integer) {
                 binder = XmlResources.loadBinder(mModule.mContext, (int)mBinder);
             } else {
-                binder = ImageLoader.defaultBinder();
+                binder = null;
             }
 
             // Creates the image loader.

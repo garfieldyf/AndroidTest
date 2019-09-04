@@ -1,6 +1,7 @@
 package android.ext.image.binder;
 
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.image.ImageLoader;
 import android.view.View;
 
 /**
@@ -27,6 +28,6 @@ public final class BackgroundBinder implements Binder<Object, Object, Object> {
 
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        ((View)target).setBackground(ImageBinder.getImageValue(params, value));
+        ((View)target).setBackground(ImageLoader.getImageValue(params, value));
     }
 }

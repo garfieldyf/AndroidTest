@@ -103,7 +103,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
             final File file = files[i];
             if (file.isDirectory()) {
                 ++index;
-                getFileCount(file, results);
+                getFileInfo(file, results);
                 result.append("  ").append(file.getName()).append(" { files = ").append(results[0]).append(", size = ").append(FileUtils.formatFileSize(results[1])).append(" }");
 
                 fileCounts  += results[0];
@@ -121,7 +121,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         }
     }
 
-    private static void getFileCount(File directory, long[] outResults) {
+    private static void getFileInfo(File directory, long[] outResults) {
         final File[] files  = directory.listFiles();
         final int fileCount = ArrayUtils.getSize(files);
 

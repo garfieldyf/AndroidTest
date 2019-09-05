@@ -76,7 +76,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      */
     public final LoadRequest<URI, Image> load(URI uri) {
         DebugUtils.__checkUIThread("load");
-        mRequest.mUri = parseURI(uri);
+        mRequest.mUri = resolveUri(uri);
         mRequest.mBinder = mBinder;
         mRequest.mParams = mModule.mParamsPool.obtain();
         return mRequest;
@@ -176,7 +176,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Returns the URI with the specified <em>uri</em>.
      */
-    private static <URI> URI parseURI(URI uri) {
+    private static <URI> URI resolveUri(URI uri) {
         return (uri instanceof String && ((String)uri).length() == 0 ? null : uri);
     }
 

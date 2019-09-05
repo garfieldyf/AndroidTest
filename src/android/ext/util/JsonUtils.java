@@ -193,6 +193,34 @@ public final class JsonUtils {
     }
 
     /**
+     * Adds the specified <em>values</em> into the <tt>JSONArray</tt> at the
+     * end of the <em>array</em>.
+     * @param array The <tt>JSONArray</tt> to add to.
+     * @param values A <tt>JSONArray</tt> to add.
+     * @return The <em>array</em>.
+     * @see #addAll(JSONArray, int, JSONArray)
+     */
+    public static JSONArray addAll(JSONArray array, JSONArray values) {
+        JSONArrayImpl.addAll(array, array.length(), values);
+        return array;
+    }
+
+    /**
+     * Inserts the specified <em>values</em> into the <tt>JSONArray</tt> at the
+     * specified <em>index</em>.
+     * @param array The <tt>JSONArray</tt> to insert to.
+     * @param index The index at which to insert.
+     * @param values A <tt>JSONArray</tt> to insert.
+     * @return The <em>array</em>.
+     * @throws IndexOutOfBoundsException if <tt>index < 0 || index > array.length()</tt>
+     * @see #addAll(JSONArray, JSONArray)
+     */
+    public static JSONArray addAll(JSONArray array, int index, JSONArray values) {
+        JSONArrayImpl.addAll(array, index, values);
+        return array;
+    }
+
+    /**
      * Equivalent to calling {@link JSONArray#put(int, Object)}.
      * @param array The <tt>JSONArray</tt> to add to.
      * @param index The index at which to put.
@@ -699,6 +727,15 @@ public final class JsonUtils {
             try {
                 JSONArrayImpl.__checkDouble(value);
                 ((List)sField.get(array)).add(index, value);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @SuppressWarnings("rawtypes")
+        public static void addAll(JSONArray array, int index, JSONArray values) {
+            try {
+                ((List)sField.get(array)).addAll(index, (List)sField.get(values));
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }

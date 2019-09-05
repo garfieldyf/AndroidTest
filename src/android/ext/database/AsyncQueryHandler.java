@@ -40,14 +40,14 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
 
     /**
      * Constructor
-     * @param activity The <tt>Activity</tt>.
+     * @param activity The owner <tt>Activity</tt>.
      * @param executor The serial <tt>Executor</tt>.
      * See {@link ThreadPool#newSerialExecutor()}.
      * @see #AsyncQueryHandler(Context, Executor)
      */
-    public AsyncQueryHandler(Activity activity, Executor executor) {
-        super(executor, activity);
-        mContext = activity.getApplicationContext();
+    public AsyncQueryHandler(Activity ownerActivity, Executor executor) {
+        super(executor, ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**

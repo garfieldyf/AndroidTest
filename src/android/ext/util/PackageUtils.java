@@ -225,12 +225,6 @@ public final class PackageUtils {
             try {
                 // Adds an additional archive file to the assets.
                 assets.addAssetPath(info.publicSourceDir);
-
-                /*
-                 * May be kill my process after unmounting usb disk.
-                 * icon  = context.getPackageManager().getApplicationIcon(info);
-                 * lable = context.getPackageManager().getApplicationLabel(info);
-                 */
                 initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), info);
             } finally {
                 // Close the assets to avoid ProcessKiller

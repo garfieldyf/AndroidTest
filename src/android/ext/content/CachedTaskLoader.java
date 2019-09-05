@@ -165,6 +165,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
                 result = loadParams.parseResult(mContext, key, null, task);
                 DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "parseResult");
             } else {
+                DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
                     result = download(task, key, loadParams, cacheFile.getPath(), hitCache);

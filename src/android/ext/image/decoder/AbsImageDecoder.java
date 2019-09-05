@@ -108,9 +108,9 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
 
         try {
             final Uri imageUri = (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString()));
-            final OpenResourceIdResult res = mContext.getContentResolver().getResourceId(imageUri);
-            DebugUtils.__checkDebug(true, "AbsImageDecoder", "load resource - ID #0x" + Integer.toHexString(res.id));
-            return (Image)res.r.getDrawable(res.id);
+            final OpenResourceIdResult result = mContext.getContentResolver().getResourceId(imageUri);
+            DebugUtils.__checkDebug(true, "AbsImageDecoder", "load resource - ID #0x" + Integer.toHexString(result.id));
+            return (Image)result.r.getDrawable(result.id);
         } catch (Exception ignored) {
             return null;
         }

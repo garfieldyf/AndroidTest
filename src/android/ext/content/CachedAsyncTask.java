@@ -145,6 +145,7 @@ public abstract class CachedAsyncTask<Params, Result> extends AbsAsyncTask<Param
                 result = parseResult(params, null);
                 DebugUtils.__checkStopMethodTracing("CachedAsyncTask", "parseResult");
             } else {
+                DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
                     result = download(params, cacheFile.getPath(), hitCache);

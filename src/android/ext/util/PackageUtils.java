@@ -81,17 +81,17 @@ public final class PackageUtils {
      */
     public static void installPackage(Context context, File packageFile, String authority) {
         DebugUtils.__checkError(packageFile == null, "packageFile == null");
-        final Uri data;
+        final Uri packageUri;
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         if (Build.VERSION.SDK_INT < 24) {
-            data = Uri.fromFile(packageFile);
+            packageUri = Uri.fromFile(packageFile);
         } else {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            data = FileProvider.getUriForFile(context, authority, packageFile);
+            packageUri = FileProvider.getUriForFile(context, authority, packageFile);
         }
 
-        DebugUtils.__checkDebug(true, "PackageUtils", "path = " + packageFile + ", uri = " + data);
-        intent.setDataAndType(data, "application/vnd.android.package-archive");
+        DebugUtils.__checkDebug(true, "PackageUtils", "path = " + packageFile + ", uri = " + packageUri);
+        intent.setDataAndType(packageUri, "application/vnd.android.package-archive");
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(intent);
     }

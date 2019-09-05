@@ -40,23 +40,6 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Called when the focus state of a view has changed.
-     * @param view The view whose state has changed.
-     * @param resId The resource id of the property animation.
-     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
-     */
-    public static void onFocusChange(View view, int resId, boolean invalidateParent) {
-        if (invalidateParent) {
-            final View parent = (View)view.getParent();
-            if (parent != null) {
-                parent.invalidate();
-            }
-        }
-
-        ViewUtils.animate(view, resId).start();
-    }
-
-    /**
      * Called when searching for a focusable view in the given direction
      * has failed for the current content of the <tt>RecyclerView</tt>.
      */

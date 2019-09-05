@@ -226,9 +226,9 @@ public final class Pools {
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
     private static class SimplePool<T> implements Pool<T>, Factory<T> {
-        /* package */ int size;
-        /* package */ final Object[] elements;
-        /* package */ final Factory<T> factory;
+        private int size;
+        private final Object[] elements;
+        private final Factory<T> factory;
 
         /**
          * Constructor

@@ -46,6 +46,23 @@ public final class ViewUtils {
     }
 
     /**
+     * Start the specified animation now.
+     * @param view The view whose play the animation.
+     * @param resId The resource id of the property animation.
+     * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
+     */
+    public static void startAnimation(View view, int resId, boolean invalidateParent) {
+        if (invalidateParent) {
+            final View parent = (View)view.getParent();
+            if (parent != null) {
+                parent.invalidate();
+            }
+        }
+
+        ViewUtils.animate(view, resId).start();
+    }
+
+    /**
      * Returns the index of the child to draw for this iteration.
      * @param container The <tt>ViewGroup</tt> whose child to draw.
      * @param childCount The number of child to draw.

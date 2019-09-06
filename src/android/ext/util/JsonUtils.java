@@ -76,8 +76,8 @@ public final class JsonUtils {
             return true;
         }
 
-        if (a == null || a == JSONObject.NULL) {
-            return (b == null || b == JSONObject.NULL);
+        if (JSONObject.NULL.equals(a)) {
+            return (JSONObject.NULL.equals(b));
         }
 
         if (a instanceof JSONArray && b instanceof JSONArray) {
@@ -394,7 +394,7 @@ public final class JsonUtils {
      * @see #writeObject(String, Object)
      */
     public static JsonWriter writeObject(JsonWriter writer, Object object) throws IOException {
-        if (object == null || object == JSONObject.NULL) {
+        if (JSONObject.NULL.equals(object)) {
             return writer.nullValue();
         } else if (object instanceof String) {
             return writer.value((String)object);
@@ -491,6 +491,11 @@ public final class JsonUtils {
 
         while (reader.hasNext()) {
             switch (reader.peek()) {
+            case NULL:
+                reader.nextNull();
+                result.put(JSONObject.NULL);
+                break;
+
             case STRING:
                 result.put(reader.nextString());
                 break;

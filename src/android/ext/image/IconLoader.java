@@ -52,7 +52,7 @@ public class IconLoader extends AsyncLoader<String, ResolveInfo, PackageItemIcon
     }
 
     @Override
-    protected PackageItemIcon loadInBackground(Task<?, ?> task, String key, ResolveInfo[] params, int flags) {
+    protected PackageItemIcon loadInBackground(Task task, String key, ResolveInfo[] params, int flags) {
         return new PackageItemIcon(mPackageManager, params[0]);
     }
 

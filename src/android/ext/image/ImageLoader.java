@@ -31,14 +31,14 @@ import android.widget.ImageView;
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
-    private final Loader<Image> mLoader;
-    private final LoadRequest<URI, Image> mRequest;
+    private final Loader mLoader;
+    private final Binder mBinder;
+    private final LoadRequest mRequest;
 
     protected final ImageDecoder<Image> mDecoder;
     protected final ImageModule<URI, Image> mModule;
-    protected final Binder<URI, Object, Image> mBinder;
 
     /**
      * Constructor
@@ -51,10 +51,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
         super(module.mExecutor, imageCache);
 
-        mRequest = new LoadRequest<URI, Image>(this);
+        mRequest = new LoadRequest(this);
         mDecoder = decoder;
         mModule  = module;
-        mBinder  = (binder != null ? binder : (Binder<URI, Object, Image>)this);
+        mBinder  = (binder != null ? binder : this);
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(module.mContext));
     }
 
@@ -74,7 +74,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param uri The uri to load.
      * @return The {@link LoadRequest}.
      */
-    public final LoadRequest<URI, Image> load(URI uri) {
+    public final LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = resolveUri(uri);
         mRequest.mBinder = mBinder;
@@ -130,11 +130,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected Image loadInBackground(Task<?, ?> task, URI uri, Object[] params, int flags) {
+    protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
-            return (matchScheme(uri) ? mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
+            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -162,7 +162,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
      */
-    protected Image loadImage(Task<?, ?> task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
+    protected Image loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
@@ -183,7 +183,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    /* package */ static abstract class Loader<Image> {
+    /* package */ static abstract class Loader {
         /**
          * Returns the {@link FileCache} associated with this loader.
          * @return The <tt>FileCache</tt> or <tt>null</tt>.
@@ -209,13 +209,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        public abstract Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer);
+        public abstract Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader extends Loader<Image> {
+    private final class URLLoader extends Loader {
         private final File mCacheDir;
 
         /**
@@ -227,7 +227,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         @Override
-        public Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer) {
+        public Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
                 return loadImage(task, url, imageFile, target, params, flags, buffer);
@@ -240,7 +240,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader extends Loader<Image> {
+    private final class FileCacheLoader extends Loader {
         private final FileCache mCache;
 
         /**
@@ -263,10 +263,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
         @Override
         @SuppressWarnings("synthetic-access")
-        public Image load(Task<?, ?> task, String url, Object target, Object[] params, int flags, byte[] buffer) {
+        public Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
-            Image result = null;
+            Object result = null;
 
             if (imageFile.exists()) {
                 // Decodes the image file, If file cache hit.
@@ -304,18 +304,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      *     .transformer(R.xml.round_rect_transformer)
      *     .into(imageView);</pre>
      */
-    public static final class LoadRequest<URI, Image> {
-        /* package */ URI mUri;
+    public static final class LoadRequest {
+        /* package */ Object mUri;
         /* package */ int mFlags;
+        /* package */ Binder mBinder;
         /* package */ Object[] mParams;
-        /* package */ Binder<URI, Object, Image> mBinder;
-        /* package */ final ImageLoader<URI, Image> mLoader;
+        /* package */ final ImageLoader mLoader;
 
         /**
          * Constructor
          * @param loader The {@link ImageLoader}.
          */
-        /* package */ LoadRequest(ImageLoader<URI, Image> loader) {
+        /* package */ LoadRequest(ImageLoader loader) {
             mLoader = loader;
         }
 
@@ -343,7 +343,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * <tt>FLAG_XXX</tt> constants.
          * @return This request.
          */
-        public final LoadRequest<URI, Image> flags(int flags) {
+        public final LoadRequest flags(int flags) {
             mFlags |= flags;
             return this;
         }
@@ -354,7 +354,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #flags(int)
          * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE FLAG_IGNORE_MEMORY_CACHE
          */
-        public final LoadRequest<URI, Image> skipMemory() {
+        public final LoadRequest skipMemory() {
             mFlags |= FLAG_IGNORE_MEMORY_CACHE;
             return this;
         }
@@ -365,7 +365,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #parameters(Parameters)
          */
-        public final LoadRequest<URI, Image> parameters(int id) {
+        public final LoadRequest parameters(int id) {
             mParams[0] = mLoader.mModule.getParameters(id);
             return this;
         }
@@ -376,7 +376,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #parameters(int)
          */
-        public final LoadRequest<URI, Image> parameters(Parameters parameters) {
+        public final LoadRequest parameters(Parameters parameters) {
             mParams[0] = parameters;
             return this;
         }
@@ -387,7 +387,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #transformer(Transformer)
          */
-        public final LoadRequest<URI, Image> transformer(int id) {
+        public final LoadRequest transformer(int id) {
             mParams[1] = mLoader.mModule.getTransformer(id);
             return this;
         }
@@ -398,7 +398,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #transformer(int)
          */
-        public final LoadRequest<URI, Image> transformer(Transformer<Image> transformer) {
+        public final LoadRequest transformer(Transformer transformer) {
             mParams[1] = transformer;
             return this;
         }
@@ -410,7 +410,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #placeholder(Drawable)
          */
         @SuppressWarnings("deprecation")
-        public final LoadRequest<URI, Image> placeholder(int id) {
+        public final LoadRequest placeholder(int id) {
             mParams[2] = mLoader.mModule.mContext.getResources().getDrawable(id);
             return this;
         }
@@ -421,7 +421,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #placeholder(int)
          */
-        public final LoadRequest<URI, Image> placeholder(Drawable drawable) {
+        public final LoadRequest placeholder(Drawable drawable) {
             mParams[2] = drawable;
             return this;
         }
@@ -431,7 +431,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param binder The <tt>Binder</tt> to bind.
          * @return This request.
          */
-        public final LoadRequest<URI, Image> binder(Binder<URI, Object, Image> binder) {
+        public final LoadRequest binder(Binder binder) {
             mBinder = binder;
             return this;
         }

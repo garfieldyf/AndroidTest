@@ -19,7 +19,6 @@ import android.util.Printer;
  * An abstract class that performs asynchronous loading of data.
  * @author Garfield
  */
-@SuppressWarnings("rawtypes")
 public abstract class Loader<Key> implements Factory<Task> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
@@ -168,14 +167,14 @@ public abstract class Loader<Key> implements Factory<Task> {
     /**
      * This abstract class should be implemented by any class whose instances are intended to be execute.
      */
-    public static abstract class Task<Params, Result> implements Runnable, Cancelable {
+    public static abstract class Task implements Runnable, Cancelable {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
         /**
          * The parameter of this task.
          */
-        /* package */ Params mParams;
+        /* package */ Object mParams;
 
         /**
          * The thread running this task.
@@ -262,16 +261,16 @@ public abstract class Loader<Key> implements Factory<Task> {
         /**
          * Runs on the UI thread after {@link #doInBackground}.
          * @param result The result, returned earlier by {@link #doInBackground}.
-         * @see #doInBackground(Params)
+         * @see #doInBackground(Object)
          */
-        public abstract void onPostExecute(Result result);
+        public abstract void onPostExecute(Object result);
 
         /**
          * Overrides this method to perform a computation on a background thread.
          * @param params The parameter of this task.
          * @return A result, defined by the subclass of this task.
-         * @see #onPostExecute(Result)
+         * @see #onPostExecute(Object)
          */
-        public abstract Result doInBackground(Params params);
+        public abstract Object doInBackground(Object params);
     }
 }

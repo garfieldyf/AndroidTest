@@ -58,7 +58,7 @@ public class PackageIconLoader extends AsyncLoader<String, ApplicationInfo, Pack
     }
 
     @Override
-    protected PackageItemIcon loadInBackground(Task<?, ?> task, String key, ApplicationInfo[] params, int flags) {
+    protected PackageItemIcon loadInBackground(Task task, String key, ApplicationInfo[] params, int flags) {
         return new PackageItemIcon(mContext, params[0]);
     }
 }

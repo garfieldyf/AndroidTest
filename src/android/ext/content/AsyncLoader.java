@@ -194,7 +194,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #loadSync(Key, int, Params[])
      * @see #load(Key, Object, int, Binder, Params[])
      */
-    protected abstract Value loadInBackground(Task<?, ?> task, Key key, Params[] params, int flags);
+    protected abstract Value loadInBackground(Task task, Key key, Params[] params, int flags);
 
     /**
      * Tests if the {@link mCache} is valid.
@@ -245,18 +245,18 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task<Params[], Value> {
+    /* package */ final class LoadTask extends Task {
         /* package */ Key mKey;
         /* package */ int mFlags;
         /* package */ Object mTarget;
         /* package */ Binder mBinder;
 
         @Override
-        public Value doInBackground(Params[] params) {
+        public Object doInBackground(Object params) {
             waitResumeIfPaused();
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
-                value = loadInBackground(this, mKey, params, mFlags);
+                value = loadInBackground(this, mKey, (Params[])params, mFlags);
                 if (value != null && isCacheValid(mFlags)) {
                     mCache.put(mKey, value);
                 }
@@ -266,14 +266,14 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         }
 
         @Override
-        public void onPostExecute(Value value) {
+        public void onPostExecute(Object value) {
             if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
-                mBinder.bindValue(mKey, mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
+                mBinder.bindValue(mKey, (Params[])mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
-            onRecycle(mParams);
+            onRecycle((Params[])mParams);
             clearForRecycle();
             mKey = null;
             mTarget = null;

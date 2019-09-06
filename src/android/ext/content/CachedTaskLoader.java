@@ -156,7 +156,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
      * @param cookie An object, passed earlier by {@link #load}.
      * @return A result or <tt>null</tt> of the load.
      */
-    protected Result loadInBackground(Task<?, ?> task, Key key, LoadParams<Key, Result> loadParams, Object cookie) {
+    protected Result loadInBackground(Task task, Key key, LoadParams<Key, Result> loadParams, Object cookie) {
         Object result = null;
         try {
             final File cacheFile = loadParams.getCacheFile(mContext, key);

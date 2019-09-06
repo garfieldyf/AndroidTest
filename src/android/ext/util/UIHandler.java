@@ -11,7 +11,6 @@ import android.os.Message;
  * Class UIHandler
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public final class UIHandler extends Handler implements Executor {
     /**
      * The {@link Handler} associated with the UI thread's message queue.

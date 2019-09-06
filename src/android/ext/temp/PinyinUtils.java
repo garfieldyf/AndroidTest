@@ -2,9 +2,7 @@ package android.ext.temp;
 
 import java.util.Locale;
 import java.util.Properties;
-
 import android.content.res.AssetManager;
-import android.ext.util.FileUtils;
 
 /**
  * Class PinyinUtils

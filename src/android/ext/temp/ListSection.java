@@ -3,7 +3,6 @@ package android.ext.temp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import android.util.SparseArray;
 
 public class ListSection<T> {
     private int mItemCount;

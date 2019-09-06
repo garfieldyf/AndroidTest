@@ -2,7 +2,6 @@ package android.ext.temp;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 
 public final class IntArray {

@@ -174,7 +174,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Returns the URI with the specified <em>uri</em>.
+     * Resolves an empty (0-length) string to <tt>null</tt>.
      */
     private static <URI> URI resolveUri(URI uri) {
         return (uri instanceof String && ((String)uri).length() == 0 ? null : uri);

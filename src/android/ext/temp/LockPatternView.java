@@ -2,11 +2,9 @@ package android.ext.temp;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.temp.LockPatternUtils;
 import android.ext.temp.LockPatternUtils.Cell;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,7 +25,6 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
-
 import com.tencent.test.R;
 
 /**

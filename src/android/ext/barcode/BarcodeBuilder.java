@@ -2,6 +2,7 @@ package android.ext.barcode;
 
 import android.content.res.Resources;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools.RectPool;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -259,10 +260,11 @@ public final class BarcodeBuilder {
             }
         }
 
-        final Rect bounds = new Rect();
+        final Rect bounds = RectPool.sInstance.obtain();
         final Rect container = new Rect(0, 0, canvasWidth, canvasHeight);
         Gravity.apply(Gravity.CENTER, width, height, container, 0, 0, bounds);
         logo.setBounds(bounds);
         logo.draw(canvas);
+        RectPool.sInstance.recycle(bounds);
     }
 }

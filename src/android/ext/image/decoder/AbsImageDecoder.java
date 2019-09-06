@@ -1,17 +1,19 @@
 package android.ext.image.decoder;
 
 import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
-import android.content.ContentResolver.OpenResourceIdResult;
+import java.util.List;
 import android.content.Context;
 import android.content.res.Resources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
-import android.ext.util.Pools.Pool;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools.Pool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -75,6 +77,34 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     }
 
     /**
+     * Decodes an image bounds (width, height and MIME type) from the specified <em>uri</em>.
+     * @param uri The uri to decode.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
+     * @param opts The {@link Options} to store the <tt>out...</tt> fields.
+     * @throws Exception if an error occurs while decode from <em>uri</em>.
+     */
+    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
+        opts.inJustDecodeBounds = true;
+        BitmapUtils.decodeBitmap(mContext, uri, opts);
+        opts.inJustDecodeBounds = false;
+    }
+
+    /**
+     * Decodes an image from the specified <em>uri</em>.
+     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
+     * @param target The target, passed earlier by {@link #decodeImage}.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param flags The flags, passed earlier by {@link #decodeImage}.
+     * @param opts The {@link Options} used to decode. The <em>opts's</em>
+     * <tt>out...</tt> fields are set.
+     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
+     * @throws Exception if an error occurs while decode from <em>uri</em>.
+     * @see #decodeImage(Object, Object, Object[], int, byte[])
+     */
+    protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
+
+    /**
      * Recycles the specified <em>opts</em> to the internal pool.
      * @param opts The {@link Options} to recycle.
      */
@@ -102,45 +132,32 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      */
     @SuppressWarnings({ "unchecked", "deprecation" })
     private Image decodeResource(Object uri) {
-        if (!SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
-            return null;
+        Object result = null;
+        if (SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
+            final Resources res = mContext.getResources();
+            final int id = getResourceId(res, (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString())));
+            if (id != 0) {
+                result = res.getDrawable(id);
+            }
         }
 
-        try {
-            final Uri imageUri = (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString()));
-            final OpenResourceIdResult result = mContext.getContentResolver().getResourceId(imageUri);
-            DebugUtils.__checkDebug(true, "AbsImageDecoder", "load resource - ID #0x" + Integer.toHexString(result.id));
-            return (Image)result.r.getDrawable(result.id);
-        } catch (Exception ignored) {
-            return null;
-        }
+        return (Image)result;
     }
 
     /**
-     * Decodes an image bounds (width, height and MIME type) from the specified <em>uri</em>.
-     * @param uri The uri to decode.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} to store the <tt>out...</tt> fields.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
+     * Resolves an "android.resource" URI to a resource id.
      */
-    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        opts.inJustDecodeBounds = true;
-        BitmapUtils.decodeBitmap(mContext, uri, opts);
-        opts.inJustDecodeBounds = false;
+    private static int getResourceId(Resources res, Uri uri) {
+        DebugUtils.__checkError(TextUtils.isEmpty(uri.getAuthority()), "No authority: " + uri);
+        final List<String> path = uri.getPathSegments();
+        final int size = ArrayUtils.getSize(path);
+        if (size == 1) {
+            return Integer.parseInt(path.get(0));
+        } else if (size == 2) {
+            return res.getIdentifier(path.get(1), path.get(0), uri.getAuthority());
+        } else {
+            DebugUtils.__checkWarning(true, "ImageDecoder", "No resource found for: " + uri);
+            return 0;
+        }
     }
-
-    /**
-     * Decodes an image from the specified <em>uri</em>.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param target The target, passed earlier by {@link #decodeImage}.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode. The <em>opts's</em>
-     * <tt>out...</tt> fields are set.
-     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeImage(Object, Object, Object[], int, byte[])
-     */
-    protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
 }

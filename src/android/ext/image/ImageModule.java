@@ -210,7 +210,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @return The <tt>Parameters</tt>.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
-    /* package */ final Parameters getParameters(int id) {
+    /* package */ final Object getParameters(int id) {
         DebugUtils.__checkUIThread("getParameters");
         Object result = mResources.get(id, null);
         if (result == null) {
@@ -218,7 +218,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             mResources.append(id, result = XmlResources.loadParameters(mContext, id));
         }
 
-        return (Parameters)result;
+        return result;
     }
 
     /**
@@ -228,8 +228,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @return The <tt>Transformer</tt>.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
-    @SuppressWarnings("unchecked")
-    /* package */ final Transformer<Image> getTransformer(int id) {
+    /* package */ final Object getTransformer(int id) {
         DebugUtils.__checkUIThread("getTransformer");
         Object result = mResources.get(id, null);
         if (result == null) {
@@ -237,7 +236,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             mResources.append(id, result = XmlResources.loadTransformer(mContext, id));
         }
 
-        return (Transformer<Image>)result;
+        return result;
     }
 
     /**

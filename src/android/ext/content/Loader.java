@@ -253,7 +253,7 @@ public abstract class Loader<Key> implements Factory<Task> {
         }
 
         /**
-         * Runs on the UI thread after {@link #setProgress(Object[])} is invoked.
+         * Runs on the UI thread after {@link #setProgress} is invoked.
          * @param value The progress value to update.
          */
         public void onProgress(Object value) {

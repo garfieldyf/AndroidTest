@@ -20,7 +20,7 @@ import android.util.Log;
  * Abstract class <tt>AbsImageDecoder</tt>
  * @author Garfield
  */
-public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
+public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Object> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -58,7 +58,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @see #decodeImage(Object, Object, Object[], int, Options)
      */
     @Override
-    public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
+    public Object decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
             // Decodes the image bounds.
@@ -66,7 +66,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             decodeImageBounds(uri, params, flags, opts);
 
             // Decodes the image pixels.
-            final Image result = decodeImage(uri, target, params, flags, opts);
+            final Object result = decodeImage(uri, target, params, flags, opts);
             return (result != null ? result : decodeResource(uri));
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - '" + uri + "'\n" + e);
@@ -130,8 +130,8 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * Decodes an image from the {@link Resources} and a resource id.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      */
-    @SuppressWarnings({ "unchecked", "deprecation" })
-    private Image decodeResource(Object uri) {
+    @SuppressWarnings("deprecation")
+    private Object decodeResource(Object uri) {
         Object result = null;
         if (SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
             final Resources res = mContext.getResources();
@@ -141,7 +141,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             }
         }
 
-        return (Image)result;
+        return result;
     }
 
     /**

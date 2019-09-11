@@ -19,37 +19,21 @@ public class AnimatedImageSpan extends ImageSpan implements Runnable {
      * Constructor
      * @param view The {@link View}.
      * @param id The resource id of the {@link AnimationDrawable}.
-     * @see #AnimatedImageSpan(View, int, int)
-     * @see #AnimatedImageSpan(View, AnimationDrawable, int)
+     * @see #AnimatedImageSpan(View, AnimationDrawable)
      */
     @SuppressWarnings("deprecation")
     public AnimatedImageSpan(View view, int id) {
-        this(view, (AnimationDrawable)view.getResources().getDrawable(id), 0);
-    }
-
-    /**
-     * Constructor
-     * @param view The {@link View}.
-     * @param id The resource id of the {@link AnimationDrawable}.
-     * @param resId The resource id of the padding.
-     * @see #AnimatedImageSpan(View, int)
-     * @see #AnimatedImageSpan(View, AnimationDrawable, int)
-     */
-    @SuppressWarnings("deprecation")
-    public AnimatedImageSpan(View view, int id, int resId) {
-        this(view, (AnimationDrawable)view.getResources().getDrawable(id), view.getResources().getDimensionPixelOffset(resId));
+        this(view, (AnimationDrawable)view.getResources().getDrawable(id));
     }
 
     /**
      * Constructor
      * @param view The {@link View}.
      * @param drawable The {@link AnimationDrawable}.
-     * @param padding The padding of the <em>drawable</em> in pixels.
      * @see #AnimatedImageSpan(View, int)
-     * @see #AnimatedImageSpan(View, int, int)
      */
-    public AnimatedImageSpan(View view, AnimationDrawable drawable, int padding) {
-        super(drawable, padding);
+    public AnimatedImageSpan(View view, AnimationDrawable drawable) {
+        super(drawable);
         mViewRef = new WeakReference<View>(view);
     }
 

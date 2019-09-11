@@ -12,26 +12,16 @@ import android.text.style.ReplacementSpan;
  * @author Garfield
  */
 public class ImageSpan extends ReplacementSpan {
-    /* package */ int mPadding;
+    /* package */ int mPaddingLeft;
+    /* package */ int mPaddingRight;
     /* package */ final Drawable mDrawable;
 
     /**
      * Constructor
      * @param drawable The {@link Drawable}.
-     * @see #ImageSpan(Drawable, int)
+     * @see #ImageSpan(Resources, int)
      */
     public ImageSpan(Drawable drawable) {
-        this(drawable, 0);
-    }
-
-    /**
-     * Constructor
-     * @param drawable The {@link Drawable}.
-     * @param padding The padding of the <em>drawable</em> in pixels.
-     * @see #ImageSpan(Drawable)
-     */
-    public ImageSpan(Drawable drawable, int padding) {
-        mPadding  = padding;
         mDrawable = drawable;
     }
 
@@ -39,36 +29,25 @@ public class ImageSpan extends ReplacementSpan {
      * Constructor
      * @param res The <tt>Resources</tt>.
      * @param id The resource id of the image.
-     * @see #ImageSpan(Resources, int, int)
+     * @see #ImageSpan(Drawable)
      */
     @SuppressWarnings("deprecation")
     public ImageSpan(Resources res, int id) {
-        this(res.getDrawable(id), 0);
-    }
-
-    /**
-     * Constructor
-     * @param res The <tt>Resources</tt>.
-     * @param id The resource id of the image.
-     * @param resId The resource id of the padding.
-     * @see #ImageSpan(Resources, int)
-     */
-    @SuppressWarnings("deprecation")
-    public ImageSpan(Resources res, int id, int resId) {
-        this(res.getDrawable(id), res.getDimensionPixelOffset(resId));
-    }
-
-    public final void setPadding(int padding) {
-        mPadding = padding;
+        mDrawable = res.getDrawable(id);
     }
 
     public final void setPadding(Resources res, int id) {
-        mPadding = res.getDimensionPixelOffset(id);
+        mPaddingRight = mPaddingLeft = res.getDimensionPixelOffset(id);
+    }
+
+    public final void setPadding(int paddingLeft, int paddingRight) {
+        mPaddingLeft  = paddingLeft;
+        mPaddingRight = paddingRight;
     }
 
     @Override
     public int getSize(Paint paint, CharSequence text, int start, int end, FontMetricsInt fm) {
-        return mDrawable.getIntrinsicWidth() + mPadding;
+        return mDrawable.getIntrinsicWidth() + mPaddingLeft + mPaddingRight;
     }
 
     @Override
@@ -78,7 +57,7 @@ public class ImageSpan extends ReplacementSpan {
 
     /* package */ final void draw(Canvas canvas, Drawable drawable, int left, int top, int bottom) {
         final int dy = (bottom - top - drawable.getIntrinsicHeight()) / 2;
-        drawable.setBounds(left + mPadding, top + dy, left + mPadding + drawable.getIntrinsicWidth(), bottom - dy);
+        drawable.setBounds(left + mPaddingLeft, top + dy, left + mPaddingLeft + drawable.getIntrinsicWidth(), bottom - dy);
         drawable.draw(canvas);
     }
 }

@@ -1,4 +1,4 @@
-package android.ext.temp;
+package android.ext.util;
 
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -7,7 +7,6 @@ import java.util.Formatter;
 import java.util.List;
 import android.ext.page.Page;
 import android.ext.page.Pages;
-import android.ext.util.DebugUtils;
 import android.util.Printer;
 
 /**

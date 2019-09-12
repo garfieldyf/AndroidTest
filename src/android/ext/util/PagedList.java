@@ -58,7 +58,13 @@ public class PagedList<E> {
      */
     public PagedList(Collection<? extends Page<? extends E>> initPages) {
         this(initPages.size());
-        addPages(initPages);
+
+        // Adds the page collection to mPages.
+        for (Page<? extends E> page : initPages) {
+            mPages[mPageCount] = page;
+            mPositions[mPageCount++] = mItemCount;
+            mItemCount += page.getCount();
+        }
     }
 
     /**
@@ -119,41 +125,51 @@ public class PagedList<E> {
     /**
      * Adds the specified <em>page</em> at the end of this <tt>PagedList</tt>.
      * @param page The {@link Page} to add.
-     * @return The number of items to add in the <em>page</em>.
-     * @see #addPages(Collection)
+     * @see #addPage(int, Page)
      * @see Pages#newPage(List)
      */
-    public int addPage(Page<? extends E> page) {
-        final int count = Pages.getCount(page);
-        if (count > 0) {
-            if (mPageCount >= mPages.length) {
-                mPages = newArray(mPages);
-                mPositions = newArray(mPositions);
-            }
-
-            mPages[mPageCount] = page;
-            mPositions[mPageCount++] = mItemCount;
-            mItemCount += count;
+    public void addPage(Page<? extends E> page) {
+        DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-length");
+        if (mPageCount == mPages.length) {
+            mPages = newArray(mPages);
+            mPositions = newArray(mPositions);
         }
 
-        return count;
+        mPages[mPageCount] = page;
+        mPositions[mPageCount++] = mItemCount;
+        mItemCount += page.getCount();
     }
 
     /**
-     * Adds the pages in the specified collection to the end of this <tt>PagedList</tt>.
-     * @param pages The collection of {@link Page}s to add.
-     * @return The number of items to add in the collection.
+     * Inserts the specified <em>page</em> into this <tt>PagedList</tt> at the specified <em>index</em>. The
+     * <em>page</em> is inserted before the current page at the specified <em>index</em>. If the <em>index</em>
+     * is equal to the page count of this <tt>PagedList</tt>, the <em>page</em> is added at the end.
+     * @param index The index at which to insert.
+     * @param page The {@link Page} to add.
      * @see #addPage(Page)
      * @see Pages#newPage(List)
      */
-    public int addPages(Collection<? extends Page<? extends E>> pages) {
-        DebugUtils.__checkError(pages == null, "pages == null");
-        int count = 0;
-        for (Page<? extends E> page : pages) {
-            count += addPage(page);
-        }
+    public void addPage(int index, Page<? extends E> page) {
+        PagedList.__checkRange(index, mPageCount);
+        DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-length");
+        if (index == mPageCount) {
+            addPage(page);
+        } else {
+            if (mPageCount < mPages.length) {
+                System.arraycopy(mPages, index, mPages, index + 1, mPageCount - index);
+            } else {
+                final Object[] newPages = new Object[mPageCount + ARRAY_CAPACITY_INCREMENT];
+                System.arraycopy(mPages, 0, newPages, 0, index);
+                System.arraycopy(mPages, index, newPages, index + 1, mPageCount - index);
+                mPages = newPages;
+                mPositions = newArray(mPositions);
+            }
 
-        return count;
+            ++mPageCount;
+            mPages[index] = page;
+            computePositions(index);
+            mItemCount += page.getCount();
+        }
     }
 
     /**
@@ -169,13 +185,7 @@ public class PagedList<E> {
         mPages[mPageCount] = null;  // Prevent memory leak.
 
         // Computes all pages start position from the removed page index.
-        final int result = mPositions[index];
-        for (int i = index, startPosition = result; i < mPageCount; ++i) {
-            mPositions[i]  = startPosition;
-            startPosition += ((Page<?>)mPages[i]).getCount();
-        }
-
-        return result;
+        return computePositions(index);
     }
 
     /**
@@ -201,20 +211,39 @@ public class PagedList<E> {
 
     @SuppressWarnings("resource")
     public final void dump(Printer printer) {
-        final StringBuilder result = new StringBuilder(90);
+        final StringBuilder result = new StringBuilder(100);
         final Formatter formatter  = new Formatter(result);
-        DebugUtils.dumpSummary(printer, result, 90, " Dumping %s [ itemCount = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ itemCount = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
 
         for (int i = 0; i < mPageCount; ++i) {
             final Page<?> page = (Page<?>)mPages[i];
             result.setLength(0);
+            final int startPos = mPositions[i];
+            final int count = page.getCount();
             formatter.format("  Page %-2d ==> ", i);
-            printer.println(DebugUtils.toString(page, result).append(" { position = ").append(mPositions[i]).append(", count = ").append(page.getCount()).append(" }").toString());
+            printer.println(DebugUtils.toString(page, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + count - 1).append(", count = ").append(count).append(" }").toString());
         }
-    }
+    }
+
     private <T> T newArray(Object srcArray) {
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), mPageCount + ARRAY_CAPACITY_INCREMENT);
         System.arraycopy(srcArray, 0, newArray, 0, mPageCount);
         return (T)newArray;
+    }
+
+    private int computePositions(int index) {
+        final int result = mPositions[index];
+        for (int i = index, startPosition = result; i < mPageCount; ++i) {
+            mPositions[i]  = startPosition;
+            startPosition += ((Page<?>)mPages[i]).getCount();
+        }
+
+        return result;
+    }
+
+    private static void __checkRange(int index, int size) {
+        if (index < 0 || index > size) {
+            throw new AssertionError("Invalid index " + index + ", size is " + size);
+        }
     }
 }

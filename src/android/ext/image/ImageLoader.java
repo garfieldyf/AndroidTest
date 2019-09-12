@@ -96,7 +96,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param value The image value, passed earlier by {@link Binder#bindValue}.
      * @return The <tt>Drawable</tt> to bind to target.
      */
-    public static Drawable getImageValue(Object[] params, Object value) {
+    public static Drawable getImageDrawable(Object[] params, Object value) {
         if (value == null) {
             return (Drawable)params[2];
         } else if (value instanceof Drawable) {
@@ -108,7 +108,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        ((ImageView)target).setImageDrawable(getImageValue(params, value));
+        ((ImageView)target).setImageDrawable(getImageDrawable(params, value));
     }
 
     /**

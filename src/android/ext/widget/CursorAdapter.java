@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_ID;
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -10,15 +11,16 @@ import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.provider.BaseColumns;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
 
 /**
  * Abstract class CursorAdapter
  * @author Garfield
  */
-public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> implements CursorObserverClient {
+public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<VH> implements CursorObserverClient {
     /**
      * If set the adapter will register a content observer on the
      * cursor and will call {@link #onContentChanged(boolean, Uri)}
@@ -58,12 +60,28 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not present
-     * or can not move to the specified <em>position</em>.
+     * or can not move to the specified adapter position.
      * @see #getItem(int)
+     * @see #getItem(View)
      */
     public final Cursor getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
-        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
+        return (position != NO_POSITION ? getItem(position) : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not present or can not move
+     * to the specified adapter position.
+     * @see #getItem(int)
+     * @see #getItem(ViewHolder)
+     */
+    public final Cursor getItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != NO_POSITION ? getItem(position) : null);
     }
 
     /**
@@ -72,6 +90,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
      * @param position The position of the cursor.
      * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not
      * present or can not move to the specified <em>position</em>.
+     * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
     public Cursor getItem(int position) {
@@ -125,6 +144,45 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
 
         notifyDataSetChanged();
         return oldCursor;
+    }
+
+    /**
+     * Equivalent to calling <tt>notifyItemChanged(id, null)</tt>.
+     * @param id The stable ID of the item.
+     * @see #notifyItemChanged(long, Object)
+     */
+    public final void notifyItemChanged(long id) {
+        notifyItemChanged(id, null);
+    }
+
+    /**
+     * Notify any registered observers that the item's stable ID equals the <em>id</em>
+     * has changed with an optional payload object.
+     * @param id The stable ID of the item.
+     * @param payload Optional parameter, pass to {@link #notifyItemChanged(int, Object)}.
+     * @see #notifyItemChanged(long)
+     */
+    public void notifyItemChanged(long id, Object payload) {
+        DebugUtils.__checkError(mRowIDColumn == -1, "The cursor has no rowID column.");
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final LayoutManager layoutManager = mRecyclerView.getLayoutManager();
+        if (mCursor == null || id == NO_ID || !(layoutManager instanceof LinearLayoutManager)) {
+            return;
+        }
+
+        final LinearLayoutManager layout = (LinearLayoutManager)layoutManager;
+        int startPos = layout.findFirstVisibleItemPosition();
+        final int lastPos = layout.findLastVisibleItemPosition();
+        if (startPos == NO_POSITION || lastPos == NO_POSITION) {
+            return;
+        }
+
+        for (; startPos <= lastPos; ++startPos) {
+            if (mCursor.moveToPosition(startPos) && mCursor.getLong(mRowIDColumn) == id) {
+                postNotifyItemRangeChanged(startPos, 1, payload);
+                break;
+            }
+        }
     }
 
     /**
@@ -200,7 +258,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends Adapter<VH> i
     /* package */ final class CursorReceiver extends DatabaseReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onContentChanged(false, null);
+            onContentChanged(false, intent.getData());
         }
     }
 }

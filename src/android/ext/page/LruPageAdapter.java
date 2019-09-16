@@ -26,7 +26,7 @@ public abstract class LruPageAdapter<E, VH extends ViewHolder> extends PageAdapt
     /**
      * Called when a {@link Page} removed by this adapter.
      * @param page The index of the page.
-     * @param oldPage The removed <tt>Page</tt>.
+     * @param oldPage The removed {@link Page}.
      */
     protected void onPageRemoved(int page, Page<E> oldPage) {
     }

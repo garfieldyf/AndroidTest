@@ -7,9 +7,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
-import android.ext.widget.LayoutManagerHelper;
+import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;
@@ -24,14 +23,13 @@ import android.view.View;
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> {
+public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> {
     private int mItemCount;
     private final int mPageSize;
     private final int mInitialSize;
     private final int mPrefetchDistance;
 
     private final BitSet mLoadStates;
-    private RecyclerView mRecyclerView;
     private Cache<Integer, Page<E>> mPageCache;
 
     /**
@@ -104,7 +102,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             mPageCache.put(0, (Page<E>)initialPage);
         }
 
-        LayoutManagerHelper.notifyDataSetChanged(mRecyclerView);
+        postNotifyDataSetChanged();
     }
 
     /**
@@ -130,7 +128,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     }
 
     /**
-     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child))</tt>.
      * @param child The child of the <tt>RecyclerView</tt> to query for the
      * <tt>ViewHolder</tt>'s adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
@@ -272,14 +270,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
     public void setPage(int page, Page<? extends E> data, Object payload) {
         DebugUtils.__checkUIThread("setPage");
         DebugUtils.__checkError(page < 0, "page < 0");
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
 
         // Clears the page loading state when the page is load complete.
         mLoadStates.clear(page);
         final int itemCount = Pages.getCount(data);
         if (itemCount > 0) {
             mPageCache.put(page, (Page<E>)data);
-            LayoutManagerHelper.notifyItemRangeChanged(mRecyclerView, getPositionForPage(page, 0), itemCount, payload);
+            postNotifyItemRangeChanged(getPositionForPage(page, 0), itemCount, payload);
         }
     }
 
@@ -295,7 +292,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
 /*
     public void addPage(int page, Page<? extends E> data) {
         DebugUtils.__checkUIThread("addPage");
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        DebugUtils.__checkError(page < 0, "page < 0");
 
         // Clears the page loading state when the page is load complete.
         mLoadStates.clear(page);
@@ -303,7 +300,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
         if (itemCount > 0) {
             mItemCount += itemCount;
             mPageCache.put(page, (Page<E>)data);
-            LayoutManagerHelper.notifyItemRangeInserted(mRecyclerView, getPositionForPage(page, 0), itemCount);
+            postNotifyItemRangeInserted(getPositionForPage(page, 0), itemCount);
         }
     }
 */
@@ -314,15 +311,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public final Map<Integer, Page<E>> snapshot() {
         return mPageCache.snapshot();
-    }
-
-    /**
-     * Returns the {@link RecyclerView} associated with this adapter.
-     * @return The {@link RecyclerView} object or <tt>null</tt> if
-     * this adapter not attached to the <tt>RecyclerView</tt>.
-     */
-    public final RecyclerView getRecyclerView() {
-        return mRecyclerView;
     }
 
     /**
@@ -382,11 +370,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
             formatter.format("    Page %-2d ==> ", entry.getKey());
             printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
         }
-    }
-
-    @Override
-    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-        mRecyclerView = recyclerView;
     }
 
     /**

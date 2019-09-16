@@ -182,10 +182,7 @@ public class PagedList<E> {
                 System.arraycopy(mPages, index, mPages, index + 1, mPageCount - index);
             } else {
                 final int newLength = mPageCount + ARRAY_CAPACITY_INCREMENT;
-                final Object[] newPages = new Object[newLength];
-                System.arraycopy(mPages, 0, newPages, 0, index);
-                System.arraycopy(mPages, index, newPages, index + 1, mPageCount - index);
-                mPages = newPages;
+                mPages = newPageArray(index, newLength);
                 mPositions = ArrayUtils.copyOf(mPositions, mPageCount, newLength);
             }
 
@@ -263,12 +260,19 @@ public class PagedList<E> {
     }
 
     private int computePositions(int index) {
-        final int result = mPositions[index];
-        for (int i = index, startPosition = result; i < mPageCount; ++i) {
-            mPositions[i]  = startPosition;
-            startPosition += ((Page<?>)mPages[i]).getCount();
+        final int startPosition = mPositions[index];
+        for (int position = startPosition; index < mPageCount; ++index) {
+            mPositions[index] = position;
+            position += ((Page<?>)mPages[index]).getCount();
         }
 
-        return result;
+        return startPosition;
+    }
+
+    private Object[] newPageArray(int index, int newLength) {
+        final Object[] newPages = new Object[newLength];
+        System.arraycopy(mPages, 0, newPages, 0, index);
+        System.arraycopy(mPages, index, newPages, index + 1, mPageCount - index);
+        return newPages;
     }
 }

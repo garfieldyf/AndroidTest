@@ -1,11 +1,9 @@
 package android.ext.widget;
 
 import android.content.res.Resources;
-import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;
 import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.LayoutManager;
@@ -120,121 +118,6 @@ public final class LayoutManagerHelper {
         } else {
             // no scroll.
             return false;
-        }
-    }
-
-    /**
-     * Like as {@link Adapter#notifyDataSetChanged()}. If the <em>recyclerView</em> is currently
-     * computing a layout then this method will be post the change using a <tt>Handler</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     */
-    public static void notifyDataSetChanged(RecyclerView recyclerView) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
-        if (recyclerView.isComputingLayout()) {
-            UIHandler.sInstance.post(new NotificationRunnable(adapter, MESSAGE_DATA_CHANGED, 0, 0, null));
-        } else {
-            adapter.notifyDataSetChanged();
-        }
-    }
-
-    /**
-     * Equivalent to calling <tt>notifyItemRangeRemoved(recyclerView, position, 1)</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param position The position of the item that was removed.
-     * @see #notifyItemRangeRemoved(RecyclerView, int, int)
-     */
-    public static void notifyItemRemoved(RecyclerView recyclerView, int position) {
-        notifyItemRangeRemoved(recyclerView, position, 1);
-    }
-
-    /**
-     * Equivalent to calling <tt>notifyItemRangeInserted(recyclerView, position, 1)</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param position The position of the item that was inserted.
-     * @see #notifyItemRangeInserted(RecyclerView, int, int)
-     */
-    public static void notifyItemInserted(RecyclerView recyclerView, int position) {
-        notifyItemRangeInserted(recyclerView, position, 1);
-    }
-
-    /**
-     * Equivalent to calling <tt>notifyItemRangeChanged(recyclerView, position, 1, payload)</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param position The position of the item that has changed
-     * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
-     * @see #notifyItemRangeChanged(RecyclerView, int, int, Object)
-     */
-    public static void notifyItemChanged(RecyclerView recyclerView, int position, Object payload) {
-        notifyItemRangeChanged(recyclerView, position, 1, payload);
-    }
-
-    /**
-     * Like as {@link Adapter#notifyItemMoved(int, int)}. If the <em>recyclerView</em> is currently
-     * computing a layout then this method will be post the change using a <tt>Handler</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param fromPosition The previous position of the item.
-     * @param toPosition The new position of the item.
-     */
-    public static void notifyItemMoved(RecyclerView recyclerView, int fromPosition, int toPosition) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
-        if (recyclerView.isComputingLayout()) {
-            UIHandler.sInstance.post(new NotificationRunnable(adapter, MESSAGE_ITEM_MOVED, fromPosition, toPosition, null));
-        } else {
-            adapter.notifyItemMoved(fromPosition, toPosition);
-        }
-    }
-
-    /**
-     * Like as {@link Adapter#notifyItemRangeRemoved(int, int)}. If the <em>recyclerView</em> is currently
-     * computing a layout then this method will be post the change using a <tt>Handler</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param positionStart The position of the first item that was removed.
-     * @param itemCount The number of items removed.
-     */
-    public static void notifyItemRangeRemoved(RecyclerView recyclerView, int positionStart, int itemCount) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
-        if (recyclerView.isComputingLayout()) {
-            UIHandler.sInstance.post(new NotificationRunnable(adapter, MESSAGE_ITEM_REMOVED, positionStart, itemCount, null));
-        } else {
-            adapter.notifyItemRangeRemoved(positionStart, itemCount);
-        }
-    }
-
-    /**
-     * Like as {@link Adapter#notifyItemRangeInserted(int, int)}. If the <em>recyclerView</em> is
-     * currently computing a layout then this method will be post the change using a <tt>Handler</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param positionStart The position of the first item that was inserted.
-     * @param itemCount The number of items inserted.
-     */
-    public static void notifyItemRangeInserted(RecyclerView recyclerView, int positionStart, int itemCount) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
-        if (recyclerView.isComputingLayout()) {
-            UIHandler.sInstance.post(new NotificationRunnable(adapter, MESSAGE_ITEM_INSERTED, positionStart, itemCount, null));
-        } else {
-            adapter.notifyItemRangeInserted(positionStart, itemCount);
-        }
-    }
-
-    /**
-     * Like as {@link Adapter#notifyItemRangeChanged(int, int, Object)}. If the <em>recyclerView</em>
-     * is currently computing a layout then this method will be post the change using a <tt>Handler</tt>.
-     * @param recyclerView The {@link RecyclerView}.
-     * @param positionStart The position of the first item that has changed.
-     * @param itemCount The number of items that have changed.
-     * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
-     */
-    public static void notifyItemRangeChanged(RecyclerView recyclerView, int positionStart, int itemCount, Object payload) {
-        final Adapter<?> adapter = recyclerView.getAdapter();
-        DebugUtils.__checkError(adapter == null, "The RecyclerView not set adapter");
-        if (recyclerView.isComputingLayout()) {
-            UIHandler.sInstance.post(new NotificationRunnable(adapter, MESSAGE_ITEM_CHANGED, positionStart, itemCount, payload));
-        } else {
-            adapter.notifyItemRangeChanged(positionStart, itemCount, payload);
         }
     }
 
@@ -405,53 +288,6 @@ public final class LayoutManagerHelper {
         }
     }
 
-    /**
-     * Class <tt>NotificationRunnable</tt> used to notify the {@link Adapter}'s events.
-     */
-    private static final class NotificationRunnable implements Runnable {
-        private final int message;
-        private final int arg1;
-        private final int arg2;
-        private final Object payload;
-        private final Adapter<?> adapter;
-
-        public NotificationRunnable(Adapter<?> adapter, int message, int arg1, int arg2, Object payload) {
-            this.arg1 = arg1;
-            this.arg2 = arg2;
-            this.message = message;
-            this.adapter = adapter;
-            this.payload = payload;
-        }
-
-        @Override
-        public void run() {
-            switch (message) {
-            case MESSAGE_DATA_CHANGED:
-                adapter.notifyDataSetChanged();
-                break;
-
-            case MESSAGE_ITEM_MOVED:
-                adapter.notifyItemMoved(arg1, arg2);
-                break;
-
-            case MESSAGE_ITEM_REMOVED:
-                adapter.notifyItemRangeRemoved(arg1, arg2);
-                break;
-
-            case MESSAGE_ITEM_INSERTED:
-                adapter.notifyItemRangeInserted(arg1, arg2);
-                break;
-
-            case MESSAGE_ITEM_CHANGED:
-                adapter.notifyItemRangeChanged(arg1, arg2, payload);
-                break;
-
-            default:
-                throw new IllegalStateException("Unknown message: " + message);
-            }
-        }
-    }
-
     private static boolean scrollBy(RecyclerView view, int dx, int dy, boolean immediate) {
         if (immediate) {
             view.scrollBy(dx, dy);
@@ -461,12 +297,6 @@ public final class LayoutManagerHelper {
 
         return true;
     }
-
-    private static final int MESSAGE_ITEM_MOVED    = 1;
-    private static final int MESSAGE_DATA_CHANGED  = 2;
-    private static final int MESSAGE_ITEM_REMOVED  = 3;
-    private static final int MESSAGE_ITEM_CHANGED  = 4;
-    private static final int MESSAGE_ITEM_INSERTED = 5;
 
     /**
      * This utility class cannot be instantiated.

@@ -67,7 +67,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * @see #setItemCount(int)
-     * @see #setItemCount(int, Page)
      */
     @Override
     public int getItemCount() {
@@ -77,31 +76,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Sets total number of items in this adapter.
      * @param itemCount The total number of items in this adapter.
-     * @see #setItemCount(int, Page)
      */
     public final void setItemCount(int itemCount) {
-        setItemCount(itemCount, null);
-    }
-
-    /**
-     * Sets total number of items in this adapter.
-     * @param itemCount The total number of items in this adapter.
-     * @param initialPage The first (index == 0) {@link Page} to add.
-     * @see #setItemCount(int)
-     */
-    public void setItemCount(int itemCount, Page<? extends E> initialPage) {
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "itemCount < 0");
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         mPageCache.clear();
         mLoadStates.clear();
         mItemCount = itemCount;
-
-        // Adds the first page to mPageCache.
-        if (Pages.getCount(initialPage) > 0) {
-            mPageCache.put(0, (Page<E>)initialPage);
-        }
-
         postNotifyDataSetChanged();
     }
 

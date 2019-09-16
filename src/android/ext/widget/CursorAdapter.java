@@ -42,7 +42,9 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
     public CursorAdapter(Cursor cursor, int flags) {
         mObserver = ((flags & FLAG_REGISTER_CONTENT_OBSERVER) != 0 ? new CursorObserver(this) : null);
         mRowIDColumn = -1;
-        swapCursor(cursor);
+        if (cursor != null) {
+            setCursor(cursor);
+        }
     }
 
     /**
@@ -119,30 +121,13 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
      * @see #getCursor()
      */
     public Cursor swapCursor(Cursor newCursor) {
-        if (mCursor == newCursor) {
-            return null;
+        Cursor oldCursor = null;
+        if (mCursor != newCursor) {
+            oldCursor = mCursor;
+            setCursor(newCursor);
+            postNotifyDataSetChanged();
         }
 
-        // Unregister the ContentObserver from old cursor.
-        final Cursor oldCursor = mCursor;
-        unregisterContentObserver();
-        mCursor = newCursor;
-
-        if (mCursor != null) {
-            // Register the ContentObserver to new cursor.
-            if (mObserver != null) {
-                mObserver.register(mCursor);
-            }
-
-            // Notifies the attached observers that the underlying data has been
-            // changed and any View reflecting the data set should refresh itself.
-            mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
-        } else {
-            // Notifies the attached observers that the underlying data is no longer valid.
-            mRowIDColumn = -1;
-        }
-
-        notifyDataSetChanged();
         return oldCursor;
     }
 
@@ -250,6 +235,25 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
 
     @Override
     public void onContentChanged(boolean selfChange, Uri uri) {
+    }
+
+    private void setCursor(Cursor cursor) {
+        // Unregister the ContentObserver from old cursor.
+        unregisterContentObserver();
+        mCursor = cursor;
+
+        if (mCursor != null) {
+            // Register the ContentObserver to new cursor.
+            if (mObserver != null) {
+                mObserver.register(mCursor);
+            }
+
+            // Get the rowID column index from the new cursor.
+            mRowIDColumn = mCursor.getColumnIndex(BaseColumns._ID);
+        } else {
+            // The rowID column index is no longer valid.
+            mRowIDColumn = -1;
+        }
     }
 
     /**

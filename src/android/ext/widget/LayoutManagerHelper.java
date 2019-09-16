@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import android.content.res.Resources;
+import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
@@ -53,11 +54,12 @@ public final class LayoutManagerHelper {
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
+     * @param offset The offset to apply to the horizontally in pixels.
      * @param immediate <tt>true</tt> to forbid animated or delayed scrolling, <tt>false</tt> otherwise.
      * @return Whether the group scrolled to handle the operation.
      * @see LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)
      */
-    public static boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate) {
+    public static boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, int offset, boolean immediate) {
         // Gets the parent left and right.
         final int parentLeft  = parent.getPaddingLeft();
         final int parentRight = parent.getWidth() - parent.getPaddingRight();
@@ -74,10 +76,10 @@ public final class LayoutManagerHelper {
         final int dx = (offScreenLeft != 0 ? offScreenLeft : Math.min(offsetLeft, offScreenRight));
         if (dx > 0) {
             // scroll to right.
-            return scrollBy(parent, offsetLeft, 0, immediate);
+            return scrollBy(parent, offsetLeft - offset, 0, immediate);
         } else if (dx < 0) {
             // scroll to left.
-            return scrollBy(parent, -(parentRight - childRight), 0, immediate);
+            return scrollBy(parent, offset - parentRight + childRight, 0, immediate);
         } else {
             // no scroll.
             return false;
@@ -90,11 +92,12 @@ public final class LayoutManagerHelper {
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
+     * @param offset The offset to apply to the vertically in pixels.
      * @param immediate <tt>true</tt> to forbid animated or delayed scrolling, <tt>false</tt> otherwise.
      * @return Whether the group scrolled to handle the operation.
      * @see LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)
      */
-    public static boolean scrollVertically(RecyclerView parent, View child, Rect rect, boolean immediate) {
+    public static boolean scrollVertically(RecyclerView parent, View child, Rect rect, int offset, boolean immediate) {
         // Gets the parent top and bottom.
         final int parentTop    = parent.getPaddingTop();
         final int parentBottom = parent.getHeight() - parent.getPaddingBottom();
@@ -111,10 +114,10 @@ public final class LayoutManagerHelper {
         final int dy = (offScreenTop != 0 ? offScreenTop : Math.min(offsetTop, offScreenBottom));
         if (dy > 0) {
             // scroll to down.
-            return scrollBy(parent, 0, offsetTop, immediate);
+            return scrollBy(parent, 0, offsetTop - offset, immediate);
         } else if (dy < 0) {
             // scroll to up.
-            return scrollBy(parent, 0, -(parentBottom - childBottom), immediate);
+            return scrollBy(parent, 0, offset - parentBottom + childBottom, immediate);
         } else {
             // no scroll.
             return false;
@@ -151,6 +154,7 @@ public final class LayoutManagerHelper {
         @Override
         public void run() {
             final View itemView = mLayoutManager.findViewByPosition(mPosition);
+            DebugUtils.__checkDebug(itemView == null && mRetryCount <= 0, "ItemViewFinder", "The LayoutManager couldn't find view by position - " + mPosition);
             if (itemView != null) {
                 onItemViewFound(mLayoutManager, mPosition, itemView);
             } else if (--mRetryCount > 0) {

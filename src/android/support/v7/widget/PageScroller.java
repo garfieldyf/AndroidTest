@@ -1,5 +1,7 @@
 package android.support.v7.widget;
 
+import static android.support.v7.widget.LinearLayoutManager.HORIZONTAL;
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import android.ext.widget.LayoutManagerHelper;
 import android.graphics.Rect;
 import android.view.View;
@@ -57,13 +59,13 @@ public class PageScroller {
         final boolean canScroll = canScroll(newPage);
         if (canScroll) {
             int dx = 0, dy = 0, offset = (newPage - mCurrentPage) * mPageSize;
-            if (mLayoutManager.mOrientation == LinearLayoutManager.HORIZONTAL) {
+            if (mLayoutManager.mOrientation == HORIZONTAL) {
                 dx = offset;
             } else {
                 dy = offset;
             }
 
-            if (immediate || mLayoutManager.mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) {
+            if (immediate || mLayoutManager.mRecyclerView.getScrollState() != SCROLL_STATE_IDLE) {
                 mLayoutManager.mRecyclerView.scrollBy(dx, dy);
             } else {
                 mLayoutManager.mRecyclerView.smoothScrollBy(dx, dy);
@@ -253,7 +255,7 @@ public class PageScroller {
     private boolean canScroll(int newPage) {
         if (newPage >= 0 && mCurrentPage != newPage && mLayoutManager.mRecyclerView != null) {
             final int direction = (mCurrentPage > newPage ? -1 : 1);
-            if (mLayoutManager.mOrientation == LinearLayoutManager.HORIZONTAL) {
+            if (mLayoutManager.mOrientation == HORIZONTAL) {
                 return mLayoutManager.mRecyclerView.canScrollHorizontally(direction);
             } else {
                 return mLayoutManager.mRecyclerView.canScrollVertically(direction);

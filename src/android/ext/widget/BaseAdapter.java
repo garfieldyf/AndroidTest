@@ -25,7 +25,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
 
     /**
      * Return the adapter position that the given <em>child</em> view corresponds to.
-     * @param child The child View to query.
+     * @param child The child <tt>View</tt> to query.
      * @return The adapter position corresponding to the given view or {@link #NO_POSITION}.
      */
     public final int getItemPosition(View child) {

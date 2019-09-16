@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,11 +18,6 @@ import java.util.Map;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public final class ArrayUtils {
-    /**
-     * The <tt>0-length</tt> byte array.
-     */
-    public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-
     /**
      * Returns the number of elements in the <em>array</em>,
      * handling <tt>null Array</tt>.
@@ -486,6 +482,16 @@ public final class ArrayUtils {
         }
 
         return (end - start) >> 1;
+    }
+
+    /**
+     * Copies <em>newLength</em> elements from <em>srcArray</em> into a new array.
+     */
+    /* package */ static <T> T copyOf(Object srcArray, int copyLength, int newLength) {
+        DebugUtils.__checkError(newLength < copyLength, "newLength < copyLength");
+        final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
+        System.arraycopy(srcArray, 0, newArray, 0, copyLength);
+        return (T)newArray;
     }
 
     /**

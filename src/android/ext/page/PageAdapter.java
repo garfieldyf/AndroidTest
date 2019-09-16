@@ -118,7 +118,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public E getItem(int position) {
         DebugUtils.__checkUIThread("getItem");
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
         final int page = Pages.getOriginalPage(combinedPosition);
         final Page<E> result = getPage(page);
@@ -166,7 +166,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends Adapter<VH> 
      */
     public E peekItem(int position) {
         DebugUtils.__checkUIThread("peekItem");
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Index out of bounds - position = " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
         final Page<E> result = mPageCache.get(Pages.getOriginalPage(combinedPosition));
         return (result != null ? result.getItem((int)combinedPosition) : null);

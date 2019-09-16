@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import static android.ext.util.ArrayUtils.EMPTY_BYTE_ARRAY;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +13,7 @@ import android.util.Printer;
  * @author Garfield
  */
 public final class ByteArrayBuffer extends OutputStream {
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
     private byte[] data;
     private int size;
 
@@ -76,7 +76,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #array()
      */
     public final byte[] toByteArray() {
-        return (size > 0 ? copyOf(size) : EMPTY_BYTE_ARRAY);
+        return (size > 0 ? ArrayUtils.<byte[]>copyOf(data, size, size) : EMPTY_BYTE_ARRAY);
     }
 
     /**
@@ -223,16 +223,10 @@ public final class ByteArrayBuffer extends OutputStream {
                .append(" ]").toString());
     }
 
-    private byte[] copyOf(int newLength) {
-        final byte[] newData = new byte[newLength];
-        System.arraycopy(data, 0, newData, 0, size);
-        return newData;
-    }
-
     private void expandCapacity(int expandCount, boolean growUp) {
         final int minCapacity = expandCount + size;
         if (minCapacity > data.length) {
-            data = copyOf(growUp ? Math.max(minCapacity, (data.length * 3) / 2) : minCapacity + 1);
+            data = ArrayUtils.copyOf(data, size, growUp ? Math.max(minCapacity, (data.length * 3) / 2) : minCapacity + 1);
         }
     }
 }

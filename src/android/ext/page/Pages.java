@@ -193,18 +193,18 @@ public final class Pages {
         }
 
         @Override
-        public Page<E> remove(Integer page) {
-            return mPages.remove(page);
+        public Page<E> remove(Integer pageIndex) {
+            return mPages.remove(pageIndex);
         }
 
         @Override
-        public Page<E> get(Integer page) {
-            return mPages.get(page);
+        public Page<E> get(Integer pageIndex) {
+            return mPages.get(pageIndex);
         }
 
         @Override
-        public Page<E> put(Integer page, Page<E> value) {
-            return mPages.put(page, value);
+        public Page<E> put(Integer pageIndex, Page<E> page) {
+            return mPages.put(pageIndex, page);
         }
 
         @Override

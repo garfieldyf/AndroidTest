@@ -25,10 +25,10 @@ public abstract class LruPageAdapter<E, VH extends ViewHolder> extends PageAdapt
 
     /**
      * Called when a {@link Page} removed by this adapter.
-     * @param page The index of the page.
+     * @param pageIndex The index of the page.
      * @param oldPage The removed {@link Page}.
      */
-    protected void onPageRemoved(int page, Page<E> oldPage) {
+    protected void onPageRemoved(int pageIndex, Page<E> oldPage) {
     }
 
     /**
@@ -45,9 +45,9 @@ public abstract class LruPageAdapter<E, VH extends ViewHolder> extends PageAdapt
         }
 
         @Override
-        protected void entryRemoved(boolean evicted, Integer page, Page<E> oldPage, Page<E> newPage) {
+        protected void entryRemoved(boolean evicted, Integer pageIndex, Page<E> oldPage, Page<E> newPage) {
             if (evicted || oldPage != newPage) {
-                onPageRemoved(page, oldPage);
+                onPageRemoved(pageIndex, oldPage);
             }
         }
     }

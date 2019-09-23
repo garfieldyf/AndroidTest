@@ -85,7 +85,7 @@ public abstract class RecyclerAdapter<VH extends ViewHolder> extends Adapter<VH>
     @SuppressWarnings("unchecked")
     public void onFocusChange(View view, boolean hasFocus) {
         if (hasFocus) {
-            mFocusManager.setFocusedChild(view);
+            mFocusManager.setFocusedChild(view, false);
         }
 
         final RecyclerView rootView = mFocusManager.getRootView();

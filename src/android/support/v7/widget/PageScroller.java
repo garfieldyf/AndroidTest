@@ -14,17 +14,17 @@ public class PageScroller {
     /* package */ int mCurrentPage;
     /* package */ final int mPageSize;
 
-    /* package */ final LinearLayoutManager mLayoutManager;
+    /* package */ final LinearLayoutManager mLayout;
     /* package */ OnPageChangeListener mOnPageChangeListener;
 
     /**
      * Constructor
-     * @param layoutManager The {@link LinearLayoutManager}.
+     * @param layout The {@link LinearLayoutManager}.
      * @param pageSize The page size in pixels.
      */
-    public PageScroller(LinearLayoutManager layoutManager, int pageSize) {
+    public PageScroller(LinearLayoutManager layout, int pageSize) {
+        mLayout = layout;
         mPageSize = pageSize;
-        mLayoutManager = layoutManager;
     }
 
     /**
@@ -59,16 +59,16 @@ public class PageScroller {
         final boolean canScroll = canScroll(newPage);
         if (canScroll) {
             int dx = 0, dy = 0, offset = (newPage - mCurrentPage) * mPageSize;
-            if (mLayoutManager.mOrientation == HORIZONTAL) {
+            if (mLayout.mOrientation == HORIZONTAL) {
                 dx = offset;
             } else {
                 dy = offset;
             }
 
-            if (immediate || mLayoutManager.mRecyclerView.getScrollState() != SCROLL_STATE_IDLE) {
-                mLayoutManager.mRecyclerView.scrollBy(dx, dy);
+            if (immediate || mLayout.mRecyclerView.getScrollState() != SCROLL_STATE_IDLE) {
+                mLayout.mRecyclerView.scrollBy(dx, dy);
             } else {
-                mLayoutManager.mRecyclerView.smoothScrollBy(dx, dy);
+                mLayout.mRecyclerView.smoothScrollBy(dx, dy);
             }
 
             // Dispatch the current page changed.
@@ -110,11 +110,11 @@ public class PageScroller {
      * @param countPerPage The item count of per-page to display.
      */
     public void requestItemFocus(int position, int countPerPage) {
-        if (position >= 0 && position < mLayoutManager.getItemCount()) {
-            final View child = mLayoutManager.findViewByPosition(position);
+        if (position >= 0 && position < mLayout.getItemCount()) {
+            final View child = mLayout.findViewByPosition(position);
             if (child == null) {
                 final int newPage = position / countPerPage;
-                mLayoutManager.scrollToPositionWithOffset(newPage * countPerPage, 0);
+                mLayout.scrollToPositionWithOffset(newPage * countPerPage, 0);
 
                 // Dispatch the current page changed.
                 if (mCurrentPage != newPage) {
@@ -122,7 +122,7 @@ public class PageScroller {
                 }
             }
 
-            LayoutManagerHelper.requestChildFocus(mLayoutManager, position);
+            LayoutManagerHelper.requestItemFocus(mLayout, position);
         }
     }
 
@@ -143,7 +143,7 @@ public class PageScroller {
     public boolean scrollHorizontally(RecyclerView parent, View child, Rect rect, boolean immediate) {
         // Gets the parent left and right.
         final int parentLeft, parentRight;
-        if (mLayoutManager.getClipToPadding()) {
+        if (mLayout.getClipToPadding()) {
             parentLeft  = parent.getPaddingLeft();
             parentRight = parent.getWidth() - parent.getPaddingRight();
         } else {
@@ -186,7 +186,7 @@ public class PageScroller {
     public boolean scrollVertically(RecyclerView parent, View child, Rect rect, boolean immediate) {
         // Gets the parent top and bottom.
         final int parentTop, parentBottom;
-        if (mLayoutManager.getClipToPadding()) {
+        if (mLayout.getClipToPadding()) {
             parentTop    = parent.getPaddingTop();
             parentBottom = parent.getHeight() - parent.getPaddingBottom();
         } else {
@@ -221,21 +221,21 @@ public class PageScroller {
      * <p>Note: This method recommended call in the {@link LinearLayoutManager#findOneVisibleChild(int, int, boolean, boolean)}.</p>
      */
     public View findOneVisibleChild(int fromIndex, int toIndex, boolean completelyVisible, boolean acceptPartiallyVisible) {
-        mLayoutManager.ensureLayoutState();
+        mLayout.ensureLayoutState();
         final int start, end;
-        if (mLayoutManager.getClipToPadding()) {
-            start = mLayoutManager.mOrientationHelper.getStartAfterPadding();
-            end   = mLayoutManager.mOrientationHelper.getEndAfterPadding();
+        if (mLayout.getClipToPadding()) {
+            start = mLayout.mOrientationHelper.getStartAfterPadding();
+            end   = mLayout.mOrientationHelper.getEndAfterPadding();
         } else {
             start = 0;
-            end   = mLayoutManager.mOrientationHelper.getEnd();
+            end   = mLayout.mOrientationHelper.getEnd();
         }
 
         View partiallyVisible = null;
         for (int i = toIndex > fromIndex ? 1 : -1; fromIndex != toIndex; fromIndex += i) {
-            final View child = mLayoutManager.getChildAt(fromIndex);
-            final int childStart = mLayoutManager.mOrientationHelper.getDecoratedStart(child);
-            final int childEnd = mLayoutManager.mOrientationHelper.getDecoratedEnd(child);
+            final View child = mLayout.getChildAt(fromIndex);
+            final int childStart = mLayout.mOrientationHelper.getDecoratedStart(child);
+            final int childEnd = mLayout.mOrientationHelper.getDecoratedEnd(child);
             if (childStart < end && childEnd > start) {
                 if (completelyVisible) {
                     if (childStart >= start && childEnd <= end) {
@@ -253,12 +253,12 @@ public class PageScroller {
     }
 
     private boolean canScroll(int newPage) {
-        if (newPage >= 0 && mCurrentPage != newPage && mLayoutManager.mRecyclerView != null) {
+        if (newPage >= 0 && mCurrentPage != newPage && mLayout.mRecyclerView != null) {
             final int direction = (mCurrentPage > newPage ? -1 : 1);
-            if (mLayoutManager.mOrientation == HORIZONTAL) {
-                return mLayoutManager.mRecyclerView.canScrollHorizontally(direction);
+            if (mLayout.mOrientation == HORIZONTAL) {
+                return mLayout.mRecyclerView.canScrollHorizontally(direction);
             } else {
-                return mLayoutManager.mRecyclerView.canScrollVertically(direction);
+                return mLayout.mRecyclerView.canScrollVertically(direction);
             }
         }
 
@@ -268,7 +268,7 @@ public class PageScroller {
     private void dispatchPageChanged(int newPage, int oldPage) {
         mCurrentPage = newPage;
         if (mOnPageChangeListener != null) {
-            mOnPageChangeListener.onPageChanged(mLayoutManager.mRecyclerView, newPage, oldPage);
+            mOnPageChangeListener.onPageChanged(mLayout.mRecyclerView, newPage, oldPage);
         }
     }
 

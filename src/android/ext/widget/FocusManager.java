@@ -10,8 +10,9 @@ import android.view.ViewGroup;
  * @author Garfield
  */
 public class FocusManager implements OnFocusChangeListener {
-    private View mFocused;
     private final ViewGroup mRootView;
+    private View mFocused;
+    private OnItemSelectedListener mListener;
 
     /**
      * Constructor
@@ -35,7 +36,7 @@ public class FocusManager implements OnFocusChangeListener {
     /**
      * Returns the focused child in the root view.
      * @return The focused child or <tt>null</tt>.
-     * @see #setFocusedChild(View)
+     * @see #setFocusedChild(View, boolean)
      */
     public View getFocusedChild() {
         return mFocused;
@@ -44,10 +45,28 @@ public class FocusManager implements OnFocusChangeListener {
     /**
      * Sets the focused child in the root view.
      * @param focused The focused child.
+     * @param changeSelection Whether to change the
+     * selection state of <em>focused</em> view.
      * @see #getFocusedChild()
      */
-    public void setFocusedChild(View focused) {
-        mFocused = focused;
+    public void setFocusedChild(View focused, boolean changeSelection) {
+        if (mFocused != focused) {
+            final View oldFocused = mFocused;
+            mFocused = focused;
+            if (changeSelection) {
+                if (oldFocused != null) {
+                    oldFocused.setSelected(false);
+                }
+
+                if (focused != null) {
+                    focused.setSelected(true);
+                }
+
+                if (mListener != null) {
+                    mListener.onItemSelected(mRootView, focused, oldFocused);
+                }
+            }
+        }
     }
 
     /**
@@ -63,6 +82,10 @@ public class FocusManager implements OnFocusChangeListener {
         return (mRootView.getFocusedChild() == null && views.add(mRootView));
     }
 
+    public void setOnItemSelectedListener(OnItemSelectedListener listener) {
+        mListener = listener;
+    }
+
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if (hasFocus) {
@@ -74,5 +97,18 @@ public class FocusManager implements OnFocusChangeListener {
                 mFocused.requestFocus();
             }
         }
+    }
+
+    /**
+     * Callback interface to be invoked when a child view has been selected.
+     */
+    public static interface OnItemSelectedListener {
+        /**
+         * Callback method to be invoked when a child view has been selected.
+         * @param parent The {@link ViewGroup} where the selection happened.
+         * @param newView The newly selected <tt>View</tt>, or <tt>null</tt>.
+         * @param oldView The previously selected <tt>View</tt>, or <tt>null</tt>.
+         */
+        void onItemSelected(ViewGroup parent, View newView, View oldView);
     }
 }

@@ -156,15 +156,15 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
         }
 
         final LinearLayoutManager layout = (LinearLayoutManager)layoutManager;
-        int startPos = layout.findFirstVisibleItemPosition();
+        int firstPos = layout.findFirstVisibleItemPosition();
         final int lastPos = layout.findLastVisibleItemPosition();
-        if (startPos == NO_POSITION || lastPos == NO_POSITION) {
+        if (firstPos == NO_POSITION || lastPos == NO_POSITION) {
             return;
         }
 
-        for (; startPos <= lastPos; ++startPos) {
-            if (mCursor.moveToPosition(startPos) && mCursor.getLong(mRowIDColumn) == id) {
-                postNotifyItemRangeChanged(startPos, 1, payload);
+        for (; firstPos <= lastPos; ++firstPos) {
+            if (mCursor.moveToPosition(firstPos) && mCursor.getLong(mRowIDColumn) == id) {
+                postNotifyItemRangeChanged(firstPos, 1, payload);
                 break;
             }
         }

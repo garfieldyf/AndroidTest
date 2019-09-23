@@ -10,7 +10,6 @@ import android.support.v7.widget.RecyclerView.ItemDecoration;
 import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.Recycler;
 import android.support.v7.widget.RecyclerView.State;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,11 +21,11 @@ import android.view.ViewGroup;
 public final class LayoutManagerHelper {
     /**
      * Called when an item in the data set of the adapter wants focus.
-     * @param layoutManager The {@link LayoutManager}.
+     * @param layout The {@link LayoutManager}.
      * @param position The position of the item in the data set of the adapter.
      */
-    public static void requestChildFocus(LayoutManager layoutManager, int position) {
-        UIHandler.sInstance.post(new FocusFinder(layoutManager, position));
+    public static void requestItemFocus(LayoutManager layout, int position) {
+        UIHandler.sInstance.post(new FocusFinder(layout, position));
     }
 
     /**
@@ -125,38 +124,29 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Class <tt>ItemViewHolder</tt> is an implementation of a {@link ViewHolder}.
-     */
-    public static final class ItemViewHolder extends ViewHolder {
-        public ItemViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
-
-    /**
      * Class <tt>ItemViewFinder</tt> used to find the specified child view from the {@link RecyclerView}.
      */
     public static abstract class ItemViewFinder implements Runnable {
         private int mRetryCount;
         private final int mPosition;
-        private final LayoutManager mLayoutManager;
+        private final LayoutManager mLayout;
 
         /**
-         * @param layoutManager The {@link LayoutManager}.
+         * @param layout The {@link LayoutManager}.
          * @param position The adapter position of the item to find.
          */
-        public ItemViewFinder(LayoutManager layoutManager, int position) {
+        public ItemViewFinder(LayoutManager layout, int position) {
             mRetryCount = 3;
+            mLayout = layout;
             mPosition = position;
-            mLayoutManager = layoutManager;
         }
 
         @Override
         public void run() {
-            final View itemView = mLayoutManager.findViewByPosition(mPosition);
-            DebugUtils.__checkDebug(itemView == null && mRetryCount <= 0, "ItemViewFinder", "The LayoutManager couldn't find view by position - " + mPosition);
+            final View itemView = mLayout.findViewByPosition(mPosition);
+            DebugUtils.__checkDebug(itemView == null && mRetryCount <= 0, "LayoutManagerHelper", "The LayoutManager couldn't find view by position - " + mPosition);
             if (itemView != null) {
-                onItemViewFound(mLayoutManager, mPosition, itemView);
+                onItemViewFound(mLayout, mPosition, itemView);
             } else if (--mRetryCount > 0) {
                 UIHandler.sInstance.post(this);
             }
@@ -164,11 +154,11 @@ public final class LayoutManagerHelper {
 
         /**
          * Called when an item in the data set of the adapter has been found.
-         * @param layoutManager The {@link LayoutManager}.
+         * @param layout The {@link LayoutManager}.
          * @param position The adapter position of the item.
          * @param itemView The item {@link View} has been found.
          */
-        protected abstract void onItemViewFound(LayoutManager layoutManager, int position, View itemView);
+        protected abstract void onItemViewFound(LayoutManager layout, int position, View itemView);
     }
 
     /**
@@ -282,12 +272,12 @@ public final class LayoutManagerHelper {
      * Class <tt>FocusFinder</tt> is an implementation of an {@link ItemViewFinder}.
      */
     private static final class FocusFinder extends ItemViewFinder {
-        public FocusFinder(LayoutManager layoutManager, int position) {
-            super(layoutManager, position);
+        public FocusFinder(LayoutManager layout, int position) {
+            super(layout, position);
         }
 
         @Override
-        protected void onItemViewFound(LayoutManager layoutManager, int position, View itemView) {
+        protected void onItemViewFound(LayoutManager layout, int position, View itemView) {
             itemView.requestFocus();
         }
     }

@@ -485,12 +485,12 @@ public final class ArrayUtils {
     }
 
     /**
-     * Copies <em>newLength</em> elements from <em>srcArray</em> into a new array.
+     * Copies the elements from <em>srcArray</em> into a new array.
      */
-    /* package */ static <T> T copyOf(Object srcArray, int copyLength, int newLength) {
-        DebugUtils.__checkError(newLength < copyLength, "newLength < copyLength");
+    /* package */ static <T> T copyOf(Object srcArray, int length, int newLength) {
+        DebugUtils.__checkError(newLength < length, "newLength < copyLength");
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
-        System.arraycopy(srcArray, 0, newArray, 0, copyLength);
+        System.arraycopy(srcArray, 0, newArray, 0, length);
         return (T)newArray;
     }
 

@@ -16,8 +16,8 @@ public class SectionList<E> implements Cloneable {
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
     private int mItemCount;
-    private int mSectionCount;
     private int[] mPositions;
+    private int mSectionCount;
     private Object[] mSections;
 
     /**

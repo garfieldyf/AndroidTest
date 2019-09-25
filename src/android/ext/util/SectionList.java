@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
+import org.json.JSONArray;
 import android.util.Printer;
 
 /**
@@ -338,6 +339,35 @@ public class SectionList<E> implements Cloneable {
          * @see #size()
          */
         E get(int position);
+    }
+
+    /**
+     * Class <tt>JSONSection</tt> is an implementation of a {@link Section}.
+     */
+    public static class JSONSection<E> implements Section<E> {
+        /**
+         * The {@link JSONArray} of the section data.
+         */
+        protected final JSONArray mData;
+
+        /**
+         * Constructor
+         * @param data A {@link JSONArray} of the section data.
+         */
+        public JSONSection(JSONArray data) {
+            DebugUtils.__checkError(JsonUtils.getSize(data) == 0, "data == null || data.length() == 0");
+            mData = data;
+        }
+
+        @Override
+        public int size() {
+            return mData.length();
+        }
+
+        @Override
+        public E get(int position) {
+            return (E)mData.opt(position);
+        }
     }
 
     /**

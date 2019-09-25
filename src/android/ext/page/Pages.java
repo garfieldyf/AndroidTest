@@ -57,17 +57,6 @@ public final class Pages {
 
     /**
      * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
-     * @param data An array of the page data.
-     * @return A new <tt>Page</tt> or <tt>null</tt>.
-     * @see ArrayPage
-     */
-    @SuppressWarnings("unchecked")
-    public static <E> Page<E> newPage(E... data) {
-        return (ArrayUtils.getSize(data) > 0 ? new ArrayPage<E>(data) : null);
-    }
-
-    /**
-     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
      * @param data A {@link JSONArray} of the page data.
      * @return A new <tt>Page</tt> or <tt>null</tt>.
      * @see JSONPage
@@ -102,35 +91,6 @@ public final class Pages {
         @Override
         public E getItem(int position) {
             return mData.get(position);
-        }
-    }
-
-    /**
-     * Class <tt>ArrayPage</tt> is an implementation of a {@link Page}.
-     */
-    public static class ArrayPage<E> implements Page<E> {
-        /**
-         * The array of the page data.
-         */
-        protected final E[] mData;
-
-        /**
-         * Constructor
-         * @param data An array of the page data.
-         */
-        public ArrayPage(E[] data) {
-            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.length == 0");
-            mData = data;
-        }
-
-        @Override
-        public int getCount() {
-            return mData.length;
-        }
-
-        @Override
-        public E getItem(int position) {
-            return mData[position];
         }
     }
 

@@ -216,10 +216,11 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the index of the section with the given the <em>position</em>.
-     * @param position The position of the item in this <tt>SectionList</tt>.
+     * Given a position within this <tt>SectionList</tt>, returns the
+     * index of the corresponding section within the array of sections.
+     * @param position The position within this <tt>SectionList</tt>.
      * @return The index of the section.
-     * @see #getPositionForSection(int, int)
+     * @see #getPositionForSection(int)
      */
     public int getSectionForPosition(int position) {
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
@@ -228,16 +229,15 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the position with the given <em>sectionIndex</em> and <em>sectionPosition</em>.
+     * Given the index of a section within the array of sections, returns the starting
+     * position of that section within this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section.
-     * @param sectionPosition The index of the item in the section.
-     * @return The position of the item in this <tt>SectionList</tt>.
+     * @return The starting position of that section within this <tt>SectionList</tt>.
      * @see #getSectionForPosition(int)
      */
-    public int getPositionForSection(int sectionIndex, int sectionPosition) {
-        DebugUtils.__checkError(sectionPosition < 0, "Invalid sectionPosition - " + sectionPosition);
+    public int getPositionForSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex - " + sectionIndex + ", sectionCount = " + mSectionCount);
-        return (mPositions[sectionIndex] + sectionPosition);
+        return mPositions[sectionIndex];
     }
 
     /**

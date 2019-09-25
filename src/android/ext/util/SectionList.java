@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
@@ -239,6 +240,31 @@ public class SectionList<E> implements Cloneable {
         return (mPositions[sectionIndex] + sectionPosition);
     }
 
+    /**
+     * Returns a new array containing all elements contained in this <tt>SectionList</tt>.
+     * @return An array of the elements from this <tt>SectionList</tt>.
+     */
+    public Object[] toArray() {
+        return copyTo(new Object[mItemCount]);
+    }
+
+    /**
+     * Returns an array containing all elements contained in this <tt>SectionList</tt>.
+     * @param contents The array.
+     * @return An array of the elements from this <tt>SectionList</tt>.
+     */
+    public E[] toArray(E[] contents) {
+        if (contents.length < mItemCount) {
+            contents = (E[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
+        }
+
+        if (copyTo(contents).length > mItemCount) {
+            contents[mItemCount] = null;
+        }
+
+        return contents;
+    }
+
     @SuppressWarnings("resource")
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(100);
@@ -265,6 +291,17 @@ public class SectionList<E> implements Cloneable {
         return (section != null ? section.getCount() : 0);
     }
 
+    private Object[] copyTo(Object[] result) {
+        for (int i = 0, index = 0; i < mSectionCount; ++i) {
+            final Section<?> section = (Section<?>)mSections[i];
+            for (int j = 0, count = section.getCount(); j < count; ++j) {
+                result[index++] = section.getItem(j);
+            }
+        }
+
+        return result;
+    }
+
     private int computePositions(int sectionIndex) {
         final int startPosition = mPositions[sectionIndex];
         for (int position = startPosition; sectionIndex < mSectionCount; ++sectionIndex) {
@@ -285,7 +322,7 @@ public class SectionList<E> implements Cloneable {
     /**
      * A <tt>Section</tt> is a collection used to adds the data to the {@link SectionList}.
      */
-    public interface Section<E> {
+    public static interface Section<E> {
         /**
          * Returns the total number of items in this section.
          * @return The total number of items in this section.

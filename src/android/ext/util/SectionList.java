@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
@@ -60,7 +61,7 @@ public class SectionList<E> implements Cloneable {
         for (Section<? extends E> section : sections) {
             mSections[mSectionCount] = section;
             mPositions[mSectionCount++] = mItemCount;
-            mItemCount += section.getCount();
+            mItemCount += section.size();
         }
     }
 
@@ -104,7 +105,7 @@ public class SectionList<E> implements Cloneable {
      */
     public E getItem(int position) {
         final int sectionIndex = getSectionForPosition(position);
-        return ((Section<E>)mSections[sectionIndex]).getItem(position - mPositions[sectionIndex]);
+        return ((Section<E>)mSections[sectionIndex]).get(position - mPositions[sectionIndex]);
     }
 
     /**
@@ -137,16 +138,16 @@ public class SectionList<E> implements Cloneable {
      * @see #getSection(int)
      */
     public Section<E> setSection(int sectionIndex, Section<? extends E> section) {
-        DebugUtils.__checkError(getCount(section) == 0, "The section is null or 0-count");
+        DebugUtils.__checkError(getSize(section) == 0, "The section is null or 0-size");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex - " + sectionIndex + ", sectionCount = " + mSectionCount);
         final Section<E> oldSection = (Section<E>)mSections[sectionIndex];
-        final int newCount = section.getCount();
-        final int oldCount = oldSection.getCount();
+        final int newSize = section.size();
+        final int oldSize = oldSection.size();
         mSections[sectionIndex] = section;
 
-        if (oldCount != newCount) {
-            mItemCount -= oldCount;
-            mItemCount += newCount;
+        if (oldSize != newSize) {
+            mItemCount -= oldSize;
+            mItemCount += newSize;
             computePositions(sectionIndex);
         }
 
@@ -159,7 +160,7 @@ public class SectionList<E> implements Cloneable {
      * @see #addSection(int, Section)
      */
     public void addSection(Section<? extends E> section) {
-        DebugUtils.__checkError(getCount(section) == 0, "The section is null or 0-count");
+        DebugUtils.__checkError(getSize(section) == 0, "The section is null or 0-size");
         if (mSectionCount == mSections.length) {
             final int newLength = mSectionCount + ARRAY_CAPACITY_INCREMENT;
             mSections  = ArrayUtils.copyOf(mSections, mSectionCount, newLength);
@@ -168,7 +169,7 @@ public class SectionList<E> implements Cloneable {
 
         mSections[mSectionCount] = section;
         mPositions[mSectionCount++] = mItemCount;
-        mItemCount += section.getCount();
+        mItemCount += section.size();
     }
 
     /**
@@ -180,7 +181,7 @@ public class SectionList<E> implements Cloneable {
      * @see #addSection(Section)
      */
     public void addSection(int sectionIndex, Section<? extends E> section) {
-        DebugUtils.__checkError(getCount(section) == 0, "The section is null or 0-count");
+        DebugUtils.__checkError(getSize(section) == 0, "The section is null or 0-size");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mSectionCount, "Invalid sectionIndex - " + sectionIndex + ", sectionCount = " + mSectionCount);
         if (sectionIndex == mSectionCount) {
             addSection(section);
@@ -196,7 +197,7 @@ public class SectionList<E> implements Cloneable {
             ++mSectionCount;
             mSections[sectionIndex] = section;
             computePositions(sectionIndex);
-            mItemCount += section.getCount();
+            mItemCount += section.size();
         }
     }
 
@@ -207,7 +208,7 @@ public class SectionList<E> implements Cloneable {
      */
     public int removeSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex - " + sectionIndex + ", sectionCount = " + mSectionCount);
-        mItemCount -= ((Section<?>)mSections[sectionIndex]).getCount();
+        mItemCount -= ((Section<?>)mSections[sectionIndex]).size();
         System.arraycopy(mSections, sectionIndex + 1, mSections, sectionIndex, --mSectionCount - sectionIndex);
         mSections[mSectionCount] = null;  // Prevent memory leak.
 
@@ -241,17 +242,17 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns a new array containing all elements contained in this <tt>SectionList</tt>.
-     * @return An array of the elements from this <tt>SectionList</tt>.
+     * Returns a new array containing all items contained in this <tt>SectionList</tt>.
+     * @return An array of the items from this <tt>SectionList</tt>.
      */
     public Object[] toArray() {
         return copyTo(new Object[mItemCount]);
     }
 
     /**
-     * Returns an array containing all elements contained in this <tt>SectionList</tt>.
+     * Returns an array containing all items contained in this <tt>SectionList</tt>.
      * @param contents The array.
-     * @return An array of the elements from this <tt>SectionList</tt>.
+     * @return An array of the items from this <tt>SectionList</tt>.
      */
     public E[] toArray(E[] contents) {
         if (contents.length < mItemCount) {
@@ -276,9 +277,9 @@ public class SectionList<E> implements Cloneable {
             result.setLength(0);
 
             final int startPos = mPositions[i];
-            final int count = section.getCount();
+            final int size = section.size();
             formatter.format("  Section %-2d ==> ", i);
-            printer.println(DebugUtils.toString(section, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + count - 1).append(", count = ").append(count).append(" }").toString());
+            printer.println(DebugUtils.toString(section, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + size - 1).append(", size = ").append(size).append(" }").toString());
         }
     }
 
@@ -287,15 +288,15 @@ public class SectionList<E> implements Cloneable {
      * @param section The {@link Section}.
      * @return The numbers of items in the <em>section</em>.
      */
-    public static int getCount(Section<?> section) {
-        return (section != null ? section.getCount() : 0);
+    public static int getSize(Section<?> section) {
+        return (section != null ? section.size() : 0);
     }
 
     private Object[] copyTo(Object[] result) {
         for (int i = 0, index = 0; i < mSectionCount; ++i) {
             final Section<?> section = (Section<?>)mSections[i];
-            for (int j = 0, count = section.getCount(); j < count; ++j) {
-                result[index++] = section.getItem(j);
+            for (int j = 0, size = section.size(); j < size; ++j) {
+                result[index++] = section.get(j);
             }
         }
 
@@ -306,7 +307,7 @@ public class SectionList<E> implements Cloneable {
         final int startPosition = mPositions[sectionIndex];
         for (int position = startPosition; sectionIndex < mSectionCount; ++sectionIndex) {
             mPositions[sectionIndex] = position;
-            position += ((Section<?>)mSections[sectionIndex]).getCount();
+            position += ((Section<?>)mSections[sectionIndex]).size();
         }
 
         return startPosition;
@@ -326,16 +327,35 @@ public class SectionList<E> implements Cloneable {
         /**
          * Returns the total number of items in this section.
          * @return The total number of items in this section.
-         * @see #getItem(int)
+         * @see #get(int)
          */
-        int getCount();
+        int size();
 
         /**
          * Returns the item at the specified <em>position</em> in this section.
-         * @param position The position of the item.
+         * @param position The index of the item.
          * @return The item at the specified <em>position</em>.
-         * @see #getCount()
+         * @see #size()
          */
-        E getItem(int position);
+        E get(int position);
+    }
+
+    /**
+     * Class <tt>ArrayListSection</tt> is an implementation of a {@link Section}.
+     */
+    public static final class ArrayListSection<E> extends ArrayList<E> implements Section<E> {
+        private static final long serialVersionUID = -7733674144000974287L;
+
+        public ArrayListSection() {
+            super();
+        }
+
+        public ArrayListSection(int capacity) {
+            super(capacity);
+        }
+
+        public ArrayListSection(Collection<? extends E> collection) {
+            super(collection);
+        }
     }
 }

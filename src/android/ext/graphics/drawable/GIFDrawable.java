@@ -25,13 +25,15 @@ import android.util.AttributeSet;
  * Class GIFDrawable
  * @author Garfield
  */
-public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
+public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implements Runnable, Animatable {
     private static final int[] GIF_DRAWABLE_ATTRS = {
         android.R.attr.oneshot,
+        android.R.attr.autoStart,
     };
 
     private static final int FLAG_RUNNING = 0x04000000;   // mFlags
     private static final int FLAG_SCHED   = 0x08000000;   // mFlags
+    private static final int FLAG_START   = 0x04000000;   // mState.mFlags
     private static final int FLAG_ONESHOT = 0x08000000;   // mState.mFlags
 
     /**
@@ -143,8 +145,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
 
     /**
      * Tests the animation should play once or repeat.
-     * @return <tt>true</tt> if the animation will play
-     * once, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if the animation will play once, <tt>false</tt> otherwise.
      * @see #setOneShot(boolean)
      */
     public boolean isOneShot() {
@@ -153,8 +154,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
 
     /**
      * Sets whether the animation should play once or repeat.
-     * @param oneShot <tt>true</tt> if the animation should
-     * only play once.
+     * @param oneShot <tt>true</tt> if the animation should only play once.
      * @see #isOneShot()
      */
     public void setOneShot(boolean oneShot) {
@@ -162,6 +162,28 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
             mState.mFlags |= FLAG_ONESHOT;
         } else {
             mState.mFlags &= ~FLAG_ONESHOT;
+        }
+    }
+
+    /**
+     * Tests the animation should auto play when this drawable to render.
+     * @return <tt>true</tt> if the animation will auto play, <tt>false</tt> otherwise.
+     * @see #setAutoStart(boolean)
+     */
+    public boolean isAutoStart() {
+        return ((mState.mFlags & FLAG_START) != 0);
+    }
+
+    /**
+     * Sets whether the animation should auto play when this drawable to render.
+     * @param autoStart <tt>true</tt> if the animation should auto play.
+     * @see #isAutoStart()
+     */
+    public void setAutoStart(boolean autoStart) {
+        if (autoStart) {
+            mState.mFlags |= FLAG_START;
+        } else {
+            mState.mFlags &= ~FLAG_START;
         }
     }
 
@@ -229,7 +251,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        if (visible) {
+        if (isAutoStart() && visible) {
             start();
         } else {
             stop();
@@ -271,6 +293,10 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
         final TypedArray a = res.obtainAttributes(attrs, GIF_DRAWABLE_ATTRS);
         if (a.getBoolean(0 /* android.R.attr.oneshot */, false)) {
             mState.mFlags |= FLAG_ONESHOT;
+        }
+
+        if (a.getBoolean(1 /* android.R.attr.autoStart */, true)) {
+            mState.mFlags |= FLAG_START;
         }
 
         mState.setImage(GIFImage.decode(res, id));
@@ -315,7 +341,7 @@ public class GIFDrawable extends AbsBitmapDrawable<GIFDrawable.GIFImageState> im
     /**
      * Class <tt>GIFImageState</tt> is an implementation of a {@link ConstantState}.
      */
-    /* package */ static final class GIFImageState extends AbsBitmapDrawable.BaseConstantState {
+    /* package */ static final class GIFImageState extends ImageDrawable.ImageState {
         /* package */ Bitmap mCanvas;
         /* package */ GIFImage mImage;
 

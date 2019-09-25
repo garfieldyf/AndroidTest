@@ -16,7 +16,7 @@ import android.view.View;
  * Class InvertedBitmapDrawable
  * @author Garfield
  */
-public class InvertedBitmapDrawable extends AbsBitmapDrawable<InvertedBitmapDrawable.InvertedBitmapState> {
+public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable.InvertedBitmapState> {
     /**
      * Constructor
      * @param bitmap The original {@link Bitmap} to create the inverted bitmap.
@@ -133,7 +133,7 @@ public class InvertedBitmapDrawable extends AbsBitmapDrawable<InvertedBitmapDraw
     /**
      * Class <tt>InvertedBitmapState</tt> is an implementation of a {@link ConstantState}.
      */
-    /* package */ static final class InvertedBitmapState extends AbsBitmapDrawable.BaseConstantState {
+    /* package */ static final class InvertedBitmapState extends ImageDrawable.ImageState {
         /* package */ final int mAlpha;
         /* package */ final int mDirection;
         /* package */ final float mPercent;

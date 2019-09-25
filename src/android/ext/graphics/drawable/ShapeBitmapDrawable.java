@@ -28,7 +28,7 @@ import android.util.AttributeSet;
  * Abstract class ShapeBitmapDrawable
  * @author Garfield
  */
-public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapState> extends AbsBitmapDrawable<T> {
+public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapState> extends ImageDrawable<T> {
     private static final int FLAG_PATH = 0x08000000;  // mFlags
 
     /**
@@ -193,7 +193,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     /**
      * Class <tt>BitmapState</tt> is an implementation of a {@link ConstantState}.
      */
-    public static abstract class BitmapState extends BaseConstantState {
+    public static abstract class BitmapState extends ImageState {
         /* package */ Bitmap mBitmap;
         /* package */ Shader mShader;
         /* package */ final Path mPath;

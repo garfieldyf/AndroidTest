@@ -25,6 +25,7 @@ public final class LayoutManagerHelper {
      * @param position The position of the item in the data set of the adapter.
      */
     public static void requestItemFocus(LayoutManager layout, int position) {
+        DebugUtils.__checkError(layout == null, "layout == null");
         UIHandler.sInstance.post(new FocusFinder(layout, position));
     }
 

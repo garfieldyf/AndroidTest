@@ -13,7 +13,7 @@ import android.view.View;
 public class AnimatedImageSpan extends ImageSpan implements Runnable {
     private int mFrameIndex;
     private boolean mScheduleNext;
-    private final WeakReference<View> mViewRef;
+    private final WeakReference<View> mView;
 
     /**
      * Constructor
@@ -34,7 +34,7 @@ public class AnimatedImageSpan extends ImageSpan implements Runnable {
      */
     public AnimatedImageSpan(View view, AnimationDrawable drawable) {
         super(drawable);
-        mViewRef = new WeakReference<View>(view);
+        mView = new WeakReference<View>(view);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class AnimatedImageSpan extends ImageSpan implements Runnable {
     }
 
     private View getView() {
-        final View view = mViewRef.get();
+        final View view = mView.get();
         return (view != null && view.getParent() != null ? view : null);
     }
 }

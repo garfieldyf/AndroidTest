@@ -135,10 +135,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         Object result = null;
         if (SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
             final Resources res = mContext.getResources();
-            final int id = getResourceId(res, (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString())));
-            if (id != 0) {
-                result = res.getDrawable(id);
-            }
+            result = res.getDrawable(getResourceId(res, (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString()))));
         }
 
         return result;
@@ -150,14 +147,15 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     private static int getResourceId(Resources res, Uri uri) {
         DebugUtils.__checkError(TextUtils.isEmpty(uri.getAuthority()), "No authority: " + uri);
         final List<String> path = uri.getPathSegments();
-        final int size = ArrayUtils.getSize(path);
-        if (size == 1) {
+        switch (ArrayUtils.getSize(path)) {
+        case 1:
             return Integer.parseInt(path.get(0));
-        } else if (size == 2) {
+
+        case 2:
             return res.getIdentifier(path.get(1), path.get(0), uri.getAuthority());
-        } else {
-            DebugUtils.__checkWarning(true, "ImageDecoder", "No resource found for: " + uri);
-            return 0;
+
+        default:
+            throw new AssertionError("No resource found for: " + uri);
         }
     }
 }

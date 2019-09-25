@@ -36,9 +36,9 @@ public class FocusManager implements OnFocusChangeListener {
     /**
      * Returns the focused child in the root view.
      * @return The focused child or <tt>null</tt>.
-     * @see #setFocusedChild(View, boolean)
+     * @see #setFocusedView(View, boolean)
      */
-    public View getFocusedChild() {
+    public View getFocusedView() {
         return mFocused;
     }
 
@@ -47,9 +47,9 @@ public class FocusManager implements OnFocusChangeListener {
      * @param focused The focused child.
      * @param changeSelection Whether to change the
      * selection state of <em>focused</em> view.
-     * @see #getFocusedChild()
+     * @see #getFocusedView()
      */
-    public void setFocusedChild(View focused, boolean changeSelection) {
+    public void setFocusedView(View focused, boolean changeSelection) {
         if (mFocused != focused) {
             final View oldFocused = mFocused;
             mFocused = focused;

@@ -10,8 +10,8 @@ import android.view.ViewGroup;
  * @author Garfield
  */
 public class FocusManager implements OnFocusChangeListener {
-    private final ViewGroup mRootView;
     private View mFocused;
+    private final ViewGroup mRootView;
     private OnItemSelectedListener mListener;
 
     /**
@@ -34,8 +34,8 @@ public class FocusManager implements OnFocusChangeListener {
     }
 
     /**
-     * Returns the focused child in the root view.
-     * @return The focused child or <tt>null</tt>.
+     * Returns the focused view in the root view.
+     * @return The focused view or <tt>null</tt>.
      * @see #setFocusedView(View, boolean)
      */
     public View getFocusedView() {
@@ -43,10 +43,10 @@ public class FocusManager implements OnFocusChangeListener {
     }
 
     /**
-     * Sets the focused child in the root view.
-     * @param focused The focused child.
-     * @param changeSelection Whether to change the
-     * selection state of <em>focused</em> view.
+     * Sets the focused view in the root view.
+     * @param focused The focused <tt>View</tt>.
+     * @param changeSelection Whether to change
+     * the selection state of <em>focused</em> view.
      * @see #getFocusedView()
      */
     public void setFocusedView(View focused, boolean changeSelection) {

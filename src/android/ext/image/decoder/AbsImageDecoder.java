@@ -1,19 +1,11 @@
 package android.ext.image.decoder;
 
-import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
-import java.util.List;
 import android.content.Context;
-import android.content.res.Resources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
-import android.ext.util.ArrayUtils;
-import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
-import android.ext.util.UriUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
-import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 /**
@@ -66,14 +58,35 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             decodeImageBounds(uri, params, flags, opts);
 
             // Decodes the image pixels.
-            final Object result = decodeImage(uri, target, params, flags, opts);
-            return (result != null ? result : decodeResource(uri));
+            return decodeImage(uri, target, params, flags, opts);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - '" + uri + "'\n" + e);
-            return decodeResource(uri);
+            return null;
         } finally {
             recycleOptions(opts);
         }
+    }
+
+    /**
+     * Recycles the specified <em>opts</em> to the internal pool.
+     * @param opts The {@link Options} to recycle.
+     */
+    private void recycleOptions(Options opts) {
+        opts.inBitmap  = null;
+        opts.inDensity = 0;
+        opts.outWidth  = 0;
+        opts.outHeight = 0;
+        opts.inScaled  = true;
+        opts.inMutable = false;
+        opts.inSampleSize  = 0;
+        opts.outMimeType   = null;
+        opts.inTempStorage = null;
+        opts.inTargetDensity = 0;
+        opts.inScreenDensity = 0;
+        opts.inPremultiplied = true;
+        opts.inJustDecodeBounds = false;
+        opts.inPreferredConfig  = Config.ARGB_8888;
+        mOptionsPool.recycle(opts);
     }
 
     /**
@@ -103,59 +116,4 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @see #decodeImage(Object, Object, Object[], int, byte[])
      */
     protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
-
-    /**
-     * Recycles the specified <em>opts</em> to the internal pool.
-     * @param opts The {@link Options} to recycle.
-     */
-    private void recycleOptions(Options opts) {
-        opts.inBitmap  = null;
-        opts.inDensity = 0;
-        opts.outWidth  = 0;
-        opts.outHeight = 0;
-        opts.inScaled  = true;
-        opts.inMutable = false;
-        opts.inSampleSize  = 0;
-        opts.outMimeType   = null;
-        opts.inTempStorage = null;
-        opts.inTargetDensity = 0;
-        opts.inScreenDensity = 0;
-        opts.inPremultiplied = true;
-        opts.inJustDecodeBounds = false;
-        opts.inPreferredConfig  = Config.ARGB_8888;
-        mOptionsPool.recycle(opts);
-    }
-
-    /**
-     * Decodes an image from the {@link Resources} and a resource id.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     */
-    @SuppressWarnings("deprecation")
-    private Object decodeResource(Object uri) {
-        Object result = null;
-        if (SCHEME_ANDROID_RESOURCE.equals(UriUtils.parseScheme(uri))) {
-            final Resources res = mContext.getResources();
-            result = res.getDrawable(getResourceId(res, (uri instanceof Uri ? (Uri)uri : Uri.parse(uri.toString()))));
-        }
-
-        return result;
-    }
-
-    /**
-     * Resolves an "android.resource" URI to a resource id.
-     */
-    private static int getResourceId(Resources res, Uri uri) {
-        DebugUtils.__checkError(TextUtils.isEmpty(uri.getAuthority()), "No authority: " + uri);
-        final List<String> path = uri.getPathSegments();
-        switch (ArrayUtils.getSize(path)) {
-        case 1:
-            return Integer.parseInt(path.get(0));
-
-        case 2:
-            return res.getIdentifier(path.get(1), path.get(0), uri.getAuthority());
-
-        default:
-            throw new AssertionError("No resource found for: " + uri);
-        }
-    }
 }

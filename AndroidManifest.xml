@@ -93,7 +93,8 @@
             android:screenOrientation="landscape" />
         <activity
             android:name="com.tencent.test.ui.WebViewActivity"
-            android:screenOrientation="landscape" >
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.DeviceDefault" >
         </activity>
         <activity android:name="PrinterActivity" />
         <activity android:name="ViewPagerActivity" />
@@ -108,7 +109,7 @@
         <activity android:name="RecyclerViewActivity" />
         <activity android:name="PackageArchiveActivity" />
         <activity android:name="com.tencent.test.ui.VideoActivity" />
-        
+
         <service
             android:name="CrashService"
             android:process=":crash" />

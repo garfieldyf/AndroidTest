@@ -108,8 +108,8 @@ public final class BarcodeBuilder {
      * @param logo The <tt>Drawable</tt> to set.
      * @return This builder.
      * @see #logo(Resources, int)
-     * @see #size(int, int)
-     * @see #size(Resources, int)
+     * @see #logoSize(int, int)
+     * @see #logoSize(Resources, int)
      */
     public final BarcodeBuilder logo(Drawable logo) {
         this.logo = logo;
@@ -122,8 +122,8 @@ public final class BarcodeBuilder {
      * @param id The resource id of the logo.
      * @return This builder.
      * @see #logo(Drawable)
-     * @see #size(int, int)
-     * @see #size(Resources, int)
+     * @see #logoSize(int, int)
+     * @see #logoSize(Resources, int)
      */
     @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int id) {
@@ -136,9 +136,9 @@ public final class BarcodeBuilder {
      * @param width The width to draw in pixels.
      * @param height The height to draw in pixels.
      * @return This builder.
-     * @see #size(Resources, int)
+     * @see #logoSize(Resources, int)
      */
-    public final BarcodeBuilder size(int width, int height) {
+    public final BarcodeBuilder logoSize(int width, int height) {
         this.logoWidth  = width;
         this.logoHeight = height;
         return this;
@@ -149,9 +149,9 @@ public final class BarcodeBuilder {
      * @param res The <tt>Resources</tt>.
      * @param id The resource id of the size dimension.
      * @return This builder.
-     * @see #size(int, int)
+     * @see #logoSize(int, int)
      */
-    public final BarcodeBuilder size(Resources res, int id) {
+    public final BarcodeBuilder logoSize(Resources res, int id) {
         this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(id);
         return this;
     }

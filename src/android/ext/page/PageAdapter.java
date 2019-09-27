@@ -76,11 +76,11 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Sets total number of items in this adapter.
      * @param itemCount The total number of items in this adapter.
+     * @see #getItemCount()
      */
-    public final void setItemCount(int itemCount) {
+    public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "itemCount < 0");
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         mPageCache.clear();
         mLoadStates.clear();
         mItemCount = itemCount;
@@ -258,7 +258,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         final int itemCount = Pages.getCount(page);
         if (itemCount > 0) {
             mPageCache.put(pageIndex, (Page<E>)page);
-            postNotifyItemRangeChanged(getPositionForPage(pageIndex, 0), itemCount, payload);
+            postNotifyItemRangeChanged(getPositionForPage(pageIndex), itemCount, payload);
         }
     }
 
@@ -282,7 +282,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         if (itemCount > 0) {
             mItemCount += itemCount;
             mPageCache.put(pageIndex, (Page<E>)page);
-            postNotifyItemRangeInserted(getPositionForPage(pageIndex, 0), itemCount);
+            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
         }
     }
 */
@@ -312,7 +312,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * <li>bit 32-63 : Higher 32 bits of the index of the page.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The combined position of the page.
-     * @see #getPositionForPage(int, int)
+     * @see #getPositionForPage(int)
      * @see Pages#getOriginalPage(long)
      * @see Pages#getOriginalPosition(long)
      */
@@ -323,15 +323,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns the adapter position with the given <em>pageIndex</em> and <em>pagePosition</em>.
+     * Given the index of a page within this adapter, returns the starting
+     * position of that page within this this adapter.
      * @param pageIndex The index of the page.
-     * @param pagePosition The index of the item in the page.
-     * @return The adapter position of the item in this adapter.
+     * @return The starting position of that page within this adapter.
      * @see #getPageForPosition(int)
      */
-    public final int getPositionForPage(int pageIndex, int pagePosition) {
-        DebugUtils.__checkError(pageIndex < 0 || pagePosition < 0, "pageIndex < 0 || pagePosition < 0");
-        return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize + pagePosition : pagePosition);
+    public final int getPositionForPage(int pageIndex) {
+        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+        return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize : 0);
     }
 
     @SuppressWarnings("resource")

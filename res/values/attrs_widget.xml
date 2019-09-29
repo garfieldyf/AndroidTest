@@ -24,4 +24,14 @@
         <attr name="scale" format="fraction" />
     </declare-styleable>
 
+    <!-- ImageLoader styleable -->
+    <declare-styleable name="ImageLoader">
+        <attr name="decoder" format="string" />
+        <attr name="flags">
+            <flag name="none" value="0" />
+            <flag name="noFileCache" value="0x01" />
+            <flag name="noMemoryCache" value="0x02" />
+        </attr>
+    </declare-styleable>
+
 </resources>

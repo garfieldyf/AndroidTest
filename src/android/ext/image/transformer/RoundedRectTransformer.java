@@ -69,7 +69,7 @@ public class RoundedRectTransformer implements Transformer<Bitmap> {
         return new RoundedBitmapDrawable(bitmap, mRadii);
     }
 
-    /* package */ final void dump(Printer printer, StringBuilder result) {
+    public final void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { radii = ").append(Arrays.toString(mRadii))
             .append(" }").toString());

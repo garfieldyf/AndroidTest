@@ -69,7 +69,7 @@ public class RoundedGIFTransformer implements Transformer<GIFImage> {
         return new RoundedGIFDrawable(image, mRadii);
     }
 
-    /* package */ final void dump(Printer printer, StringBuilder result) {
+    public final void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { radii = ").append(Arrays.toString(mRadii))
             .append(" }").toString());

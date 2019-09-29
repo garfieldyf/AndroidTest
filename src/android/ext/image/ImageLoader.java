@@ -29,12 +29,18 @@ import android.widget.ImageView;
  * <p>The two types used by an image loader are the following:</p>
  * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
+ * <h3>Usage</h3>
+ * <p>Here is a xml resource example:</p><pre>
+ * &lt;[ ImageLoader | loader ]
+ *      xmlns:app="http://schemas.android.com/apk/res-auto"
+ *      class="classFullName"
+ *      app:flags="[ none | noFileCache | noMemoryCache ]"
+ *      app:decoder="classFullName" /&gt;</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
     private final Loader mLoader;
-    private final Binder mBinder;
     private final LoadRequest mRequest;
 
     protected final ImageDecoder<Image> mDecoder;
@@ -46,15 +52,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
-     * @param binder May be <tt>null</tt>. The {@link Binder} to bind the image to target.
      */
-    public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder, Binder<URI, Object, Image> binder) {
+    public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
         super(module.mExecutor, imageCache);
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;
         mModule  = module;
-        mBinder  = (binder != null ? binder : this);
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(module.mContext));
     }
 
@@ -77,7 +81,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     public final LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = resolveUri(uri);
-        mRequest.mBinder = mBinder;
+        mRequest.mBinder = this;
         mRequest.mParams = mModule.mParamsPool.obtain();
         return mRequest;
     }
@@ -298,7 +302,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
-     * mImageLoader.load(uri)
+     * module.with(R.xml.image_loader).load(uri)
      *     .parameters(R.xml.decode_params)
      *     .placeholder(R.drawable.ic_placeholder)
      *     .transformer(R.xml.round_rect_transformer)
@@ -428,8 +432,20 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
         /**
          * Sets the {@link Binder} to bind the image to target.
+         * @param id The xml resource id of the <tt>Binder</tt>.
+         * @return This request.
+         * @see #binder(Binder)
+         */
+        public final LoadRequest binder(int id) {
+            mBinder = (Binder)mLoader.mModule.getBinder(id);
+            return this;
+        }
+
+        /**
+         * Sets the {@link Binder} to bind the image to target.
          * @param binder The <tt>Binder</tt> to bind.
          * @return This request.
+         * @see #binder(int)
          */
         public final LoadRequest binder(Binder binder) {
             mBinder = binder;

@@ -27,7 +27,7 @@ public class RoundedRectTransformer implements Transformer<Bitmap> {
      * radius values [X, Y]. The corners are ordered <tt>top-left</tt>,
      * <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      */
-    private final float[] mRadii;
+    protected final float[] mRadii;
 
     /**
      * Constructor

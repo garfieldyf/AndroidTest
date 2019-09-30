@@ -315,10 +315,10 @@ public class SectionList<E> implements Cloneable {
     }
 
     private Object[] newSectionArray(int sectionIndex, int newLength) {
-        final Object[] newSections = new Object[newLength];
-        System.arraycopy(mSections, 0, newSections, 0, sectionIndex);
-        System.arraycopy(mSections, sectionIndex, newSections, sectionIndex + 1, mSectionCount - sectionIndex);
-        return newSections;
+        final Object[] result = new Object[newLength];
+        System.arraycopy(mSections, 0, result, 0, sectionIndex);
+        System.arraycopy(mSections, sectionIndex, result, sectionIndex + 1, mSectionCount - sectionIndex);
+        return result;
     }
 
     /**

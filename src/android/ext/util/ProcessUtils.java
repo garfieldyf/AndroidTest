@@ -342,7 +342,7 @@ public final class ProcessUtils {
             Formatter formatter = null;
             try {
                 // Creates the log file.
-                final PrintStream ps = new PrintStream(new FileOutputStream(new File(FileUtils.getFilesDir(mContext, null), "crashes.log"), true));
+                final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
                 formatter = new Formatter(ps);
 
                 // Writes the uncaught exception to log file.

@@ -488,7 +488,7 @@ public final class ArrayUtils {
      * Copies the elements from <em>srcArray</em> into a new array.
      */
     /* package */ static <T> T copyOf(Object srcArray, int length, int newLength) {
-        DebugUtils.__checkError(newLength < length, "newLength < copyLength");
+        DebugUtils.__checkError(newLength < length, "newLength < length");
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
         System.arraycopy(srcArray, 0, newArray, 0, length);
         return (T)newArray;

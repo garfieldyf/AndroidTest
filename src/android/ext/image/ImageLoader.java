@@ -128,12 +128,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected void onRecycle(Object[] params) {
-        Arrays.fill(params, null);
-        mModule.mParamsPool.recycle(params);
-    }
-
-    @Override
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
@@ -142,6 +136,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
+    }
+
+    @Override
+    protected void onRecycle(Object[] params) {
+        Arrays.fill(params, null);
+        mModule.mParamsPool.recycle(params);
     }
 
     /**
@@ -324,24 +324,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         /**
-         * Loads the image with the arguments supplied to this request.
-         * @param target The <tt>Object</tt> to bind.
-         */
-        public final void into(Object target) {
-            if (mParams[0] == null) {
-                mParams[0] = Parameters.defaultParameters();
-            }
-
-            if (mParams[1] == null) {
-                mParams[1] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
-            }
-
-            mLoader.load(mUri, target, mFlags, mBinder, mParams);
-            mFlags  = 0;
-            mParams = null;
-        }
-
-        /**
          * Adds the loading flags to load image.
          * @param flags Loading flags. May be any combination of
          * <tt>FLAG_XXX</tt> constants.
@@ -450,6 +432,24 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         public final LoadRequest binder(Binder binder) {
             mBinder = binder;
             return this;
+        }
+
+        /**
+         * Loads the image with the arguments supplied to this request.
+         * @param target The <tt>Object</tt> to bind.
+         */
+        public final void into(Object target) {
+            if (mParams[0] == null) {
+                mParams[0] = Parameters.defaultParameters();
+            }
+
+            if (mParams[1] == null) {
+                mParams[1] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
+            }
+
+            mLoader.load(mUri, target, mFlags, mBinder, mParams);
+            mFlags  = 0;
+            mParams = null;
         }
     }
 

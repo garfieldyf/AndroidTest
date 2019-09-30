@@ -372,25 +372,25 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     private static String toString(int level) {
         switch (level) {
-        case ComponentCallbacks2.TRIM_MEMORY_COMPLETE:
+        case TRIM_MEMORY_COMPLETE:
             return "TRIM_MEMORY_COMPLETE";
 
-        case ComponentCallbacks2.TRIM_MEMORY_MODERATE:
+        case TRIM_MEMORY_MODERATE:
             return "TRIM_MEMORY_MODERATE";
 
-        case ComponentCallbacks2.TRIM_MEMORY_BACKGROUND:
+        case TRIM_MEMORY_BACKGROUND:
             return "TRIM_MEMORY_BACKGROUND";
 
-        case ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN:
+        case TRIM_MEMORY_UI_HIDDEN:
             return "TRIM_MEMORY_UI_HIDDEN";
 
-        case ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW:
+        case TRIM_MEMORY_RUNNING_LOW:
             return "TRIM_MEMORY_RUNNING_LOW";
 
-        case ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL:
+        case TRIM_MEMORY_RUNNING_CRITICAL:
             return "TRIM_MEMORY_RUNNING_CRITICAL";
 
-        case ComponentCallbacks2.TRIM_MEMORY_RUNNING_MODERATE:
+        case TRIM_MEMORY_RUNNING_MODERATE:
             return "TRIM_MEMORY_RUNNING_MODERATE";
 
         default:
@@ -405,9 +405,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         }
 
         final StringBuilder result = new StringBuilder(130);
+        final TypedValue value = new TypedValue();
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s cache [ size = %d ] ", cacheName, size);
         for (int i = 0; i < size; ++i) {
-            final TypedValue value = new TypedValue();
             res.getValue(cache.keyAt(i), value, true);
             final Object object = cache.valueAt(i);
 

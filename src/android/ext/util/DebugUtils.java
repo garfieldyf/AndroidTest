@@ -161,7 +161,7 @@ public final class DebugUtils {
     public static void __checkMemoryLeaks(Class<?> clazz) {
         if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
             final String className = clazz.getName();
-            Log.e(className, "WARNING: The " + className + " class should be a static inner member class to avoid potential memory leaks.");
+            Log.e(className, "WARNING: The " + className + " class should be a static inner member class to avoid potential memory leaks.", new RuntimeException());
         }
     }
 

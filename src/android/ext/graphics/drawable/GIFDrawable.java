@@ -31,10 +31,10 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
         android.R.attr.autoStart,
     };
 
-    private static final int FLAG_RUNNING = 0x04000000;   // mFlags
-    private static final int FLAG_SCHED   = 0x08000000;   // mFlags
-    private static final int FLAG_START   = 0x04000000;   // mState.mFlags
-    private static final int FLAG_ONESHOT = 0x08000000;   // mState.mFlags
+    private static final int FLAG_RUNNING = 0x04000000;     // mFlags
+    private static final int FLAG_SCHED   = 0x08000000;     // mFlags
+    private static final int FLAG_ONESHOT = 0x04000000;     // mState.mFlags
+    private static final int FLAG_AUTO_START = 0x08000000;  // mState.mFlags
 
     /**
      * The current frame index to draw.
@@ -158,11 +158,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
      * @see #isOneShot()
      */
     public void setOneShot(boolean oneShot) {
-        if (oneShot) {
-            mState.mFlags |= FLAG_ONESHOT;
-        } else {
-            mState.mFlags &= ~FLAG_ONESHOT;
-        }
+        mState.setFlags(oneShot, FLAG_ONESHOT);
     }
 
     /**
@@ -171,7 +167,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
      * @see #setAutoStart(boolean)
      */
     public boolean isAutoStart() {
-        return ((mState.mFlags & FLAG_START) != 0);
+        return ((mState.mFlags & FLAG_AUTO_START) != 0);
     }
 
     /**
@@ -180,11 +176,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
      * @see #isAutoStart()
      */
     public void setAutoStart(boolean autoStart) {
-        if (autoStart) {
-            mState.mFlags |= FLAG_START;
-        } else {
-            mState.mFlags &= ~FLAG_START;
-        }
+        mState.setFlags(autoStart, FLAG_AUTO_START);
     }
 
     public final void setAnimationCallback(AnimationCallback callback) {
@@ -295,11 +287,8 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
             mState.mFlags |= FLAG_ONESHOT;
         }
 
-        if (a.getBoolean(1 /* android.R.attr.autoStart */, true)) {
-            mState.mFlags |= FLAG_START;
-        }
-
         mState.setImage(GIFImage.decode(res, id));
+        mState.setFlags(a.getBoolean(1 /* android.R.attr.autoStart */, true), FLAG_AUTO_START);
         DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
         a.recycle();
     }
@@ -352,6 +341,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
          */
         public GIFImageState(GIFImage image) {
             setImage(image);
+            mFlags = FLAG_AUTO_START;
         }
 
         /**

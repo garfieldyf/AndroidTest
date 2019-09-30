@@ -395,5 +395,13 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         public int getChangingConfigurations() {
             return 0;
         }
+
+        /* package */ final void setFlags(boolean set, int flags) {
+            if (set) {
+                mFlags |= flags;
+            } else {
+                mFlags &= ~flags;
+            }
+        }
     }
 }

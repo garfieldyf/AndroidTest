@@ -87,14 +87,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Returns the {@link FileCache} associated with this loader.
-     * @return The <tt>FileCache</tt> or <tt>null</tt>.
-     */
-    public final FileCache getFileCache() {
-        return mLoader.getFileCache();
-    }
-
-    /**
      * Returns a <tt>Drawable</tt> with the specified <em>params</em> and <em>value</em>.
      * @param params The parameters, passed earlier by {@link Binder#bindValue}.
      * @param value The image value, passed earlier by {@link Binder#bindValue}.
@@ -115,18 +107,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         ((ImageView)target).setImageDrawable(getImageDrawable(params, value));
     }
 
-    /**
-     * Removes the image from this loader's memory cache and file cache.
-     * @param uri The uri to remove.
-     */
-    @Override
-    public void remove(URI uri) {
-        super.remove(uri);
-        if (matchScheme(uri)) {
-            mLoader.remove(uri);
-        }
-    }
-
     @Override
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
@@ -140,7 +120,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected void onRecycle(Object[] params) {
-        Arrays.fill(params, null);
+        Arrays.fill(params, null);  // Prevent memory leak.
         mModule.mParamsPool.recycle(params);
     }
 
@@ -187,22 +167,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    /* package */ static abstract class Loader {
-        /**
-         * Returns the {@link FileCache} associated with this loader.
-         * @return The <tt>FileCache</tt> or <tt>null</tt>.
-         */
-        public FileCache getFileCache() {
-            return null;
-        }
-
-        /**
-         * Removes the cache file for the specified <em>uri</em>.
-         * @param uri The uri to remove.
-         */
-        public void remove(Object uri) {
-        }
-
+    private static interface Loader {
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
@@ -213,13 +178,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        public abstract Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer);
+        Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer);
     }
 
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class URLLoader extends Loader {
+    private final class URLLoader implements Loader {
         private final File mCacheDir;
 
         /**
@@ -244,7 +209,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader extends Loader {
+    private final class FileCacheLoader implements Loader {
         private final FileCache mCache;
 
         /**
@@ -253,16 +218,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
         public FileCacheLoader(FileCache cache) {
             mCache = cache;
-        }
-
-        @Override
-        public FileCache getFileCache() {
-            return mCache;
-        }
-
-        @Override
-        public void remove(Object uri) {
-            mCache.remove(StringUtils.toHexString(MessageDigests.computeString(uri.toString(), Algorithm.SHA1)));
         }
 
         @Override
@@ -302,11 +257,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
-     * module.with(R.xml.image_loader).load(uri)
-     *     .parameters(R.xml.decode_params)
-     *     .placeholder(R.drawable.ic_placeholder)
-     *     .transformer(R.xml.round_rect_transformer)
-     *     .into(imageView);</pre>
+     * module.load(R.xml.image_loader, uri)
+     *       .parameters(R.xml.decode_params)
+     *       .transformer(R.xml.decode_transformer)
+     *       .placeholder(R.drawable.ic_placeholder)
+     *       .into(imageView);</pre>
      */
     public static final class LoadRequest {
         /* package */ Object mUri;

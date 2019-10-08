@@ -9,11 +9,11 @@ import org.json.JSONArray;
 import android.util.Printer;
 
 /**
- * Class <tt>SectionList</tt> allows to adding data by section.
+ * Class <tt>SectionArray</tt> allows to adding data by section.
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public class SectionList<E> implements Cloneable {
+public class SectionArray<E> implements Cloneable {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
@@ -25,20 +25,20 @@ public class SectionList<E> implements Cloneable {
 
     /**
      * Constructor
-     * @see #SectionList(int)
-     * @see #SectionList(Collection)
+     * @see #SectionArray(int)
+     * @see #SectionArray(Collection)
      */
-    public SectionList() {
+    public SectionArray() {
         this(0);
     }
 
     /**
      * Constructor
-     * @param capacity The initial capacity of this <tt>SectionList</tt>.
-     * @see #SectionList()
-     * @see #SectionList(Collection)
+     * @param capacity The initial capacity of this <tt>SectionArray</tt>.
+     * @see #SectionArray()
+     * @see #SectionArray(Collection)
      */
-    public SectionList(int capacity) {
+    public SectionArray(int capacity) {
         DebugUtils.__checkError(capacity < 0, "capacity < 0");
         if (capacity == 0) {
             mPositions = EMPTY_INT_ARRAY;
@@ -52,10 +52,10 @@ public class SectionList<E> implements Cloneable {
     /**
      * Constructor
      * @param sections The collection of {@link Section}s to add.
-     * @see #SectionList()
-     * @see #SectionList(int)
+     * @see #SectionArray()
+     * @see #SectionArray(int)
      */
-    public SectionList(Collection<? extends Section<? extends E>> sections) {
+    public SectionArray(Collection<? extends Section<? extends E>> sections) {
         this(sections.size());
 
         // Adds the section collection to mSections.
@@ -67,9 +67,9 @@ public class SectionList<E> implements Cloneable {
     }
 
     @Override
-    public SectionList<E> clone() {
+    public SectionArray<E> clone() {
         try {
-            final SectionList<E> result = (SectionList<E>)super.clone();
+            final SectionArray<E> result = (SectionArray<E>)super.clone();
             result.mSections  = mSections.clone();
             result.mPositions = mPositions.clone();
             return result;
@@ -79,7 +79,7 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Removes all items from this <tt>SectionList</tt>, leaving it empty.
+     * Removes all items from this <tt>SectionArray</tt>, leaving it empty.
      * @see #getItemCount()
      */
     public void clear() {
@@ -90,8 +90,8 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the number of items in this <tt>SectionList</tt>.
-     * @return The number of items in this <tt>SectionList</tt>.
+     * Returns the number of items in this <tt>SectionArray</tt>.
+     * @return The number of items in this <tt>SectionArray</tt>.
      * @see #getItem(int)
      */
     public int getItemCount() {
@@ -99,7 +99,7 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the item at the specified <em>position</em> in this <tt>SectionList</tt>.
+     * Returns the item at the specified <em>position</em> in this <tt>SectionArray</tt>.
      * @param position The index of the item.
      * @return The item at the specified <em>position</em>.
      * @see #getItemCount()
@@ -110,8 +110,8 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the number of sections in this <tt>SectionList</tt>.
-     * @return The number of sections in this <tt>SectionList</tt>.
+     * Returns the number of sections in this <tt>SectionArray</tt>.
+     * @return The number of sections in this <tt>SectionArray</tt>.
      * @see #getSection(int)
      */
     public int getSectionCount() {
@@ -119,7 +119,7 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns the {@link Section} at the specified <em>sectionIndex</em> in this <tt>SectionList</tt>.
+     * Returns the {@link Section} at the specified <em>sectionIndex</em> in this <tt>SectionArray</tt>.
      * @param sectionIndex The index of the section.
      * @return The {@link Section} at the specified <em>sectionIndex</em>.
      * @see #getSectionCount()
@@ -132,7 +132,7 @@ public class SectionList<E> implements Cloneable {
 
     /**
      * Replaces the section at the specified <em>sectionIndex</em> in this
-     * <tt>SectionList</tt> with the specified <em>section</em>.
+     * <tt>SectionArray</tt> with the specified <em>section</em>.
      * @param sectionIndex The index at which to put the <em>section</em>.
      * @param section The {@link Section} to put.
      * @return The previous <tt>Section</tt> at the <em>sectionIndex</em>.
@@ -156,7 +156,7 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Adds the specified <em>section</em> at the end of this <tt>SectionList</tt>.
+     * Adds the specified <em>section</em> at the end of this <tt>SectionArray</tt>.
      * @param section The {@link Section} to add.
      * @see #addSection(int, Section)
      */
@@ -174,9 +174,9 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Inserts the specified <em>section</em> into this <tt>SectionList</tt> at the specified <em>sectionIndex</em>. The <em>section</em>
+     * Inserts the specified <em>section</em> into this <tt>SectionArray</tt> at the specified <em>sectionIndex</em>. The <em>section</em>
      * is inserted before the current section at the specified <em>sectionIndex</em>. If the <em>sectionIndex</em> is equal to the section
-     * count of this <tt>SectionList</tt>, the <em>section</em> is added at the end.
+     * count of this <tt>SectionArray</tt>, the <em>section</em> is added at the end.
      * @param sectionIndex The index at which to insert.
      * @param section The {@link Section} to add.
      * @see #addSection(Section)
@@ -203,9 +203,9 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Removes the section at the specified <em>sectionIndex</em> from this <tt>SectionList</tt>.
+     * Removes the section at the specified <em>sectionIndex</em> from this <tt>SectionArray</tt>.
      * @param sectionIndex The index of the section to remove.
-     * @return The start position of the removed section in this <tt>SectionList</tt>.
+     * @return The start position of the removed section in this <tt>SectionArray</tt>.
      */
     public int removeSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex - " + sectionIndex + ", sectionCount = " + mSectionCount);
@@ -218,9 +218,9 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Given a position within this <tt>SectionList</tt>, returns the
+     * Given a position within this <tt>SectionArray</tt>, returns the
      * index of the corresponding section within the array of sections.
-     * @param position The position within this <tt>SectionList</tt>.
+     * @param position The position within this <tt>SectionArray</tt>.
      * @return The index of the section.
      * @see #getPositionForSection(int)
      */
@@ -232,9 +232,9 @@ public class SectionList<E> implements Cloneable {
 
     /**
      * Given the index of a section within the array of sections, returns the starting
-     * position of that section within this <tt>SectionList</tt>.
+     * position of that section within this <tt>SectionArray</tt>.
      * @param sectionIndex The index of the section.
-     * @return The starting position of that section within this <tt>SectionList</tt>.
+     * @return The starting position of that section within this <tt>SectionArray</tt>.
      * @see #getSectionForPosition(int)
      */
     public int getPositionForSection(int sectionIndex) {
@@ -243,17 +243,17 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * Returns a new array containing all items contained in this <tt>SectionList</tt>.
-     * @return An array of the items from this <tt>SectionList</tt>.
+     * Returns a new array containing all items contained in this <tt>SectionArray</tt>.
+     * @return An array of the items from this <tt>SectionArray</tt>.
      */
     public Object[] toArray() {
         return copyTo(new Object[mItemCount]);
     }
 
     /**
-     * Returns an array containing all items contained in this <tt>SectionList</tt>.
+     * Returns an array containing all items contained in this <tt>SectionArray</tt>.
      * @param contents The array.
-     * @return An array of the items from this <tt>SectionList</tt>.
+     * @return An array of the items from this <tt>SectionArray</tt>.
      */
     public E[] toArray(E[] contents) {
         if (contents.length < mItemCount) {
@@ -322,7 +322,7 @@ public class SectionList<E> implements Cloneable {
     }
 
     /**
-     * A <tt>Section</tt> is a collection used to adds the data to the {@link SectionList}.
+     * A <tt>Section</tt> is a collection used to adds the data to the {@link SectionArray}.
      */
     public static interface Section<E> {
         /**

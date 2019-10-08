@@ -324,7 +324,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * Given the index of a page within this adapter, returns the starting
-     * position of that page within this this adapter.
+     * position of that page within this adapter.
      * @param pageIndex The index of the page.
      * @return The starting position of that page within this adapter.
      * @see #getPageForPosition(int)

@@ -1,11 +1,11 @@
 package android.ext.temp;
 
 import android.database.Cursor;
+import android.ext.temp.Filters.CursorFilter;
+import android.ext.temp.Filters.CursorFilterClient;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.ext.widget.Filters.CursorFilter;
-import android.ext.widget.Filters.CursorFilterClient;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.view.View;

@@ -231,29 +231,6 @@ public final class BitmapUtils {
         }
     }
 
-    public static void dumpOptions(String tag, Options opts) {
-        if (opts == null) {
-            Log.d(tag, "The opts is null");
-        } else {
-            final StringBuilder result = new StringBuilder(opts.toString()).append("\n{")
-               .append("\n  inSampleSize = ").append(opts.inSampleSize)
-               .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
-               .append("\n  inPreferredConfig  = ").append(opts.inPreferredConfig)
-               .append("\n  inMutable = ").append(opts.inMutable)
-               .append("\n  inDensity = ").append(opts.inDensity)
-               .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
-               .append("\n  inBitmap  = ").append(opts.inBitmap)
-               .append("\n  outWidth  = ").append(opts.outWidth)
-               .append("\n  outHeight = ").append(opts.outHeight)
-               .append("\n  outMimeType = ").append(opts.outMimeType)
-               .append("\n  inTempStorage = ").append(opts.inTempStorage)
-               .append("\n  inScaled = ").append(opts.inScaled)
-               .append("\n  inPremultiplied = ").append(opts.inPremultiplied)
-               .append("\n  inScreenDensity = ").append(opts.inScreenDensity);
-            Log.d(tag, result.append("\n}").toString());
-        }
-    }
-
     public static void dumpBitmap(Context context, String tag, Bitmap bitmap) {
         if (bitmap == null) {
             Log.d(tag, "The bitmap is null");

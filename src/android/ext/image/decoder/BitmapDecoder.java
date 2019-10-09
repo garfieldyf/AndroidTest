@@ -1,5 +1,6 @@
 package android.ext.image.decoder;
 
+import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
@@ -17,12 +18,6 @@ import android.util.Log;
  * @author Garfield
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
-    /**
-     * If set the image decoder will be dump the {@link Options} when
-     * it will be decode image. <p>This flag can be used DEBUG mode.</p>
-     */
-    public static final int FLAG_DUMP_OPTIONS = 0x00400000;
-
     /**
      * The {@link BitmapPool} used to decode the bitmap.
      */
@@ -88,7 +83,22 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     private static void __checkDumpOptions(Options opts, int flags) {
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
-            BitmapUtils.dumpOptions("BitmapDecoder", opts);
+            Log.d("BitmapDecoder", new StringBuilder(opts.toString()).append("\n{")
+               .append("\n  inSampleSize = ").append(opts.inSampleSize)
+               .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
+               .append("\n  inPreferredConfig  = ").append(opts.inPreferredConfig)
+               .append("\n  inMutable = ").append(opts.inMutable)
+               .append("\n  inDensity = ").append(opts.inDensity)
+               .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
+               .append("\n  inBitmap  = ").append(opts.inBitmap)
+               .append("\n  outWidth  = ").append(opts.outWidth)
+               .append("\n  outHeight = ").append(opts.outHeight)
+               .append("\n  outMimeType = ").append(opts.outMimeType)
+               .append("\n  inTempStorage = ").append(opts.inTempStorage)
+               .append("\n  inScaled = ").append(opts.inScaled)
+               .append("\n  inPremultiplied = ").append(opts.inPremultiplied)
+               .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
+               .append("\n}").toString());
         }
     }
 }

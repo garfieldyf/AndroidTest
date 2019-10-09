@@ -22,9 +22,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;
 
     /**
-     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_CUSTOM_PARAMETERS | FLAG_DUMP_OPTIONS);
+     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_DUMP_OPTIONS);
      */
-    private static final int FLAG_MASK = 0xFF1FFFFF;
+    private static final int FLAG_MASK = 0xFF3FFFFF;
 
     /**
      * The {@link Cache} to store the loaded values.

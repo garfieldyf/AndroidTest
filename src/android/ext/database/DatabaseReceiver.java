@@ -17,15 +17,12 @@ import android.util.Log;
  */
 public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**
-     * Local Broadcast Action: The table content has changed. <p>May include the following extras:
-     * <ul><li>{@link #EXTRA_STATEMENT} containing the integer SQL statement type, May be one of
-     * <tt>STATEMENT_XXX</tt> constants.</ul>
+     * Local Broadcast Action: The table content has changed.
      */
     public static final String ACTION_TABLE_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
 
     /**
      * Intent extra used to define the SQL statement type.
-     * @see #ACTION_TABLE_CONTENT_CHANGED
      */
     public static final String EXTRA_STATEMENT = "statement";
 
@@ -44,7 +41,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     /**
      * The scheme specific part for the local broadcasts.
      */
-    private static final String SSP_PREFIX = "//db.table.contents";
+    private static final String SSP_PREFIX = "//contents";
 
     /**
      * The type of the SQL statement INSERT.
@@ -117,26 +114,24 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Equivalent to calling <tt>resolveIntent(scheme, Long.toString(id), statement)</tt>.
+     * Equivalent to calling <tt>resolveIntent(scheme, Long.toString(id))</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param id The row ID to match.
-     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @return The <tt>Intent</tt> used to send local broadcast.
-     * @see #resolveIntent(String, String, int)
+     * @see #resolveIntent(String, String)
      */
-    public static Intent resolveIntent(String scheme, long id, int statement) {
-        return resolveIntent(scheme, Long.toString(id), statement);
+    public static Intent resolveIntent(String scheme, long id) {
+        return resolveIntent(scheme, Long.toString(id));
     }
 
     /**
      * Returns the {@link Intent} that should be used to send local broadcast.
      * @param scheme The <tt>Intent</tt> data scheme to match.
      * @param path May be <tt>null</tt>. The path to match.
-     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @return The <tt>Intent</tt> used to send local broadcast.
-     * @see #resolveIntent(String, long, int)
+     * @see #resolveIntent(String, long)
      */
-    public static Intent resolveIntent(String scheme, String path, int statement) {
+    public static Intent resolveIntent(String scheme, String path) {
         final StringBuilder builder = new StringBuilder(scheme).append(':').append(SSP_PREFIX);
         if (!TextUtils.isEmpty(path)) {
             builder.append('/').append(path);
@@ -144,21 +139,18 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
 
         final String data = builder.toString();
         DebugUtils.__checkDebug(true, "DatabaseReceiver", "Intent data = " + data);
-        final Intent intent = new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(data));
-        intent.putExtra(EXTRA_STATEMENT, statement);
-        return intent;
+        return new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(data));
     }
 
     /**
      * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match.
-     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param rowID The row ID of the inserted row.
-     * @see #sendBroadcast(Context, String, int, int)
+     * @see #sendBroadcast(Context, String, int)
      */
-    public static void sendBroadcast(Context context, String scheme, int statement, long rowID) {
-        final Intent intent = resolveIntent(scheme, null, statement);
+    public static void sendBroadcast(Context context, String scheme, long rowID) {
+        final Intent intent = resolveIntent(scheme, Long.toString(rowID));
         intent.putExtra(EXTRA_ROW_ID, rowID);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -167,12 +159,11 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match.
-     * @param statement The SQL statement type, May be one of <tt>STATEMENT_XXX</tt> constants.
      * @param rowsAffected the number of rows affected for update/delete.
-     * @see #sendBroadcast(Context, String, int, long)
+     * @see #sendBroadcast(Context, String, long)
      */
-    public static void sendBroadcast(Context context, String scheme, int statement, int rowsAffected) {
-        final Intent intent = resolveIntent(scheme, null, statement);
+    public static void sendBroadcast(Context context, String scheme, int rowsAffected) {
+        final Intent intent = resolveIntent(scheme, null);
         intent.putExtra(EXTRA_ROWS_AFFECTED, rowsAffected);
         LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
@@ -182,89 +173,7 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
            .append("Intent { action = ").append(intent.getAction())
            .append(", scheme = ").append(intent.getScheme())
            .append(", data = ").append(intent.getDataString())
-           .append(", statement = ").append(toString(intent.getIntExtra(EXTRA_STATEMENT, 0)))
            .append(", extras = ").append(intent.getExtras())
            .append(" }").toString());
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        DebugUtils.__checkError(!ACTION_TABLE_CONTENT_CHANGED.equals(intent.getAction()), "Unknown action - " + intent.getAction());
-        final int statement = intent.getIntExtra(EXTRA_STATEMENT, 0);
-        switch (statement) {
-        case STATEMENT_INSERT:
-            onHandleInsert(intent);
-            break;
-
-        case STATEMENT_UPDATE:
-            onHandleUpdate(intent);
-            break;
-
-        case STATEMENT_DELETE:
-            onHandleDelete(intent);
-            break;
-
-        case STATEMENT_REPLACE:
-            onHandleReplace(intent);
-            break;
-
-        default:
-            onHandleIntent(statement, intent);
-        }
-    }
-
-    /**
-     * Called on the UI thread when a SQL statement INSERT to process.
-     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
-     */
-    protected void onHandleInsert(Intent intent) {
-    }
-
-    /**
-     * Called on the UI thread when a SQL statement UPDATE to process.
-     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
-     */
-    protected void onHandleUpdate(Intent intent) {
-    }
-
-    /**
-     * Called on the UI thread when a SQL statement DELETE to process.
-     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
-     */
-    protected void onHandleDelete(Intent intent) {
-    }
-
-    /**
-     * Called on the UI thread when a SQL statement REPALCE to process.
-     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
-     */
-    protected void onHandleReplace(Intent intent) {
-    }
-
-    /**
-     * Called on the UI thread when a SQL statement type to process.
-     * @param statement The SQL statement type.
-     * @param intent The <tt>Intent</tt>, passed earlier by {@link #onReceive}.
-     */
-    protected void onHandleIntent(int statement, Intent intent) {
-    }
-
-    private static String toString(int statement) {
-        switch (statement) {
-        case STATEMENT_INSERT:
-            return "INSERT";
-
-        case STATEMENT_UPDATE:
-            return "UPDATE";
-
-        case STATEMENT_DELETE:
-            return "DELETE";
-
-        case STATEMENT_REPLACE:
-            return "REPLACE";
-
-        default:
-            return Integer.toString(statement);
-        }
     }
 }

@@ -21,7 +21,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     /**
      * The <tt>Options</tt> {@link Pool} to decode image.
      */
-    protected final Pool<Options> mOptionsPool;
+    private final Pool<Options> mOptionsPool;
 
     /**
      * Constructor
@@ -55,7 +55,9 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         try {
             // Decodes the image bounds.
             opts.inTempStorage = tempStorage;
-            decodeImageBounds(uri, params, flags, opts);
+            opts.inJustDecodeBounds = true;
+            BitmapUtils.decodeBitmap(mContext, uri, opts);
+            opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
             return decodeImage(uri, target, params, flags, opts);
@@ -87,20 +89,6 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.inJustDecodeBounds = false;
         opts.inPreferredConfig  = Config.ARGB_8888;
         mOptionsPool.recycle(opts);
-    }
-
-    /**
-     * Decodes an image bounds (width, height and MIME type) from the specified <em>uri</em>.
-     * @param uri The uri to decode.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} to store the <tt>out...</tt> fields.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     */
-    protected void decodeImageBounds(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        opts.inJustDecodeBounds = true;
-        BitmapUtils.decodeBitmap(mContext, uri, opts);
-        opts.inJustDecodeBounds = false;
     }
 
     /**

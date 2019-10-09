@@ -15,6 +15,7 @@ import android.ext.util.FileUtils;
 import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
 /**
@@ -148,7 +149,28 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      */
     protected Object decodeImage(Object uri, byte[] tempBuffer) {
-        return BitmapUtils.decodeBitmap(mContext, uri, mParameters, tempBuffer);
+        try {
+            final Options opts = new Options();
+            opts.inTempStorage = tempBuffer;
+
+            if (mParameters != null) {
+                // Decodes the bitmap bounds.
+                opts.inJustDecodeBounds = true;
+                BitmapUtils.decodeBitmap(mContext, uri, opts);
+                opts.inJustDecodeBounds = false;
+
+                // Computes the sample size.
+                opts.inMutable = mParameters.mutable;
+                opts.inPreferredConfig = mParameters.config;
+                mParameters.computeSampleSize(mContext, null, opts);
+            }
+
+            // Decodes the bitmap pixels.
+            return BitmapUtils.decodeBitmap(mContext, uri, opts);
+        } catch (Exception e) {
+            Log.e(BitmapUtils.class.getName(), "Couldn't decode image from - " + uri + "\n" + e);
+            return null;
+        }
     }
 
     /**
@@ -163,7 +185,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
             final int statusCode = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).download(imageFile.getPath(), this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
+            Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);
             return null;
         } finally {
             imageFile.delete();

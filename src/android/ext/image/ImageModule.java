@@ -56,15 +56,15 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      */
     public final Context mContext;
 
-    protected final Executor mExecutor;
-    protected final FileCache mFileCache;
-    protected final Cache<URI, Image> mImageCache;
-
+    /* package */ final Executor mExecutor;
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Options> mOptionsPool;
     /* package */ final Pool<Object[]> mParamsPool;
-    /* package */ final SparseArray<Object> mResources;
-    /* package */ final SparseArray<ImageLoader> mLoaderCache;
+
+    private final FileCache mFileCache;
+    private final Cache<URI, Image> mImageCache;
+    private final SparseArray<Object> mResources;
+    private final SparseArray<ImageLoader> mLoaderCache;
 
     /**
      * Constructor
@@ -151,14 +151,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      */
     public final ImageLoader<URI, Image> with(int id) {
         DebugUtils.__checkUIThread("with");
-        ImageLoader result = mLoaderCache.get(id, null);
-        if (result == null) {
+        ImageLoader loader = mLoaderCache.get(id, null);
+        if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
-            mLoaderCache.append(id, result = XmlResources.load(mContext, id, this));
+            mLoaderCache.append(id, loader = XmlResources.load(mContext, id, this));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the ImageLoader - ID #0x" + Integer.toHexString(id));
         }
 
-        return result;
+        return loader;
     }
 
     /**
@@ -185,14 +185,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         if (loader != null) {
             loader.resume();
         }
-    }
-
-    /**
-     * Returns the {@link Executor} associated with this object.
-     * @return The <tt>Executor</tt>.
-     */
-    public final Executor getExecutor() {
-        return mExecutor;
     }
 
     /**
@@ -342,6 +334,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         return result;
     }
 
+    /**
+     * Returns a new {@link FileCache} instance.
+     * @param maxSize The maximum number of files to allow in the <tt>FileCache</tt>.
+     */
+    protected static FileCache createFileCache(Context context, int maxSize) {
+        return (maxSize > 0 ? new LruFileCache(context, "._image_cache", maxSize) : null);
+    }
+
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) {
         final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
         if (!TextUtils.isEmpty(className)) {
@@ -351,10 +351,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         } else {
             return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
         }
-    }
-
-    private static FileCache createFileCache(Context context, int maxSize) {
-        return (maxSize > 0 ? new LruFileCache(context, "._image_cache", maxSize) : null);
     }
 
     private static int computeBufferPoolMaxSize(Executor executor) {

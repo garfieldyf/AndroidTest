@@ -152,7 +152,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             request.__checkDumpHeaders = false;
             return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, target, params, flags, buffer) : null);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load image data from - '" + url + "'\n" + e);
+            Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);
             return null;
         }
     }

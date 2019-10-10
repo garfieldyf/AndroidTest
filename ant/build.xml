@@ -21,7 +21,7 @@
     <property name="libs.jar.dir" value="E:\Include\java" />
     <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
-    <property name="android.jar.stubs.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
+    <property name="android.stubs.jar.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
     <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
@@ -95,7 +95,7 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.jar.stubs.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
+            classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
@@ -146,7 +146,7 @@
             -include        "${basedir}/../proguard.txt"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.jar.stubs.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
             -dump           "${out.file.dir}/dump.txt"
             -printseeds     "${out.file.dir}/seeds.txt"
             -printusage     "${out.file.dir}/usage.txt"

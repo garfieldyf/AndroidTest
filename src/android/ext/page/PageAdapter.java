@@ -34,11 +34,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * Constructor
+     * <p>Creates a new <b>unlimitted-size</b> <tt>PageAdapter</tt> to store the pages.</p>
      * @param initialSize The item count of the first page (page index == 0).
      * @param pageSize The item count of the each page (page index > 0).
-     * @param prefetchDistance Defines how far to the first or last item in the
-     * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
-     * this adapter will not prefetch data.
+     * @param prefetchDistance Defines how far to the first or last item in the page to
+     * this adapter should prefetch the data. Pass <tt>0</tt> indicates this adapter will
+     * not prefetch data.
      * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
@@ -54,6 +55,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
      * this adapter will not prefetch data.
      * @see #PageAdapter(int, int, int)
+     * @see Pages#SimpleLruCache
      */
     public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");

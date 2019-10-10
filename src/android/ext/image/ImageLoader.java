@@ -307,17 +307,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         /**
-         * Equivalent to calling <tt>flags(FLAG_DUMP_OPTIONS)</tt>.
-         * @return This request.
-         * @see #flags(int)
-         * @see #FLAG_DUMP_OPTIONS
-         */
-        public final LoadRequest dumpOptions() {
-            mFlags |= FLAG_DUMP_OPTIONS;
-            return this;
-        }
-
-        /**
          * Sets the {@link Parameters} to decode image.
          * @param id The xml resource id of the <tt>Parameters</tt>.
          * @return This request.

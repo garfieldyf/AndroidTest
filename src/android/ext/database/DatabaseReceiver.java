@@ -132,12 +132,12 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * @see #resolveIntent(String, long)
      */
     public static Intent resolveIntent(String scheme, String path) {
-        final StringBuilder builder = new StringBuilder(scheme).append(':').append(SSP_PREFIX);
+        final StringBuilder uri = new StringBuilder(scheme).append(':').append(SSP_PREFIX);
         if (!TextUtils.isEmpty(path)) {
-            builder.append('/').append(path);
+            uri.append('/').append(path);
         }
 
-        final String data = builder.toString();
+        final String data = uri.toString();
         DebugUtils.__checkDebug(true, "DatabaseReceiver", "Intent data = " + data);
         return new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(data));
     }

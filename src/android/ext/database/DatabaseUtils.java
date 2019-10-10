@@ -232,15 +232,14 @@ public final class DatabaseUtils {
      * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
-        Cursor cursor = null;
+        final Cursor cursor = db.rawQuery(sql, selectionArgs);
         try {
-            cursor = db.rawQuery(sql, selectionArgs);
-            return (cursor != null ? parse(cursor, componentType) : null);
+            return parse(cursor, componentType);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
         } finally {
-            FileUtils.close(cursor);
+            cursor.close();
         }
     }
 
@@ -450,9 +449,9 @@ public final class DatabaseUtils {
         writer.endArray();
     }
 
-    private static List<Pair<Field, String>> getCursorFields(Class<?> objectClass) {
+    private static List<Pair<Field, String>> getCursorFields(Class<?> kclass) {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();
-        for (Class<?> clazz = objectClass; clazz != Object.class; clazz = clazz.getSuperclass()) {
+        for (Class<?> clazz = kclass; clazz != Object.class; clazz = clazz.getSuperclass()) {
             final Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 final CursorField cursorField = field.getAnnotation(CursorField.class);
@@ -464,7 +463,7 @@ public final class DatabaseUtils {
             }
         }
 
-        DatabaseUtils.__checkDumpCursorFields(objectClass, cursorFields);
+        DatabaseUtils.__checkDumpCursorFields(kclass, cursorFields);
         return cursorFields;
     }
 

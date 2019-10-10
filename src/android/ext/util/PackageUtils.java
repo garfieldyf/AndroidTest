@@ -75,11 +75,11 @@ public final class PackageUtils {
     /**
      * Install a package with the specified <em>packageFile</em>.
      * @param context The <tt>Context</tt>.
-     * @param packageFile The location of the package file to install.
      * @param authority The authority of a {@link FileProvider} defined
      * in a <tt>&lt;provider&gt;</tt> element in your app's manifest.
+     * @param packageFile The location of the package file to install.
      */
-    public static void installPackage(Context context, File packageFile, String authority) {
+    public static void installPackage(Context context, String authority, File packageFile) {
         DebugUtils.__checkError(packageFile == null, "packageFile == null");
         final Uri packageUri;
         final Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -345,13 +345,13 @@ public final class PackageUtils {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         public int onScanFile(String path, int type, Object cookie) {
             if (isArchiveFile(path, type)) {
                 final PackageInfo packageInfo = mPackageManager.getPackageArchiveInfo(path, mParseFlags);
                 if (packageInfo != null) {
                     packageInfo.applicationInfo.publicSourceDir = path;
-                    ((Collection<PackageInfo>)cookie).add(packageInfo);
+                    ((Collection)cookie).add(packageInfo);
                 }
             }
 
@@ -379,7 +379,7 @@ public final class PackageUtils {
             this.__checkParseStatus = true;
 
             if (checkParseStatus) {
-                throw new AssertionError("Cannot parse: the PackageParser has already been parsed (a PackageParser can be parsed only once)");
+                throw new AssertionError("Cannot parse: the PackageParser has already been executed (a PackageParser can be executed only once)");
             }
         }
     }

@@ -110,7 +110,7 @@ public final class ProcessUtils {
      * @param context The <tt>Context</tt>.
      */
     public static void installUncaughtExceptionHandler(Context context) {
-        new UncaughtHandler(context);
+        new CrashHandler(context);
     }
 
     /**
@@ -284,13 +284,13 @@ public final class ProcessUtils {
     }
 
     /**
-     * Class <tt>UncaughtHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
+     * Class <tt>CrashHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
      */
-    private static final class UncaughtHandler implements UncaughtExceptionHandler {
+    private static final class CrashHandler implements UncaughtExceptionHandler {
         private final Context mContext;
         private final UncaughtExceptionHandler mDefaultHandler;
 
-        public UncaughtHandler(Context context) {
+        public CrashHandler(Context context) {
             mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
@@ -351,7 +351,7 @@ public final class ProcessUtils {
                 formatter.format("Model : %s %s (sdk = %d, version = %s, cpu abis = %s)\n", Build.MANUFACTURER, Build.MODEL, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
                 formatter.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
                 formatter.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
-                formatter.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());
+                formatter.format("Process : %s (pid = %d, uid = %d, user = %s)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), myUserName(), thread.getName());
                 e.printStackTrace(ps);
                 ps.println();
             } finally {

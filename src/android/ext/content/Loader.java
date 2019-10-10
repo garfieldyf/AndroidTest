@@ -115,8 +115,8 @@ public abstract class Loader<Key> implements Factory<Task> {
         Pools.dumpPool(mTaskPool, printer);
         final int size = mRunningTasks.size();
         if (size > 0) {
-            final StringBuilder result = new StringBuilder(130);
-            DebugUtils.dumpSummary(printer, result, 130, " Dumping Running Tasks [ size = %d ] ", size);
+            final StringBuilder result = new StringBuilder(80);
+            DebugUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
             for (Entry<Key, Task> entry : mRunningTasks.entrySet()) {
                 result.setLength(0);
                 printer.println(DebugUtils.toSimpleString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());

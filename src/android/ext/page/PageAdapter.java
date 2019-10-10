@@ -29,8 +29,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private final int mInitialSize;
     private final int mPrefetchDistance;
 
-    private final BitSet mLoadStates;
-    private Cache<Integer, Page<E>> mPageCache;
+    /* package */ final BitSet mLoadStates;
+    /* package */ Cache<Integer, Page<E>> mPageCache;
 
     /**
      * Constructor
@@ -355,15 +355,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Prefetch the {@link Page} with the given <em>pageIndex</em> and <em>pagePosition</em>.
+     * Prefetch the {@link Page} with the given <em>pageIndex</em> and <em>position</em>.
      * The default implementation load the previous and next page data from the current page.
      * @param pageIndex The index of the current page.
-     * @param pagePosition The index of the item in the page.
+     * @param position The index of the item in the page.
      * @param prefetchDistance Defines how far to the first or last item in the page.
      */
-    protected void prefetchPage(int pageIndex, int pagePosition, int prefetchDistance) {
+    protected void prefetchPage(int pageIndex, int position, int prefetchDistance) {
         // Prefetch the previous page data.
-        if (pageIndex > 0 && pagePosition == prefetchDistance - 1) {
+        if (pageIndex > 0 && position == prefetchDistance - 1) {
             getPage(pageIndex - 1);
         }
 
@@ -371,7 +371,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         if (pageIndex < lastPage) {
             // Prefetch the next page data.
             final int pageSize = (pageIndex > 0 ? mPageSize : mInitialSize);
-            if (pagePosition == pageSize - prefetchDistance) {
+            if (position == pageSize - prefetchDistance) {
                 getPage(pageIndex + 1);
             }
         }
@@ -384,16 +384,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * the UI, it is possible to return <tt>null</tt> and at a later time call
      * {@link #setPage(int, Page, Object)}.<p>
      * @param pageIndex The index of the page whose data should be returned.
-     * @param startPosition The position of the first item in the page to load.
+     * @param startPosition The starting position of the page within this adapter.
      * @param itemCount The number of items to load.
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
     protected abstract Page<E> loadPage(int pageIndex, int startPosition, int itemCount);
-
-    /**
-     * Initializes the {@link Page} {@link Cache} to store the pages.
-     */
-    /* package */ final void initPageCache(Cache<Integer, Page<E>> pageCache) {
-        mPageCache = pageCache;
-    }
 }

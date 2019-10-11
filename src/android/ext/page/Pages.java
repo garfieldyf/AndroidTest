@@ -1,13 +1,10 @@
 package android.ext.page;
 
 import java.util.List;
-import java.util.Map;
 import org.json.JSONArray;
-import android.ext.cache.Cache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.JsonUtils;
-import android.util.ArrayMap;
 
 /**
  * Class Pages
@@ -121,55 +118,6 @@ public final class Pages {
         @SuppressWarnings("unchecked")
         public E getItem(int position) {
             return (E)mData.opt(position);
-        }
-    }
-
-    /**
-     * Class <tt>ArrayMapCache</tt> is an implementation of a {@link Cache}.
-     */
-    public static class ArrayMapCache<E> implements Cache<Integer, Page<E>> {
-        protected final ArrayMap<Integer, Page<E>> mPages;
-
-        /**
-         * Constructor
-         * @see #ArrayMapCache(int)
-         */
-        public ArrayMapCache() {
-            this(8);
-        }
-
-        /**
-         * Constructor
-         * @param capacity The initial capacity of this cache.
-         * @see #ArrayMapCache()
-         */
-        public ArrayMapCache(int capacity) {
-            mPages = new ArrayMap<Integer, Page<E>>(capacity);
-        }
-
-        @Override
-        public void clear() {
-            mPages.clear();
-        }
-
-        @Override
-        public Page<E> remove(Integer pageIndex) {
-            return mPages.remove(pageIndex);
-        }
-
-        @Override
-        public Page<E> get(Integer pageIndex) {
-            return mPages.get(pageIndex);
-        }
-
-        @Override
-        public Page<E> put(Integer pageIndex, Page<E> page) {
-            return mPages.put(pageIndex, page);
-        }
-
-        @Override
-        public Map<Integer, Page<E>> snapshot() {
-            return new ArrayMap<Integer, Page<E>>(mPages);
         }
     }
 

@@ -371,6 +371,20 @@ public final class ArrayUtils {
     }
 
     /**
+     * Copies the elements from <em>srcArray</em> into a new array.
+     * @param srcArray The original array.
+     * @param length The length of the <em>srcArray</em>.
+     * @param newLength The length of the new array.
+     * @return The new array.
+     */
+    public static <T> T copyOf(Object srcArray, int length, int newLength) {
+        DebugUtils.__checkError(newLength < length, "newLength < length");
+        final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
+        System.arraycopy(srcArray, 0, newArray, 0, length);
+        return (T)newArray;
+    }
+
+    /**
      * Checks that the range described by <tt>offset</tt> and <tt>length</tt>
      * doesn't exceed <tt>arrayLength</tt>.
      * @param offset The start position to check.
@@ -482,16 +496,6 @@ public final class ArrayUtils {
         }
 
         return (end - start) >> 1;
-    }
-
-    /**
-     * Copies the elements from <em>srcArray</em> into a new array.
-     */
-    /* package */ static <T> T copyOf(Object srcArray, int length, int newLength) {
-        DebugUtils.__checkError(newLength < length, "newLength < length");
-        final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
-        System.arraycopy(srcArray, 0, newArray, 0, length);
-        return (T)newArray;
     }
 
     /**

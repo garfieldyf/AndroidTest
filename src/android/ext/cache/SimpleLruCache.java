@@ -50,17 +50,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Clears this cache, calling {@link #entryRemoved} on each removed entry.
-     * @see #clear()
-     * @see #trimToSize(int)
-     */
-    public final void evictAll() {
-        trimToSize(-1);
-    }
-
-    /**
      * Clears this cache, but do not call {@link #entryRemoved} on each removed entry.
-     * @see #evictAll()
      * @see #trimToSize(int)
      */
     @Override
@@ -126,7 +116,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @param maxSize The maximum size of the cache. May be <tt>-1</tt>
      * to evict all entries.
      * @see #clear()
-     * @see #evictAll()
      */
     public void trimToSize(int maxSize) {
         final Iterator<Entry<K, V>> itor = map.entrySet().iterator();

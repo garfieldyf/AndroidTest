@@ -4,7 +4,6 @@ import android.ext.util.DebugUtils;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.view.View;
 
 /**
  * Class BaseAdapter implementation for an {@link Adapter} that can be used in {@link RecyclerView}.
@@ -12,16 +11,6 @@ import android.view.View;
  */
 public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     protected RecyclerView mRecyclerView;
-
-    /**
-     * Return the adapter position that the given <em>child</em> view corresponds to.
-     * @param child The child <tt>View</tt> to query.
-     * @return The adapter position corresponding to the given view or {@link #NO_POSITION}.
-     */
-    public final int getItemPosition(View child) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        return mRecyclerView.getChildAdapterPosition(child);
-    }
 
     /**
      * Called when an item in the data set of the adapter wants focus.

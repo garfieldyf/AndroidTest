@@ -1,10 +1,13 @@
 package android.ext.net;
 
 import java.net.HttpURLConnection;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +21,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.StringUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
 import android.util.Printer;
 
 /**
@@ -100,6 +104,39 @@ public final class NetworkUtils {
         }
 
         return outAddress;
+    }
+
+    /**
+     * Returns the numeric IP address from the network interface (such as "127.0.0.1").
+     * @param ifname The network interface name. May be {@link #WLAN}, {@link #ETHERNET}
+     * or other interface name.
+     * @return The IP address or <tt>fallback</tt>.
+     */
+    public static String getIPAddress(String ifname, String fallback) {
+        final InetAddress address = getInetAddress(ifname);
+        return (address != null ? address.getHostAddress() : fallback);
+    }
+
+    /**
+     * Returns the {@link InetAddress} from the network interface.
+     * @param ifname The network interface name. May be {@link #WLAN},
+     * {@link #ETHERNET} or other interface name.
+     * @return The <tt>InetAddress</tt> or <tt>null</tt> if it has no address.
+     */
+    public static InetAddress getInetAddress(String ifname) {
+        try {
+            final Enumeration<InetAddress> addresses = NetworkInterface.getByName(ifname).getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                final InetAddress address = addresses.nextElement();
+                if (!address.isLoopbackAddress() && address instanceof Inet4Address) {
+                    return address;
+                }
+            }
+        } catch (Exception e) {
+            Log.e(NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname, e);
+        }
+
+        return null;
     }
 
     /**

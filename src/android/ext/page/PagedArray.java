@@ -143,13 +143,11 @@ public class PagedArray<E> implements Cloneable {
         DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-count");
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex - " + pageIndex + ", pageCount = " + mPageCount);
         final Page<E> oldPage = (Page<E>)mPages[pageIndex];
-        final int newCount = page.getCount();
-        final int oldCount = oldPage.getCount();
-        mPages[pageIndex]  = page;
+        mPages[pageIndex] = page;
 
-        if (oldCount != newCount) {
-            mItemCount -= oldCount;
-            mItemCount += newCount;
+        final int itemCount = page.getCount() - oldPage.getCount();
+        if (itemCount != 0) {
+            mItemCount += itemCount;
             DebugUtils.__checkError(mItemCount < 0, "Error: the PagedArray's item count < 0");
             computePositions(pageIndex);
         }

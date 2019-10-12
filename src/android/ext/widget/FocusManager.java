@@ -58,6 +58,17 @@ public class FocusManager implements OnFocusChangeListener {
     }
 
     /**
+     * Called when a child of the root view wants focus.
+     * @param index The index of a child.
+     */
+    public void requestChildFocus(int index) {
+        final View child = mRootView.getChildAt(index);
+        if (child != null && child.requestFocus()) {
+            setFocusedView(child);
+        }
+    }
+
+    /**
      * Called to populate focusable views within the root view. <p>Note: This method
      * recommended call in {@link View#addFocusables(ArrayList, int, int)}.</p>
      * @param views The <tt>List</tt> of output views.

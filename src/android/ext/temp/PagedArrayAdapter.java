@@ -18,6 +18,17 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
         return mPages.getItemCount();
     }
 
+    public E getItem(int position) {
+        return mPages.getItem(position);
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        final int pageIndex = mPages.getPageForPosition(position);
+        final AdapterPage<E> page = (AdapterPage<E>)mPages.getPage(pageIndex);
+        return page.getItemViewType(position - mPages.getPositionForPage(pageIndex));
+    }
+
     public void addPage(Page<? extends E> page) {
 //        final int itemCount = Pages.getCount(page);
 //        if (itemCount > 0) {
@@ -26,13 +37,19 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
 //            notifyItemRangeInserted(positionStart, itemCount);
 //        }
 
-        addPage(mPages.getItemCount(), page);
+        addPage(mPages.getPageCount(), page);
     }
 
     public void addPage(int pageIndex, Page<? extends E> page) {
         final int itemCount = Pages.getCount(page);
         if (itemCount > 0) {
-            final int positionStart = mPages.getPositionForPage(pageIndex);
+            final int positionStart;
+            if (pageIndex == mPages.getPageCount()) {
+                positionStart = mPages.getItemCount();
+            } else {
+                positionStart = mPages.getPositionForPage(pageIndex);
+            }
+
             mPages.addPage(pageIndex, page);
             notifyItemRangeInserted(positionStart, itemCount);
         }
@@ -55,5 +72,10 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
         final Page<E> oldPage = mPages.getPage(pageIndex);
         final int positionStart = mPages.removePage(pageIndex);
         notifyItemRangeRemoved(positionStart, oldPage.getCount());
+    }
+
+    public static interface AdapterPage<E> extends Page<E> {
+        int getItemViewType(int position);
+        int getItemSpanSize(int position);
     }
 }

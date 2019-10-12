@@ -24,9 +24,15 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
 
     @Override
     public int getItemViewType(int position) {
-        final int pageIndex = mPages.getPageForPosition(position);
-        final AdapterPage<E> page = (AdapterPage<E>)mPages.getPage(pageIndex);
-        return page.getItemViewType(position - mPages.getPositionForPage(pageIndex));
+        final long combinedPosition = mPages.getPageForPosition(position);
+        final AdapterPage<E> page = mPages.getPage(Pages.getOriginalPage(combinedPosition));
+        return page.getItemViewType(Pages.getOriginalPosition(combinedPosition));
+    }
+
+    public int getItemSpanSize(int position) {
+        final long combinedPosition = mPages.getPageForPosition(position);
+        final AdapterPage<E> page = mPages.getPage(Pages.getOriginalPage(combinedPosition));
+        return page.getItemSpanSize(Pages.getOriginalPosition(combinedPosition));
     }
 
     public void addPage(Page<? extends E> page) {

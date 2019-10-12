@@ -2,9 +2,11 @@ package android.ext.page;
 
 import java.util.BitSet;
 import java.util.Formatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import org.json.JSONArray;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.DebugUtils;
@@ -103,10 +105,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final int page = Pages.getOriginalPage(combinedPosition);
-        final Page<E> result = getPage(page);
+        final int pageIndex  = Pages.getOriginalPage(combinedPosition);
+        final Page<E> result = getPage(pageIndex);
         if (mPrefetchDistance > 0) {
-            prefetchPage(page, (int)combinedPosition, mPrefetchDistance);
+            prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
         }
 
         return (result != null ? result.getItem((int)combinedPosition) : null);
@@ -231,11 +233,32 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Equivalent to calling <tt>setPage(pageIndex, Pages.newPage(pageData), null)</tt>.
+     * @param pageIndex The index of the page.
+     * @param pageData May be <tt>null</tt>. The page data to add.
+     * @see Pages#newPage(List)
+     * @see #setPage(int, Page, Object)
+     */
+    public final void setPage(int pageIndex, List<E> pageData) {
+        setPage(pageIndex, Pages.newPage(pageData), null);
+    }
+
+    /**
+     * Equivalent to calling <tt>setPage(pageIndex, Pages.newPage(pageData), null)</tt>.
+     * @param pageIndex The index of the page.
+     * @param pageData May be <tt>null</tt>. The page data to add.
+     * @see Pages#newPage(JSONArray)
+     * @see #setPage(int, Page, Object)
+     */
+    public final void setPage(int pageIndex, JSONArray pageData) {
+        setPage(pageIndex, Pages.<E>newPage(pageData), null);
+    }
+
+    /**
      * Equivalent to calling <tt>setPage(pageIndex, page, null)</tt>.
      * @param pageIndex The index of the page.
      * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @see #setPage(int, Page, Object)
-     * @see Pages#newPage(java.util.List)
      */
     public final void setPage(int pageIndex, Page<? extends E> page) {
         setPage(pageIndex, page, null);
@@ -249,8 +272,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param pageIndex The index of the page.
      * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
-     * @see #setPage(int, Page)
-     * @see Pages#newPage(java.util.List)
      */
     @SuppressWarnings("unchecked")
     public void setPage(int pageIndex, Page<? extends E> page, Object payload) {
@@ -266,28 +287,68 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         }
     }
 
+//    /**
+//     * Equivalent to calling <tt>addPage(pageIndex, Pages.newPage(pageData))</tt>.
+//     * @param pageIndex The index of the page.
+//     * @param pageData May be <tt>null</tt>. The page data to add.
+//     * @see Pages#newPage(List)
+//     * @see #addPage(int, Page)
+//     */
+//    public final void addPage(int pageIndex, List<E> pageData) {
+//        addPage(pageIndex, Pages.newPage(pageData));
+//    }
+//
+//    /**
+//     * Equivalent to calling <tt>addPage(pageIndex, Pages.newPage(pageData))</tt>.
+//     * @param pageIndex The index of the page.
+//     * @param pageData May be <tt>null</tt>. The page data to add.
+//     * @see Pages#newPage(JSONArray)
+//     * @see #addPage(int, Page)
+//     */
+//    public final void addPage(int pageIndex, JSONArray pageData) {
+//        addPage(pageIndex, Pages.<E>newPage(pageData));
+//    }
+//
+//    /**
+//     * Adds the {@link Page} at the specified <em>pageIndex</em> in this adapter.
+//     * This method will be call {@link #notifyItemRangeInserted(int, int)} when
+//     * the <em>page</em> has added. <p>This is useful when asynchronously loading
+//     * to prevent blocking the UI.</p>
+//     * @param pageIndex The index of the page.
+//     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
+//     */
+//    @SuppressWarnings("unchecked")
+//    public void addPage(int pageIndex, Page<? extends E> page) {
+//        DebugUtils.__checkUIThread("addPage");
+//        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+//
+//        // Clears the page loading state when the page is load complete.
+//        mLoadStates.clear(pageIndex);
+//        final int itemCount = Pages.getCount(page);
+//        if (itemCount > 0) {
+//            mItemCount += itemCount;
+//            mPageCache.put(pageIndex, (Page<E>)page);
+//            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
+//        }
+//    }
+
     /**
-     * Adds the {@link Page} at the specified <em>pageIndex</em> in this adapter.
-     * This method will be call {@link #notifyItemRangeInserted(int, int)} when
-     * the <em>page</em> has added. <p>This is useful when asynchronously loading
-     * to prevent blocking the UI.</p>
-     * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
-     * @see Pages#newPage(java.util.List)
+     * Removes the page at the specified <em>pageIndex</em> from this adapter.
+     * This method will be call {@link #notifyItemRangeRemoved(int, int)} when
+     * the page was removed and the total item count will be changed.
+     * @param pageIndex The index of the page to remove.
      */
 /*
-    @SuppressWarnings("unchecked")
-    public void addPage(int pageIndex, Page<? extends E> page) {
-        DebugUtils.__checkUIThread("addPage");
+    public void removePage(int pageIndex) {
+        DebugUtils.__checkUIThread("removePage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
 
-        // Clears the page loading state when the page is load complete.
-        mLoadStates.clear(pageIndex);
-        final int itemCount = Pages.getCount(page);
-        if (itemCount > 0) {
-            mItemCount += itemCount;
-            mPageCache.put(pageIndex, (Page<E>)page);
-            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
+        final Page<E> oldPage = mPageCache.remove(pageIndex);
+        if (oldPage != null) {
+            final int itemCount = oldPage.getCount();
+            mItemCount -= itemCount;
+            mLoadStates.clear(pageIndex);
+            postNotifyItemRangeRemoved(getPositionForPage(pageIndex), itemCount);
         }
     }
 */

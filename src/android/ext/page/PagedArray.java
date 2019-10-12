@@ -106,8 +106,8 @@ public class PagedArray<E> implements Cloneable {
      * @see #getItemCount()
      */
     public E getItem(int position) {
-        final int pageIndex = getPageForPosition(position);
-        return ((Page<E>)mPages[pageIndex]).getItem(position - mPositions[pageIndex]);
+        final long combinedPosition = getPageForPosition(position);
+        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).getItem((int)combinedPosition);
     }
 
     /**
@@ -126,9 +126,9 @@ public class PagedArray<E> implements Cloneable {
      * @see #getPageCount()
      * @see #setPage(int, Page)
      */
-    public Page<E> getPage(int pageIndex) {
+    public <T extends Page<E>> T getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex - " + pageIndex + ", pageCount = " + mPageCount);
-        return (Page<E>)mPages[pageIndex];
+        return (T)mPages[pageIndex];
     }
 
     /**
@@ -221,16 +221,25 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Given a position within this <tt>PagedArray</tt>, returns the
-     * index of the corresponding page within the array of pages.
+     * Returns the combined position of the page with the given the <em>position</em>.
+     * <p>The returned combined position:
+     * <li>bit &nbsp;&nbsp;0-31 : Lower 32 bits of the index of the item in the page.
+     * <li>bit 32-63 : Higher 32 bits of the index of the page.</p>
      * @param position The position within this <tt>PagedArray</tt>.
-     * @return The index of the page.
+     * @return The combined position of the page.
      * @see #getPositionForPage(int)
+     * @see Pages#getOriginalPage(long)
+     * @see Pages#getOriginalPosition(long)
      */
-    public int getPageForPosition(int position) {
+    public long getPageForPosition(int position) {
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
-        final int pageIndex = Arrays.binarySearch(mPositions, 0, mPageCount, position);
-        return (pageIndex >= 0 ? pageIndex : -pageIndex - 2);
+        int pageIndex = Arrays.binarySearch(mPositions, 0, mPageCount, position);
+        if (pageIndex < 0) {
+            pageIndex = -pageIndex - 2;
+        }
+
+        DebugUtils.__checkError(pageIndex < 0, "Invalid pageIndex - " + pageIndex);
+        return (((long)pageIndex << 32) | ((position - mPositions[pageIndex]) & 0xFFFFFFFFL));
     }
 
     /**

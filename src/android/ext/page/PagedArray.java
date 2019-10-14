@@ -145,9 +145,9 @@ public class PagedArray<E> implements Cloneable {
         final Page<E> oldPage = (Page<E>)mPages[pageIndex];
         mPages[pageIndex] = page;
 
-        final int itemCount = page.getCount() - oldPage.getCount();
-        if (itemCount != 0) {
-            mItemCount += itemCount;
+        final int countDelta = page.getCount() - oldPage.getCount();
+        if (countDelta != 0) {
+            mItemCount += countDelta;
             DebugUtils.__checkError(mItemCount < 0, "Error: the PagedArray's item count < 0");
             computePositions(pageIndex);
         }

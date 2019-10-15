@@ -34,12 +34,12 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @param cache May be <tt>null</tt>. The {@link Cache} to store
-     * the loaded values.
+     * @param cache The {@link Cache} to store the loaded values.
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
         super(executor, 48);
         mCache = cache;
+        DebugUtils.__checkError(cache == null, "cache == null");
     }
 
     /**
@@ -77,7 +77,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
             }
 
             // Loads the value from the memory cache.
-            if (isCacheValid(flags)) {
+            if ((flags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
                 final Value value = mCache.get(key);
                 if (value != null) {
                     bindValue(binder, key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE);
@@ -122,7 +122,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         }
 
         Value value;
-        if (!isCacheValid(flags)) {
+        if ((flags & FLAG_IGNORE_MEMORY_CACHE) != 0) {
             value = loadInBackground(null, key, params, flags);
         } else if ((value = mCache.get(key)) == null) {
             value = loadInBackground(null, key, params, flags);
@@ -135,18 +135,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Removes the value for the specified <em>key</em>.
-     * @param key The key to remove.
-     */
-    public void remove(Key key) {
-        if (mCache != null) {
-            mCache.remove(key);
-        }
-    }
-
-    /**
      * Returns the {@link Cache} associated with this loader.
-     * @return The <tt>Cache</tt> or <tt>null</tt>.
+     * @return The <tt>Cache</tt>.
      */
     public final Cache<Key, Value> getCache() {
         return mCache;
@@ -195,13 +185,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #load(Key, Object, int, Binder, Params[])
      */
     protected abstract Value loadInBackground(Task task, Key key, Params[] params, int flags);
-
-    /**
-     * Tests if the {@link mCache} is valid.
-     */
-    /* package */ final boolean isCacheValid(int flags) {
-        return (mCache != null && (flags & FLAG_IGNORE_MEMORY_CACHE) == 0);
-    }
 
     /**
      * Tests the specified task is running.
@@ -257,7 +240,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
             Value value = null;
             if (mState != SHUTDOWN && !isCancelled()) {
                 value = loadInBackground(this, mKey, (Params[])params, mFlags);
-                if (value != null && isCacheValid(mFlags)) {
+                if (value != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
                     mCache.put(mKey, value);
                 }
             }

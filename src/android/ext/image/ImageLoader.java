@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.Arrays;
 import android.content.Context;
 import android.ext.cache.Cache;
+import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
@@ -60,7 +61,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, imageCache);
+        super(module.mExecutor, imageCache != null ? imageCache : Caches.<URI, Image>emptyCache());
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;

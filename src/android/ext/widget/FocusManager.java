@@ -69,6 +69,14 @@ public class FocusManager implements OnFocusChangeListener {
     }
 
     /**
+     * Give focus to the previous focus child in the root view.
+     * @return Whether the child actually took focus.
+     */
+    public boolean restoreChildFocus() {
+        return (mRootView.getChildCount() > 0 && mRootView.getFocusedChild() == null && mFocused != null && mFocused.requestFocus());
+    }
+
+    /**
      * Called to populate focusable views within the root view. <p>Note: This method
      * recommended call in {@link View#addFocusables(ArrayList, int, int)}.</p>
      * @param views The <tt>List</tt> of output views.

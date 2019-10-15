@@ -243,13 +243,16 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
 
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
-        if (isAutoStart() && visible) {
-            start();
-        } else {
-            stop();
+        final boolean changed = super.setVisible(visible, restart);
+        if (changed) {
+            if (visible) {
+                if (isAutoStart()) start();
+            } else {
+                stop();
+            }
         }
 
-        return super.setVisible(visible, restart);
+        return changed;
     }
 
     @Override
@@ -315,7 +318,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
 
         // Dispatch the animation is end.
         if (mCallback != null) {
-            mCallback.onAnimationEnd(this, mFrameIndex);
+            mCallback.onAnimationEnd(this);
         }
     }
 
@@ -391,8 +394,7 @@ public class GIFDrawable extends ImageDrawable<GIFDrawable.GIFImageState> implem
         /**
          * Called when the animation ends.
          * @param drawable The {@link GIFDrawable} finished the animation.
-         * @param frameIndex The end frame index.
          */
-        void onAnimationEnd(GIFDrawable drawable, int frameIndex);
+        void onAnimationEnd(GIFDrawable drawable);
     }
 }

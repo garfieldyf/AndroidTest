@@ -141,6 +141,43 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Equivalent to calling <tt>setItem(position, value, null)</tt>.
+     * @param position The adapter position of the item in this adapter.
+     * @param value The value to set.
+     * @return The previous item at the specified <em>position</em>
+     * or <tt>null</tt> if the item not found.
+     * @see #setItem(int, E, Object)
+     */
+    public final E setItem(int position, E value) {
+        return setItem(position, value, null);
+    }
+
+    /**
+     * Sets the item at the specified <em>position</em> in this adapter with the specified <em>value</em>.
+     * This method will be call {@link #notifyItemChanged(int, Object)} when the <em>value</em> has set.
+     * @param position The adapter position of the item in this adapter.
+     * @param value The value to set.
+     * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
+     * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
+     * @see #setItem(int, E)
+     */
+    public E setItem(int position, E value, Object payload) {
+        DebugUtils.__checkUIThread("setItem");
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
+
+        E result = null;
+        final long combinedPosition = getPageForPosition(position);
+        final int pageIndex = Pages.getOriginalPage(combinedPosition);
+        final Page<E> page  = getPage(pageIndex);
+        if (page != null) {
+            result = page.setItem((int)combinedPosition, value);
+            postNotifyItemRangeChanged(position, 1, payload);
+        }
+
+        return result;
+    }
+
+    /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
      * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)}
      * when the item was not present.</p>

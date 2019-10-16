@@ -103,11 +103,24 @@ public class PagedArray<E> implements Cloneable {
      * Returns the item at the specified <em>position</em> in this <tt>PagedArray</tt>.
      * @param position The index of the item.
      * @return The item at the specified <em>position</em>.
-     * @see #getItemCount()
+     * @see #setItem(int, E)
      */
     public E getItem(int position) {
         final long combinedPosition = getPageForPosition(position);
         return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).getItem((int)combinedPosition);
+    }
+
+    /**
+     * Sets the item at the specified <em>position</em> in this <tt>PagedArray</tt>
+     * with the specified <em>value</em>.
+     * @param position The index of the item.
+     * @param value The value to set.
+     * @return The previous item at the specified <em>position</em>.
+     * @see #getItem(int)
+     */
+    public E setItem(int position, E value) {
+        final long combinedPosition = getPageForPosition(position);
+        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).setItem((int)combinedPosition, value);
     }
 
     /**

@@ -20,4 +20,14 @@ public interface Page<E> {
      * @see #getCount()
      */
     E getItem(int position);
+
+    /**
+     * Sets the item at the specified <em>position</em> in this page with
+     * the specified <em>value</em>. This operation does not change the
+     * count of this page.
+     * @param position The position of the item.
+     * @param value The value to set.
+     * @return The previous item at the specified <em>position</em>.
+     */
+    E setItem(int position, E value);
 }

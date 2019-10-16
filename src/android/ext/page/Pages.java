@@ -2,6 +2,7 @@ package android.ext.page;
 
 import java.util.List;
 import org.json.JSONArray;
+import org.json.JSONException;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.JsonUtils;
@@ -59,7 +60,7 @@ public final class Pages {
      * @see JSONPage
      */
     public static <E> Page<E> newPage(JSONArray data) {
-        return (JsonUtils.getSize(data) > 0 ? new JSONPage<E>(data) : null);
+        return (JsonUtils.getLength(data) > 0 ? new JSONPage<E>(data) : null);
     }
 
     /**
@@ -89,11 +90,17 @@ public final class Pages {
         public E getItem(int position) {
             return mData.get(position);
         }
+
+        @Override
+        public E setItem(int position, E value) {
+            return mData.set(position, value);
+        }
     }
 
     /**
      * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
      */
+    @SuppressWarnings("unchecked")
     public static class JSONPage<E> implements Page<E> {
         /**
          * The {@link JSONArray} of the page data.
@@ -105,7 +112,7 @@ public final class Pages {
          * @param data A {@link JSONArray} of the page data.
          */
         public JSONPage(JSONArray data) {
-            DebugUtils.__checkError(JsonUtils.getSize(data) == 0, "data == null || data.length() == 0");
+            DebugUtils.__checkError(JsonUtils.getLength(data) == 0, "data == null || data.length() == 0");
             mData = data;
         }
 
@@ -115,9 +122,19 @@ public final class Pages {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public E getItem(int position) {
             return (E)mData.opt(position);
+        }
+
+        @Override
+        public E setItem(int position, E value) {
+            try {
+                final Object result = mData.get(position);
+                mData.put(position, value);
+                return (E)result;
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

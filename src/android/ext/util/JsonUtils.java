@@ -4,11 +4,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.lang.reflect.Field;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -47,9 +46,9 @@ public final class JsonUtils {
      * handling <tt>null array</tt>.
      * @param array The <tt>JSONArray</tt>.
      * @return The number of values.
-     * @see #getSize(JSONObject)
+     * @see #getLength(JSONObject)
      */
-    public static int getSize(JSONArray array) {
+    public static int getLength(JSONArray array) {
         return (array != null ? array.length() : 0);
     }
 
@@ -58,9 +57,9 @@ public final class JsonUtils {
      * <em>object</em>, handling <tt>null object</tt>.
      * @param object The <tt>JSONObject</tt>.
      * @return The number of name/value mappings.
-     * @see #getSize(JSONArray)
+     * @see #getLength(JSONArray)
      */
-    public static int getSize(JSONObject object) {
+    public static int getLength(JSONObject object) {
         return (object != null ? object.length() : 0);
     }
 
@@ -178,49 +177,6 @@ public final class JsonUtils {
     }
 
     /**
-     * Inserts the specified <em>value</em> into the <tt>JSONArray</tt> at the
-     * specified <em>index</em>.
-     * @param array The <tt>JSONArray</tt> to insert to.
-     * @param index The index at which to insert.
-     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
-     * {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @return The <em>array</em>.
-     * @throws IndexOutOfBoundsException if <tt>index < 0 || index > array.length()</tt>
-     */
-    public static JSONArray add(JSONArray array, int index, Object value) {
-        JSONArrayImpl.add(array, index, value);
-        return array;
-    }
-
-    /**
-     * Adds the specified <em>values</em> into the <tt>JSONArray</tt> at the
-     * end of the <em>array</em>.
-     * @param array The <tt>JSONArray</tt> to add to.
-     * @param values A <tt>JSONArray</tt> to add.
-     * @return The <em>array</em>.
-     * @see #addAll(JSONArray, int, JSONArray)
-     */
-    public static JSONArray addAll(JSONArray array, JSONArray values) {
-        JSONArrayImpl.addAll(array, array.length(), values);
-        return array;
-    }
-
-    /**
-     * Inserts the specified <em>values</em> into the <tt>JSONArray</tt> at the
-     * specified <em>index</em>.
-     * @param array The <tt>JSONArray</tt> to insert to.
-     * @param index The index at which to insert.
-     * @param values A <tt>JSONArray</tt> to insert.
-     * @return The <em>array</em>.
-     * @throws IndexOutOfBoundsException if <tt>index < 0 || index > array.length()</tt>
-     * @see #addAll(JSONArray, JSONArray)
-     */
-    public static JSONArray addAll(JSONArray array, int index, JSONArray values) {
-        JSONArrayImpl.addAll(array, index, values);
-        return array;
-    }
-
-    /**
      * Equivalent to calling {@link JSONArray#put(int, Object)}.
      * @param array The <tt>JSONArray</tt> to add to.
      * @param index The index at which to put.
@@ -335,6 +291,19 @@ public final class JsonUtils {
     }
 
     /**
+     * Parses a JSON data from the specified JSON string.
+     * @param json A JSON-encoded string.
+     * @throws IOException if an error occurs while reading the data.
+     * @throws JSONException if data can not be parsed.
+     * @return A {@link JSONObject} or {@link JSONArray}.
+     * @see #parse(JsonReader, Cancelable)
+     * @see #parse(Context, Object, Cancelable)
+     */
+    public static <T> T parse(String json) throws IOException, JSONException {
+        return parse(new JsonReader(new StringReader(json)), null);
+    }
+
+    /**
      * Parses a JSON data from the specified <em>reader</em>.
      * @param reader The {@link JsonReader} to read the data.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
@@ -342,6 +311,7 @@ public final class JsonUtils {
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
+     * @see #parse(String)
      * @see #parse(Context, Object, Cancelable)
      */
     public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
@@ -372,6 +342,7 @@ public final class JsonUtils {
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
      * @throws JSONException if data can not be parsed.
+     * @see #parse(String)
      * @see #parse(JsonReader, Cancelable)
      * @see UriUtils#openInputStream(Context, Object)
      */
@@ -718,50 +689,6 @@ public final class JsonUtils {
         @Override
         public JSONObject accumulate(String name, Object value) throws JSONException {
             throw new UnsupportedOperationException();
-        }
-    }
-
-    /**
-     * Class <tt>JSONArrayImpl</tt> used to inserts a value into a <tt>JSONArray</tt>.
-     */
-    private static final class JSONArrayImpl {
-        private static final Field sField;
-
-        @SuppressWarnings("rawtypes")
-        public static void add(JSONArray array, int index, Object value) {
-            try {
-                JSONArrayImpl.__checkDouble(value);
-                ((List)sField.get(array)).add(index, value);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @SuppressWarnings("rawtypes")
-        public static void addAll(JSONArray array, int index, JSONArray values) {
-            try {
-                ((List)sField.get(array)).addAll(index, (List)sField.get(values));
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        private static void __checkDouble(Object value) {
-            if (value instanceof Number) {
-                final double d = ((Number)value).doubleValue();
-                if (Double.isInfinite(d) || Double.isNaN(d)) {
-                    throw new AssertionError("Forbidden numeric value: " + d);
-                }
-            }
-        }
-
-        static {
-            try {
-                sField = JSONArray.class.getDeclaredField("values");
-                sField.setAccessible(true);
-            } catch (Exception e) {
-                throw new AssertionError(e);
-            }
         }
     }
 

@@ -1,6 +1,7 @@
 package android.ext.temp;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,7 +28,6 @@ import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.JsonUtils;
 import android.ext.util.PackageUtils;
 import android.os.Build;
 import android.os.Debug.MemoryInfo;
@@ -160,7 +160,7 @@ public final class ProcessUtils {
      * @param context The <tt>Context</tt>.
      */
     public static void installUncaughtExceptionHandler(Context context) {
-        new UncaughtHandler(context);
+        new CrashHandler(context);
     }
 
     public static void dumpProcessInfos(Printer printer, List<RunningAppProcessInfo> infos) {
@@ -315,10 +315,10 @@ public final class ProcessUtils {
         public static final int CLASS = 5;
 
         /**
-         * The exception stack trace column index of the table.
+         * The stack trace column index of the table.
          * <P>Type: TEXT</P>
          */
-        public static final int STACK = 6;
+        public static final int STACK_TRACE = 6;
 
         /**
          * Constructor
@@ -326,6 +326,14 @@ public final class ProcessUtils {
          */
         public CrashDatabase(Context context) {
             super(context, "crash.db", null, 1);
+        }
+
+        /**
+         * Returns the number of the crash infos in the table.
+         * @return The number of the crash infos.
+         */
+        public final int getCount() {
+            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(_date) FROM crashes", (Object[])null).intValue();
         }
 
         /**
@@ -376,10 +384,7 @@ public final class ProcessUtils {
          *   "model": "MODEL",
          *   "sdk": 19,
          *   "version": "4.4.4",
-         *   "abis": [
-         *     "armeabi-v7a",
-         *     "armeabi"
-         *   ],
+         *   "abis": "armeabi-v7a, armeabi",
          *   "package": "com.xxxx",
          *   "crashes": [{
          *     "_date": 1537852558991,
@@ -406,7 +411,13 @@ public final class ProcessUtils {
 
         /**
          * Writes the device info (e.g. brand, mode, version, abis and package name)
-         * to the <em>writer</em>.
+         * to the <em>writer</em>.<p>The device info such as the following:</p><pre>
+         * "brand": "BRAND",
+         * "model": "MODEL",
+         * "sdk": 19,
+         * "version": "4.4.4",
+         * "abis": "armeabi-v7a, armeabi",
+         * "package": "com.xxxx"</pre>
          * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.
          * @return The <em>writer</em>.
@@ -414,24 +425,33 @@ public final class ProcessUtils {
          * @see #writeTo(Context, JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
-            return JsonUtils.writeObject(writer.name("brand").value(Build.BRAND)
+            return writer.name("brand").value(Build.BRAND)
                 .name("model").value(Build.MODEL)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
-                .name("abis"), DeviceUtils.getSupportedABIs())
+                .name("abis").value(getSupportedABIs())
                 .name("package").value(context.getPackageName());
+        }
+
+        private static String getSupportedABIs() {
+            final String[] abis = DeviceUtils.getSupportedABIs();
+            final StringBuilder result = new StringBuilder(48).append(abis[0]);
+            for (int i = 1; i < abis.length; ++i) {
+                result.append(", ").append(abis[i]);
+            }
+
+            return result.toString();
         }
     }
 
     /**
-     * Class <tt>UncaughtHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
+     * Class <tt>CrashHandler</tt> is an implementation of an {@link UncaughtExceptionHandler}.
      */
-    @SuppressWarnings("unused")
-    private static final class UncaughtHandler implements UncaughtExceptionHandler {
+    private static final class CrashHandler implements UncaughtExceptionHandler {
         private final Context mContext;
         private final UncaughtExceptionHandler mDefaultHandler;
 
-        public UncaughtHandler(Context context) {
+        public CrashHandler(Context context) {
             mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
@@ -462,8 +482,9 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos to the "crash.crashes" table.
+         * Writes the crash infos to the "crash.db.crashes" table.
          */
+        @SuppressWarnings("unused")
         private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {
@@ -476,13 +497,13 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos to "/storage/emulated/0/Android/data/packagename/files/crashes.log"
+         * Writes the crash infos to "/storage/emulated/0/Android/data/<em>packagename</em>/files/crashes.log"
          */
         private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             Formatter formatter = null;
             try {
                 // Creates the log file.
-                final PrintStream ps = new PrintStream(new FileOutputStream(FileUtils.getFilesDir(mContext, null).getPath() + "/crashes.log", true));
+                final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
                 formatter = new Formatter(ps);
 
                 // Writes the uncaught exception to log file.
@@ -491,7 +512,7 @@ public final class ProcessUtils {
                 formatter.format("Model : %s %s (sdk = %d, version = %s, cpu abis = %s)\n", Build.MANUFACTURER, Build.MODEL, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
                 formatter.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
                 formatter.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
-                formatter.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());
+                formatter.format("Process : %s (pid = %d, uid = %d, user = %s)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), myUserName(), thread.getName());
                 e.printStackTrace(ps);
                 ps.println();
             } finally {

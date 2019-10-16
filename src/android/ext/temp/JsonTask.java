@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.ext.content.CachedAsyncTask;
 import android.ext.content.CachedTaskLoader.LoadParams;
 import android.ext.net.DownloadRequest;
-import android.ext.util.JsonUtils;
+import android.ext.util.JSONUtils;
 import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
@@ -32,8 +32,8 @@ public class JsonTask extends CachedAsyncTask<String, JSONObject> {
     @Override
     protected JSONObject parseResult(String[] params, File cacheFile) throws Exception {
         final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/title"));
-        final JSONObject result = JsonUtils.parse(MainApplication.sInstance, uri, this);
-        return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
+        final JSONObject result = JSONUtils.parse(MainApplication.sInstance, uri, this);
+        return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);
     }
 
     @Override

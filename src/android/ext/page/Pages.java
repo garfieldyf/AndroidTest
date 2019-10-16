@@ -5,7 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.JsonUtils;
+import android.ext.util.JSONUtils;
 
 /**
  * Class Pages
@@ -60,7 +60,7 @@ public final class Pages {
      * @see JSONPage
      */
     public static <E> Page<E> newPage(JSONArray data) {
-        return (JsonUtils.getLength(data) > 0 ? new JSONPage<E>(data) : null);
+        return (JSONUtils.getLength(data) > 0 ? new JSONPage<E>(data) : null);
     }
 
     /**
@@ -112,7 +112,7 @@ public final class Pages {
          * @param data A {@link JSONArray} of the page data.
          */
         public JSONPage(JSONArray data) {
-            DebugUtils.__checkError(JsonUtils.getLength(data) == 0, "data == null || data.length() == 0");
+            DebugUtils.__checkError(JSONUtils.getLength(data) == 0, "data == null || data.length() == 0");
             mData = data;
         }
 

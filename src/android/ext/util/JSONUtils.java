@@ -20,11 +20,11 @@ import android.util.JsonReader;
 import android.util.JsonWriter;
 
 /**
- * Class JsonUtils
+ * Class JSONUtils
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public final class JsonUtils {
+public final class JSONUtils {
     /**
      * Returns a <tt>0-length</tt>, immutable {@link JSONArray}.
      * @return An empty {@link JSONArray}.
@@ -695,6 +695,6 @@ public final class JsonUtils {
     /**
      * This utility class cannot be instantiated.
      */
-    private JsonUtils() {
+    private JSONUtils() {
     }
 }

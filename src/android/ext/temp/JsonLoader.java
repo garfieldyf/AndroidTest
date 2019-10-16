@@ -9,7 +9,7 @@ import android.ext.content.CachedTaskLoader.OnLoadCompleteListener;
 import android.ext.net.DownloadPostRequest;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
-import android.ext.util.JsonUtils;
+import android.ext.util.JSONUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
@@ -20,8 +20,8 @@ import com.tencent.test.MainApplication;
 public final class JsonLoader {
 
     static String getName(JSONObject result) {
-        final JSONArray rows = JsonUtils.optJSONArray(JsonUtils.optJSONObject(result, "data"), "rows");
-        return JsonUtils.optString(JsonUtils.optJSONObject(rows, 0), "name", "null") + "  " + JsonUtils.optString(JsonUtils.optJSONObject(rows, 1), "name", "null");
+        final JSONArray rows = JSONUtils.optJSONArray(JSONUtils.optJSONObject(result, "data"), "rows");
+        return JSONUtils.optString(JSONUtils.optJSONObject(rows, 0), "name", "null") + "  " + JSONUtils.optString(JSONUtils.optJSONObject(rows, 1), "name", "null");
     }
 
     public static final OnLoadCompleteListener<String, JSONObject> sListener = new OnLoadCompleteListener<String, JSONObject>() {
@@ -49,7 +49,7 @@ public final class JsonLoader {
 
         @Override
         public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
-            return JsonUtils.parse(context, cacheFile, cancelable);
+            return JSONUtils.parse(context, cacheFile, cancelable);
         }
     }
 
@@ -71,8 +71,8 @@ public final class JsonLoader {
         @Override
         public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
             final Object uri = (cacheFile.exists() ? cacheFile : UriUtils.getAssetUri("json_cache/content"));
-            final JSONObject result = JsonUtils.parse(context, uri, cancelable);
-            return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
+            final JSONObject result = JSONUtils.parse(context, uri, cancelable);
+            return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }
     }
 
@@ -94,8 +94,8 @@ public final class JsonLoader {
 
         @Override
         public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
-            final JSONObject result = JsonUtils.parse(context, cacheFile, cancelable);
-            return (JsonUtils.optInt(result, "retCode", 0) == 200 ? result : null);
+            final JSONObject result = JSONUtils.parse(context, cacheFile, cancelable);
+            return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);
         }
     }
 }

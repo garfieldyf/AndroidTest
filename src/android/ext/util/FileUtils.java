@@ -577,7 +577,7 @@ public final class FileUtils {
     /**
      * Wrap the specified <em>cancelable</em>, handling <tt>null Cancelable</tt>.
      */
-    /* package */ static Cancelable wrap(Cancelable cancelable) {
+    public static Cancelable wrap(Cancelable cancelable) {
         return (cancelable != null ? cancelable : CancelableImpl.sInstance);
     }
 

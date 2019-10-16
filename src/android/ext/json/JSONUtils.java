@@ -1,21 +1,20 @@
-package android.ext.util;
+package android.ext.json;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import android.content.Context;
-import android.ext.util.ArrayUtils.Filter;
+import android.ext.util.Cancelable;
+import android.ext.util.FileUtils;
+import android.ext.util.UriUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 
@@ -25,22 +24,6 @@ import android.util.JsonWriter;
  */
 @SuppressWarnings("unchecked")
 public final class JSONUtils {
-    /**
-     * Returns a <tt>0-length</tt>, immutable {@link JSONArray}.
-     * @return An empty {@link JSONArray}.
-     */
-    public static JSONArray emptyArray() {
-        return EmptyJSONArray.sInstance;
-    }
-
-    /**
-     * Returns a <tt>0-length</tt>, immutable {@link JSONObject}.
-     * @return An empty {@link JSONObject}.
-     */
-    public static JSONObject emptyObject() {
-        return EmptyJSONObject.sInstance;
-    }
-
     /**
      * Returns the number of values in the <em>array</em>,
      * handling <tt>null array</tt>.
@@ -61,31 +44,6 @@ public final class JSONUtils {
      */
     public static int getLength(JSONObject object) {
         return (object != null ? object.length() : 0);
-    }
-
-    /**
-     * Compares the two JSON values, handling <tt>null</tt> values.
-     * @param a The first value.
-     * @param b The second value.
-     * @return <tt>true</tt> if both values are <tt>null</tt> or are
-     * equals, <tt>false</tt> otherwise.
-     */
-    public static boolean equals(Object a, Object b) {
-        if (a == b) {
-            return true;
-        }
-
-        if (JSONObject.NULL.equals(a)) {
-            return (JSONObject.NULL.equals(b));
-        }
-
-        if (a instanceof JSONArray && b instanceof JSONArray) {
-            return equals((JSONArray)a, (JSONArray)b);
-        } else if (a instanceof JSONObject && b instanceof JSONObject) {
-            return equals((JSONObject)a, (JSONObject)b);
-        } else {
-            return a.equals(b);
-        }
     }
 
     /**
@@ -177,129 +135,14 @@ public final class JSONUtils {
     }
 
     /**
-     * Equivalent to calling {@link JSONArray#put(int, Object)}.
-     * @param array The <tt>JSONArray</tt> to add to.
-     * @param index The index at which to put.
-     * @param value A <tt>JSONObject, JSONArray, String, Boolean,
-     * Number</tt>, {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @return The <em>array</em>.
-     */
-    public static JSONArray put(JSONArray array, int index, Object value) {
-        try {
-            return array.put(index, value);
-        } catch (JSONException e) {
-            return array;
-        }
-    }
-
-    /**
-     * Equivalent to calling {@link JSONObject#put(String, Object)}.
-     * @param object The <tt>JSONObject</tt>.
-     * @param name The JSON property name.
-     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
-     * {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @return The <em>object</em>.
-     */
-    public static JSONObject put(JSONObject object, String name, Object value) {
-        try {
-            return object.put(name, value);
-        } catch (JSONException e) {
-            return object;
-        }
-    }
-
-    /**
-     * Equivalent to calling {@link JSONObject#putOpt(String, Object)}.
-     * @param object The <tt>JSONObject</tt>.
-     * @param name The JSON property name.
-     * @param value A <tt>JSONObject, JSONArray, String, Boolean, Number</tt>,
-     * {@link JSONObject#NULL}, or <tt>null</tt>.
-     * @return The <em>object</em>.
-     */
-    public static JSONObject putOpt(JSONObject object, String name, Object value) {
-        try {
-            return object.putOpt(name, value);
-        } catch (JSONException e) {
-            return object;
-        }
-    }
-
-    /**
-     * Equivalent to calling <tt>indexOf(array, 0, array.length(), filter)</tt>.
-     * @param array The <tt>JSONArray</tt> to search.
-     * @param filter The {@link Filter} using to search.
-     * @return The index of the first occurrence of the element, or <tt>-1</tt>
-     * if it was not found.
-     * @see #indexOf(JSONArray, int, int, Filter)
-     */
-    public static <T> int indexOf(JSONArray array, Filter<? super T> filter) {
-        return indexOf(array, 0, array.length(), filter);
-    }
-
-    /**
-     * Searches the specified {@link JSONArray} for the first occurrence of the element using the
-     * specified <tt>filter</tt>.
-     * @param array The <tt>JSONArray</tt> to search.
-     * @param start The inclusive start index in <em>array</em>.
-     * @param end The exclusive end index in <em>array</em>.
-     * @param filter The {@link Filter} using to search.
-     * @return The index of the first occurrence of the element, or <tt>-1</tt> if it was not found.
-     * @see #indexOf(JSONArray, Filter)
-     */
-    public static <T> int indexOf(JSONArray array, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkRange(start, end - start, array.length());
-        for (; start < end; ++start) {
-            if (filter.accept((T)array.opt(start))) {
-                return start;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * Equivalent to calling <tt>lastIndexOf(array, 0, array.length(), filter)</tt>.
-     * @param array The <tt>JSONArray</tt> to search.
-     * @param filter The {@link Filter} using to search.
-     * @return The index of the last occurrence of the element, or <tt>-1</tt> if it
-     * was not found.
-     * @see #lastIndexOf(JSONArray, int, int, Filter)
-     */
-    public static <T> int lastIndexOf(JSONArray array, Filter<? super T> filter) {
-        return lastIndexOf(array, 0, array.length(), filter);
-    }
-
-    /**
-     * Searches the specified {@link JSONArray} for the last occurrence of the element using the
-     * specified <tt>filter</tt>.
-     * @param array The <tt>JSONArray</tt> to search.
-     * @param start The inclusive start index in <em>array</em>.
-     * @param end The exclusive end index in <em>array</em>.
-     * @param filter The {@link Filter} using to search.
-     * @return The index of the last occurrence of the element, or <tt>-1</tt> if it was not found.
-     * @see #lastIndexOf(JSONArray, Filter)
-     */
-    public static <T> int lastIndexOf(JSONArray array, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkRange(start, end - start, array.length());
-        for (--end; end >= start; --end) {
-            if (filter.accept((T)array.opt(end))) {
-                return end;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
      * Parses a JSON data from the specified JSON string.
      * @param json A JSON-encoded string.
      * @throws IOException if an error occurs while reading the data.
-     * @throws JSONException if data can not be parsed.
      * @return A {@link JSONObject} or {@link JSONArray}.
      * @see #parse(JsonReader, Cancelable)
      * @see #parse(Context, Object, Cancelable)
      */
-    public static <T> T parse(String json) throws IOException, JSONException {
+    public static <T> T parse(String json) throws IOException {
         return parse(new JsonReader(new StringReader(json)), null);
     }
 
@@ -310,11 +153,10 @@ public final class JSONUtils {
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
-     * @throws JSONException if data can not be parsed.
      * @see #parse(String)
      * @see #parse(Context, Object, Cancelable)
      */
-    public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
             return (T)parseArray(reader, FileUtils.wrap(cancelable));
@@ -341,12 +183,11 @@ public final class JSONUtils {
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
-     * @throws JSONException if data can not be parsed.
      * @see #parse(String)
      * @see #parse(JsonReader, Cancelable)
      * @see UriUtils#openInputStream(Context, Object)
      */
-    public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException, JSONException {
+    public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException {
         final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri)));
         try {
             return parse(reader, cancelable);
@@ -365,7 +206,7 @@ public final class JSONUtils {
      * @see #writeObject(String, Object)
      */
     public static JsonWriter writeObject(JsonWriter writer, Object object) throws IOException {
-        if (JSONObject.NULL.equals(object)) {
+        if (object == null) {
             return writer.nullValue();
         } else if (object instanceof String) {
             return writer.value((String)object);
@@ -374,9 +215,9 @@ public final class JSONUtils {
         } else if (object instanceof Boolean) {
             return writer.value((boolean)object);
         } else if (object instanceof JSONArray) {
-            return writeValues(writer, (JSONArray)object);
+            return writeValues(writer, ((JSONArray)object).values);
         } else if (object instanceof JSONObject) {
-            return writeValues(writer, (JSONObject)object);
+            return writeValues(writer, ((JSONObject)object).values.entrySet());
         } else if (object instanceof Object[]) {
             return writeValues(writer, Arrays.asList((Object[])object));
         } else if (object instanceof Set) {
@@ -409,35 +250,93 @@ public final class JSONUtils {
         }
     }
 
-    private static boolean equals(JSONArray a, JSONArray b) {
-        final int length = a.length();
-        if (length != b.length()) {
-            return false;
+    /* package */ static String toString(Object value) {
+        if (value instanceof String) {
+            return (String)value;
+        } else if (value != null) {
+            return value.toString();
+        } else {
+            return null;
         }
-
-        for (int i = 0; i < length; ++i) {
-            if (!equals(a.opt(i), b.opt(i))) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
-    private static boolean equals(JSONObject a, JSONObject b) {
-        if (a.length() != b.length()) {
-            return false;
-        }
-
-        final Iterator<String> keys = a.keys();
-        while (keys.hasNext()) {
-            final String key = keys.next();
-            if (!b.has(key) || !equals(a.opt(key), b.opt(key))) {
-                return false;
+    /* package */ static Integer toInteger(Object value) {
+        if (value instanceof Integer) {
+            return (Integer)value;
+        } else if (value instanceof Number) {
+            return ((Number)value).intValue();
+        } else if (value instanceof String) {
+            try {
+                return Integer.valueOf((String)value, 10);
+            } catch (NumberFormatException ignored) {
             }
         }
 
-        return true;
+        return null;
+    }
+
+    /* package */ static Long toLong(Object value) {
+        if (value instanceof Long) {
+            return (Long)value;
+        } else if (value instanceof Number) {
+            return ((Number)value).longValue();
+        } else if (value instanceof String) {
+            try {
+                return Long.valueOf((String)value, 10);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    /* package */ static Double toDouble(Object value) {
+        if (value instanceof Double) {
+            return (Double)value;
+        } else if (value instanceof Number) {
+            return ((Number)value).doubleValue();
+        } else if (value instanceof String) {
+            try {
+                return Double.valueOf((String)value);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    /* package */ static Boolean toBoolean(Object value) {
+        if (value instanceof Boolean) {
+            return (Boolean)value;
+        } else if (value instanceof String) {
+            final String string = (String)value;
+            if ("true".equalsIgnoreCase(string)) {
+                return Boolean.TRUE;
+            } else if ("false".equalsIgnoreCase(string)) {
+                return Boolean.FALSE;
+            }
+        }
+
+        return null;
+    }
+
+    /* package */ static String toJSONString(Object value) {
+        try {
+            final StringWriter out = new StringWriter();
+            writeObject(new JsonWriter(out), value);
+            return out.toString();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /* package */ static void __checkDouble(Object value) {
+        if (value instanceof Number) {
+            final double d = ((Number)value).doubleValue();
+            if (Double.isInfinite(d) || Double.isNaN(d)) {
+                throw new AssertionError("Forbidden numeric value: " + value);
+            }
+        }
     }
 
     private static Number parseNumber(JsonReader reader) throws IOException {
@@ -456,35 +355,35 @@ public final class JSONUtils {
         return Double.valueOf(string);
     }
 
-    private static JSONArray parseArray(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    private static JSONArray parseArray(JsonReader reader, Cancelable cancelable) throws IOException {
         final JSONArray result = new JSONArray();
         reader.beginArray();
 
         while (reader.hasNext()) {
             switch (reader.peek()) {
             case NULL:
+                result.add(null);
                 reader.nextNull();
-                result.put(JSONObject.NULL);
                 break;
 
             case STRING:
-                result.put(reader.nextString());
+                result.add(reader.nextString());
                 break;
 
             case NUMBER:
-                result.put(parseNumber(reader));
+                result.add(parseNumber(reader));
                 break;
 
             case BOOLEAN:
-                result.put(reader.nextBoolean());
+                result.add(reader.nextBoolean());
                 break;
 
             case BEGIN_ARRAY:
-                result.put(parseArray(reader, cancelable));
+                result.add(parseArray(reader, cancelable));
                 break;
 
             case BEGIN_OBJECT:
-                result.put(parseObject(reader, cancelable));
+                result.add(parseObject(reader, cancelable));
                 break;
 
             default:
@@ -500,7 +399,7 @@ public final class JSONUtils {
         return result;
     }
 
-    private static JSONObject parseObject(JsonReader reader, Cancelable cancelable) throws IOException, JSONException {
+    private static JSONObject parseObject(JsonReader reader, Cancelable cancelable) throws IOException {
         final JSONObject result = new JSONObject();
         reader.beginObject();
 
@@ -540,26 +439,6 @@ public final class JSONUtils {
         return result;
     }
 
-    private static JsonWriter writeValues(JsonWriter writer, JSONArray values) throws IOException {
-        writer.beginArray();
-        for (int i = 0, length = values.length(); i < length; ++i) {
-            writeObject(writer, values.opt(i));
-        }
-
-        return writer.endArray();
-    }
-
-    private static JsonWriter writeValues(JsonWriter writer, JSONObject values) throws IOException {
-        final Iterator<String> names = values.keys();
-        writer.beginObject();
-        while (names.hasNext()) {
-            final String name = names.next();
-            writeObject(writer.name(name), values.opt(name));
-        }
-
-        return writer.endObject();
-    }
-
     private static JsonWriter writeValues(JsonWriter writer, Collection<Object> values) throws IOException {
         writer.beginArray();
         for (Object value : values) {
@@ -576,120 +455,6 @@ public final class JSONUtils {
         }
 
         return writer.endObject();
-    }
-
-    /**
-     * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
-     */
-    private static final class EmptyJSONArray extends JSONArray {
-        public static final JSONArray sInstance = new EmptyJSONArray();
-
-        @Override
-        public int length() {
-            return 0;
-        }
-
-        @Override
-        public boolean isNull(int index) {
-            return true;
-        }
-
-        @Override
-        public Object remove(int index) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(int value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(long value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(boolean value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(Object value) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(double value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONArray put(int index, Object value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-    }
-
-    /**
-     * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
-     */
-    private static final class EmptyJSONObject extends JSONObject {
-        public static final JSONObject sInstance = new EmptyJSONObject();
-
-        @Override
-        public int length() {
-            return 0;
-        }
-
-        @Override
-        public boolean has(String name) {
-            return false;
-        }
-
-        @Override
-        public boolean isNull(String name) {
-            return true;
-        }
-
-        @Override
-        public Object remove(String name) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject put(String name, int value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject put(String name, long value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject put(String name, Object value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject put(String name, double value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject put(String name, boolean value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject putOpt(String name, Object value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public JSONObject accumulate(String name, Object value) throws JSONException {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**

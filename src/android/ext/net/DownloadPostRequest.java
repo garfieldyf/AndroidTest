@@ -13,11 +13,11 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Map;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import android.ext.json.JSONArray;
+import android.ext.json.JSONObject;
+import android.ext.json.JSONUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
 import android.util.JsonWriter;
 
 /**

@@ -1,12 +1,13 @@
 package android.ext.temp;
 
 import java.io.File;
-import org.json.JSONObject;
+import java.io.IOException;
 import android.app.Activity;
 import android.ext.content.CachedAsyncTask;
 import android.ext.content.CachedTaskLoader.LoadParams;
+import android.ext.json.JSONObject;
+import android.ext.json.JSONUtils;
 import android.ext.net.DownloadRequest;
-import android.ext.util.JSONUtils;
 import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;

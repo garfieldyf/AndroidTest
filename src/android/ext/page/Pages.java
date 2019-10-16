@@ -1,11 +1,10 @@
 package android.ext.page;
 
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
+import android.ext.json.JSONArray;
+import android.ext.json.JSONUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.JSONUtils;
 
 /**
  * Class Pages
@@ -128,13 +127,7 @@ public final class Pages {
 
         @Override
         public E setItem(int position, E value) {
-            try {
-                final Object result = mData.get(position);
-                mData.put(position, value);
-                return (E)result;
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
+            return (E)mData.set(position, value);
         }
     }
 

@@ -14,11 +14,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.json.JSONException;
+import android.ext.json.JSONUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
-import android.ext.util.JSONUtils;
 import android.util.JsonReader;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -284,12 +283,11 @@ public class DownloadRequest {
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download was
      * cancelled before it completed normally the returned value is undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
-     * @throws JSONException if data can not be parsed.
      * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
-    public final <T> T download(Cancelable cancelable) throws IOException, JSONException {
+    public final <T> T download(Cancelable cancelable) throws IOException {
         try {
             return (connect(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
@@ -396,7 +394,7 @@ public class DownloadRequest {
     /**
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      */
-    /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException, JSONException {
+    /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException {
         final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream()));
         try {
             return JSONUtils.parse(reader, cancelable);

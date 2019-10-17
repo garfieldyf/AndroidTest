@@ -122,7 +122,7 @@ public final class Pages {
 
         @Override
         public E getItem(int position) {
-            return (E)mData.opt(position);
+            return (E)mData.get(position);
         }
 
         @Override

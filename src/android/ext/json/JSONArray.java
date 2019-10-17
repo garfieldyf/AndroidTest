@@ -1,7 +1,6 @@
 package android.ext.json;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import android.ext.util.DebugUtils;
@@ -11,14 +10,6 @@ import android.ext.util.DebugUtils;
  * @author Garfield
  */
 public class JSONArray implements Iterable<Object> {
-    /**
-     * The <tt>0-length</tt>, immutable {@link JSONArray}.
-     */
-    public static final JSONArray EMPTY = new JSONArray(Collections.emptyList());
-
-    /**
-     * The JSON values.
-     */
     /* package */ final List<Object> values;
 
     /**
@@ -41,7 +32,7 @@ public class JSONArray implements Iterable<Object> {
     /**
      * Constructor
      */
-    private JSONArray(List<Object> values) {
+    /* package */ JSONArray(List<Object> values) {
         this.values = values;
     }
 
@@ -306,6 +297,28 @@ public class JSONArray implements Iterable<Object> {
     }
 
     /**
+     * Returns the value at the specified <em>index</em> in this array.
+     * @param index The index of the value.
+     * @return The value at <em>index</em>.
+     * @throws IndexOutOfBoundsException if <tt>index < 0 || index >= length()</tt>
+     */
+    public Object get(int index) {
+        return (values.get(index));
+    }
+
+    /**
+     * Sets the value at the specified <em>index</em> in this array with
+     * the specified <em>value</em>.
+     * @param index The index of the value.
+     * @param value The value to set.
+     * @return The previous value at the specified <em>index</em>.
+     * @throws IndexOutOfBoundsException if <tt>index < 0 || index >= length()</tt>
+     */
+    public Object set(int index, Object value) {
+        return values.set(index, value);
+    }
+
+    /**
      * Returns <tt>true</tt> if this array has no value at
      * <em>index</em>, or if its value is the <tt>null</tt>.
      */
@@ -321,17 +334,6 @@ public class JSONArray implements Iterable<Object> {
      */
     public Object remove(int index) {
         return (index >= 0 && index < values.size() ? values.remove(index) : null);
-    }
-
-    /**
-     * Sets the value at the specified <em>index</em> in this array
-     * with the specified <em>value</em>.
-     * @param index The index of the value.
-     * @param value The value to set.
-     * @return The previous value at the specified <em>index</em>.
-     */
-    public Object set(int index, Object value) {
-        return values.set(index, value);
     }
 
     @Override

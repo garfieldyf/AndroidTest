@@ -8,6 +8,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -24,6 +25,16 @@ import android.util.JsonWriter;
  */
 @SuppressWarnings("unchecked")
 public final class JSONUtils {
+    /**
+     * The <tt>0-length</tt>, immutable {@link JSONArray}.
+     */
+    public static final JSONArray EMPTY_ARRAY = new JSONArray(Collections.emptyList());
+
+    /**
+     * The <tt>0-length</tt>, immutable {@link JSONObject}.
+     */
+    public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.<String, Object>emptyMap());
+
     /**
      * Returns the number of values in the <em>array</em>,
      * handling <tt>null array</tt>.
@@ -267,7 +278,7 @@ public final class JSONUtils {
             return ((Number)value).intValue();
         } else if (value instanceof String) {
             try {
-                return Integer.valueOf((String)value, 10);
+                return (int)Double.parseDouble((String)value);
             } catch (NumberFormatException ignored) {
             }
         }
@@ -282,7 +293,7 @@ public final class JSONUtils {
             return ((Number)value).longValue();
         } else if (value instanceof String) {
             try {
-                return Long.valueOf((String)value, 10);
+                return (long)Double.parseDouble((String)value);
             } catch (NumberFormatException ignored) {
             }
         }

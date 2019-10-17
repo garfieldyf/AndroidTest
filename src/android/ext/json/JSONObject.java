@@ -12,14 +12,6 @@ import android.ext.util.DebugUtils;
  * @author Garfield
  */
 public class JSONObject {
-    /**
-     * The <tt>0-length</tt>, immutable {@link JSONObject}.
-     */
-    public static final JSONObject EMPTY = new JSONObject(Collections.<String, Object>emptyMap());
-
-    /**
-     * The JSON name/value mappings.
-     */
     /* package */ final Map<String, Object> values;
 
     /**
@@ -42,7 +34,7 @@ public class JSONObject {
     /**
      * Constructor
      */
-    private JSONObject(Map<String, Object> values) {
+    /* package */ JSONObject(Map<String, Object> values) {
         this.values = values;
     }
 

@@ -261,19 +261,9 @@ public final class JSONUtils {
         }
     }
 
-    /* package */ static String toString(Object value) {
-        if (value instanceof String) {
-            return (String)value;
-        } else if (value != null) {
-            return value.toString();
-        } else {
-            return null;
-        }
-    }
-
-    /* package */ static Integer toInteger(Object value) {
+    /* package */ static int toInt(Object value, int fallback) {
         if (value instanceof Integer) {
-            return (Integer)value;
+            return (int)value;
         } else if (value instanceof Number) {
             return ((Number)value).intValue();
         } else if (value instanceof String) {
@@ -283,12 +273,12 @@ public final class JSONUtils {
             }
         }
 
-        return null;
+        return fallback;
     }
 
-    /* package */ static Long toLong(Object value) {
+    /* package */ static long toLong(Object value, long fallback) {
         if (value instanceof Long) {
-            return (Long)value;
+            return (long)value;
         } else if (value instanceof Number) {
             return ((Number)value).longValue();
         } else if (value instanceof String) {
@@ -298,37 +288,47 @@ public final class JSONUtils {
             }
         }
 
-        return null;
+        return fallback;
     }
 
-    /* package */ static Double toDouble(Object value) {
+    /* package */ static String toString(Object value, String fallback) {
+        if (value instanceof String) {
+            return (String)value;
+        } else if (value != null) {
+            return value.toString();
+        } else {
+            return fallback;
+        }
+    }
+
+    /* package */ static double toDouble(Object value, double fallback) {
         if (value instanceof Double) {
-            return (Double)value;
+            return (double)value;
         } else if (value instanceof Number) {
             return ((Number)value).doubleValue();
         } else if (value instanceof String) {
             try {
-                return Double.valueOf((String)value);
+                return Double.parseDouble((String)value);
             } catch (NumberFormatException ignored) {
             }
         }
 
-        return null;
+        return fallback;
     }
 
-    /* package */ static Boolean toBoolean(Object value) {
+    /* package */ static boolean toBoolean(Object value, boolean fallback) {
         if (value instanceof Boolean) {
-            return (Boolean)value;
+            return (boolean)value;
         } else if (value instanceof String) {
             final String string = (String)value;
             if ("true".equalsIgnoreCase(string)) {
-                return Boolean.TRUE;
+                return true;
             } else if ("false".equalsIgnoreCase(string)) {
-                return Boolean.FALSE;
+                return false;
             }
         }
 
-        return null;
+        return fallback;
     }
 
     /* package */ static String toJSONString(Object value) {

@@ -125,8 +125,8 @@ public class JSONObject {
      * Equivalent to calling <tt>optInt(name, 0)</tt>.
      * @see #optInt(String, int)
      */
-    public final int optInt(String name) {
-        return optInt(name, 0);
+    public int optInt(String name) {
+        return JSONUtils.toInt(values.get(name), 0);
     }
 
     /**
@@ -137,17 +137,15 @@ public class JSONObject {
      * @see #optInt(String)
      */
     public int optInt(String name, int fallback) {
-        final Object value = values.get(name);
-        final Integer result = JSONUtils.toInteger(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toInt(values.get(name), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optLong(name, 0)</tt>.
      * @see #optLong(String, int)
      */
-    public final long optLong(String name) {
-        return optLong(name, 0);
+    public long optLong(String name) {
+        return JSONUtils.toLong(values.get(name), 0);
     }
 
     /**
@@ -158,17 +156,15 @@ public class JSONObject {
      * @see #optLong(String)
      */
     public long optLong(String name, long fallback) {
-        final Object value = values.get(name);
-        final Long result  = JSONUtils.toLong(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toLong(values.get(name), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optString(name, "")</tt>.
      * @see #optString(String, String)
      */
-    public final String optString(String name) {
-        return optString(name, "");
+    public String optString(String name) {
+        return JSONUtils.toString(values.get(name), "");
     }
 
     /**
@@ -179,17 +175,15 @@ public class JSONObject {
      * @see #optString(String)
      */
     public String optString(String name, String fallback) {
-        final Object value  = values.get(name);
-        final String result = JSONUtils.toString(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toString(values.get(name), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optDouble(name, 0)</tt>.
      * @see #optDouble(String, double)
      */
-    public final double optDouble(String name) {
-        return optDouble(name, 0);
+    public double optDouble(String name) {
+        return JSONUtils.toDouble(values.get(name), 0);
     }
 
     /**
@@ -200,17 +194,15 @@ public class JSONObject {
      * @see #optDouble(String)
      */
     public double optDouble(String name, double fallback) {
-        final Object value  = values.get(name);
-        final Double result = JSONUtils.toDouble(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toDouble(values.get(name), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optBoolean(name, false)</tt>.
      * @see #optBoolean(String, boolean)
      */
-    public final boolean optBoolean(String name) {
-        return optBoolean(name, false);
+    public boolean optBoolean(String name) {
+        return JSONUtils.toBoolean(values.get(name), false);
     }
 
     /**
@@ -221,9 +213,7 @@ public class JSONObject {
      * @see #optBoolean(String)
      */
     public boolean optBoolean(String name, boolean fallback) {
-        final Object value = values.get(name);
-        final Boolean result = JSONUtils.toBoolean(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toBoolean(values.get(name), fallback);
     }
 
     /**

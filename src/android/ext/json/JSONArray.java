@@ -1,8 +1,11 @@
 package android.ext.json;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 
 /**
@@ -173,8 +176,8 @@ public class JSONArray implements Iterable<Object> {
      * Equivalent to calling <tt>optInt(index, 0)</tt>.
      * @see #optInt(int, int)
      */
-    public final int optInt(int index) {
-        return optInt(index, 0);
+    public int optInt(int index) {
+        return JSONUtils.toInt(opt(index), 0);
     }
 
     /**
@@ -185,17 +188,15 @@ public class JSONArray implements Iterable<Object> {
      * @see #optInt(int)
      */
     public int optInt(int index, int fallback) {
-        final Object value = opt(index);
-        final Integer result = JSONUtils.toInteger(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toInt(opt(index), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optLong(index, 0)</tt>.
      * @see #optLong(int, long)
      */
-    public final long optLong(int index) {
-        return optLong(index, 0);
+    public long optLong(int index) {
+        return JSONUtils.toLong(opt(index), 0);
     }
 
     /**
@@ -206,17 +207,15 @@ public class JSONArray implements Iterable<Object> {
      * @see #optLong(int)
      */
     public long optLong(int index, long fallback) {
-        final Object value = opt(index);
-        final Long result  = JSONUtils.toLong(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toLong(opt(index), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optDouble(index, 0)</tt>.
      * @see #optDouble(int, double)
      */
-    public final double optDouble(int index) {
-        return optDouble(index, 0);
+    public double optDouble(int index) {
+        return JSONUtils.toDouble(opt(index), 0);
     }
 
     /**
@@ -227,17 +226,15 @@ public class JSONArray implements Iterable<Object> {
      * @see #optDouble(int)
      */
     public double optDouble(int index, double fallback) {
-        final Object value  = opt(index);
-        final Double result = JSONUtils.toDouble(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toDouble(opt(index), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optBoolean(index, false)</tt>.
      * @see #optBoolean(int, boolean)
      */
-    public final boolean optBoolean(int index) {
-        return optBoolean(index, false);
+    public boolean optBoolean(int index) {
+        return JSONUtils.toBoolean(opt(index), false);
     }
 
     /**
@@ -248,17 +245,15 @@ public class JSONArray implements Iterable<Object> {
      * @see #optBoolean(int)
      */
     public boolean optBoolean(int index, boolean fallback) {
-        final Object value = opt(index);
-        final Boolean result = JSONUtils.toBoolean(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toBoolean(opt(index), fallback);
     }
 
     /**
      * Equivalent to calling <tt>optString(index, "")</tt>.
      * @see #optString(int, String)
      */
-    public final String optString(int index) {
-        return optString(index, "");
+    public String optString(int index) {
+        return JSONUtils.toString(opt(index), "");
     }
 
     /**
@@ -269,9 +264,7 @@ public class JSONArray implements Iterable<Object> {
      * @see #optString(int)
      */
     public String optString(int index, String fallback) {
-        final Object value  = opt(index);
-        final String result = JSONUtils.toString(value);
-        return (result != null ? result : fallback);
+        return JSONUtils.toString(opt(index), fallback);
     }
 
     /**
@@ -334,6 +327,35 @@ public class JSONArray implements Iterable<Object> {
      */
     public Object remove(int index) {
         return (index >= 0 && index < values.size() ? values.remove(index) : null);
+    }
+
+    /**
+     * Sorts this array using the given <em>comparator</em>. If the <em>comparator</em>
+     * is <tt>null</tt> sorts this array in ascending natural order.
+     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
+     * @see #sort(int, int, Comparator)
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <T> void sort(Comparator<? super T> comparator) {
+        if (comparator == null) {
+            Collections.sort((List)values);
+        } else {
+            Collections.sort((List)values, comparator);
+        }
+    }
+
+    /**
+     * Sorts the specified range in this array using the given <em>comparator</em>. If
+     * the <em>comparator</em> is <tt>null</tt> sorts this array in ascending natural order.
+     * @param start The inclusive start index in this array.
+     * @param end The exclusive end index in this array.
+     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
+     * @see #sort(Comparator)
+     * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > length()</tt>
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public <T> void sort(int start, int end, Comparator<? super T> comparator) {
+        ArrayUtils.sort((List)values, start, end, comparator);
     }
 
     @Override

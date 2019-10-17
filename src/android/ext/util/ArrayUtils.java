@@ -269,12 +269,14 @@ public final class ArrayUtils {
     }
 
     /**
-     * Sorts the specified range in the <em>list</em> using the specified <em>comparator</em>.
+     * Sorts the specified range in the <em>list</em> using the given <em>comparator</em>.
+     * If the <em>comparator</em> is <tt>null</tt> sorts the list in ascending natural order.
      * @param list The {@link List} to sort.
      * @param start The inclusive start index in <em>list</em>.
      * @param end The exclusive end index in <em>list</em>.
      * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
      * @see Arrays#sort(Object[], int, int, Comparator)
+     * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > list.size()</tt>
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         DebugUtils.__checkRange(start, end - start, list.size());

@@ -14,6 +14,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import android.content.Context;
 import android.ext.util.Cancelable;
+import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.util.JsonReader;
@@ -402,6 +403,7 @@ public final class JSONUtils {
             }
 
             if (cancelable.isCancelled()) {
+                DebugUtils.__checkDebug(true, "JSONUtils", "parseArray was cancelled.");
                 return result;
             }
         }
@@ -442,6 +444,7 @@ public final class JSONUtils {
             }
 
             if (cancelable.isCancelled()) {
+                DebugUtils.__checkDebug(true, "JSONUtils", "parseObject was cancelled.");
                 return result;
             }
         }

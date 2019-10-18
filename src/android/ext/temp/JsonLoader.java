@@ -1,10 +1,9 @@
 package android.ext.temp;
 
 import java.io.File;
-import java.io.IOException;
 import android.content.Context;
-import android.ext.content.CachedTaskLoader.LoadParams;
-import android.ext.content.CachedTaskLoader.OnLoadCompleteListener;
+import android.ext.content.ResourceLoader.LoadParams;
+import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;

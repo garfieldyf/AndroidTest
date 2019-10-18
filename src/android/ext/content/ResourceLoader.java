@@ -14,9 +14,9 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>CachedTaskLoader</tt> allows to load the resource on a background thread
+ * Class <tt>ResourceLoader</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>CachedTaskLoader's generic types</h3>
+ * <h3>ResourceLoader's generic types</h3>
  * <p>The two types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type.</li></ol>
@@ -59,14 +59,14 @@ import android.util.Log;
  *     }
  * }
  *
- * private CachedTaskLoader&lt;String, JSONObject&gt; mLoader;
+ * private ResourceLoader&lt;String, JSONObject&gt; mLoader;
  *
- * mLoader = new CachedTaskLoader&lt;String, JSONObject&gt;(activity, executor);
+ * mLoader = new ResourceLoader&lt;String, JSONObject&gt;(activity, executor);
  * mLoader.load(url, new JSONLoadParams(), listener, cookie);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
-public class CachedTaskLoader<Key, Result> extends Loader<Key> {
+public class ResourceLoader<Key, Result> extends Loader<Key> {
     private static final int MAX_POOL_SIZE = 8;
 
     /**
@@ -83,9 +83,9 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CachedTaskLoader(Activity, Executor)
+     * @see #ResourceLoader(Activity, Executor)
      */
-    public CachedTaskLoader(Context context, Executor executor) {
+    public ResourceLoader(Context context, Executor executor) {
         super(executor, MAX_POOL_SIZE);
         mContext = context.getApplicationContext();
     }
@@ -94,9 +94,9 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
      * Constructor
      * @param ownerActivity The owner <tt>Activity</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #CachedTaskLoader(Context, Executor)
+     * @see #ResourceLoader(Context, Executor)
      */
-    public CachedTaskLoader(Activity ownerActivity, Executor executor) {
+    public ResourceLoader(Activity ownerActivity, Executor executor) {
         super(executor, MAX_POOL_SIZE);
         mOwner = new WeakReference<Object>(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
@@ -163,7 +163,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(mContext, key, null, task);
-                DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "parseResult");
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", "parseResult");
             } else {
                 DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
@@ -207,7 +207,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache");
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -229,7 +229,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             // If the cache file is hit and the cache file's contents are equal the temp
             // file's contents. Deletes the temp file and cancel the task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "CachedTaskLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
                 return null;
@@ -238,7 +238,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("CachedTaskLoader", "download");
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "download");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;
@@ -294,7 +294,7 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
     }
 
     /**
-     * Class <tt>LoadParams</tt> used to {@link CachedTaskLoader} to load resource.
+     * Class <tt>LoadParams</tt> used to {@link ResourceLoader} to load resource.
      */
     public static interface LoadParams<Key, Result> {
         /**
@@ -329,14 +329,14 @@ public class CachedTaskLoader<Key, Result> extends Loader<Key> {
     }
 
     /**
-     * Callback interface when a {@link CachedTaskLoader} has finished loading its data.
+     * Callback interface when a {@link ResourceLoader} has finished loading its data.
      */
     public static interface OnLoadCompleteListener<Key, Result> {
         /**
          * Called on the UI thread when the load is complete.
-         * @param key The key, passed earlier by {@link CachedTaskLoader#load}.
-         * @param loadParams The parameters, passed earlier by {@link CachedTaskLoader#load}.
-         * @param cookie An object, passed earlier by {@link CachedTaskLoader#load}.
+         * @param key The key, passed earlier by {@link ResourceLoader#load}.
+         * @param loadParams The parameters, passed earlier by {@link ResourceLoader#load}.
+         * @param cookie An object, passed earlier by {@link ResourceLoader#load}.
          * @param result A result or <tt>null</tt> of the load.
          */
         void onLoadComplete(Key key, LoadParams<Key, Result> loadParams, Object cookie, Result result);

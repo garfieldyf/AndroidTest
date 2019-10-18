@@ -28,6 +28,7 @@ import android.ext.image.params.Parameters;
 import android.ext.image.transformer.RoundedGIFTransformer;
 import android.ext.image.transformer.RoundedRectTransformer;
 import android.ext.image.transformer.Transformer;
+import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -74,7 +75,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @see #ImageModule(Context, Executor, Cache, FileCache)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, ThreadPool.createImageThreadPool(Math.min(Runtime.getRuntime().availableProcessors(), 3), 60, TimeUnit.SECONDS), imageCache, fileCache);
+        this(context, ThreadPool.createImageThreadPool(ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 3, 5), 60, TimeUnit.SECONDS), imageCache, fileCache);
     }
 
     /**

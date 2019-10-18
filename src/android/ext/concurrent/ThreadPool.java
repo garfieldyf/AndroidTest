@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import android.ext.util.ArrayUtils;
 import android.os.Process;
 
 /**
@@ -66,7 +67,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return The maximum number of threads.
      */
     public static int computeMaximumThreads() {
-        return Math.min(Runtime.getRuntime().availableProcessors() * 2 + 1, 5);
+        return ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors() * 2 + 1, 5, 8);
     }
 
     /**

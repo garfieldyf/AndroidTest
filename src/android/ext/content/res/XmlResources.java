@@ -10,6 +10,7 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.binder.BackgroundBinder;
+import android.ext.image.binder.ImageBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.ScaleParameters;
@@ -200,6 +201,7 @@ public final class XmlResources {
         public static final XmlBinderInflater sInstance = new XmlBinderInflater();
 
         @Override
+        @SuppressWarnings("rawtypes")
         public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
             String name = parser.getName();
             if (name.equals("binder") && (name = parser.getAttributeValue(null, "class")) == null) {
@@ -207,6 +209,9 @@ public final class XmlResources {
             }
 
             switch (name) {
+            case "ImageBinder":
+                return new ImageBinder(context, Xml.asAttributeSet(parser));
+
             case "BackgroundBinder":
                 return BackgroundBinder.getInstance();
 

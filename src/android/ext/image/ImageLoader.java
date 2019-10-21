@@ -85,7 +85,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param uri The uri to load.
      * @return The {@link LoadRequest}.
      */
-    public final LoadRequest load(URI uri) {
+    public LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = resolveUri(uri);
         mRequest.mBinder = this;

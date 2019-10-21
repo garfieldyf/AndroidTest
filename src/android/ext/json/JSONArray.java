@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import android.ext.util.ArrayUtils;
-import android.ext.util.DebugUtils;
 
 /**
  * Class JSONArray
@@ -92,12 +91,24 @@ public class JSONArray implements Iterable<Object> {
 
     /**
      * Adds <em>value</em> to the end of this array.
+     * @param value A float value to add. May not be {@link Float#isNaN() NaN}
+     * or {@link Float#isInfinite() infinite}.
+     * @return This array.
+     */
+    public JSONArray add(float value) {
+        JSONUtils.__checkDouble(value);
+        values.add(value);
+        return this;
+    }
+
+    /**
+     * Adds <em>value</em> to the end of this array.
      * @param value A double value to add. May not be {@link Double#isNaN() NaN}
      * or {@link Double#isInfinite() infinite}.
      * @return This array.
      */
     public JSONArray add(double value) {
-        DebugUtils.__checkError(Double.isInfinite(value) || Double.isNaN(value), "Forbidden numeric value: " + value);
+        JSONUtils.__checkDouble(value);
         values.add(value);
         return this;
     }
@@ -152,12 +163,25 @@ public class JSONArray implements Iterable<Object> {
     /**
      * Inserts <em>value</em> into this array at the specified <em>index</em>.
      * @param index The index at which to insert.
+     * @param value A float value to add. May not be {@link Float#isNaN() NaN}
+     * or {@link Float#isInfinite() infinite}.
+     * @return This array.
+     */
+    public JSONArray add(int index, float value) {
+        JSONUtils.__checkDouble(value);
+        values.add(index, value);
+        return this;
+    }
+
+    /**
+     * Inserts <em>value</em> into this array at the specified <em>index</em>.
+     * @param index The index at which to insert.
      * @param value A double value to add. May not be {@link Double#isNaN() NaN}
      * or {@link Double#isInfinite() infinite}.
      * @return This array.
      */
     public JSONArray add(int index, double value) {
-        DebugUtils.__checkError(Double.isInfinite(value) || Double.isNaN(value), "Forbidden numeric value: " + value);
+        JSONUtils.__checkDouble(value);
         values.add(index, value);
         return this;
     }
@@ -208,6 +232,25 @@ public class JSONArray implements Iterable<Object> {
      */
     public long optLong(int index, long fallback) {
         return JSONUtils.toLong(opt(index), fallback);
+    }
+
+    /**
+     * Equivalent to calling <tt>optFloat(index, 0)</tt>.
+     * @see #optFloat(int, float)
+     */
+    public float optFloat(int index) {
+        return (float)JSONUtils.toDouble(opt(index), 0);
+    }
+
+    /**
+     * Returns the value at <em>index</em> if it exists and is a float
+     * or can be coerced to a float. Returns <em>fallback</em> otherwise.
+     * @param index The index of the value.
+     * @return The value at <em>index</em> or <em>fallback</em>.
+     * @see #optFloat(int)
+     */
+    public float optFloat(int index, float fallback) {
+        return (float)JSONUtils.toDouble(opt(index), fallback);
     }
 
     /**

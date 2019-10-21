@@ -230,6 +230,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         }
 
         // Dispatch the animation is end.
+        DebugUtils.__checkDebug(true, "GIFBaseDrawable", "The " + this + " is end.");
         if (mCallback != null) {
             mCallback.onAnimationEnd(this);
         }

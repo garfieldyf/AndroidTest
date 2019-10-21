@@ -114,6 +114,17 @@ public final class JSONUtils {
     }
 
     /**
+     * Equivalent to calling {@link JSONObject#optFloat(String, float)},
+     * handling <tt>null</tt> <em>object</em>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A float value or <em>fallback</em>.
+     */
+    public static float optFloat(JSONObject object, String name, float fallback) {
+        return (object != null ? object.optFloat(name, fallback) : fallback);
+    }
+
+    /**
      * Equivalent to calling {@link JSONObject#optDouble(String, double)},
      * handling <tt>null</tt> <em>object</em>.
      * @param object The <tt>JSONObject</tt>.
@@ -263,9 +274,7 @@ public final class JSONUtils {
     }
 
     /* package */ static int toInt(Object value, int fallback) {
-        if (value instanceof Integer) {
-            return (int)value;
-        } else if (value instanceof Number) {
+        if (value instanceof Number) {
             return ((Number)value).intValue();
         } else if (value instanceof String) {
             try {
@@ -278,9 +287,7 @@ public final class JSONUtils {
     }
 
     /* package */ static long toLong(Object value, long fallback) {
-        if (value instanceof Long) {
-            return (long)value;
-        } else if (value instanceof Number) {
+        if (value instanceof Number) {
             return ((Number)value).longValue();
         } else if (value instanceof String) {
             try {
@@ -303,9 +310,7 @@ public final class JSONUtils {
     }
 
     /* package */ static double toDouble(Object value, double fallback) {
-        if (value instanceof Double) {
-            return (double)value;
-        } else if (value instanceof Number) {
+        if (value instanceof Number) {
             return ((Number)value).doubleValue();
         } else if (value instanceof String) {
             try {
@@ -348,6 +353,12 @@ public final class JSONUtils {
             if (Double.isInfinite(d) || Double.isNaN(d)) {
                 throw new AssertionError("Forbidden numeric value: " + value);
             }
+        }
+    }
+
+    /* package */ static void __checkDouble(double value) {
+        if (Double.isInfinite(value) || Double.isNaN(value)) {
+            throw new AssertionError("Forbidden numeric value: " + value);
         }
     }
 

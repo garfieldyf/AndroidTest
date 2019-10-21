@@ -3,7 +3,7 @@
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="yuanfeng" />
-    <property name="version" value="2.2.5" />
+    <property name="version" value="2.2.6" />
     <property name="ndk.dir" value="com/funshion" />
     <property name="java.package" value="com.funshion" />
     <property name="out.file.name" value="${ant.project.name}.jar" />
@@ -26,7 +26,7 @@
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
 
     <condition property="compile.barcode">
-        <istrue value="true" />
+        <istrue value="${compile_barcode}" />
     </condition>
 
     <!-- target -copy -->
@@ -177,6 +177,7 @@
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
                 <exclude name="*.xml" />
+                <exclude name="*.bat" />
                 <exclude name="**/out/**" />
             </fileset>
         </delete>

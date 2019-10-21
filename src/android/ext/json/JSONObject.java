@@ -100,13 +100,27 @@ public class JSONObject {
     /**
      * Maps the specified <em>name</em> to the specified <em>value</em>.
      * @param name The JSON property name.
+     * @param value A float value. May not be {@link Float#isNaN() NaN}
+     * or {@link Float#isInfinite() infinite}.
+     * @return This object.
+     */
+    public JSONObject put(String name, float value) {
+        DebugUtils.__checkError(name == null, "name == null");
+        JSONUtils.__checkDouble(value);
+        values.put(name, value);
+        return this;
+    }
+
+    /**
+     * Maps the specified <em>name</em> to the specified <em>value</em>.
+     * @param name The JSON property name.
      * @param value A double value. May not be {@link Double#isNaN() NaN}
      * or {@link Double#isInfinite() infinite}.
      * @return This object.
      */
     public JSONObject put(String name, double value) {
         DebugUtils.__checkError(name == null, "name == null");
-        DebugUtils.__checkError(Double.isInfinite(value) || Double.isNaN(value), "Forbidden numeric value: " + value);
+        JSONUtils.__checkDouble(value);
         values.put(name, value);
         return this;
     }
@@ -176,6 +190,25 @@ public class JSONObject {
      */
     public String optString(String name, String fallback) {
         return JSONUtils.toString(values.get(name), fallback);
+    }
+
+    /**
+     * Equivalent to calling <tt>optFloat(name, 0)</tt>.
+     * @see #optFloat(String, float)
+     */
+    public float optFloat(String name) {
+        return (float)JSONUtils.toDouble(values.get(name), 0);
+    }
+
+    /**
+     * Returns the value mapped by <em>name</em> if it exists and is a float
+     * or can be coerced to a float. Returns <em>fallback</em> otherwise.
+     * @param name The JSON property name.
+     * @return The float value or <em>fallback</em>.
+     * @see #optFloat(String)
+     */
+    public float optFloat(String name, float fallback) {
+        return (float)JSONUtils.toDouble(values.get(name), fallback);
     }
 
     /**

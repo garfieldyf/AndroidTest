@@ -1,5 +1,7 @@
 package android.ext.image.binder;
 
+import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
+import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
@@ -53,14 +55,14 @@ public final class TransitionBinder implements Binder<Object, Object, Object> {
     @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        DebugUtils.__checkError(params[2] == null, "The placeholder drawable is null");
+        DebugUtils.__checkError(params[PLACEHOLDER_INDEX] == null, "The placeholder drawable is null");
         final ImageView view = (ImageView)target;
         if (value == null) {
-            view.setImageDrawable((Drawable)params[2]);
+            view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
         } else if (value instanceof Drawable) {
             setViewImage(view, (Drawable)value, params, state);
         } else {
-            setViewImage(view, ((Transformer)params[1]).transform(value), params, state);
+            setViewImage(view, ((Transformer)params[TRANSFORMER_INDEX]).transform(value), params, state);
         }
     }
 
@@ -68,7 +70,7 @@ public final class TransitionBinder implements Binder<Object, Object, Object> {
         if ((state & STATE_LOAD_FROM_CACHE) != 0) {
             view.setImageDrawable(image);
         } else {
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[2], image });
+            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[PLACEHOLDER_INDEX], image });
             view.setImageDrawable(drawable);
             drawable.setCrossFadeEnabled(true);
             drawable.startTransition(mDuration);

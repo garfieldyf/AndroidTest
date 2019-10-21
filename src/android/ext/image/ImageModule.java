@@ -1,5 +1,6 @@
 package android.ext.image;
 
+import static android.ext.image.ImageLoader.LoadRequest.PARAM_ARRAY_LENGTH;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -95,7 +96,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(48, 3, Object.class);
+        mParamsPool  = Pools.newPool(48, PARAM_ARRAY_LENGTH, Object.class);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);

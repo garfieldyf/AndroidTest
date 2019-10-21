@@ -1,5 +1,7 @@
 package android.ext.image.binder;
 
+import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
+import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.cache.SimpleLruCache;
@@ -54,11 +56,11 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
         Drawable drawable;
         if (image == null) {
-            drawable = (Drawable)params[2];
+            drawable = (Drawable)params[PLACEHOLDER_INDEX];
         } else if (image instanceof Drawable) {
             drawable = (Drawable)image;
         } else if ((drawable = mImageCache.get(uri)) == null) {
-            mImageCache.put(uri, drawable = ((Transformer<Image>)params[1]).transform(image));
+            mImageCache.put(uri, drawable = ((Transformer<Image>)params[TRANSFORMER_INDEX]).transform(image));
         }
 
         ((ImageView)target).setImageDrawable(drawable);

@@ -1,6 +1,7 @@
 package android.ext.image.decoder;
 
 import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
+import static android.ext.image.ImageLoader.LoadRequest.PARAMETERS_INDEX;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.BitmapUtils;
@@ -39,7 +40,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     @SuppressWarnings("unchecked")
     protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
-        final Parameters parameters = (Parameters)params[0];
+        final Parameters parameters = (Parameters)params[PARAMETERS_INDEX];
         DebugUtils.__checkError(parameters == null, "parameters == null");
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;

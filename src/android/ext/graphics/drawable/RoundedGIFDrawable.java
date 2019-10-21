@@ -1,19 +1,35 @@
 package android.ext.graphics.drawable;
 
+import java.io.IOException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.TargetApi;
+import android.content.res.Resources;
+import android.content.res.Resources.Theme;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.annotation.Keep;
+import android.util.AttributeSet;
 
 /**
  * Class RoundedGIFDrawable
  * @author Garfield
  */
-public class RoundedGIFDrawable extends ShapeGIFDrawable {
-    private float[] mRadii;
+public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.RoundedGIFState> {
+    /**
+     * Constructor
+     * <p>The default constructor used by {@link Resources#getDrawable(int)}.</p>
+     */
+    @Keep
+    public RoundedGIFDrawable() {
+        super(new RoundedGIFState((GIFImage)null));
+    }
 
     /**
      * Constructor
@@ -23,7 +39,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image) {
-        super(image);
+        super(new RoundedGIFState(image));
     }
 
     /**
@@ -35,7 +51,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image, float cornerRadius) {
-        super(image);
+        super(new RoundedGIFState(image));
         setCornerRadii(cornerRadius);
     }
 
@@ -50,7 +66,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @see #RoundedGIFDrawable(GIFImage, float, float, float, float)
      */
     public RoundedGIFDrawable(GIFImage image, float[] radii) {
-        super(image);
+        super(new RoundedGIFState(image));
         setCornerRadii(radii);
     }
 
@@ -66,7 +82,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * @see #RoundedGIFDrawable(GIFImage, float[])
      */
     public RoundedGIFDrawable(GIFImage image, float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
-        super(image);
+        super(new RoundedGIFState(image));
         setCornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
     }
 
@@ -77,7 +93,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      * radii, or <tt>null</tt> if none set.
      */
     public float[] getCornerRadii() {
-        return mRadii;
+        return mState.mRadii;
     }
 
     /**
@@ -113,32 +129,99 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable {
      */
     public void setCornerRadii(float[] radii) {
         if (radiusEquals(radii, 0, +0.0f)) {
-            mRadii = null;
+            mState.mRadii = null;
             invalidateSelf(false);
         } else {
-            mRadii = radii;
+            mState.mRadii = radii;
             invalidateSelf(true);
         }
     }
 
     @Override
+    public Drawable mutate() {
+        if ((mFlags & FLAG_MUTATED) == 0) {
+            mFlags |= FLAG_MUTATED;
+            mState = new RoundedGIFState(mState);
+        }
+
+        return this;
+    }
+
+    @Override
     protected void getConvexPath(RectF bounds, Path outPath) {
-        outPath.addRoundRect(bounds, mRadii, Direction.CW);
+        outPath.addRoundRect(bounds, mState.mRadii, Direction.CW);
     }
 
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
-        if (mRadii == null) {
+        if (mState.mRadii == null) {
             outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
         } else {
-            final float radius = mRadii[0];
-            if (radiusEquals(mRadii, 1, radius)) {
+            final float radius = mState.mRadii[0];
+            if (radiusEquals(mState.mRadii, 1, radius)) {
                 // Round rect all corner radii are equals, for efficiency, and to enable clipping.
                 outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
             } else {
                 super.getOutline(outline, bounds);
             }
+        }
+    }
+
+    @Override
+    protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
+        super.inflateAttributes(res, parser, attrs, theme, id);
+        setCornerRadii(XmlResources.loadCornerRadii(res, attrs));
+    }
+
+    /**
+     * Constructor
+     * <p>The constructor used by {@link ConstantState#newDrawable()}.</p>
+     */
+    /* package */ RoundedGIFDrawable(RoundedGIFState state) {
+        super(state);
+    }
+
+    /**
+     * Class <tt>RoundedGIFState</tt> is an implementation of a {@link ConstantState}.
+     */
+    /* package */ static final class RoundedGIFState extends ShapeGIFDrawable.ShapeGIFState {
+        /* package */ float[] mRadii;
+
+        /**
+         * Constructor
+         * @param image The {@link GIFImage}.
+         * @see #RoundedGIFState(RoundedGIFState)
+         */
+        public RoundedGIFState(GIFImage image) {
+            super(image);
+        }
+
+        /**
+         * Copy constructor
+         * @param state The {@link RoundedGIFState}.
+         * @see #RoundedGIFState(GIFImage)
+         */
+        public RoundedGIFState(RoundedGIFState state) {
+            super(state);
+            if (state.mRadii != null) {
+                mRadii = state.mRadii.clone();
+            }
+        }
+
+        @Override
+        public Drawable newDrawable() {
+            return new RoundedGIFDrawable(this);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res) {
+            return new RoundedGIFDrawable(this);
+        }
+
+        @Override
+        public Drawable newDrawable(Resources res, Theme theme) {
+            return new RoundedGIFDrawable(this);
         }
     }
 }

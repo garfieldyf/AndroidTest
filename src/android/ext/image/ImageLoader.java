@@ -266,7 +266,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
      *       .parameters(R.xml.decode_params)
-     *       .transformer(R.xml.decode_transformer)
+     *       .transformer(R.xml.transformer)
      *       .placeholder(R.drawable.ic_placeholder)
      *       .into(imageView);</pre>
      */

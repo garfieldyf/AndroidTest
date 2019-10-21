@@ -13,26 +13,21 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 
 /**
  * Abstract class ShapeGIFDrawable
  * @author Garfield
  */
-public abstract class ShapeGIFDrawable extends GIFDrawable {
+public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState> extends GIFBaseDrawable<T> {
     private static final int FLAG_PATH = 0x00800000;  // mFlags
-    private final Path mPath;
-    private final Shader mShader;
 
     /**
      * Constructor
-     * @param image The {@link GIFImage}. Never <tt>null</tt>.
+     * @param state The {@link ShapeGIFState}.
      */
-    public ShapeGIFDrawable(GIFImage image) {
-        super(image);
-        mPath = new Path();
-        mShader = new BitmapShader(mState.mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+    public ShapeGIFDrawable(T state) {
+        super(state);
     }
 
     @Override
@@ -45,16 +40,6 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
     }
 
     @Override
-    public Drawable mutate() {
-        return this;
-    }
-
-    @Override
-    public ConstantState getConstantState() {
-        return null;
-    }
-
-    @Override
     protected void onBoundsChange(Rect bounds) {
         applyGravity();
     }
@@ -62,13 +47,13 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     protected void getOutline(Outline outline, RectF bounds) {
-        outline.setConvexPath(mPath);
+        outline.setConvexPath(mState.mPath);
     }
 
     @Override
     protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
         if (paint.getShader() != null) {
-            canvas.drawPath(mPath, paint);
+            canvas.drawPath(mState.mPath, paint);
         } else {
             canvas.drawBitmap(frame, null, bounds, paint);
         }
@@ -84,25 +69,14 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
             DrawUtils.applyGravity(mState.mGravity, width, height, getBounds(), outBounds);
 
             // Sets the shader's scale matrix.
-            setShaderMatrix(mShader, width, height, outBounds);
+            setShaderMatrix(mState.mShader, width, height, outBounds);
         }
 
         // Builds the convex path.
         if ((mFlags & FLAG_PATH) != 0) {
             mFlags &= ~FLAG_PATH;
-            mPath.rewind();
-            getConvexPath(outBounds, mPath);
-        }
-    }
-
-    /**
-     * Adds the <tt>FLAG_GRAVITY</tt> constant. If paint shader
-     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
-     */
-    private void applyGravity() {
-        mFlags |= FLAG_GRAVITY;
-        if (mState.mPaint.getShader() != null) {
-            mFlags |= FLAG_PATH;
+            mState.mPath.rewind();
+            getConvexPath(outBounds, mState.mPath);
         }
     }
 
@@ -114,7 +88,7 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
     protected final void invalidateSelf(boolean invalidatePath) {
         if (invalidatePath) {
             mFlags |= FLAG_PATH;
-            mState.mPaint.setShader(mShader);
+            mState.mPaint.setShader(mState.mShader);
         } else {
             mFlags &= ~FLAG_PATH;
             mState.mPaint.setShader(null);
@@ -132,4 +106,53 @@ public abstract class ShapeGIFDrawable extends GIFDrawable {
      * @param outPath The empty path to be build.
      */
     protected abstract void getConvexPath(RectF bounds, Path outPath);
+
+    /**
+     * Adds the <tt>FLAG_GRAVITY</tt> constant. If paint shader
+     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
+     */
+    private void applyGravity() {
+        mFlags |= FLAG_GRAVITY;
+        if (mState.mPaint.getShader() != null) {
+            mFlags |= FLAG_PATH;
+        }
+    }
+
+    /**
+     * Class <tt>ShapeGIFState</tt> is an implementation of a {@link ConstantState}.
+     */
+    public static abstract class ShapeGIFState extends GIFBaseDrawable.GIFBaseState {
+        /* package */ Shader mShader;
+        /* package */ final Path mPath;
+
+        /**
+         * Constructor
+         * @param image The {@link GIFImage}.
+         * @see #ShapeGIFState(ShapeGIFState)
+         */
+        public ShapeGIFState(GIFImage image) {
+            super(image);
+            mPath = new Path();
+        }
+
+        /**
+         * Copy constructor
+         * @param state The {@link ShapeGIFState}.
+         * @see #ShapeGIFState(GIFImage)
+         */
+        public ShapeGIFState(ShapeGIFState state) {
+            super(state);
+            mPath   = new Path(state.mPath);
+            mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+        }
+
+        @Override
+        /* package */ void setImage(GIFImage image) {
+            if (image != null) {
+                mImage  = image;
+                mCanvas = image.createBitmapCanvas();
+                mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+            }
+        }
+    }
 }

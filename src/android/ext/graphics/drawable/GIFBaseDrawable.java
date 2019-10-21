@@ -167,12 +167,10 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     @Override
     public boolean setVisible(boolean visible, boolean restart) {
         final boolean changed = super.setVisible(visible, restart);
-        if (changed) {
-            if (visible) {
-                if (isAutoStart()) start();
-            } else {
-                stop();
-            }
+        if (visible) {
+            if (isAutoStart()) start();
+        } else {
+            stop();
         }
 
         return changed;

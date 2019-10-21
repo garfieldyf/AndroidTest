@@ -1,5 +1,6 @@
 package android.ext.page;
 
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
@@ -11,7 +12,6 @@ import android.ext.cache.SimpleLruCache;
 import android.ext.json.JSONArray;
 import android.ext.util.DebugUtils;
 import android.ext.widget.BaseAdapter;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.ArrayMap;
 import android.util.Printer;
@@ -125,7 +125,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public final E getItem(View child) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int position = mRecyclerView.getChildAdapterPosition(child);
-        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
+        return (position != NO_POSITION ? getItem(position) : null);
     }
 
     /**
@@ -137,7 +137,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public final E getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
-        return (position != RecyclerView.NO_POSITION ? getItem(position) : null);
+        return (position != NO_POSITION ? getItem(position) : null);
     }
 
     /**
@@ -155,6 +155,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Sets the item at the specified <em>position</em> in this adapter with the specified <em>value</em>.
      * This method will be call {@link #notifyItemChanged(int, Object)} when the <em>value</em> has set.
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when
+     * the item was not present.</p>
      * @param position The adapter position of the item in this adapter.
      * @param value The value to set.
      * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
@@ -167,8 +169,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
         E result = null;
         final long combinedPosition = getPageForPosition(position);
-        final int pageIndex = Pages.getOriginalPage(combinedPosition);
-        final Page<E> page  = getPage(pageIndex);
+        final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
         if (page != null) {
             result = page.setItem((int)combinedPosition, value);
             postNotifyItemRangeChanged(position, 1, payload);
@@ -205,7 +206,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public final E peekItem(View child) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int position = mRecyclerView.getChildAdapterPosition(child);
-        return (position != RecyclerView.NO_POSITION ? peekItem(position) : null);
+        return (position != NO_POSITION ? peekItem(position) : null);
     }
 
     /**
@@ -217,7 +218,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public final E peekItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
-        return (position != RecyclerView.NO_POSITION ? peekItem(position) : null);
+        return (position != NO_POSITION ? peekItem(position) : null);
     }
 
     /**

@@ -6,7 +6,6 @@ import org.xmlpull.v1.XmlPullParserException;
 import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.ext.graphics.DrawUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -29,8 +28,6 @@ import android.util.AttributeSet;
  * @author Garfield
  */
 public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapState> extends ImageDrawable<T> {
-    private static final int FLAG_PATH = 0x08000000;  // mFlags
-
     /**
      * Constructor
      * @param state The {@link BitmapState}.
@@ -70,15 +67,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     @Override
-    public void setGravity(int gravity) {
-        if (mState.mGravity != gravity) {
-            mState.mGravity = gravity;
-            applyGravity();
-            invalidateSelf();
-        }
-    }
-
-    @Override
     public int getMinimumWidth() {
         return mState.mBitmap.getWidth();
     }
@@ -101,11 +89,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     @Override
     public int getOpacity() {
         return (mState.mPaint.getShader() != null || mState.mBitmap.hasAlpha() || mState.mPaint.getAlpha() < 255 ? PixelFormat.TRANSLUCENT : PixelFormat.OPAQUE);
-    }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        applyGravity();
     }
 
     @Override
@@ -132,24 +115,8 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     @Override
-    /* package */ void computeDrawingBounds(RectF outBounds) {
-        // Computes the drawing bounds.
-        if ((mFlags & FLAG_GRAVITY) != 0) {
-            mFlags &= ~FLAG_GRAVITY;
-            final int width  = getIntrinsicWidth();
-            final int height = getIntrinsicHeight();
-            DrawUtils.applyGravity(mState.mGravity, width, height, getBounds(), outBounds);
-
-            // Sets the shader's scale matrix.
-            setShaderMatrix(mState.mShader, width, height, outBounds);
-        }
-
-        // Builds the convex path.
-        if ((mFlags & FLAG_PATH) != 0) {
-            mFlags &= ~FLAG_PATH;
-            mState.mPath.rewind();
-            getConvexPath(outBounds, mState.mPath);
-        }
+    /* package */ void computeDrawingBounds(Rect bounds, RectF outBounds) {
+        computeDrawingBounds(bounds, mState.mShader, mState.mPath, outBounds);
     }
 
     /**
@@ -158,15 +125,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
      * @param invalidatePath Whether the path for this drawable should be invalidated as well.
      */
     protected final void invalidateSelf(boolean invalidatePath) {
-        if (invalidatePath) {
-            mFlags |= FLAG_PATH;
-            mState.mPaint.setShader(mState.mShader);
-        } else {
-            mFlags &= ~FLAG_PATH;
-            mState.mPaint.setShader(null);
-        }
-
-        invalidateSelf();
+        invalidateSelf(mState.mShader, invalidatePath);
     }
 
     /**
@@ -178,17 +137,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
      * @param outPath The empty path to be build.
      */
     protected abstract void getConvexPath(RectF bounds, Path outPath);
-
-    /**
-     * Adds the <tt>FLAG_GRAVITY</tt> constant. If paint shader
-     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
-     */
-    private void applyGravity() {
-        mFlags |= FLAG_GRAVITY;
-        if (mState.mPaint.getShader() != null) {
-            mFlags |= FLAG_PATH;
-        }
-    }
 
     /**
      * Class <tt>BitmapState</tt> is an implementation of a {@link ConstantState}.

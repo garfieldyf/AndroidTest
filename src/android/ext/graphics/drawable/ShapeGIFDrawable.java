@@ -1,7 +1,6 @@
 package android.ext.graphics.drawable;
 
 import android.annotation.TargetApi;
-import android.ext.graphics.DrawUtils;
 import android.ext.graphics.GIFImage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -20,28 +19,12 @@ import android.os.Build;
  * @author Garfield
  */
 public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState> extends GIFBaseDrawable<T> {
-    private static final int FLAG_PATH = 0x00800000;  // mFlags
-
     /**
      * Constructor
      * @param state The {@link ShapeGIFState}.
      */
     public ShapeGIFDrawable(T state) {
         super(state);
-    }
-
-    @Override
-    public void setGravity(int gravity) {
-        if (mState.mGravity != gravity) {
-            mState.mGravity = gravity;
-            applyGravity();
-            invalidateSelf();
-        }
-    }
-
-    @Override
-    protected void onBoundsChange(Rect bounds) {
-        applyGravity();
     }
 
     @Override
@@ -60,24 +43,8 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
     }
 
     @Override
-    /* package */ void computeDrawingBounds(RectF outBounds) {
-        // Computes the drawing bounds.
-        if ((mFlags & FLAG_GRAVITY) != 0) {
-            mFlags &= ~FLAG_GRAVITY;
-            final int width  = getIntrinsicWidth();
-            final int height = getIntrinsicHeight();
-            DrawUtils.applyGravity(mState.mGravity, width, height, getBounds(), outBounds);
-
-            // Sets the shader's scale matrix.
-            setShaderMatrix(mState.mShader, width, height, outBounds);
-        }
-
-        // Builds the convex path.
-        if ((mFlags & FLAG_PATH) != 0) {
-            mFlags &= ~FLAG_PATH;
-            mState.mPath.rewind();
-            getConvexPath(outBounds, mState.mPath);
-        }
+    /* package */ void computeDrawingBounds(Rect bounds, RectF outBounds) {
+        computeDrawingBounds(bounds, mState.mShader, mState.mPath, outBounds);
     }
 
     /**
@@ -86,15 +53,7 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
      * @param invalidatePath Whether the path for this drawable should be invalidated as well.
      */
     protected final void invalidateSelf(boolean invalidatePath) {
-        if (invalidatePath) {
-            mFlags |= FLAG_PATH;
-            mState.mPaint.setShader(mState.mShader);
-        } else {
-            mFlags &= ~FLAG_PATH;
-            mState.mPaint.setShader(null);
-        }
-
-        invalidateSelf();
+        invalidateSelf(mState.mShader, invalidatePath);
     }
 
     /**
@@ -106,17 +65,6 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
      * @param outPath The empty path to be build.
      */
     protected abstract void getConvexPath(RectF bounds, Path outPath);
-
-    /**
-     * Adds the <tt>FLAG_GRAVITY</tt> constant. If paint shader
-     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
-     */
-    private void applyGravity() {
-        mFlags |= FLAG_GRAVITY;
-        if (mState.mPaint.getShader() != null) {
-            mFlags |= FLAG_PATH;
-        }
-    }
 
     /**
      * Class <tt>ShapeGIFState</tt> is an implementation of a {@link ConstantState}.

@@ -17,6 +17,7 @@ import android.graphics.Matrix;
 import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Outline;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
@@ -52,6 +53,8 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     private static final int MIRRORED_MASK = 0xC0000000;
 
     /* --------------------- mFlags --------------------- */
+    private static final int FLAG_PATH = 0x20000000;
+
     /**
      * If set the drawable gravity has been changed.
      */
@@ -123,7 +126,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     public void setGravity(int gravity) {
         if (mState.mGravity != gravity) {
             mState.mGravity = gravity;
-            mFlags |= FLAG_GRAVITY;
+            applyGravity();
             invalidateSelf();
         }
     }
@@ -218,11 +221,12 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void getOutline(Outline outline) {
-        if (getBounds().isEmpty()) {
+        final Rect bounds = getBounds();
+        if (bounds.isEmpty()) {
             outline.setEmpty();
             outline.setAlpha(0);
         } else {
-            computeDrawingBounds(mBounds);
+            computeDrawingBounds(bounds, mBounds);
             outline.setAlpha(getAlpha() / 255.0f);
             getOutline(outline, mBounds);
         }
@@ -235,14 +239,15 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
 
     @Override
     public void draw(Canvas canvas) {
-        computeDrawingBounds(mBounds);
+        final Rect bounds = getBounds();
+        computeDrawingBounds(bounds, mBounds);
         switch (getAutoMirrored()) {
         case VERTICAL_MIRRORED:
-            draw(canvas, 0, getBounds().height(), 1.0f);
+            draw(canvas, 0, bounds.height(), 1.0f);
             break;
 
         case HORIZONTAL_MIRRORED:
-            draw(canvas, getBounds().width(), 0, -1.0f);
+            draw(canvas, bounds.width(), 0, -1.0f);
             break;
 
         default:
@@ -275,7 +280,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
 
     @Override
     protected void onBoundsChange(Rect bounds) {
-        mFlags |= FLAG_GRAVITY;
+        applyGravity();
     }
 
     /**
@@ -311,12 +316,24 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
      * Computes this drawable's drawing bounds to draw the content. The returned
      * <em>outBounds</em> may not equals to this drawable's bounds. <p>By default,
      * this returns bounds computed with this drawable's gravity and bounds.</p>
-     * @param outBounds The {@link RectF} to compute.
+     * @param bounds The drawable's bounds {@link Rect}.
+     * @param outBounds The drawing bounds {@link RectF} to compute.
      */
-    /* package */ void computeDrawingBounds(RectF outBounds) {
+    /* package */ void computeDrawingBounds(Rect bounds, RectF outBounds) {
         if ((mFlags & FLAG_GRAVITY) != 0) {
             mFlags &= ~FLAG_GRAVITY;
-            DrawUtils.applyGravity(mState.mGravity, getIntrinsicWidth(), getIntrinsicHeight(), getBounds(), outBounds);
+            DrawUtils.applyGravity(mState.mGravity, getIntrinsicWidth(), getIntrinsicHeight(), bounds, outBounds);
+        }
+    }
+
+    /**
+     * Adds the <tt>FLAG_GRAVITY</tt> constant. If paint shader
+     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
+     */
+    private void applyGravity() {
+        mFlags |= FLAG_GRAVITY;
+        if (mState.mPaint.getShader() != null) {
+            mFlags |= FLAG_PATH;
         }
     }
 
@@ -329,6 +346,77 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         canvas.scale(scale, -scale);
         draw(canvas, mBounds, mState.mPaint);
         canvas.restoreToCount(saveCount);
+    }
+
+    /* ----------------------- ShapeXXXDrawable API ----------------------- */
+
+    /**
+     * Defines by the <tt>ShapeGIFDrawable</tt> and <tt>ShapeBitmapDrawable</tt>.
+     */
+    /* package */ void getConvexPath(RectF bounds, Path outPath) {
+    }
+
+    /**
+     * Invalidates this drawable.
+     */
+    /* package */ final void invalidateSelf(Shader shader, boolean invalidatePath) {
+        if (invalidatePath) {
+            mFlags |= FLAG_PATH;
+            mState.mPaint.setShader(shader);
+        } else {
+            mFlags &= ~FLAG_PATH;
+            mState.mPaint.setShader(null);
+        }
+
+        invalidateSelf();
+    }
+
+    /**
+     * Called to get this drawable to populate the {@link Outline} that defines its drawing area.
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    /* package */ final void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
+        if (radii == null) {
+            outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
+        } else {
+            final float radius = radii[0];
+            if (radiusEquals(radii, 1, radius)) {
+                // Round rect all corner radii are equals, for efficiency, and to enable clipping.
+                outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
+            } else {
+                outline.setConvexPath(path);
+            }
+        }
+    }
+
+    /**
+     * Computes this drawable's drawing bounds to draw the content.
+     */
+    /* package */ final void computeDrawingBounds(Rect bounds, Shader shader, Path outPath, RectF outBounds) {
+        // Computes the drawing bounds.
+        if ((mFlags & FLAG_GRAVITY) != 0) {
+            mFlags &= ~FLAG_GRAVITY;
+            final int width  = getIntrinsicWidth();
+            final int height = getIntrinsicHeight();
+            DrawUtils.applyGravity(mState.mGravity, width, height, bounds, outBounds);
+
+            // Computes the scale value that map the source
+            // rectangle to the destination rectangle.
+            final RectF src = RectFPool.sInstance.obtain(0, 0, width, height);
+            final Matrix matrix = MatrixPool.sInstance.obtain();
+            matrix.setRectToRect(src, outBounds, ScaleToFit.FILL);
+            shader.setLocalMatrix(matrix);
+
+            RectFPool.sInstance.recycle(src);
+            MatrixPool.sInstance.recycle(matrix);
+        }
+
+        // Builds the convex path.
+        if ((mFlags & FLAG_PATH) != 0) {
+            mFlags &= ~FLAG_PATH;
+            outPath.rewind();
+            getConvexPath(outBounds, outPath);
+        }
     }
 
     /**
@@ -345,22 +433,6 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         }
 
         return true;
-    }
-
-    /**
-     * Sets the {@link Shader}'s local matrix.
-     */
-    /* package */ static void setShaderMatrix(Shader shader, int width, int height, RectF bounds) {
-        // Computes the scale value that map the source
-        // rectangle to the destination rectangle.
-        final RectF src = RectFPool.sInstance.obtain(0, 0, width, height);
-        final Matrix matrix = MatrixPool.sInstance.obtain();
-        matrix.setRectToRect(src, bounds, ScaleToFit.FILL);
-
-        // Sets the shader scale matrix.
-        shader.setLocalMatrix(matrix);
-        RectFPool.sInstance.recycle(src);
-        MatrixPool.sInstance.recycle(matrix);
     }
 
     /**

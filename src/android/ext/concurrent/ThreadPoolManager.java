@@ -168,6 +168,11 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         @Override
+        public final boolean cancel(boolean mayInterruptIfRunning) {
+            return cancel(mayInterruptIfRunning, true);
+        }
+
+        @Override
         public final boolean isCancelled() {
             return (mState.get() == CANCELLED);
         }

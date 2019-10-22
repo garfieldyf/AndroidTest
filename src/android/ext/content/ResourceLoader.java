@@ -67,7 +67,7 @@ import android.util.Log;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ResourceLoader<Key, Result> extends Loader<Key> {
-    private static final int MAX_POOL_SIZE = 8;
+    private static final int MAX_POOL_SIZE = 16;
 
     /**
      * The application <tt>Context</tt>.

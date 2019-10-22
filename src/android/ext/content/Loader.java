@@ -195,13 +195,7 @@ public abstract class Loader<Key> implements Factory<Task> {
             mState = new AtomicInteger(RUNNING);
         }
 
-        /**
-         * Attempts to stop execution of this task. This attempt will fail if this task
-         * has already completed, or already been cancelled.
-         * @param mayInterruptIfRunning <tt>true</tt> if the thread executing this task
-         * should be interrupted, <tt>false</tt> otherwise.
-         * @return <tt>true</tt> if this task has been cancelled, <tt>false</tt> otherwise.
-         */
+        @Override
         public final boolean cancel(boolean mayInterruptIfRunning) {
             final boolean result = mState.compareAndSet(RUNNING, CANCELLED);
             if (result && mayInterruptIfRunning && mRunner != null) {

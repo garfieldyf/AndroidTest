@@ -1389,6 +1389,11 @@ public final class FileUtils {
         public boolean isCancelled() {
             return false;
         }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
     }
 
     /**

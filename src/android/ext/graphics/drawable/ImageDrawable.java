@@ -351,7 +351,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     /* ----------------------- ShapeXXXDrawable API ----------------------- */
 
     /**
-     * Defines by the <tt>ShapeGIFDrawable</tt> and <tt>ShapeBitmapDrawable</tt>.
+     * Defines by the <tt>ShapeXXXDrawable</tt>.
      */
     /* package */ void getConvexPath(RectF bounds, Path outPath) {
     }

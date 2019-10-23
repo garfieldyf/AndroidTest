@@ -80,7 +80,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
             if ((flags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
                 final Value value = mCache.get(key);
                 if (value != null) {
-                    bindValue(binder, key, params, target, value, flags | Binder.STATE_LOAD_FROM_CACHE);
+                    bindValue(binder, key, params, target, value, flags);
                     return;
                 }
             }
@@ -250,13 +250,14 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
 
         @Override
         public void onPostExecute(Object value) {
+            final Params[] params = (Params[])mParams;
             if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
-                mBinder.bindValue(mKey, (Params[])mParams, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
+                mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
             // Recycles this task to avoid potential memory
             // leaks, Even the loader has been shut down.
-            onRecycle((Params[])mParams);
+            onRecycle(params);
             clearForRecycle();
             mKey = null;
             mTarget = null;
@@ -280,11 +281,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Callback interface used to bind the value to the target.
      */
     public static interface Binder<Key, Params, Value> {
-        /**
-         * Indicates the value load from memory cache.
-         */
-        int STATE_LOAD_FROM_CACHE = 0x40000000;
-
         /**
          * Indicates the value load from a background thread.
          */

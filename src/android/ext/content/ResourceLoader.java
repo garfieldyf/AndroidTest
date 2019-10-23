@@ -266,7 +266,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         @Override
         public Object doInBackground(Object params) {
             waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mLoadParams, mParams) : null);
+            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mLoadParams, params) : null);
         }
 
         @Override

@@ -67,7 +67,7 @@ public final class TransitionBinder implements Binder<Object, Object, Object> {
     }
 
     private void setViewImage(ImageView view, Drawable image, Object[] params, int state) {
-        if ((state & STATE_LOAD_FROM_CACHE) != 0) {
+        if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
             view.setImageDrawable(image);
         } else {
             final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[PLACEHOLDER_INDEX], image });

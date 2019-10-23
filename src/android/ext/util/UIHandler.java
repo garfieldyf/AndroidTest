@@ -91,11 +91,11 @@ public final class UIHandler extends Handler implements Executor {
         }
     }
 
-    // The Task messages
+    // The Task messages.
     private static final int MESSAGE_PROGRESS = 0xEEEEEEEE;
     private static final int MESSAGE_FINISHED = 0xEFEFEFEF;
 
-    // The DatabaseHandler messages
+    // The DatabaseHandler messages.
     private static final int MESSAGE_DATABASE_MESSAGE = 0xFEFEFEFE;
 
     /**

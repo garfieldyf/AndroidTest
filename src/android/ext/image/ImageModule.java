@@ -165,6 +165,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     /**
      * Temporarily stops all actively running tasks with the specified image loader.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #resume(int)
      */
@@ -178,6 +179,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
 
     /**
      * Resumes all actively running tasks associated with the specified image loader.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #pause(int)
      */

@@ -2,16 +2,13 @@ package android.ext.json;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
-import android.ext.util.ArrayUtils;
 
 /**
  * Class JSONArray
  * @author Garfield
  */
-public class JSONArray implements Iterable<Object> {
+public class JSONArray {
     /* package */ final List<Object> values;
 
     /**
@@ -373,37 +370,11 @@ public class JSONArray implements Iterable<Object> {
     }
 
     /**
-     * Sorts this array using the given <em>comparator</em>. If the <em>comparator</em>
-     * is <tt>null</tt> sorts this array in ascending natural order.
-     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
-     * @see #sort(int, int, Comparator)
+     * Returns an unmodifiable {@link List} of the values contained in this array.
+     * @return An unmodifiable <tt>List</tt> of the values.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public <T> void sort(Comparator<? super T> comparator) {
-        if (comparator == null) {
-            Collections.sort((List)values);
-        } else {
-            Collections.sort((List)values, comparator);
-        }
-    }
-
-    /**
-     * Sorts the specified range in this array using the given <em>comparator</em>. If
-     * the <em>comparator</em> is <tt>null</tt> sorts this array in ascending natural order.
-     * @param start The inclusive start index in this array.
-     * @param end The exclusive end index in this array.
-     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
-     * @see #sort(Comparator)
-     * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > length()</tt>
-     */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-    public <T> void sort(int start, int end, Comparator<? super T> comparator) {
-        ArrayUtils.sort((List)values, start, end, comparator);
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
-        return values.iterator();
+    public List<Object> values() {
+        return Collections.unmodifiableList(values);
     }
 
     @Override

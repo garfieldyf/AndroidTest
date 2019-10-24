@@ -1,10 +1,8 @@
 package android.ext.json;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import android.ext.util.DebugUtils;
 
 /**
@@ -296,27 +294,11 @@ public class JSONObject {
     }
 
     /**
-     * Returns a {@link Set} of the property names in this object.
-     * @return A <tt>Set</tt> of the property names.
+     * Returns an unmodifiable {@link Map} of the name/value mappings contained in this object.
+     * @return An unmodifiable <tt>Map</tt> of the name/value mappings.
      */
-    public Set<String> names() {
-        return values.keySet();
-    }
-
-    /**
-     * Returns a {@link Collection} of the values contained in this object.
-     * @return A <tt>Collection</tt> of the values.
-     */
-    public Collection<Object> values() {
-        return values.values();
-    }
-
-    /**
-     * Returns a {@link Set} of the name/value entries in this object.
-     * @return A <tt>Set</tt> of the name/value entries.
-     */
-    public Set<Entry<String, Object>> entries() {
-        return values.entrySet();
+    public Map<String, Object> values() {
+        return Collections.unmodifiableMap(values);
     }
 
     @Override

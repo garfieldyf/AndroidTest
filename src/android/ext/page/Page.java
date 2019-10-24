@@ -21,8 +21,7 @@ public interface Page<E> {
 
     /**
      * Sets the item at the specified <em>position</em> in this page with
-     * the specified <em>value</em>. This operation does not change the
-     * item count of this page.
+     * the specified <em>value</em>.
      * @param position The position of the item.
      * @param value The value to set.
      * @return The previous item at the specified <em>position</em>.

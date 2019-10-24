@@ -65,7 +65,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * <em>(Params[])null</em> instead of allocating an empty array.
      * @see #load(Key, Object, Binder)
      */
-    public final void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
+    public void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null, "target == null");
         DebugUtils.__checkError(binder == null, "binder == null");
@@ -115,7 +115,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @return The result, or <tt>null</tt> if load failed or this loader was shut down.
      * @see #loadSync(Key)
      */
-    public final Value loadSync(Key key, int flags, Params... params) {
+    public Value loadSync(Key key, int flags, Params... params) {
         DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");
         if (key == null || mState == SHUTDOWN) {
             return null;

@@ -578,7 +578,7 @@ public final class FileUtils {
      * Wrap the specified <em>cancelable</em>, handling <tt>null Cancelable</tt>.
      */
     public static Cancelable wrap(Cancelable cancelable) {
-        return (cancelable != null ? cancelable : CancelableImpl.sInstance);
+        return (cancelable != null ? cancelable : MockCancelable.sInstance);
     }
 
     /**
@@ -1380,10 +1380,10 @@ public final class FileUtils {
     }
 
     /**
-     * Class <tt>CancelableImpl</tt> is an implementation of a {@link Cancelable}.
+     * Class <tt>MockCancelable</tt> is an implementation of a {@link Cancelable}.
      */
-    private static final class CancelableImpl implements Cancelable {
-        public static final Cancelable sInstance = new CancelableImpl();
+    private static final class MockCancelable implements Cancelable {
+        public static final Cancelable sInstance = new MockCancelable();
 
         @Override
         public boolean isCancelled() {

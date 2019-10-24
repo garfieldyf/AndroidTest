@@ -141,7 +141,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     /**
      * Class <tt>BitmapState</tt> is an implementation of a {@link ConstantState}.
      */
-    public static abstract class BitmapState extends ImageState {
+    public static abstract class BitmapState extends ImageDrawable.ImageState {
         /* package */ Bitmap mBitmap;
         /* package */ Shader mShader;
         /* package */ final Path mPath;

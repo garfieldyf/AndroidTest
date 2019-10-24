@@ -174,7 +174,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
     }
 
     /**
-     * Decodes an image from the specified <em>url</em>
+     * Downloads an image from the specified <em>url</em>
      * @param url The url to download.
      * @param tempBuffer The temporary storage to use for downloading.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.

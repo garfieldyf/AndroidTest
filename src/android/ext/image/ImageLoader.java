@@ -308,7 +308,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * Equivalent to calling <tt>flags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
          * @return This request.
          * @see #flags(int)
-         * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE FLAG_IGNORE_MEMORY_CACHE
+         * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE
          */
         public final LoadRequest skipMemory() {
             mFlags |= FLAG_IGNORE_MEMORY_CACHE;

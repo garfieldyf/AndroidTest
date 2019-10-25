@@ -1,6 +1,6 @@
-package android.ext.widget;
+package android.ext.temp;
 
-import android.ext.temp.AnimatorManager;
+import android.ext.widget.FocusManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;

@@ -1,7 +1,8 @@
-package android.ext.widget;
+package android.ext.temp;
 
 import android.database.Cursor;
 import android.ext.util.FileUtils;
+import android.ext.widget.CursorObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.provider.BaseColumns;

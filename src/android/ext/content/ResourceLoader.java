@@ -21,8 +21,8 @@ import android.util.Log;
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
  * <li><tt>Result</tt>, The load result type.</li></ol>
  * <h3>Usage</h3>
- * <p>Here is an example of subclassing:</p><pre>
- * public static class JSONLoadParams implements LoadParams&lt;String, JSONObject&gt; {
+ * <p>Here is an example:</p><pre>
+ * private static class JSONLoadParams implements LoadParams&lt;String, JSONObject&gt; {
  *     {@code @Override}
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
@@ -42,10 +42,10 @@ import android.util.Log;
  *             result = newDownloadRequest(context, url).download(cancelable);
  *         } else if (cacheFile.exists()) {
  *             // Parse the JSON data from the cache file.
- *             result = JsonUtils.parse(context, cacheFile, cancelable);
+ *             result = JSONUtils.parse(context, cacheFile, cancelable);
  *         } else {
  *             // If the cache file not exists, parse the JSON data from the "assets" file.
- *             result = JsonUtils.parse(context, UriUtils.getAssetUri("cacheFile.json"), cancelable);
+ *             result = JSONUtils.parse(context, UriUtils.getAssetUri("cacheFile.json"), cancelable);
  *             // or return null
  *             return null;
  *         }
@@ -59,15 +59,27 @@ import android.util.Log;
  *     }
  * }
  *
+ * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;String, JSONObject&gt; {
+ *     {@code @Override}
+ *     public void onLoadComplete(String key, LoadParams&lt;String, JSONObject&gt; loadParams, Object cookie, JSONObject result) {
+ *         if (result != null) {
+ *             // Loading succeeded, update UI.
+ *         } else {
+ *             // 1、If the cache file is hit, do not update UI.
+ *             // 2、Loading failed, show error or empty UI.
+ *         }
+ *     }
+ * }
+ *
  * private ResourceLoader&lt;String, JSONObject&gt; mLoader;
  *
  * mLoader = new ResourceLoader&lt;String, JSONObject&gt;(activity, executor);
- * mLoader.load(url, new JSONLoadParams(), listener, cookie);</pre>
+ * mLoader.load(url, new JSONLoadParams(), new LoadCompleteListener(), cookie);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ResourceLoader<Key, Result> extends Loader<Key> {
-    private static final int MAX_POOL_SIZE = 16;
+    private static final int MAX_POOL_SIZE = 8;
 
     /**
      * The application <tt>Context</tt>.
@@ -226,10 +238,10 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
         if (statusCode == HTTP_OK && !isTaskCancelled(task)) {
-            // If the cache file is hit and the cache file's contents are equal the temp
+            // If the cache file is hit and the cache file's contents are equal the download
             // file's contents. Deletes the temp file and cancel the task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 task.cancel(false);
                 return null;

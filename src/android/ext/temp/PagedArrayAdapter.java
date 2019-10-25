@@ -1,16 +1,16 @@
 package android.ext.temp;
 
 import android.ext.page.Page;
-import android.ext.page.PagedArray;
+import android.ext.page.PagedList;
 import android.ext.page.Pages;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 
 public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapter<VH> {
-    private final PagedArray<E> mPages;
+    private final PagedList<E> mPages;
 
     public PagedArrayAdapter(int capacity) {
-        mPages = new PagedArray<E>(capacity);
+        mPages = new PagedList<E>(capacity);
     }
 
     @Override

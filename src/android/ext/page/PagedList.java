@@ -9,11 +9,11 @@ import android.ext.util.DebugUtils;
 import android.util.Printer;
 
 /**
- * Class <tt>PagedArray</tt> allows to adding data by page.
+ * Class <tt>PagedList</tt> allows to adding data by page.
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public class PagedArray<E> implements Cloneable {
+public class PagedList<E> implements Cloneable {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
@@ -25,20 +25,20 @@ public class PagedArray<E> implements Cloneable {
 
     /**
      * Constructor
-     * @see #PagedArray(int)
-     * @see #PagedArray(Collection)
+     * @see #PagedList(int)
+     * @see #PagedList(Collection)
      */
-    public PagedArray() {
+    public PagedList() {
         this(0);
     }
 
     /**
      * Constructor
-     * @param capacity The initial capacity of this <tt>PagedArray</tt>.
-     * @see #PagedArray()
-     * @see #PagedArray(Collection)
+     * @param capacity The initial capacity of this <tt>PagedList</tt>.
+     * @see #PagedList()
+     * @see #PagedList(Collection)
      */
-    public PagedArray(int capacity) {
+    public PagedList(int capacity) {
         DebugUtils.__checkError(capacity < 0, "capacity < 0");
         if (capacity == 0) {
             mPages = EMPTY_OBJECT_ARRAY;
@@ -52,10 +52,10 @@ public class PagedArray<E> implements Cloneable {
     /**
      * Constructor
      * @param pages The collection of {@link Page}s to add.
-     * @see #PagedArray()
-     * @see #PagedArray(int)
+     * @see #PagedList()
+     * @see #PagedList(int)
      */
-    public PagedArray(Collection<? extends Page<? extends E>> pages) {
+    public PagedList(Collection<? extends Page<? extends E>> pages) {
         this(pages.size());
 
         // Adds the page collection to mPages.
@@ -67,9 +67,9 @@ public class PagedArray<E> implements Cloneable {
     }
 
     @Override
-    public PagedArray<E> clone() {
+    public PagedList<E> clone() {
         try {
-            final PagedArray<E> result = (PagedArray<E>)super.clone();
+            final PagedList<E> result = (PagedList<E>)super.clone();
             result.mPages = mPages.clone();
             result.mPositions = mPositions.clone();
             return result;
@@ -79,7 +79,7 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Removes all items from this <tt>PagedArray</tt>, leaving it empty.
+     * Removes all items from this <tt>PagedList</tt>, leaving it empty.
      * @see #getItemCount()
      */
     public void clear() {
@@ -91,8 +91,8 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Returns the number of items in this <tt>PagedArray</tt>.
-     * @return The number of items in this <tt>PagedArray</tt>.
+     * Returns the number of items in this <tt>PagedList</tt>.
+     * @return The number of items in this <tt>PagedList</tt>.
      * @see #getItem(int)
      */
     public int getItemCount() {
@@ -100,7 +100,7 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Returns the item at the specified <em>position</em> in this <tt>PagedArray</tt>.
+     * Returns the item at the specified <em>position</em> in this <tt>PagedList</tt>.
      * @param position The index of the item.
      * @return The item at the specified <em>position</em>.
      * @see #setItem(int, E)
@@ -111,7 +111,7 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Sets the item at the specified <em>position</em> in this <tt>PagedArray</tt>
+     * Sets the item at the specified <em>position</em> in this <tt>PagedList</tt>
      * with the specified <em>value</em>.
      * @param position The index of the item.
      * @param value The value to set.
@@ -124,8 +124,8 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Returns the number of pages in this <tt>PagedArray</tt>.
-     * @return The number of pages in this <tt>PagedArray</tt>.
+     * Returns the number of pages in this <tt>PagedList</tt>.
+     * @return The number of pages in this <tt>PagedList</tt>.
      * @see #getPage(int)
      */
     public int getPageCount() {
@@ -133,7 +133,7 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Returns the {@link Page} at the specified <em>pageIndex</em> in this <tt>PagedArray</tt>.
+     * Returns the {@link Page} at the specified <em>pageIndex</em> in this <tt>PagedList</tt>.
      * @param pageIndex The index of the page.
      * @return The {@link Page} at the specified <em>pageIndex</em>.
      * @see #getPageCount()
@@ -146,7 +146,7 @@ public class PagedArray<E> implements Cloneable {
 
     /**
      * Replaces the page at the specified <em>pageIndex</em> in this
-     * <tt>PagedArray</tt> with the specified <em>page</em>.
+     * <tt>PagedList</tt> with the specified <em>page</em>.
      * @param pageIndex The index at which to put the <em>page</em>.
      * @param page The {@link Page} to put.
      * @return The previous <tt>Page</tt> at the <em>pageIndex</em>.
@@ -161,7 +161,7 @@ public class PagedArray<E> implements Cloneable {
         final int countDelta = page.getCount() - oldPage.getCount();
         if (countDelta != 0) {
             mItemCount += countDelta;
-            DebugUtils.__checkError(mItemCount < 0, "Error: the PagedArray's item count < 0");
+            DebugUtils.__checkError(mItemCount < 0, "Error: the PagedList's item count < 0");
             computePositions(pageIndex);
         }
 
@@ -169,7 +169,7 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Adds the specified <em>page</em> at the end of this <tt>PagedArray</tt>.
+     * Adds the specified <em>page</em> at the end of this <tt>PagedList</tt>.
      * @param page The {@link Page} to add.
      * @see #addPage(int, Page)
      */
@@ -187,9 +187,9 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Inserts the specified <em>page</em> into this <tt>PagedArray</tt> at the specified <em>pageIndex</em>. The <em>page</em>
+     * Inserts the specified <em>page</em> into this <tt>PagedList</tt> at the specified <em>pageIndex</em>. The <em>page</em>
      * is inserted before the current page at the specified <em>pageIndex</em>. If the <em>pageIndex</em> is equal to the page
-     * count of this <tt>PagedArray</tt>, the <em>page</em> is added at the end.
+     * count of this <tt>PagedList</tt>, the <em>page</em> is added at the end.
      * @param pageIndex The index at which to insert.
      * @param page The {@link Page} to add.
      * @see #addPage(Page)
@@ -216,9 +216,9 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Removes the page at the specified <em>pageIndex</em> from this <tt>PagedArray</tt>.
+     * Removes the page at the specified <em>pageIndex</em> from this <tt>PagedList</tt>.
      * @param pageIndex The index of the page to remove.
-     * @return The start position of the removed page in this <tt>PagedArray</tt>.
+     * @return The start position of the removed page in this <tt>PagedList</tt>.
      */
     public int removePage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex - " + pageIndex + ", pageCount = " + mPageCount);
@@ -228,8 +228,8 @@ public class PagedArray<E> implements Cloneable {
         mPages[mPageCount] = null;  // Prevent memory leak.
 
         // Computes all pages start position from the removed page index.
-        DebugUtils.__checkError(mItemCount < 0, "Error: the PagedArray's item count < 0");
-        DebugUtils.__checkError(mPageCount < 0, "Error: the PagedArray's page count < 0");
+        DebugUtils.__checkError(mItemCount < 0, "Error: the PagedList's item count < 0");
+        DebugUtils.__checkError(mPageCount < 0, "Error: the PagedList's page count < 0");
         return computePositions(pageIndex);
     }
 
@@ -238,7 +238,7 @@ public class PagedArray<E> implements Cloneable {
      * <p>The returned combined position:
      * <li>bit &nbsp;&nbsp;0-31 : Lower 32 bits of the index of the item in the page.
      * <li>bit 32-63 : Higher 32 bits of the index of the page.</p>
-     * @param position The position within this <tt>PagedArray</tt>.
+     * @param position The position within this <tt>PagedList</tt>.
      * @return The combined position of the page.
      * @see #getPositionForPage(int)
      * @see Pages#getOriginalPage(long)
@@ -257,9 +257,9 @@ public class PagedArray<E> implements Cloneable {
 
     /**
      * Given the index of a page within the array of pages, returns the starting
-     * position of that page within this <tt>PagedArray</tt>.
+     * position of that page within this <tt>PagedList</tt>.
      * @param pageIndex The index of the page.
-     * @return The starting position of that page within this <tt>PagedArray</tt>.
+     * @return The starting position of that page within this <tt>PagedList</tt>.
      * @see #getPageForPosition(int)
      */
     public int getPositionForPage(int pageIndex) {
@@ -268,17 +268,17 @@ public class PagedArray<E> implements Cloneable {
     }
 
     /**
-     * Returns a new array containing all items contained in this <tt>PagedArray</tt>.
-     * @return An array of the items from this <tt>PagedArray</tt>.
+     * Returns a new array containing all items contained in this <tt>PagedList</tt>.
+     * @return An array of the items from this <tt>PagedList</tt>.
      */
     public Object[] toArray() {
         return copyTo(new Object[mItemCount]);
     }
 
     /**
-     * Returns an array containing all items contained in this <tt>PagedArray</tt>.
+     * Returns an array containing all items contained in this <tt>PagedList</tt>.
      * @param contents The array.
-     * @return An array of the items from this <tt>PagedArray</tt>.
+     * @return An array of the items from this <tt>PagedList</tt>.
      */
     public E[] toArray(E[] contents) {
         if (contents.length < mItemCount) {

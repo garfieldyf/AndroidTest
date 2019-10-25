@@ -12,15 +12,15 @@ import android.os.Process;
 import android.util.Log;
 
 /**
- * Class <tt>AsyncResourceTask</tt> allows to load the resource on a background thread
+ * Class <tt>ResourceTask</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>AsyncResourceTask's generic types</h3>
+ * <h3>ResourceTask's generic types</h3>
  * <p>The two types used by a task are the following:</p>
  * <ol><li><tt>Params</tt>, The type of the parameters sent to the task.</li>
  * <li><tt>Result</tt>, The type of the result of the task.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * private static class JSONTask extends AsyncResourceTask&lt;String, JSONObject&gt; {
+ * private static class JSONTask extends ResourceTask&lt;String, JSONObject&gt; {
  *     public JSONTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
@@ -44,10 +44,10 @@ import android.util.Log;
  *             result = newDownloadRequest(urls).download(this);
  *         } else if (cacheFile.exists()) {
  *             // Parse the JSON data from the cache file.
- *             result = JsonUtils.parse(mContext, cacheFile, this);
+ *             result = JSONUtils.parse(mContext, cacheFile, this);
  *         } else {
  *             // If the cache file not exists, parse the JSON data from the "assets" file.
- *             result = JsonUtils.parse(mContext, UriUtils.getAssetUri("cacheFile.json"), this);
+ *             result = JSONUtils.parse(mContext, UriUtils.getAssetUri("cacheFile.json"), this);
  *             // or return null
  *             return null;
  *         }
@@ -71,7 +71,8 @@ import android.util.Log;
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
- *             // Loading failed, show error or empty UI.
+ *             // 1、If the cache file is hit, do not update UI.
+ *             // 2、Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -79,7 +80,7 @@ import android.util.Log;
  * new JSONTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
+public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -88,18 +89,18 @@ public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Par
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @see #AsyncResourceTask(Activity)
+     * @see #ResourceTask(Activity)
      */
-    public AsyncResourceTask(Context context) {
+    public ResourceTask(Context context) {
         mContext = context.getApplicationContext();
     }
 
     /**
      * Constructor
      * @param activity The owner <tt>Activity</tt>.
-     * @see #AsyncResourceTask(Context)
+     * @see #ResourceTask(Context)
      */
-    public AsyncResourceTask(Activity ownerActivity) {
+    public ResourceTask(Activity ownerActivity) {
         super(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
@@ -143,7 +144,7 @@ public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Par
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = parseResult(params, null);
-                DebugUtils.__checkStopMethodTracing("AsyncResourceTask", "parseResult");
+                DebugUtils.__checkStopMethodTracing("ResourceTask", "parseResult");
             } else {
                 DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(params, cacheFile);
@@ -164,7 +165,7 @@ public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Par
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing("AsyncResourceTask", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache");
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -183,10 +184,10 @@ public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Par
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         if (statusCode == HTTP_OK && !isCancelled()) {
-            // If the cache file is hit and the cache file's contents are equal the temp
+            // If the cache file is hit and the cache file's contents are equal the download
             // file's contents. Deletes the temp file and cancel this task, do not update UI.
             if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "AsyncResourceTask", "The cache file's contents are equal the downloaded file's contents, do not update UI.");
+                DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI.");
                 FileUtils.deleteFiles(tempFile, false);
                 cancel(false);
                 return null;
@@ -195,7 +196,7 @@ public abstract class AsyncResourceTask<Params, Result> extends AbsAsyncTask<Par
             // Parse the temp file and save it to the cache file.
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing("AsyncResourceTask", "download");
+            DebugUtils.__checkStopMethodTracing("ResourceTask", "download");
             if (result != null) {
                 FileUtils.moveFile(tempFile, cacheFile);
                 return result;

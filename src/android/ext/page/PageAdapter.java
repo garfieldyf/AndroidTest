@@ -106,12 +106,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
         final int pageIndex  = Pages.getOriginalPage(combinedPosition);
-        final Page<E> result = getPage(pageIndex);
+        final Page<E> page = getPage(pageIndex);
         if (mPrefetchDistance > 0) {
             prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
         }
 
-        return (result != null ? result.getItem((int)combinedPosition) : null);
+        return (page != null ? page.getItem((int)combinedPosition) : null);
     }
 
     /**
@@ -167,15 +167,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("setItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
 
-        E result = null;
+        E oldValue = null;
         final long combinedPosition = getPageForPosition(position);
         final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
         if (page != null) {
-            result = page.setItem((int)combinedPosition, value);
+            oldValue = page.setItem((int)combinedPosition, value);
             postNotifyItemRangeChanged(position, 1, payload);
         }
 
-        return result;
+        return oldValue;
     }
 
     /**
@@ -191,8 +191,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("peekItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final Page<E> result = mPageCache.get(Pages.getOriginalPage(combinedPosition));
-        return (result != null ? result.getItem((int)combinedPosition) : null);
+        final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
+        return (page != null ? page.getItem((int)combinedPosition) : null);
     }
 
     /**
@@ -232,8 +232,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public Page<E> getPage(int pageIndex) {
         DebugUtils.__checkUIThread("getPage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
-        Page<E> result = mPageCache.get(pageIndex);
-        if (result == null && !mLoadStates.get(pageIndex)) {
+        Page<E> page = mPageCache.get(pageIndex);
+        if (page == null && !mLoadStates.get(pageIndex)) {
             // Computes the startPosition and itemCount to load.
             final int startPosition, itemCount;
             if (pageIndex == 0) {
@@ -246,15 +246,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
             // Loads the page data and marks the page loading state.
             mLoadStates.set(pageIndex);
-            result = loadPage(pageIndex, startPosition, itemCount);
-            if (Pages.getCount(result) > 0) {
+            page = loadPage(pageIndex, startPosition, itemCount);
+            if (Pages.getCount(page) > 0) {
                 // Clears the page loading state.
                 mLoadStates.clear(pageIndex);
-                mPageCache.put(pageIndex, result);
+                mPageCache.put(pageIndex, page);
             }
         }
 
-        return result;
+        return page;
     }
 
     /**

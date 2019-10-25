@@ -1,27 +1,31 @@
 package android.ext.page;
 
 import java.lang.reflect.Array;
+import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
+import java.util.Iterator;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
 
 /**
- * Class <tt>PagedList</tt> allows to adding data by page.
+ * Class <tt>PagedList</tt> allows to adding data by page. This class
+ * does not support adding or removing the item, but the items can be
+ * set. Setting an item modifies the underlying array.
  * @author Garfield
  */
 @SuppressWarnings("unchecked")
-public class PagedList<E> implements Cloneable {
+public class PagedList<E> extends AbstractList<E> implements Cloneable {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
     private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
 
-    private int mItemCount;
-    private int mPageCount;
-    private Object[] mPages;
-    private int[] mPositions;
+    /* package */ int mItemCount;
+    /* package */ int mPageCount;
+    /* package */ Object[] mPages;
+    /* package */ int[] mPositions;
 
     /**
      * Constructor
@@ -67,6 +71,42 @@ public class PagedList<E> implements Cloneable {
     }
 
     @Override
+    public void clear() {
+        if (mItemCount > 0) {
+            Arrays.fill(mPages, 0, mPageCount, null);
+            mPageCount = 0;
+            mItemCount = 0;
+        }
+    }
+
+    @Override
+    public int size() {
+        return mItemCount;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return (mItemCount == 0);
+    }
+
+    @Override
+    public E get(int position) {
+        final long combinedPosition = getPageForPosition(position);
+        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).getItem((int)combinedPosition);
+    }
+
+    @Override
+    public E set(int position, E value) {
+        final long combinedPosition = getPageForPosition(position);
+        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).setItem((int)combinedPosition, value);
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new ListIterator();
+    }
+
+    @Override
     public PagedList<E> clone() {
         try {
             final PagedList<E> result = (PagedList<E>)super.clone();
@@ -78,49 +118,22 @@ public class PagedList<E> implements Cloneable {
         }
     }
 
-    /**
-     * Removes all items from this <tt>PagedList</tt>, leaving it empty.
-     * @see #getItemCount()
-     */
-    public void clear() {
-        if (mItemCount > 0) {
-            Arrays.fill(mPages, 0, mPageCount, null);
-            mPageCount = 0;
-            mItemCount = 0;
+    @Override
+    public Object[] toArray() {
+        return copyTo(new Object[mItemCount]);
+    }
+
+    @Override
+    public <T> T[] toArray(T[] contents) {
+        if (contents.length < mItemCount) {
+            contents = (T[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
         }
-    }
 
-    /**
-     * Returns the number of items in this <tt>PagedList</tt>.
-     * @return The number of items in this <tt>PagedList</tt>.
-     * @see #getItem(int)
-     */
-    public int getItemCount() {
-        return mItemCount;
-    }
+        if (copyTo(contents).length > mItemCount) {
+            contents[mItemCount] = null;
+        }
 
-    /**
-     * Returns the item at the specified <em>position</em> in this <tt>PagedList</tt>.
-     * @param position The index of the item.
-     * @return The item at the specified <em>position</em>.
-     * @see #setItem(int, E)
-     */
-    public E getItem(int position) {
-        final long combinedPosition = getPageForPosition(position);
-        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).getItem((int)combinedPosition);
-    }
-
-    /**
-     * Sets the item at the specified <em>position</em> in this <tt>PagedList</tt>
-     * with the specified <em>value</em>.
-     * @param position The index of the item.
-     * @param value The value to set.
-     * @return The previous item at the specified <em>position</em>.
-     * @see #getItem(int)
-     */
-    public E setItem(int position, E value) {
-        final long combinedPosition = getPageForPosition(position);
-        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).setItem((int)combinedPosition, value);
+        return contents;
     }
 
     /**
@@ -161,7 +174,7 @@ public class PagedList<E> implements Cloneable {
         final int countDelta = page.getCount() - oldPage.getCount();
         if (countDelta != 0) {
             mItemCount += countDelta;
-            DebugUtils.__checkError(mItemCount < 0, "Error: the PagedList's item count < 0");
+            DebugUtils.__checkError(mItemCount < 0, "Error: The PagedList's size < 0");
             computePositions(pageIndex);
         }
 
@@ -222,14 +235,13 @@ public class PagedList<E> implements Cloneable {
      */
     public int removePage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex - " + pageIndex + ", pageCount = " + mPageCount);
-        final Page<?> oldPage = (Page<?>)mPages[pageIndex];
-        mItemCount -= oldPage.getCount();
+        mItemCount -= ((Page<?>)mPages[pageIndex]).getCount();
         System.arraycopy(mPages, pageIndex + 1, mPages, pageIndex, --mPageCount - pageIndex);
         mPages[mPageCount] = null;  // Prevent memory leak.
 
         // Computes all pages start position from the removed page index.
-        DebugUtils.__checkError(mItemCount < 0, "Error: the PagedList's item count < 0");
-        DebugUtils.__checkError(mPageCount < 0, "Error: the PagedList's page count < 0");
+        DebugUtils.__checkError(mItemCount < 0, "Error: The PagedList's size < 0");
+        DebugUtils.__checkError(mPageCount < 0, "Error: The PagedList's page count < 0");
         return computePositions(pageIndex);
     }
 
@@ -245,7 +257,7 @@ public class PagedList<E> implements Cloneable {
      * @see Pages#getOriginalPosition(long)
      */
     public long getPageForPosition(int position) {
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", size = " + mItemCount);
         int pageIndex = Arrays.binarySearch(mPositions, 0, mPageCount, position);
         if (pageIndex < 0) {
             pageIndex = -pageIndex - 2;
@@ -267,36 +279,11 @@ public class PagedList<E> implements Cloneable {
         return mPositions[pageIndex];
     }
 
-    /**
-     * Returns a new array containing all items contained in this <tt>PagedList</tt>.
-     * @return An array of the items from this <tt>PagedList</tt>.
-     */
-    public Object[] toArray() {
-        return copyTo(new Object[mItemCount]);
-    }
-
-    /**
-     * Returns an array containing all items contained in this <tt>PagedList</tt>.
-     * @param contents The array.
-     * @return An array of the items from this <tt>PagedList</tt>.
-     */
-    public E[] toArray(E[] contents) {
-        if (contents.length < mItemCount) {
-            contents = (E[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
-        }
-
-        if (copyTo(contents).length > mItemCount) {
-            contents[mItemCount] = null;
-        }
-
-        return contents;
-    }
-
     @SuppressWarnings("resource")
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(100);
         final Formatter formatter  = new Formatter(result);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ itemCount = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ size = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
 
         for (int i = 0; i < mPageCount; ++i) {
             final Page<?> page = (Page<?>)mPages[i];
@@ -309,15 +296,15 @@ public class PagedList<E> implements Cloneable {
         }
     }
 
-    private Object[] copyTo(Object[] result) {
+    private Object[] copyTo(Object[] contents) {
         for (int i = 0, index = 0; i < mPageCount; ++i) {
             final Page<?> page = (Page<?>)mPages[i];
             for (int j = 0, count = page.getCount(); j < count; ++j) {
-                result[index++] = page.getItem(j);
+                contents[index++] = page.getItem(j);
             }
         }
 
-        return result;
+        return contents;
     }
 
     private int computePositions(int pageIndex) {
@@ -331,9 +318,41 @@ public class PagedList<E> implements Cloneable {
     }
 
     private Object[] newPageArray(int pageIndex, int newLength) {
-        final Object[] result = new Object[newLength];
-        System.arraycopy(mPages, 0, result, 0, pageIndex);
-        System.arraycopy(mPages, pageIndex, result, pageIndex + 1, mPageCount - pageIndex);
-        return result;
+        final Object[] newPages = new Object[newLength];
+        System.arraycopy(mPages, 0, newPages, 0, pageIndex);
+        System.arraycopy(mPages, pageIndex, newPages, pageIndex + 1, mPageCount - pageIndex);
+        return newPages;
+    }
+
+    /**
+     * Class <tt>ListIterator</tt> is an implementation of a {@link Iterator}.
+     */
+    /* package */ final class ListIterator implements Iterator<E> {
+        private int mPosition;
+        private int mPageIndex;
+
+        @Override
+        public boolean hasNext() {
+            return (mPosition < mItemCount);
+        }
+
+        @Override
+        public E next() {
+            DebugUtils.__checkError(mPosition >= mItemCount, "NoSuchElementException");
+            final int position = mPositions[mPageIndex];
+            final Page<E> page = (Page<E>)mPages[mPageIndex];
+            final E value = page.getItem(mPosition - position);
+
+            if (++mPosition >= position + page.getCount()) {
+                ++mPageIndex;
+            }
+
+            return value;
+        }
+
+        @Override
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
     }
 }

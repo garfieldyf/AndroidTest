@@ -419,7 +419,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            initParams();
+            setParams();
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
             mFlags  = 0;
             mParams = null;
@@ -430,13 +430,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
         public final void preload() {
             DebugUtils.__checkError(mUri == null, "uri == null");
-            initParams();
+            setParams();
             mLoader.load(mUri, mUri, mFlags, AsyncLoader.emptyBinder(), mParams);
             mFlags  = 0;
             mParams = null;
         }
 
-        private void initParams() {
+        private void setParams() {
             if (mParams[PARAMETERS_INDEX] == null) {
                 mParams[PARAMETERS_INDEX] = Parameters.defaultParameters();
             }

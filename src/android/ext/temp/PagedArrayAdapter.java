@@ -15,11 +15,11 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
 
     @Override
     public int getItemCount() {
-        return mPages.getItemCount();
+        return mPages.size();
     }
 
     public E getItem(int position) {
-        return mPages.getItem(position);
+        return mPages.get(position);
     }
 
     @Override
@@ -51,7 +51,7 @@ public abstract class PagedArrayAdapter<E, VH extends ViewHolder> extends Adapte
         if (itemCount > 0) {
             final int positionStart;
             if (pageIndex == mPages.getPageCount()) {
-                positionStart = mPages.getItemCount();
+                positionStart = mPages.size();
             } else {
                 positionStart = mPages.getPositionForPage(pageIndex);
             }

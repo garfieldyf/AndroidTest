@@ -119,6 +119,16 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
     }
 
     @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return (this == object);
+    }
+
+    @Override
     public Object[] toArray() {
         return copyTo(new Object[mItemCount]);
     }

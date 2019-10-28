@@ -105,8 +105,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final int pageIndex  = Pages.getOriginalPage(combinedPosition);
-        final Page<E> page = getPage(pageIndex);
+        final int pageIndex = Pages.getOriginalPage(combinedPosition);
+        final Page<E> page  = getPage(pageIndex);
         if (mPrefetchDistance > 0) {
             prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
         }
@@ -167,15 +167,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("setItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position - " + position + ", itemCount = " + mItemCount);
 
-        E oldValue = null;
+        E previous = null;
         final long combinedPosition = getPageForPosition(position);
         final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
         if (page != null) {
-            oldValue = page.setItem((int)combinedPosition, value);
+            previous = page.setItem((int)combinedPosition, value);
             postNotifyItemRangeChanged(position, 1, payload);
         }
 
-        return oldValue;
+        return previous;
     }
 
     /**

@@ -419,10 +419,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            setParams();
-            mLoader.load(mUri, target, mFlags, mBinder, mParams);
-            mFlags  = 0;
-            mParams = null;
+            load(target, mBinder);
         }
 
         /**
@@ -430,13 +427,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
         public final void preload() {
             DebugUtils.__checkError(mUri == null, "uri == null");
-            setParams();
-            mLoader.load(mUri, mUri, mFlags, AsyncLoader.emptyBinder(), mParams);
-            mFlags  = 0;
-            mParams = null;
+            load(mUri, AsyncLoader.emptyBinder());
         }
 
-        private void setParams() {
+        private void load(Object target, Binder binder) {
             if (mParams[PARAMETERS_INDEX] == null) {
                 mParams[PARAMETERS_INDEX] = Parameters.defaultParameters();
             }
@@ -444,6 +438,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             if (mParams[TRANSFORMER_INDEX] == null) {
                 mParams[TRANSFORMER_INDEX] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
             }
+
+            mLoader.load(mUri, target, mFlags, binder, mParams);
+            mFlags  = 0;
+            mParams = null;
         }
     }
 

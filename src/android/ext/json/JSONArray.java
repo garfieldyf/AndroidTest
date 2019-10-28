@@ -336,7 +336,7 @@ public class JSONArray {
      * @throws IndexOutOfBoundsException if <tt>index < 0 || index >= length()</tt>
      */
     public Object get(int index) {
-        return (values.get(index));
+        return values.get(index);
     }
 
     /**

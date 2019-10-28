@@ -218,14 +218,7 @@ public final class ProcessUtils {
         /**
          * Writes the specified crash infos to the <em>writer</em>.
          * <p>The crash infos such as the following:</p><pre>
-         * {
-         *   "brand": "BRAND",
-         *   "model": "MODEL",
-         *   "sdk": 19,
-         *   "version": "4.4.4",
-         *   "abis": "armeabi-v7a, armeabi",
-         *   "package": "com.xxxx",
-         *   "crashes": [{
+         * [{
          *     "_date": 1537852558991,
          *     "vcode": 1,
          *     "vname": "1.0",
@@ -233,9 +226,7 @@ public final class ProcessUtils {
          *     "thread": "main",
          *     "class": "java.lang.NullPointerException",
          *     "stack": "java.lang.NullPointerException: This is test! ... ..."
-         *   }, ... ]
-         * }</pre>
-         * @param context The <tt>Context</tt>.
+         *   }, ... ]</pre>
          * @param writer The {@link JsonWriter} to write to.
          * @param cursor The {@link Cursor} from which to get the crash data.
          * May be returned earlier by {@link CrashDatabase#query(long)}.
@@ -244,8 +235,8 @@ public final class ProcessUtils {
          * @see #writeDeviceInfo(Context, JsonWriter)
          * @see DatabaseUtils#writeCursor(JsonWriter, Cursor, String[])
          */
-        public static JsonWriter writeTo(Context context, JsonWriter writer, Cursor cursor) throws IOException {
-            return DatabaseUtils.writeCursor(writeDeviceInfo(context, writer.beginObject()).name("crashes"), cursor, cursor.getColumnNames()).endObject();
+        public static JsonWriter writeTo(JsonWriter writer, Cursor cursor) throws IOException {
+            return DatabaseUtils.writeCursor(writer, cursor, cursor.getColumnNames());
         }
 
         /**
@@ -261,7 +252,7 @@ public final class ProcessUtils {
          * @param writer The {@link JsonWriter} to write to.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see #writeTo(Context, JsonWriter, Cursor)
+         * @see #writeTo(JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
             return writer.name("brand").value(Build.BRAND)

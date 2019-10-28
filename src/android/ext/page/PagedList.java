@@ -38,7 +38,7 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
     /**
      * Constructor
-     * @param capacity The initial capacity of this <tt>PagedList</tt>.
+     * @param capacity The initial capacity of the page.
      * @see #PagedList()
      * @see #PagedList(Collection)
      */

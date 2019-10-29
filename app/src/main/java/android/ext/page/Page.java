@@ -31,12 +31,20 @@ public interface Page<E> {
 
     /**
      * Return the view type of the item at the specified <em>position</em> for the
-     * purposes of view recycling. <p>The default implementation returns <tt>0</tt>,
-     * making the assumption of a single view type for the adapter.<p>
+     * purposes of view recycling.
      * @param position The position of the item.
      * @return The type of the view needed to represent the item at <em>position</em>.
      */
     default int getItemViewType(int position) {
+        return 0;
+    }
+
+    /**
+     * Returns the number of span occupied by the item at the specified <em>position</em>.
+     * @param position The position of the item.
+     * @return The number of spans occupied by the item at <em>position</em>.
+     */
+    default int getItemSpanSize(int position) {
         return 0;
     }
 }

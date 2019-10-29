@@ -36,7 +36,7 @@ public interface Page<E> {
      * @return The type of the view needed to represent the item at <em>position</em>.
      */
     default int getItemViewType(int position) {
-        return 0;
+        throw new RuntimeException("Must be implementation!");
     }
 
     /**
@@ -45,6 +45,6 @@ public interface Page<E> {
      * @return The number of spans occupied by the item at <em>position</em>.
      */
     default int getItemSpanSize(int position) {
-        return 0;
+        throw new RuntimeException("Must be implementation!");
     }
 }

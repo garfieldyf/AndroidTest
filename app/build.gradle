@@ -32,6 +32,7 @@ dependencies {
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
     compileOnly files(rootProject.libsDir + '/android/android-sdk-stubs.jar')
     implementation files(rootProject.libsDir + '/zxing/zxing.jar')
+    implementation files(rootProject.libsDir + '/focus-layout/foucs-layout.jar')
 
     implementation 'com.android.support:recyclerview-v7:26.1.0'
     implementation 'com.android.support:support-core-utils:26.1.0'

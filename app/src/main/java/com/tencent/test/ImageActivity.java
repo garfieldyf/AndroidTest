@@ -1204,7 +1204,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         case 1:
 //             throw new NullPointerException("This is test!");
-            startActivity(new Intent(this, WebViewActivity.class));
+            startActivity(new Intent(this, RecyclerViewActivity.class));
 //            PackageUtils.installPackage(this, new File("/sdcard/apks/vst_4.0.5_dangbei.apk"), "com.tencent.test.fileprovider");
             break;
 

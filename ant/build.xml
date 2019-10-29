@@ -14,6 +14,7 @@
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
     <property name="class.dir" value="${basedir}/classes" />
+    <property name="source.dir" value="${basedir}/../app/src/main" />
 
     <property name="api.level" value="22" />
     <property name="sdk.version" value="5.1.1" />
@@ -33,16 +34,15 @@
     <target name="-copy">
         <!-- copy the java files -->
         <copy todir="${src.dir}/${ndk.dir}" overwrite="true">
-            <fileset dir="${basedir}/../src/android/ext">
+            <fileset dir="${source.dir}/java/android/ext">
                 <exclude name="**/temp/**" />
-                <exclude name="**/reference/**" />
             </fileset>
         </copy>
 
         <!-- copy the android support v7 files -->
         <!-- 
         <copy todir="${src.dir}/android/support/v7" overwrite="true">
-            <fileset dir="${basedir}/../src/android/support/v7" />
+            <fileset dir="${source.dir}/java/android/support/v7" />
         </copy>
         -->
 
@@ -63,14 +63,14 @@
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">
-        <property name="ndk.debug" value="1" />
+        <property name="ndk.target" value="debug" />
         <property name="out.file.dir" value="${out.dir}/debug" />
         <echo level="info">Build the ${out.file.name} in DEBUG mode.</echo>
     </target>
 
     <!-- target -set-release-mode -->
     <target name="-set-release-mode">
-        <property name="ndk.debug" value="0" />
+        <property name="ndk.target" value="release" />
         <property name="out.file.dir" value="${out.dir}/release" />
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
 
@@ -89,7 +89,7 @@
     <target name="-compile-jar">
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
-        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.7" target="1.7" includeAntRuntime="false" includeJavaRuntime="false"
+        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false"
             classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
@@ -114,20 +114,14 @@
     <!-- target -compile-so -->
     <target name="-compile-so">
         <!-- compile c++ files -->
-        <echo level="info">ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}</echo>
-        <echo level="info" />
-        <exec executable="cmd.exe">
-            <arg line="/C ndk-build NDK_DEBUG=${ndk.debug} ${ndk.args}" />
-        </exec>
+        <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
+            <property name="ndk_args" value="${ndk.args}" />
+        </ant>
 
         <!-- copy so file -->
         <copy todir="${out.file.dir}" overwrite="true">
-            <fileset dir="${basedir}/../libs" includes="**/*.so" />
+            <fileset dir="${source.dir}/jniLibs" includes="**/*.so" />
         </copy>
-
-        <!-- delete obj, libs files -->
-        <delete dir="${basedir}/../obj" />
-        <delete dir="${basedir}/../libs" />
     </target>
 
     <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
@@ -138,7 +132,7 @@
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
 
         <proguard>
-            -include        "${basedir}/../proguard.txt"
+            -include        "${basedir}/../app/proguard.txt"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
             -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
@@ -151,13 +145,13 @@
 
     <!-- target -compile-dex -->
     <target name="-compile-dex">
-        <property name="dx.dir" value="${sdk.dir}/build-tools/25.0.3" />
+        <property name="dx.dir" value="${sdk.dir}/build-tools/29.0.0" />
         <property name="dex.file.name" value="${ant.project.name}-dex.jar" />
 
         <!-- compile dex file -->
-        <echo level="info">dx --dex --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
+        <echo level="info">dx --dex --min-sdk-version=24 --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
         <exec executable="cmd.exe">
-            <arg line="/C ${dx.dir}/dx.bat --dex --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
+            <arg line="/C ${dx.dir}/dx.bat --dex --min-sdk-version=24 --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
         </exec>
         <echo level="info">Install: ${out.file.dir}/${dex.file.name}</echo>
     </target>
@@ -165,9 +159,9 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${basedir}/../res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ant.project.name}_widget.xml" />
-        <copy file="${basedir}/../res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
-        <copy file="${basedir}/../jni/proguard.txt" tofile="${out.dir}/${ant.project.name}-proguard.txt" />
+        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ant.project.name}_widget.xml" />
+        <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
+        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.dir}/${ant.project.name}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
@@ -197,7 +191,9 @@
 
     <!-- target compile-so -->
     <target name="compile-so">
-        <ant antfile="${basedir}/../jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
+        <ant antfile="${source.dir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" >
+            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=androidext" />
+        </ant>
     </target>
 
     <!-- target debug -->

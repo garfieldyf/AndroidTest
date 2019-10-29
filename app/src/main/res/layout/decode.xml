@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <android.ext.widget.BarcodeCameraView
+        android:id="@+id/camera_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+        <android.ext.widget.BarcodeDecorView
+            android:id="@+id/barcode_frame_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_above="@+id/zoom_in"
+            android:layout_below="@+id/scan"
+            android:text="@string/barcode_scanning_hint"
+            tencent:scanningIndicator="@drawable/barcode_scanning_indicator" />
+
+        <Button
+            android:id="@+id/scan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:text="Scan" />
+
+        <ImageView
+            android:id="@+id/thumbnial"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/scan"
+            android:contentDescription="@null"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/barcode_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/zoom_in"
+            android:background="@android:color/white"
+            android:singleLine="false"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@android:color/black"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/zoom_in"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:text="Zoom In" />
+    </RelativeLayout>
+
+</FrameLayout>

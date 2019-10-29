@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tencent.test.ui.MyImageTransformer xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tencent="http://schemas.android.com/apk/res/com.tencent.test"
+    android:gravity="center"
+    tencent:autoMirrored="horizontal" >
+
+    <RoundedRectTransformer android:radius="8px" />
+
+    <GIFTransformer />
+
+</com.tencent.test.ui.MyImageTransformer>

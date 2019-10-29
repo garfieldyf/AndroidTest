@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<channels>
+ <channel id="2157">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2166">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2095">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2202">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2055">
+   <channel_category>res</channel_category>
+    <except_city>杭州</except_city>
+ </channel>
+ <channel id="2092">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2093">
+   <channel_category>res</channel_category>
+   <except_city>上海</except_city>
+ </channel>
+ <channel id="2094">
+   <channel_category>res</channel_category>
+   <except_city>上海</except_city>
+ </channel>
+  <channel id="2052">
+   <channel_category>res</channel_category>
+   <except_city>上海</except_city>
+ </channel>
+  <channel id="2097">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2130">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2109">
+   <channel_category>res</channel_category>
+   <except_city>沈阳</except_city>
+ </channel>
+ <channel id="2112">
+   <channel_category>res</channel_category>
+   <except_city>杭州</except_city>
+ </channel>
+ <channel id="2194">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2062">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2063">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+  <channel id="2133">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2134">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2132">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+  <channel id="2131">
+   <channel_category>res</channel_category>
+   <except_city>上海</except_city>
+ </channel>
+ <channel id="2096">
+   <channel_category>res</channel_category>
+    <except_city>北京</except_city>
+ </channel>
+  <channel id="2142">
+   <channel_category>res</channel_category>
+    <except_city>成都</except_city>
+ </channel>
+ <channel id="2056">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2079">
+   <channel_category>res</channel_category>
+   <except_city>广州</except_city>
+ </channel>
+ <channel id="2077">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2102">
+   <channel_category>res</channel_category>
+   <except_city>北京</except_city>
+ </channel>
+ <channel id="2103">
+   <channel_category>res</channel_category>
+   <except_city>上海</except_city>
+ </channel>
+ <channel id="2111">
+   <channel_category>res</channel_category>
+   <except_city>杭州</except_city>
+ </channel>
+    <channel id="2206">
+   <channel_category>res</channel_category>
+   <except_city>深圳</except_city>
+ </channel>
+ <channel id="2144">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2164">
+   <channel_category>open</channel_category>
+ </channel>
+   <channel id="2201">
+   <channel_category>open</channel_category>
+ </channel>
+   <channel id="2173">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2160">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2153">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2078">
+   <channel_category>open</channel_category>
+ </channel>
+   <channel id="2192">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2182">
+   <channel_category>open</channel_category>
+ </channel>
+ <channel id="2183">
+   <channel_category>open</channel_category>
+ </channel>
+  <channel id="2153">
+   <channel_category>open</channel_category>
+ </channel>
+
+   <channel id="2208">
+   <channel_category>open</channel_category>
+ </channel>
+ <!--
+ <channel id="2159">
+   <channel_category>open</channel_category>
+ </channel>
+ -->
+</channels>

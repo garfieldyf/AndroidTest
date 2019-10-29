@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.focus.FocusLinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="320px"
+    android:focusable="true"
+    android:orientation="vertical"
+    app:focus="@drawable/tv_fun_card_selector" >
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="250px"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/recycler_item_title_bg"
+        android:gravity="left|center_vertical"
+        android:paddingLeft="8px"
+        android:paddingRight="8px"
+        android:singleLine="true"
+        android:textColor="#99ffffff"
+        android:textSize="36px" />
+
+</android.support.focus.FocusLinearLayout>

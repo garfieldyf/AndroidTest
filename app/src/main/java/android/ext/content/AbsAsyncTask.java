@@ -1,10 +1,10 @@
 package android.ext.content;
 
-import java.lang.ref.WeakReference;
 import android.app.Activity;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.os.AsyncTask;
+import java.lang.ref.WeakReference;
 
 /**
  * Like as {@link AsyncTask}, but this class has an owner <tt>Object</tt> to avoid potential memory

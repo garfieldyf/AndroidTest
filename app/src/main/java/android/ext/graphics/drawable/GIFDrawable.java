@@ -1,12 +1,12 @@
 package android.ext.graphics.drawable;
 
-import java.io.InputStream;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.GIFImage;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
+import java.io.InputStream;
 
 /**
  * Class GIFDrawable

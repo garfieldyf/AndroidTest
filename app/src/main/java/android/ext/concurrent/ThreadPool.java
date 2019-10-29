@@ -1,5 +1,7 @@
 package android.ext.concurrent;
 
+import android.ext.util.ArrayUtils;
+import android.os.Process;
 import java.util.ArrayDeque;
 import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -7,8 +9,6 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import android.ext.util.ArrayUtils;
-import android.os.Process;
 
 /**
  * Class ThreadPool

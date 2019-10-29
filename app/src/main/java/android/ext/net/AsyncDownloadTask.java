@@ -2,12 +2,12 @@ package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URLConnection;
 import android.ext.content.AbsAsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.util.Log;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.URLConnection;
 
 /**
  * Class <tt>AsyncDownloadTask</tt> allows to download the resource from the remote server on a

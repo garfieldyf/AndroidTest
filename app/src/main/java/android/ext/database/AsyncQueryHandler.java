@@ -1,7 +1,5 @@
 package android.ext.database;
 
-import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -14,6 +12,8 @@ import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import java.util.ArrayList;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>AsyncQueryHandler</tt> is a helper class to help make

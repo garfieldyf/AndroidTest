@@ -1,6 +1,5 @@
 package android.ext.widget;
 
-import java.util.concurrent.Executor;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -13,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import java.util.concurrent.Executor;
 
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.

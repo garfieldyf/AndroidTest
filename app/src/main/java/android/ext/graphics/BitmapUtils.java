@@ -1,7 +1,5 @@
 package android.ext.graphics;
 
-import java.io.IOException;
-import java.io.InputStream;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -21,6 +19,8 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Class BitmapUtils

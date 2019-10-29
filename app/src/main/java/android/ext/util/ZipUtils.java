@@ -1,5 +1,7 @@
 package android.ext.util;
 
+import android.ext.util.FileUtils.Dirent;
+import android.ext.util.Pools.ByteArrayPool;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,8 +18,6 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
-import android.ext.util.FileUtils.Dirent;
-import android.ext.util.Pools.ByteArrayPool;
 
 /**
  * Class ZipUtils

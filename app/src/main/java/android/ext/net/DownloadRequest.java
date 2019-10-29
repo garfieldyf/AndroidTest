@@ -2,6 +2,13 @@ package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
+import android.ext.json.JSONUtils;
+import android.ext.util.ArrayUtils;
+import android.ext.util.Cancelable;
+import android.ext.util.FileUtils;
+import android.util.JsonReader;
+import android.util.Log;
+import android.util.LogPrinter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,13 +21,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
 import java.util.Map.Entry;
-import android.ext.json.JSONUtils;
-import android.ext.util.ArrayUtils;
-import android.ext.util.Cancelable;
-import android.ext.util.FileUtils;
-import android.util.JsonReader;
-import android.util.Log;
-import android.util.LogPrinter;
 
 /**
  * Class <tt>DownloadRequest</tt> used to downloads the resource from the remote server.

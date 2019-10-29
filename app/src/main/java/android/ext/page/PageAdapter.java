@@ -1,12 +1,6 @@
 package android.ext.page;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
-import java.util.BitSet;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.json.JSONArray;
@@ -16,6 +10,12 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.ArrayMap;
 import android.util.Printer;
 import android.view.View;
+import java.util.BitSet;
+import java.util.Formatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Class <tt>PageAdapter</tt> allows to loading data by page.

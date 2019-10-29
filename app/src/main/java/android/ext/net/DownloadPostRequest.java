@@ -1,5 +1,11 @@
 package android.ext.net;
 
+import android.ext.json.JSONArray;
+import android.ext.json.JSONObject;
+import android.ext.json.JSONUtils;
+import android.ext.util.DebugUtils;
+import android.ext.util.FileUtils;
+import android.util.JsonWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,12 +19,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.Collection;
 import java.util.Map;
-import android.ext.json.JSONArray;
-import android.ext.json.JSONObject;
-import android.ext.json.JSONUtils;
-import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
-import android.util.JsonWriter;
 
 /**
  * Class <tt>DownloadPostRequest</tt> used to downloads the resource from the

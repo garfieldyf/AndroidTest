@@ -1,10 +1,5 @@
 package android.ext.content;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.Executor;
-import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
@@ -14,6 +9,11 @@ import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.UIHandler;
 import android.util.Printer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * An abstract class that performs asynchronous loading of data.

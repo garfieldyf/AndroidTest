@@ -1,8 +1,5 @@
 package android.ext.barcode;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -16,6 +13,9 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.datamatrix.encoder.SymbolShapeHint;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 /**
  * Class BarcodeEncoder

@@ -1,5 +1,13 @@
 package android.ext.util;
 
+import android.content.Context;
+import android.ext.util.Pools.ByteArrayPool;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.Keep;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.util.Printer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -10,14 +18,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import android.content.Context;
-import android.ext.util.Pools.ByteArrayPool;
-import android.os.Parcel;
-import android.os.Parcelable;
-import android.support.annotation.Keep;
-import android.text.format.DateFormat;
-import android.util.Log;
-import android.util.Printer;
 
 /**
  * Class FileUtils

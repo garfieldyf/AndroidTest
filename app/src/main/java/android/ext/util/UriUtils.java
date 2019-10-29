@@ -2,13 +2,13 @@ package android.ext.util;
 
 import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import static android.content.ContentResolver.SCHEME_FILE;
+import android.content.Context;
+import android.content.res.AssetManager;
+import android.net.Uri;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import android.content.Context;
-import android.content.res.AssetManager;
-import android.net.Uri;
 
 /**
  * Class UriUtils

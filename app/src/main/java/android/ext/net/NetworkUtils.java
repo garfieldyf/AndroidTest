@@ -1,5 +1,13 @@
 package android.ext.net;
 
+import android.content.Context;
+import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
+import android.ext.util.StringUtils;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.util.Log;
+import android.util.Printer;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -15,14 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
-import android.content.Context;
-import android.ext.util.ArrayUtils;
-import android.ext.util.DebugUtils;
-import android.ext.util.StringUtils;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.util.Log;
-import android.util.Printer;
 
 /**
  * Class NetworkUtils

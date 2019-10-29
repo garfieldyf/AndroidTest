@@ -1,5 +1,6 @@
 package android.ext.util;
 
+import android.ext.util.Pools.ByteArrayPool;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
@@ -11,7 +12,6 @@ import java.security.spec.RSAPublicKeySpec;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-import android.ext.util.Pools.ByteArrayPool;
 
 /**
  * Class CryptoUtils

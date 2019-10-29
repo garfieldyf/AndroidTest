@@ -1,8 +1,5 @@
 package android.ext.util;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.Arrays;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -21,6 +18,9 @@ import android.util.DisplayMetrics;
 import android.util.Printer;
 import android.view.Display;
 import android.view.WindowManager;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Class DeviceUtils

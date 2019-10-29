@@ -1,12 +1,12 @@
 package android.ext.widget;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Handler;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Class <tt>CursorObserver</tt> is an implementation of a {@link ContentObserver}.

@@ -1,9 +1,6 @@
 package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
@@ -12,6 +9,9 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Log;
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>ResourceLoader</tt> allows to load the resource on a background thread

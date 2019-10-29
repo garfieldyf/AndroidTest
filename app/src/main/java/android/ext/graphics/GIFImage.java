@@ -1,8 +1,5 @@
 package android.ext.graphics;
 
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -15,6 +12,9 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.util.Log;
 import android.util.Printer;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 /**
  * Class GIFImage

@@ -1,6 +1,5 @@
 package android.ext.image;
 
-import java.util.concurrent.Executor;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.ext.cache.Cache;
@@ -8,6 +7,7 @@ import android.ext.cache.LruCache;
 import android.ext.content.AsyncLoader;
 import android.ext.util.PackageUtils.PackageItemIcon;
 import android.util.Printer;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>PackageIconLoader</tt> allows to load a package archive file's

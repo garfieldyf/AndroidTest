@@ -1,10 +1,10 @@
 package android.ext.cache;
 
-import java.util.Map;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.ArrayMap;
 import android.util.Printer;
+import java.util.Map;
 
 /**
  * Class <tt>LruImageCache</tt> is an implementation of a {@link LruCache}.

@@ -1,9 +1,6 @@
 package android.ext.content.res;
 
-import java.util.Arrays;
 import android.annotation.SuppressLint;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -27,6 +24,9 @@ import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
+import java.util.Arrays;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Class XmlResources

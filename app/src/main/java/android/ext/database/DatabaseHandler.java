@@ -1,13 +1,13 @@
 package android.ext.database;
 
-import java.lang.ref.WeakReference;
-import java.util.concurrent.Executor;
 import android.app.Activity;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import java.lang.ref.WeakReference;
+import java.util.concurrent.Executor;
 
 /**
  * Abstract class <tt>DatabaseHandler</tt>.

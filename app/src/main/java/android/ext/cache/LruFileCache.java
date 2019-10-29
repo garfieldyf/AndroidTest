@@ -1,13 +1,13 @@
 package android.ext.cache;
 
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collection;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.util.Printer;
+import java.io.File;
+import java.util.Arrays;
+import java.util.Collection;
 
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link LruCache}.

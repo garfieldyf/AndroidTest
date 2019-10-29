@@ -1,7 +1,7 @@
 package android.ext.util;
 
-import java.lang.reflect.Constructor;
 import android.content.Context;
+import java.lang.reflect.Constructor;
 
 /**
  * Class ClassUtils

@@ -1,14 +1,14 @@
 package android.ext.page;
 
+import android.ext.util.ArrayUtils;
+import android.ext.util.DebugUtils;
+import android.util.Printer;
 import java.lang.reflect.Array;
 import java.util.AbstractList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Iterator;
-import android.ext.util.ArrayUtils;
-import android.ext.util.DebugUtils;
-import android.util.Printer;
 
 /**
  * Class <tt>PagedList</tt> allows to adding data by page. This class

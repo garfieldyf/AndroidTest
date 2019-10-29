@@ -1,6 +1,5 @@
 package android.ext.graphics;
 
-import java.util.concurrent.atomic.AtomicReference;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.Pools.RectPool;
@@ -21,6 +20,7 @@ import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class DrawUtils

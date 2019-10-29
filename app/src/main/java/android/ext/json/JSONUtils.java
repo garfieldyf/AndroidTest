@@ -1,5 +1,12 @@
 package android.ext.json;
 
+import android.content.Context;
+import android.ext.util.Cancelable;
+import android.ext.util.DebugUtils;
+import android.ext.util.FileUtils;
+import android.ext.util.UriUtils;
+import android.util.JsonReader;
+import android.util.JsonWriter;
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,13 +20,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import android.content.Context;
-import android.ext.util.Cancelable;
-import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
-import android.ext.util.UriUtils;
-import android.util.JsonReader;
-import android.util.JsonWriter;
 
 /**
  * Class JSONUtils

@@ -1,9 +1,9 @@
 package android.ext.cache;
 
+import android.ext.util.DebugUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import android.ext.util.DebugUtils;
 
 /**
  * Like as {@link SimpleLruCache}, but this class is thread-safely.

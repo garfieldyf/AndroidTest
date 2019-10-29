@@ -1,8 +1,5 @@
 package android.ext.image;
 
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.Executor;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -13,6 +10,9 @@ import android.ext.content.AsyncLoader;
 import android.ext.util.DebugUtils;
 import android.ext.util.PackageUtils.PackageItemIcon;
 import android.util.Printer;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>IconLoader</tt> allows to load the {@link ResolveInfo}'s icon

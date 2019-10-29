@@ -1,8 +1,8 @@
 package android.ext.renderscript;
 
-import java.io.Closeable;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
+import java.io.Closeable;
 
 /**
  * Class AbsRenderScript

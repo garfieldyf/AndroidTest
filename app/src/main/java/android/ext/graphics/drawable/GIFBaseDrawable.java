@@ -1,9 +1,6 @@
 package android.ext.graphics.drawable;
 
-import java.io.IOException;
 import android.annotation.SuppressLint;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
@@ -17,6 +14,9 @@ import android.graphics.RectF;
 import android.graphics.drawable.Animatable;
 import android.os.SystemClock;
 import android.util.AttributeSet;
+import java.io.IOException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Abstract class GIFBaseDrawable

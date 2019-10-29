@@ -1,8 +1,5 @@
 package android.ext.widget;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -21,6 +18,9 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Class BarcodeCameraView

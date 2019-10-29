@@ -1,10 +1,10 @@
 package android.ext.service;
 
-import java.util.concurrent.Executor;
 import android.app.Service;
 import android.content.Intent;
 import android.ext.util.DebugUtils;
 import android.os.IBinder;
+import java.util.concurrent.Executor;
 
 /**
  * Class IntentService

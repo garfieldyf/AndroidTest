@@ -1,9 +1,9 @@
 package android.ext.util;
 
-import java.lang.reflect.Modifier;
 import android.os.Looper;
 import android.util.Log;
 import android.util.Printer;
+import java.lang.reflect.Modifier;
 
 /**
  * Class DebugUtils

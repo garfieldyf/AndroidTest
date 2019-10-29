@@ -1,6 +1,5 @@
 package android.ext.image.transformer;
 
-import java.util.Arrays;
 import android.content.Context;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
@@ -8,6 +7,7 @@ import android.ext.graphics.drawable.RoundedGIFDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Printer;
+import java.util.Arrays;
 
 /**
  * Class <tt>RoundedGIFTransformer</tt> used to transforms a {@link GIFImage} to a {@link RoundedGIFDrawable}.

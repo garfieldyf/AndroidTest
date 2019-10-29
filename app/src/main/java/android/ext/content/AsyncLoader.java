@@ -1,8 +1,8 @@
 package android.ext.content;
 
-import java.util.concurrent.Executor;
 import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>AsyncLoader</tt> allows to load the resource on

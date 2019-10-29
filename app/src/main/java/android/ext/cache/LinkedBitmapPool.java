@@ -1,16 +1,16 @@
 package android.ext.cache;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Class <tt>LinkedBitmapPool</tt> is an implementation of a {@link BitmapPool}.

@@ -1,11 +1,11 @@
 package android.ext.util;
 
-import java.util.concurrent.Executor;
 import android.ext.content.Loader.Task;
 import android.ext.database.DatabaseHandler;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import java.util.concurrent.Executor;
 
 /**
  * Class UIHandler

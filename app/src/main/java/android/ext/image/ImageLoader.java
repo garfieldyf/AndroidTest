@@ -3,8 +3,6 @@ package android.ext.image;
 import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
 import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import static java.net.HttpURLConnection.HTTP_OK;
-import java.io.File;
-import java.util.Arrays;
 import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
@@ -24,6 +22,8 @@ import android.ext.util.UriUtils;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * Class <tt>ImageLoader</tt> allows to load the image from the URI

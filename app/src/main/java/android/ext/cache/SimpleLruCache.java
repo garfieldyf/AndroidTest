@@ -1,13 +1,13 @@
 package android.ext.cache;
 
+import android.content.Context;
+import android.ext.util.DebugUtils;
+import android.util.Printer;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import android.content.Context;
-import android.ext.util.DebugUtils;
-import android.util.Printer;
 
 /**
  * A <tt>SimpleLruCache</tt> that holds strong references to a limited number

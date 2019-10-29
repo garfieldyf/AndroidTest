@@ -1,12 +1,12 @@
 package android.ext.database;
 
-import java.util.concurrent.Executor;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.DebugUtils;
 import android.ext.util.UIHandler;
 import android.util.Log;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>AsyncSQLiteHandler</tt> is a helper class to help make

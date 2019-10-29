@@ -1,13 +1,13 @@
 package android.ext.cache;
 
-import java.util.Map.Entry;
-import java.util.Set;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Class <tt>LruBitmapCache</tt> is an implementation of a {@link LruCache}.

@@ -1,13 +1,5 @@
 package android.ext.database;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -29,6 +21,14 @@ import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Pair;
 import android.util.Printer;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class DatabaseUtils

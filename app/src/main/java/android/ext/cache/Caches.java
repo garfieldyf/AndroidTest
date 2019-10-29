@@ -1,13 +1,13 @@
 package android.ext.cache;
 
-import java.util.Collections;
-import java.util.Map;
 import android.content.Context;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * Class Caches

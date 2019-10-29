@@ -1,12 +1,12 @@
 package android.ext.util;
 
-import java.lang.reflect.Array;
-import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Printer;
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class Pools

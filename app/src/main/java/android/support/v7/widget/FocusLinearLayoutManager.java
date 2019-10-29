@@ -1,10 +1,10 @@
 package android.support.v7.widget;
 
-import java.util.ArrayList;
 import android.content.Context;
 import android.support.v7.widget.FocusManager.OnItemSelectedListener;
 import android.util.AttributeSet;
 import android.view.View;
+import java.util.ArrayList;
 
 /**
  * Class FocusLinearLayoutManager

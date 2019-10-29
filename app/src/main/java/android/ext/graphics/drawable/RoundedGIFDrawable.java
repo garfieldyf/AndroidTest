@@ -1,8 +1,5 @@
 package android.ext.graphics.drawable;
 
-import java.io.IOException;
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
@@ -14,6 +11,9 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
+import java.io.IOException;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
 /**
  * Class RoundedGIFDrawable

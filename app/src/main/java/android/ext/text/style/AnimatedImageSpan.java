@@ -1,10 +1,10 @@
 package android.ext.text.style;
 
-import java.lang.ref.WeakReference;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.AnimationDrawable;
 import android.view.View;
+import java.lang.ref.WeakReference;
 
 /**
  * Class AnimatedImageSpan

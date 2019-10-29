@@ -1,7 +1,5 @@
 package android.ext.image;
 
-import java.io.File;
-import java.net.HttpURLConnection;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
@@ -17,6 +15,8 @@ import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
+import java.io.File;
+import java.net.HttpURLConnection;
 
 /**
  * Class <tt>AsyncImageTask</tt> allows to load the images from the specified

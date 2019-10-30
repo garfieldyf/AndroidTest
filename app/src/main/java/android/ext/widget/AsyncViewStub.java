@@ -109,7 +109,10 @@ public final class AsyncViewStub extends View {
         final ViewGroup parent = (ViewGroup)getParent();
         DebugUtils.__checkError(mLayoutId == 0, "AsyncViewStub must have a valid layout resource id");
         DebugUtils.__checkError(parent == null, "AsyncViewStub must have a non-null ViewGroup parent");
-        new AsyncInflateTask(parent, listener).executeOnExecutor(executor, (Object[])null);
+        /*
+         * params - { parent, OnInflateListener, null }
+         */
+        new AsyncInflateTask().executeOnExecutor(executor, parent, listener, null);
     }
 
     @Override
@@ -166,43 +169,44 @@ public final class AsyncViewStub extends View {
     /**
      * Class <tt>AsyncInflateTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private final class AsyncInflateTask extends AsyncTask<Object, Object, View> {
-        private final ViewGroup mParent;
+    private final class AsyncInflateTask extends AsyncTask<Object, Object, Object[]> {
         private final LayoutInflater mInflater;
-        private final OnInflateListener mListener;
 
-        /**
-         * Constructor
-         * @param parent The <tt>ViewGroup</tt> to be the parent of the generated hierarchy.
-         * @param listener The {@link OnInflateListener} to notify of successful inflation.
-         */
-        public AsyncInflateTask(ViewGroup parent, OnInflateListener listener) {
-            mParent   = parent;
-            mListener = listener;
+        public AsyncInflateTask() {
             mInflater = new BasicLayoutInflater(getContext());
         }
 
         @Override
-        protected View doInBackground(Object... params) {
+        protected Object[] doInBackground(Object... params) {
             try {
-                return mInflater.inflate(mLayoutId, mParent, false);
+                /*
+                 * params - { parent, OnInflateListener, null }
+                 */
+                DebugUtils.__checkError(params.length < 3, "params.length < 3");
+                params[2] = mInflater.inflate(mLayoutId, (ViewGroup)params[0], false);
             } catch (RuntimeException e) {
-                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread - parent = " + mParent.getClass().getSimpleName() + "\n" + e);
-                return null;
+                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread - parent = " + params[0].getClass().getSimpleName() + "\n" + e);
             }
+
+            return params;
         }
 
         @Override
-        protected void onPostExecute(View result) {
-            // Failed to inflate mLayoutId in the background.
-            // Inflating it on the UI thread.
-            if (result == null) {
-                result = mInflater.inflate(mLayoutId, mParent, false);
+        protected void onPostExecute(Object[] result) {
+            /*
+             * result - { parent, OnInflateListener, view }
+             */
+            final ViewGroup parent = (ViewGroup)result[0];
+            View view = (View)result[2];
+            if (view == null) {
+                // Failed to inflate mLayoutId in the background.
+                // Inflating it on the UI thread.
+                view = mInflater.inflate(mLayoutId, parent, false);
             }
 
-            onFinishInflate(result, mParent);
-            if (mListener != null) {
-                mListener.onFinishInflate(AsyncViewStub.this, result, mLayoutId);
+            onFinishInflate(view, parent);
+            if (result[1] != null) {
+                ((OnInflateListener)result[1]).onFinishInflate(AsyncViewStub.this, view, mLayoutId);
             }
         }
     }

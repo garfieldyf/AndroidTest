@@ -6,7 +6,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.AsyncTask;
-import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -108,7 +107,10 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
      */
     public final void startDecode(int[] pixels, int width, int height, Executor executor, OnDecodeListener listener) {
-        new DecodeTask(listener).executeOnExecutor(executor, new RGBLuminanceSource(width, height, pixels));
+        /*
+         * params - { RGBLuminanceSource, OnDecodeListener, null }
+         */
+        new DecodeTask().executeOnExecutor(executor, new RGBLuminanceSource(width, height, pixels), listener, null);
     }
 
     /**
@@ -124,7 +126,10 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
      */
     public final void startDecode(byte[] data, int width, int height, Rect clipBounds, Executor executor, OnDecodeListener listener) {
-        new DecodeTask(listener).executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false));
+        /*
+         * params - { PlanarYUVLuminanceSource, OnDecodeListener, null }
+         */
+        new DecodeTask().executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener, null);
     }
 
     /**
@@ -143,7 +148,10 @@ public class BarcodeDecoder {
      * @see #startDecode(byte[], int, int, Rect, Executor, OnDecodeListener)
      */
     public final void startDecode(byte[] data, int width, int height, int left, int top, int right, int bottom, Executor executor, OnDecodeListener listener) {
-        new DecodeTask(listener).executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false));
+        /*
+         * params - { PlanarYUVLuminanceSource, OnDecodeListener, null }
+         */
+        new DecodeTask().executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener, null);
     }
 
     /**
@@ -229,24 +237,23 @@ public class BarcodeDecoder {
     /**
      * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private final class DecodeTask extends AsyncTask<LuminanceSource, Object, Pair<LuminanceSource, Result>> {
-        private OnDecodeListener mListener;
-
-        public DecodeTask(OnDecodeListener listener) {
-            DebugUtils.__checkError(listener == null, "listener == null");
-            mListener = listener;
+    /* package */ final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
+        @Override
+        protected Object[] doInBackground(Object... params) {
+            /*
+             * params - { LuminanceSource, OnDecodeListener, null }
+             */
+            DebugUtils.__checkError(params.length < 3, "params.length < 3");
+            params[2] = decode((LuminanceSource)params[0]);
+            return params;
         }
 
         @Override
-        protected Pair<LuminanceSource, Result> doInBackground(LuminanceSource... params) {
-            final LuminanceSource source = params[0];
-            return new Pair<LuminanceSource, Result>(source, decode(source));
-        }
-
-        @Override
-        protected void onPostExecute(Pair<LuminanceSource, Result> result) {
-            mListener.onDecodeComplete(result.first, result.second);
-            mListener = null;   // Prevent memory leak.
+        protected void onPostExecute(Object[] result) {
+            /*
+             * result - { LuminanceSource, OnDecodeListener, Result }
+             */
+            ((OnDecodeListener)result[1]).onDecodeComplete((LuminanceSource)result[0], (Result)result[2]);
         }
     }
 

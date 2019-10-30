@@ -468,9 +468,9 @@ public final class FileUtils {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
         } else if (buffer == null) {
-            copyStreamImpl(is, out, wrap(cancelable));
+            copyStreamImpl(is, out, Optional.ofNullable(cancelable));
         } else {
-            copyStreamImpl(is, out, wrap(cancelable), buffer);
+            copyStreamImpl(is, out, Optional.ofNullable(cancelable), buffer);
         }
     }
 
@@ -573,13 +573,6 @@ public final class FileUtils {
      * @see #createFile(String, long)
      */
     public static native String createUniqueFile(String filename, long length);
-
-    /**
-     * Wrap the specified <em>cancelable</em>, handling <tt>null Cancelable</tt>.
-     */
-    public static Cancelable wrap(Cancelable cancelable) {
-        return (cancelable != null ? cancelable : MockCancelable.sInstance);
-    }
 
     /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
@@ -1376,23 +1369,6 @@ public final class FileUtils {
             default:
                 throw new AssertionError("Unknown Dirent type - " + type);
             }
-        }
-    }
-
-    /**
-     * Class <tt>MockCancelable</tt> is an implementation of a {@link Cancelable}.
-     */
-    private static final class MockCancelable implements Cancelable {
-        public static final Cancelable sInstance = new MockCancelable();
-
-        @Override
-        public boolean isCancelled() {
-            return false;
-        }
-
-        @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return false;
         }
     }
 

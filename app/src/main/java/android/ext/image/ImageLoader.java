@@ -5,7 +5,6 @@ import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.content.Context;
 import android.ext.cache.Cache;
-import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
@@ -17,6 +16,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
+import android.ext.util.Optional;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.graphics.drawable.Drawable;
@@ -63,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, imageCache != null ? imageCache : Caches.<URI, Image>emptyCache());
+        super(module.mExecutor, Optional.ofNullable(imageCache));
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;

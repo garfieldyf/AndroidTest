@@ -119,7 +119,7 @@ public final class ZipUtils {
         DebugUtils.__checkError(files == null, "Invalid parameter - The files is null");
         // Creates the necessary directories.
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
-        cancelable = FileUtils.wrap(cancelable);
+        cancelable = Optional.ofNullable(cancelable);
 
         // Creates the ZipOutputStream.
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
@@ -155,7 +155,7 @@ public final class ZipUtils {
         try {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
-            cancelable = FileUtils.wrap(cancelable);
+            cancelable = Optional.ofNullable(cancelable);
 
             // Enumerates the ZIP file entries.
             final CRC32 crc = new CRC32();

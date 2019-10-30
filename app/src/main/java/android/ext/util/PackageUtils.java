@@ -333,7 +333,7 @@ public final class PackageUtils {
             DebugUtils.__checkError(dirPaths == null, "Invalid parameter - The dirPaths is null");
             this.__checkParseStatus();
             int result  = 0;
-            mCancelable = FileUtils.wrap(mCancelable);
+            mCancelable = Optional.ofNullable(mCancelable);
             for (int i = 0; i < dirPaths.length; ++i) {
                 if ((result = FileUtils.scanFiles(dirPaths[i], this, mScanFlags, outInfos)) != 0) {
                     break;

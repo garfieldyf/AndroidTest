@@ -92,6 +92,9 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
             super(state);
             mPath   = new Path(state.mPath);
             mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+            if (mPaint.getShader() != null) {
+                mPaint.setShader(mShader);
+            }
         }
 
         @Override

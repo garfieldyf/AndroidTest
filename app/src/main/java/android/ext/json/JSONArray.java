@@ -1,14 +1,17 @@
 package android.ext.json;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.RandomAccess;
 
 /**
  * Class JSONArray
  * @author Garfield
  */
-public class JSONArray {
+public class JSONArray implements List<Object>, RandomAccess {
     /* package */ final List<Object> values;
 
     /**
@@ -35,12 +38,19 @@ public class JSONArray {
         this.values = values;
     }
 
-    /**
-     * Returns the number of values in this array.
-     * @return The number of values in this array.
-     */
-    public int length() {
+    @Override
+    public void clear() {
+        values.clear();
+    }
+
+    @Override
+    public int size() {
         return values.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
     /**
@@ -48,12 +58,11 @@ public class JSONArray {
      * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
      * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
      * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
-     * @return This array.
      */
-    public JSONArray add(Object value) {
+    @Override
+    public boolean add(Object value) {
         JSONUtils.__checkDouble(value);
-        values.add(value);
-        return this;
+        return values.add(value);
     }
 
     /**
@@ -116,12 +125,11 @@ public class JSONArray {
      * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
      * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
      * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
-     * @return This array.
      */
-    public JSONArray add(int index, Object value) {
+    @Override
+    public void add(int index, Object value) {
         JSONUtils.__checkDouble(value);
         values.add(index, value);
-        return this;
     }
 
     /**
@@ -329,34 +337,20 @@ public class JSONArray {
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
-    /**
-     * Returns the value at the specified <em>index</em> in this array.
-     * @param index The index of the value.
-     * @return The value at <em>index</em>.
-     * @throws IndexOutOfBoundsException if <tt>index < 0 || index >= length()</tt>
-     */
+    @Override
     public Object get(int index) {
         return values.get(index);
     }
 
-    /**
-     * Sets the value at the specified <em>index</em> in this array with
-     * the specified <em>value</em>.
-     * @param index The index of the value.
-     * @param value The value to set.
-     * @return The previous value at the specified <em>index</em>.
-     * @throws IndexOutOfBoundsException if <tt>index < 0 || index >= length()</tt>
-     */
+    @Override
     public Object set(int index, Object value) {
+        JSONUtils.__checkDouble(value);
         return values.set(index, value);
     }
 
-    /**
-     * Returns <tt>true</tt> if this array has no value at
-     * <em>index</em>, or if its value is the <tt>null</tt>.
-     */
-    public boolean isNull(int index) {
-        return (opt(index) == null);
+    @Override
+    public boolean remove(Object value) {
+        return values.remove(value);
     }
 
     /**
@@ -365,16 +359,81 @@ public class JSONArray {
      * @param index The index of the value to remove.
      * @return The removed value or <tt>null</tt>.
      */
+    @Override
     public Object remove(int index) {
         return (index >= 0 && index < values.size() ? values.remove(index) : null);
     }
 
-    /**
-     * Returns an unmodifiable {@link List} of the values contained in this array.
-     * @return An unmodifiable <tt>List</tt> of the values.
-     */
-    public List<Object> values() {
-        return Collections.unmodifiableList(values);
+    @Override
+    public int indexOf(Object value) {
+        return values.indexOf(value);
+    }
+
+    @Override
+    public int lastIndexOf(Object value) {
+        return values.lastIndexOf(value);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return values.iterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator() {
+        return values.listIterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator(int index) {
+        return values.listIterator(index);
+    }
+
+    @Override
+    public Object[] toArray() {
+        return values.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] array) {
+        return values.toArray(array);
+    }
+
+    @Override
+    public List<Object> subList(int start, int end) {
+        return values.subList(start, end);
+    }
+
+    @Override
+    public boolean contains(Object value) {
+        return values.contains(value);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> collection) {
+        return values.containsAll(collection);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection) {
+        return values.retainAll(collection);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> collection) {
+        return values.removeAll(collection);
+    }
+
+    @Override
+    public boolean addAll(Collection<?> collection) {
+        JSONUtils.__checkDouble(collection);
+        return values.addAll(collection);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<?> collection) {
+        JSONUtils.__checkDouble(collection);
+        return values.addAll(index, collection);
     }
 
     @Override

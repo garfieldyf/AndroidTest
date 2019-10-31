@@ -157,7 +157,6 @@ public final class NetworkUtils {
      * @return The <em>out</em>.
      * @see #formatMacAddress(byte[])
      */
-    @SuppressWarnings("resource")
     public static Appendable formatMacAddress(Appendable out, byte[] macAddress, char separator) {
         DebugUtils.__checkError(macAddress == null || macAddress.length < 6, "macAddress == null || macAddress.length < 6");
         return new Formatter(out).format("%02x%c%02x%c%02x%c%02x%c%02x%c%02x", macAddress[0], separator, macAddress[1], separator, macAddress[2], separator, macAddress[3], separator, macAddress[4], separator, macAddress[5]).out();

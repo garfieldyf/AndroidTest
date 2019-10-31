@@ -24,7 +24,6 @@ public final class ArrayUtils {
      * @param array The <tt>Array</tt>.
      * @return The number of elements.
      * @see #getSize(int[])
-     * @see #getSize(long[])
      * @see #getSize(Object[])
      */
     public static int getSize(byte[] array) {
@@ -37,7 +36,6 @@ public final class ArrayUtils {
      * @param array The <tt>Array</tt>.
      * @return The number of elements.
      * @see #getSize(byte[])
-     * @see #getSize(long[])
      * @see #getSize(Object[])
      */
     public static int getSize(int[] array) {
@@ -51,20 +49,6 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(int[])
      * @see #getSize(byte[])
-     * @see #getSize(Object[])
-     */
-    public static int getSize(long[] array) {
-        return (array != null ? array.length : 0);
-    }
-
-    /**
-     * Returns the number of elements in the <em>array</em>,
-     * handling <tt>null Array</tt>.
-     * @param array The <tt>Array</tt>.
-     * @return The number of elements.
-     * @see #getSize(int[])
-     * @see #getSize(byte[])
-     * @see #getSize(long[])
      */
     public static int getSize(Object[] array) {
         return (array != null ? array.length : 0);

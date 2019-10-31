@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,28 +38,6 @@ public final class JSONUtils {
      * The <tt>0-length</tt>, immutable {@link JSONObject}.
      */
     public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.<String, Object>emptyMap());
-
-    /**
-     * Returns the number of values in the <em>array</em>,
-     * handling <tt>null array</tt>.
-     * @param array The <tt>JSONArray</tt>.
-     * @return The number of values.
-     * @see #getLength(JSONObject)
-     */
-    public static int getLength(JSONArray array) {
-        return (array != null ? array.length() : 0);
-    }
-
-    /**
-     * Returns the number of name/value mappings in the
-     * <em>object</em>, handling <tt>null object</tt>.
-     * @param object The <tt>JSONObject</tt>.
-     * @return The number of name/value mappings.
-     * @see #getLength(JSONArray)
-     */
-    public static int getLength(JSONObject object) {
-        return (object != null ? object.length() : 0);
-    }
 
     /**
      * Equivalent to calling {@link JSONObject#optJSONArray(String)},
@@ -366,17 +345,37 @@ public final class JSONUtils {
     }
 
     /* package */ static void __checkDouble(Object value) {
-        if (value instanceof Number) {
-            final double d = ((Number)value).doubleValue();
-            if (Double.isInfinite(d) || Double.isNaN(d)) {
-                throw new AssertionError("Forbidden numeric value: " + value);
-            }
-        }
+        checkDouble(value, "");
     }
 
     /* package */ static void __checkDouble(double value) {
         if (Double.isInfinite(value) || Double.isNaN(value)) {
             throw new AssertionError("Forbidden numeric value: " + value);
+        }
+    }
+
+    /* package */ static void __checkDouble(Collection<?> values) {
+        final Iterator<?> iter = values.iterator();
+        for (int i = 0; iter.hasNext(); ++i) {
+            checkDouble(iter.next(), ", index = " + i);
+        }
+    }
+
+    /* package */ static void __checkDouble(Map<? extends String, ?> values) {
+        for (Entry<? extends String, ?> entry : values.entrySet()) {
+            final String name  = entry.getKey();
+            final Object value = entry.getValue();
+            DebugUtils.__checkError(name == null, "name == null, value = " + value);
+            checkDouble(value, ", name = " + name);
+        }
+    }
+
+    private static void checkDouble(Object value, String suffix) {
+        if (value instanceof Number) {
+            final double d = ((Number)value).doubleValue();
+            if (Double.isInfinite(d) || Double.isNaN(d)) {
+                throw new AssertionError("Forbidden numeric value: " + value + suffix);
+            }
         }
     }
 

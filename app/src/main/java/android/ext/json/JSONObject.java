@@ -1,15 +1,16 @@
 package android.ext.json;
 
 import android.ext.util.DebugUtils;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Class JSONObject
  * @author Garfield
  */
-public class JSONObject {
+public class JSONObject implements Map<String, Object> {
     /* package */ final Map<String, Object> values;
 
     /**
@@ -36,12 +37,19 @@ public class JSONObject {
         this.values = values;
     }
 
-    /**
-     * Returns the number of name/value mappings in this object.
-     * @return The number of name/value mappings in this object.
-     */
-    public int length() {
+    @Override
+    public void clear() {
+        values.clear();
+    }
+
+    @Override
+    public int size() {
         return values.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
     /**
@@ -52,6 +60,7 @@ public class JSONObject {
      * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
      * @return This object.
      */
+    @Override
     public JSONObject put(String name, Object value) {
         JSONUtils.__checkDouble(value);
         DebugUtils.__checkError(name == null, "name == null");
@@ -123,13 +132,8 @@ public class JSONObject {
         return this;
     }
 
-    /**
-     * Returns the value mapped by <em>name</em>.
-     * @param name The JSON property name.
-     * @return The value mapped by <em>name</em>,
-     * or <tt>null</tt> if no such mapping exists.
-     */
-    public Object opt(String name) {
+    @Override
+    public Object get(Object name) {
         return values.get(name);
     }
 
@@ -269,36 +273,40 @@ public class JSONObject {
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
-    /**
-     * Returns <tt>true</tt> if this object has a mapping for <em>name</em>.
-     */
-    public boolean has(String name) {
-        return values.containsKey(name);
-    }
-
-    /**
-     * Returns <tt>true</tt> if this object has no mapping for <em>name</em>.
-     */
-    public boolean isNull(String name) {
-        return (values.get(name) == null);
-    }
-
-    /**
-     * Removes a mapping with the specified <em>name</em> from this object.
-     * @param name The JSON property name to remove.
-     * @return The value previously mapped by <em>name</em>, or <tt>null</tt>
-     * if there was no such mapping.
-     */
-    public Object remove(String name) {
+    @Override
+    public Object remove(Object name) {
         return values.remove(name);
     }
 
-    /**
-     * Returns an unmodifiable {@link Map} of the name/value mappings contained in this object.
-     * @return An unmodifiable <tt>Map</tt> of the name/value mappings.
-     */
-    public Map<String, Object> values() {
-        return Collections.unmodifiableMap(values);
+    @Override
+    public boolean containsKey(Object name) {
+        return values.containsKey(name);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return values.containsValue(value);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return values.keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return values.values();
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return values.entrySet();
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> map) {
+        JSONUtils.__checkDouble(map);
+        values.putAll(map);
     }
 
     @Override

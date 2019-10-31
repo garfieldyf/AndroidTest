@@ -101,51 +101,6 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
         return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).setItem((int)combinedPosition, value);
     }
 
-    @Override
-    public Iterator<E> iterator() {
-        return new ListIterator();
-    }
-
-    @Override
-    public PagedList<E> clone() {
-        try {
-            final PagedList<E> result = (PagedList<E>)super.clone();
-            result.mPages = mPages.clone();
-            result.mPositions = mPositions.clone();
-            return result;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return System.identityHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        return (this == object);
-    }
-
-    @Override
-    public Object[] toArray() {
-        return copyTo(new Object[mItemCount]);
-    }
-
-    @Override
-    public <T> T[] toArray(T[] contents) {
-        if (contents.length < mItemCount) {
-            contents = (T[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
-        }
-
-        if (copyTo(contents).length > mItemCount) {
-            contents[mItemCount] = null;
-        }
-
-        return contents;
-    }
-
     /**
      * Returns the number of pages in this <tt>PagedList</tt>.
      * @return The number of pages in this <tt>PagedList</tt>.
@@ -289,7 +244,6 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
         return mPositions[pageIndex];
     }
 
-    @SuppressWarnings("resource")
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(100);
         final Formatter formatter  = new Formatter(result);
@@ -304,6 +258,51 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
             formatter.format("  Page %-2d ==> ", i);
             printer.println(DebugUtils.toString(page, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + count - 1).append(", count = ").append(count).append(" }").toString());
         }
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new ListIterator();
+    }
+
+    @Override
+    public PagedList<E> clone() {
+        try {
+            final PagedList<E> result = (PagedList<E>)super.clone();
+            result.mPages = mPages.clone();
+            result.mPositions = mPositions.clone();
+            return result;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return (this == object);
+    }
+
+    @Override
+    public Object[] toArray() {
+        return copyTo(new Object[mItemCount]);
+    }
+
+    @Override
+    public <T> T[] toArray(T[] contents) {
+        if (contents.length < mItemCount) {
+            contents = (T[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
+        }
+
+        if (copyTo(contents).length > mItemCount) {
+            contents[mItemCount] = null;
+        }
+
+        return contents;
     }
 
     private Object[] copyTo(Object[] contents) {

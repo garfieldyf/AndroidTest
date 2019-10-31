@@ -149,7 +149,6 @@ public final class StringUtils {
      * @see #toHexString(byte[])
      * @see #toHexString(byte[], int, int)
      */
-    @SuppressWarnings("resource")
     public static Appendable toHexString(Appendable out, byte[] data, int start, int end) {
         final Formatter formatter = new Formatter(out);
         for (; start < end; ++start) {

@@ -203,7 +203,6 @@ public final class XmlResources {
         public static final XmlBinderInflater sInstance = new XmlBinderInflater();
 
         @Override
-        @SuppressWarnings("rawtypes")
         public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
             String name = parser.getName();
             if (name.equals("binder") && (name = parser.getAttributeValue(null, "class")) == null) {

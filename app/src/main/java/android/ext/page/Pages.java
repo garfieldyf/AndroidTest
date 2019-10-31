@@ -1,7 +1,5 @@
 package android.ext.page;
 
-import android.ext.json.JSONArray;
-import android.ext.json.JSONUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import java.util.List;
@@ -48,18 +46,8 @@ public final class Pages {
      * @return A new <tt>Page</tt> or <tt>null</tt>.
      * @see ListPage
      */
-    public static <E> Page<E> newPage(List<E> data) {
+    public static <E> Page<E> newPage(List<?> data) {
         return (ArrayUtils.getSize(data) > 0 ? new ListPage<E>(data) : null);
-    }
-
-    /**
-     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
-     * @param data A {@link JSONArray} of the page data.
-     * @return A new <tt>Page</tt> or <tt>null</tt>.
-     * @see JSONPage
-     */
-    public static <E> Page<E> newPage(JSONArray data) {
-        return (JSONUtils.getLength(data) > 0 ? new JSONPage<E>(data) : null);
     }
 
     /**
@@ -75,7 +63,8 @@ public final class Pages {
          * Constructor
          * @param data A {@link List} of the page data.
          */
-        public ListPage(List<E> data) {
+        @SuppressWarnings("unchecked")
+        public ListPage(List data) {
             DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.size() == 0");
             mData = data;
         }
@@ -93,41 +82,6 @@ public final class Pages {
         @Override
         public E setItem(int position, E value) {
             return mData.set(position, value);
-        }
-    }
-
-    /**
-     * Class <tt>JSONPage</tt> is an implementation of a {@link Page}.
-     */
-    @SuppressWarnings("unchecked")
-    public static class JSONPage<E> implements Page<E> {
-        /**
-         * The {@link JSONArray} of the page data.
-         */
-        protected final JSONArray mData;
-
-        /**
-         * Constructor
-         * @param data A {@link JSONArray} of the page data.
-         */
-        public JSONPage(JSONArray data) {
-            DebugUtils.__checkError(JSONUtils.getLength(data) == 0, "data == null || data.length() == 0");
-            mData = data;
-        }
-
-        @Override
-        public int getCount() {
-            return mData.length();
-        }
-
-        @Override
-        public E getItem(int position) {
-            return (E)mData.get(position);
-        }
-
-        @Override
-        public E setItem(int position, E value) {
-            return (E)mData.set(position, value);
         }
     }
 

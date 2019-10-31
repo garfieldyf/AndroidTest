@@ -3,7 +3,6 @@ package android.ext.page;
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
-import android.ext.json.JSONArray;
 import android.ext.util.DebugUtils;
 import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -275,27 +274,18 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param pageIndex The index of the page.
      * @param pageData May be <tt>null</tt>. The page data to add.
      * @see Pages#newPage(List)
+     * @see #setPage(int, Page)
      * @see #setPage(int, Page, Object)
      */
-    public final void setPage(int pageIndex, List<E> pageData) {
+    public final void setPage(int pageIndex, List<?> pageData) {
         setPage(pageIndex, Pages.newPage(pageData), null);
-    }
-
-    /**
-     * Equivalent to calling <tt>setPage(pageIndex, Pages.newPage(pageData), null)</tt>.
-     * @param pageIndex The index of the page.
-     * @param pageData May be <tt>null</tt>. The page data to add.
-     * @see Pages#newPage(JSONArray)
-     * @see #setPage(int, Page, Object)
-     */
-    public final void setPage(int pageIndex, JSONArray pageData) {
-        setPage(pageIndex, Pages.<E>newPage(pageData), null);
     }
 
     /**
      * Equivalent to calling <tt>setPage(pageIndex, page, null)</tt>.
      * @param pageIndex The index of the page.
      * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
+     * @see #setPage(int, List)
      * @see #setPage(int, Page, Object)
      */
     public final void setPage(int pageIndex, Page<? extends E> page) {
@@ -310,6 +300,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param pageIndex The index of the page.
      * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
+     * @see #setPage(int, List)
+     * @see #setPage(int, Page)
      */
     @SuppressWarnings("unchecked")
     public void setPage(int pageIndex, Page<? extends E> page, Object payload) {
@@ -332,19 +324,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //     * @see Pages#newPage(List)
 //     * @see #addPage(int, Page)
 //     */
-//    public final void addPage(int pageIndex, List<E> pageData) {
+//    public final void addPage(int pageIndex, List<?> pageData) {
 //        addPage(pageIndex, Pages.newPage(pageData));
-//    }
-//
-//    /**
-//     * Equivalent to calling <tt>addPage(pageIndex, Pages.newPage(pageData))</tt>.
-//     * @param pageIndex The index of the page.
-//     * @param pageData May be <tt>null</tt>. The page data to add.
-//     * @see Pages#newPage(JSONArray)
-//     * @see #addPage(int, Page)
-//     */
-//    public final void addPage(int pageIndex, JSONArray pageData) {
-//        addPage(pageIndex, Pages.<E>newPage(pageData));
 //    }
 //
 //    /**
@@ -354,6 +335,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //     * to prevent blocking the UI.</p>
 //     * @param pageIndex The index of the page.
 //     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
+//     * @see #addPage(int, List)
 //     */
 //    @SuppressWarnings("unchecked")
 //    public void addPage(int pageIndex, Page<? extends E> page) {
@@ -369,27 +351,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
 //        }
 //    }
-
-    /**
-     * Removes the page at the specified <em>pageIndex</em> from this adapter.
-     * This method will be call {@link #notifyItemRangeRemoved(int, int)} when
-     * the page was removed and the total item count will be changed.
-     * @param pageIndex The index of the page to remove.
-     */
-/*
-    public void removePage(int pageIndex) {
-        DebugUtils.__checkUIThread("removePage");
-        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
-
-        final Page<E> oldPage = mPageCache.remove(pageIndex);
-        if (oldPage != null) {
-            final int itemCount = oldPage.getCount();
-            mItemCount -= itemCount;
-            mLoadStates.clear(pageIndex);
-            postNotifyItemRangeRemoved(getPositionForPage(pageIndex), itemCount);
-        }
-    }
-*/
+//
+//    /**
+//     * Removes the page at the specified <em>pageIndex</em> from this adapter.
+//     * This method will be call {@link #notifyItemRangeRemoved(int, int)} when
+//     * the page was removed and the total item count will be changed.
+//     * @param pageIndex The index of the page to remove.
+//     */
+//    public void removePage(int pageIndex) {
+//        DebugUtils.__checkUIThread("removePage");
+//        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+//
+//        final Page<E> oldPage = mPageCache.remove(pageIndex);
+//        if (oldPage != null) {
+//            final int itemCount = oldPage.getCount();
+//            mItemCount -= itemCount;
+//            mLoadStates.clear(pageIndex);
+//            postNotifyItemRangeRemoved(getPositionForPage(pageIndex), itemCount);
+//        }
+//    }
 
     /**
      * Returns a copy of the current page cache of this adapter.
@@ -438,7 +418,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize : 0);
     }
 
-    @SuppressWarnings("resource")
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         final StringBuilder result = new StringBuilder(128);

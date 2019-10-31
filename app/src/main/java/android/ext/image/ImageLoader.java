@@ -63,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, Optional.ofNullable(imageCache));
+        super(module.mExecutor, Optional.ofNullable(imageCache), 48);
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;
@@ -276,7 +276,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         public static final int TRANSFORMER_INDEX  = 1;
         public static final int PLACEHOLDER_INDEX  = 2;
         public static final int COOKIE_INDEX       = 3;
-        public static final int PARAM_ARRAY_LENGTH = 4;
 
         /* package */ Object mUri;
         /* package */ int mFlags;

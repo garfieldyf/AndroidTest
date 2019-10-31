@@ -1,6 +1,5 @@
 package android.ext.image;
 
-import static android.ext.image.ImageLoader.LoadRequest.PARAM_ARRAY_LENGTH;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -50,6 +49,7 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options>, XmlResourceInflater<ImageLoader> {
+    private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
@@ -96,7 +96,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(48, PARAM_ARRAY_LENGTH, Object.class);
+        mParamsPool  = Pools.newPool(48, MAX_ARRAY_LENGTH, Object.class);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);

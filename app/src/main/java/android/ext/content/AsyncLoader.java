@@ -35,9 +35,23 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache The {@link Cache} to store the loaded values.
+     * @see #AsyncLoader(Executor, Cache, int)
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
         super(executor, 48);
+        mCache = cache;
+        DebugUtils.__checkError(cache == null, "cache == null");
+    }
+
+    /**
+     * Constructor
+     * @param executor The <tt>Executor</tt> to executing load task.
+     * @param cache The {@link Cache} to store the loaded values.
+     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
+     * @see #AsyncLoader(Executor, Cache)
+     */
+    public AsyncLoader(Executor executor, Cache<Key, Value> cache, int maxPoolSize) {
+        super(executor, maxPoolSize);
         mCache = cache;
         DebugUtils.__checkError(cache == null, "cache == null");
     }

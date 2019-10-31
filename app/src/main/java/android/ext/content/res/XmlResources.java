@@ -42,7 +42,7 @@ public final class XmlResources {
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static Parameters loadParameters(Context context, int id) throws NotFoundException {
-        return (Parameters)load(context, id, XmlParametersInflater.sInstance);
+        return (Parameters)load(context, id, XmlResourceInflaterImpl.sInstance);
     }
 
     /**
@@ -53,7 +53,7 @@ public final class XmlResources {
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static <Image> Transformer<Image> loadTransformer(Context context, int id) throws NotFoundException {
-        return (Transformer<Image>)load(context, id, XmlTransformerInflater.sInstance);
+        return (Transformer<Image>)load(context, id, XmlResourceInflaterImpl.sInstance);
     }
 
     /**
@@ -64,7 +64,7 @@ public final class XmlResources {
      * @throws NotFoundException if the given <em>id</em> cannot be load.
      */
     public static <URI, Params, Image> Binder<URI, Params, Image> loadBinder(Context context, int id) throws NotFoundException {
-        return (Binder<URI, Params, Image>)load(context, id, XmlBinderInflater.sInstance);
+        return (Binder<URI, Params, Image>)load(context, id, XmlResourceInflaterImpl.sInstance);
     }
 
     /**
@@ -76,7 +76,7 @@ public final class XmlResources {
      * @throws ReflectiveOperationException if the constructor cannot be invoked.
      */
     public static <Image> Transformer<Image> inflateTransformer(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-        return (Transformer<Image>)XmlTransformerInflater.sInstance.inflate(context, parser);
+        return (Transformer<Image>)XmlResourceInflaterImpl.sInstance.inflate(context, parser);
     }
 
     /**
@@ -167,20 +167,24 @@ public final class XmlResources {
     }
 
     /**
-     * Class <tt>XmlParametersInflater</tt> is an implementation of a {@link XmlResourceInflater}.
+     * Class <tt>XmlResourceInflaterImpl</tt> is an implementation of a {@link XmlResourceInflater}.
      */
-    private static final class XmlParametersInflater implements XmlResourceInflater<Object> {
-        public static final XmlParametersInflater sInstance = new XmlParametersInflater();
+    private static final class XmlResourceInflaterImpl implements XmlResourceInflater<Object> {
+        public static final XmlResourceInflater<Object> sInstance = new XmlResourceInflaterImpl();
 
         @Override
         public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
             String name = parser.getName();
-            if (name.equals("parameters") && (name = parser.getAttributeValue(null, "class")) == null) {
-                throw new XmlPullParserException(parser.getPositionDescription() + ": The <parameters> tag requires a valid 'class' attribute");
+            if (name.equals("binder") || name.equals("parameters") || name.equals("transformer")) {
+                final String tagName = name;
+                if ((name = parser.getAttributeValue(null, "class")) == null) {
+                    throw new XmlPullParserException(parser.getPositionDescription() + ": The <" + tagName + "> tag requires a valid 'class' attribute");
+                }
             }
 
             final AttributeSet attrs = Xml.asAttributeSet(parser);
             switch (name) {
+            /* --------------- parameters --------------- */
             case "Parameters":
                 return new Parameters(context, attrs);
 
@@ -190,75 +194,37 @@ public final class XmlResources {
             case "ScaleParameters":
                 return new ScaleParameters(context, attrs);
 
-            default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
-            }
-        }
-    }
-
-    /**
-     * Class <tt>XmlBinderInflater</tt> is an implementation of a {@link XmlResourceInflater}.
-     */
-    private static final class XmlBinderInflater implements XmlResourceInflater<Object> {
-        public static final XmlBinderInflater sInstance = new XmlBinderInflater();
-
-        @Override
-        public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-            String name = parser.getName();
-            if (name.equals("binder") && (name = parser.getAttributeValue(null, "class")) == null) {
-                throw new XmlPullParserException(parser.getPositionDescription() + ": The <binder> tag requires a valid 'class' attribute");
-            }
-
-            switch (name) {
+            /* ---------------- binders ----------------- */
             case "ImageBinder":
-                return new ImageBinder(context, Xml.asAttributeSet(parser));
+                return new ImageBinder(context, attrs);
 
             case "BackgroundBinder":
                 return BackgroundBinder.getInstance();
 
             case "TransitionBinder":
-                return new TransitionBinder(context, Xml.asAttributeSet(parser));
+                return new TransitionBinder(context, attrs);
 
-            default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, Xml.asAttributeSet(parser));
-            }
-        }
-    }
-
-    /**
-     * Class <tt>XmlTransformerInflater</tt> is an implementation of a {@link XmlResourceInflater}.
-     */
-    private static final class XmlTransformerInflater implements XmlResourceInflater<Object> {
-        public static final XmlTransformerInflater sInstance = new XmlTransformerInflater();
-
-        @Override
-        public Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-            String name = parser.getName();
-            if (name.equals("transformer") && (name = parser.getAttributeValue(null, "class")) == null) {
-                throw new XmlPullParserException(parser.getPositionDescription() + ": The <transformer> tag requires a valid 'class' attribute");
-            }
-
-            switch (name) {
+            /* -------------- transformers --------------- */
             case "GIFTransformer":
                 return GIFTransformer.sInstance;
 
             case "OvalTransformer":
                 return OvalTransformer.sInstance;
 
+            case "ImageTransformer":
+                return new ImageTransformer(context, attrs);
+
             case "BitmapTransformer":
                 return BitmapTransformer.getInstance(context);
 
-            case "ImageTransformer":
-                return new ImageTransformer(context, Xml.asAttributeSet(parser));
-
             case "RoundedGIFTransformer":
-                return new RoundedGIFTransformer(context, Xml.asAttributeSet(parser));
+                return new RoundedGIFTransformer(context, attrs);
 
             case "RoundedRectTransformer":
-                return new RoundedRectTransformer(context, Xml.asAttributeSet(parser));
+                return new RoundedRectTransformer(context, attrs);
 
             default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, Xml.asAttributeSet(parser));
+                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
             }
         }
     }

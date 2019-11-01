@@ -10,7 +10,6 @@ import android.ext.cache.BitmapPool;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
-import android.ext.cache.ImageCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
@@ -351,7 +350,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
-        final BitmapPool bitmapPool = (imageCache instanceof ImageCache ? ((ImageCache)imageCache).getBitmapPool() : null);
+        final BitmapPool bitmapPool = imageCache.getBitmapPool();
         if (!TextUtils.isEmpty(className)) {
             return (ImageLoader.ImageDecoder)ClassUtils.getConstructor(className, Context.class, Pool.class, BitmapPool.class).newInstance(mContext, mOptionsPool, bitmapPool);
         } else if (imageCache instanceof LruImageCache) {

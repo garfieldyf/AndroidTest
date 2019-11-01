@@ -5,13 +5,12 @@ import android.ext.database.DatabaseHandler;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import java.util.concurrent.Executor;
 
 /**
  * Class UIHandler
  * @author Garfield
  */
-public final class UIHandler extends Handler implements Executor {
+public final class UIHandler extends Handler {
     /**
      * The {@link Handler} associated with the UI thread's message queue.
      */
@@ -25,7 +24,11 @@ public final class UIHandler extends Handler implements Executor {
      * @param action The action to run on the UI thread.
      */
     public static void runOnUIThread(Runnable action) {
-        sInstance.execute(action);
+        if (sInstance.getLooper() == Looper.myLooper()) {
+            action.run();
+        } else {
+            sInstance.post(action);
+        }
     }
 
     /**
@@ -58,15 +61,6 @@ public final class UIHandler extends Handler implements Executor {
         msg.arg2 = token;
         msg.obj  = result;
         sendMessage(msg);
-    }
-
-    @Override
-    public void execute(Runnable command) {
-        if (getLooper() == Looper.myLooper()) {
-            command.run();
-        } else {
-            post(command);
-        }
     }
 
     @Override

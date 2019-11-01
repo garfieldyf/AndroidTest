@@ -11,7 +11,7 @@ import java.util.Map;
  * Class <tt>LruImageCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
  */
-public final class LruImageCache<K> implements ImageCache<K, Object> {
+public final class LruImageCache<K> implements Cache<K, Object> {
     private final Cache<K, Object> mImageCache;
     private final Cache<K, Bitmap> mBitmapCache;
 
@@ -72,7 +72,7 @@ public final class LruImageCache<K> implements ImageCache<K, Object> {
 
     @Override
     public BitmapPool getBitmapPool() {
-        return (mBitmapCache instanceof ImageCache ? ((ImageCache<?, ?>)mBitmapCache).getBitmapPool() : null);
+        return mBitmapCache.getBitmapPool();
     }
 
     /* package */ final void dump(Context context, Printer printer) {

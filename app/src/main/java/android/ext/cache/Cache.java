@@ -46,4 +46,12 @@ public interface Cache<K, V> {
      * @return A copy of this cache.
      */
     Map<K, V> snapshot();
+
+    /**
+     * Returns the {@link BitmapPool} associated with this cache.
+     * @return The <tt>BitmapPool</tt> or <tt>null</tt> if no bitmap pool.
+     */
+    default BitmapPool getBitmapPool() {
+        return null;
+    }
 }

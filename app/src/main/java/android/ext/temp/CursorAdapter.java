@@ -189,10 +189,6 @@ public abstract class CursorAdapter extends BaseAdapter implements Filterable, C
         return mCursor;
     }
 
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
-    }
-
     /**
      * Returns a new {@link View} to hold the data pointed to by cursor.
      * @param position The position of the item within the adapter's data

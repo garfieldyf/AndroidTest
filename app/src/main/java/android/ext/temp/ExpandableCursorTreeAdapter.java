@@ -146,10 +146,6 @@ public abstract class ExpandableCursorTreeAdapter extends ExpandableCursorAdapte
         return mGroup.mCursor;
     }
 
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
-    }
-
     /**
      * Makes a new group view to hold the group data pointed to by cursor.
      * @param cursor The group cursor from which to get the data.

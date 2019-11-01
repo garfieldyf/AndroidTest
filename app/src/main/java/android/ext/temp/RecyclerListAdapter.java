@@ -1,6 +1,5 @@
 package android.ext.temp;
 
-import java.util.List;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.ext.widget.CursorObserver.CursorObserverClient;
@@ -10,6 +9,7 @@ import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 import android.view.ViewGroup;
+import java.util.List;
 
 /**
  * Abstract class RecyclerListAdapter
@@ -94,10 +94,6 @@ public abstract class RecyclerListAdapter<T, VH extends ViewHolder> extends Adap
     @Override
     public int getItemCount() {
         return mAdapter.mData.size();
-    }
-
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
     }
 
     /**

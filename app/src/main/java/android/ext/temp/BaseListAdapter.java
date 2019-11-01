@@ -1,7 +1,5 @@
 package android.ext.temp;
 
-import java.util.Collections;
-import java.util.List;
 import android.content.Context;
 import android.ext.temp.Filters.ListFilter;
 import android.ext.temp.Filters.ListFilterClient;
@@ -13,6 +11,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Abstract class BaseListAdapter
@@ -114,10 +114,6 @@ public abstract class BaseListAdapter<E> extends BaseAdapter implements Filterab
         }
 
         return mFilter;
-    }
-
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
     }
 
     @Override

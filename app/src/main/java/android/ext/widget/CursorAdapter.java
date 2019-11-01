@@ -9,7 +9,6 @@ import android.ext.database.DatabaseReceiver;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
-import android.net.Uri;
 import android.provider.BaseColumns;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView.LayoutManager;
@@ -231,10 +230,6 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
     @Override
     public long getItemId(int position) {
         return (mCursor != null && mRowIDColumn != -1 && mCursor.moveToPosition(position) ? mCursor.getLong(mRowIDColumn) : NO_ID);
-    }
-
-    @Override
-    public void onContentChanged(boolean selfChange, Uri uri) {
     }
 
     private void setCursor(Cursor cursor) {

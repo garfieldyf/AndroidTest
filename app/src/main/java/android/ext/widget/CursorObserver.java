@@ -123,6 +123,7 @@ public class CursorObserver extends ContentObserver {
          * @param uri The Uri of the changed content, or <tt>null</tt> if unknown.
          * @see ContentObserver#onChange(boolean, Uri)
          */
-        void onContentChanged(boolean selfChange, Uri uri);
+        default void onContentChanged(boolean selfChange, Uri uri) {
+        }
     }
 }

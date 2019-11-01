@@ -4,7 +4,11 @@
     <property name="out.dir" value="${basedir}/../jniLibs" />
     <property name="lib.dir" value="${basedir}/../libs" />
     <property name="obj.dir" value="${basedir}/../obj" />
-    <property name="ndk.args" value="${ndk_args}" />
+
+    <!-- optional ndk.args NDK_STL=1 -->
+    <condition property="ndk.args" value="${ndk_args}" else="-B all=1 LOCAL_MODULE_NAME=${ant.project.name}">
+        <isset property="ndk_args" />
+    </condition>
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">

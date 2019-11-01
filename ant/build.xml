@@ -8,8 +8,6 @@
     <property name="java.package" value="com.funshion" />
     <property name="out.file.name" value="${ant.project.name}.jar" />
     <property name="source.file.name" value="${ant.project.name}-sources.jar" />
-    <property name="ndk.args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" />
-    <!-- <property name="ndk.args" value="-B NDK_STL=1 all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" /> -->
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
@@ -115,7 +113,8 @@
     <target name="-compile-so">
         <!-- compile c++ files -->
         <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
-            <property name="ndk_args" value="${ndk.args}" />
+            <!-- optional ndk_args NDK_STL=1 -->
+            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" />
         </ant>
 
         <!-- copy so file -->
@@ -191,9 +190,7 @@
 
     <!-- target compile-so -->
     <target name="compile-so">
-        <ant antfile="${source.dir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" >
-            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=androidext" />
-        </ant>
+        <ant antfile="${source.dir}/jni/build.xml" target="debug" inheritAll="false" inheritRefs="false" />
     </target>
 
     <!-- target debug -->

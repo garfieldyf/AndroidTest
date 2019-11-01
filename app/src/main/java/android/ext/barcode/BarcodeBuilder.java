@@ -108,8 +108,8 @@ public final class BarcodeBuilder {
      * @param logo The <tt>Drawable</tt> to set.
      * @return This builder.
      * @see #logo(Resources, int)
-     * @see #logoSize(int, int)
-     * @see #logoSize(Resources, int)
+     * @see #logo(Drawable, int, int)
+     * @see #logo(Resources, int, int)
      */
     public final BarcodeBuilder logo(Drawable logo) {
         this.logo = logo;
@@ -122,8 +122,8 @@ public final class BarcodeBuilder {
      * @param id The resource id of the logo.
      * @return This builder.
      * @see #logo(Drawable)
-     * @see #logoSize(int, int)
-     * @see #logoSize(Resources, int)
+     * @see #logo(Drawable, int, int)
+     * @see #logo(Resources, int, int)
      */
     public final BarcodeBuilder logo(Resources res, int id) {
         this.logo = res.getDrawable(id);
@@ -131,27 +131,35 @@ public final class BarcodeBuilder {
     }
 
     /**
-     * Sets the width and height to draw the {@link #logo} <tt>Drawable</tt>.
-     * @param width The width to draw in pixels.
-     * @param height The height to draw in pixels.
+     * Sets the logo will be draw into the barcode image.
+     * @param res The <tt>Resources</tt>.
+     * @param id The resource id of the logo.
+     * @param sizeId The resource id of the size dimension.
      * @return This builder.
-     * @see #logoSize(Resources, int)
+     * @see #logo(Drawable)
+     * @see #logo(Resources, int)
+     * @see #logo(Drawable, int, int)
      */
-    public final BarcodeBuilder logoSize(int width, int height) {
-        this.logoWidth  = width;
-        this.logoHeight = height;
+    public final BarcodeBuilder logo(Resources res, int id, int sizeId) {
+        this.logo = res.getDrawable(id);
+        this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(sizeId);
         return this;
     }
 
     /**
-     * Sets the width and height to draw the {@link #logo} <tt>Drawable</tt>.
-     * @param res The <tt>Resources</tt>.
-     * @param id The resource id of the size dimension.
+     * Sets the logo will be draw into the barcode image.
+     * @param logo The <tt>Drawable</tt> to set.
+     * @param width The width of the <em>logo</em> to draw in pixels.
+     * @param height The height of the <em>logo</em> to draw in pixels.
      * @return This builder.
-     * @see #logoSize(int, int)
+     * @see #logo(Drawable)
+     * @see #logo(Resources, int)
+     * @see #logo(Resources, int, int)
      */
-    public final BarcodeBuilder logoSize(Resources res, int id) {
-        this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(id);
+    public final BarcodeBuilder logo(Drawable logo, int width, int height) {
+        this.logo = logo;
+        this.logoWidth  = width;
+        this.logoHeight = height;
         return this;
     }
 

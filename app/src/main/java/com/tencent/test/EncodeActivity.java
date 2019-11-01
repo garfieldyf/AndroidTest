@@ -86,8 +86,7 @@ public class EncodeActivity extends Activity implements OnClickListener, OnEncod
 
         DebugUtils.startMethodTracing();
         final Bitmap bitmap = new BarcodeBuilder(bitMatrix)
-            .logo(logo)
-            .logoSize(128, 128)
+            .logo(logo, 128, 128)
             .margins(30)
             .build();
         DebugUtils.stopMethodTracing("yf", "encode", 'm');

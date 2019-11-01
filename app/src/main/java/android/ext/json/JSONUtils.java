@@ -234,10 +234,6 @@ public final class JSONUtils {
             return writer.value((Number)object);
         } else if (object instanceof Boolean) {
             return writer.value((boolean)object);
-        } else if (object instanceof JSONArray) {
-            return writeValues(writer, ((JSONArray)object).values);
-        } else if (object instanceof JSONObject) {
-            return writeValues(writer, ((JSONObject)object).values.entrySet());
         } else if (object instanceof Object[]) {
             return writeValues(writer, Arrays.asList((Object[])object));
         } else if (object instanceof Set) {
@@ -246,6 +242,10 @@ public final class JSONUtils {
             return writeValues(writer, (Collection<Object>)object);
         } else if (object instanceof Map) {
             return writeValues(writer, ((Map<String, Object>)object).entrySet());
+        } else if (object instanceof org.json.JSONArray) {
+            return writeValues(writer, ((org.json.JSONArray)object));
+        } else if (object instanceof org.json.JSONObject) {
+            return writeValues(writer, ((org.json.JSONObject)object));
         } else {
             throw new AssertionError("Unsupported type - " + object.getClass().getName());
         }
@@ -480,6 +480,26 @@ public final class JSONUtils {
 
         reader.endObject();
         return result;
+    }
+
+    private static JsonWriter writeValues(JsonWriter writer, org.json.JSONArray values) throws IOException {
+        writer.beginArray();
+        for (int i = 0, length = values.length(); i < length; ++i) {
+            writeObject(writer, values.opt(i));
+        }
+
+        return writer.endArray();
+    }
+
+    private static JsonWriter writeValues(JsonWriter writer, org.json.JSONObject values) throws IOException {
+        final Iterator<String> names = values.keys();
+        writer.beginObject();
+        while (names.hasNext()) {
+            final String name = names.next();
+            writeObject(writer.name(name), values.opt(name));
+        }
+
+        return writer.endObject();
     }
 
     private static JsonWriter writeValues(JsonWriter writer, Collection<Object> values) throws IOException {

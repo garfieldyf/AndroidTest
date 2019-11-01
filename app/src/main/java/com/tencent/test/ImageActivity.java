@@ -194,7 +194,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testUri(Uri.parse(UriUtils.getResourceUri("com.tencent.test", R.raw.abc)));
         //testArraySectionIndexer();
         //testListSectionIndexer();
-        testPagedList();
+//        testPagedList();
 //        testFileProvider();
 //        testScaleParameters();
 //        testComputeFileSizes();

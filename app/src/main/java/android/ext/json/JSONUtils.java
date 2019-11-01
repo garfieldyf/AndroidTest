@@ -247,7 +247,7 @@ public final class JSONUtils {
         } else if (object instanceof org.json.JSONObject) {
             return writeValues(writer, ((org.json.JSONObject)object));
         } else {
-            throw new AssertionError("Unsupported type - " + object.getClass().getName());
+            return writer.value(object.toString());
         }
     }
 

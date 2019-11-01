@@ -11,7 +11,7 @@ import java.util.Set;
  * @author Garfield
  */
 public class JSONObject implements Map<String, Object> {
-    /* package */ final Map<String, Object> values;
+    private final Map<String, Object> values;
 
     /**
      * Constructor

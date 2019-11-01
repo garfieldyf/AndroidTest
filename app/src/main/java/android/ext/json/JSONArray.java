@@ -12,7 +12,7 @@ import java.util.RandomAccess;
  * @author Garfield
  */
 public class JSONArray implements List<Object>, RandomAccess {
-    /* package */ final List<Object> values;
+    private final List<Object> values;
 
     /**
      * Constructor

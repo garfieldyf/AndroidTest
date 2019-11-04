@@ -26,10 +26,12 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Printer;
@@ -250,6 +252,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             mBufferPool.clear();
             mOptionsPool.clear();
             mLoaderCache.clear();
+            ByteArrayPool.sInstance.clear();
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append('(').append(level).append("),").toString());
@@ -299,6 +302,25 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             DebugUtils.__checkStartMethodTracing();
             mResources.append(id, result = XmlResources.loadBinder(mContext, id));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the Binder - ID #0x" + Integer.toHexString(id));
+        }
+
+        return result;
+    }
+
+    /**
+     * Return a {@link Drawable} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The resource id of the <tt>Drawable</tt>.
+     * @return The <tt>Drawable</tt>.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    /* package */ final Object getDrawable(int id) {
+        DebugUtils.__checkUIThread("getDrawable");
+        Object result = mResources.get(id, null);
+        if (result == null) {
+            DebugUtils.__checkStartMethodTracing();
+            mResources.append(id, result = mContext.getResources().getDrawable(id));
+            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the placeholder - ID #0x" + Integer.toHexString(id));
         }
 
         return result;

@@ -1,5 +1,6 @@
 package android.ext.graphics;
 
+import android.annotation.SuppressLint;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.Pools.RectPool;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Class DrawUtils
  * @author Garfield
  */
+@SuppressLint("RtlHardcoded")
 public final class DrawUtils {
     /**
      * The content is align to forward diagonal.
@@ -385,7 +387,6 @@ public final class DrawUtils {
     /**
      * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
-    @SuppressWarnings("serial")
     private static final class FontMetricsPool extends AtomicReference<FontMetrics> {
         public static final FontMetricsPool sInstance = new FontMetricsPool();
 

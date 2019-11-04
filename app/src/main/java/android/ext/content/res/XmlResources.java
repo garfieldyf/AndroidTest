@@ -224,7 +224,7 @@ public final class XmlResources {
                 return new RoundedRectTransformer(context, attrs);
 
             default:
-                return ClassUtils.getConstructor(name, Context.class, AttributeSet.class).newInstance(context, attrs);
+                return ClassUtils.newInstance(name, new Class[] { Context.class, AttributeSet.class }, context, attrs);
             }
         }
     }

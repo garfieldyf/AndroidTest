@@ -46,11 +46,10 @@ import org.xmlpull.v1.XmlPullParserException;
  * Class ImageModule
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options>, XmlResourceInflater<ImageLoader> {
-    private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
+    private static final int MAX_ARRAY_LENGTH     = 4;
 
     /**
      * The application <tt>Context</tt>.
@@ -150,6 +149,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @see #load(int, URI)
      * @see ImageLoader#load(URI)
      */
+    @SuppressWarnings("unchecked")
     public final ImageLoader<URI, Image> with(int id) {
         DebugUtils.__checkUIThread("with");
         ImageLoader loader = mLoaderCache.get(id, null);
@@ -260,6 +260,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
         if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
@@ -280,7 +281,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         if (className.equals("ImageLoader")) {
             return new ImageLoader(this, imageCache, fileCache, decoder);
         } else {
-            return (ImageLoader)ClassUtils.getConstructor(className, ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class).newInstance(this, imageCache, fileCache, decoder);
+            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, decoder);
         }
     }
 
@@ -352,7 +353,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = imageCache.getBitmapPool();
         if (!TextUtils.isEmpty(className)) {
-            return (ImageLoader.ImageDecoder)ClassUtils.getConstructor(className, Context.class, Pool.class, BitmapPool.class).newInstance(mContext, mOptionsPool, bitmapPool);
+            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         } else if (imageCache instanceof LruImageCache) {
             return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
         } else {

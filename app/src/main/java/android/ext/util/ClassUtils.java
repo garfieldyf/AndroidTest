@@ -16,7 +16,6 @@ public final class ClassUtils {
      * to the empty array.
      * @return A <tt>Constructor</tt> object.
      * @throws NoSuchMethodException if the requested constructor cannot be found.
-     * @see #getConstructor(String, Class[])
      */
     public static <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
         final Constructor<T> result = clazz.getDeclaredConstructor(parameterTypes);
@@ -25,19 +24,18 @@ public final class ClassUtils {
     }
 
     /**
-     * Equivalent to calling <tt>getConstructor(Class.forName(className), parameterTypes)</tt>.
+     * Returns a new instance with the specified <em>className</em> and <em>args</em>.
      * @param className The name of the <tt>Class</tt> which is declared the constructor.
-     * @param parameterTypes The parameter types of the constructor or <em>(Class[])null</em>
-     * is equivalent to the empty array.
-     * @return A <tt>Constructor</tt> object.
-     * @throws ClassNotFoundException if the requested class cannot be found.
-     * @throws NoSuchMethodException if the requested constructor cannot be found.
-     * @see #getConstructor(Class, Class[])
+     * @param parameterTypes The parameter types of the constructor.
+     * @param args The arguments of the constructor.
+     * @return A new instance.
+     * @throws ReflectiveOperationException if an error occurs while creating an instance.
      */
-    public static Constructor<?> getConstructor(String className, Class<?>... parameterTypes) throws ClassNotFoundException, NoSuchMethodException {
-        final Constructor<?> result = Class.forName(className).getDeclaredConstructor(parameterTypes);
-        result.setAccessible(true);
-        return result;
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstance(String className, Class<?>[] parameterTypes, Object... args) throws ReflectiveOperationException {
+        final Constructor<?> constructor = Class.forName(className).getDeclaredConstructor(parameterTypes);
+        constructor.setAccessible(true);
+        return (T)constructor.newInstance(args);
     }
 
     /**

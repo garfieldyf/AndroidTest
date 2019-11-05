@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion "29.0.0"
+    buildToolsVersion "29.0.2"
 
     defaultConfig {
         applicationId "com.tencent.test"
@@ -14,7 +14,7 @@ android {
 
     buildTypes {
         release {
-            useProguard true
+            //useProguard true
             minifyEnabled true
             zipAlignEnabled true
             shrinkResources true

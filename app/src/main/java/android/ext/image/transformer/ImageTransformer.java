@@ -61,11 +61,7 @@ public class ImageTransformer implements Transformer {
 
     @Override
     public Drawable transform(Object image) {
-        if (image instanceof Bitmap) {
-            return mBitmapTransformer.transform(image);
-        } else {
-            return mImageTransformer.transform(image);
-        }
+        return (image instanceof Bitmap ? mBitmapTransformer.transform(image) : mImageTransformer.transform(image));
     }
 
     /**

@@ -449,10 +449,10 @@ public final class DatabaseUtils {
         writer.endArray();
     }
 
-    private static List<Pair<Field, String>> getCursorFields(Class<?> kclass) {
+    private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();
-        for (Class<?> clazz = kclass; clazz != Object.class; clazz = clazz.getSuperclass()) {
-            final Field[] fields = clazz.getDeclaredFields();
+        for (Class<?> kclass = clazz; kclass != Object.class; kclass = kclass.getSuperclass()) {
+            final Field[] fields = kclass.getDeclaredFields();
             for (Field field : fields) {
                 final CursorField cursorField = field.getAnnotation(CursorField.class);
                 if (cursorField != null) {
@@ -463,7 +463,7 @@ public final class DatabaseUtils {
             }
         }
 
-        DatabaseUtils.__checkDumpCursorFields(kclass, cursorFields);
+        DatabaseUtils.__checkDumpCursorFields(clazz, cursorFields);
         return cursorFields;
     }
 

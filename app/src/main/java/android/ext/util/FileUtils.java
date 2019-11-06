@@ -624,6 +624,7 @@ public final class FileUtils {
      * Called by native code.
      */
     @Keep
+    @SuppressWarnings("unused")
     private static void setStat(Stat stat, int mode, int uid, int gid, long size, long blocks, long blksize, long mtime) {
         stat.mode    = mode;
         stat.uid     = uid;

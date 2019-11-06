@@ -23,7 +23,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
-import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -330,23 +329,20 @@ public final class ProcessUtils {
          * Writes the crash infos to "/storage/emulated/0/Android/data/<em>packagename</em>/files/crashes.log"
          */
         private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
-            Formatter formatter = null;
+            // Open the log file.
+            final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
             try {
-                // Creates the log file.
-                final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
-                formatter = new Formatter(ps);
-
                 // Writes the uncaught exception to log file.
-                ps.println("========================================================================================================================");
                 final long now = System.currentTimeMillis();
-                formatter.format("Model : %s %s (sdk = %d, version = %s, cpu abis = %s)\n", Build.MANUFACTURER, Build.MODEL, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
-                formatter.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
-                formatter.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
-                formatter.format("Process : %s (pid = %d, uid = %d, user = %s)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), myUserName(), thread.getName());
+                ps.println("========================================================================================================================");
+                ps.format("Model : %s %s (sdk = %d, version = %s, cpu abis = %s)\n", Build.MANUFACTURER, Build.MODEL, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
+                ps.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
+                ps.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
+                ps.format("Process : %s (pid = %d, uid = %d, user = %s)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), myUserName(), thread.getName());
                 e.printStackTrace(ps);
                 ps.println();
             } finally {
-                FileUtils.close(formatter);
+                ps.close();
             }
         }
     }

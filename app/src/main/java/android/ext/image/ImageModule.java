@@ -49,9 +49,9 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options>, XmlResourceInflater<ImageLoader> {
+    private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
-    private static final int MAX_ARRAY_LENGTH     = 4;
 
     /**
      * The application <tt>Context</tt>.
@@ -76,7 +76,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @see #ImageModule(Context, Executor, Cache, FileCache)
      */
     public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, ThreadPool.createImageThreadPool(ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 3, 5), 60, TimeUnit.SECONDS), imageCache, fileCache);
+        this(context, ThreadPool.createImageThreadPool(ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, 4), 60, TimeUnit.SECONDS), imageCache, fileCache);
     }
 
     /**

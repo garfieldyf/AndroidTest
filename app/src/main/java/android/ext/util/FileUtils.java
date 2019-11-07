@@ -9,11 +9,13 @@ import android.text.format.DateFormat;
 import android.util.Log;
 import android.util.Printer;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -467,6 +469,8 @@ public final class FileUtils {
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, cancelable);
+        } else if (is instanceof FileInputStream && out instanceof FileOutputStream) {
+            copyStreamImpl((FileInputStream)is, (FileOutputStream)out, Optional.ofNullable(cancelable));
         } else if (buffer == null) {
             copyStreamImpl(is, out, Optional.ofNullable(cancelable));
         } else {
@@ -617,6 +621,27 @@ public final class FileUtils {
             copyStreamImpl(is, out, cancelable, buffer);
         } finally {
             ByteArrayPool.sInstance.recycle(buffer);
+        }
+    }
+
+    /**
+     * Transfers the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     */
+    private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
+        final FileChannel source = is.getChannel();
+        final FileChannel target = out.getChannel();
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            long writtenBytes, position = 0, size = source.size();
+            while (size > 0 && !cancelable.isCancelled()) {
+                writtenBytes = source.transferTo(position, size, target);
+                size -= writtenBytes;
+                position += writtenBytes;
+            }
+            DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
+        } finally {
+            FileUtils.close(source);
+            FileUtils.close(target);
         }
     }
 

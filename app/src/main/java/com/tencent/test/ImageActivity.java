@@ -47,6 +47,8 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
+import android.ext.util.MessageDigests;
+import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.PackageUtils;
 import android.ext.util.PackageUtils.PackageItemIcon;
 import android.ext.util.PackageUtils.PackageParser;
@@ -201,6 +203,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testJSONArray();
 //        XmlResources.loadTransformer(this, R.xml.image_transformer);
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
+        //testFileCopy();
 
         testJsonLoader();
     }
@@ -211,7 +214,23 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        JsonUtils.addAll(array, 3, makeArray(3, "insert"));
         Log.i("yf", array.toString());
     }
-    
+
+    private void testFileCopy() {
+        String srcPath = "/sdcard/jdk.zip";
+        String dstPath = "/data/data/com.tencent.test/files/1.rar";
+
+        byte[] digest = MessageDigests.computeFile(srcPath, Algorithm.SHA1);
+        Log.i("yf", "srcSHA = " + StringUtils.toHexString(digest));
+
+        try {
+            FileUtils.copyFile(this, UriUtils.getFileUri(srcPath), dstPath, null);
+            digest = MessageDigests.computeFile(dstPath, Algorithm.SHA1);
+            Log.i("yf", "dstSHA = " + StringUtils.toHexString(digest));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private JSONArray makeArray(int length, String prefix) {
         JSONArray array = new JSONArray();
         for (int i = 0; i < length; ++i) {

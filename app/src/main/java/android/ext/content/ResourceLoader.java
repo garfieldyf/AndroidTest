@@ -237,27 +237,31 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     private Object download(Task task, Object key, LoadParams loadParams, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
-        if (statusCode == HTTP_OK && !isTaskCancelled(task)) {
-            // If the cache file is hit and the cache file's contents are equal the download
-            // file's contents. Deletes the temp file and cancel the task, do not update UI.
-            if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI.");
-                FileUtils.deleteFiles(tempFile, false);
-                task.cancel(false);
-                return null;
-            }
-
-            // Parse the temp file and save it to the cache file.
-            DebugUtils.__checkStartMethodTracing();
-            final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "download");
-            if (result != null) {
-                FileUtils.moveFile(tempFile, cacheFile);
-                return result;
-            }
+        // If download failed or the task was cancelled, deletes the temp file.
+        if (statusCode != HTTP_OK || isTaskCancelled(task)) {
+            DebugUtils.__checkDebug(true, "ResourceLoader", "Downloads statusCode = " + statusCode + ", isCancelled = " + isTaskCancelled(task));
+            FileUtils.deleteFiles(tempFile, false);
+            return null;
         }
 
-        return null;
+        // If the cache file is hit and the cache file's contents are equal the temp
+        // file's contents, deletes the temp file and cancel the task, do not update UI.
+        if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
+            DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI.");
+            FileUtils.deleteFiles(tempFile, false);
+            task.cancel(false);
+            return null;
+        }
+
+        // Parse the temp file and save it to the cache file.
+        DebugUtils.__checkStartMethodTracing();
+        final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
+        DebugUtils.__checkStopMethodTracing("ResourceLoader", "download");
+        if (result != null) {
+            FileUtils.moveFile(tempFile, cacheFile);
+        }
+
+        return result;
     }
 
     /**

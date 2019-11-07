@@ -186,26 +186,30 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
     private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
-        if (statusCode == HTTP_OK && !isCancelled()) {
-            // If the cache file is hit and the cache file's contents are equal the download
-            // file's contents. Deletes the temp file and cancel this task, do not update UI.
-            if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-                DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI.");
-                FileUtils.deleteFiles(tempFile, false);
-                cancel(false);
-                return null;
-            }
-
-            // Parse the temp file and save it to the cache file.
-            DebugUtils.__checkStartMethodTracing();
-            final Result result = parseResult(params, new File(tempFile));
-            DebugUtils.__checkStopMethodTracing("ResourceTask", "download");
-            if (result != null) {
-                FileUtils.moveFile(tempFile, cacheFile);
-                return result;
-            }
+        // If download failed or this task was cancelled, deletes the temp file.
+        if (statusCode != HTTP_OK || isCancelled()) {
+            DebugUtils.__checkDebug(true, "ResourceTask", "Downloads statusCode = " + statusCode + ", isCancelled = " + isCancelled());
+            FileUtils.deleteFiles(tempFile, false);
+            return null;
         }
 
-        return null;
+        // If the cache file is hit and the cache file's contents are equal the temp
+        // file's contents. Deletes the temp file and cancel this task, do not update UI.
+        if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
+            DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI.");
+            FileUtils.deleteFiles(tempFile, false);
+            cancel(false);
+            return null;
+        }
+
+        // Parse the temp file and save it to the cache file.
+        DebugUtils.__checkStartMethodTracing();
+        final Result result = parseResult(params, new File(tempFile));
+        DebugUtils.__checkStopMethodTracing("ResourceTask", "download");
+        if (result != null) {
+            FileUtils.moveFile(tempFile, cacheFile);
+        }
+
+        return result;
     }
 }

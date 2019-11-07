@@ -372,14 +372,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //    }
 
     /**
-     * Returns a copy of the current page cache of this adapter.
-     * @return A copy of the page cache.
-     */
-    public final Map<Integer, Page<E>> snapshot() {
-        return mPageCache.snapshot();
-    }
-
-    /**
      * Returns the item count in the specified page.
      * @param pageIndex The index of the page.
      * @return The item count.

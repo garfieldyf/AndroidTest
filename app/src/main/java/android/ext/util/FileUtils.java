@@ -625,7 +625,7 @@ public final class FileUtils {
     }
 
     /**
-     * Transfers the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
         final FileChannel source = is.getChannel();

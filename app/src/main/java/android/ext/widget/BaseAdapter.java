@@ -13,6 +13,15 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     protected RecyclerView mRecyclerView;
 
     /**
+     * Returns the {@link RecyclerView} associated with this adapter.
+     * @return The <tt>RecyclerView</tt> or <tt>null</tt> if this
+     * adapter not attached to the recycler view.
+     */
+    public final RecyclerView getRecyclerView() {
+        return mRecyclerView;
+    }
+
+    /**
      * Called when an item in the data set of the adapter wants focus.
      * @param position The position of the item in the data set of the adapter.
      */

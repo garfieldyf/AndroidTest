@@ -373,7 +373,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
-        final BitmapPool bitmapPool = imageCache.getBitmapPool();
+        final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
         if (!TextUtils.isEmpty(className)) {
             return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         } else if (imageCache instanceof LruImageCache) {

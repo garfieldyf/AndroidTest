@@ -7,7 +7,7 @@ import java.io.File;
  * keys and files in which each key is mapped to a single {@link File}.
  * @author Garfield
  */
-public interface FileCache extends Cache<String, File> {
+public interface FileCache {
     /**
      * Returns the absolute path of the cache directory.
      * @return The absolute path of the cache directory.

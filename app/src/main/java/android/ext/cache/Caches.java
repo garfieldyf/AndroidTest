@@ -46,8 +46,10 @@ public final class Caches {
         return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxPoolSize > 0 ? new LruBitmapCache2<K>(scaleMemory, maxPoolSize) : new LruBitmapCache<K>(scaleMemory)) : null);
     }
 
-    public static void dumpCache(Cache<?, ?> cache, Context context, Printer printer) {
-        if (cache instanceof SimpleLruCache) {
+    public static void dumpCache(Object cache, Context context, Printer printer) {
+        if (cache instanceof LruFileCache) {
+            ((LruFileCache)cache).dump(context, printer);
+        } else if (cache instanceof SimpleLruCache) {
             ((SimpleLruCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof LruImageCache) {
             ((LruImageCache<?>)cache).dump(context, printer);

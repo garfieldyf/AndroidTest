@@ -40,17 +40,6 @@ public final class JSONUtils {
     public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.<String, Object>emptyMap());
 
     /**
-     * Equivalent to calling {@link JSONObject#optJSONArray(String)},
-     * handling <tt>null</tt> <em>object</em>.
-     * @param object The <tt>JSONObject</tt>.
-     * @param name The JSON property name.
-     * @return A <tt>JSONArray</tt> or <tt>null</tt>.
-     */
-    public static JSONArray optJSONArray(JSONObject object, String name) {
-        return (object != null ? object.optJSONArray(name) : null);
-    }
-
-    /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
      * handling <tt>null</tt> <em>array</em>.
      * @param array The <tt>JSONArray</tt>.
@@ -59,6 +48,17 @@ public final class JSONUtils {
      */
     public static JSONObject optJSONObject(JSONArray array, int index) {
         return (array != null ? array.optJSONObject(index) : null);
+    }
+
+    /**
+     * Equivalent to calling {@link JSONObject#optJSONArray(String)},
+     * handling <tt>null</tt> <em>object</em>.
+     * @param object The <tt>JSONObject</tt>.
+     * @param name The JSON property name.
+     * @return A <tt>JSONArray</tt> or <tt>null</tt>.
+     */
+    public static JSONArray optJSONArray(JSONObject object, String name) {
+        return (object != null ? object.optJSONArray(name) : null);
     }
 
     /**

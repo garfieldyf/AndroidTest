@@ -60,19 +60,23 @@ public class ThreadPoolManager extends ThreadPool {
         // Cancel and remove from running task queue.
         final Iterator<Task> itor = mRunningTasks.iterator();
         while (itor.hasNext()) {
-            if (itor.next().cancel(id, mayInterruptIfRunning)) {
+            final Task task = itor.next();
+            if (task.getId() == id) {
                 itor.remove();
-                return true;
+                return task.cancel(mayInterruptIfRunning, true);
             }
         }
 
         // Cancel and remove from pending task queue.
         final Iterator<Runnable> iter = getQueue().iterator();
         while (iter.hasNext()) {
-            final Runnable task = iter.next();
-            if (task instanceof Task && ((Task)task).cancel(id, false)) {
-                iter.remove();
-                return true;
+            final Runnable command = iter.next();
+            if (command instanceof Task) {
+                final Task task = (Task)command;
+                if (task.getId() == id) {
+                    iter.remove();
+                    return task.cancel(mayInterruptIfRunning, true);
+                }
             }
         }
 
@@ -242,14 +246,6 @@ public class ThreadPoolManager extends ThreadPool {
             }
 
             return result;
-        }
-
-        /**
-         * Attempts to stop execution of this task. This attempt will fail
-         * if this task has already completed, or already been cancelled.
-         */
-        /* package */ final boolean cancel(long id, boolean mayInterruptIfRunning) {
-            return (getId() == id && cancel(mayInterruptIfRunning, true));
         }
     }
 }

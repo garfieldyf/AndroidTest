@@ -22,6 +22,16 @@ import java.io.InputStream;
  */
 public final class GIFImage {
     /**
+     * The GIF image's width in pixels.
+     */
+    public final int width;
+
+    /**
+     * The GIF image's height in pixels.
+     */
+    public final int height;
+
+    /**
      * The native GIF image handle.
      */
     private final long mNativeImage;
@@ -115,24 +125,6 @@ public final class GIFImage {
     }
 
     /**
-     * Returns this GIF image's width.
-     * @return The width in pixels.
-     * @see #getHeight()
-     */
-    public final int getWidth() {
-        return nativeGetWidth(mNativeImage);
-    }
-
-    /**
-     * Returns this GIF image's height.
-     * @return The height in pixels.
-     * @see #getWidth()
-     */
-    public final int getHeight() {
-        return nativeGetHeight(mNativeImage);
-    }
-
-    /**
      * Returns the number of frames of this GIF image.
      * @return The frame count, must be >= 1.
      * @see #getFrameDelay(int)
@@ -174,14 +166,13 @@ public final class GIFImage {
      * @see #draw(Bitmap, int)
      */
     public final Bitmap createBitmapCanvas() {
-        return Bitmap.createBitmap(nativeGetWidth(mNativeImage), nativeGetHeight(mNativeImage), Config.ARGB_8888);
+        return Bitmap.createBitmap(width, height, Config.ARGB_8888);
     }
 
     public final void dump(Printer printer) {
         printer.println(new StringBuilder(96)
             .append("GIFImage { nativePtr = 0x").append(Long.toHexString(mNativeImage))
-            .append(", width = ").append(nativeGetWidth(mNativeImage))
-            .append(", height = ").append(nativeGetHeight(mNativeImage))
+            .append(", width = ").append(width).append(", height = ").append(height)
             .append(", frameCount = ").append(nativeGetFrameCount(mNativeImage))
             .append(" }").toString());
     }
@@ -197,6 +188,8 @@ public final class GIFImage {
 
     private GIFImage(long nativeImage) {
         mNativeImage = nativeImage;
+        width  = nativeGetWidth(nativeImage);
+        height = nativeGetHeight(nativeImage);
     }
 
     private static long decodeStreamInternal(InputStream is) {

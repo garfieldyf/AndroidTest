@@ -142,22 +142,22 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
     @Override
     public int getMinimumWidth() {
-        return mState.mImage.getWidth();
+        return mState.mImage.width;
     }
 
     @Override
     public int getMinimumHeight() {
-        return mState.mImage.getHeight();
+        return mState.mImage.height;
     }
 
     @Override
     public int getIntrinsicWidth() {
-        return mState.mImage.getWidth();
+        return mState.mImage.width;
     }
 
     @Override
     public int getIntrinsicHeight() {
-        return mState.mImage.getHeight();
+        return mState.mImage.height;
     }
 
     @Override

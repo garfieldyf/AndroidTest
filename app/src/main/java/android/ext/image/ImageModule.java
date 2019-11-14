@@ -32,7 +32,6 @@ import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -210,6 +209,15 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      */
     public final Cache<URI, Image> getImageCache() {
         return mImageCache;
+    }
+
+    /**
+     * Clears the {@link FileCache} and all cache files will be delete from filesystem.
+     */
+    public final void clearCacheFiles() {
+        if (mFileCache instanceof LruFileCache) {
+            ((LruFileCache)mFileCache).clearCache();
+        }
     }
 
     public final void dump(Printer printer) {

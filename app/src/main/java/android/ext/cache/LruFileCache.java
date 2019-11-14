@@ -39,6 +39,16 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         mCacheDir = FileUtils.getCacheDir(context, name);
     }
 
+    /**
+     * Clears this cache and all cache files will be delete from filesystem,
+     * but do not call {@link #entryRemoved} on each removed entry.
+     */
+    public synchronized void clearCache() {
+        size = 0;
+        map.clear();
+        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+    }
+
     @Override
     public File getCacheDir() {
         return mCacheDir;

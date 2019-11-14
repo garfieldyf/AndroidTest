@@ -25,6 +25,7 @@ import android.ext.image.transformer.Transformer;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
@@ -34,6 +35,8 @@ import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -100,6 +103,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);
+        ImageModule.__checkDumpSystemInfo(context);
     }
 
     /**
@@ -308,25 +312,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     /**
-     * Return a {@link Drawable} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The resource id of the <tt>Drawable</tt>.
-     * @return The <tt>Drawable</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    /* package */ final Object getDrawable(int id) {
-        DebugUtils.__checkUIThread("getDrawable");
-        Object result = mResources.get(id, null);
-        if (result == null) {
-            DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = mContext.getResources().getDrawable(id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the placeholder - ID #0x" + Integer.toHexString(id));
-        }
-
-        return result;
-    }
-
-    /**
      * Return a {@link Parameters} object associated with a resource id.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>Parameters</tt>.
@@ -414,6 +399,10 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         default:
             return Integer.toString(level);
         }
+    }
+
+    private static void __checkDumpSystemInfo(Context context) {
+        DeviceUtils.dumpSystemInfo(context, new LogPrinter(Log.DEBUG, "ImageModule"));
     }
 
     private static void dumpCache(Printer printer, Resources res, SparseArray cache, String cacheName) {

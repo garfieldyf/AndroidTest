@@ -364,7 +364,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #placeholder(Drawable)
          */
         public final LoadRequest placeholder(int id) {
-            mParams[PLACEHOLDER_INDEX] = mLoader.mModule.getDrawable(id);
+            mParams[PLACEHOLDER_INDEX] = mLoader.mModule.mContext.getResources().getDrawable(id);
             return this;
         }
 

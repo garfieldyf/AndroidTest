@@ -10,6 +10,10 @@ import android.ext.cache.BitmapPool;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
+import android.ext.cache.LinkedBitmapPool;
+import android.ext.cache.LruBitmapCache;
+import android.ext.cache.LruBitmapCache2;
+import android.ext.cache.LruCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
@@ -30,8 +34,8 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.os.Process;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -50,6 +54,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * Class ImageModule
  * @author Garfield
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
@@ -73,22 +78,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
-     * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
-     * @see #ImageModule(Context, Executor, Cache, FileCache)
-     */
-    public ImageModule(Context context, Cache<URI, Image> imageCache, FileCache fileCache) {
-        this(context, ThreadPool.createImageThreadPool(ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, 4), 60, TimeUnit.SECONDS), imageCache, fileCache);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
      * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
-     * @see #ImageModule(Context, Cache, FileCache)
-     * @see ThreadPool#createImageThreadPool(int, long, TimeUnit)
      */
     public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
@@ -103,35 +95,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         mBufferPool  = Pools.synchronizedPool(Pools.<byte[]>newPool(maxPoolSize, 16384, byte.class));
         mContext.registerComponentCallbacks(this);
         ImageModule.__checkDumpSystemInfo(context);
-    }
-
-    /**
-     * Creates a new {@link Bitmap} module.
-     * @param context The <tt>Context</tt>.
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
-     * of the current device. Pass <tt>0</tt> indicates the module has no bitmap cache.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> indicates the module has no file cache.
-     * @param maxPoolSize The maximum number of bitmaps to allow in the internal {@link BitmapPool} of the bitmap cache.
-     * Pass <tt>0</tt> indicates the bitmap cache has no {@link BitmapPool}.
-     * @return The {@link ImageModule}.
-     */
-    public static <URI> ImageModule<URI, Bitmap> createBitmapModule(Context context, float scaleMemory, int maxFileSize, int maxPoolSize) {
-        return new ImageModule<URI, Bitmap>(context, Caches.<URI>createBitmapCache(scaleMemory, maxPoolSize), createFileCache(context, maxFileSize));
-    }
-
-    /**
-     * Creates a new image module.
-     * @param context The <tt>Context</tt>.
-     * @param scaleMemory The scale of memory of the bitmap cache, expressed as a percentage of this application maximum memory
-     * of the current device. Pass <tt>0</tt> indicates the module has no bitmap cache.
-     * @param maxFileSize The maximum number of files in the file cache. Pass <tt>0</tt> indicates the module has no file cache.
-     * @param maxImageSize The maximum image size in the cache. Pass <tt>0</tt> indicates the module has no image cache.
-     * @param maxPoolSize The maximum number of bitmaps to allow in the internal {@link BitmapPool} of the bitmap cache.
-     * Pass <tt>0</tt> indicates the bitmap cache has no {@link BitmapPool}.
-     * @return The {@link ImageModule}.
-     */
-    public static <URI> ImageModule<URI, Object> createImageModule(Context context, float scaleMemory, int maxFileSize, int maxImageSize, int maxPoolSize) {
-        return new ImageModule<URI, Object>(context, new LruImageCache<URI>(scaleMemory, maxImageSize, maxPoolSize), createFileCache(context, maxFileSize));
     }
 
     /**
@@ -154,7 +117,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
      * @see #load(int, URI)
      * @see ImageLoader#load(URI)
      */
-    @SuppressWarnings("unchecked")
     public final ImageLoader<URI, Image> with(int id) {
         DebugUtils.__checkUIThread("with");
         ImageLoader loader = mLoaderCache.get(id, null);
@@ -275,7 +237,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
         if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
@@ -357,14 +318,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
         return result;
     }
 
-    /**
-     * Returns a new {@link FileCache} instance.
-     * @param maxSize The maximum number of files to allow in the <tt>FileCache</tt>.
-     */
-    protected static FileCache createFileCache(Context context, int maxSize) {
-        return (maxSize > 0 ? new LruFileCache(context, "._image_cache", maxSize) : null);
-    }
-
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
         if (!TextUtils.isEmpty(className)) {
@@ -437,6 +390,171 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Opt
             } else {
                 printer.println(DebugUtils.toString(object, result).toString());
             }
+        }
+    }
+
+    /**
+     * Class <tt>Builder</tt> to creates an {@link ImageModule}.
+     */
+    public static final class Builder<URI, Image> {
+        private int mPriority;
+        private int mPoolSize;
+        private int mImageSize;
+        private int mMaxThreads;
+        private Object mFileCache;
+        private Object mImageCache;
+        private final Context mContext;
+
+        /**
+         * Constructor
+         * @param context The <tt>Context</tt>.
+         */
+        public Builder(Context context) {
+            mContext  = context;
+            mPriority = Process.THREAD_PRIORITY_DEFAULT;
+        }
+
+        /**
+         * Sets the maximum number of images to allow in the internal image cache.
+         * @param size The maximum number of images.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setImageSize(int size) {
+            mImageSize = size;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of bitmaps to allow in the internal {@link BitmapPool}.
+         * @param size The maximum number of bitmaps.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setPoolSize(int size) {
+            mPoolSize = size;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of bytes to allow in the internal bitmap cache.
+         * @param size The maximum number of bytes.
+         * @return This builder.
+         * @see #setMemorySize(int)
+         */
+        public final Builder<URI, Image> setMemorySize(int size) {
+            mImageCache = size;
+            return this;
+        }
+
+        /**
+         * Sets the scale of memory of the internal bitmap cache, expressed as a
+         * percentage of this application maximum memory of the current device.
+         * @param scaleMemory The scale of memory of the bitmap cache.
+         * @return This builder.
+         * @see #setScaleMemory(float)
+         */
+        public final Builder<URI, Image> setScaleMemory(float scaleMemory) {
+            mImageCache = scaleMemory;
+            return this;
+        }
+
+        /**
+         * Sets the image {@link Cache} to store the loaded images.
+         * @param cache The image <tt>Cache</tt>.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setImageCache(Cache<URI, Image> cache) {
+            mImageCache = cache;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of files to allow in the internal {@link FileCache}.
+         * @param size The maximum number of files.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setFileSize(int size) {
+            mFileCache = size;
+            return this;
+        }
+
+        /**
+         * Sets the {@link FileCache} to store the loaded image files.
+         * @param cache The <tt>FileCache</tt>.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setFileCache(FileCache cache) {
+            mFileCache = cache;
+            return this;
+        }
+
+        /**
+         * Sets the priority to run the work thread at. The value supplied
+         * must be from {@link Process} and not from {@link Thread}.
+         * @param priority The priority.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setPriority(int priority) {
+            mPriority = priority;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of threads to allow in the internal thread pool.
+         * @param maxThreads The maximum number of threads.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setMaximumThreads(int maxThreads) {
+            mMaxThreads = maxThreads;
+            return this;
+        }
+
+        /**
+         * Creates an {@link ImageModule} with the arguments supplied to this builder.
+         * @return The <tt>ImageModule</tt>.
+         */
+        public final ImageModule<URI, Image> build() {
+            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 3, 5));
+            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(), createFileCache());
+        }
+
+        private FileCache createFileCache() {
+            if (mFileCache == null) {
+                return null;
+            } else if (mFileCache instanceof FileCache) {
+                return (FileCache)mFileCache;
+            } else {
+                final int maxSize = (int)mFileCache;
+                return (maxSize > 0 ? new LruFileCache(mContext, "._image_cache", maxSize) : null);
+            }
+        }
+
+        private Cache createImageCache() {
+            if (mImageCache == null) {
+                return null;
+            } else if (mImageCache instanceof Cache) {
+                return (Cache)mImageCache;
+            }
+
+            final int maxSize;
+            if (mImageCache instanceof Integer) {
+                maxSize = (int)mImageCache;
+            } else {
+                final float scaleMemory = (float)mImageCache;
+                DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory >= 1.0");
+                maxSize = (int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f);
+            }
+
+            if (maxSize == 0) {
+                return null;
+            } else if (mImageSize == 0) {
+                return createBitmapCache(maxSize);
+            } else {
+                return new LruImageCache(createBitmapCache(maxSize), new LruCache(mImageSize));
+            }
+        }
+
+        private Cache createBitmapCache(int maxSize) {
+            return (mPoolSize > 0 ? new LruBitmapCache2(maxSize, new LinkedBitmapPool(mPoolSize)) : new LruBitmapCache(maxSize));
         }
     }
 }

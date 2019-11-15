@@ -133,7 +133,7 @@ public final class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname, e);
+            Log.e(NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname);
         }
 
         return null;

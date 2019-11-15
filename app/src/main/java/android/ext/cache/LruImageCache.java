@@ -1,6 +1,7 @@
 package android.ext.cache;
 
 import android.content.Context;
+import android.ext.util.DebugUtils;
 import android.ext.util.Optional;
 import android.graphics.Bitmap;
 import android.util.ArrayMap;
@@ -25,7 +26,7 @@ public final class LruImageCache<K> implements Cache<K, Object> {
      * @see #LruImageCache(Cache, Cache)
      */
     public LruImageCache(float scaleMemory, int maxImageSize, int maxPoolSize) {
-        this(Caches.<K>createBitmapCache(scaleMemory, maxPoolSize), (maxImageSize > 0 ? new LruCache<K, Object>(maxImageSize) : null));
+        this(createBitmapCache(scaleMemory, maxPoolSize), (maxImageSize > 0 ? new LruCache<K, Object>(maxImageSize) : null));
     }
 
     /**
@@ -78,5 +79,10 @@ public final class LruImageCache<K> implements Cache<K, Object> {
     /* package */ final void dump(Context context, Printer printer) {
         Caches.dumpCache(mBitmapCache, context, printer);
         Caches.dumpCache(mImageCache, context, printer);
+    }
+
+    private static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory, int maxPoolSize) {
+        DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory >= 1.0");
+        return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxPoolSize > 0 ? new LruBitmapCache2<K>(scaleMemory, maxPoolSize) : new LruBitmapCache<K>(scaleMemory)) : null);
     }
 }

@@ -1,5 +1,7 @@
 package com.tencent.test;
 
+import android.ext.image.ImageModule.Builder;
+import android.os.Process;
 import java.io.File;
 import java.util.concurrent.Executor;
 import android.app.Application;
@@ -40,7 +42,8 @@ public final class MainApplication extends Application {
 
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
-        mImageModule = ImageModule.createBitmapModule(this, (DeviceUtils.isLowMemory() ? 0 : 0.4f), 500, 0);
+        mImageModule = new Builder<String, Bitmap>(this).setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f).setFileSize(500).build();
+
         AsyncTask.setDefaultExecutor(mThreadPool);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
     }

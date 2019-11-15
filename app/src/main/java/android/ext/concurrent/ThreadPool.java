@@ -23,11 +23,11 @@ public class ThreadPool extends ThreadPoolExecutor {
      * available. Threads that have not been used for <em>60</em> seconds are terminated and
      * removed from the cache.</p>
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @see #ThreadPool(int, long, TimeUnit)
+     * @see #ThreadPool(int, long, TimeUnit, int)
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-");
+        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-", Process.THREAD_PRIORITY_DEFAULT);
     }
 
     /**
@@ -38,11 +38,13 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks
      * before terminating.
      * @param unit The time unit for the <em>keepAliveTime</em> parameter.
+     * @param priority The priority to run the work thread at. The value supplied must be from
+     * {@link Process} and not from {@link Thread}.
      * @see #ThreadPool(int)
      * @see #computeMaximumThreads()
      */
-    public ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        this(maxThreads, keepAliveTime, unit, "Pool-thread-");
+    public ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
+        this(maxThreads, keepAliveTime, unit, "Pool-thread-", priority);
     }
 
     /**
@@ -73,20 +75,22 @@ public class ThreadPool extends ThreadPoolExecutor {
     /**
      * Creates a new <tt>ThreadPool</tt> to execute the given task.
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @param keepAliveTime The maximum time that excess idle threads will wait
-     * for new tasks before terminating.
+     * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks
+     * before terminating.
      * @param unit The time unit for the <em>keepAliveTime</em> parameter.
+     * @param priority The priority to run the work thread at. The value supplied must be from
+     * {@link Process} and not from {@link Thread}.
      * @return A {@link ThreadPool} instance.
      */
-    public static ThreadPool createImageThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-thread-");
+    public static ThreadPool createImageThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
+        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-thread-", priority);
     }
 
     /**
      * Constructor
      */
-    /* package */ ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix) {
-        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix));
+    /* package */ ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix, int priority) {
+        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix, priority));
         allowCoreThreadTimeOut(true);
     }
 
@@ -146,13 +150,16 @@ public class ThreadPool extends ThreadPoolExecutor {
      * Class <tt>PriorityThread</tt> is an implementation of a {@link Thread}.
      */
     private static final class PriorityThread extends Thread {
-        public PriorityThread(Runnable runnable, String threadName) {
+        private final int priority;
+
+        public PriorityThread(Runnable runnable, String threadName, int priority) {
             super(runnable, threadName);
+            this.priority = priority;
         }
 
         @Override
         public void run() {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
+            Process.setThreadPriority(priority);
             super.run();
         }
     }
@@ -161,17 +168,19 @@ public class ThreadPool extends ThreadPoolExecutor {
      * Class <tt>PriorityThreadFactory</tt> is an implementation of a {@link ThreadFactory}.
      */
     private static final class PriorityThreadFactory implements ThreadFactory {
+        private final int priority;
         private final String namePrefix;
         private final AtomicInteger nameSuffix;
 
-        public PriorityThreadFactory(String namePrefix) {
+        public PriorityThreadFactory(String namePrefix, int priority) {
+            this.priority   = priority;
             this.namePrefix = namePrefix;
             this.nameSuffix = new AtomicInteger();
         }
 
         @Override
         public Thread newThread(Runnable runnable) {
-            return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet());
+            return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet(), priority);
         }
     }
 }

@@ -2,6 +2,7 @@ package android.ext.concurrent;
 
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.os.Process;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,10 +27,10 @@ public class ThreadPoolManager extends ThreadPool {
      * a thread is available. Threads that have not been used for <em>60</em> seconds are
      * terminated and removed from the cache.</P>
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @see #ThreadPoolManager(int, long, TimeUnit)
+     * @see #ThreadPoolManager(int, long, TimeUnit, int)
      */
     public ThreadPoolManager(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS);
+        this(maxThreads, 60, TimeUnit.SECONDS, Process.THREAD_PRIORITY_DEFAULT);
     }
 
     /**
@@ -40,10 +41,12 @@ public class ThreadPoolManager extends ThreadPool {
      * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks before
      * terminating.
      * @param unit The time unit for the <em>keepAliveTime</em> parameter.
+     * @param priority The priority to run the work thread at. The value supplied must be from
+     * {@link Process} and not from {@link Thread}.
      * @see #ThreadPoolManager(int)
      */
-    public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit) {
-        super(maxThreads, keepAliveTime, unit, "PoolM-thread-");
+    public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
+        super(maxThreads, keepAliveTime, unit, "PoolM-thread-", priority);
         mRunningTasks = new ConcurrentLinkedQueue<Task>();
     }
 

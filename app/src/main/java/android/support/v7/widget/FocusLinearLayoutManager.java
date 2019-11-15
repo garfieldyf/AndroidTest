@@ -1,79 +1,51 @@
 package android.support.v7.widget;
 
+import static android.support.v7.widget.RecyclerView.SCROLL_STATE_IDLE;
 import android.content.Context;
-import android.support.v7.widget.FocusManager.OnItemSelectedListener;
-import android.util.AttributeSet;
+import android.ext.widget.LayoutManagerHelper;
+import android.graphics.Rect;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import java.util.ArrayList;
 
 /**
  * Class FocusLinearLayoutManager
  * @author Garfield
  */
-public class FocusLinearLayoutManager extends LinearLayoutManager {
-    private final FocusManager mFocusManager;
+public class FocusLinearLayoutManager extends LinearLayoutManager implements OnFocusChangeListener {
+    private int mPosition;
 
-    /**
-     * Constructor
-     * @see #FocusLinearLayoutManager(Context, int, boolean)
-     * @see #FocusLinearLayoutManager(Context, AttributeSet, int, int)
-     */
     public FocusLinearLayoutManager(Context context) {
-        this(context, VERTICAL, false);
+        super(context);
     }
 
-    /**
-     * Constructor
-     * @see #FocusLinearLayoutManager(Context)
-     * @see #FocusLinearLayoutManager(Context, AttributeSet, int, int)
-     */
     public FocusLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
         super(context, orientation, reverseLayout);
-        mFocusManager = new FocusManager(this);
     }
 
-    /**
-     * Constructor
-     * @see #FocusLinearLayoutManager(Context)
-     * @see #FocusLinearLayoutManager(Context, int, boolean)
-     */
-    public FocusLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        mFocusManager = new FocusManager(this);
-    }
-
-    /**
-     * Returns the focused item in the data set of the adapter.
-     * @return The position of the item in the data set of the adapter.
-     * @see #setFocusedItem(int)
-     * @see #setFocusedView(View)
-     */
     public int getFocusedItem() {
-        return mFocusManager.mPosition;
+        return mPosition;
     }
 
-    /**
-     * Sets the focused item in the data set of the adapter.
-     * @param position The position of the item in the data set of the adapter.
-     * @see #getFocusedItem()
-     * @see #setFocusedView(View)
-     */
-    public void setFocusedItem(int position) {
-        mFocusManager.setFocusedItem(position);
+    public int setFocusedItem(View child) {
+        return (mPosition = (child != null ? getPosition(child) : 0));
     }
 
-    /**
-     * Sets the focused view in the <tt>RecyclerView</tt>.
-     * @param focused The focused <tt>View</tt>.
-     * @see #getFocusedItem()
-     * @see #setFocusedItem(int)
-     */
-    public final void setFocusedView(View focused) {
-        mFocusManager.setFocusedItem(focused != null ? getPosition(focused) : 0);
+    public void requestItemFocus(int position) {
+        if (mRecyclerView != null) {
+            mPosition = position;
+            if (!requestItemFocus()) {
+                scrollToPosition(mPosition);
+                LayoutManagerHelper.requestItemFocus(this, mPosition);
+            }
+        }
     }
 
-    public final void setOnItemSelectedListener(OnItemSelectedListener listener) {
-        mFocusManager.mListener = listener;
+    @Override
+    public void onFocusChange(View view, boolean hasFocus) {
+        if (hasFocus) {
+            requestItemFocus();
+        }
     }
 
     @Override
@@ -82,8 +54,44 @@ public class FocusLinearLayoutManager extends LinearLayoutManager {
     }
 
     @Override
+    public boolean requestChildRectangleOnScreen(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {
+        if (mOrientation == VERTICAL) {
+            final int dy = (child.getTop() + child.getHeight() / 2) - getHeight() / 2;
+            if (dy != 0) {
+                scrollBy(parent, 0, dy, immediate);
+                return true;
+            }
+        } else {
+            final int dx = (child.getLeft() + child.getWidth() / 2) - getWidth() / 2;
+            if (dx != 0) {
+                scrollBy(parent, dx, 0, immediate);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     /* package */ void setRecyclerView(RecyclerView recyclerView) {
         super.setRecyclerView(recyclerView);
-        mFocusManager.onSetRecyclerView(recyclerView);
+        if (recyclerView != null) {
+            recyclerView.setFocusable(true);
+            recyclerView.setOnFocusChangeListener(this);
+            recyclerView.setDescendantFocusability(RecyclerView.FOCUS_BEFORE_DESCENDANTS);
+        }
+    }
+
+    private boolean requestItemFocus() {
+        final View focused = findViewByPosition(mPosition);
+        return (focused != null && focused.requestFocus());
+    }
+
+    private static void scrollBy(RecyclerView parent, int dx, int dy, boolean immediate) {
+        if (immediate || parent.getScrollState() != SCROLL_STATE_IDLE) {
+            parent.scrollBy(dx, dy);
+        } else {
+            parent.smoothScrollBy(dx, dy);
+        }
     }
 }

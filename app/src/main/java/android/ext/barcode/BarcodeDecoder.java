@@ -204,7 +204,7 @@ public class BarcodeDecoder {
      * @param source The {@link LuminanceSource} to decode.
      * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
      */
-    protected synchronized Result decode(LuminanceSource source) {
+    /* package */ synchronized Result decode(LuminanceSource source) {
         try {
             return mReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
         } catch (Exception e) {

@@ -63,9 +63,20 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     }
 
     /**
+     * Equivalent to calling <tt>postNotifyItemChanged(position, null)</tt>.
+     * @param position The position of the item that has changed
+     * @see #postNotifyItemChanged(int, Object)
+     * @see #postNotifyItemRangeChanged(int, int, Object)
+     */
+    public final void postNotifyItemChanged(int position) {
+        postNotifyItemRangeChanged(position, 1, null);
+    }
+
+    /**
      * Equivalent to calling <tt>postNotifyItemRangeChanged(position, 1, payload)</tt>.
      * @param position The position of the item that has changed
      * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
+     * @see #postNotifyItemChanged(int)
      * @see #postNotifyItemRangeChanged(int, int, Object)
      */
     public final void postNotifyItemChanged(int position, Object payload) {
@@ -128,6 +139,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * @param positionStart The position of the first item that has changed.
      * @param itemCount The number of items that have changed.
      * @param payload Optional parameter, use <tt>null</tt> to identify a "full" update.
+     * @see #postNotifyItemChanged(int)
      * @see #postNotifyItemChanged(int, Object)
      */
     public final void postNotifyItemRangeChanged(int positionStart, int itemCount, Object payload) {

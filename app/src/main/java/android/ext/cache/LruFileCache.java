@@ -44,8 +44,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
      * but do not call {@link #entryRemoved} on each removed entry.
      */
     public synchronized void clearCache() {
-        size = 0;
-        map.clear();
+        super.clear();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
     }
 
@@ -55,9 +54,18 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     }
 
     @Override
-    public synchronized File get(String key) {
-        final File result = map.get(key);
-        return (result != null ? result : buildCacheFile(key));
+    public File get(String key) {
+        File result = super.get(key);
+        if (result != null) {
+            return result;
+        }
+
+        result = buildCacheFile(key);
+        if (result.exists()) {
+            put(key, result);
+        }
+
+        return result;
     }
 
     @Override
@@ -67,18 +75,22 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         }
     }
 
-    /**
-     * Builds the cache file with the specified <em>key</em>.
-     * @param key The key.
-     * @return The absolute path of the cache <tt>File</tt>. Never <tt>null</tt>.
-     */
-    protected File buildCacheFile(String key) {
-        final File result = new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
-        if (result.exists()) {
-            put(key, result);
+    @Override
+    /* package */ File removeImpl(String key) {
+        File result = super.removeImpl(key);
+        if (result != null) {
+            return result;
         }
 
-        return result;
+        result = buildCacheFile(key);
+        return (result.exists() ? result : null);
+    }
+
+    /**
+     * Builds the cache file with the specified <em>key</em>.
+     */
+    private File buildCacheFile(String key) {
+        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     @Override

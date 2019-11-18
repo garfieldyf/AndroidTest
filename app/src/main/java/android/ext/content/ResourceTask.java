@@ -146,7 +146,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = parseResult(params, null);
-                DebugUtils.__checkStopMethodTracing("ResourceTask", "parseResult");
+                DebugUtils.__checkStopMethodTracing("ResourceTask", "no cache file parseResult params = " + Arrays.toString(params));
             } else {
                 DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(params, cacheFile);
@@ -165,7 +165,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         try {
             DebugUtils.__checkStartMethodTracing();
             final Result result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -183,7 +183,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
         // If download failed or this task was cancelled, deletes the temp file.
         if (statusCode != HTTP_OK || isCancelled()) {
-            DebugUtils.__checkDebug(true, "ResourceTask", "Downloads statusCode = " + statusCode + ", isCancelled = " + isCancelled());
+            DebugUtils.__checkDebug(true, "ResourceTask", "downloads params = " + Arrays.toString(params) + " statusCode = " + statusCode + ", isCancelled = " + isCancelled());
             FileUtils.deleteFiles(tempFile, false);
             return null;
         }
@@ -191,7 +191,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         // If the cache file is hit and the cache file's contents are equal the temp
         // file's contents. Deletes the temp file and cancel this task, do not update UI.
         if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI.");
+            DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI. params = " + Arrays.toString(params));
             FileUtils.deleteFiles(tempFile, false);
             cancel(false);
             return null;
@@ -200,7 +200,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         // Parse the temp file and save it to the cache file.
         DebugUtils.__checkStartMethodTracing();
         final Result result = parseResult(params, new File(tempFile));
-        DebugUtils.__checkStopMethodTracing("ResourceTask", "download");
+        DebugUtils.__checkStopMethodTracing("ResourceTask", "downloads params = " + Arrays.toString(params));
         if (result != null) {
             FileUtils.moveFile(tempFile, cacheFile);
         }

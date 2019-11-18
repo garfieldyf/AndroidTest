@@ -174,7 +174,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             if (cacheFile == null) {
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(mContext, key, null, task);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", "parseResult");
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", "no cache file parseResult key = " + key);
             } else {
                 DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
@@ -216,7 +216,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         try {
             DebugUtils.__checkStartMethodTracing();
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache");
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache key = " + key + ", cacheFile = " + cacheFile);
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -234,7 +234,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         final int statusCode  = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
         // If download failed or the task was cancelled, deletes the temp file.
         if (statusCode != HTTP_OK || isTaskCancelled(task)) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "Downloads statusCode = " + statusCode + ", isCancelled = " + isTaskCancelled(task));
+            DebugUtils.__checkDebug(true, "ResourceLoader", "downloads key = " + key + ", statusCode = " + statusCode + ", isCancelled = " + isTaskCancelled(task));
             FileUtils.deleteFiles(tempFile, false);
             return null;
         }
@@ -242,7 +242,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         // If the cache file is hit and the cache file's contents are equal the temp
         // file's contents, deletes the temp file and cancel the task, do not update UI.
         if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI.");
+            DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI. key = " + key);
             FileUtils.deleteFiles(tempFile, false);
             task.cancel(false);
             return null;
@@ -251,7 +251,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         // Parse the temp file and save it to the cache file.
         DebugUtils.__checkStartMethodTracing();
         final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-        DebugUtils.__checkStopMethodTracing("ResourceLoader", "download");
+        DebugUtils.__checkStopMethodTracing("ResourceLoader", "downloads key = " + key);
         if (result != null) {
             FileUtils.moveFile(tempFile, cacheFile);
         }

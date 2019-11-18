@@ -32,19 +32,17 @@ public class FocusLinearLayoutManager extends LinearLayoutManager implements OnF
     }
 
     public void requestItemFocus(int position) {
-        if (mRecyclerView != null) {
-            mPosition = position;
-            if (!requestItemFocus()) {
-                scrollToPosition(mPosition);
-                LayoutManagerHelper.requestItemFocus(this, mPosition);
-            }
+        mPosition = position;
+        if (!requestChildFocus()) {
+            scrollToPosition(mPosition);
+            LayoutManagerHelper.requestItemFocus(this, mPosition);
         }
     }
 
     @Override
     public void onFocusChange(View view, boolean hasFocus) {
         if (hasFocus) {
-            requestItemFocus();
+            requestChildFocus();
         }
     }
 
@@ -82,7 +80,7 @@ public class FocusLinearLayoutManager extends LinearLayoutManager implements OnF
         }
     }
 
-    private boolean requestItemFocus() {
+    private boolean requestChildFocus() {
         final View focused = findViewByPosition(mPosition);
         return (focused != null && focused.requestFocus());
     }

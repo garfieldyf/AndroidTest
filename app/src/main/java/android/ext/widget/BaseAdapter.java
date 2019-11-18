@@ -35,11 +35,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * a layout then this method will be post the change using a <tt>Handler</tt>.
      */
     public final void postNotifyDataSetChanged() {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mRecyclerView.isComputingLayout()) {
+        if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
             mRecyclerView.post(new NotificationRunnable(MESSAGE_DATA_CHANGED, 0, 0, null));
         } else {
+            DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyDataSetChanged();
         }
     }
@@ -90,11 +90,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * @param toPosition The new position of the item.
      */
     public final void postNotifyItemMoved(int fromPosition, int toPosition) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mRecyclerView.isComputingLayout()) {
+        if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
             mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_MOVED, fromPosition, toPosition, null));
         } else {
+            DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemMoved(fromPosition, toPosition);
         }
     }
@@ -107,11 +107,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * @see #postNotifyItemRemoved(int)
      */
     public final void postNotifyItemRangeRemoved(int positionStart, int itemCount) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mRecyclerView.isComputingLayout()) {
+        if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
             mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_REMOVED, positionStart, itemCount, null));
         } else {
+            DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeRemoved(positionStart, itemCount);
         }
     }
@@ -124,11 +124,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * @see #postNotifyItemInserted(int)
      */
     public final void postNotifyItemRangeInserted(int positionStart, int itemCount) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mRecyclerView.isComputingLayout()) {
+        if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
             mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_INSERTED, positionStart, itemCount, null));
         } else {
+            DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeInserted(positionStart, itemCount);
         }
     }
@@ -143,11 +143,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
      * @see #postNotifyItemChanged(int, Object)
      */
     public final void postNotifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        if (mRecyclerView.isComputingLayout()) {
+        if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
             mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_CHANGED, positionStart, itemCount, payload));
         } else {
+            DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeChanged(positionStart, itemCount, payload);
         }
     }

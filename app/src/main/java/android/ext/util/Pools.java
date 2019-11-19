@@ -22,20 +22,7 @@ public final class Pools {
      * @see #synchronizedPool(Pool)
      */
     public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
-        DebugUtils.__checkError(factory == null, "factory == null");
-        return new SimplePool<T>(factory, maxSize);
-    }
-
-    /**
-     * Creates a new <b>fixed-size</b> array {@link Pool}.
-     * @param maxSize The maximum number of arrays to allow in this pool.
-     * @param length The maximum number of elements in the each array.
-     * @param componentType The array's component type.
-     * @return An newly array <tt>Pool</tt>.
-     * @see #synchronizedPool(Pool)
-     */
-    public static <T> Pool<T> newPool(int maxSize, int length, Class<?> componentType) {
-        return new ArrayPool<T>(maxSize, length, componentType);
+        return new ArrayPool<T>(factory, maxSize);
     }
 
     /**
@@ -43,6 +30,7 @@ public final class Pools {
      * all access to the pool.
      * @param pool The {@link Pool} to wrap in a synchronized pool.
      * @return A synchronized <tt>Pool</tt>.
+     * @see #newPool(Factory, int)
      */
     public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
         return new SynchronizedPool<T>(pool);
@@ -51,8 +39,8 @@ public final class Pools {
     public static void dumpPool(Pool<?> pool, Printer printer) {
         if (pool instanceof SynchronizedPool) {
             ((SynchronizedPool<?>)pool).dump(printer);
-        } else if (pool instanceof SimplePool) {
-            ((SimplePool<?>)pool).dump(printer, null);
+        } else if (pool instanceof ArrayPool) {
+            ((ArrayPool<?>)pool).dump(printer, null);
         }
     }
 
@@ -176,7 +164,7 @@ public final class Pools {
      * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
      */
     public static final class ByteArrayPool {
-        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(2, 8192, byte.class));
+        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 2));
     }
 
     /**
@@ -223,9 +211,9 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static class SimplePool<T> implements Pool<T>, Factory<T> {
+    private static class ArrayPool<T> implements Pool<T> {
         private int size;
         private final Object[] elements;
         private final Factory<T> factory;
@@ -237,10 +225,11 @@ public final class Pools {
          * @param maxSize The maximum number of elements
          * to allow in this pool.
          */
-        public SimplePool(Factory<T> factory, int maxSize) {
+        public ArrayPool(Factory<T> factory, int maxSize) {
             DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
+            DebugUtils.__checkError(factory == null, "factory == null");
+            this.factory  = factory;
             this.elements = new Object[maxSize];
-            this.factory  = (factory != null ? factory : this);
         }
 
         @Override
@@ -249,11 +238,6 @@ public final class Pools {
                 Arrays.fill(elements, 0, size, null);
                 size = 0;
             }
-        }
-
-        @Override
-        public T newInstance() {
-            throw new RuntimeException("Must be implementation!");
         }
 
         @Override
@@ -310,33 +294,6 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
-     */
-    private static final class ArrayPool<T> extends SimplePool<T> {
-        private final int length;
-        private final Class<?> componentType;
-
-        /**
-         * Constructor
-         * @param maxSize The maximum number of arrays to allow in this pool.
-         * @param length The maximum number of elements in the each array.
-         * @param componentType The array's component type.
-         */
-        public ArrayPool(int maxSize, int length, Class<?> componentType) {
-            super(null, maxSize);
-            this.length = length;
-            this.componentType = componentType;
-            DebugUtils.__checkError(length <= 0, "length <= 0");
-        }
-
-        @Override
-        @SuppressWarnings("unchecked")
-        public T newInstance() {
-            return (T)Array.newInstance(componentType, length);
-        }
-    }
-
-    /**
      * Class <tt>SynchronizedPool</tt> is an implementation of a {@link Pool}.
      */
     private static final class SynchronizedPool<T> implements Pool<T> {
@@ -367,8 +324,8 @@ public final class Pools {
         }
 
         public synchronized final void dump(Printer printer) {
-            if (pool instanceof SimplePool) {
-                ((SimplePool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
+            if (pool instanceof ArrayPool) {
+                ((ArrayPool<?>)pool).dump(printer, SynchronizedPool.class.getSimpleName());
             }
         }
     }

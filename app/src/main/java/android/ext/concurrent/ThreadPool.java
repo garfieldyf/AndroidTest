@@ -110,7 +110,14 @@ public class ThreadPool extends ThreadPoolExecutor {
         @Override
         public synchronized void execute(Runnable task) {
             // Adds the new task to the task queue.
-            mTasks.addLast(new Task(task));
+            mTasks.addLast(() -> {
+                try {
+                    task.run();
+                } finally {
+                    // Executes the next task.
+                    scheduleNext();
+                }
+            });
 
             // If mActive is not running, run it.
             if (mActive == null) {
@@ -118,49 +125,10 @@ public class ThreadPool extends ThreadPoolExecutor {
             }
         }
 
-        public synchronized void scheduleNext() {
+        private synchronized void scheduleNext() {
             if ((mActive = mTasks.pollFirst()) != null) {
                 mExecutor.execute(mActive);
             }
-        }
-
-        /**
-         * Class <tt>Task</tt> is an implementation of an {@link Runnable}.
-         */
-        private final class Task implements Runnable {
-            private final Runnable task;
-
-            public Task(Runnable task) {
-                this.task = task;
-            }
-
-            @Override
-            public void run() {
-                try {
-                    task.run();
-                } finally {
-                    // Executes the next task.
-                    scheduleNext();
-                }
-            }
-        }
-    }
-
-    /**
-     * Class <tt>PriorityThread</tt> is an implementation of a {@link Thread}.
-     */
-    private static final class PriorityThread extends Thread {
-        private final int priority;
-
-        public PriorityThread(Runnable runnable, String threadName, int priority) {
-            super(runnable, threadName);
-            this.priority = priority;
-        }
-
-        @Override
-        public void run() {
-            Process.setThreadPriority(priority);
-            super.run();
         }
     }
 
@@ -179,8 +147,11 @@ public class ThreadPool extends ThreadPoolExecutor {
         }
 
         @Override
-        public Thread newThread(Runnable runnable) {
-            return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet(), priority);
+        public Thread newThread(Runnable target) {
+            return new Thread(() -> {
+                Process.setThreadPriority(priority);
+                target.run();
+            }, namePrefix + nameSuffix.incrementAndGet());
         }
     }
 }

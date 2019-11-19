@@ -222,7 +222,7 @@ public final class FileUtils {
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
         final List<Dirent> result = new ArrayList<Dirent>();
-        return (scanFiles(dirPath, ListCallback.sInstance, flags, result) == 0 ? result : null);
+        return (scanFiles(dirPath, FileUtils::onScanFile, flags, result) == 0 ? result : null);
     }
 
     /**
@@ -237,7 +237,7 @@ public final class FileUtils {
      * @see #listFiles(String, int)
      */
     public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
-        return scanFiles(dirPath, ListCallback.sInstance, flags, outDirents);
+        return scanFiles(dirPath, FileUtils::onScanFile, flags, outDirents);
     }
 
     /**
@@ -643,6 +643,12 @@ public final class FileUtils {
             FileUtils.close(source);
             FileUtils.close(target);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static int onScanFile(String path, int type, Object cookie) {
+        ((Collection)cookie).add(new Dirent(path, type));
+        return ScanCallback.SC_CONTINUE;
     }
 
     /**
@@ -1334,7 +1340,7 @@ public final class FileUtils {
          * @see #compareToIgnoreCase(Dirent)
          */
         public static Comparator<Dirent> caseInsensitiveOrder() {
-            return CaseInsensitiveComparator.sInstance;
+            return Dirent::compareToIgnoreCase;
         }
 
         public final void dump(Printer printer) {
@@ -1395,34 +1401,6 @@ public final class FileUtils {
             default:
                 throw new AssertionError("Unknown Dirent type - " + type);
             }
-        }
-    }
-
-    /**
-     * Class <tt>ListCallback</tt> used to {@link FileUtils#listFiles(String, int)}.
-     */
-    private static final class ListCallback implements ScanCallback {
-        public static final ListCallback sInstance = new ListCallback();
-
-        @Keep
-        @Override
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        public int onScanFile(String path, int type, Object result) {
-            ((Collection)result).add(new Dirent(path, type));
-            return SC_CONTINUE;
-        }
-    }
-
-    /**
-     * Class <tt>CaseInsensitiveComparator</tt> compares {@link Dirent} ignoring
-     * the {@link Dirent#path path} field case differences.
-     */
-    private static final class CaseInsensitiveComparator implements Comparator<Dirent> {
-        public static final CaseInsensitiveComparator sInstance = new CaseInsensitiveComparator();
-
-        @Override
-        public int compare(Dirent one, Dirent another) {
-            return one.compareToIgnoreCase(another);
         }
     }
 

@@ -12,7 +12,6 @@ import android.support.v7.widget.RecyclerView.Recycler;
 import android.support.v7.widget.RecyclerView.State;
 import android.util.Printer;
 import android.view.View;
-import android.view.ViewGroup;
 
 /**
  * Class LayoutManagerHelper
@@ -35,7 +34,7 @@ public final class LayoutManagerHelper {
      * @see RecyclerView#setChildDrawingOrderCallback(ChildDrawingOrderCallback)
      */
     public static void setChildDrawingOrderCallback(RecyclerView recyclerView) {
-        recyclerView.setChildDrawingOrderCallback(new ChildDrawingOrder(recyclerView));
+        recyclerView.setChildDrawingOrderCallback((childCount, i) -> ViewUtils.getChildDrawingOrder(recyclerView, childCount, i));
     }
 
     /**
@@ -122,44 +121,6 @@ public final class LayoutManagerHelper {
             // no scroll.
             return false;
         }
-    }
-
-    /**
-     * Class <tt>ItemViewFinder</tt> used to find the specified child view from the {@link RecyclerView}.
-     */
-    public static abstract class ItemViewFinder implements Runnable {
-        private int mRetryCount;
-        private final int mPosition;
-        private final LayoutManager mLayout;
-
-        /**
-         * @param layout The {@link LayoutManager}.
-         * @param position The adapter position of the item to find.
-         */
-        public ItemViewFinder(LayoutManager layout, int position) {
-            mRetryCount = 3;
-            mLayout = layout;
-            mPosition = position;
-        }
-
-        @Override
-        public void run() {
-            final View itemView = mLayout.findViewByPosition(mPosition);
-            DebugUtils.__checkDebug(itemView == null && mRetryCount <= 0, "LayoutManagerHelper", "The LayoutManager couldn't find view by position - " + mPosition);
-            if (itemView != null) {
-                onItemViewFound(mLayout, mPosition, itemView);
-            } else if (--mRetryCount > 0) {
-                UIHandler.sInstance.post(this);
-            }
-        }
-
-        /**
-         * Called when an item in the data set of the adapter has been found.
-         * @param layout The {@link LayoutManager}.
-         * @param position The adapter position of the item.
-         * @param itemView The item {@link View} has been found.
-         */
-        protected abstract void onItemViewFound(LayoutManager layout, int position, View itemView);
     }
 
     /**
@@ -250,36 +211,32 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Class <tt>ChildDrawingOrder</tt> is an implementation of a {@link ChildDrawingOrderCallback}.
+     * Class <tt>FocusFinder</tt> try to give focus to a specific child view.
      */
-    public static final class ChildDrawingOrder implements ChildDrawingOrderCallback {
-        private final ViewGroup mContainer;
+    private static final class FocusFinder implements Runnable {
+        private int mRetryCount;
+        private final int mPosition;
+        private final LayoutManager mLayout;
 
         /**
-         * Constructor
-         * @param container The <tt>ViewGroup</tt>.
+         * @param layout The {@link LayoutManager}.
+         * @param position The adapter position of the item to find.
          */
-        public ChildDrawingOrder(ViewGroup container) {
-            mContainer = container;
-        }
-
-        @Override
-        public int onGetChildDrawingOrder(int childCount, int i) {
-            return ViewUtils.getChildDrawingOrder(mContainer, childCount, i);
-        }
-    }
-
-    /**
-     * Class <tt>FocusFinder</tt> is an implementation of an {@link ItemViewFinder}.
-     */
-    private static final class FocusFinder extends ItemViewFinder {
         public FocusFinder(LayoutManager layout, int position) {
-            super(layout, position);
+            mRetryCount = 3;
+            mLayout = layout;
+            mPosition = position;
         }
 
         @Override
-        protected void onItemViewFound(LayoutManager layout, int position, View itemView) {
-            itemView.requestFocus();
+        public void run() {
+            final View child = mLayout.findViewByPosition(mPosition);
+            DebugUtils.__checkDebug(child == null && mRetryCount <= 0, "LayoutManagerHelper", "The LayoutManager couldn't find view by position - " + mPosition);
+            if (child != null) {
+                child.requestFocus();
+            } else if (--mRetryCount > 0) {
+                UIHandler.sInstance.post(this);
+            }
         }
     }
 

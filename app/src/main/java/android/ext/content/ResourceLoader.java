@@ -242,7 +242,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         // If the cache file is hit and the cache file's contents are equal the temp
         // file's contents, deletes the temp file and cancel the task, do not update UI.
         if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "The cache file's contents are equal the download file's contents, do not update UI. key = " + key);
+            DebugUtils.__checkDebug(true, "ResourceLoader", "compareFile is equals, do not update UI. key = " + key);
             FileUtils.deleteFiles(tempFile, false);
             task.cancel(false);
             return null;

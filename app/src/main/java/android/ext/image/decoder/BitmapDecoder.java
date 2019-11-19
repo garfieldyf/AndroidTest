@@ -49,7 +49,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
         // Retrieves the bitmap from bitmap pool to reuse it.
         opts.inBitmap = mBitmapPool.get(mContext, parameters, opts);
-        DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "opts.inBitmap = " + opts.inBitmap);
+        DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.
         return (Image)decodeBitmap(uri, flags, opts);

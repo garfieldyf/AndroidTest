@@ -191,7 +191,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         // If the cache file is hit and the cache file's contents are equal the temp
         // file's contents. Deletes the temp file and cancel this task, do not update UI.
         if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceTask", "The cache file's contents are equal the download file's contents, do not update UI. params = " + Arrays.toString(params));
+            DebugUtils.__checkDebug(true, "ResourceTask", "compareFile is equals, do not update UI. params = " + Arrays.toString(params));
             FileUtils.deleteFiles(tempFile, false);
             cancel(false);
             return null;

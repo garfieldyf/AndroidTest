@@ -56,12 +56,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
     @Override
     public File get(String key) {
         File result = super.get(key);
-        if (result != null) {
-            return result;
-        }
-
-        result = buildCacheFile(key);
-        if (result.exists()) {
+        if (result == null && (result = buildCacheFile(key)).exists()) {
             put(key, result);
         }
 

@@ -243,6 +243,7 @@ public final class PackageUtils {
          * @param res The package archive file's <tt>Resources</tt>.
          * @param info The package archive file's {@link ApplicationInfo}.
          */
+        @SuppressWarnings("deprecation")
         protected void initialize(Context context, Resources res, ApplicationInfo info) {
             this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : context.getPackageManager().getDefaultActivityIcon());
             this.label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));

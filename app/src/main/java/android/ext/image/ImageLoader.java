@@ -41,7 +41,7 @@ import java.util.Arrays;
  *      app:decoder="classFullName" /&gt;</pre>
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
     /**
      * If set the image loader will be dump the {@link Options} when
@@ -363,6 +363,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #placeholder(Drawable)
          */
+        @SuppressWarnings("deprecation")
         public final LoadRequest placeholder(int id) {
             mParams[PLACEHOLDER_INDEX] = mLoader.mModule.mContext.getResources().getDrawable(id);
             return this;

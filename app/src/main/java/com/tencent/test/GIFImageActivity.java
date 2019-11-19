@@ -1,12 +1,10 @@
 package com.tencent.test;
 
-import java.util.Arrays;
 import android.app.Activity;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageLoader.ImageDecoder;
-import android.ext.temp.BaseListAdapter;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -18,6 +16,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.tencent.temp.BaseListAdapter;
+import java.util.Arrays;
 
 public class GIFImageActivity extends Activity {
     private ListView mListView;

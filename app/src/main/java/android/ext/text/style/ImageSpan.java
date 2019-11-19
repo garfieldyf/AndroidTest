@@ -31,6 +31,7 @@ public class ImageSpan extends ReplacementSpan {
      * @param id The resource id of the image.
      * @see #ImageSpan(Drawable)
      */
+    @SuppressWarnings("deprecation")
     public ImageSpan(Resources res, int id) {
         mDrawable = res.getDrawable(id);
     }

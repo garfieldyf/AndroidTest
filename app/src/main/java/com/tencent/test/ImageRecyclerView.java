@@ -1,12 +1,12 @@
 package com.tencent.test;
 
-import java.util.ArrayList;
 import android.content.Context;
-import android.ext.temp.RecyclerAdapter;
 import android.ext.widget.ViewUtils;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.View;
+import com.tencent.temp.RecyclerAdapter;
+import java.util.ArrayList;
 
 public class ImageRecyclerView extends RecyclerView {
     public ImageRecyclerView(Context context) {

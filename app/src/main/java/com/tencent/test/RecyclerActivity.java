@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
-import android.ext.temp.RecyclerAdapter;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
 import android.graphics.Bitmap;
@@ -21,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.tencent.temp.RecyclerAdapter;
 import java.util.Arrays;
 import java.util.List;
 

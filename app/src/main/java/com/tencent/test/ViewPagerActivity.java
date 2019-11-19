@@ -2,18 +2,18 @@ package com.tencent.test;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.temp.ViewPager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import com.tencent.temp.ViewPager;
 
 public class ViewPagerActivity extends Activity {
     private static final int[] PAGE_COLOR = { Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.GRAY, Color.MAGENTA, };
 
-    /* package */ViewPager mViewPager;
+    /* package */ ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

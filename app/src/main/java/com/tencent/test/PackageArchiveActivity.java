@@ -1,13 +1,11 @@
 package com.tencent.test;
 
-import java.util.List;
 import android.app.Activity;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.PackageIconLoader;
-import android.ext.temp.BaseListAdapter;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -21,7 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.tencent.temp.BaseListAdapter;
 import com.tencent.test.PackageActivity.ViewHolder;
+import java.util.List;
 
 public class PackageArchiveActivity extends Activity {
     /* package */ ListView mPackageList;

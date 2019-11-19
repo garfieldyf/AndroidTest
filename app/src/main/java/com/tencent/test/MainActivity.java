@@ -1,10 +1,8 @@
 package com.tencent.test;
 
-import java.net.HttpURLConnection;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.ext.temp.BaseListAdapter;
 import android.ext.util.FileUtils;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.Stat;
@@ -13,6 +11,8 @@ import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import com.tencent.temp.BaseListAdapter;
+import java.net.HttpURLConnection;
 
 public class MainActivity extends Activity {
     private ListView mListView;

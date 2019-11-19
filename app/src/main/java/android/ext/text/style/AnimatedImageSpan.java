@@ -21,6 +21,7 @@ public class AnimatedImageSpan extends ImageSpan implements Runnable {
      * @param id The resource id of the {@link AnimationDrawable}.
      * @see #AnimatedImageSpan(View, AnimationDrawable)
      */
+    @SuppressWarnings("deprecation")
     public AnimatedImageSpan(View view, int id) {
         this(view, (AnimationDrawable)view.getResources().getDrawable(id));
     }

@@ -1,7 +1,6 @@
 package com.tencent.test;
 
 import android.app.Activity;
-import android.ext.temp.PrinterView;
 import android.ext.util.DeviceUtils;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -9,6 +8,7 @@ import android.text.Spannable;
 import android.text.TextUtils;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import com.tencent.temp.PrinterView;
 
 public class PrinterActivity extends Activity {
     @Override

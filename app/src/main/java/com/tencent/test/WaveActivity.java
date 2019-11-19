@@ -3,7 +3,6 @@ package com.tencent.test;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
-import android.ext.temp.AnimatorDrawable;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.view.View;
+import com.tencent.temp.AnimatorDrawable;
 
 public class WaveActivity extends Activity {
 

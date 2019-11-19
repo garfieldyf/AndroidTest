@@ -64,8 +64,8 @@ import java.util.concurrent.Executor;
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
- *             // 1、If the cache file is hit, do not update UI.
- *             // 2、Loading failed, show error or empty UI.
+ *             // 1.If the cache file is hit, do not update UI.
+ *             // 2.Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -76,7 +76,7 @@ import java.util.concurrent.Executor;
  * mLoader.load(url, new JSONLoadParams(), new LoadCompleteListener(), cookie);</pre>
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ResourceLoader<Key, Result> extends Loader<Key> {
     private static final int MAX_POOL_SIZE = 8;
 

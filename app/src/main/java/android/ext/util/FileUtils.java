@@ -645,7 +645,7 @@ public final class FileUtils {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private static int onScanFile(String path, int type, Object cookie) {
         ((Collection)cookie).add(new Dirent(path, type));
         return ScanCallback.SC_CONTINUE;

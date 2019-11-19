@@ -1,9 +1,9 @@
 package com.tencent.test;
 
 import android.app.Activity;
-import android.ext.temp.BarcodeCameraView;
 import android.os.Bundle;
 import android.view.View;
+import com.tencent.temp.BarcodeCameraView;
 
 public class AndroidTestActivity extends Activity {
     private BarcodeCameraView mCameraView;

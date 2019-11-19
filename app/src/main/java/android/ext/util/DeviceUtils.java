@@ -101,6 +101,7 @@ public final class DeviceUtils {
     /**
      * Returns an array of ABIs supported by this device.
      */
+    @SuppressWarnings("deprecation")
     public static String[] getSupportedABIs() {
         return (Build.VERSION.SDK_INT > 20 ? Build.SUPPORTED_ABIS : new String[] { Build.CPU_ABI, Build.CPU_ABI2 });
     }

@@ -54,7 +54,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * Class ImageModule
  * @author Garfield
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byte[]>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;

@@ -70,8 +70,8 @@ import java.util.Arrays;
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
- *             // 1、If the cache file is hit, do not update UI.
- *             // 2、Loading failed, show error or empty UI.
+ *             // 1.If the cache file is hit, do not update UI.
+ *             // 2.Loading failed, show error or empty UI.
  *         }
  *     }
  * }

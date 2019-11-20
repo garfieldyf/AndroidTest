@@ -27,7 +27,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-", Process.THREAD_PRIORITY_DEFAULT);
+        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-", Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     /**

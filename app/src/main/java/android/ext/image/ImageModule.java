@@ -411,7 +411,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
          */
         public Builder(Context context) {
             mContext  = context;
-            mPriority = Process.THREAD_PRIORITY_DEFAULT;
+            mPriority = Process.THREAD_PRIORITY_BACKGROUND;
         }
 
         /**

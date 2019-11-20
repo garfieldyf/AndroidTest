@@ -30,7 +30,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @see #ThreadPoolManager(int, long, TimeUnit, int)
      */
     public ThreadPoolManager(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, Process.THREAD_PRIORITY_DEFAULT);
+        this(maxThreads, 60, TimeUnit.SECONDS, Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     /**

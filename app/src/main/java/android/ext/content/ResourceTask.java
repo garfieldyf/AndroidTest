@@ -6,6 +6,7 @@ import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.os.Process;
 import android.util.Log;
 import java.io.File;
 import java.util.Arrays;
@@ -162,8 +163,10 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
     }
 
     private boolean loadFromCache(Params[] params, File cacheFile) {
+        final int priority = Process.getThreadPriority(Process.myTid());
         try {
             DebugUtils.__checkStartMethodTracing();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             final Result result = parseResult(params, cacheFile);
             DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
             if (result != null) {
@@ -173,6 +176,8 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
             }
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
+        } finally {
+            Process.setThreadPriority(priority);
         }
 
         return false;

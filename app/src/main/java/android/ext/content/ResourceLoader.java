@@ -7,6 +7,7 @@ import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.os.Process;
 import android.util.Log;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -213,8 +214,10 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     }
 
     private boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {
+        final int priority = Process.getThreadPriority(Process.myTid());
         try {
             DebugUtils.__checkStartMethodTracing();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
             DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache key = " + key + ", cacheFile = " + cacheFile);
             if (result != null) {
@@ -224,6 +227,8 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             }
         } catch (Exception e) {
             Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
+        } finally {
+            Process.setThreadPriority(priority);
         }
 
         return false;

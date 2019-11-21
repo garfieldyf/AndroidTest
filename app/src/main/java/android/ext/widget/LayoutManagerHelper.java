@@ -231,7 +231,7 @@ public final class LayoutManagerHelper {
         @Override
         public void run() {
             final View child = mLayout.findViewByPosition(mPosition);
-            DebugUtils.__checkDebug(child == null && mRetryCount <= 0, "LayoutManagerHelper", "The LayoutManager couldn't find view by position - " + mPosition);
+            DebugUtils.__checkDebug(child == null && mRetryCount <= 0, "LayoutManagerHelper", "The " + mLayout + " couldn't find view by position - " + mPosition);
             if (child != null) {
                 child.requestFocus();
             } else if (--mRetryCount > 0) {

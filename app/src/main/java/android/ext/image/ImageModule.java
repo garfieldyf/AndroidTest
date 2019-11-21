@@ -25,7 +25,6 @@ import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.transformer.RoundedGIFTransformer;
 import android.ext.image.transformer.RoundedRectTransformer;
-import android.ext.image.transformer.Transformer;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
@@ -262,57 +261,19 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
     }
 
     /**
-     * Return a {@link Binder} object associated with a resource id.
+     * Return an object associated with a xml resource id.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>Binder</tt>.
-     * @return The <tt>Binder</tt>.
+     * @param id The xml resource id.
+     * @return The object.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
-    /* package */ final Object getBinder(int id) {
-        DebugUtils.__checkUIThread("getBinder");
+    /* package */ final Object getResource(int id) {
+        DebugUtils.__checkUIThread("getResource");
         Object result = mResources.get(id, null);
         if (result == null) {
             DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = XmlResources.loadBinder(mContext, id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the Binder - ID #0x" + Integer.toHexString(id));
-        }
-
-        return result;
-    }
-
-    /**
-     * Return a {@link Parameters} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>Parameters</tt>.
-     * @return The <tt>Parameters</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    /* package */ final Object getParameters(int id) {
-        DebugUtils.__checkUIThread("getParameters");
-        Object result = mResources.get(id, null);
-        if (result == null) {
-            DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = XmlResources.loadParameters(mContext, id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the Parameters - ID #0x" + Integer.toHexString(id));
-        }
-
-        return result;
-    }
-
-    /**
-     * Return a {@link Transformer} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>Transformer</tt>.
-     * @return The <tt>Transformer</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    /* package */ final Object getTransformer(int id) {
-        DebugUtils.__checkUIThread("getTransformer");
-        Object result = mResources.get(id, null);
-        if (result == null) {
-            DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = XmlResources.loadTransformer(mContext, id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the Transformer - ID #0x" + Integer.toHexString(id));
+            mResources.append(id, result = XmlResources.load(mContext, id));
+            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads xml resource - ID #0x" + Integer.toHexString(id));
         }
 
         return result;

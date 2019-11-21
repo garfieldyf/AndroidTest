@@ -320,7 +320,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #parameters(Parameters)
          */
         public final LoadRequest parameters(int id) {
-            mParams[PARAMETERS_INDEX] = mLoader.mModule.getParameters(id);
+            mParams[PARAMETERS_INDEX] = mLoader.mModule.getResource(id);
             return this;
         }
 
@@ -342,7 +342,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #transformer(Transformer)
          */
         public final LoadRequest transformer(int id) {
-            mParams[TRANSFORMER_INDEX] = mLoader.mModule.getTransformer(id);
+            mParams[TRANSFORMER_INDEX] = mLoader.mModule.getResource(id);
             return this;
         }
 
@@ -397,7 +397,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #binder(Binder)
          */
         public final LoadRequest binder(int id) {
-            mBinder = (Binder)mLoader.mModule.getBinder(id);
+            mBinder = (Binder)mLoader.mModule.getResource(id);
             return this;
         }
 

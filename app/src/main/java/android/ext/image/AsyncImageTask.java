@@ -97,7 +97,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
      * @see #setParameters(Parameters)
      */
     public final AsyncImageTask<URI> setParameters(int id) {
-        mParameters = XmlResources.loadParameters(mContext, id);
+        mParameters = XmlResources.load(mContext, id);
         return this;
     }
 

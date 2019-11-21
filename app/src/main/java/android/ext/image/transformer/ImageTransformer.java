@@ -96,10 +96,10 @@ public class ImageTransformer implements Transformer {
             a.recycle();
 
             if (id != 0) {
-                return XmlResources.loadTransformer(context, id);
+                return XmlResources.load(context, id);
             }
         }
 
-        return XmlResources.inflateTransformer(context, parser);
+        return (Transformer)XmlResources.inflate(context, parser);
     }
 }

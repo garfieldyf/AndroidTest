@@ -168,7 +168,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @return An empty <tt>Binder</tt>.
      */
     public static <Key, Params, Value> Binder<Key, Params, Value> emptyBinder() {
-        return EmptyBinder.sInstance;
+        return (key, params, target, value, state) -> { };
     }
 
     /**
@@ -277,17 +277,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
             mTarget = null;
             mBinder = null;
             mTaskPool.recycle(this);
-        }
-    }
-
-    /**
-     * Class <tt>EmptyBinder</tt> is an implementation of a {@link Binder}.
-     */
-    private static final class EmptyBinder implements Binder {
-        public static final EmptyBinder sInstance = new EmptyBinder();
-
-        @Override
-        public void bindValue(Object key, Object[] params, Object target, Object value, int state) {
         }
     }
 

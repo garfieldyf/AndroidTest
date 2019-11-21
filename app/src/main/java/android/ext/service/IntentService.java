@@ -19,7 +19,11 @@ public abstract class IntentService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         DebugUtils.__checkError(mSerialExecutor == null, "The mSerialExecutor uninitialized, You can initialize it on onCreate() method.");
-        mSerialExecutor.execute(new IntentAction(intent, startId));
+        mSerialExecutor.execute(() -> {
+            onHandleIntent(intent, startId);
+            stopSelf(startId);
+        });
+
         return START_NOT_STICKY;
     }
 
@@ -36,23 +40,4 @@ public abstract class IntentService extends Service {
      * @param startId A unique integer, passed earlier by {@link #onStartCommand(Intent, int, int)}.
      */
     protected abstract void onHandleIntent(Intent intent, int startId);
-
-    /**
-     * Class <tt>IntentAction</tt> is an implementation of a {@link Runnable}.
-     */
-    private final class IntentAction implements Runnable {
-        private final int mStartId;
-        private final Intent mIntent;
-
-        public IntentAction(Intent intent, int startId) {
-            mIntent  = intent;
-            mStartId = startId;
-        }
-
-        @Override
-        public void run() {
-            onHandleIntent(mIntent, mStartId);
-            stopSelf(mStartId);
-        }
-    }
 }

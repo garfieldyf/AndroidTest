@@ -54,7 +54,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byte[]>, XmlResourceInflater<ImageLoader> {
+public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, Factory<byte[]>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
@@ -82,6 +82,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      */
     public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+        ImageModule.__checkDumpSystemInfo(context);
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
@@ -93,7 +94,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mContext.registerComponentCallbacks(this);
-        ImageModule.__checkDumpSystemInfo(context);
+        if (mFileCache instanceof LruFileCache) {
+            mExecutor.execute(this);
+        }
     }
 
     /**
@@ -172,17 +175,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
         return mImageCache;
     }
 
-    public final void initCacheFiles() {
-        if (mFileCache instanceof LruFileCache) {
-            ((LruFileCache)mFileCache).initialize();
-        }
-    }
-
     /**
-     * Clears the {@link FileCache} and all cache files will be delete from filesystem.
+     * Clears the {@link FileCache} and deletes all cache files from the filesystem.
      */
     public final void clearCacheFiles() {
-        if (mFileCache != null) {
+        if (mFileCache instanceof LruFileCache) {
             mFileCache.clear();
         }
     }
@@ -206,6 +203,13 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
     @Override
     public final byte[] newInstance() {
         return new byte[16384];
+    }
+
+    @Override
+    public final void run() {
+        DebugUtils.__checkStartMethodTracing();
+        ((LruFileCache)mFileCache).initialize();
+        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize");
     }
 
     @Override

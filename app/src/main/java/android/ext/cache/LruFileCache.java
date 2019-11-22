@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 /**
- * Class <tt>LruFileCache</tt> is an implementation of a {@link LruCache}.
+ * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
 public class LruFileCache extends LruCache<String, File> implements FileCache, ScanCallback {
@@ -46,28 +46,13 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
         mCacheDir = FileUtils.getCacheDir(context, name);
     }
 
-    public synchronized void initialize() {
-        if (!mInitialized) {
-            final int priority = Process.getThreadPriority(Process.myTid());
-            try {
-                DebugUtils.__checkStartMethodTracing();
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
-                FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
-                DebugUtils.__checkStopMethodTracing("LruFileCache", "initialize size = " + size);
-            } finally {
-                mInitialized = true;
-                Process.setThreadPriority(priority);
-            }
-        }
-    }
-
     @Override
     public File getCacheDir() {
         return mCacheDir;
     }
 
     /**
-     * Clears this cache and all cache files will be delete from filesystem,
+     * Clears this cache and deletes all cache files from the filesystem,
      * but do not call {@link #entryRemoved} on each removed entry.
      */
     @Override
@@ -86,13 +71,29 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
     @Override
     public int onScanFile(String path, int type, Object cookie) {
         if (type == DT_REG) {
-            final File value = new File(path);
-            final String key = value.getName();
-            map.put(key, value);
-            size += sizeOf(key, value);
+            final File cacheFile = new File(path);
+            final String key = cacheFile.getName();
+            map.put(key, cacheFile);
+            size += sizeOf(key, cacheFile);
         }
 
         return SC_CONTINUE;
+    }
+
+    /**
+     * Initialize this file cache from the filesystem, do not call this method directly.
+     */
+    public synchronized final void initialize() {
+        if (!mInitialized) {
+            final int priority = Process.getThreadPriority(Process.myTid());
+            try {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
+                FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
+            } finally {
+                mInitialized = true;
+                Process.setThreadPriority(priority);
+            }
+        }
     }
 
     @Override

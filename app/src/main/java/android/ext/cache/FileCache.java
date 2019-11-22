@@ -15,8 +15,7 @@ public interface FileCache {
     File getCacheDir();
 
     /**
-     * Removes all files from this cache, leaving it empty,
-     * but do <b>not</b> delete cache files from filesystem.
+     * Removes all files from this cache, leaving it empty.
      * @see #remove(String)
      */
     void clear();

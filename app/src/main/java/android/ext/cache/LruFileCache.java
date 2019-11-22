@@ -1,9 +1,15 @@
 package android.ext.cache;
 
+import static android.ext.util.FileUtils.Dirent.DT_REG;
+import static android.ext.util.FileUtils.FLAG_IGNORE_HIDDEN_FILE;
+import static android.ext.util.FileUtils.FLAG_SCAN_FOR_DESCENDENTS;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.FileUtils.ScanCallback;
+import android.os.Process;
+import android.util.Log;
 import android.util.Printer;
 import java.io.File;
 import java.util.Arrays;
@@ -13,8 +19,9 @@ import java.util.Collection;
  * Class <tt>LruFileCache</tt> is an implementation of a {@link LruCache}.
  * @author Garfield
  */
-public class LruFileCache extends LruCache<String, File> implements FileCache {
-    protected final File mCacheDir;
+public class LruFileCache extends LruCache<String, File> implements FileCache, ScanCallback {
+    private boolean mInitialized;
+    private final File mCacheDir;
 
     /**
      * Constructor
@@ -39,13 +46,19 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         mCacheDir = FileUtils.getCacheDir(context, name);
     }
 
-    /**
-     * Clears this cache and all cache files will be delete from filesystem,
-     * but do not call {@link #entryRemoved} on each removed entry.
-     */
-    public synchronized void clearCache() {
-        super.clear();
-        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+    public synchronized void initialize() {
+        if (!mInitialized) {
+            final int priority = Process.getThreadPriority(Process.myTid());
+            try {
+                DebugUtils.__checkStartMethodTracing();
+                Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
+                FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
+                DebugUtils.__checkStopMethodTracing("LruFileCache", "initialize size = " + size);
+            } finally {
+                mInitialized = true;
+                Process.setThreadPriority(priority);
+            }
+        }
     }
 
     @Override
@@ -53,14 +66,33 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         return mCacheDir;
     }
 
+    /**
+     * Clears this cache and all cache files will be delete from filesystem,
+     * but do not call {@link #entryRemoved} on each removed entry.
+     */
     @Override
-    public File get(String key) {
-        File result = super.get(key);
-        if (result == null && (result = buildCacheFile(key)).exists()) {
-            put(key, result);
+    public synchronized void clear() {
+        size = 0;
+        map.clear();
+        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+    }
+
+    @Override
+    public synchronized File get(String key) {
+        final File cacheFile = map.get(key);
+        return (cacheFile != null ? cacheFile : new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString()));
+    }
+
+    @Override
+    public int onScanFile(String path, int type, Object cookie) {
+        if (type == DT_REG) {
+            final File value = new File(path);
+            final String key = value.getName();
+            map.put(key, value);
+            size += sizeOf(key, value);
         }
 
-        return result;
+        return SC_CONTINUE;
     }
 
     @Override
@@ -68,24 +100,6 @@ public class LruFileCache extends LruCache<String, File> implements FileCache {
         if (evicted || !oldFile.equals(newFile)) {
             oldFile.delete();
         }
-    }
-
-    @Override
-    /* package */ File removeImpl(String key) {
-        File result = super.removeImpl(key);
-        if (result != null) {
-            return result;
-        }
-
-        result = buildCacheFile(key);
-        return (result.exists() ? result : null);
-    }
-
-    /**
-     * Builds the cache file with the specified <em>key</em>.
-     */
-    private File buildCacheFile(String key) {
-        return new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString());
     }
 
     @Override

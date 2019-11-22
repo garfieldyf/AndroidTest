@@ -172,12 +172,18 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<byt
         return mImageCache;
     }
 
+    public final void initCacheFiles() {
+        if (mFileCache instanceof LruFileCache) {
+            ((LruFileCache)mFileCache).initialize();
+        }
+    }
+
     /**
      * Clears the {@link FileCache} and all cache files will be delete from filesystem.
      */
     public final void clearCacheFiles() {
-        if (mFileCache instanceof LruFileCache) {
-            ((LruFileCache)mFileCache).clearCache();
+        if (mFileCache != null) {
+            mFileCache.clear();
         }
     }
 

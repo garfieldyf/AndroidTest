@@ -133,6 +133,24 @@ public class ThreadPool extends ThreadPoolExecutor {
     }
 
     /**
+     * Class <tt>PriorityThread</tt> is an implementation of a {@link Thread}.
+     */
+    private static final class PriorityThread extends Thread {
+        private final int priority;
+
+        public PriorityThread(Runnable runnable, String threadName, int priority) {
+            super(runnable, threadName);
+            this.priority = priority;
+        }
+
+        @Override
+        public void run() {
+            Process.setThreadPriority(priority);
+            super.run();
+        }
+    }
+
+    /**
      * Class <tt>PriorityThreadFactory</tt> is an implementation of a {@link ThreadFactory}.
      */
     private static final class PriorityThreadFactory implements ThreadFactory {
@@ -148,10 +166,7 @@ public class ThreadPool extends ThreadPoolExecutor {
 
         @Override
         public Thread newThread(Runnable target) {
-            return new Thread(() -> {
-                Process.setThreadPriority(priority);
-                target.run();
-            }, namePrefix + nameSuffix.incrementAndGet());
+            return new PriorityThread(target, namePrefix + nameSuffix.incrementAndGet(), priority);
         }
     }
 }

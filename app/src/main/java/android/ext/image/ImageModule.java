@@ -94,8 +94,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mContext.registerComponentCallbacks(this);
-        if (mFileCache instanceof LruFileCache) {
-            mExecutor.execute(this);
+        if (fileCache instanceof LruFileCache) {
+            executor.execute(this);
         }
     }
 
@@ -180,7 +180,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
      */
     public final void clearCacheFiles() {
         if (mFileCache instanceof LruFileCache) {
-            mFileCache.clear();
+            ((LruFileCache)mFileCache).clear();
         }
     }
 
@@ -209,7 +209,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
     public final void run() {
         DebugUtils.__checkStartMethodTracing();
         ((LruFileCache)mFileCache).initialize();
-        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize");
+        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize, size = " + ((LruFileCache)mFileCache).size());
     }
 
     @Override

@@ -15,18 +15,11 @@ public interface FileCache {
     File getCacheDir();
 
     /**
-     * Removes all files from this cache, leaving it empty.
-     * @see #remove(String)
-     */
-    void clear();
-
-    /**
      * Removes the cache file for the specified <em>key</em> in this cache.
      * The cache file will be delete from filesystem.
      * @param key The key to remove.
      * @return The cache <tt>File</tt> mapped by <em>key</em> or <tt>null</tt>
      * if there was no mapping.
-     * @see #clear()
      */
     File remove(String key);
 

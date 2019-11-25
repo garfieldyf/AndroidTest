@@ -9,7 +9,6 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.FileUtils.ScanCallback;
 import android.os.Process;
-import android.util.Log;
 import android.util.Printer;
 import java.io.File;
 import java.util.Arrays;
@@ -20,8 +19,7 @@ import java.util.Collection;
  * @author Garfield
  */
 public class LruFileCache extends LruCache<String, File> implements FileCache, ScanCallback {
-    private boolean mInitialized;
-    private final File mCacheDir;
+    protected final File mCacheDir;
 
     /**
      * Constructor
@@ -32,6 +30,7 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
     public LruFileCache(File cacheDir, int maxSize) {
         super(maxSize);
         mCacheDir = cacheDir;
+        DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
     }
 
     /**
@@ -57,14 +56,17 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
      */
     @Override
     public synchronized void clear() {
+        DebugUtils.__checkStartMethodTracing();
         size = 0;
         map.clear();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
     @Override
-    public synchronized File get(String key) {
-        final File cacheFile = map.get(key);
+    public File get(String key) {
+        DebugUtils.__checkError(key == null, "key == null");
+        final File cacheFile = super.get(key);
         return (cacheFile != null ? cacheFile : new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString()));
     }
 
@@ -84,15 +86,12 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
      * Initialize this file cache from the filesystem, do not call this method directly.
      */
     public synchronized final void initialize() {
-        if (!mInitialized) {
-            final int priority = Process.getThreadPriority(Process.myTid());
-            try {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
-                FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
-            } finally {
-                mInitialized = true;
-                Process.setThreadPriority(priority);
-            }
+        final int priority = Process.getThreadPriority(Process.myTid());
+        try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
+        } finally {
+            Process.setThreadPriority(priority);
         }
     }
 

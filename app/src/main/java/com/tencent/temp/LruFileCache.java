@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.cache.FileCache;
+import android.ext.cache.LruCache;
 import android.ext.database.DatabaseUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -17,23 +18,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public class LruFileCache implements FileCache {
-    private int mSize;
-    private final int mMaxSize;
-    private boolean mInitialized;
-
+public class LruFileCache extends LruCache<String, File> implements FileCache {
     private final File mCacheDir;
-    private final Map<String, File> mCache;
-
     private final Object[] mBindArgs;
     private final SQLiteDatabase mDatabase;
 
@@ -56,13 +47,11 @@ public class LruFileCache implements FileCache {
      * @see #LruFileCache(Context, String, int)
      */
     public LruFileCache(Context context, File cacheDir, int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
-        DebugUtils.__checkError(cacheDir == null || cacheDir.getPath().isEmpty(), "cacheDir == null || cacheDir.length() == 0");
-        mMaxSize  = maxSize;
+        super(maxSize);
         mCacheDir = cacheDir;
         mBindArgs = new Object[1];
         mDatabase = openDatabase(context);
-        mCache = new LinkedHashMap<String, File>(0, 0.75f, true);
+        DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
     }
 
     @Override
@@ -71,82 +60,50 @@ public class LruFileCache implements FileCache {
     }
 
     /**
-     * Returns the maximum size in this cache in user-defined units.
-     * @return The maximum size.
-     * @see #size()
-     */
-    public final int maxSize() {
-        return mMaxSize;
-    }
-
-    /**
-     * For caches that do not override {@link #sizeOf}, this returns the
-     * number of cache files in the cache. For all other caches, this
-     * returns the sum of the sizes of the cache files in this cache.
-     * @return The size.
-     */
-    public synchronized int size() {
-        initialize();
-        return mSize;
-    }
-
-    /**
-     * Clears this cache and all cache files will be delete from filesystem.
+     * Clears this cache and deletes all cache files from the filesystem,
+     * but do not call {@link #entryRemoved} on each removed entry.
      */
     @Override
     public synchronized void clear() {
         DebugUtils.__checkStartMethodTracing();
-        mSize = 0;
-        mCache.clear();
+        //size = 0;
+        //map.clear();
+        super.clear();
         mDatabase.execSQL("DELETE FROM caches");
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
-        DebugUtils.__checkStopMethodTracing("LruFileCache", "clearFileCache");
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
     @Override
-    public synchronized File remove(String key) {
+    public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        initialize();
-        final File oldFile = mCache.remove(key);
-        if (oldFile != null) {
-            mSize -= sizeOf(key, oldFile);
-            entryRemoved(key, oldFile, null);
-        }
-
-        return oldFile;
-    }
-
-    @Override
-    public synchronized File get(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
-        initialize();
-        final File cacheFile = mCache.get(key);
+        final File cacheFile = super.get(key);
         return (cacheFile != null ? cacheFile : getCacheFile(key));
     }
 
-    @Override
-    public synchronized File put(String key, File cacheFile) {
-        // Initialize this file cache from the cache database.
-        DebugUtils.__checkError(key == null || cacheFile == null, "key == null || cacheFile == null");
-        initialize();
+    /**
+     * Initialize this file cache from the filesystem, do not call this method directly.
+     */
+    public synchronized final void initialize() {
+        final int priority = Process.getThreadPriority(Process.myTid());
+        Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
 
-        final int size = sizeOf(key, cacheFile);
-        DebugUtils.__checkError(size < 0, "Negative size: " + key + " = " + cacheFile);
-        mSize += size;
-
-        // Inserts the key into caches table if not exists.
-        mBindArgs[0] = key;
-        mDatabase.execSQL("INSERT OR IGNORE INTO caches VALUES(?)", mBindArgs);
-
-        // Sets the cacheFile into file cache.
-        final File oldFile = mCache.put(key, cacheFile);
-        if (oldFile != null) {
-            mSize -= sizeOf(key, oldFile);
-            entryRemoved(key, oldFile, cacheFile);
+        DebugUtils.__checkStartMethodTracing();
+        final Cursor cursor = mDatabase.rawQuery("SELECT _data FROM caches", null);
+        try {
+            while (cursor.moveToNext()) {
+                final String key = cursor.getString(0);
+                final File value = getCacheFile(key);
+                //map.put(key, value);
+                //size += sizeOf(key, value);
+                put(key, value);
+            }
+        } finally {
+            cursor.close();
+            Process.setThreadPriority(priority);
+            //DebugUtils.__checkStopMethodTracing("LruFileCache", "initialize maxSize = " + maxSize() + ", size = " + size() + ", count = " + map.size());
+            DebugUtils.__checkStopMethodTracing("LruFileCache", "initialize maxSize = " + maxSize() + ", size = " + size());
         }
-
-        removeEldest();
-        return oldFile;
     }
 
     @Override
@@ -158,80 +115,21 @@ public class LruFileCache implements FileCache {
         }
     }
 
-    /**
-     * Returns the size of the cache file for <tt>key</tt> and <tt>cacheFile</tt>
-     * in user-defined units. The default implementation returns 1 so that size is
-     * the number of cache files and max size is the maximum number of cache files.
-     * @param key The key.
-     * @param cacheFile The cache file.
-     * @return The size of the cache file, must be <tt>>= 0</tt>.
-     */
-    protected int sizeOf(String key, File cacheFile) {
-        return 1;
-    }
-
-    /**
-     * Called for cache files that have been evicted or removed. This method is invoked
-     * when a cache file is evicted to make space, removed by a call to {@link #remove},
-     * or replaced by a call to {@link #put}.
-     * @param key The key.
-     * @param oldFile The old cache file for <em>key</em>.
-     * @param newFile The new cache file for <em>key</em> or <tt>null</tt>.
-     */
-    protected void entryRemoved(String key, File oldFile, File newFile) {
-        if (!oldFile.equals(newFile)) {
+    @Override
+    protected void entryRemoved(boolean evicted, String key, File oldFile, File newFile) {
+        if (evicted || !oldFile.equals(newFile)) {
             oldFile.delete();
             mBindArgs[0] = key;
             mDatabase.execSQL("DELETE FROM caches WHERE _data=?", mBindArgs);
         }
     }
 
-    /**
-     * Initialize this file cache from the cache database.
-     */
-    private void initialize() {
-        if (mInitialized) {
-            return;
-        }
-
-        final int priority = Process.getThreadPriority(Process.myTid());
-        Process.setThreadPriority(Process.THREAD_PRIORITY_DISPLAY);
-
-        DebugUtils.__checkStartMethodTracing();
-        final Cursor cursor = mDatabase.rawQuery("SELECT _data FROM caches", null);
-        try {
-            while (cursor.moveToNext()) {
-                final String key = cursor.getString(0);
-                final File value = getCacheFile(key);
-                mCache.put(key, value);
-                mSize += sizeOf(key, value);
-            }
-        } finally {
-            cursor.close();
-            mInitialized = true;
-            Process.setThreadPriority(priority);
-            DebugUtils.__checkStopMethodTracing("LruFileCache", "initialize maxSize = " + mMaxSize + ", size = " + mSize + ", count = " + mCache.size());
-        }
-    }
-
-    /**
-     * Remove the eldest cache files until the total of remaining
-     * cache files is at or below the requested <em>mMaxSize</em>.
-     */
-    private void removeEldest() {
-        final Iterator<Entry<String, File>> itor = mCache.entrySet().iterator();
-        while (mSize > mMaxSize && itor.hasNext()) {
-            final Entry<String, File> toEvict = itor.next();
-            final String key = toEvict.getKey();
-            final File value = toEvict.getValue();
-            itor.remove();
-
-            final int size = sizeOf(key, value);
-            DebugUtils.__checkError(size < 0, "Negative size: " + key + " = " + value);
-            mSize -= size;
-            entryRemoved(key, value, null);
-        }
-    }
+//    @Override
+//    /* package */ synchronized File putImpl(String key, File value) {
+//        mBindArgs[0] = key;
+//        mDatabase.execSQL("INSERT OR IGNORE INTO caches VALUES(?)", mBindArgs);
+//        return super.putImpl(key, value);
+//    }
 
     /**
      * Open the cache database associated with this cache.
@@ -258,13 +156,6 @@ public class LruFileCache implements FileCache {
         }
 
         return db;
-    }
-
-    /**
-     * Returns a copy of the current contents of this cache.
-     */
-    private synchronized Map<String, File> snapshot() {
-        return new LinkedHashMap<String, File>(mCache);
     }
 
     /**

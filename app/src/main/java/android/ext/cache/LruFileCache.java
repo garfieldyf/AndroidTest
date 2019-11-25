@@ -73,10 +73,15 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
     @Override
     public int onScanFile(String path, int type, Object cookie) {
         if (type == DT_REG) {
-            final File cacheFile = new File(path);
-            final String key = cacheFile.getName();
-            map.put(key, cacheFile);
-            size += sizeOf(key, cacheFile);
+            if (size < maxSize) {
+                final File cacheFile = new File(path);
+                final String key = cacheFile.getName();
+                map.put(key, cacheFile);
+                size += sizeOf(key, cacheFile);
+            } else {
+                FileUtils.deleteFiles(path, false);
+                DebugUtils.__checkDebug(true, "LruFileCache", "delete cache file - " + path);
+            }
         }
 
         return SC_CONTINUE;

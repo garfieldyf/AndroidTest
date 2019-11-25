@@ -209,7 +209,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
     public final void run() {
         DebugUtils.__checkStartMethodTracing();
         ((LruFileCache)mFileCache).initialize();
-        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize, size = " + ((LruFileCache)mFileCache).size());
+        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize, size = " + ((LruFileCache)mFileCache).size() + ", maxSize = " + ((LruFileCache)mFileCache).maxSize());
     }
 
     @Override

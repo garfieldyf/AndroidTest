@@ -306,6 +306,7 @@ public final class Pools {
          */
         public SynchronizedPool(Pool<T> pool) {
             this.pool = pool;
+            DebugUtils.__checkError(pool == null, "pool == null");
         }
 
         @Override

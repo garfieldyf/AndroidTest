@@ -66,10 +66,10 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
 
     /* package */ final Executor mExecutor;
     /* package */ final Pool<byte[]> mBufferPool;
-    /* package */ final Pool<Options> mOptionsPool;
     /* package */ final Pool<Object[]> mParamsPool;
 
     private final FileCache mFileCache;
+    private final Pool<Options> mOptionsPool;
     private final Cache<URI, Image> mImageCache;
     private final SparseArray<Object> mResources;
     private final SparseArray<ImageLoader> mLoaderCache;

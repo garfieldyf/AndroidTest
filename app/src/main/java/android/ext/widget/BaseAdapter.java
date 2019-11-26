@@ -37,7 +37,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public final void postNotifyDataSetChanged() {
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-            mRecyclerView.post(new NotificationRunnable(MESSAGE_DATA_CHANGED, 0, 0, null));
+            mRecyclerView.post(this::notifyDataSetChanged);
         } else {
             DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyDataSetChanged();
@@ -92,7 +92,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public final void postNotifyItemMoved(int fromPosition, int toPosition) {
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-            mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_MOVED, fromPosition, toPosition, null));
+            mRecyclerView.post(() -> notifyItemMoved(fromPosition, toPosition));
         } else {
             DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemMoved(fromPosition, toPosition);
@@ -109,7 +109,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public final void postNotifyItemRangeRemoved(int positionStart, int itemCount) {
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-            mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_REMOVED, positionStart, itemCount, null));
+            mRecyclerView.post(() -> notifyItemRangeRemoved(positionStart, itemCount));
         } else {
             DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeRemoved(positionStart, itemCount);
@@ -126,7 +126,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public final void postNotifyItemRangeInserted(int positionStart, int itemCount) {
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-            mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_INSERTED, positionStart, itemCount, null));
+            mRecyclerView.post(() -> notifyItemRangeInserted(positionStart, itemCount));
         } else {
             DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeInserted(positionStart, itemCount);
@@ -145,7 +145,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public final void postNotifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
             DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-            mRecyclerView.post(new NotificationRunnable(MESSAGE_ITEM_CHANGED, positionStart, itemCount, payload));
+            mRecyclerView.post(() -> notifyItemRangeChanged(positionStart, itemCount, payload));
         } else {
             DebugUtils.__checkWarning(mRecyclerView == null, "BaseAdapter", "This adapter not attached to RecyclerView.");
             notifyItemRangeChanged(positionStart, itemCount, payload);
@@ -156,55 +156,4 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         mRecyclerView = recyclerView;
     }
-
-    /**
-     * Class <tt>NotificationRunnable</tt> used to notify the {@link Adapter}'s events.
-     */
-    private final class NotificationRunnable implements Runnable {
-        private final Object payload;
-        private final int message;
-        private final int itemCount;
-        private final int positionStart;
-
-        public NotificationRunnable(int message, int positionStart, int itemCount, Object payload) {
-            this.message   = message;
-            this.payload   = payload;
-            this.itemCount = itemCount;
-            this.positionStart = positionStart;
-        }
-
-        @Override
-        public void run() {
-            switch (message) {
-            case MESSAGE_DATA_CHANGED:
-                notifyDataSetChanged();
-                break;
-
-            case MESSAGE_ITEM_MOVED:
-                notifyItemMoved(positionStart, itemCount);
-                break;
-
-            case MESSAGE_ITEM_REMOVED:
-                notifyItemRangeRemoved(positionStart, itemCount);
-                break;
-
-            case MESSAGE_ITEM_INSERTED:
-                notifyItemRangeInserted(positionStart, itemCount);
-                break;
-
-            case MESSAGE_ITEM_CHANGED:
-                notifyItemRangeChanged(positionStart, itemCount, payload);
-                break;
-
-            default:
-                throw new IllegalStateException("Unknown message: " + message);
-            }
-        }
-    }
-
-    private static final int MESSAGE_ITEM_MOVED    = 1;
-    private static final int MESSAGE_DATA_CHANGED  = 2;
-    private static final int MESSAGE_ITEM_REMOVED  = 3;
-    private static final int MESSAGE_ITEM_CHANGED  = 4;
-    private static final int MESSAGE_ITEM_INSERTED = 5;
 }

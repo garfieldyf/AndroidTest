@@ -219,6 +219,7 @@ public final class LayoutManagerHelper {
         private final LayoutManager mLayout;
 
         /**
+         * Constructor
          * @param layout The {@link LayoutManager}.
          * @param position The adapter position of the item to find.
          */

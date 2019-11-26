@@ -30,7 +30,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#newSerialExecutor()}.
+     * See {@link ThreadPool#createSerialExecutor()}.
      * @see #AsyncQueryHandler(Activity, Executor)
      */
     public AsyncQueryHandler(Context context, Executor executor) {
@@ -42,7 +42,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * Constructor
      * @param activity The owner <tt>Activity</tt>.
      * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#newSerialExecutor()}.
+     * See {@link ThreadPool#createSerialExecutor()}.
      * @see #AsyncQueryHandler(Context, Executor)
      */
     public AsyncQueryHandler(Activity ownerActivity, Executor executor) {

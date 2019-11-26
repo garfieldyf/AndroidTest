@@ -19,7 +19,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#newSerialExecutor()}.
+     * See {@link ThreadPool#createSerialExecutor()}.
      * @param db The {@link SQLiteDatabase}.
      * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase, Object)
      */
@@ -31,7 +31,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#newSerialExecutor()}.
+     * See {@link ThreadPool#createSerialExecutor()}.
      * @param db The {@link SQLiteDatabase}.
      * @param owner The owner object. See {@link #setOwner(Object)}.
      * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase)

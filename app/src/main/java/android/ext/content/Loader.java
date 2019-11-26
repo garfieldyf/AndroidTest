@@ -1,7 +1,6 @@
 package android.ext.content;
 
 import android.content.Context;
-import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -19,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * An abstract class that performs asynchronous loading of data.
  * @author Garfield
  */
-public abstract class Loader<Key> implements Factory<Task> {
+public abstract class Loader<Key> implements Factory<Object> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
     /* package */ static final int SHUTDOWN = 2;
@@ -27,7 +26,7 @@ public abstract class Loader<Key> implements Factory<Task> {
     /* package */ volatile int mState;
     /* package */ final Executor mExecutor;
 
-    /* package */ final Pool<Task> mTaskPool;
+    /* package */ final Pool<Object> mTaskPool;
     /* package */ final Map<Key, Task> mRunningTasks;
 
     /**

@@ -13,7 +13,7 @@ import java.util.concurrent.Executor;
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
-public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
+public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -27,7 +27,7 @@ public abstract class DatabaseHandler implements Runnable, Factory<Runnable> {
 
     /* package */ WeakReference<Object> mOwner;
     /* package */ final Executor mExecutor;
-    /* package */ final Pool<Runnable> mTaskPool;
+    /* package */ final Pool<Object> mTaskPool;
 
     /**
      * Constructor

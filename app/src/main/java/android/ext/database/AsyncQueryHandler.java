@@ -166,7 +166,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     @Override
-    public final Runnable newInstance() {
+    public final Object newInstance() {
         return new AsyncQueryTask();
     }
 

@@ -157,7 +157,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     @Override
-    public final Task newInstance() {
+    public final Object newInstance() {
         return new LoadTask();
     }
 

@@ -152,7 +152,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     @Override
-    public final Runnable newInstance() {
+    public final Object newInstance() {
         return new SQLiteTask();
     }
 

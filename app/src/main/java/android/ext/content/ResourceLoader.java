@@ -156,7 +156,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     }
 
     @Override
-    public final Task newInstance() {
+    public final Object newInstance() {
         return new LoadTask();
     }
 

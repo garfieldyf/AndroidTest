@@ -8,7 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.ext.util.DebugUtils;
-import android.ext.util.UIHandler;
+import android.ext.widget.UIHandler;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import java.lang.ref.WeakReference;

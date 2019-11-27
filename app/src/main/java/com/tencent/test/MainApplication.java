@@ -1,29 +1,27 @@
 package com.tencent.test;
 
-import android.ext.image.ImageModule.Builder;
-import android.os.Process;
-import java.io.File;
-import java.util.concurrent.Executor;
 import android.app.Application;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.concurrent.ThreadPool;
+import android.ext.content.pm.PackageUtils;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageLoader.LoadRequest;
 import android.ext.image.ImageModule;
+import android.ext.image.ImageModule.Builder;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
-import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Printer;
+import java.io.File;
+import java.util.concurrent.Executor;
 
 public final class MainApplication extends Application {
     public static MainApplication sInstance;
@@ -44,7 +42,7 @@ public final class MainApplication extends Application {
         mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
         mImageModule = new Builder<String, Bitmap>(this).setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f).setFileSize(500).build();
 
-        AsyncTask.setDefaultExecutor(mThreadPool);
+        //AsyncTask.setDefaultExecutor(mThreadPool);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
     }
 

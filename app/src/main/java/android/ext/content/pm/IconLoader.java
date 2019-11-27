@@ -1,4 +1,4 @@
-package android.ext.image;
+package android.ext.content.pm;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -7,8 +7,8 @@ import android.ext.cache.Cache;
 import android.ext.cache.LruCache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader;
+import android.ext.content.pm.PackageUtils.PackageItemIcon;
 import android.ext.util.DebugUtils;
-import android.ext.util.PackageUtils.PackageItemIcon;
 import android.util.Printer;
 import java.util.Map.Entry;
 import java.util.Set;

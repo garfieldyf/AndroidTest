@@ -7,6 +7,7 @@ import android.content.pm.PackageInfo;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.ext.content.pm.PackageUtils;
 import android.ext.database.DatabaseUtils;
 import android.os.AsyncTask;
 import android.os.Build;

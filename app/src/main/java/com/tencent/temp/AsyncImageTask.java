@@ -1,4 +1,4 @@
-package android.ext.image;
+package com.tencent.temp;
 
 import android.app.Activity;
 import android.content.Context;

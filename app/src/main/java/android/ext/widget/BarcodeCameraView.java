@@ -26,6 +26,7 @@ import java.util.List;
  * Class BarcodeCameraView
  * @author Garfield
  */
+@SuppressWarnings("deprecation")
 public class BarcodeCameraView extends SurfaceView implements Callback, Runnable, AutoFocusCallback, Comparator<Size> {
     /**
      * The <tt>Camera</tt> device open failed.

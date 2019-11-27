@@ -2,7 +2,6 @@ package android.ext.widget;
 
 import android.content.res.Resources;
 import android.ext.util.DebugUtils;
-import android.ext.util.UIHandler;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ChildDrawingOrderCallback;

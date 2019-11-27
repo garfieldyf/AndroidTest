@@ -3,7 +3,6 @@ package android.ext.widget;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
-import android.ext.util.UIHandler;
 import android.net.Uri;
 import android.os.Handler;
 import java.util.concurrent.atomic.AtomicInteger;

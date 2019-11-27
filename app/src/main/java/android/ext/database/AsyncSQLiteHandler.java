@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.DebugUtils;
-import android.ext.util.UIHandler;
+import android.ext.widget.UIHandler;
 import android.util.Log;
 import java.util.concurrent.Executor;
 

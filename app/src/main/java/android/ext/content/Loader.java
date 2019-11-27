@@ -6,7 +6,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
-import android.ext.util.UIHandler;
+import android.ext.widget.UIHandler;
 import android.util.Printer;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package android.ext.util;
+package android.ext.widget;
 
 import android.ext.content.Loader.Task;
 import android.ext.database.DatabaseHandler;

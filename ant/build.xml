@@ -32,9 +32,7 @@
     <target name="-copy">
         <!-- copy the java files -->
         <copy todir="${src.dir}/${ndk.dir}" overwrite="true">
-            <fileset dir="${source.dir}/java/android/ext">
-                <exclude name="**/temp/**" />
-            </fileset>
+            <fileset dir="${source.dir}/java/android/ext" />
         </copy>
 
         <!-- copy the android support v7 files -->
@@ -87,7 +85,7 @@
     <target name="-compile-jar">
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
-        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false" deprecation="on"
+        <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false"
             classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->

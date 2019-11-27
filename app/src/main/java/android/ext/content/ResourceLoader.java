@@ -302,7 +302,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             // leaks, Even the loader has been shut down.
             clearForRecycle();
             mKey = null;
-            mListener   = null;
+            mListener = null;
             mLoadParams = null;
             mTaskPool.recycle(this);
         }

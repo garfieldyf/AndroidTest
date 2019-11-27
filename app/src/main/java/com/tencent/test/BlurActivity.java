@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
-import android.ext.image.AsyncImageTask;
 import android.ext.renderscript.RenderScriptBlur;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -15,6 +14,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import com.tencent.temp.AsyncImageTask;
 
 public class BlurActivity extends Activity implements OnClickListener {
     private ImageView mImageView;

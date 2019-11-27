@@ -66,7 +66,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     protected Bitmap decodeBitmap(Object uri, int flags, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
-            DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused");
+            DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
             BitmapDecoder.__checkDumpOptions(opts, flags);
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {

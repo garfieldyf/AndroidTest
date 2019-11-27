@@ -121,8 +121,12 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
         dumpCacheFiles(printer, result);
     }
 
-    /* package */ void dumpSummary(Printer printer, StringBuilder result, int count) {
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), count, maxSize());
+    private void dumpSummary(Printer printer, StringBuilder result, int count) {
+        if (this instanceof LruFileCache2) {
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ count = %d, size = %s, maxSize = %s ] ", getClass().getSimpleName(), count, FileUtils.formatFileSize(size()), FileUtils.formatFileSize(maxSize()));
+        } else {
+            DebugUtils.dumpSummary(printer, result, 130, " Dumping %s memory cache [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), count, maxSize());
+        }
     }
 
     private void dumpCacheFiles(Printer printer, StringBuilder result) {

@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -118,10 +119,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
-        final byte[] buffer = mModule.mBufferPool.obtain();
+        final ByteBuffer buffer = mModule.mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
-            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
+            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer.array()) : mDecoder.decodeImage(uri, target, params, flags, buffer.array()));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }

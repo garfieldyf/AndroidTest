@@ -158,21 +158,19 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
 
     @Override
     public final void dispatchMessage(int message, int token, Object result) {
-        if (!validateOwner()) {
-            return;
-        }
+        if (validateOwner()) {
+            switch (message) {
+            case MESSAGE_INSERT:
+                onInsertComplete(token, (long)result);
+                break;
 
-        switch (message) {
-        case MESSAGE_INSERT:
-            onInsertComplete(token, (long)result);
-            break;
+            case MESSAGE_REPLACE:
+                onReplaceComplete(token, (long)result);
+                break;
 
-        case MESSAGE_REPLACE:
-            onReplaceComplete(token, (long)result);
-            break;
-
-        default:
-            super.dispatchMessage(message, token, result);
+            default:
+                super.dispatchMessage(message, token, result);
+            }
         }
     }
 

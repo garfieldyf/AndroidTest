@@ -30,7 +30,7 @@ import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
@@ -43,6 +43,7 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -54,7 +55,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, Factory<byte[]>, XmlResourceInflater<ImageLoader> {
+public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, Factory<ByteBuffer>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
@@ -65,8 +66,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
     public final Context mContext;
 
     /* package */ final Executor mExecutor;
-    /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Object[]> mParamsPool;
+    /* package */ final Pool<ByteBuffer> mBufferPool;
 
     private final FileCache mFileCache;
     private final Pool<Options> mOptionsPool;
@@ -201,8 +202,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
     }
 
     @Override
-    public final byte[] newInstance() {
-        return new byte[16384];
+    public final ByteBuffer newInstance() {
+        return ByteBuffer.allocateDirect(16384);
     }
 
     @Override
@@ -235,7 +236,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
             mBufferPool.clear();
             mOptionsPool.clear();
             mLoaderCache.clear();
-            ByteArrayPool.sInstance.clear();
+            ByteBufferPool.sInstance.clear();
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append('(').append(level).append("),").toString());

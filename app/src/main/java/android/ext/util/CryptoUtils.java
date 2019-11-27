@@ -1,9 +1,10 @@
 package android.ext.util;
 
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -155,16 +156,17 @@ public final class CryptoUtils {
         final Cipher cipher = Cipher.getInstance(transformation);
         cipher.init(opmode, key);
 
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
+            final byte[] array = buffer.array();
             int readBytes;
-            while ((readBytes = source.read(buffer, 0, buffer.length)) > 0) {
-                cipher.update(buffer, 0, readBytes);
+            while ((readBytes = source.read(array, 0, array.length)) > 0) {
+                cipher.update(array, 0, readBytes);
             }
 
             return cipher.doFinal();
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteBufferPool.sInstance.recycle(buffer);
         }
     }
 

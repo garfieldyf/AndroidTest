@@ -1,13 +1,14 @@
 package android.ext.util;
 
 import android.ext.util.FileUtils.Dirent;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools.ByteBufferPool;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -125,15 +126,16 @@ public final class ZipUtils {
         final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile));
         os.setLevel(compressionLevel);
 
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
             // Compresses the files.
+            final byte[] array = buffer.array();
             for (String file : files) {
                 final Dirent dirent = new Dirent(file);
-                compress(os, dirent, dirent.getName(), cancelable, buffer);
+                compress(os, dirent, dirent.getName(), cancelable, array);
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteBufferPool.sInstance.recycle(buffer);
             os.close();
         }
     }
@@ -151,7 +153,7 @@ public final class ZipUtils {
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
         final ZipFile file  = new ZipFile(zipFile);
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
         try {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
@@ -159,6 +161,7 @@ public final class ZipUtils {
 
             // Enumerates the ZIP file entries.
             final CRC32 crc = new CRC32();
+            final byte[] array = buffer.array();
             final Enumeration<? extends ZipEntry> entries = file.entries();
             while (entries.hasMoreElements() && !cancelable.isCancelled()) {
                 final ZipEntry entry = entries.nextElement();
@@ -168,11 +171,11 @@ public final class ZipUtils {
                 if (entry.isDirectory()) {
                     FileUtils.mkdirs(pathName.getPath(), 0);
                 } else {
-                    uncompress(file, entry, pathName, crc, cancelable, buffer);
+                    uncompress(file, entry, pathName, crc, cancelable, array);
                 }
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            ByteBufferPool.sInstance.recycle(buffer);
             file.close();
         }
     }

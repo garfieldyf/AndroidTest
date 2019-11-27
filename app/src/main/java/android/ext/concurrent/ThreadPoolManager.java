@@ -73,9 +73,9 @@ public class ThreadPoolManager extends ThreadPool {
         // Cancel and remove from pending task queue.
         final Iterator<Runnable> iter = getQueue().iterator();
         while (iter.hasNext()) {
-            final Runnable command = iter.next();
-            if (command instanceof Task) {
-                final Task task = (Task)command;
+            final Runnable runnable = iter.next();
+            if (runnable instanceof Task) {
+                final Task task = (Task)runnable;
                 if (task.getId() == id) {
                     iter.remove();
                     return task.cancel(mayInterruptIfRunning, true);

@@ -70,6 +70,19 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
         return (cacheFile != null ? cacheFile : new File(mCacheDir, new StringBuilder(key.length() + 3).append('/').append(key.charAt(0)).append('/').append(key).toString()));
     }
 
+    /**
+     * Initialize this file cache from the filesystem, do not call this method directly.
+     */
+    public synchronized void initialize() {
+        final int priority = Process.getThreadPriority(Process.myTid());
+        try {
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
+        } finally {
+            Process.setThreadPriority(priority);
+        }
+    }
+
     @Override
     public int onScanFile(String path, int type, Object cookie) {
         if (type == DT_REG) {
@@ -85,19 +98,6 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
         }
 
         return SC_CONTINUE;
-    }
-
-    /**
-     * Initialize this file cache from the filesystem, do not call this method directly.
-     */
-    public synchronized final void initialize() {
-        final int priority = Process.getThreadPriority(Process.myTid());
-        try {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
-        } finally {
-            Process.setThreadPriority(priority);
-        }
     }
 
     @Override

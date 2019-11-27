@@ -23,7 +23,7 @@ import java.io.Closeable;
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         if (mScript != null) {
             mScript.destroy();
             mScript = null;

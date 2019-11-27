@@ -37,7 +37,7 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
     }
 
     @Override
-    public void close() {
+    public synchronized void close() {
         super.close();
         if (mColorMatrix != null) {
             mColorMatrix.destroy();
@@ -54,7 +54,7 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
      * @return The converted <tt>Bitmap</tt> or <tt>null</tt>.
      * @see #convert(byte[], Bitmap, boolean)
      */
-    public Bitmap convert(byte[] yuvData, int width, int height, boolean grayscale) {
+    public synchronized Bitmap convert(byte[] yuvData, int width, int height, boolean grayscale) {
         DebugUtils.__checkError(yuvData == null || width <= 0 || height <= 0, "yuvData == null || width <= 0 || height <= 0");
         if (mScript != null) {
             final Bitmap result = Bitmap.createBitmap(width, height, Config.ARGB_8888);
@@ -72,7 +72,7 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
      * @param grayscale Whether to convert to grey-scale bitmap.
      * @see #convert(byte[], int, int, boolean)
      */
-    public void convert(byte[] yuvData, Bitmap outBitmap, boolean grayscale) {
+    public synchronized void convert(byte[] yuvData, Bitmap outBitmap, boolean grayscale) {
         DebugUtils.__checkError(yuvData == null || outBitmap == null, "yuvData == null || outBitmap == null");
         DebugUtils.__checkError(outBitmap.getConfig() != Config.ARGB_8888, "The outBitmap must be ARGB_8888 pixel format.");
         if (mScript != null) {

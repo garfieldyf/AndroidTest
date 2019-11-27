@@ -38,7 +38,7 @@ public final class RenderScriptBlur extends AbsRenderScript<ScriptIntrinsicBlur>
      * @param bitmap The bitmap to blur, must be {@link Config#ARGB_8888} pixel format.
      * @param radius The radius of the blur, Supported range <tt>0 &lt; radius &lt;= 25</tt>.
      */
-    public void blur(Bitmap bitmap, float radius) {
+    public synchronized void blur(Bitmap bitmap, float radius) {
         DebugUtils.__checkError(bitmap == null, "bitmap == null");
         DebugUtils.__checkError(bitmap.getConfig() != Config.ARGB_8888, "The bitmap must be ARGB_8888 pixel format.");
         if (mScript != null) {

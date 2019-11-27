@@ -34,7 +34,7 @@ public final class DownloadManager {
 
     public final void cancelAll() {
         mExecutor.execute(() -> {
-            mThreadPool.cancelAll(false, false);
+            mThreadPool.cancelAll(false);
             mDatabase.update(null, null, null);
         });
     }
@@ -52,7 +52,7 @@ public final class DownloadManager {
 
     public final void removeAll() {
         mExecutor.execute(() -> {
-            mThreadPool.cancelAll(false, false);
+            mThreadPool.cancelAll(false);
             mDatabase.deleteAll(null);
         });
     }
@@ -79,10 +79,6 @@ public final class DownloadManager {
         @Override
         protected long getId() {
             return request.id;
-        }
-
-        @Override
-        protected void onCancelled() {
         }
 
         @Override

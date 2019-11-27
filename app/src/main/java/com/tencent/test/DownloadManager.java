@@ -86,7 +86,7 @@ public final class DownloadManager {
         }
 
         @Override
-        protected void doInBackground(Thread thread) {
+        protected void doInBackground() {
         }
     }
 

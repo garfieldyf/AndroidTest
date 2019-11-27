@@ -191,7 +191,8 @@ public class ThreadPoolManager extends ThreadPool {
         public final void run() {
             if (mState.get() == RUNNING) {
                 try {
-                    doInBackground(mRunner = Thread.currentThread());
+                    mRunner = Thread.currentThread();
+                    doInBackground();
                 } finally {
                     mRunner = null;
                     if (mState.compareAndSet(RUNNING, COMPLETED)) {
@@ -208,18 +209,17 @@ public class ThreadPoolManager extends ThreadPool {
         protected abstract long getId();
 
         /**
-         * Runs on a background thread after {@link #doInBackground(Thread)}.
+         * Runs on a background thread after {@link #doInBackground()}.
          * <p>This method won't be invoked if this task was cancelled.</p>
-         * @see #doInBackground(Thread)
+         * @see #doInBackground()
          */
         protected abstract void onCompletion();
 
         /**
          * Runs on a background thread when this task is executing. <p>This method
          * won't be invoked if this task was cancelled when it has no start.</p>
-         * @param thread The <tt>Thread</tt> whose executing this task.
          * @see #onCompletion()
          */
-        protected abstract void doInBackground(Thread thread);
+        protected abstract void doInBackground();
     }
 }

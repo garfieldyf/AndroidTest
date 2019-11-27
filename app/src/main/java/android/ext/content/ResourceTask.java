@@ -149,7 +149,6 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
                 result = parseResult(params, null);
                 DebugUtils.__checkStopMethodTracing("ResourceTask", "no cache file parseResult params = " + Arrays.toString(params));
             } else {
-                DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(params, cacheFile);
                 if (!isCancelled()) {
                     result = download(params, cacheFile.getPath(), hitCache);
@@ -175,7 +174,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
                 return true;
             }
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
+            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile);
         } finally {
             Process.setThreadPriority(priority);
         }

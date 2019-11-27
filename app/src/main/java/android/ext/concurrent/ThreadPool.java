@@ -48,14 +48,6 @@ public class ThreadPool extends ThreadPoolExecutor {
     }
 
     /**
-     * Removes all pending tasks from the internal task queue.
-     * @see #remove(Runnable)
-     */
-    public void removeAll() {
-        getQueue().clear();
-    }
-
-    /**
      * Returns a new serial {@link Executor}. A serial <tt>Executor</tt>
      * that executes tasks one at a time in serial order.
      * @return A newly serial <tt>Executor</tt>.

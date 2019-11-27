@@ -177,7 +177,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
                 result = loadParams.parseResult(mContext, key, null, task);
                 DebugUtils.__checkStopMethodTracing("ResourceLoader", "no cache file parseResult key = " + key);
             } else {
-                DebugUtils.__checkError(cacheFile.getPath().length() == 0, "The cacheFile is 0-length");
                 final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
                 if (!isTaskCancelled(task)) {
                     result = download(task, key, loadParams, cacheFile.getPath(), hitCache);
@@ -226,7 +225,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
                 return true;
             }
         } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile.getPath());
+            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile);
         } finally {
             Process.setThreadPriority(priority);
         }

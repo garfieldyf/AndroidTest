@@ -46,7 +46,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
      * @see #ImageBinder(int)
      */
     public ImageBinder(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "ImageBinder"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context.getPackageName(), "ImageBinder"));
         mImageCache = new SimpleLruCache<URI, Drawable>(a.getInt(0 /* R.styleable.ImageBinder_maxCacheSize */, 0));
         a.recycle();
     }

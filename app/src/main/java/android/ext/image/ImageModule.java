@@ -253,10 +253,11 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
             throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
         }
 
+        final String packageName = context.getPackageName();
         final AttributeSet attrs = Xml.asAttributeSet(parser);
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context, "ImageLoader"));
-        final int flags = a.getInt((int)ClassUtils.getFieldValue(context, "ImageLoader_flags"), 0);
-        final String name = a.getString((int)ClassUtils.getFieldValue(context, "ImageLoader_decoder"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(packageName, "ImageLoader"));
+        final int flags = a.getInt((int)ClassUtils.getFieldValue(packageName, "ImageLoader_flags"), 0);
+        final String name = a.getString((int)ClassUtils.getFieldValue(packageName, "ImageLoader_decoder"));
         a.recycle();
 
         final Cache imageCache = ((flags & FLAG_NO_MEMORY_CACHE) == 0 ? mImageCache : null);

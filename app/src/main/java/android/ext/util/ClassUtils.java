@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import android.content.Context;
 import java.lang.reflect.Constructor;
 
 /**
@@ -39,14 +38,14 @@ public final class ClassUtils {
     }
 
     /**
-     * Returns the <em>package</em>.R.styleable.<em>name</em> field value.
-     * @param context The <tt>Context</tt>.
+     * Returns the <em>packageName</em>.R.styleable.<em>name</em> field value.
+     * @param packageName The package name.
      * @param name The name of field.
      * @return The value of the <em>name</em> field.
      */
-    public static Object getFieldValue(Context context, String name) {
+    public static Object getFieldValue(String packageName, String name) {
         try {
-            return Class.forName(context.getPackageName() + ".R$styleable").getField(name).get(null);
+            return Class.forName(packageName + ".R$styleable").getField(name).get(null);
         } catch (Throwable e) {
             throw new AssertionError(e);
         }

@@ -47,8 +47,8 @@ public final class FileUtils {
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;
 
     /**
-     * This flag use with {@link #scanFiles}. If set if path refers to a
-     * symbolic link return the file type is {@link Dirent#DT_LNK DT_LNK}.
+     * This flag use with {@link #scanFiles}. If set if path is a symbolic link, do
+     * not dereference it: instead return the file type is {@link Dirent#DT_LNK DT_LNK}.
      */
     public static final int FLAG_SCAN_SYMLINK_NOFOLLOW = 0x04;
 

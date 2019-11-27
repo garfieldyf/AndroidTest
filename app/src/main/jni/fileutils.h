@@ -88,7 +88,9 @@ __STATIC_INLINE__ jint resolveType(const char* path, const struct dirent* entry,
     if (type == DT_LNK && (flags & FLAG_SCAN_SYMLINK_NOFOLLOW) == 0)
     {
         struct stat buf;
-        type = (::stat(path, &buf) == 0 ? ((buf.st_mode & S_IFMT) >> 12) : DT_UNKNOWN);
+        if (::stat(path, &buf) == 0) {
+            type = ((buf.st_mode & S_IFMT) >> 12);
+        }
     }
 
     return type;

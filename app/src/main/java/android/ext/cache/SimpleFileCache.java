@@ -1,12 +1,12 @@
 package android.ext.cache;
 
-import static android.ext.util.FileUtils.Dirent.DT_REG;
 import static android.ext.util.FileUtils.FLAG_IGNORE_HIDDEN_FILE;
 import static android.ext.util.FileUtils.FLAG_SCAN_FOR_DESCENDENTS;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.os.Process;
 import android.util.Printer;
@@ -17,7 +17,8 @@ import java.util.Arrays;
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public final class SimpleFileCache implements FileCache {
+public final class SimpleFileCache implements FileCache, ScanCallback {
+    private int mSize;
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -66,20 +67,32 @@ public final class SimpleFileCache implements FileCache {
     /**
      * Clears this cache and deletes all cache files from the filesystem.
      */
-    public synchronized void clear() {
+    public final void clear() {
         DebugUtils.__checkStartMethodTracing();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
     }
 
-    @Override
-    public File getCacheDir() {
-        return mCacheDir;
+    /**
+     * Remove the cache files until the total of remaining files is
+     * at or below the maximum size, do not call this method directly.
+     */
+    public final void trimToSize() {
+        final int priority = Process.getThreadPriority(Process.myTid());
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            mSize = 0;
+            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
+            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + mSize + ", maxSize = " + mMaxSize);
+        } finally {
+            Process.setThreadPriority(priority);
+        }
     }
 
     @Override
-    public File put(String key, File cacheFile) {
-        return null;
+    public File getCacheDir() {
+        return mCacheDir;
     }
 
     @Override
@@ -89,22 +102,28 @@ public final class SimpleFileCache implements FileCache {
     }
 
     @Override
-    public synchronized File remove(String key) {
+    public File put(String key, File cacheFile) {
+        return null;
+    }
+
+    @Override
+    public File remove(String key) {
         final File cacheFile = get(key);
         return (cacheFile.delete() ? cacheFile : null);
     }
 
-    /**
-     * Initialize this file cache from the filesystem, do not call this method directly.
-     */
-    public synchronized void initialize() {
-        final int priority = Process.getThreadPriority(Process.myTid());
-        try {
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            new FileScanner().scanFiles(mCacheDir.getPath(), mMaxSize);
-        } finally {
-            Process.setThreadPriority(priority);
+    @Override
+    public int onScanFile(String path, int type, Object cookie) {
+        if (type == Dirent.DT_REG) {
+            if (mSize < mMaxSize) {
+                ++mSize;
+            } else {
+                FileUtils.deleteFiles(path, false);
+                DebugUtils.__checkDebug(true, "SimpleFileCache", "delete cache file - " + path);
+            }
         }
+
+        return SC_CONTINUE;
     }
 
     /* package */ final void dump(Context context, Printer printer) {
@@ -151,34 +170,5 @@ public final class SimpleFileCache implements FileCache {
 
         outResults[0] = fileCount;
         outResults[1] = fileLength;
-    }
-
-    /**
-     * Class <tt>FileScanner</tt> is an implementation of a {@link ScanCallback}.
-     */
-    /* package */ static final class FileScanner implements ScanCallback {
-        private int size;
-        private int maxSize;
-
-        public final void scanFiles(String cacheDir, int maxSize) {
-            DebugUtils.__checkStartMethodTracing();
-            this.maxSize = maxSize;
-            FileUtils.scanFiles(cacheDir, this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "initialize size = " + size + ", maxSize = " + maxSize);
-        }
-
-        @Override
-        public int onScanFile(String path, int type, Object cookie) {
-            if (type == DT_REG) {
-                if (size < maxSize) {
-                    ++size;
-                } else {
-                    FileUtils.deleteFiles(path, false);
-                    DebugUtils.__checkDebug(true, "SimpleFileCache", "delete cache file - " + path);
-                }
-            }
-
-            return SC_CONTINUE;
-        }
     }
 }

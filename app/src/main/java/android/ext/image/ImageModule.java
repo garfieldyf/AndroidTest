@@ -95,8 +95,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Byt
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mContext.registerComponentCallbacks(this);
-        if (mFileCache instanceof SimpleFileCache) {
-            executor.execute(((SimpleFileCache)mFileCache)::initialize);
+        if (fileCache instanceof SimpleFileCache) {
+            executor.execute(((SimpleFileCache)fileCache)::trimToSize);
         }
     }
 

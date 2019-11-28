@@ -199,7 +199,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testPagedList();
 //        testFileProvider();
 //        testScaleParameters();
-//        testComputeFileSizes();
+        testComputeFileSizes();
 //        testJSONArray();
 //        XmlResources.loadTransformer(this, R.xml.image_transformer);
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
@@ -269,15 +269,12 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     private void testComputeFileSizes() {
         final File dir = new File("/sdcard/Android/data/tv.fun.foods/cache");
         DebugUtils.startMethodTracing();
-        long l = computeFiles(dir);
-        DebugUtils.stopMethodTracing("yf", "computeFiles     = " + l);
+        long l = FileUtils.computeFileBytes(dir);
+        DebugUtils.stopMethodTracing("yf", "computeFileBytes = " + l);
 
         DebugUtils.startMethodTracing();
-        l = FileUtils.computeFileSizes(dir);
-        DebugUtils.stopMethodTracing("yf", "computeFileSizes = " + l);
-        
-        l = FileUtils.computeFileSizes(new File("/sdcard/foods_page_contents"));
-        Log.i("yf", "foods_page_contents length = " + l);
+        l = computeFiles(dir);
+        DebugUtils.stopMethodTracing("yf", "computeFiles     = " + l);
     }
 
     private static long computeFiles(File dir) {

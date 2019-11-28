@@ -176,15 +176,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Byt
         return mImageCache;
     }
 
-    /**
-     * Clears the {@link FileCache} and deletes all cache files from the filesystem.
-     */
-    public final void clearCacheFiles() {
-        if (mFileCache instanceof SimpleFileCache) {
-            ((SimpleFileCache)mFileCache).clear();
-        }
-    }
-
     public final void dump(Printer printer) {
         Pools.dumpPool(mParamsPool, printer);
         Pools.dumpPool(mBufferPool, printer);

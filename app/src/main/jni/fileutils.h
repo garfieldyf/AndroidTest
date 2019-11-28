@@ -25,7 +25,7 @@
 // scanFiles()
 // compareFile()
 // deleteFiles()
-// getFileMode()
+// getFileLength()
 // getFileStatus()
 // createFile()
 // createUniqueFile()
@@ -54,8 +54,7 @@ enum
     FLAG_IGNORE_HIDDEN_FILE = 0x01,
 
     // The flags use with scanFiles function.
-    FLAG_SCAN_FOR_DESCENDENTS  = 0x02,
-    FLAG_SCAN_SYMLINK_NOFOLLOW = 0x04,
+    FLAG_SCAN_FOR_DESCENDENTS = 0x02,
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -80,20 +79,6 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     __NS::splitPath(filename, path);
 
     return (path.empty() ? EINVAL : __NS::createDirectory(path.data, path.size));
-}
-
-__STATIC_INLINE__ jint resolveType(const char* path, const struct dirent* entry, jint flags)
-{
-    jint type = entry->d_type;
-    if (type == DT_LNK && (flags & FLAG_SCAN_SYMLINK_NOFOLLOW) == 0)
-    {
-        struct stat buf;
-        if (::stat(path, &buf) == 0) {
-            type = ((buf.st_mode & S_IFMT) >> 12);
-        }
-    }
-
-    return type;
 }
 
 __STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)
@@ -187,7 +172,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint f
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie);
+                result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie);
                 if (result == SC_STOP) {
                     dirPaths.clear();
                     break;
@@ -223,7 +208,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint fl
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie);
+            result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie);
             if (result == SC_BREAK) {
                 continue;
             } else if (result == SC_STOP || result == SC_BREAK_PARENT) {
@@ -305,7 +290,7 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
                 ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), resolveType(filePath, entry, flags), cookie) != SC_CONTINUE)
+                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE)
                     break;
             }
         }
@@ -371,16 +356,16 @@ JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    getFileMode
-// Signature: (Ljava/lang/String;)I
+// Method:    getFileLength
+// Signature: (Ljava/lang/String;)J
 
-JNIEXPORT_METHOD(jint) getFileMode(JNIEnv* env, jclass /*clazz*/, jstring path)
+JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring file)
 {
     assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", 0);
+    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
 
     struct stat buf;
-    return (::stat(JNI::jstring_t(env, path), &buf) == 0 ? buf.st_mode : 0);
+    return (::stat(JNI::jstring_t(env, file), &buf) == 0 ? (jlong)buf.st_size : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -487,8 +472,8 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
     {
         { "mkdirs", "(Ljava/lang/String;I)I", (void*)mkdirs },
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
-        { "getFileMode", "(Ljava/lang/String;)I", (void*)getFileMode },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
+        { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

@@ -47,12 +47,6 @@ public final class FileUtils {
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;
 
     /**
-     * This flag use with {@link #scanFiles}. If set if path is a symbolic link, do
-     * not dereference it: instead return the file type is {@link Dirent#DT_LNK DT_LNK}.
-     */
-    public static final int FLAG_SCAN_SYMLINK_NOFOLLOW = 0x04;
-
-    /**
      * Returns the absolute path to the directory in which the application can place
      * its own files on the filesystem. <p>If the external storage mounted the result
      * path such as <tt>"/storage/emulated/0/Android/data/packagename/files/name"</tt>,
@@ -204,8 +198,8 @@ public final class FileUtils {
      * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
      * @param dirPath The directory path, must be absolute file path.
      * @param callback The {@link ScanCallback} used to scan.
-     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
+     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE}
+     * and {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      */
@@ -216,8 +210,8 @@ public final class FileUtils {
      * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
      * part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
      * @see #listFiles(String, int, Collection)
      */
@@ -231,8 +225,8 @@ public final class FileUtils {
      * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as part
      * of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE},
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS} and {@link #FLAG_SCAN_SYMLINK_NOFOLLOW}.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param outDirents A <tt>Collection</tt> to store the {@link Dirent} objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      * @see #listFiles(String, int)
@@ -380,21 +374,12 @@ public final class FileUtils {
     }
 
     /**
-     * Returns the file type of the specified <em>path</em>.
-     * @param path The file or directory path, must be absolute file path.
-     * @return The file type, one of <tt>Dirent.DT_XXX</tt> constants.
+     * Returns the length with the specified <em>file</em> in bytes. The result for a
+     * directory is not defined.
+     * @param file The file path, must be absolute file path.
+     * @return The number of bytes or <tt>0</tt> if the <em>file</em> does not exist.
      */
-    public static int getFileType(String path) {
-        return ((getFileMode(path) & Stat.S_IFMT) >> 12);
-    }
-
-    /**
-     * Returns the file protection with the specified <em>path</em>. The
-     * returned value corresponds to the linux structure <tt>stat.st_mode</tt>.
-     * @param path The file or directory path, must be absolute file path.
-     * @return The file protection if the operation succeeded, <tt>0</tt> otherwise.
-     */
-    public static native int getFileMode(String path);
+    public static native long getFileLength(String file);
 
     /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
@@ -524,14 +509,14 @@ public final class FileUtils {
     }
 
     /**
-     * Computes the file's length with specified <em>file</em>. if <em>file</em>
+     * Returns the length in bytes with specified <em>file</em>. if <em>file</em>
      * is a directory, all sub files will be computed.
      * @param file The file or directory to compute, must be absolute file path.
      * @return The total number of bytes or <tt>0</tt> if the file does not exist.
      */
-    public static long computeFileSizes(File file) {
+    public static long computeFileBytes(File file) {
         DebugUtils.__checkError(file == null, "file == null");
-        return (file.isDirectory() ? computeFileSizesImpl(file) : file.length());
+        return (file.isDirectory() ? computeFiles(file) : file.length());
     }
 
     /**
@@ -600,20 +585,6 @@ public final class FileUtils {
     }
 
     /**
-     * Computes all file's sizes with specified <em>dir</em>.
-     */
-    private static long computeFileSizesImpl(File dir) {
-        long result = 0;
-        final File[] files = dir.listFiles();
-        for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
-            final File file = files[i];
-            result += (file.isDirectory() ? computeFileSizesImpl(file) : file.length());
-        }
-
-        return result;
-    }
-
-    /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
@@ -644,6 +615,17 @@ public final class FileUtils {
             FileUtils.close(source);
             FileUtils.close(target);
         }
+    }
+
+    private static long computeFiles(File dir) {
+        long result = 0;
+        final File[] files = dir.listFiles();
+        for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
+            final File file = files[i];
+            result += (file.isDirectory() ? computeFiles(file) : file.length());
+        }
+
+        return result;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -1342,6 +1324,12 @@ public final class FileUtils {
          */
         public static Comparator<Dirent> caseInsensitiveOrder() {
             return Dirent::compareToIgnoreCase;
+        }
+
+        private static int getFileType(String path) {
+            final Stat stat = new Stat();
+            FileUtils.stat(path, stat);
+            return ((stat.mode & Stat.S_IFMT) >> 12);
         }
 
         public final void dump(Printer printer) {

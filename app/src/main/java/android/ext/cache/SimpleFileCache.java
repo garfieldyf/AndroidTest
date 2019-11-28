@@ -60,7 +60,7 @@ public final class SimpleFileCache implements FileCache {
      * @return The total number of bytes.
      */
     public final long getCacheSize() {
-        return FileUtils.computeFileSizes(mCacheDir);
+        return FileUtils.computeFileBytes(mCacheDir);
     }
 
     /**

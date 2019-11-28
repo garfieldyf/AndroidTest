@@ -1,4 +1,4 @@
-package android.ext.cache;
+package com.tencent.temp;
 
 import android.content.Context;
 import android.ext.util.FileUtils;

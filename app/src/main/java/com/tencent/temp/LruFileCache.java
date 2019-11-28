@@ -1,9 +1,11 @@
-package android.ext.cache;
+package com.tencent.temp;
 
 import static android.ext.util.FileUtils.Dirent.DT_REG;
 import static android.ext.util.FileUtils.FLAG_IGNORE_HIDDEN_FILE;
 import static android.ext.util.FileUtils.FLAG_SCAN_FOR_DESCENDENTS;
 import android.content.Context;
+import android.ext.cache.FileCache;
+import android.ext.cache.LruCache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -57,8 +59,9 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
     @Override
     public synchronized void clear() {
         DebugUtils.__checkStartMethodTracing();
-        size = 0;
-        map.clear();
+//        size = 0;
+//        map.clear();
+        super.clear();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
@@ -86,11 +89,13 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
     @Override
     public int onScanFile(String path, int type, Object cookie) {
         if (type == DT_REG) {
-            if (size < maxSize) {
+            //if (size < maxSize) {
+            if (size() < maxSize()) {
                 final File cacheFile = new File(path);
                 final String key = cacheFile.getName();
-                map.put(key, cacheFile);
-                size += sizeOf(key, cacheFile);
+                //map.put(key, cacheFile);
+                //size += sizeOf(key, cacheFile);
+                put(key, cacheFile);
             } else {
                 FileUtils.deleteFiles(path, false);
                 DebugUtils.__checkDebug(true, "LruFileCache", "delete cache file - " + path);
@@ -107,7 +112,6 @@ public class LruFileCache extends LruCache<String, File> implements FileCache, S
         }
     }
 
-    @Override
     /* package */ void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
         final Collection<File> files = snapshot().values();

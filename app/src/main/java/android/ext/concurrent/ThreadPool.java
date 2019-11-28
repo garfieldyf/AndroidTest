@@ -157,8 +157,8 @@ public class ThreadPool extends ThreadPoolExecutor {
         }
 
         @Override
-        public Thread newThread(Runnable target) {
-            return new PriorityThread(target, namePrefix + nameSuffix.incrementAndGet(), priority);
+        public Thread newThread(Runnable runnable) {
+            return new PriorityThread(runnable, namePrefix + nameSuffix.incrementAndGet(), priority);
         }
     }
 }

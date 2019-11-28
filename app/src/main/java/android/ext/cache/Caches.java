@@ -34,8 +34,8 @@ public final class Caches {
     }
 
     public static void dumpCache(Object cache, Context context, Printer printer) {
-        if (cache instanceof LruFileCache) {
-            ((LruFileCache)cache).dump(context, printer);
+        if (cache instanceof SimpleFileCache) {
+            ((SimpleFileCache)cache).dump(context, printer);
         } else if (cache instanceof SimpleLruCache) {
             ((SimpleLruCache<?, ?>)cache).dump(context, printer);
         } else if (cache instanceof LruImageCache) {

@@ -15,7 +15,7 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     /**
      * The size of this cache in units. Not necessarily the number of entries.
      */
-    /* package */ int size;
+    private int size;
 
     /**
      * Constructor

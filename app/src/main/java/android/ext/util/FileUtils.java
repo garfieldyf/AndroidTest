@@ -524,10 +524,10 @@ public final class FileUtils {
     }
 
     /**
-     * Computes all file's sizes with specified <em>file</em>. if <em>file</em>
+     * Computes the file's length with specified <em>file</em>. if <em>file</em>
      * is a directory, all sub files will be computed.
      * @param file The file or directory to compute, must be absolute file path.
-     * @return The number of bytes or <tt>0</tt> if the file does not exist.
+     * @return The total number of bytes or <tt>0</tt> if the file does not exist.
      */
     public static long computeFileSizes(File file) {
         DebugUtils.__checkError(file == null, "file == null");

@@ -14,8 +14,8 @@ import android.ext.cache.LinkedBitmapPool;
 import android.ext.cache.LruBitmapCache;
 import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruCache;
-import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
+import android.ext.cache.SimpleFileCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
@@ -55,7 +55,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, Factory<ByteBuffer>, XmlResourceInflater<ImageLoader> {
+public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<ByteBuffer>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
@@ -95,8 +95,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mContext.registerComponentCallbacks(this);
-        if (fileCache instanceof LruFileCache) {
-            executor.execute(this);
+        if (mFileCache instanceof SimpleFileCache) {
+            executor.execute(((SimpleFileCache)mFileCache)::initialize);
         }
     }
 
@@ -180,8 +180,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
      * Clears the {@link FileCache} and deletes all cache files from the filesystem.
      */
     public final void clearCacheFiles() {
-        if (mFileCache instanceof LruFileCache) {
-            ((LruFileCache)mFileCache).clear();
+        if (mFileCache instanceof SimpleFileCache) {
+            ((SimpleFileCache)mFileCache).clear();
         }
     }
 
@@ -204,13 +204,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
     @Override
     public final ByteBuffer newInstance() {
         return ByteBuffer.allocateDirect(16384);
-    }
-
-    @Override
-    public final void run() {
-        DebugUtils.__checkStartMethodTracing();
-        ((LruFileCache)mFileCache).initialize();
-        DebugUtils.__checkStopMethodTracing("ImageModule", "The file cache initialize, size = " + ((LruFileCache)mFileCache).size() + ", maxSize = " + ((LruFileCache)mFileCache).maxSize());
     }
 
     @Override
@@ -497,7 +490,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Runnable, F
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(mContext, "._image_cache", maxSize) : null);
+                return (maxSize > 0 ? new SimpleFileCache(mContext, "._image_cache", maxSize) : null);
             }
         }
 

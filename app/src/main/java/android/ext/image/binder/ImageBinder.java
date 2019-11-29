@@ -27,7 +27,7 @@ import android.widget.ImageView;
  * @author Garfield
  */
 public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
-    private final SimpleLruCache<URI, Drawable> mImageCache;
+    protected final SimpleLruCache<URI, Drawable> mImageCache;
 
     /**
      * Constructor
@@ -52,8 +52,19 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
+        ((ImageView)target).setImageDrawable(getImageDrawable(uri, params, image));
+    }
+
+    /**
+     * Returns a <tt>Drawable</tt> with the specified <em>uri</em> and <em>params</em>.
+     * @param uri The uri, passed earlier by {@link #bindValue}.
+     * @param params The parameters, passed earlier by {@link #bindValue}.
+     * @param image The image value, passed earlier by {@link #bindValue}.
+     * @return The <tt>Drawable</tt> to bind to target.
+     */
+    @SuppressWarnings("unchecked")
+    protected Drawable getImageDrawable(URI uri, Object[] params, Image image) {
         Drawable drawable;
         if (image == null) {
             drawable = (Drawable)params[PLACEHOLDER_INDEX];
@@ -63,6 +74,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             mImageCache.put(uri, drawable = ((Transformer<Image>)params[TRANSFORMER_INDEX]).transform(image));
         }
 
-        ((ImageView)target).setImageDrawable(drawable);
+        return drawable;
     }
 }

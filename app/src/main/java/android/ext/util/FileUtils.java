@@ -450,7 +450,7 @@ public final class FileUtils {
      * the <em>out's</em> contents is undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #copyStream(InputStream, OutputStream, Cancelable)
+     * @see #copyStream(InputStream, String, Cancelable)
      */
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {

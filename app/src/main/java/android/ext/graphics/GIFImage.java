@@ -14,6 +14,7 @@ import android.util.Log;
 import android.util.Printer;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
@@ -205,8 +206,8 @@ public final class GIFImage {
     private static FileDescriptor getFileDescriptor(InputStream is) {
         try {
             return ((FileInputStream)is).getFD();
-        } catch (Exception e) {
-            throw new AssertionError(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

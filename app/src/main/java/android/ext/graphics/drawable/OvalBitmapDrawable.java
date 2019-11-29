@@ -25,7 +25,8 @@ import org.xmlpull.v1.XmlPullParserException;
 public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.OvalBitmapState> {
     /**
      * Constructor
-     * <p>The default constructor used by {@link Resources#getDrawable(int)}.</p>
+     * <p>The default constructor used by {@link Resources#getDrawable(int)},
+     * do not call this method directly.</p>
      */
     @Keep
     public OvalBitmapDrawable() {

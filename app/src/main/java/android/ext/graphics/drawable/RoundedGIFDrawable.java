@@ -22,7 +22,8 @@ import org.xmlpull.v1.XmlPullParserException;
 public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.RoundedGIFState> {
     /**
      * Constructor
-     * <p>The default constructor used by {@link Resources#getDrawable(int)}.</p>
+     * <p>The default constructor used by {@link Resources#getDrawable(int)},
+     * do not call this method directly.</p>
      */
     @Keep
     public RoundedGIFDrawable() {

@@ -204,7 +204,7 @@ public final class DrawUtils {
      * @param height The vertical size of the <em>source</em>.
      * @param alpha The alpha component [0..255] to be drawn.
      * @param percent The percentage, expressed as a percentage of the <em>source's</em> width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
      * or {@link Gravity#BOTTOM}.
      * @param paint The paint used to draw, This parameter can <b>not</b> be <tt>null</tt>.
      */

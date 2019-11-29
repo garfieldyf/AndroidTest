@@ -67,6 +67,6 @@ public class TestActivity extends Activity {
 
     private void reset(ImageView imageView) {
         final View view = findViewById(R.id.image_frame);
-        ((InvertedBitmapDrawable)imageView.getDrawable()).refresh(view);
+        ((InvertedBitmapDrawable)imageView.getDrawable()).setView(view);
     }
 }

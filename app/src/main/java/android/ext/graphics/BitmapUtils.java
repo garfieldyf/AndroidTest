@@ -184,7 +184,7 @@ public final class BitmapUtils {
      * @param height The vertical size of the <em>source</em>.
      * @param alpha The alpha component [0..255] of the inverted bitmap.
      * @param percent The percentage, expressed as a percentage of the <em>source's</em> width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
      * or {@link Gravity#BOTTOM}.
      * @param paint May be <tt>null</tt>. The paint used to draw the bitmap.
      * @return An inverted bitmap.

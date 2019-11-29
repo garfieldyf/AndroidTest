@@ -2,6 +2,7 @@ package android.ext.graphics.drawable;
 
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.DrawUtils;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -23,7 +24,7 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
      * @param alpha The alpha component [0..255] of the inverted bitmap.
      * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em>
      * width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
      * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
      * @see #InvertedBitmapDrawable(View, int, float, int)
      */
@@ -37,7 +38,7 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
      * @param alpha The alpha component [0..255] of the inverted bitmap.
      * @param percent The percentage, expressed as a percentage of the <em>view's</em>
      * width or height.
-     * @param direction The direction. One of {@link Gravity#LFET}, {@link Gravity#TOP},
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
      * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
      * @see #InvertedBitmapDrawable(Bitmap, int, float, int)
      */
@@ -46,22 +47,22 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
     }
 
     /**
-     * Changes this drawable's content with the specified <em>view</em>.
-     * @param view The {@link View} to rebuild the content.
-     * @see #refresh(Bitmap)
+     * Sets this drawable's content with the specified <em>view</em>.
+     * @param view The {@link View} to draw the content.
+     * @see #setBitmap(Bitmap)
      */
-    public final void refresh(View view) {
-        mState.refresh(view, view.getWidth(), view.getHeight());
+    public final void setView(View view) {
+        mState.setContent(view, view.getWidth(), view.getHeight());
         invalidateSelf();
     }
 
     /**
-     * Changes this drawable's content with the specified <em>bitmap</em>.
-     * @param bitmap The {@link Bitmap} to rebuild the content.
-     * @see #refresh(View)
+     * Sets this drawable's content with the specified <em>bitmap</em>.
+     * @param bitmap The {@link Bitmap} to draw the content.
+     * @see #setView(View)
      */
-    public final void refresh(Bitmap bitmap) {
-        mState.refresh(bitmap, bitmap.getWidth(), bitmap.getHeight());
+    public final void setBitmap(Bitmap bitmap) {
+        mState.setContent(bitmap, bitmap.getWidth(), bitmap.getHeight());
         invalidateSelf();
     }
 
@@ -147,7 +148,7 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
          * @param alpha The alpha component [0..255] of the inverted bitmap.
          * @param percent The percentage, expressed as a percentage of the
          * <em>source's</em> width or height.
-         * @param direction The direction. One of {@link Gravity#LFET},
+         * @param direction The direction. One of {@link Gravity#LEFT},
          * {@link Gravity#TOP}, {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
          */
         public InvertedBitmapState(Object source, int width, int height, int alpha, float percent, int direction) {
@@ -162,11 +163,13 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
             throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
         }
 
-        /* package */ final void refresh(Object source, int width, int height) {
+        /* package */ final void setContent(Object source, int width, int height) {
+            DebugUtils.__checkStartMethodTracing();
             final Canvas canvas = new Canvas(mBitmap);
             mBitmap.eraseColor(Color.TRANSPARENT);
             DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);
             canvas.setBitmap(null);
+            DebugUtils.__checkStopMethodTracing("InvertedBitmapDrawable", "setContent");
         }
     }
 }

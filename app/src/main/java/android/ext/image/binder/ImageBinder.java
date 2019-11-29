@@ -4,6 +4,7 @@ import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
 import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.transformer.Transformer;
@@ -27,7 +28,7 @@ import android.widget.ImageView;
  * @author Garfield
  */
 public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
-    protected final SimpleLruCache<URI, Drawable> mImageCache;
+    protected final Cache<URI, Drawable> mImageCache;
 
     /**
      * Constructor
@@ -52,19 +53,8 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     @Override
-    public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
-        ((ImageView)target).setImageDrawable(getImageDrawable(uri, params, image));
-    }
-
-    /**
-     * Returns a <tt>Drawable</tt> with the specified <em>uri</em> and <em>params</em>.
-     * @param uri The uri, passed earlier by {@link #bindValue}.
-     * @param params The parameters, passed earlier by {@link #bindValue}.
-     * @param image The image value, passed earlier by {@link #bindValue}.
-     * @return The <tt>Drawable</tt> to bind to target.
-     */
     @SuppressWarnings("unchecked")
-    protected Drawable getImageDrawable(URI uri, Object[] params, Image image) {
+    public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
         Drawable drawable;
         if (image == null) {
             drawable = (Drawable)params[PLACEHOLDER_INDEX];
@@ -74,6 +64,6 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             mImageCache.put(uri, drawable = ((Transformer<Image>)params[TRANSFORMER_INDEX]).transform(image));
         }
 
-        return drawable;
+        ((ImageView)target).setImageDrawable(drawable);
     }
 }

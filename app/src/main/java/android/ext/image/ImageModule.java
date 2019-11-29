@@ -275,6 +275,26 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
         return result;
     }
 
+    /**
+     * Return a <tt>Drawable</tt> object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The resource id of the <tt>Drawable</tt>.
+     * @return The <tt>Drawable</tt>.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     */
+    @SuppressWarnings("deprecation")
+    /* package */ final Object getDrawable(int id) {
+        DebugUtils.__checkUIThread("getDrawable");
+        Object result = mResources.get(id, null);
+        if (result == null) {
+            DebugUtils.__checkStartMethodTracing();
+            mResources.append(id, result = mContext.getResources().getDrawable(id));
+            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the drawable - ID #0x" + Integer.toHexString(id));
+        }
+
+        return result;
+    }
+
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
         if (!TextUtils.isEmpty(className)) {

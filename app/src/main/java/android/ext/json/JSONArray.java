@@ -58,6 +58,7 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
      * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
      * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
+     * @return Always return <tt>true</tt>.
      */
     @Override
     public boolean add(Object value) {

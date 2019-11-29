@@ -78,7 +78,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * JSONArray</tt> or their collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[], int, int)
-     * @see #post(PostCallback, Params[])
+     * @see #post(PostCallback, Object[])
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
     public final DownloadPostRequest post(Object data) {
@@ -91,13 +91,12 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Sets the {@link PostCallback} to post the data to the remote HTTP server.
      * @param callback The <tt>PostCallback</tt> to set.
      * @param params The parameters passed into {@link PostCallback#onPostData}.
-     * If no parameters, you can pass <em>(Params[])null</em> instead of allocating
+     * If no parameters, you can pass <em>(Object[])null</em> instead of allocating
      * an empty array.
      * @see #post(Object)
      * @see #post(byte[], int, int)
      */
-    @SuppressWarnings("unchecked")
-    public final <Params> DownloadPostRequest post(PostCallback<Params> callback, Params... params) {
+    public final DownloadPostRequest post(PostCallback callback, Object... params) {
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         mParams = params;
         mData = callback;
@@ -111,7 +110,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * @param count The number of bytes from <em>data</em> to write to.
      * @return This request.
      * @see #post(Object)
-     * @see #post(PostCallback, Params[])
+     * @see #post(PostCallback, Object[])
      */
     public final DownloadPostRequest post(byte[] data, int offset, int count) {
         DebugUtils.__checkRange(offset, count, data.length);
@@ -143,7 +142,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             postData((InputStream)mData, tempBuffer);
         } else if (mData instanceof PostCallback) {
             connectImpl();
-            ((PostCallback<Object>)mData).onPostData(mConnection, mParams);
+            ((PostCallback)mData).onPostData(mConnection, mParams);
         } else {
             DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", DebugUtils.toSimpleString(mData, new StringBuilder("Unsupported POST type - ")).toString());
             mConnection.connect();
@@ -214,13 +213,13 @@ public final class DownloadPostRequest extends DownloadRequest {
     /**
      * Callback interface used to post the data to the remote server.
      */
-    public static interface PostCallback<Params> {
+    public static interface PostCallback {
         /**
          * Called on a background thread to post the data to the remote server.
          * @param conn The {@link URLConnection} whose connecting the remote server.
          * @param params The parameters, passed earlier by {@link DownloadPostRequest#post}.
          * @throws IOException if an error occurs while writing the data to the remote server.
          */
-        void onPostData(URLConnection conn, Params[] params) throws IOException;
+        void onPostData(URLConnection conn, Object[] params) throws IOException;
     }
 }

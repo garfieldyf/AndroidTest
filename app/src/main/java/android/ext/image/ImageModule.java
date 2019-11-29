@@ -55,7 +55,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<ByteBuffer>, XmlResourceInflater<ImageLoader> {
+public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
     private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
@@ -91,9 +91,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Byt
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(() -> new Object[MAX_ARRAY_LENGTH], 48);
-        mBufferPool  = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
+        mParamsPool  = Pools.newPool(this, 48);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
+        mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> ByteBuffer.allocateDirect(16384), maxPoolSize));
         mContext.registerComponentCallbacks(this);
         if (fileCache instanceof SimpleFileCache) {
             executor.execute(((SimpleFileCache)fileCache)::trimToSize);
@@ -193,8 +193,8 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Byt
     }
 
     @Override
-    public final ByteBuffer newInstance() {
-        return ByteBuffer.allocateDirect(16384);
+    public final Object[] newInstance() {
+        return new Object[MAX_ARRAY_LENGTH];
     }
 
     @Override

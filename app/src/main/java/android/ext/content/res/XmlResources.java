@@ -6,7 +6,6 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.ext.image.binder.BackgroundBinder;
 import android.ext.image.binder.ImageBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
@@ -147,9 +146,6 @@ public final class XmlResources {
         /* ---------------- binders ----------------- */
         case "ImageBinder":
             return new ImageBinder(context, attrs);
-
-        case "BackgroundBinder":
-            return BackgroundBinder.getInstance();
 
         case "TransitionBinder":
             return new TransitionBinder(context, attrs);

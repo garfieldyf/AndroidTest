@@ -122,8 +122,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
         try {
             final byte[] array = buffer.array();
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
-                final URI uri = params[i];
-                results[i] = (matchScheme(uri) ? downloadImage(uri.toString(), array) : decodeImage(uri, array));
+                results[i] = decodeImage(params[i], array, null);
             }
         } finally {
             ByteBufferPool.sInstance.recycle(buffer);
@@ -133,14 +132,15 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
     }
 
     /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation
-     * match the "http", "https" and "ftp".
-     * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
-     * @see UriUtils#matchScheme(Object)
+     * Decodes an image from the specified <em>uri</em>.
+     * @param uri The uri to decode.
+     * @param tempBuffer The temporary storage to use for decoding.
+     * @param reserved Reserved.
+     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decodeImage(Object, byte[])
      */
-    protected boolean matchScheme(URI uri) {
-        return UriUtils.matchScheme(uri);
+    protected Object decodeImage(URI uri, byte[] tempBuffer, Object reserved) {
+        return (UriUtils.matchScheme(uri) ? downloadImage(uri.toString(), tempBuffer) : decodeImage(uri, tempBuffer));
     }
 
     /**
@@ -149,6 +149,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
      * @param uri The uri to decode.
      * @param tempBuffer The temporary storage to use for decoding.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
+     * @see #decodeImage(URI, byte[], Object)
      */
     protected Object decodeImage(Object uri, byte[] tempBuffer) {
         try {

@@ -121,8 +121,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final ByteBuffer buffer = mModule.mBufferPool.obtain();
         try {
-            final Object target = getTarget(task);
-            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer.array()) : mDecoder.decodeImage(uri, target, params, flags, buffer.array()));
+            return loadImage(task, uri, getTarget(task), params, flags, buffer.array());
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -135,14 +134,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation
-     * match the "http", "https" and "ftp".
-     * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
-     * @see UriUtils#matchScheme(Object)
+     * Called on a background thread to load an image from the specified <em>uri</em>.
+     * @param task The current {@link Task} whose executing this method.
+     * @param uri The uri to load.
+     * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
+     * @param params The parameters, passed earlier by {@link #load}.
+     * @param flags Loading flags, passed earlier by {@link #load}.
+     * @param buffer The temporary byte array to used for loading image data.
+     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
+     * @see #loadImage(Task, String, File, Object, Object[], int, byte[])
      */
-    protected boolean matchScheme(URI uri) {
-        return UriUtils.matchScheme(uri);
+    protected Image loadImage(Task task, URI uri, Object target, Object[] params, int flags, byte[] buffer) {
+        return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
     }
 
     /**
@@ -155,6 +158,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param flags Loading flags, passed earlier by {@link #load}.
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
+     * @see #loadImage(Task, URI, Object, Object[], int, byte[])
      */
     protected Image loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
         try {

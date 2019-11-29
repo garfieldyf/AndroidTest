@@ -15,9 +15,11 @@ import java.util.Arrays;
 
 /**
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
+ * By default, this cache size is the number of entries. Overrides {@link #sizeOf}
+ * to size this cache in different units.
  * @author Garfield
  */
-public final class SimpleFileCache implements FileCache, ScanCallback {
+public class SimpleFileCache implements FileCache, ScanCallback {
     private int mSize;
     private final int mMaxSize;
     private final File mCacheDir;
@@ -25,7 +27,9 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
     /**
      * Constructor
      * @param cacheDir The absolute path of the cache directory.
-     * @param maxSize The maximum number of files to allow in this cache.
+     * @param maxSize For caches that do not override {@link #sizeOf}, this is
+     * the maximum number of files to allow in this cache. For all other caches,
+     * this is the maximum sum of the sizes of the files to allow in this cache.
      * @see #SimpleFileCache(Context, String, int)
      */
     public SimpleFileCache(File cacheDir, int maxSize) {
@@ -39,7 +43,9 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
-     * @param maxSize The maximum number of files to allow in this cache.
+     * @param maxSize For caches that do not override {@link #sizeOf}, this is the maximum
+     * number of files to allow in this cache. For all other caches, this is the maximum sum
+     * of the sizes of the files to allow in this cache.
      * @see #SimpleFileCache(File, int)
      */
     public SimpleFileCache(Context context, String name, int maxSize) {
@@ -49,8 +55,8 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
     }
 
     /**
-     * Returns the maximum number of files in this cache.
-     * @return The maximum number of files.
+     * Returns the maximum size in this cache in user-defined units.
+     * @return The maximum size.
      */
     public final int maxSize() {
         return mMaxSize;
@@ -67,7 +73,7 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
     /**
      * Clears this cache and deletes all cache files from the filesystem.
      */
-    public final void clear() {
+    public void clear() {
         DebugUtils.__checkStartMethodTracing();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
@@ -77,7 +83,7 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
      * Remove the cache files until the total of remaining files is
      * at or below the maximum size, do not call this method directly.
      */
-    public final void trimToSize() {
+    public void trimToSize() {
         final int priority = Process.getThreadPriority(Process.myTid());
         try {
             DebugUtils.__checkStartMethodTracing();
@@ -116,7 +122,9 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
     public int onScanFile(String path, int type, Object cookie) {
         if (type == Dirent.DT_REG) {
             if (mSize < mMaxSize) {
-                ++mSize;
+                final int size = sizeOf(path);
+                DebugUtils.__checkError(size < 0, "Negative size: " + path);
+                mSize += size;
             } else {
                 FileUtils.deleteFiles(path, false);
                 DebugUtils.__checkDebug(true, "SimpleFileCache", "delete cache file - " + path);
@@ -124,6 +132,17 @@ public final class SimpleFileCache implements FileCache, ScanCallback {
         }
 
         return SC_CONTINUE;
+    }
+
+    /**
+     * Returns the size of the cache file for <em>cacheFile</em> in user-defined
+     * units. The default implementation returns 1 so that size is the number of
+     * files and max size is the maximum number of files.
+     * @param cacheFile The cache file.
+     * @return The size of the cache file, must be <tt>>= 0</tt>.
+     */
+    protected int sizeOf(String cacheFile) {
+        return 1;
     }
 
     /* package */ final void dump(Context context, Printer printer) {

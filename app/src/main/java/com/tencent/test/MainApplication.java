@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.LogPrinter;
 import android.util.Printer;
+import com.tencent.temp.SimpleFileCache2;
 import java.io.File;
 import java.util.concurrent.Executor;
 
@@ -40,7 +41,11 @@ public final class MainApplication extends Application {
 
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
-        mImageModule = new Builder<String, Bitmap>(this).setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f).setFileSize(500).build();
+        mImageModule = new Builder<String, Bitmap>(this)
+            .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
+//            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
+            .setFileSize(500)
+            .build();
 
         //AsyncTask.setDefaultExecutor(mThreadPool);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');

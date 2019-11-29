@@ -199,7 +199,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testPagedList();
 //        testFileProvider();
 //        testScaleParameters();
-        testComputeFileSizes();
+//        testComputeFileSizes();
 //        testJSONArray();
 //        XmlResources.loadTransformer(this, R.xml.image_transformer);
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
@@ -268,26 +268,26 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     private void testComputeFileSizes() {
         final File dir = new File("/sdcard/Android/data/tv.fun.foods/cache");
-        DebugUtils.startMethodTracing();
-        long l = FileUtils.computeFileBytes(dir);
-        DebugUtils.stopMethodTracing("yf", "computeFileBytes = " + l);
 
-        DebugUtils.startMethodTracing();
-        l = computeFiles(dir);
-        DebugUtils.stopMethodTracing("yf", "computeFiles     = " + l);
+        for (int i = 0; i < 2; ++i) {
+            DebugUtils.startMethodTracing();
+            long l = computeFiles(dir);
+            DebugUtils.stopMethodTracing("yf", "computeFiles     = " + l);
+        }
+
+        for (int i = 0; i < 2; ++i) {
+            DebugUtils.startMethodTracing();
+            long l = FileUtils.computeFileBytes(dir);
+            DebugUtils.stopMethodTracing("yf", "computeFileBytes = " + l);
+        }
     }
 
     private static long computeFiles(File dir) {
         long result = 0;
-        final File[] files = dir.listFiles();
-        final int size = ArrayUtils.getSize(files);
-        for (int i = 0; i < size; ++i) {
-            final File file = files[i];
-            if (file.isDirectory()) {
-                result += computeFiles(file);
-            } else {
-                result += file.length();
-            }
+        final String[] filenames = dir.list();
+        for (int i = 0, size = ArrayUtils.getSize(filenames); i < size; ++i) {
+            final File file = new File(dir, filenames[i]);
+            result += (file.isDirectory() ? computeFiles(file) : file.length());
         }
 
         return result;

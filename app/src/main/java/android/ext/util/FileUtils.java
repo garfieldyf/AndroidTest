@@ -619,9 +619,9 @@ public final class FileUtils {
 
     private static long computeFiles(File dir) {
         long result = 0;
-        final File[] files = dir.listFiles();
-        for (int i = 0, size = ArrayUtils.getSize(files); i < size; ++i) {
-            final File file = files[i];
+        final String[] filenames = dir.list();
+        for (int i = 0, size = ArrayUtils.getSize(filenames); i < size; ++i) {
+            final File file = new File(dir, filenames[i]);
             result += (file.isDirectory() ? computeFiles(file) : file.length());
         }
 
@@ -928,24 +928,6 @@ public final class FileUtils {
         }
 
         /**
-         * Returns the user name assigned to a particular {@link #uid}.
-         * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
-         * @see #getGroupName()
-         */
-        public final String getUserName() {
-            return ProcessUtils.getUserName(uid);
-        }
-
-        /**
-         * Returns the group name assigned to a particular {@link #gid}.
-         * @return The group name if the operation succeeded, <tt>null</tt> otherwise.
-         * @see #getUserName()
-         */
-        public final String getGroupName() {
-            return ProcessUtils.getGroupName(gid);
-        }
-
-        /**
          * Formats the total size to be in the from of bytes, kilobytes, megabytes, etc.
          * @param context The <tt>Context</tt>.
          * @param resId The resource id for the format string.
@@ -958,8 +940,7 @@ public final class FileUtils {
         public final void dump(Printer printer) {
             printer.println(new StringBuilder(256)
                 .append("Stat { mode = ").append(Integer.toOctalString(mode))
-                .append(", user = ").append(getUserName()).append('(').append(uid).append(')')
-                .append(", group = ").append(getGroupName()).append('(').append(gid).append(')')
+                .append(", uid = ").append(uid).append(", gid = ").append(gid)
                 .append(", type = ").append(Integer.toOctalString(mode & S_IFMT))
                 .append(", size = ").append(size).append('(').append(formatFileSize(size)).append(')')
                 .append(", perm = ").append(toCharType(mode & S_IFMT))

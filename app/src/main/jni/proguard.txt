@@ -11,7 +11,6 @@
 -keep class **.GIFImage
 -keep class **.FileUtils
 -keep class **.BitmapUtils
--keep class **.ProcessUtils
 -keep class **.MessageDigests
 
 -keepclassmembers class * {

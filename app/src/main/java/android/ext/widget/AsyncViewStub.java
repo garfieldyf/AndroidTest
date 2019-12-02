@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
 import android.os.AsyncTask;
+import android.os.Process;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,10 +17,10 @@ import java.util.concurrent.Executor;
 
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.
- * <p>Note: For a layout to be inflated asynchronously it needs to have a parent whose
+ * <p>Note:</p><ol><li>For a layout to be inflated asynchronously it needs to have a parent whose
  * {@link ViewGroup#generateLayoutParams(AttributeSet)} is thread-safely and all the <tt>Views</tt>
- * being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</p>
- * <p>Note: This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</p>
+ * being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</li>
+ * <li>This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</li></ol>
  * @author Garfield
  */
 public final class AsyncViewStub extends View {
@@ -183,6 +184,7 @@ public final class AsyncViewStub extends View {
                  * params - { parent, OnInflateListener, null }
                  */
                 DebugUtils.__checkError(params.length < 3, "params.length < 3");
+                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 params[2] = mInflater.inflate(mLayoutId, (ViewGroup)params[0], false);
             } catch (RuntimeException e) {
                 Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread - parent = " + params[0].getClass().getSimpleName() + "\n" + e);

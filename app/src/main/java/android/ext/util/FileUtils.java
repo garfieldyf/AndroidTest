@@ -28,7 +28,7 @@ import java.util.List;
  */
 public final class FileUtils {
     /**
-     * This flag use with {@link #mkdirs(String, int)}. If
+     * This flag use for {@link #mkdirs(String, int)}. If
      * set the last item in path is a file name, so ignore.
      * <P>Example: if path is "/mnt/sdcard/mydir/myfile",
      * only use "/mnt/sdcard/mydir"</P>.
@@ -41,7 +41,7 @@ public final class FileUtils {
     public static final int FLAG_IGNORE_HIDDEN_FILE = 0x01;
 
     /**
-     * This flag use with {@link #scanFiles}. If set the
+     * This flag use for {@link #scanFiles}. If set the
      * <tt>scanFiles</tt> will scan the descendent files.
      */
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;

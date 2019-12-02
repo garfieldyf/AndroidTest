@@ -44,16 +44,16 @@ enum
     SC_BREAK = 2,
     SC_BREAK_PARENT = 3,
 
-    // The flag use with compareFile function.
-    BUFFER_SIZE = 2048,
+    // The buffer size for compareFile function.
+    _BUF_SIZE = 4096,
 
-    // The flag use with mkdirs function.
+    // The flag use for mkdirs function.
     FLAG_IGNORE_FILENAME = 0x01,
 
     // Ignores the hidden file (start with ".").
     FLAG_IGNORE_HIDDEN_FILE = 0x01,
 
-    // The flags use with scanFiles function.
+    // The flags use for scanFiles function.
     FLAG_SCAN_FOR_DESCENDENTS = 0x02,
 };
 
@@ -106,7 +106,7 @@ __STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
     return result;
 }
 
-__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[BUFFER_SIZE], ssize_t& readCount)
+__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_SIZE], ssize_t& readCount)
 {
     assert(!file.isEmpty());
 
@@ -317,7 +317,7 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
         result = (f1.open(jfile1, O_RDONLY) == 0 && f2.open(jfile2, O_RDONLY) == 0);
         if (result)
         {
-            uint8_t buffer1[BUFFER_SIZE], buffer2[BUFFER_SIZE];
+            uint8_t buffer1[_BUF_SIZE], buffer2[_BUF_SIZE];
             ssize_t readBytes1, readBytes2, readCount1, readCount2;
 
             while ((readBytes1 = readFile(f1, buffer1, readCount1)) != 0 && (readBytes2 = readFile(f2, buffer2, readCount2)) != 0)

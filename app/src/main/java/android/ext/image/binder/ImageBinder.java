@@ -12,6 +12,7 @@ import android.ext.util.ClassUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 
 /**
  * Class <tt>ImageBinder</tt> allows to bind the image to the {@link ImageView}.
@@ -53,17 +54,28 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
-        Drawable drawable;
+        final ImageView view = (ImageView)target;
         if (image == null) {
-            drawable = (Drawable)params[PLACEHOLDER_INDEX];
-        } else if (image instanceof Drawable) {
-            drawable = (Drawable)image;
-        } else if ((drawable = mImageCache.get(uri)) == null) {
+            view.setScaleType(ScaleType.CENTER);
+            view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
+        } else {
+            view.setScaleType(ScaleType.FIT_XY);
+            if (image instanceof Drawable) {
+                view.setImageDrawable((Drawable)image);
+            } else {
+                view.setImageDrawable(getCachedDrawable(uri, params, image));
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Drawable getCachedDrawable(URI uri, Object[] params, Image image) {
+        Drawable drawable = mImageCache.get(uri);
+        if (drawable == null) {
             mImageCache.put(uri, drawable = ((Transformer<Image>)params[TRANSFORMER_INDEX]).transform(image));
         }
 
-        ((ImageView)target).setImageDrawable(drawable);
+        return drawable;
     }
 }

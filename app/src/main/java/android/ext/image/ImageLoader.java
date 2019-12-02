@@ -22,6 +22,7 @@ import android.ext.util.UriUtils;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -96,25 +97,20 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         return mRequest;
     }
 
-    /**
-     * Returns a <tt>Drawable</tt> with the specified <em>params</em> and <em>value</em>.
-     * @param params The parameters, passed earlier by {@link Binder#bindValue}.
-     * @param value The image value, passed earlier by {@link Binder#bindValue}.
-     * @return The <tt>Drawable</tt> to bind to target.
-     */
-    public static Drawable getImageDrawable(Object[] params, Object value) {
-        if (value == null) {
-            return (Drawable)params[PLACEHOLDER_INDEX];
-        } else if (value instanceof Drawable) {
-            return (Drawable)value;
-        } else {
-            return ((Transformer<Object>)params[TRANSFORMER_INDEX]).transform(value);
-        }
-    }
-
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
-        ((ImageView)target).setImageDrawable(getImageDrawable(params, value));
+        final ImageView view = (ImageView)target;
+        if (value == null) {
+            view.setScaleType(ScaleType.CENTER);
+            view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
+        } else {
+            view.setScaleType(ScaleType.FIT_XY);
+            if (value instanceof Drawable) {
+                view.setImageDrawable((Drawable)value);
+            } else {
+                view.setImageDrawable(((Transformer<Object>)params[TRANSFORMER_INDEX]).transform(value));
+            }
+        }
     }
 
     @Override
@@ -368,9 +364,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          * @see #placeholder(Drawable)
          */
-        @SuppressWarnings("deprecation")
         public final LoadRequest placeholder(int id) {
-            mParams[PLACEHOLDER_INDEX] = mLoader.mModule.mContext.getResources().getDrawable(id);
+            mParams[PLACEHOLDER_INDEX] = mLoader.mModule.getDrawable(id);
             return this;
         }
 

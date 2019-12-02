@@ -3,7 +3,6 @@ package android.ext.image.params;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -85,7 +84,6 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
-        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity and opts.inTargetDensity uninitialized");
         final int width, height;
         if (target instanceof View) {
             final View view = (View)target;
@@ -102,6 +100,8 @@ public class SizeParameters extends Parameters {
             final int screenDensity = (int)value;
             opts.inTargetDensity = screenDensity;
             opts.inDensity = (int)(screenDensity * scale + 0.5f);
+        } else {
+            opts.inDensity = opts.inTargetDensity = 0;
         }
     }
 

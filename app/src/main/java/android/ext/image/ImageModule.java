@@ -25,6 +25,7 @@ import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.transformer.RoundedGIFTransformer;
 import android.ext.image.transformer.RoundedRectTransformer;
+import android.ext.image.transformer.Transformer;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
@@ -34,6 +35,7 @@ import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
+import android.graphics.drawable.Drawable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.AttributeSet;
@@ -56,9 +58,13 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
-    private static final int MAX_ARRAY_LENGTH     = 4;
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
+
+    /* package */ static final int COOKIE      = 0;
+    /* package */ static final int PARAMETERS  = 1;
+    /* package */ static final int TRANSFORMER = 2;
+    /* package */ static final int PLACEHOLDER = 3;
 
     /**
      * The application <tt>Context</tt>.
@@ -194,7 +200,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
 
     @Override
     public final Object[] newInstance() {
-        return new Object[MAX_ARRAY_LENGTH];
+        return new Object[4];
     }
 
     @Override
@@ -254,6 +260,54 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
         } else {
             return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, decoder);
         }
+    }
+
+    /**
+     * Returns an object by user-defined associated with the <em>params</em>.
+     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @return An object by user-defined.
+     * @see #getParameters(Object[])
+     * @see #getTransformer(Object[])
+     * @see #getPlaceholder(Object[])
+     */
+    public static <T> T getCookie(Object[] params) {
+        return (T)params[COOKIE];
+    }
+
+    /**
+     * Returns the {@link Parameters} associated with the <em>params</em>.
+     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @return The <tt>Parameters</tt>.
+     * @see #getCookie(Object[])
+     * @see #getTransformer(Object[])
+     * @see #getPlaceholder(Object[])
+     */
+    public static Parameters getParameters(Object[] params) {
+        return (Parameters)params[PARAMETERS];
+    }
+
+    /**
+     * Returns the placeholder associated with the <em>params</em>.
+     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @return The <tt>Drawable</tt>.
+     * @see #getCookie(Object[])
+     * @see #getParameters(Object[])
+     * @see #getTransformer(Object[])
+     */
+    public static Drawable getPlaceholder(Object[] params) {
+        return (Drawable)params[PLACEHOLDER];
+    }
+
+    /**
+     * Returns the {@link Transformer} associated with the <em>params</em>.
+     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @return The <tt>Transformer</tt>.
+     * @see #getCookie(Object[])
+     * @see #getParameters(Object[])
+     * @see #getPlaceholder(Object[])
+     */
+    public static <Image> Transformer<Image> getTransformer(Object[] params) {
+        return (Transformer<Image>)params[TRANSFORMER];
     }
 
     /**

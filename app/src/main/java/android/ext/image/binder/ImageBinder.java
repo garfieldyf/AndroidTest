@@ -1,13 +1,11 @@
 package android.ext.image.binder;
 
-import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
-import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.image.transformer.Transformer;
+import android.ext.image.ImageModule;
 import android.ext.util.ClassUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -58,18 +56,17 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
         final ImageView view = (ImageView)target;
         if (image == null) {
             view.setScaleType(ScaleType.CENTER);
-            view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
+            view.setImageDrawable(ImageModule.getPlaceholder(params));
         } else {
             view.setScaleType(ScaleType.FIT_XY);
             view.setImageDrawable(getCachedDrawable(uri, params, image));
         }
     }
 
-    @SuppressWarnings("unchecked")
     protected Drawable getCachedDrawable(URI uri, Object[] params, Image image) {
         Drawable drawable = mImageCache.get(uri);
         if (drawable == null) {
-            mImageCache.put(uri, drawable = ((Transformer<Image>)params[TRANSFORMER_INDEX]).transform(image));
+            mImageCache.put(uri, drawable = ImageModule.getTransformer(params).transform(image));
         }
 
         return drawable;

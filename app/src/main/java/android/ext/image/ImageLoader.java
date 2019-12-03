@@ -1,7 +1,9 @@
 package android.ext.image;
 
-import static android.ext.image.ImageLoader.LoadRequest.PLACEHOLDER_INDEX;
-import static android.ext.image.ImageLoader.LoadRequest.TRANSFORMER_INDEX;
+import static android.ext.image.ImageModule.COOKIE;
+import static android.ext.image.ImageModule.PARAMETERS;
+import static android.ext.image.ImageModule.PLACEHOLDER;
+import static android.ext.image.ImageModule.TRANSFORMER;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.content.Context;
 import android.ext.cache.Cache;
@@ -103,10 +105,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         final ImageView view = (ImageView)target;
         if (value == null) {
             view.setScaleType(ScaleType.CENTER);
-            view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
+            view.setImageDrawable((Drawable)params[PLACEHOLDER]);
         } else {
             view.setScaleType(ScaleType.FIT_XY);
-            final Transformer transformer = (Transformer)params[TRANSFORMER_INDEX];
+            final Transformer transformer = (Transformer)params[TRANSFORMER];
             if (transformer instanceof BitmapTransformer) {
                 view.setImageBitmap((Bitmap)value);
             } else {
@@ -275,11 +277,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      *       .into(imageView);</pre>
      */
     public static final class LoadRequest {
-        public static final int PARAMETERS_INDEX   = 0;
-        public static final int TRANSFORMER_INDEX  = 1;
-        public static final int PLACEHOLDER_INDEX  = 2;
-        public static final int COOKIE_INDEX       = 3;
-
         /* package */ Object mUri;
         /* package */ int mFlags;
         /* package */ Binder mBinder;
@@ -323,7 +320,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #parameters(Parameters)
          */
         public final LoadRequest parameters(int id) {
-            mParams[PARAMETERS_INDEX] = mLoader.mModule.getResource(id);
+            mParams[PARAMETERS] = mLoader.mModule.getResource(id);
             return this;
         }
 
@@ -334,7 +331,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #parameters(int)
          */
         public final LoadRequest parameters(Parameters parameters) {
-            mParams[PARAMETERS_INDEX] = parameters;
+            mParams[PARAMETERS] = parameters;
             return this;
         }
 
@@ -345,7 +342,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #transformer(Transformer)
          */
         public final LoadRequest transformer(int id) {
-            mParams[TRANSFORMER_INDEX] = mLoader.mModule.getResource(id);
+            mParams[TRANSFORMER] = mLoader.mModule.getResource(id);
             return this;
         }
 
@@ -356,7 +353,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #transformer(int)
          */
         public final LoadRequest transformer(Transformer transformer) {
-            mParams[TRANSFORMER_INDEX] = transformer;
+            mParams[TRANSFORMER] = transformer;
             return this;
         }
 
@@ -367,7 +364,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #placeholder(Drawable)
          */
         public final LoadRequest placeholder(int id) {
-            mParams[PLACEHOLDER_INDEX] = mLoader.mModule.getDrawable(id);
+            mParams[PLACEHOLDER] = mLoader.mModule.getDrawable(id);
             return this;
         }
 
@@ -378,7 +375,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #placeholder(int)
          */
         public final LoadRequest placeholder(Drawable drawable) {
-            mParams[PLACEHOLDER_INDEX] = drawable;
+            mParams[PLACEHOLDER] = drawable;
             return this;
         }
 
@@ -388,7 +385,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @return This request.
          */
         public final LoadRequest cookie(Object cookie) {
-            mParams[COOKIE_INDEX] = cookie;
+            mParams[COOKIE] = cookie;
             return this;
         }
 
@@ -431,12 +428,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         private void load(Object target, Binder binder) {
-            if (mParams[PARAMETERS_INDEX] == null) {
-                mParams[PARAMETERS_INDEX] = Parameters.defaultParameters();
+            if (mParams[PARAMETERS] == null) {
+                mParams[PARAMETERS] = Parameters.defaultParameters();
             }
 
-            if (mParams[TRANSFORMER_INDEX] == null) {
-                mParams[TRANSFORMER_INDEX] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
+            if (mParams[TRANSFORMER] == null) {
+                mParams[TRANSFORMER] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
             }
 
             mLoader.load(mUri, target, mFlags, binder, mParams);

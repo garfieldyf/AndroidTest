@@ -266,6 +266,21 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
     }
 
     @Override
+    public boolean contains(Object value) {
+        return (indexOf(value) != -1);
+    }
+
+    @Override
+    public int indexOf(Object value) {
+        return (value != null ? indexOfValue(value) : indexOfNull());
+    }
+
+    @Override
+    public int lastIndexOf(Object value) {
+        return (value != null ? lastIndexOfValue(value) : lastIndexOfNull());
+    }
+
+    @Override
     public PagedList<E> clone() {
         try {
             final PagedList<E> result = (PagedList<E>)super.clone();
@@ -303,6 +318,58 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
         }
 
         return contents;
+    }
+
+    private int indexOfNull() {
+        for (int i = 0; i < mPageCount; ++i) {
+            final Page<?> page = (Page<?>)mPages[i];
+            for (int j = 0, count = page.getCount(); j < count; ++j) {
+                if (page.getItem(j) == null) {
+                    return mPositions[i] + j;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private int indexOfValue(Object value) {
+        for (int i = 0; i < mPageCount; ++i) {
+            final Page<?> page = (Page<?>)mPages[i];
+            for (int j = 0, count = page.getCount(); j < count; ++j) {
+                if (value.equals(page.getItem(j))) {
+                    return mPositions[i] + j;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private int lastIndexOfNull() {
+        for (int i = mPageCount - 1; i >= 0; --i) {
+            final Page<?> page = (Page<?>)mPages[i];
+            for (int j = page.getCount() - 1; j >= 0; --j) {
+                if (page.getItem(j) == null) {
+                    return mPositions[i] + j;
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private int lastIndexOfValue(Object value) {
+        for (int i = mPageCount - 1; i >= 0; --i) {
+            final Page<?> page = (Page<?>)mPages[i];
+            for (int j = page.getCount() - 1; j >= 0; --j) {
+                if (value.equals(page.getItem(j))) {
+                    return mPositions[i] + j;
+                }
+            }
+        }
+
+        return -1;
     }
 
     private Object[] copyTo(Object[] contents) {

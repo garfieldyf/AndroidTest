@@ -380,6 +380,32 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         Log.i("yf", "notifyItemRangeRemoved - positionStart = " + positionStart + ", itemCount = " + page.getCount());
     }
 
+    private static void indexOf(PagedList<String> list) {
+        int index = list.indexOf("page_2_0");
+        Log.i("yf", "page_2_0 index = " + index);
+
+        index = list.indexOf("page_0_5");
+        Log.i("yf", "page_0_5 index = " + index);
+
+        index = list.indexOf(null);
+        Log.i("yf", "null index = " + index);
+
+        index = list.indexOf("page_0");
+        Log.i("yf", "page_0 index = " + index);
+
+        index = list.lastIndexOf("page_0_1");
+        Log.i("yf", "page_0_1 index = " + index);
+
+        index = list.lastIndexOf("page_2_7");
+        Log.i("yf", "page_2_7 index = " + index);
+
+        index = list.lastIndexOf(null);
+        Log.i("yf", "null index = " + index);
+
+        index = list.lastIndexOf("page_2");
+        Log.i("yf", "page_2 index = " + index);
+    }
+
     private void testPagedList() {
         final LogPrinter printer = new LogPrinter(Log.INFO, "yf");
         PagedList<String> list = new PagedList<String>(Arrays.asList(buildPage(0, 11), buildPage(1, 9)));
@@ -397,6 +423,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         removePage(list, 1);
         list.dump(printer);
         forEach(printer, list);
+        indexOf(list);
     }
     
     private void testSemaphore() {

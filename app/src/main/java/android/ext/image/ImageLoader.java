@@ -19,6 +19,7 @@ import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.Optional;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
@@ -105,10 +106,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
         } else {
             view.setScaleType(ScaleType.FIT_XY);
-            if (value instanceof Drawable) {
-                view.setImageDrawable((Drawable)value);
+            final Transformer transformer = (Transformer)params[TRANSFORMER_INDEX];
+            if (transformer instanceof BitmapTransformer) {
+                view.setImageBitmap((Bitmap)value);
             } else {
-                view.setImageDrawable(((Transformer<Object>)params[TRANSFORMER_INDEX]).transform(value));
+                view.setImageDrawable(transformer.transform(value));
             }
         }
     }

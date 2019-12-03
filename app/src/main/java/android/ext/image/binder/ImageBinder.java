@@ -61,11 +61,7 @@ public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
             view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
         } else {
             view.setScaleType(ScaleType.FIT_XY);
-            if (image instanceof Drawable) {
-                view.setImageDrawable((Drawable)image);
-            } else {
-                view.setImageDrawable(getCachedDrawable(uri, params, image));
-            }
+            view.setImageDrawable(getCachedDrawable(uri, params, image));
         }
     }
 

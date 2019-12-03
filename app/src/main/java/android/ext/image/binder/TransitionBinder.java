@@ -59,21 +59,16 @@ public final class TransitionBinder implements Binder<Object, Object, Object> {
         final ImageView view = (ImageView)target;
         if (value == null) {
             view.setImageDrawable((Drawable)params[PLACEHOLDER_INDEX]);
-        } else if (value instanceof Drawable) {
-            setViewImage(view, (Drawable)value, params, state);
         } else {
-            setViewImage(view, ((Transformer)params[TRANSFORMER_INDEX]).transform(value), params, state);
-        }
-    }
-
-    private void setViewImage(ImageView view, Drawable image, Object[] params, int state) {
-        if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(image);
-        } else {
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[PLACEHOLDER_INDEX], image });
-            view.setImageDrawable(drawable);
-            drawable.setCrossFadeEnabled(true);
-            drawable.startTransition(mDuration);
+            final Drawable image = ((Transformer)params[TRANSFORMER_INDEX]).transform(value);
+            if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+                view.setImageDrawable(image);
+            } else {
+                final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { (Drawable)params[PLACEHOLDER_INDEX], image });
+                view.setImageDrawable(drawable);
+                drawable.setCrossFadeEnabled(true);
+                drawable.startTransition(mDuration);
+            }
         }
     }
 }

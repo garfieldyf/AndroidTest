@@ -20,12 +20,11 @@ import android.ext.concurrent.ThreadPool;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.image.ImageLoader.LoadRequest;
+import android.ext.image.binder.RoundedBitmapBinder;
+import android.ext.image.binder.TransitionBinder;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
-import android.ext.image.transformer.RoundedGIFTransformer;
-import android.ext.image.transformer.RoundedRectTransformer;
-import android.ext.image.transformer.Transformer;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
@@ -63,8 +62,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
 
     /* package */ static final int COOKIE      = 0;
     /* package */ static final int PARAMETERS  = 1;
-    /* package */ static final int TRANSFORMER = 2;
-    /* package */ static final int PLACEHOLDER = 3;
+    /* package */ static final int PLACEHOLDER = 2;
 
     /**
      * The application <tt>Context</tt>.
@@ -200,7 +198,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
 
     @Override
     public final Object[] newInstance() {
-        return new Object[4];
+        return new Object[3];
     }
 
     @Override
@@ -267,7 +265,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return An object by user-defined.
      * @see #getParameters(Object[])
-     * @see #getTransformer(Object[])
      * @see #getPlaceholder(Object[])
      */
     public static <T> T getCookie(Object[] params) {
@@ -279,7 +276,6 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The <tt>Parameters</tt>.
      * @see #getCookie(Object[])
-     * @see #getTransformer(Object[])
      * @see #getPlaceholder(Object[])
      */
     public static Parameters getParameters(Object[] params) {
@@ -292,22 +288,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      * @return The <tt>Drawable</tt>.
      * @see #getCookie(Object[])
      * @see #getParameters(Object[])
-     * @see #getTransformer(Object[])
      */
     public static Drawable getPlaceholder(Object[] params) {
         return (Drawable)params[PLACEHOLDER];
-    }
-
-    /**
-     * Returns the {@link Transformer} associated with the <em>params</em>.
-     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
-     * @return The <tt>Transformer</tt>.
-     * @see #getCookie(Object[])
-     * @see #getParameters(Object[])
-     * @see #getPlaceholder(Object[])
-     */
-    public static <Image> Transformer<Image> getTransformer(Object[] params) {
-        return (Transformer<Image>)params[TRANSFORMER];
     }
 
     /**
@@ -414,10 +397,10 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
             result.append("  ").append(value.string).append(" ==> ");
             if (object instanceof Parameters) {
                 ((Parameters)object).dump(printer, result);
-            } else if (object instanceof RoundedGIFTransformer) {
-                ((RoundedGIFTransformer)object).dump(printer, result);
-            } else if (object instanceof RoundedRectTransformer) {
-                ((RoundedRectTransformer)object).dump(printer, result);
+            } else if (object instanceof TransitionBinder) {
+                ((TransitionBinder)object).dump(printer, result);
+            } else if (object instanceof RoundedBitmapBinder) {
+                ((RoundedBitmapBinder)object).dump(printer, result);
             } else {
                 printer.println(DebugUtils.toString(object, result).toString());
             }

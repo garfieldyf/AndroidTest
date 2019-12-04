@@ -3,7 +3,6 @@ package android.ext.image;
 import static android.ext.image.ImageModule.COOKIE;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PLACEHOLDER;
-import static android.ext.image.ImageModule.TRANSFORMER;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.content.Context;
 import android.ext.cache.Cache;
@@ -11,8 +10,6 @@ import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.params.Parameters;
-import android.ext.image.transformer.BitmapTransformer;
-import android.ext.image.transformer.Transformer;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -47,7 +44,7 @@ import java.util.Arrays;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
+public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Bitmap> {
     /**
      * If set the image loader will be dump the {@link Options} when
      * it will be load image. <p>This flag can be used DEBUG mode.</p>
@@ -101,19 +98,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
+    public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
-        if (value == null) {
+        if (bitmap != null) {
+            view.setScaleType(ScaleType.FIT_XY);
+            view.setImageBitmap(bitmap);
+        } else {
             view.setScaleType(ScaleType.CENTER);
             view.setImageDrawable((Drawable)params[PLACEHOLDER]);
-        } else {
-            view.setScaleType(ScaleType.FIT_XY);
-            final Transformer transformer = (Transformer)params[TRANSFORMER];
-            if (transformer instanceof BitmapTransformer) {
-                view.setImageBitmap((Bitmap)value);
-            } else {
-                view.setImageDrawable(transformer.transform(value));
-            }
         }
     }
 
@@ -272,7 +264,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
      *       .parameters(R.xml.decode_params)
-     *       .transformer(R.xml.transformer)
      *       .placeholder(R.drawable.ic_placeholder)
      *       .into(imageView);</pre>
      */
@@ -332,28 +323,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
         public final LoadRequest parameters(Parameters parameters) {
             mParams[PARAMETERS] = parameters;
-            return this;
-        }
-
-        /**
-         * Sets the {@link Transformer} to bind image.
-         * @param id The xml resource id of the <tt>Transformer</tt>.
-         * @return This request.
-         * @see #transformer(Transformer)
-         */
-        public final LoadRequest transformer(int id) {
-            mParams[TRANSFORMER] = mLoader.mModule.getResource(id);
-            return this;
-        }
-
-        /**
-         * Sets the {@link Transformer} to bind image.
-         * @param transformer The <tt>Transformer</tt>.
-         * @return This request.
-         * @see #transformer(int)
-         */
-        public final LoadRequest transformer(Transformer transformer) {
-            mParams[TRANSFORMER] = transformer;
             return this;
         }
 
@@ -430,10 +399,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         private void load(Object target, Binder binder) {
             if (mParams[PARAMETERS] == null) {
                 mParams[PARAMETERS] = Parameters.defaultParameters();
-            }
-
-            if (mParams[TRANSFORMER] == null) {
-                mParams[TRANSFORMER] = BitmapTransformer.getInstance(mLoader.mModule.mContext);
             }
 
             mLoader.load(mUri, target, mFlags, binder, mParams);

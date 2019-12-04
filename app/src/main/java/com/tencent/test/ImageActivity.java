@@ -28,7 +28,6 @@ import android.ext.database.DatabaseUtils;
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
-import android.ext.image.transformer.OvalTransformer;
 import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
@@ -167,7 +166,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         // testJson(printer);
         // testRegex();
         // testDex();
-        // testTransformer();
         // testColor();
         // testUncompress();
         // testLogo();
@@ -201,7 +199,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testScaleParameters();
 //        testComputeFileSizes();
 //        testJSONArray();
-//        XmlResources.loadTransformer(this, R.xml.image_transformer);
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
         //testFileCopy();
 
@@ -1323,8 +1320,8 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //            } else {
                 MainApplication.sInstance.load(R.xml.image_loader, itemData)
                     .parameters(R.xml.size_params)
+                    .binder(R.xml.transition_binder)
                     .placeholder(R.drawable.ic_placeholder)
-                    .transformer(OvalTransformer.sInstance)
 //                    .binder(R.xml.image_binder)
 //                    .preload();
                     .into(image);

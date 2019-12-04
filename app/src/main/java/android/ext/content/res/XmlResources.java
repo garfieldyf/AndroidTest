@@ -6,17 +6,11 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.ext.image.binder.ImageBinder;
+import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.ScaleParameters;
 import android.ext.image.params.SizeParameters;
-import android.ext.image.transformer.BitmapTransformer;
-import android.ext.image.transformer.GIFTransformer;
-import android.ext.image.transformer.ImageTransformer;
-import android.ext.image.transformer.OvalTransformer;
-import android.ext.image.transformer.RoundedGIFTransformer;
-import android.ext.image.transformer.RoundedRectTransformer;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.util.AttributeSet;
@@ -31,8 +25,8 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public final class XmlResources {
     /**
-     * Loads an new object from a xml resource. The returns value may be one
-     * of {@link Parameters}, {@link Binder} or {@link Transformer} object.
+     * Loads an new object from a xml resource. The returns value may be
+     * one of {@link Parameters} or {@link Binder} object.
      * @param context The <tt>Context</tt>.
      * @param id The resource id of the object to load.
      * @throws NotFoundException if the given <em>id</em> cannot be load.
@@ -124,7 +118,7 @@ public final class XmlResources {
      */
     public static Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String name = parser.getName();
-        if (name.equals("binder") || name.equals("parameters") || name.equals("transformer")) {
+        if (name.equals("binder") || name.equals("parameters")) {
             final String tagName = name;
             if ((name = parser.getAttributeValue(null, "class")) == null) {
                 throw new XmlPullParserException(parser.getPositionDescription() + ": The <" + tagName + "> tag requires a valid 'class' attribute");
@@ -144,30 +138,11 @@ public final class XmlResources {
             return new ScaleParameters(context, attrs);
 
         /* ---------------- binders ----------------- */
-        case "ImageBinder":
-            return new ImageBinder(context, attrs);
-
         case "TransitionBinder":
             return new TransitionBinder(context, attrs);
 
-        /* -------------- transformers --------------- */
-        case "GIFTransformer":
-            return GIFTransformer.sInstance;
-
-        case "OvalTransformer":
-            return OvalTransformer.sInstance;
-
-        case "ImageTransformer":
-            return new ImageTransformer(context, attrs);
-
-        case "BitmapTransformer":
-            return BitmapTransformer.getInstance(context);
-
-        case "RoundedGIFTransformer":
-            return new RoundedGIFTransformer(context, attrs);
-
-        case "RoundedRectTransformer":
-            return new RoundedRectTransformer(context, attrs);
+        case "RoundedBitmapBinder":
+            return new RoundedBitmapBinder(context, attrs);
 
         default:
             return ClassUtils.newInstance(name, new Class[] { Context.class, AttributeSet.class }, context, attrs);

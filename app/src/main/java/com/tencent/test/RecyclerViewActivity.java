@@ -3,13 +3,11 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
-import android.ext.image.ImageLoader;
 import android.ext.page.Page;
 import android.ext.page.PageAdapter;
 import android.ext.widget.LayoutManagerHelper;
-import android.ext.widget.ViewUtils;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.graphics.Bitmap;
+import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -229,7 +227,6 @@ public class RecyclerViewActivity extends Activity {
                 .binder(R.xml.transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
-                .transformer(R.xml.round_rect_transformer)
                 .into(itemView);
         }
 
@@ -259,7 +256,6 @@ public class RecyclerViewActivity extends Activity {
                 .binder(R.xml.transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
-                .transformer(R.xml.top_round_rect_transformer)
                 .into(icon);
         }
 

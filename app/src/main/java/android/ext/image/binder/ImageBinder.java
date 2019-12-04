@@ -1,74 +1,42 @@
 package android.ext.image.binder;
 
-import android.content.Context;
-import android.content.res.TypedArray;
-import android.ext.cache.Cache;
-import android.ext.cache.SimpleLruCache;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.graphics.GIFImage;
+import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.image.ImageModule;
-import android.ext.util.ClassUtils;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.util.AttributeSet;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 /**
- * Class <tt>ImageBinder</tt> allows to bind the image to the {@link ImageView}.
- * This class can be support the drawable cache.
- * <h3>Usage</h3>
- * <p>Here is a xml resource example:</p><pre>
- * &lt;[ ImageBinder | binder ]
- *     xmlns:app="http://schemas.android.com/apk/res-auto"
- *     class="classFullName"
- *     app:maxCacheSize="128"
- *     app:attribute1="value1"
- *     app:attribute2="value2"
- *     ... ... /&gt;</pre>
+ * Class <tt>ImageBinder</tt> used to bind the image to the {@link ImageView}.
  * @author Garfield
  */
-public class ImageBinder<URI, Image> implements Binder<URI, Object, Image> {
-    protected final Cache<URI, Drawable> mImageCache;
+public final class ImageBinder implements Binder<Object, Object, Object> {
+    public static final Binder<Object, Object, Object> sInstance = new ImageBinder();
 
     /**
-     * Constructor
-     * @param maxCacheSize The maximum number of
-     * drawables to allow in the internal cache.
-     * @see #ImageBinder(Context, AttributeSet)
+     * This class cannot be instantiated.
      */
-    public ImageBinder(int maxCacheSize) {
-        mImageCache = new SimpleLruCache<URI, Drawable>(maxCacheSize);
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param attrs The base set of attribute values.
-     * @see #ImageBinder(int)
-     */
-    public ImageBinder(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(context.getPackageName(), "ImageBinder"));
-        mImageCache = new SimpleLruCache<URI, Drawable>(a.getInt(0 /* R.styleable.ImageBinder_maxCacheSize */, 0));
-        a.recycle();
+    private ImageBinder() {
     }
 
     @Override
-    public void bindValue(URI uri, Object[] params, Object target, Image image, int state) {
+    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
         final ImageView view = (ImageView)target;
-        if (image == null) {
+        if (value == null) {
             view.setScaleType(ScaleType.CENTER);
             view.setImageDrawable(ImageModule.getPlaceholder(params));
         } else {
             view.setScaleType(ScaleType.FIT_XY);
-            view.setImageDrawable(getCachedDrawable(uri, params, image));
+            if (value instanceof Bitmap) {
+                view.setImageBitmap((Bitmap)value);
+            } else if (value instanceof Drawable) {
+                view.setImageDrawable((Drawable)value);
+            } else {
+                view.setImageDrawable(new GIFDrawable((GIFImage)value));
+            }
         }
-    }
-
-    protected Drawable getCachedDrawable(URI uri, Object[] params, Image image) {
-        Drawable drawable = mImageCache.get(uri);
-        if (drawable == null) {
-            mImageCache.put(uri, drawable = ImageModule.getTransformer(params).transform(image));
-        }
-
-        return drawable;
     }
 }

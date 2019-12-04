@@ -5,12 +5,11 @@ import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 
 /**
- * Class <tt>ImageBinder</tt> used to bind the image to the {@link ImageView}.
+ * Class <tt>ImageBinder</tt> used to bind an image to the {@link ImageView}.
  * @author Garfield
  */
 public final class ImageBinder implements Binder<Object, Object, Object> {
@@ -32,8 +31,6 @@ public final class ImageBinder implements Binder<Object, Object, Object> {
             view.setScaleType(ScaleType.FIT_XY);
             if (value instanceof Bitmap) {
                 view.setImageBitmap((Bitmap)value);
-            } else if (value instanceof Drawable) {
-                view.setImageDrawable((Drawable)value);
             } else {
                 view.setImageDrawable(new GIFDrawable((GIFImage)value));
             }

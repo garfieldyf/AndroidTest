@@ -93,7 +93,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
         mExecutor = executor;
         mFileCache   = fileCache;
         mImageCache  = imageCache;
-        mResources   = new SparseArray<Object>(8);
+        mResources   = new SparseArray<Object>(12);
         mLoaderCache = new SparseArray<ImageLoader>(2);
         mParamsPool  = Pools.newPool(this, 48);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
@@ -106,6 +106,12 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
 
     /**
      * Equivalent to calling <tt>with(id).load(uri)</tt>.
+     * <h3>Usage</h3>
+     * <p>Here is an example:</p><pre>
+     * module.load(R.xml.image_loader, uri)
+     *       .parameters(R.xml.decode_params)
+     *       .placeholder(R.drawable.ic_placeholder)
+     *       .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
      * @see #with(int)

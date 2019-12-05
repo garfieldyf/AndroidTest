@@ -7,6 +7,7 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.ext.image.binder.RoundedImageBinder;
+import android.ext.image.binder.RoundedTransitionBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.ScaleParameters;
@@ -143,6 +144,9 @@ public final class XmlResources {
 
         case "RoundedImageBinder":
             return new RoundedImageBinder(context, attrs);
+
+        case "RoundedTransitionBinder":
+            return new RoundedTransitionBinder(context, attrs);
 
         default:
             return ClassUtils.newInstance(name, new Class[] { Context.class, AttributeSet.class }, context, attrs);

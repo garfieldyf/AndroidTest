@@ -53,39 +53,38 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
         a.recycle();
     }
 
+    public void dump(Printer printer, StringBuilder result) {
+        printer.println(result.append(getClass().getSimpleName())
+            .append(" { duration = ").append(mDuration)
+            .append(" }").toString());
+    }
+
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
+        final Drawable placeholder = ImageModule.getPlaceholder(params);
+        DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
         final ImageView view = (ImageView)target;
         if (bitmap == null) {
-            view.setImageDrawable(ImageModule.getPlaceholder(params));
+            view.setImageDrawable(placeholder);
         } else {
-            setViewImage(view, new BitmapDrawable(view.getResources(), bitmap), params, state);
+            final Drawable drawable = getDrawable(view, bitmap);
+            if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+                view.setImageDrawable(drawable);
+            } else {
+                final TransitionDrawable transition = new TransitionDrawable(new Drawable[] { placeholder, drawable });
+                view.setImageDrawable(transition);
+                transition.setCrossFadeEnabled(true);
+                transition.startTransition(mDuration);
+            }
         }
     }
 
     /**
-     * Sets an image as the content of the specified {@link ImageView}.
-     * @param view The target <tt>ImageView</tt>.
-     * @param drawable The <tt>Drawable</tt> to set.
-     * @param params The parameters, passed earlier by {@link #bindValue}.
-     * @param state The state, passed earlier by {@link #bindValue}.
+     * Converts a {@link Bitmap} to a {@link Drawable}. Subclasses
+     * should override this method to convert the drawable. The
+     * default implementation returns a <tt>BitmapDrawable</tt>.
      */
-    protected void setViewImage(ImageView view, Drawable drawable, Object[] params, int state) {
-        if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(drawable);
-        } else {
-            final Drawable placeholder = ImageModule.getPlaceholder(params);
-            DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
-            final TransitionDrawable transition = new TransitionDrawable(new Drawable[] { placeholder, drawable });
-            view.setImageDrawable(transition);
-            transition.setCrossFadeEnabled(true);
-            transition.startTransition(mDuration);
-        }
-    }
-
-    public final void dump(Printer printer, StringBuilder result) {
-        printer.println(result.append(getClass().getSimpleName())
-            .append(" { duration = ").append(mDuration)
-            .append(" }").toString());
+    protected Drawable getDrawable(ImageView view, Bitmap bitmap) {
+        return new BitmapDrawable(view.getResources(), bitmap);
     }
 }

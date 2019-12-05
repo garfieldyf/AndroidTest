@@ -224,7 +224,7 @@ public class RecyclerViewActivity extends Activity {
         @Override
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
             MainApplication.sInstance.load(R.xml.image_loader, itemData)
-                .binder(R.xml.transition_binder)
+                .binder(R.xml.rounded_transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
                 .into(itemView);
@@ -253,7 +253,7 @@ public class RecyclerViewActivity extends Activity {
 //            title.setText(itemData);
             title.setText(Integer.toString(position));
             MainApplication.sInstance.load(R.xml.image_loader, itemData)
-                .binder(R.xml.transition_binder)
+                .binder(R.xml.rounded_transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
                 .into(icon);

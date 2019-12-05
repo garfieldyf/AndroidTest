@@ -185,6 +185,10 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
     }
 
     public boolean handleUIMessage(Message msg) {
+        if (mMediaPlayer == null) {
+            return true;
+        }
+
         switch (msg.what) {
         case MESSAGE_VIDEO_ERROR:
             if (mListener != null) {

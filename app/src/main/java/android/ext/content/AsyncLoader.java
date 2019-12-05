@@ -38,7 +38,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #AsyncLoader(Executor, Cache, int)
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
-        super(executor, 48);
+        super(executor, 32);
         mCache = cache;
         DebugUtils.__checkError(cache == null, "cache == null");
     }

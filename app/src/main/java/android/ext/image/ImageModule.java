@@ -19,6 +19,8 @@ import android.ext.cache.SimpleFileCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
+import android.ext.graphics.GIFImage;
+import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.image.ImageLoader.LoadRequest;
 import android.ext.image.binder.RoundedImageBinder;
 import android.ext.image.binder.TransitionBinder;
@@ -33,6 +35,7 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.os.Process;
@@ -44,6 +47,7 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.widget.ImageView;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -56,7 +60,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
+public final class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
@@ -86,14 +90,14 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      */
-    public ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+    /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
         ImageModule.__checkDumpSystemInfo(context);
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
         mFileCache   = fileCache;
         mImageCache  = imageCache;
-        mResources   = new SparseArray<Object>(12);
+        mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
         mParamsPool  = Pools.newPool(this, 48);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
@@ -105,7 +109,9 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
     }
 
     /**
-     * Equivalent to calling <tt>with(id).load(uri)</tt>.
+     * Loads the image from the specified <em>uri</em>, bind it to the target. If the image
+     * is already cached, it is bind immediately. Otherwise loads the image on a background
+     * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
@@ -114,24 +120,10 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      *       .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
-     * @see #with(int)
      * @see ImageLoader#load(URI)
      */
     public final LoadRequest load(int id, URI uri) {
-        return with(id).load(uri);
-    }
-
-    /**
-     * Return an {@link ImageLoader} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
-     * @return The <tt>ImageLoader</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     * @see #load(int, URI)
-     * @see ImageLoader#load(URI)
-     */
-    public final ImageLoader<URI, Image> with(int id) {
-        DebugUtils.__checkUIThread("with");
+        DebugUtils.__checkUIThread("load");
         ImageLoader loader = mLoaderCache.get(id, null);
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
@@ -139,7 +131,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the ImageLoader - ID #0x" + Integer.toHexString(id));
         }
 
-        return loader;
+        return loader.load(uri);
     }
 
     /**
@@ -241,7 +233,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
     }
 
     @Override
-    public ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+    public final ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
         if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
             throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
@@ -297,6 +289,21 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
      */
     public static Drawable getPlaceholder(Object[] params) {
         return (Drawable)params[PLACEHOLDER];
+    }
+
+    /**
+     * Sets an image as the content of the specified {@link ImageView}.
+     * @param view The target <tt>ImageView</tt>.
+     * @param value The image value to set.
+     */
+    public static void bindValue(ImageView view, Object value) {
+        if (value instanceof Bitmap) {
+            view.setImageBitmap((Bitmap)value);
+        } else if (value instanceof Drawable) {
+            view.setImageDrawable((Drawable)value);
+        } else {
+            view.setImageDrawable(new GIFDrawable((GIFImage)value));
+        }
     }
 
     /**
@@ -513,7 +520,7 @@ public class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Obj
          * @param priority The priority.
          * @return This builder.
          */
-        public final Builder<URI, Image> setPriority(int priority) {
+        public final Builder<URI, Image> setThreadPriority(int priority) {
             mPriority = priority;
             return this;
         }

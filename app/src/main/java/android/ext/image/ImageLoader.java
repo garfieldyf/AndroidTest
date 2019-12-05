@@ -18,7 +18,6 @@ import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.Optional;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
-import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
@@ -44,7 +43,7 @@ import java.util.Arrays;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Bitmap> {
+public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
     /**
      * If set the image loader will be dump the {@link Options} when
      * it will be load image. <p>This flag can be used DEBUG mode.</p>
@@ -64,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
-    public ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
+    protected ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
         super(module.mExecutor, Optional.ofNullable(imageCache), 48);
 
         mRequest = new LoadRequest(this);
@@ -98,11 +97,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
+    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
         final ImageView view = (ImageView)target;
-        if (bitmap != null) {
+        if (value != null) {
             view.setScaleType(ScaleType.FIT_XY);
-            view.setImageBitmap(bitmap);
+            ImageModule.bindValue(view, value);
         } else {
             view.setScaleType(ScaleType.CENTER);
             view.setImageDrawable((Drawable)params[PLACEHOLDER]);
@@ -291,7 +290,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * Equivalent to calling <tt>flags(FLAG_IGNORE_MEMORY_CACHE)</tt>.
          * @return This request.
          * @see #flags(int)
-         * @see AsyncLoader#FLAG_IGNORE_MEMORY_CACHE
+         * @see #FLAG_IGNORE_MEMORY_CACHE
          */
         public final LoadRequest skipMemory() {
             mFlags |= FLAG_IGNORE_MEMORY_CACHE;

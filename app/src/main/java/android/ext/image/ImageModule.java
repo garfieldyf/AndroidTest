@@ -281,9 +281,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Returns the placeholder associated with the <em>params</em>.
+     * Returns the placeholder drawable associated with the <em>params</em>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
-     * @return The <tt>Drawable</tt>.
+     * @return The placeholder drawable.
      * @see #getCookie(Object[])
      * @see #getParameters(Object[])
      */
@@ -296,7 +296,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param view The target <tt>ImageView</tt>.
      * @param value The image value to set.
      */
-    public static void bindValue(ImageView view, Object value) {
+    public static void setViewImage(ImageView view, Object value) {
         if (value instanceof Bitmap) {
             view.setImageBitmap((Bitmap)value);
         } else if (value instanceof Drawable) {

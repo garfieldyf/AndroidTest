@@ -101,7 +101,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         final ImageView view = (ImageView)target;
         if (value != null) {
             view.setScaleType(ScaleType.FIT_XY);
-            ImageModule.bindValue(view, value);
+            ImageModule.setViewImage(view, value);
         } else {
             view.setScaleType(ScaleType.CENTER);
             view.setImageDrawable((Drawable)params[PLACEHOLDER]);

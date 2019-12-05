@@ -21,7 +21,7 @@ public final class ImageBinder implements Binder<Object, Object, Object> {
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
         final ImageView view = (ImageView)target;
         if (value != null) {
-            ImageModule.bindValue(view, value);
+            ImageModule.setViewImage(view, value);
         } else {
             view.setImageDrawable(ImageModule.getPlaceholder(params));
         }

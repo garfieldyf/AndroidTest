@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
@@ -148,6 +149,21 @@ public final class DeviceUtils {
              .append("\n  eth0 = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
         printer.println(infos.toString());
 
+        // Dumps configuration infos.
+        final Configuration config = context.getResources().getConfiguration();
+        infos.setLength(0);
+        infos.append("  mcc = ").append(config.mcc)
+             .append("\n  mnc = ").append(config.mnc)
+             .append("\n  locale = ").append(config.locale)
+             .append("\n  uiModeType  = [ ").append(toUiType(config.uiMode)).append(", ").append(config.uiMode & Configuration.UI_MODE_TYPE_MASK).append(" ]")
+             .append("\n  orientation = [ ").append(toOrientation(config.orientation)).append(", ").append(config.orientation).append(" ]")
+             .append("\n  layoutSize  = [ ").append(toLayoutSize(config.screenLayout)).append(", ").append(config.screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK).append(" ]")
+             .append("\n  touchScreen = [ ").append(toTouchScreen(config.touchscreen)).append(", ").append(config.touchscreen).append(" ]")
+             .append("\n  navigation  = [ ").append(toNavigation(config.navigation)).append(", ").append(config.navigation).append(" ]")
+             .append("\n  screenWidthDp  = ").append(config.screenWidthDp).append("dp")
+             .append("\n  screenHeightDp = ").append(config.screenHeightDp).append("dp");
+        printer.println(infos.toString());
+
         // Dumps display infos.
         infos.setLength(0);
         infos.append("  realWidth  = ").append(size.x)
@@ -221,6 +237,143 @@ public final class DeviceUtils {
 
         default:
             return "DENSITY_" + densityDpi;
+        }
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description
+     * with the specified <em>uiMode</em>.
+     * @param uiMode The ui mode.
+     * @return A readable representation of the <em>uiMode</em>.
+     */
+    public static String toUiType(int uiMode) {
+        final int type = (uiMode & Configuration.UI_MODE_TYPE_MASK);
+        switch (type) {
+        case Configuration.UI_MODE_TYPE_CAR:
+            return "car";
+
+        case Configuration.UI_MODE_TYPE_DESK:
+            return "desk";
+
+        case Configuration.UI_MODE_TYPE_WATCH:
+            return "watch";
+
+        case Configuration.UI_MODE_TYPE_NORMAL:
+            return "nromal";
+
+        case Configuration.UI_MODE_TYPE_APPLIANCE:
+            return "appliance";
+
+        case Configuration.UI_MODE_TYPE_TELEVISION:
+            return "television";
+
+        default:
+            return Integer.toString(type);
+        }
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description
+     * with the specified <em>navigation</em>.
+     * @param navigation The kind of navigation on the device.
+     * @return A readable representation of the <em>navigation</em>.
+     */
+    public static String toNavigation(int navigation) {
+        switch (navigation) {
+        case Configuration.NAVIGATION_NONAV:
+            return "nonav";
+
+        case Configuration.NAVIGATION_DPAD:
+            return "dpad";
+
+        case Configuration.NAVIGATION_WHEEL:
+            return "wheel";
+
+        case Configuration.NAVIGATION_TRACKBALL:
+            return "trackball";
+
+        case Configuration.NAVIGATION_UNDEFINED:
+            return "undefined";
+
+        default:
+            return Integer.toString(navigation);
+        }
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description
+     * with the specified <em>orientation</em>.
+     * @param orientation The orientation of the screen.
+     * @return A readable representation of the <em>orientation</em>.
+     */
+    public static String toOrientation(int orientation) {
+        switch (orientation) {
+        case Configuration.ORIENTATION_PORTRAIT:
+            return "portrait";
+
+        case Configuration.ORIENTATION_LANDSCAPE:
+            return "landscape";
+
+        case Configuration.ORIENTATION_UNDEFINED:
+            return "undefined";
+
+        default:
+            return Integer.toString(orientation);
+        }
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description
+     * with the specified <em>touchscreen</em>.
+     * @param touchscreen The kind of touch screen attached to the device.
+     * @return A readable representation of the <em>touchscreen</em>.
+     */
+    @SuppressWarnings("deprecation")
+    public static String toTouchScreen(int touchscreen) {
+        switch (touchscreen) {
+        case Configuration.TOUCHSCREEN_FINGER:
+            return "finger";
+
+        case Configuration.TOUCHSCREEN_STYLUS:
+            return "stylus";
+
+        case Configuration.TOUCHSCREEN_NOTOUCH:
+            return "notouch";
+
+        case Configuration.TOUCHSCREEN_UNDEFINED:
+            return "undefined";
+
+        default:
+            return Integer.toString(touchscreen);
+        }
+    }
+
+    /**
+     * Returns a string containing a concise, human-readable description
+     * with the specified <em>screenLayout</em>.
+     * @param screenLayout The layout of the screen.
+     * @return A readable representation of the <em>screenLayout</em>.
+     */
+    public static String toLayoutSize(int screenLayout) {
+        final int layoutSize = (screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK);
+        switch (layoutSize) {
+        case Configuration.SCREENLAYOUT_SIZE_SMALL:
+            return "small";
+
+        case Configuration.SCREENLAYOUT_SIZE_NORMAL:
+            return "normal";
+
+        case Configuration.SCREENLAYOUT_SIZE_LARGE:
+            return "large";
+
+        case Configuration.SCREENLAYOUT_SIZE_XLARGE:
+            return "xlarge";
+
+        case Configuration.SCREENLAYOUT_SIZE_UNDEFINED:
+            return "undefined";
+
+        default:
+            return Integer.toString(layoutSize);
         }
     }
 

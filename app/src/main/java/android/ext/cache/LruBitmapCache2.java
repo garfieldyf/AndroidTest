@@ -10,7 +10,7 @@ import android.util.Printer;
  * @author Garfield
  */
 public class LruBitmapCache2<K> extends LruBitmapCache<K> {
-    protected final BitmapPool mBitmapPool;
+    private final BitmapPool mBitmapPool;
 
     /**
      * Constructor

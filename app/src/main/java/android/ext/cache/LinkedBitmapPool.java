@@ -17,8 +17,8 @@ import java.util.List;
  * @author Garfield
  */
 public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
-    protected final int mMaxSize;
-    protected final LinkedList<Bitmap> mBitmaps;
+    private final int mMaxSize;
+    private final LinkedList<Bitmap> mBitmaps;
 
     /**
      * Constructor

@@ -25,7 +25,7 @@ import java.util.Arrays;
  *         super(ownerActivity);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected File getCacheFile(String[] urls) {
  *         // Builds the cache file, For example:
  *         return new File(mContext.getFilesDir(), "xxx/cacheFile.json");
@@ -38,12 +38,12 @@ import java.util.Arrays;
  *         return cacheFile.
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected DownloadRequest newDownloadRequest(String[] urls) throws Exception {
  *         return new DownloadRequest(urls[0]).connectTimeout(30000).readTimeout(30000);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected JSONObject parseResult(String[] urls, File cacheFile) throws Exception {
  *         final JSONObject result;
  *         if (cacheFile == null) {
@@ -62,7 +62,7 @@ import java.util.Arrays;
  *         return null;
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
@@ -73,8 +73,7 @@ import java.util.Arrays;
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
- *             // 1.If the cache file is hit, do not update UI.
- *             // 2.Loading failed, show error or empty UI.
+ *             // Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -143,21 +142,23 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
     @Override
     @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
+        final File cacheFile = getCacheFile(params);
+        if (cacheFile == null) {
+            return parseResult(params);
+        } else {
+            final boolean hitCache = loadFromCache(params, cacheFile);
+            return (isCancelled() ? null : download(params, cacheFile.getPath(), hitCache));
+        }
+    }
+
+    private Result parseResult(Params[] params) {
         Result result = null;
         try {
-            final File cacheFile = getCacheFile(params);
-            if (cacheFile == null) {
-                DebugUtils.__checkStartMethodTracing();
-                result = parseResult(params, null);
-                DebugUtils.__checkStopMethodTracing("ResourceTask", "no cache file parseResult params = " + Arrays.toString(params));
-            } else {
-                final boolean hitCache = loadFromCache(params, cacheFile);
-                if (!isCancelled()) {
-                    result = download(params, cacheFile.getPath(), hitCache);
-                }
-            }
+            DebugUtils.__checkStartMethodTracing();
+            result = parseResult(params, null);
+            DebugUtils.__checkStopMethodTracing("ResourceTask", "parse result - params = " + Arrays.toString(params));
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load resource - params = " + Arrays.toString(params) + "\n" + e);
+            Log.e(getClass().getName(), "Couldn't parse result - params = " + Arrays.toString(params) + "\n" + e);
         }
 
         return result;
@@ -169,7 +170,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             final Result result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
+            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache - params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -184,31 +185,31 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         return false;
     }
 
-    private Result download(Params[] params, String cacheFile, boolean hitCache) throws Exception {
+    private Result download(Params[] params, String cacheFile, boolean hitCache) {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = newDownloadRequest(params).download(tempFile, this, null);
-        // If download failed or this task was cancelled, deletes the temp file.
-        if (statusCode != HTTP_OK || isCancelled()) {
-            DebugUtils.__checkDebug(true, "ResourceTask", "downloads params = " + Arrays.toString(params) + " statusCode = " + statusCode + ", isCancelled = " + isCancelled());
-            FileUtils.deleteFiles(tempFile, false);
-            return null;
+        Result result = null;
+        try {
+            final int statusCode = newDownloadRequest(params).download(tempFile, this, null);
+            if (statusCode == HTTP_OK && !isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
+                // If the cache file is not equals the temp file, parse the temp file.
+                DebugUtils.__checkStartMethodTracing();
+                result = parseResult(params, new File(tempFile));
+                DebugUtils.__checkStopMethodTracing("ResourceTask", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", params = ").append(Arrays.toString(params)).toString());
+                if (result != null) {
+                    // Save the temp file to the cache file.
+                    FileUtils.moveFile(tempFile, cacheFile);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(getClass().getName(), "Couldn't load resource - params = " + Arrays.toString(params) + "\n" + e);
         }
 
-        // If the cache file is hit and the cache file's contents are equal the temp
-        // file's contents. Deletes the temp file and cancel this task, do not update UI.
-        if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceTask", "compareFile is equals, do not update UI. params = " + Arrays.toString(params));
-            FileUtils.deleteFiles(tempFile, false);
+        if (hitCache && result == null) {
+            // If the cache file is hit and parse the temp file failed,
+            // cancel this task and delete the temp file, do not update UI.
+            DebugUtils.__checkDebug(true, "ResourceTask", "cancel task - params = " + Arrays.toString(params));
             cancel(false);
-            return null;
-        }
-
-        // Parse the temp file and save it to the cache file.
-        DebugUtils.__checkStartMethodTracing();
-        final Result result = parseResult(params, new File(tempFile));
-        DebugUtils.__checkStopMethodTracing("ResourceTask", "downloads params = " + Arrays.toString(params));
-        if (result != null) {
-            FileUtils.moveFile(tempFile, cacheFile);
+            FileUtils.deleteFiles(tempFile, false);
         }
 
         return result;

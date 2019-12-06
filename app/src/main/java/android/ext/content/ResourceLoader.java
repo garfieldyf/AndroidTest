@@ -23,7 +23,7 @@ import java.util.concurrent.Executor;
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * private static class JSONLoadParams implements LoadParams&lt;String, JSONObject&gt; {
- *     {@code @Override}
+ *    {@code @Override}
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
  *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
@@ -36,12 +36,12 @@ import java.util.concurrent.Executor;
  *         return cacheFile.
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     public DownloadRequest newDownloadRequest(Context context, String url) throws Exception {
  *         return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     public JSONObject parseResult(Context context, String url, File cacheFile, Cancelable cancelable) throws Exception {
  *         final JSONObject result;
  *         if (cacheFile == null) {
@@ -62,13 +62,12 @@ import java.util.concurrent.Executor;
  * }
  *
  * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;String, JSONObject&gt; {
- *     {@code @Override}
+ *    {@code @Override}
  *     public void onLoadComplete(String key, LoadParams&lt;String, JSONObject&gt; loadParams, Object cookie, JSONObject result) {
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
- *             // 1.If the cache file is hit, do not update UI.
- *             // 2.Loading failed, show error or empty UI.
+ *             // Loading failed, show error or empty UI.
  *         }
  *     }
  * }
@@ -162,35 +161,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return new LoadTask();
     }
 
-    /**
-     * Called on a background thread to load the resource.
-     * @param task The current {@link Task} whose executing this method.
-     * @param key The key, passed earlier by {@link #load}.
-     * @param loadParams The parameters, passed earlier by {@link #load}.
-     * @param cookie An object, passed earlier by {@link #load}.
-     * @return A result or <tt>null</tt> of the load.
-     */
-    protected Result loadInBackground(Task task, Key key, LoadParams<Key, Result> loadParams, Object cookie) {
-        Object result = null;
-        try {
-            final File cacheFile = loadParams.getCacheFile(mContext, key);
-            if (cacheFile == null) {
-                DebugUtils.__checkStartMethodTracing();
-                result = loadParams.parseResult(mContext, key, null, task);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", "no cache file parseResult key = " + key);
-            } else {
-                final boolean hitCache = loadFromCache(task, key, loadParams, cacheFile);
-                if (!isTaskCancelled(task)) {
-                    result = download(task, key, loadParams, cacheFile.getPath(), hitCache);
-                }
-            }
-        } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
-        }
-
-        return (Result)result;
-    }
-
     /* package */ final boolean validateOwner() {
         if (mOwner != null) {
             final Object owner = mOwner.get();
@@ -205,6 +175,19 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return true;
     }
 
+    /* package */ final Object parseResult(Task task, Object key, LoadParams loadParams) {
+        Object result = null;
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            result = loadParams.parseResult(mContext, key, null, task);
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + key);
+        } catch (Exception e) {
+            Log.e(getClass().getName(), "Couldn't parse result - key = " + key + "\n" + e);
+        }
+
+        return result;
+    }
+
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -214,13 +197,13 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return task;
     }
 
-    private boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {
+    /* package */ final boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {
         final int priority = Process.getThreadPriority(Process.myTid());
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache key = " + key + ", cacheFile = " + cacheFile);
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
             if (result != null) {
                 // If the task was cancelled then invoking setProgress has no effect.
                 task.setProgress(result);
@@ -235,31 +218,31 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return false;
     }
 
-    private Object download(Task task, Object key, LoadParams loadParams, String cacheFile, boolean hitCache) throws Exception {
+    /* package */ final Object download(Task task, Object key, LoadParams loadParams, String cacheFile, boolean hitCache) {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        final int statusCode  = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
-        // If download failed or the task was cancelled, deletes the temp file.
-        if (statusCode != HTTP_OK || isTaskCancelled(task)) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "downloads key = " + key + ", statusCode = " + statusCode + ", isCancelled = " + isTaskCancelled(task));
-            FileUtils.deleteFiles(tempFile, false);
-            return null;
+        Object result = null;
+        try {
+            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
+            if (statusCode == HTTP_OK && !isTaskCancelled(task) && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
+                // If the cache file is not equals the temp file, parse the temp file.
+                DebugUtils.__checkStartMethodTracing();
+                result = loadParams.parseResult(mContext, key, new File(tempFile), task);
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
+                if (result != null) {
+                    // Save the temp file to the cache file.
+                    FileUtils.moveFile(tempFile, cacheFile);
+                }
+            }
+        } catch (Exception e) {
+            Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
-        // If the cache file is hit and the cache file's contents are equal the temp
-        // file's contents, deletes the temp file and cancel the task, do not update UI.
-        if (hitCache && FileUtils.compareFile(cacheFile, tempFile)) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "compareFile is equals, do not update UI. key = " + key);
-            FileUtils.deleteFiles(tempFile, false);
+        if (hitCache && result == null) {
+            // If the cache file is hit and parse the temp file failed,
+            // cancel the task and delete the temp file, do not update UI.
+            DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
             task.cancel(false);
-            return null;
-        }
-
-        // Parse the temp file and save it to the cache file.
-        DebugUtils.__checkStartMethodTracing();
-        final Object result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-        DebugUtils.__checkStopMethodTracing("ResourceLoader", "downloads key = " + key);
-        if (result != null) {
-            FileUtils.moveFile(tempFile, cacheFile);
+            FileUtils.deleteFiles(tempFile, false);
         }
 
         return result;
@@ -283,7 +266,20 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         @Override
         public Object doInBackground(Object params) {
             waitResumeIfPaused();
-            return (mState != SHUTDOWN && !isCancelled() ? loadInBackground(this, mKey, mLoadParams, params) : null);
+            Object result = null;
+            if (mState != SHUTDOWN && !isCancelled()) {
+                final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
+                if (cacheFile == null) {
+                    result = parseResult(this, mKey, mLoadParams);
+                } else {
+                    final boolean hitCache = loadFromCache(this, mKey, mLoadParams, cacheFile);
+                    if (mState != SHUTDOWN && !isCancelled()) {
+                        result = download(this, mKey, mLoadParams, cacheFile.getPath(), hitCache);
+                    }
+                }
+            }
+
+            return result;
         }
 
         @Override

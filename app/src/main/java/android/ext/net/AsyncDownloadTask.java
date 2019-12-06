@@ -19,12 +19,12 @@ import java.net.URLConnection;
  *         super(ownerActivity);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
  *         return new DownloadRequest(params[0]).readTimeout(30000).connectTimeout(30000);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {

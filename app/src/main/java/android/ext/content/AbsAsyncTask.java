@@ -16,12 +16,12 @@ import java.lang.ref.WeakReference;
  *         super(ownerActivity);
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected Long doInBackground(String... urls) {
  *         ... ...
  *     }
  *
- *     {@code @Override}
+ *    {@code @Override}
  *     protected void onPostExecute(Long result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {

@@ -29,6 +29,13 @@ import java.util.Arrays;
  *     protected File getCacheFile(String[] urls) {
  *         // Builds the cache file, For example:
  *         return new File(mContext.getFilesDir(), "xxx/cacheFile.json");
+ *         // or
+ *         final File cacheFile = new File(context.getFilesDir(), "xxx/cacheFile.json");
+ *         if (!cacheFile.exists()) {
+ *             // Copy assets file to cacheFile.
+ *         }
+ *
+ *         return cacheFile.
  *     }
  *
  *     {@code @Override}
@@ -42,14 +49,9 @@ import java.util.Arrays;
  *         if (cacheFile == null) {
  *             // If no cache file, parse the JSON data from the network.
  *             result = newDownloadRequest(urls).download(this);
- *         } else if (cacheFile.exists()) {
+ *         } else {
  *             // Parse the JSON data from the cache file.
  *             result = JSONUtils.parse(mContext, cacheFile, this);
- *         } else {
- *             // If the cache file not exists, parse the JSON data from the "assets" file.
- *             result = JSONUtils.parse(mContext, UriUtils.getAssetUri("cacheFile.json"), this);
- *             // or return null
- *             return null;
  *         }
  *
  *         // Check the result is valid.

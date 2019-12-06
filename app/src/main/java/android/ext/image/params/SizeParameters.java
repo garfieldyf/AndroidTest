@@ -99,7 +99,7 @@ public class SizeParameters extends Parameters {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             final int screenDensity = (int)value;
             opts.inTargetDensity = screenDensity;
-            opts.inDensity = (int)(screenDensity * scale + 0.5f);
+            opts.inDensity = (int)(screenDensity * scale);
         } else {
             opts.inDensity = opts.inTargetDensity = 0;
         }

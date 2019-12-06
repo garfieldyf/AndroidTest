@@ -27,6 +27,13 @@ import java.util.concurrent.Executor;
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
  *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
+ *         // or
+ *         final File cacheFile = new File(context.getFilesDir(), "xxx/cacheFile.json");
+ *         if (!cacheFile.exists()) {
+ *             // Copy assets file to cacheFile.
+ *         }
+ *
+ *         return cacheFile.
  *     }
  *
  *     {@code @Override}
@@ -40,14 +47,9 @@ import java.util.concurrent.Executor;
  *         if (cacheFile == null) {
  *             // If no cache file, parse the JSON data from the network.
  *             result = newDownloadRequest(context, url).download(cancelable);
- *         } else if (cacheFile.exists()) {
+ *         } else {
  *             // Parse the JSON data from the cache file.
  *             result = JSONUtils.parse(context, cacheFile, cancelable);
- *         } else {
- *             // If the cache file not exists, parse the JSON data from the "assets" file.
- *             result = JSONUtils.parse(context, UriUtils.getAssetUri("cacheFile.json"), cancelable);
- *             // or return null
- *             return null;
  *         }
  *
  *         // Check the result is valid.

@@ -109,9 +109,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Loads the image from the specified <em>uri</em>, bind it to the target. If the image
-     * is already cached, it is bind immediately. Otherwise loads the image on a background
-     * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * Equivalent to calling <tt>module.with(id).load(uri)</tt>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
@@ -120,10 +119,24 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      *       .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
+     * @see #with(int)
      * @see ImageLoader#load(URI)
      */
     public final LoadRequest load(int id, URI uri) {
-        DebugUtils.__checkUIThread("load");
+        return with(id).load(uri);
+    }
+
+    /**
+     * Return an {@link ImageLoader} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @return The <tt>ImageLoader</tt>.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     * @see #load(int, URI)
+     * @see ImageLoader#load(URI)
+     */
+    public final ImageLoader<URI, Image> with(int id) {
+        DebugUtils.__checkUIThread("with");
         ImageLoader loader = mLoaderCache.get(id, null);
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
@@ -131,7 +144,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the ImageLoader - ID #0x" + Integer.toHexString(id));
         }
 
-        return loader.load(uri);
+        return loader;
     }
 
     /**

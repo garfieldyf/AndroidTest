@@ -252,7 +252,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         public Object doInBackground(Object params) {
             waitResumeIfPaused();
             Value value = null;
-            if (mState != SHUTDOWN && !isCancelled()) {
+            if (!isTaskCancelled(this)) {
                 value = loadInBackground(this, mKey, (Params[])params, mFlags);
                 if (value != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
                     mCache.put(mKey, value);
@@ -265,7 +265,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         @Override
         public void onPostExecute(Object value) {
             final Params[] params = (Params[])mParams;
-            if (mState != SHUTDOWN && !isCancelled() && mRunningTasks.remove(mTarget) == this) {
+            if (!isTaskCancelled(this) && mRunningTasks.remove(mTarget) == this) {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 

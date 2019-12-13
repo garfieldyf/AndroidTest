@@ -257,29 +257,29 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         /* package */ OnLoadCompleteListener mListener;
 
         @Override
-        public void onProgress(Object value) {
-            if (validateOwner()) {
-                mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
-            }
-        }
-
-        @Override
         public Object doInBackground(Object params) {
             waitResumeIfPaused();
             Object result = null;
-            if (mState != SHUTDOWN && !isCancelled()) {
+            if (!isTaskCancelled(this)) {
                 final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
                 if (cacheFile == null) {
                     result = parseResult(this, mKey, mLoadParams);
                 } else {
                     final boolean hitCache = loadFromCache(this, mKey, mLoadParams, cacheFile);
-                    if (mState != SHUTDOWN && !isCancelled()) {
+                    if (!isTaskCancelled(this)) {
                         result = download(this, mKey, mLoadParams, cacheFile.getPath(), hitCache);
                     }
                 }
             }
 
             return result;
+        }
+
+        @Override
+        public void onProgress(Object value) {
+            if (validateOwner()) {
+                mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
+            }
         }
 
         @Override

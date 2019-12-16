@@ -128,6 +128,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         DebugUtils.__checkError(key == null || loadParams == null || listener == null, "key == null || loadParams == null || listener == null");
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
+            DebugUtils.__checkDebug(task != null && !task.isCancelled(), "ResourceLoader", "The task is already running - key = " + key);
             if (task == null || task.isCancelled()) {
                 final LoadTask newTask = obtain(key, loadParams, cookie, listener);
                 mRunningTasks.put(key, newTask);
@@ -287,6 +288,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             if (mState != SHUTDOWN) {
                 // Removes the finished task from running tasks if exists.
                 if (mRunningTasks.get(mKey) == this) {
+                    DebugUtils.__checkDebug(true, "ResourceLoader", "remove task - key = " + mKey);
                     mRunningTasks.remove(mKey);
                 }
 

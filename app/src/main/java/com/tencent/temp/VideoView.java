@@ -34,17 +34,17 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
     private static final int STATE_ERROR     = -1;
     private static final int STATE_IDLE      = 0;
     private static final int STATE_PREPARING = 1;
-    private static final int STATE_PREPARED  = 2;
-    private static final int STATE_PLAYING   = 3;
-    private static final int STATE_PAUSED    = 4;
-    private static final int STATE_COMPLETED = 5;
+    private static final int STATE_PLAYING   = 2;
+    private static final int STATE_PAUSED    = 3;
+    private static final int STATE_COMPLETED = 4;
 
     // The media player messages.
     private static final int MESSAGE_OPEN_VIDEO  = 0;
     private static final int MESSAGE_STOP_VIDEO  = 1;
     private static final int MESSAGE_SEEK_VIDEO  = 2;
     private static final int MESSAGE_PLAY_VIDEO  = 3;
-    private static final int MESSAGE_PAUSE_VIDEO = 4;
+    private static final int MESSAGE_LOOP_VIDEO  = 4;
+    private static final int MESSAGE_PAUSE_VIDEO = 5;
 
     // The callback messages.
     private static final int MESSAGE_VIDEO_ERROR     = 1;
@@ -93,7 +93,7 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
     public void setVideoURI(Uri uri, Map<String, String> headers) {
         mUri = uri;
         mHeaders = headers;
-        mSeekToPosition = -1;
+        mSeekToPosition = 0;
         mVideoHandler.sendEmptyMessage(MESSAGE_OPEN_VIDEO);
     }
 
@@ -114,11 +114,9 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
     }
 
     public void seekTo(int msec) {
-        if (msec != -1 && isPlaybackState()) {
-            mVideoHandler.sendMessage(Message.obtain(mVideoHandler, MESSAGE_SEEK_VIDEO, msec, 0));
-            mSeekToPosition = -1;
-        } else {
-            mSeekToPosition = msec;
+        mSeekToPosition = msec;
+        if (msec > 0 && isPlaybackState()) {
+            mVideoHandler.sendEmptyMessage(MESSAGE_SEEK_VIDEO);
         }
     }
 
@@ -133,7 +131,7 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
 
     public void setLooping(boolean looping) {
         if (isPlaybackState()) {
-            mMediaPlayer.setLooping(looping);
+            mVideoHandler.sendMessage(Message.obtain(mVideoHandler, MESSAGE_LOOP_VIDEO, looping ? 1 : 0, 0));
         }
     }
 
@@ -142,11 +140,25 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
     }
 
     public int getDuration() {
-        return (isPlaybackState() ? mMediaPlayer.getDuration() : -1);
+        if (isPlaybackState()) {
+            try {
+                return mMediaPlayer.getDuration();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return -1;
     }
 
     public int getCurrentPosition() {
-        return (isPlaybackState() ? mMediaPlayer.getCurrentPosition() : 0);
+        if (isPlaybackState()) {
+            try {
+                return mMediaPlayer.getCurrentPosition();
+            } catch (Exception ignored) {
+            }
+        }
+
+        return 0;
     }
 
     public void setOnVideoListener(OnVideoListener listener) {
@@ -165,12 +177,18 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
             break;
 
         case MESSAGE_SEEK_VIDEO:
-            mMediaPlayer.seekTo(msg.arg1);
+            if (mCurrentState == STATE_PLAYING || mCurrentState == STATE_PAUSED) {
+                seekToImpl();
+            }
             break;
 
         case MESSAGE_PLAY_VIDEO:
             mCurrentState = STATE_PLAYING;
             mMediaPlayer.start();
+            break;
+
+        case MESSAGE_LOOP_VIDEO:
+            mMediaPlayer.setLooping(msg.arg1 == 1);
             break;
 
         case MESSAGE_PAUSE_VIDEO:
@@ -225,14 +243,10 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
 
     @Override
     public void onPrepared(MediaPlayer mp) {
-        mCurrentState = STATE_PREPARED;
+        mCurrentState = STATE_PLAYING;
         mMediaPlayer.start();
+        seekToImpl();
         mUIHandler.sendEmptyMessage(MESSAGE_VIDEO_PREPARED);
-
-        if (mSeekToPosition != -1) {
-            mMediaPlayer.seekTo(mSeekToPosition);
-            mSeekToPosition = -1;
-        }
     }
 
     @Override
@@ -306,7 +320,6 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
             mMediaPlayer.setDisplay(getHolder());
             mMediaPlayer.setDataSource(context, mUri, mHeaders);
             mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mMediaPlayer.setScreenOnWhilePlaying(true);
             mCurrentState = STATE_PREPARING;
             mMediaPlayer.prepareAsync();
         } catch (IOException | IllegalArgumentException e) {
@@ -352,6 +365,14 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
         }
 
         setMeasuredDimension(width, height);
+    }
+
+    private void seekToImpl() {
+        if (mSeekToPosition != 0) {
+            mMediaPlayer.seekTo(mSeekToPosition);
+            Log.i(TAG, "seekTo = " + mSeekToPosition);
+            mSeekToPosition = 0;
+        }
     }
 
     private void onVideoSizeChanged(int width, int height) {

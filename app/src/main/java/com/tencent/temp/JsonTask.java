@@ -1,8 +1,8 @@
 package com.tencent.temp;
 
 import android.app.Activity;
+import android.ext.content.AsyncLoadTask;
 import android.ext.content.ResourceLoader.LoadParams;
-import android.ext.content.ResourceTask;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
 import android.ext.net.DownloadRequest;
@@ -11,7 +11,7 @@ import android.util.Log;
 import com.tencent.test.MainApplication;
 import java.io.File;
 
-public class JsonTask extends ResourceTask<String, JSONObject> {
+public class JsonTask extends AsyncLoadTask<String, JSONObject> {
     private final LoadParams<String, JSONObject> mLoadParams;
 
     public JsonTask(Activity ownerActivity, LoadParams<String, JSONObject> params) {

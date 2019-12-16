@@ -12,15 +12,15 @@ import java.io.File;
 import java.util.Arrays;
 
 /**
- * Class <tt>ResourceTask</tt> allows to load the resource on a background thread
+ * Class <tt>AsyncLoadTask</tt> allows to load the resource on a background thread
  * and publish results on the UI thread. This class can be support the cache file.
- * <h3>ResourceTask's generic types</h3>
+ * <h3>AsyncLoadTask's generic types</h3>
  * <p>The two types used by a task are the following:</p>
  * <ol><li><tt>Params</tt>, The type of the parameters sent to the task.</li>
  * <li><tt>Result</tt>, The type of the result of the task.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
- * private static class JSONTask extends ResourceTask&lt;String, JSONObject&gt; {
+ * private static class JSONTask extends AsyncLoadTask&lt;String, JSONObject&gt; {
  *     public JSONTask(Activity ownerActivity) {
  *         super(ownerActivity);
  *     }
@@ -81,7 +81,7 @@ import java.util.Arrays;
  * new JSONTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
+public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -90,18 +90,18 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @see #ResourceTask(Activity)
+     * @see #AsyncLoadTask(Activity)
      */
-    public ResourceTask(Context context) {
+    public AsyncLoadTask(Context context) {
         mContext = context.getApplicationContext();
     }
 
     /**
      * Constructor
      * @param activity The owner <tt>Activity</tt>.
-     * @see #ResourceTask(Context)
+     * @see #AsyncLoadTask(Context)
      */
-    public ResourceTask(Activity ownerActivity) {
+    public AsyncLoadTask(Activity ownerActivity) {
         super(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
     }
@@ -135,12 +135,6 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
 
     @Override
     @SuppressWarnings("unchecked")
-    protected void onProgressUpdate(Object... values) {
-        onPostExecute((Result)values[0]);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
     protected Result doInBackground(Params... params) {
         final File cacheFile = getCacheFile(params);
         if (cacheFile == null) {
@@ -151,12 +145,18 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected final void onProgressUpdate(Object... values) {
+        onPostExecute((Result)values[0]);
+    }
+
     private Result parseResult(Params[] params) {
         Result result = null;
         try {
             DebugUtils.__checkStartMethodTracing();
             result = parseResult(params, null);
-            DebugUtils.__checkStopMethodTracing("ResourceTask", "parse result - params = " + Arrays.toString(params));
+            DebugUtils.__checkStopMethodTracing("AsyncLoadTask", "parse result - params = " + Arrays.toString(params));
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't parse result - params = " + Arrays.toString(params) + "\n" + e);
         }
@@ -170,7 +170,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             final Result result = parseResult(params, cacheFile);
-            DebugUtils.__checkStopMethodTracing("ResourceTask", "loadFromCache - params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
+            DebugUtils.__checkStopMethodTracing("AsyncLoadTask", "loadFromCache - params = " + Arrays.toString(params) + ", cacheFile = " + cacheFile);
             if (result != null) {
                 // If this task was cancelled then invoking publishProgress has no effect.
                 publishProgress(result);
@@ -194,7 +194,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
                 result = parseResult(params, new File(tempFile));
-                DebugUtils.__checkStopMethodTracing("ResourceTask", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", params = ").append(Arrays.toString(params)).toString());
+                DebugUtils.__checkStopMethodTracing("AsyncLoadTask", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", params = ").append(Arrays.toString(params)).toString());
                 if (result != null) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile, cacheFile);
@@ -207,7 +207,7 @@ public abstract class ResourceTask<Params, Result> extends AbsAsyncTask<Params, 
         if (hitCache && result == null) {
             // If the cache file is hit and parse the temp file failed,
             // cancel this task and delete the temp file, do not update UI.
-            DebugUtils.__checkDebug(true, "ResourceTask", "cancel task - params = " + Arrays.toString(params));
+            DebugUtils.__checkDebug(true, "AsyncLoadTask", "cancel task - params = " + Arrays.toString(params));
             cancel(false);
             FileUtils.deleteFiles(tempFile, false);
         }

@@ -277,7 +277,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
 
         @Override
         public void onProgress(Object value) {
-            if (validateOwner()) {
+            if (mState != SHUTDOWN && validateOwner()) {
                 mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
             }
         }
@@ -285,8 +285,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         @Override
         public void onPostExecute(Object result) {
             if (mState != SHUTDOWN) {
-                // Removes the finished task from running
-                // tasks, excluding the cancelled task.
+                // Removes the finished task from running tasks if exists.
                 if (mRunningTasks.get(mKey) == this) {
                     mRunningTasks.remove(mKey);
                 }

@@ -285,16 +285,8 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
 
         @Override
         public void onPostExecute(Object result) {
-            if (mState != SHUTDOWN) {
-                // Removes the finished task from running tasks if exists.
-                if (mRunningTasks.get(mKey) == this) {
-                    DebugUtils.__checkDebug(true, "ResourceLoader", "remove task - key = " + mKey);
-                    mRunningTasks.remove(mKey);
-                }
-
-                if (!isCancelled() && validateOwner()) {
-                    mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
-                }
+            if (!isTaskCancelled(mKey, this) && validateOwner()) {
+                mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
             }
 
             // Recycles this task to avoid potential memory

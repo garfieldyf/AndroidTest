@@ -265,7 +265,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         @Override
         public void onPostExecute(Object value) {
             final Params[] params = (Params[])mParams;
-            if (!isTaskCancelled(this) && mRunningTasks.remove(mTarget) == this) {
+            if (!isTaskCancelled(mTarget, this)) {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 

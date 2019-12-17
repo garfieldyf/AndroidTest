@@ -151,6 +151,23 @@ public abstract class Loader<Key> implements Factory<Object> {
     }
 
     /**
+     * Returns <tt>true</tt> if the <em>task</em> was cancelled.
+     */
+    /* package */ final boolean isTaskCancelled(Key key, Task task) {
+        if (mState == SHUTDOWN) {
+            return true;
+        }
+
+        // Removes the task from running tasks if exists.
+        if (mRunningTasks.get(key) == task) {
+            DebugUtils.__checkDebug(task.isCancelled(), "Loader", "remove task - key = " + key);
+            mRunningTasks.remove(key);
+        }
+
+        return task.isCancelled();
+    }
+
+    /**
      * Stops all running tasks.
      */
     private void cancelAll() {

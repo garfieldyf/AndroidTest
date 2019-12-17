@@ -301,7 +301,7 @@ public class VideoView extends SurfaceView implements SurfaceHolder.Callback, On
             return;
         }
 
-        final Context context = getContext();
+        final Context context = getContext().getApplicationContext();
         final AudioManager am = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
         if (am != null) {
             am.requestAudioFocus(null, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);

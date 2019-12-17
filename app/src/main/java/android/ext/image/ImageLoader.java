@@ -378,23 +378,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            load(target, mBinder);
-        }
-
-        /**
-         * Preloads the image with the arguments supplied to this request.
-         */
-        public final void preload() {
-            DebugUtils.__checkError(mUri == null, "uri == null");
-            load(mUri, AsyncLoader.emptyBinder());
-        }
-
-        private void load(Object target, Binder binder) {
             if (mParams[PARAMETERS] == null) {
                 mParams[PARAMETERS] = Parameters.defaultParameters();
             }
 
-            mLoader.load(mUri, target, mFlags, binder, mParams);
+            mLoader.load(mUri, target, mFlags, mBinder, mParams);
             mFlags  = 0;
             mParams = null;
         }

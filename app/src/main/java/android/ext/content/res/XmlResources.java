@@ -6,7 +6,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
-import android.ext.image.binder.RoundedImageBinder;
+import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.RoundedTransitionBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
@@ -142,8 +142,8 @@ public final class XmlResources {
         case "TransitionBinder":
             return new TransitionBinder(context, attrs);
 
-        case "RoundedImageBinder":
-            return new RoundedImageBinder(context, attrs);
+        case "RoundedBitmapBinder":
+            return new RoundedBitmapBinder(context, attrs);
 
         case "RoundedTransitionBinder":
             return new RoundedTransitionBinder(context, attrs);

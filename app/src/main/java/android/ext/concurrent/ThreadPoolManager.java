@@ -6,9 +6,8 @@ import android.os.Process;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Garfield
  */
 public class ThreadPoolManager extends ThreadPool {
-    private final Queue<Task> mRunningTasks;
+    private final List<Task> mRunningTasks;
 
     /**
      * Constructor
@@ -47,7 +46,7 @@ public class ThreadPoolManager extends ThreadPool {
      */
     public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
         super(maxThreads, keepAliveTime, unit, "PoolM-thread-", priority);
-        mRunningTasks = new ConcurrentLinkedQueue<Task>();
+        mRunningTasks = new LinkedList<Task>();
     }
 
     /**
@@ -70,10 +69,12 @@ public class ThreadPoolManager extends ThreadPool {
         }
 
         // Cancel and remove from running task queue.
-        final Iterator<Task> iter = mRunningTasks.iterator();
-        while (iter.hasNext()) {
-            result |= iter.next().cancel(mayInterruptIfRunning);
-            iter.remove();
+        synchronized (mRunningTasks) {
+            final Iterator<Task> iter = mRunningTasks.iterator();
+            while (iter.hasNext()) {
+                result |= iter.next().cancel(mayInterruptIfRunning);
+                iter.remove();
+            }
         }
 
         return result;
@@ -90,12 +91,14 @@ public class ThreadPoolManager extends ThreadPool {
      */
     public boolean cancel(long id, boolean mayInterruptIfRunning) {
         // Cancel and remove from running task queue.
-        final Iterator<Task> itor = mRunningTasks.iterator();
-        while (itor.hasNext()) {
-            final Task task = itor.next();
-            if (task.getId() == id) {
-                itor.remove();
-                return task.cancel(mayInterruptIfRunning);
+        synchronized (mRunningTasks) {
+            final Iterator<Task> itor = mRunningTasks.iterator();
+            while (itor.hasNext()) {
+                final Task task = itor.next();
+                if (task.getId() == id) {
+                    itor.remove();
+                    return task.cancel(mayInterruptIfRunning);
+                }
             }
         }
 
@@ -117,27 +120,36 @@ public class ThreadPoolManager extends ThreadPool {
 
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(96);
-        dumpQueue(printer, result, mRunningTasks, " Dumping %s Running Tasks [ size = %d ] ");
-        dumpQueue(printer, result, getQueue(), " Dumping %s Pending Tasks [ size = %d ] ");
+        dumpTasks(printer, result, getRunningTasks(), "Running");
+        dumpTasks(printer, result, new ArrayList<Object>(getQueue()), "Pending");
     }
 
     @Override
     protected void beforeExecute(Thread thread, Runnable target) {
         if (target instanceof Task) {
-            mRunningTasks.offer((Task)target);
+            synchronized (mRunningTasks) {
+                mRunningTasks.add((Task)target);
+            }
         }
     }
 
     @Override
     protected void afterExecute(Runnable target, Throwable throwable) {
         if (target instanceof Task) {
-            mRunningTasks.remove(target);
+            synchronized (mRunningTasks) {
+                mRunningTasks.remove(target);
+            }
         }
     }
 
-    private void dumpQueue(Printer printer, StringBuilder result, Queue<?> queue, String format) {
-        final List<Object> tasks = new ArrayList<Object>(queue);
-        DebugUtils.dumpSummary(printer, result, 80, format, getClass().getSimpleName(), tasks.size());
+    private List<?> getRunningTasks() {
+        synchronized (mRunningTasks) {
+            return new ArrayList<Object>(mRunningTasks);
+        }
+    }
+
+    private void dumpTasks(Printer printer, StringBuilder result, List<?> tasks, String namePrefix) {
+        DebugUtils.dumpSummary(printer, result, 80, " Dumping %s %s Tasks [ size = %d ] ", getClass().getSimpleName(), namePrefix, tasks.size());
         for (Object task : tasks) {
             result.setLength(0);
             printer.println(result.append("  ").append(task).toString());

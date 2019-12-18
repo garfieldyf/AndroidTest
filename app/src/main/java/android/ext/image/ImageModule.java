@@ -19,8 +19,6 @@ import android.ext.cache.SimpleFileCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
-import android.ext.graphics.GIFImage;
-import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.image.ImageLoader.LoadRequest;
 import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.TransitionBinder;
@@ -35,7 +33,6 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.os.Process;
@@ -47,7 +44,6 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
-import android.widget.ImageView;
 import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -302,21 +298,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     public static Drawable getPlaceholder(Object[] params) {
         return (Drawable)params[PLACEHOLDER];
-    }
-
-    /**
-     * Sets an image as the content of the specified {@link ImageView}.
-     * @param view The target <tt>ImageView</tt>.
-     * @param value The image value to set.
-     */
-    public static void setViewImage(ImageView view, Object value) {
-        if (value instanceof Bitmap) {
-            view.setImageBitmap((Bitmap)value);
-        } else if (value instanceof Drawable) {
-            view.setImageDrawable((Drawable)value);
-        } else {
-            view.setImageDrawable(new GIFDrawable((GIFImage)value));
-        }
     }
 
     /**

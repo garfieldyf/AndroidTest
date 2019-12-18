@@ -9,6 +9,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.image.binder.ImageBinder;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
@@ -101,7 +102,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         final ImageView view = (ImageView)target;
         if (value != null) {
             view.setScaleType(ScaleType.FIT_XY);
-            ImageModule.setViewImage(view, value);
+            ImageBinder.setViewImage(view, value);
         } else {
             view.setScaleType(ScaleType.CENTER);
             view.setImageDrawable((Drawable)params[PLACEHOLDER]);

@@ -78,7 +78,22 @@ import java.util.Arrays;
  *     }
  * }
  *
- * new JSONTask(activity).execute(url);</pre>
+ * new JSONTask(activity).execute(url);
+ * or
+ * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;JSONObject&gt; {
+ *    {@code @Override}
+ *     public void onLoadComplete(JSONObject result) {
+ *         if (result != null) {
+ *             // Loading succeeded, update UI.
+ *         } else {
+ *             // Loading failed, show error or empty UI.
+ *         }
+ *     }
+ * }
+ *
+ * final JSONTask task = new JSONTask(activity);
+ * task.setOnLoadCompleteListener(new LoadCompleteListener());
+ * task.execute(url);</pre>
  * @author Garfield
  */
 public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params, Object, Result> {
@@ -86,6 +101,11 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
+
+    /**
+     * The {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
+     */
+    private OnLoadCompleteListener<Result> mListener;
 
     /**
      * Constructor
@@ -104,6 +124,14 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     public AsyncLoadTask(Activity ownerActivity) {
         super(ownerActivity);
         mContext = ownerActivity.getApplicationContext();
+    }
+
+    /**
+     * Sets An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
+     * @param listener The <tt>OnLoadCompleteListener</tt>.
+     */
+    public final void setOnLoadCompleteListener(OnLoadCompleteListener<Result> listener) {
+        mListener = listener;
     }
 
     /**
@@ -142,6 +170,13 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
         } else {
             final boolean hitCache = loadFromCache(params, cacheFile);
             return (isCancelled() ? null : download(params, cacheFile.getPath(), hitCache));
+        }
+    }
+
+    @Override
+    protected void onPostExecute(Result result) {
+        if (mListener != null && validateOwner(mOwner)) {
+            mListener.onLoadComplete(result);
         }
     }
 
@@ -213,5 +248,16 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
         }
 
         return result;
+    }
+
+    /**
+     * Callback interface when an {@link AsyncLoadTask} has finished loading its data.
+     */
+    public static interface OnLoadCompleteListener<Result> {
+        /**
+         * Called on the UI thread when the load is complete.
+         * @param result A result or <tt>null</tt> of the load.
+         */
+        void onLoadComplete(Result result);
     }
 }

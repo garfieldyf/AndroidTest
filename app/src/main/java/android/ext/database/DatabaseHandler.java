@@ -1,6 +1,5 @@
 package android.ext.database;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -138,22 +137,5 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
      * @param rowsAffected The number of rows affected.
      */
     protected void onDeleteComplete(int token, int rowsAffected) {
-    }
-
-    /**
-     * Validates the owner <tt>Object</tt> is valid.
-     */
-    /* package */ final boolean validateOwner() {
-        if (mOwner != null) {
-            final Object owner = mOwner.get();
-            if (owner == null) {
-                return false;
-            } else if (owner instanceof Activity) {
-                final Activity activity = (Activity)owner;
-                return (!activity.isFinishing() && !activity.isDestroyed());
-            }
-        }
-
-        return true;
     }
 }

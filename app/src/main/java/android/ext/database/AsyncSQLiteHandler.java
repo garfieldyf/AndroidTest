@@ -1,5 +1,6 @@
 package android.ext.database;
 
+import static android.ext.content.AbsAsyncTask.validateOwner;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -158,7 +159,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
 
     @Override
     public final void dispatchMessage(int message, int token, Object result) {
-        if (validateOwner()) {
+        if (validateOwner(mOwner)) {
             switch (message) {
             case MESSAGE_INSERT:
                 onInsertComplete(token, (long)result);

@@ -1,5 +1,6 @@
 package android.ext.content;
 
+import static android.ext.content.AbsAsyncTask.validateOwner;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.app.Activity;
 import android.content.Context;
@@ -90,7 +91,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     /**
      * The owner of this loader.
      */
-    private WeakReference<Object> mOwner;
+    /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -160,20 +161,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     @Override
     public final Object newInstance() {
         return new LoadTask();
-    }
-
-    /* package */ final boolean validateOwner() {
-        if (mOwner != null) {
-            final Object owner = mOwner.get();
-            if (owner == null) {
-                return false;
-            } else if (owner instanceof Activity) {
-                final Activity activity = (Activity)owner;
-                return (!activity.isFinishing() && !activity.isDestroyed());
-            }
-        }
-
-        return true;
     }
 
     /* package */ final Object parseResult(Task task, Object key, LoadParams loadParams) {
@@ -278,14 +265,14 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
 
         @Override
         public void onProgress(Object value) {
-            if (mState != SHUTDOWN && validateOwner()) {
+            if (mState != SHUTDOWN && validateOwner(mOwner)) {
                 mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
             }
         }
 
         @Override
         public void onPostExecute(Object result) {
-            if (!isTaskCancelled(mKey, this) && validateOwner()) {
+            if (!isTaskCancelled(mKey, this) && validateOwner(mOwner)) {
                 mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
             }
 

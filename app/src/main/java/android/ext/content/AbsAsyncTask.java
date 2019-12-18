@@ -38,7 +38,7 @@ import java.lang.ref.WeakReference;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
-    private WeakReference<Object> mOwner;
+    /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -87,5 +87,22 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    }
+
+    /**
+     * Validates the owner <em>ownerRef</em> is valid.
+     */
+    public static boolean validateOwner(WeakReference<Object> ownerRef) {
+        if (ownerRef != null) {
+            final Object owner = ownerRef.get();
+            if (owner == null) {
+                return false;
+            } else if (owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                return (!activity.isFinishing() && !activity.isDestroyed());
+            }
+        }
+
+        return true;
     }
 }

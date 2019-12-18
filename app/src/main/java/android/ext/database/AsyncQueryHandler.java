@@ -1,5 +1,6 @@
 package android.ext.database;
 
+import static android.ext.content.AbsAsyncTask.validateOwner;
 import android.app.Activity;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
@@ -172,7 +173,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
 
     @Override
     public final void dispatchMessage(int message, int token, Object result) {
-        if (!validateOwner()) {
+        if (!validateOwner(mOwner)) {
             return;
         }
 

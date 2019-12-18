@@ -18,11 +18,11 @@ import java.util.Arrays;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedBitmapBinder xmlns:android="http://schemas.android.com/apk/res/android"
- *      android:radius="20dp"
- *      android:topLeftRadius="20dp"
- *      android:topRightRadius="20dp"
- *      android:bottomLeftRadius="20dp"
- *      android:bottomRightRadius="20dp" /&gt;</pre>
+ *     android:radius="20dp"
+ *     android:topLeftRadius="20dp"
+ *     android:topRightRadius="20dp"
+ *     android:bottomLeftRadius="20dp"
+ *     android:bottomRightRadius="20dp" /&gt;</pre>
  * @author Garfield
  */
 public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap> {

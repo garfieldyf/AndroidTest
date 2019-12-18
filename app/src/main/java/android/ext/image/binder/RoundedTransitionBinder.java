@@ -16,14 +16,13 @@ import java.util.Arrays;
  * bind to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
- * &lt;RoundedTransitionBinder
- *      xmlns:android="http://schemas.android.com/apk/res/android"
- *      android:radius="20dp"
- *      android:topLeftRadius="20dp"
- *      android:topRightRadius="20dp"
- *      android:bottomLeftRadius="20dp"
- *      android:bottomRightRadius="20dp"
- *      android:duration="@android:integer/config_longAnimTime" /&gt;</pre>
+ * &lt;RoundedTransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
+ *     android:duration="@android:integer/config_longAnimTime"
+ *     android:radius="20dp"
+ *     android:topLeftRadius="20dp"
+ *     android:topRightRadius="20dp"
+ *     android:bottomLeftRadius="20dp"
+ *     android:bottomRightRadius="20dp" /&gt;</pre>
  * @author Garfield
  */
 public class RoundedTransitionBinder extends TransitionBinder {

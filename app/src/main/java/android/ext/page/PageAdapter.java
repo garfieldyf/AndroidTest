@@ -142,7 +142,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Equivalent to calling <tt>setItem(position, value, null)</tt>.
      * @param position The adapter position of the item in this adapter.
-     * @param value The value to set.
+     * @param value The value to set. Never <tt>null</tt>.
      * @return The previous item at the specified <em>position</em>
      * or <tt>null</tt> if the item not found.
      * @see #setItem(int, E, Object)
@@ -157,13 +157,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when
      * the item was not present.</p>
      * @param position The adapter position of the item in this adapter.
-     * @param value The value to set.
+     * @param value The value to set. Never <tt>null</tt>.
      * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
      * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
      * @see #setItem(int, E)
      */
     public E setItem(int position, E value, Object payload) {
         DebugUtils.__checkUIThread("setItem");
+        DebugUtils.__checkError(value == null, "value == null");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
 
         E previous = null;

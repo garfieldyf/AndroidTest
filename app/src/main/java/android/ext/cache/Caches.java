@@ -97,7 +97,7 @@ public final class Caches {
         }
 
         @Override
-        public Bitmap get(Context context, Parameters parameters, Options opts) {
+        public Bitmap get(Parameters parameters, Options opts) {
             return null;
         }
 

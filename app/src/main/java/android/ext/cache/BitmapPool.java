@@ -1,6 +1,5 @@
 package android.ext.cache;
 
-import android.content.Context;
 import android.ext.image.params.Parameters;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
@@ -32,12 +31,11 @@ public interface BitmapPool {
 
     /**
      * Retrieves the <tt>Bitmap</tt> from this pool.
-     * @param context The <tt>Context</tt>.
      * @param parameters The decode parameters, passed earlier by <tt>decodeImage</tt>.
      * @param opts The {@link Options}, passed earlier by <tt>decodeImage</tt>.
      * @return The <tt>Bitmap</tt> or <tt>null</tt> if there is no match the bitmap.
      */
-    default Bitmap get(Context context, Parameters parameters, Options opts) {
-        return get(parameters.computeByteCount(context, opts));
+    default Bitmap get(Parameters parameters, Options opts) {
+        return get(parameters.computeByteCount(opts));
     }
 }

@@ -45,10 +45,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         DebugUtils.__checkError(parameters == null, "parameters == null");
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
-        parameters.computeSampleSize(mContext, target, opts);
+        parameters.computeSampleSize(target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
-        opts.inBitmap = mBitmapPool.get(mContext, parameters, opts);
+        opts.inBitmap = mBitmapPool.get(parameters, opts);
         DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.

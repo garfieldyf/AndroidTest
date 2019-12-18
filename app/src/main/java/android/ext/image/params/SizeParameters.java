@@ -72,12 +72,12 @@ public class SizeParameters extends Parameters {
     }
 
     @Override
-    public int computeByteCount(Context context, Options opts) {
-        return computeByteCount(opts);
+    public int computeByteCount(Options opts) {
+        return computeByteCountImpl(opts);
     }
 
     @Override
-    public void computeSampleSize(Context context, Object target, Options opts) {
+    public void computeSampleSize(Object target, Options opts) {
         /*
          * Scale width and height.
          *      scaleX = opts.outWidth  / width;

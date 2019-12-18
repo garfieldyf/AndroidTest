@@ -72,20 +72,18 @@ public class Parameters {
     /**
      * Computes the number of bytes that can be used to store the image's
      * pixels when decoding the image.
-     * @param context The <tt>Context</tt>.
      * @param opts The {@link Options} to compute byte count.
      */
-    public int computeByteCount(Context context, Options opts) {
+    public int computeByteCount(Options opts) {
         return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(config);
     }
 
     /**
      * Computes a sample size for used to decode image.
-     * @param context The <tt>Context</tt>.
-     * @param target May be <tt>null</tt>. The <tt>Object</tt> to compute.
+     * @param target May be <tt>null</tt>. The target to compute.
      * @param opts The {@link Options} to store the sample size.
      */
-    public void computeSampleSize(Context context, Object target, Options opts) {
+    public void computeSampleSize(Object target, Options opts) {
         opts.inSampleSize = (int)value;
     }
 
@@ -122,7 +120,7 @@ public class Parameters {
      * the image's pixels when decoding the image.
      * @param opts The {@link Options} to compute byte count.
      */
-    /* package */ final int computeByteCount(Options opts) {
+    /* package */ final int computeByteCountImpl(Options opts) {
         final int byteCount = BitmapUtils.getBytesPerPixel(config);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);

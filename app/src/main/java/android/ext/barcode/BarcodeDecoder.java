@@ -108,9 +108,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(int[] pixels, int width, int height, Executor executor, OnDecodeListener listener) {
         /*
-         * params - { RGBLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, RGBLuminanceSource, OnDecodeListener, null }
          */
-        new DecodeTask().executeOnExecutor(executor, new RGBLuminanceSource(width, height, pixels), listener, null);
+        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        new DecodeTask().executeOnExecutor(executor, this, new RGBLuminanceSource(width, height, pixels), listener, null);
     }
 
     /**
@@ -127,9 +128,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(byte[] data, int width, int height, Rect clipBounds, Executor executor, OnDecodeListener listener) {
         /*
-         * params - { PlanarYUVLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */
-        new DecodeTask().executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener, null);
+        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener, null);
     }
 
     /**
@@ -149,9 +151,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(byte[] data, int width, int height, int left, int top, int right, int bottom, Executor executor, OnDecodeListener listener) {
         /*
-         * params - { PlanarYUVLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */
-        new DecodeTask().executeOnExecutor(executor, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener, null);
+        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener, null);
     }
 
     /**
@@ -204,7 +207,7 @@ public class BarcodeDecoder {
      * @param source The {@link LuminanceSource} to decode.
      * @return The contents of the image if succeeded, <tt>null</tt> otherwise.
      */
-    /* package */ synchronized Result decode(LuminanceSource source) {
+    /* package */ synchronized final Result decode(LuminanceSource source) {
         try {
             return mReader.decodeWithState(new BinaryBitmap(new HybridBinarizer(source)));
         } catch (Exception e) {
@@ -237,23 +240,23 @@ public class BarcodeDecoder {
     /**
      * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    /* package */ final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
+    /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
         @Override
         protected Object[] doInBackground(Object... params) {
             /*
-             * params - { LuminanceSource, OnDecodeListener, null }
+             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
              */
-            DebugUtils.__checkError(params.length < 3, "params.length < 3");
-            params[2] = decode((LuminanceSource)params[0]);
+            DebugUtils.__checkError(params.length != 4, "params.length != 4");
+            params[3] = ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
             return params;
         }
 
         @Override
         protected void onPostExecute(Object[] result) {
             /*
-             * result - { LuminanceSource, OnDecodeListener, Result }
+             * result - { BarcodeDecoder, LuminanceSource, OnDecodeListener, Result }
              */
-            ((OnDecodeListener)result[1]).onDecodeComplete((LuminanceSource)result[0], (Result)result[2]);
+            ((OnDecodeListener)result[2]).onDecodeComplete((LuminanceSource)result[1], (Result)result[3]);
         }
     }
 

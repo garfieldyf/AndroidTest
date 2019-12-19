@@ -341,12 +341,18 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
-        if (!TextUtils.isEmpty(className)) {
-            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
-        } else if (imageCache instanceof LruImageCache) {
-            return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
+        if (TextUtils.isEmpty(className)) {
+            if (imageCache instanceof LruImageCache) {
+                return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
+            } else {
+                return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+            }
         } else {
-            return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+            try {
+                return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class }, mContext, mOptionsPool);
+            } catch (ReflectiveOperationException e) {
+                return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
+            }
         }
     }
 

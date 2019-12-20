@@ -242,7 +242,7 @@ public class BarcodeDecoder {
      */
     /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
         @Override
-        protected Object[] doInBackground(Object... params) {
+        protected Object[] doInBackground(Object[] params) {
             /*
              * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
              */

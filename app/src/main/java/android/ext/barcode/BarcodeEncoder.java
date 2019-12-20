@@ -176,7 +176,7 @@ public class BarcodeEncoder {
      */
     /* package */ static final class EncodeTask extends AsyncTask<Encoder, Object, Encoder> {
         @Override
-        protected Encoder doInBackground(Encoder... encoders) {
+        protected Encoder doInBackground(Encoder[] encoders) {
             return encoders[0].encode();
         }
 

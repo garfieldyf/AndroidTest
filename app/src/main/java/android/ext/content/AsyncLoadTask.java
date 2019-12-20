@@ -162,8 +162,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     protected abstract Result parseResult(Params[] params, File cacheFile) throws Exception;
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected Result doInBackground(Params... params) {
+    protected Result doInBackground(Params[] params) {
         final File cacheFile = getCacheFile(params);
         if (cacheFile == null) {
             return parseResult(params);

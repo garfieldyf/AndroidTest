@@ -244,7 +244,7 @@ public final class AsyncViewStub extends View {
      */
     /* package */ static final class AsyncInflateTask extends AsyncTask<Inflater, Object, Inflater> {
         @Override
-        protected Inflater doInBackground(Inflater... inflaters) {
+        protected Inflater doInBackground(Inflater[] inflaters) {
             return inflaters[0].inflate();
         }
 

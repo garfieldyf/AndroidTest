@@ -61,8 +61,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected Result doInBackground(Params... params) {
+    protected Result doInBackground(Params[] params) {
         try {
             mRequest = newDownloadRequest(params);
             return mRequest.download(this, params);

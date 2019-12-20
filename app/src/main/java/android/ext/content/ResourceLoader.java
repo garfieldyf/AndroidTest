@@ -228,7 +228,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
                 result = mLoadParams.parseResult(mContext, mKey, null, this);
                 DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + mKey);
             } catch (Exception e) {
-                Log.e("ResourceLoader", "Couldn't parse result - key = " + mKey + "\n" + e);
+                Log.e(ResourceLoader.class.getName(), "Couldn't parse result - key = " + mKey + "\n" + e);
             }
 
             return result;
@@ -247,7 +247,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
                     return true;
                 }
             } catch (Exception e) {
-                Log.w("ResourceLoader", "Couldn't load resource from the cache - " + cacheFile);
+                Log.w(ResourceLoader.class.getName(), "Couldn't load resource from the cache - " + cacheFile);
             } finally {
                 Process.setThreadPriority(priority);
             }
@@ -271,7 +271,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
                     }
                 }
             } catch (Exception e) {
-                Log.e("ResourceLoader", "Couldn't load resource - key = " + mKey + "\n" + e);
+                Log.e(ResourceLoader.class.getName(), "Couldn't load resource - key = " + mKey + "\n" + e);
             }
 
             if (hitCache && result == null) {

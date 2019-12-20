@@ -163,19 +163,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return new LoadTask();
     }
 
-    /* package */ final Object parseResult(Task task, Object key, LoadParams loadParams) {
-        Object result = null;
-        try {
-            DebugUtils.__checkStartMethodTracing();
-            result = loadParams.parseResult(mContext, key, null, task);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + key);
-        } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't parse result - key = " + key + "\n" + e);
-        }
-
-        return result;
-    }
-
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -183,57 +170,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         task.mListener = listener;
         task.mLoadParams = loadParams;
         return task;
-    }
-
-    /* package */ final boolean loadFromCache(Task task, Object key, LoadParams loadParams, File cacheFile) {
-        final int priority = Process.getThreadPriority(Process.myTid());
-        try {
-            DebugUtils.__checkStartMethodTracing();
-            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-            final Object result = loadParams.parseResult(mContext, key, cacheFile, task);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
-            if (result != null) {
-                // If the task was cancelled then invoking setProgress has no effect.
-                task.setProgress(result);
-                return true;
-            }
-        } catch (Exception e) {
-            Log.w(getClass().getName(), "Couldn't load resource from the cache - " + cacheFile);
-        } finally {
-            Process.setThreadPriority(priority);
-        }
-
-        return false;
-    }
-
-    /* package */ final Object download(Task task, Object key, LoadParams loadParams, String cacheFile, boolean hitCache) {
-        final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
-        Object result = null;
-        try {
-            final int statusCode = loadParams.newDownloadRequest(mContext, key).download(tempFile, task, null);
-            if (statusCode == HTTP_OK && !isTaskCancelled(task) && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
-                // If the cache file is not equals the temp file, parse the temp file.
-                DebugUtils.__checkStartMethodTracing();
-                result = loadParams.parseResult(mContext, key, new File(tempFile), task);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
-                if (result != null) {
-                    // Save the temp file to the cache file.
-                    FileUtils.moveFile(tempFile, cacheFile);
-                }
-            }
-        } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't load resource - key = " + key + "\n" + e);
-        }
-
-        if (hitCache && result == null) {
-            // If the cache file is hit and parse the temp file failed,
-            // cancel the task and delete the temp file, do not update UI.
-            DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
-            task.cancel(false);
-            FileUtils.deleteFiles(tempFile, false);
-        }
-
-        return result;
     }
 
     /**
@@ -251,11 +187,11 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             if (!isTaskCancelled(this)) {
                 final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
                 if (cacheFile == null) {
-                    result = parseResult(this, mKey, mLoadParams);
+                    result = parseResult();
                 } else {
-                    final boolean hitCache = loadFromCache(this, mKey, mLoadParams, cacheFile);
+                    final boolean hitCache = loadFromCache(cacheFile);
                     if (!isTaskCancelled(this)) {
-                        result = download(this, mKey, mLoadParams, cacheFile.getPath(), hitCache);
+                        result = download(cacheFile.getPath(), hitCache);
                     }
                 }
             }
@@ -283,6 +219,70 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
             mListener = null;
             mLoadParams = null;
             mTaskPool.recycle(this);
+        }
+
+        private Object parseResult() {
+            Object result = null;
+            try {
+                DebugUtils.__checkStartMethodTracing();
+                result = mLoadParams.parseResult(mContext, mKey, null, this);
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + mKey);
+            } catch (Exception e) {
+                Log.e("ResourceLoader", "Couldn't parse result - key = " + mKey + "\n" + e);
+            }
+
+            return result;
+        }
+
+        private boolean loadFromCache(File cacheFile) {
+            final int priority = Process.getThreadPriority(Process.myTid());
+            try {
+                DebugUtils.__checkStartMethodTracing();
+                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+                final Object result = mLoadParams.parseResult(mContext, mKey, cacheFile, this);
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + mKey + ", cacheFile = " + cacheFile);
+                if (result != null) {
+                    // If this task was cancelled then invoking setProgress has no effect.
+                    setProgress(result);
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.w("ResourceLoader", "Couldn't load resource from the cache - " + cacheFile);
+            } finally {
+                Process.setThreadPriority(priority);
+            }
+
+            return false;
+        }
+
+        private Object download(String cacheFile, boolean hitCache) {
+            final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
+            Object result = null;
+            try {
+                final int statusCode = mLoadParams.newDownloadRequest(mContext, mKey).download(tempFile, this, null);
+                if (statusCode == HTTP_OK && !isTaskCancelled(this) && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
+                    // If the cache file is not equals the temp file, parse the temp file.
+                    DebugUtils.__checkStartMethodTracing();
+                    result = mLoadParams.parseResult(mContext, mKey, new File(tempFile), this);
+                    DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(mKey).toString());
+                    if (result != null) {
+                        // Save the temp file to the cache file.
+                        FileUtils.moveFile(tempFile, cacheFile);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("ResourceLoader", "Couldn't load resource - key = " + mKey + "\n" + e);
+            }
+
+            if (hitCache && result == null) {
+                // If the cache file is hit and parse the temp file failed,
+                // cancel this task and delete the temp file, do not update UI.
+                DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + mKey);
+                cancel(false);
+                FileUtils.deleteFiles(tempFile, false);
+            }
+
+            return result;
         }
     }
 

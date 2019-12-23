@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
+import android.ext.util.ContextCompat;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
@@ -101,7 +102,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
      */
     public ResourceLoader(Context context, Executor executor) {
         super(executor, MAX_POOL_SIZE);
-        mContext = context.getApplicationContext();
+        mContext = ContextCompat.getContext(context);
     }
 
     /**
@@ -113,7 +114,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     public ResourceLoader(Activity ownerActivity, Executor executor) {
         super(executor, MAX_POOL_SIZE);
         mOwner = new WeakReference<Object>(ownerActivity);
-        mContext = ownerActivity.getApplicationContext();
+        mContext = ContextCompat.getContext(ownerActivity);
     }
 
     /**

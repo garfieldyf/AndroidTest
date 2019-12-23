@@ -20,7 +20,7 @@ public final class RenderScriptBlur extends AbsRenderScript<ScriptIntrinsicBlur>
      * @see #RenderScriptBlur(RenderScript)
      */
     public RenderScriptBlur(Context context) {
-        super(RenderScript.create(context), null, true);
+        super(context);
         mScript = ScriptIntrinsicBlur.create(mRS, Element.U8_4(mRS));
     }
 
@@ -30,7 +30,7 @@ public final class RenderScriptBlur extends AbsRenderScript<ScriptIntrinsicBlur>
      * @see #RenderScriptBlur(Context)
      */
     public RenderScriptBlur(RenderScript rs) {
-        super(rs, ScriptIntrinsicBlur.create(rs, Element.U8_4(rs)), false);
+        super(rs, ScriptIntrinsicBlur.create(rs, Element.U8_4(rs)));
     }
 
     /**

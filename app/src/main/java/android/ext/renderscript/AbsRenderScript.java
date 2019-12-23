@@ -1,5 +1,7 @@
 package android.ext.renderscript;
 
+import android.content.Context;
+import android.ext.util.ContextCompat;
 import android.renderscript.RenderScript;
 import android.renderscript.Script;
 import java.io.Closeable;
@@ -15,11 +17,21 @@ import java.io.Closeable;
 
     /**
      * Constructor
+     * @see #AbsRenderScript(RenderScript, Script)
      */
-    /* package */ AbsRenderScript(RenderScript rs, T script, boolean shouldDestroy) {
+    /* package */ AbsRenderScript(Context context) {
+        mShouldDestroy = true;
+        mRS = RenderScript.create(ContextCompat.getContext(context));
+    }
+
+    /**
+     * Constructor
+     * @see #AbsRenderScript(Context)
+     */
+    /* package */ AbsRenderScript(RenderScript rs, T script) {
         mRS = rs;
         mScript = script;
-        mShouldDestroy = shouldDestroy;
+        mShouldDestroy = false;
     }
 
     @Override

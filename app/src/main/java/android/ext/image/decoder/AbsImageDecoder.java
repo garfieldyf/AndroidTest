@@ -3,6 +3,7 @@ package android.ext.image.decoder;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
+import android.ext.util.ContextCompat;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -30,7 +31,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      */
     public AbsImageDecoder(Context context, Pool<Options> optionsPool) {
         mOptionsPool = optionsPool;
-        mContext = context.getApplicationContext();
+        mContext = ContextCompat.getContext(context);
     }
 
     /**

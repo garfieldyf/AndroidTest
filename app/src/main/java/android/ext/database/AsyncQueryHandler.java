@@ -8,6 +8,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.ext.util.ContextCompat;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler;
 import android.net.Uri;
@@ -36,7 +37,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public AsyncQueryHandler(Context context, Executor executor) {
         super(executor);
-        mContext = context.getApplicationContext();
+        mContext = ContextCompat.getContext(context);
     }
 
     /**
@@ -48,7 +49,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public AsyncQueryHandler(Activity ownerActivity, Executor executor) {
         super(executor, ownerActivity);
-        mContext = ownerActivity.getApplicationContext();
+        mContext = ContextCompat.getContext(ownerActivity);
     }
 
     /**

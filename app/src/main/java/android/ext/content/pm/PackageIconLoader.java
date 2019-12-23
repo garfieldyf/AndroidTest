@@ -6,6 +6,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.LruCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.pm.PackageUtils.PackageItemIcon;
+import android.ext.util.ContextCompat;
 import android.util.Printer;
 import java.util.concurrent.Executor;
 
@@ -40,7 +41,7 @@ public class PackageIconLoader extends AsyncLoader<String, ApplicationInfo, Pack
      */
     public PackageIconLoader(Context context, Executor executor, Cache<String, PackageItemIcon> cache) {
         super(executor, cache);
-        mContext = context.getApplicationContext();
+        mContext = ContextCompat.getContext(context);
     }
 
     /**

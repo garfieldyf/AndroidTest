@@ -23,7 +23,7 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
      * @see #RenderScriptYuvToRGB(RenderScript)
      */
     public RenderScriptYuvToRGB(Context context) {
-        super(RenderScript.create(context), null, true);
+        super(context);
         mScript = ScriptIntrinsicYuvToRGB.create(mRS, Element.YUV(mRS));
     }
 
@@ -33,7 +33,7 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
      * @see #RenderScriptYuvToRGB(Context)
      */
     public RenderScriptYuvToRGB(RenderScript rs) {
-        super(rs, ScriptIntrinsicYuvToRGB.create(rs, Element.YUV(rs)), false);
+        super(rs, ScriptIntrinsicYuvToRGB.create(rs, Element.YUV(rs)));
     }
 
     @Override

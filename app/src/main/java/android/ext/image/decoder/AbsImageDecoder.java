@@ -85,7 +85,6 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         opts.inTempStorage = null;
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
-        opts.inPremultiplied = true;
         opts.inJustDecodeBounds = false;
         opts.inPreferredConfig  = Config.ARGB_8888;
         mOptionsPool.recycle(opts);

@@ -28,7 +28,6 @@ import android.ext.image.params.Parameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
-import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.ByteBufferPool;
 import android.ext.util.Pools.Factory;
@@ -38,8 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
-import android.util.LogPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -87,7 +84,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      */
     /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
-        ImageModule.__checkDumpSystemInfo(context);
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = context.getApplicationContext();
         mExecutor = executor;
@@ -350,7 +346,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         } else {
             try {
                 return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class }, mContext, mOptionsPool);
-            } catch (ReflectiveOperationException e) {
+            } catch (Exception e) {
                 return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
             }
         }
@@ -387,10 +383,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         default:
             return Integer.toString(level);
         }
-    }
-
-    private static void __checkDumpSystemInfo(Context context) {
-        DeviceUtils.dumpSystemInfo(context, new LogPrinter(Log.DEBUG, "ImageModule"));
     }
 
     private static void dumpCache(Printer printer, Resources res, SparseArray cache, String cacheName) {

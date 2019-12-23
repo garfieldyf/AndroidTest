@@ -133,15 +133,15 @@ public final class BarcodeBuilder {
     /**
      * Sets the logo will be draw into the barcode image.
      * @param res The <tt>Resources</tt>.
-     * @param id The resource id of the logo.
+     * @param logoId The resource id of the logo.
      * @param sizeId The resource id of the size dimension.
      * @return This builder.
      * @see #logo(Drawable)
      * @see #logo(Resources, int)
      * @see #logo(Drawable, int, int)
      */
-    public final BarcodeBuilder logo(Resources res, int id, int sizeId) {
-        this.logo = res.getDrawable(id);
+    public final BarcodeBuilder logo(Resources res, int logoId, int sizeId) {
+        this.logo = res.getDrawable(logoId);
         this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(sizeId);
         return this;
     }

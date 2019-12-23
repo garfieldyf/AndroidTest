@@ -16,6 +16,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
+import android.support.v4.graphics.BitmapCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -243,7 +244,7 @@ public final class BitmapUtils {
         final int size = bitmap.getByteCount();
         final int density = bitmap.getDensity();
         final Config config = bitmap.getConfig();
-        final int allocSize = bitmap.getAllocationByteCount();
+        final int allocSize = BitmapCompat.getAllocationByteCount(bitmap);
         final int targetDensity = context.getResources().getDisplayMetrics().densityDpi;
 
         result.append(" { width = ").append(bitmap.getWidth())

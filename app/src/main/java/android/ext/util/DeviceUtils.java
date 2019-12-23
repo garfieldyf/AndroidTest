@@ -259,7 +259,7 @@ public final class DeviceUtils {
             return "watch";
 
         case Configuration.UI_MODE_TYPE_NORMAL:
-            return "nromal";
+            return "normal";
 
         case Configuration.UI_MODE_TYPE_APPLIANCE:
             return "appliance";
@@ -383,9 +383,20 @@ public final class DeviceUtils {
     }
 
     private static StringBuilder dumpStorageInfo(StatFs statFs, StringBuilder out) {
-        return out.append(" total = ").append(FileUtils.formatFileSize(statFs.getTotalBytes()))
-                  .append(", used = ").append(FileUtils.formatFileSize((statFs.getBlockCountLong() - statFs.getAvailableBlocksLong()) * statFs.getBlockSizeLong()))
-                  .append(", avail = ").append(FileUtils.formatFileSize(statFs.getAvailableBytes()))
+        final long bsize, blocks, bavail;
+        if (Build.VERSION.SDK_INT >= 18) {
+            bsize  = statFs.getBlockSizeLong();
+            blocks = statFs.getBlockCountLong();
+            bavail = statFs.getAvailableBlocksLong();
+        } else {
+            bsize  = statFs.getBlockSize();
+            blocks = statFs.getBlockCount();
+            bavail = statFs.getAvailableBlocks();
+        }
+
+        return out.append(" total = ").append(FileUtils.formatFileSize(blocks * bsize))
+                  .append(", used = ").append(FileUtils.formatFileSize((blocks - bavail) * bsize))
+                  .append(", avail = ").append(FileUtils.formatFileSize(bavail * bsize))
                   .append(" ]");
     }
 
@@ -393,8 +404,7 @@ public final class DeviceUtils {
         final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
         for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
             final StorageVolume volume = volumes[i];
-            final String path  = volume.getPath();
-            final String state = volume.getState();
+            final String path = volume.getPath();
 
             try {
                 statFs.restat(path);
@@ -402,12 +412,17 @@ public final class DeviceUtils {
                 continue;
             }
 
-            dumpStorageInfo(statFs, dumpWhiteSpace(out, i)
+            dumpWhiteSpace(out, i)
                 .append(getUserLabel(context, volume))
                 .append(" [ path = ").append(path)
-                .append(", primary = ").append(volume.isPrimary())
-                .append(", state = ").append(state != null ? state : "unknown")
-                .append(','));
+                .append(", primary = ").append(volume.isPrimary());
+
+            if (Build.VERSION.SDK_INT >= 18) {
+                final String state = volume.getState();
+                out.append(", state = ").append(state != null ? state : "unknown");
+            }
+
+            dumpStorageInfo(statFs, out.append(','));
         }
 
         return out.toString();
@@ -422,7 +437,11 @@ public final class DeviceUtils {
     }
 
     private static String getUserLabel(Context context, StorageVolume volume) {
-        String userLabel = volume.getUserLabel();
+        String userLabel = null;
+        if (Build.VERSION.SDK_INT >= 18) {
+            userLabel = volume.getUserLabel();
+        }
+
         if (TextUtils.isEmpty(userLabel)) {
             userLabel = volume.getDescription(context);
             if (TextUtils.isEmpty(userLabel)) {

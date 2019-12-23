@@ -86,7 +86,7 @@ public final class ProcessUtils {
      * @return The <tt>RunningAppProcessInfo</tt> of the <em>pid</em> or <tt>null</tt>.
      */
     public static RunningAppProcessInfo getRunningProcessInfo(Context context, int pid) {
-        final List<RunningAppProcessInfo> infos = ((ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
+        final List<RunningAppProcessInfo> infos = ((ActivityManager)context.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
         for (int i = 0, size = ArrayUtils.getSize(infos); i < size; ++i) {
             final RunningAppProcessInfo info = infos.get(i);
             if (info.pid == pid) {

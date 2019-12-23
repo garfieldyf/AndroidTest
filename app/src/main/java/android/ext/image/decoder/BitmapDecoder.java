@@ -96,7 +96,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
                .append("\n  outMimeType = ").append(opts.outMimeType)
                .append("\n  inTempStorage = ").append(opts.inTempStorage)
                .append("\n  inScaled = ").append(opts.inScaled)
-               .append("\n  inPremultiplied = ").append(opts.inPremultiplied)
                .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
                .append("\n}").toString());
         }

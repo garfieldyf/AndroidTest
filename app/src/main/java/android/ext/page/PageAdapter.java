@@ -399,8 +399,16 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public final long getPageForPosition(int position) {
         DebugUtils.__checkError(position < 0, "position < 0");
-        final int offset = position - mInitialSize;
-        return (offset < 0 ? (position & 0xFFFFFFFFL) : (((long)(offset / mPageSize + 1) << 32) | ((offset % mPageSize) & 0xFFFFFFFFL)));
+        final int pageIndex, itemIndex, offset = position - mInitialSize;
+        if (offset < 0) {
+            pageIndex = 0;
+            itemIndex = position;
+        } else {
+            pageIndex = offset / mPageSize + 1;
+            itemIndex = offset % mPageSize;
+        }
+
+        return (((long)pageIndex << 32) | (itemIndex & 0xFFFFFFFFL));
     }
 
     /**

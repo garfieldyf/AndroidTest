@@ -69,6 +69,19 @@ public final class XmlResources {
     }
 
     /**
+     * Returns the inner radius (android.R.attr.innerRadius) associated with <em>attrs</em>.
+     * @param res The {@link Resources} object containing the data.
+     * @param attrs The attributes of the XML tag that is inflating the data.
+     * @return The inner radius.
+     */
+    public static float loadInnerRadius(Resources res, AttributeSet attrs) {
+        final TypedArray a = res.obtainAttributes(attrs, INNER_RADIUS_ATTRS);
+        final float result = a.getDimension(0 /* android.R.attr.innerRadius */, 0);
+        a.recycle();
+        return result;
+    }
+
+    /**
      * Equivalent to calling <tt>loadCornerRadii(res, attrs, new float[8])</tt>.
      * @param res The {@link Resources} object containing the data.
      * @param attrs The attributes of the XML tag that is inflating the data.
@@ -168,6 +181,13 @@ public final class XmlResources {
          */
         T inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException;
     }
+
+    /**
+     * The inner radius attributes.
+     */
+    private static final int[] INNER_RADIUS_ATTRS = {
+        android.R.attr.innerRadius,
+    };
 
     /**
      * The drawable corners attributes.

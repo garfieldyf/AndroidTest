@@ -1318,6 +1318,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //            } else {
                 MainApplication.sInstance.load(R.xml.image_loader, itemData)
                     .parameters(R.xml.size_params)
+//                    .binder(R.xml.ring_bitmap_binder)
                     .binder(R.xml.oval_transition_binder)
                     .placeholder(R.drawable.ic_placeholder)
 //                    .binder(R.xml.image_binder)

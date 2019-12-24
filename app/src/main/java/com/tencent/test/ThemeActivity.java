@@ -1,14 +1,12 @@
 package com.tencent.test;
 
 import android.app.Activity;
-import android.ext.graphics.BitmapUtils;
-import android.ext.util.DebugUtils;
-import android.graphics.Bitmap;
+import android.content.res.Resources;
+import android.ext.graphics.drawable.RingBitmapDrawable;
 import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory.Options;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Debug;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -18,18 +16,17 @@ public class ThemeActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_theme);
 
+        final Resources res = getResources();
         ImageView src = (ImageView)findViewById(R.id.image_src);
         ImageView bin = (ImageView)findViewById(R.id.image_bin);
 
-        final Options opts = new Options();
-        opts.inMutable = true;
-        opts.inPreferredConfig = Config.ARGB_8888;
-        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.abc, opts);
-        src.setImageBitmap(bitmap);
+//        final Drawable drawable = new BitmapDrawable(res, BitmapFactory.decodeResource(res, R.drawable.personal_card));
+//        src.setImageDrawable(drawable);
+//        bin.setImageDrawable(drawable);
 
-//        Bitmap b = BitmapUtils.convert(bitmap);
-//        BitmapUtils.dumpBitmap(this, "yf", b);
-//        bin.setImageBitmap(b);
+        final float innerRadius = 30;
+        src.setImageDrawable(new RingBitmapDrawable(BitmapFactory.decodeResource(res, R.drawable.personal_card), innerRadius));
+        bin.setImageDrawable(new RingBitmapDrawable(BitmapFactory.decodeResource(res, R.drawable.personal_card), innerRadius));
     }
 
     public void onBlackClicked(View view) {

@@ -387,11 +387,11 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns the combined position of the page with the given the <em>position</em>.
-     * <p>The returned combined position:
+     * Given a position within this adapter, returns the combined position of the
+     * corresponding page within the array of pages.<p>The returned combined position:
      * <li>bit &nbsp;&nbsp;0-31 : Lower 32 bits of the index of the item in the page.
      * <li>bit 32-63 : Higher 32 bits of the index of the page.</p>
-     * @param position The adapter position of the item in this adapter.
+     * @param position The adapter position of the item.
      * @return The combined position of the page.
      * @see #getPositionForPage(int)
      * @see Pages#getOriginalPage(long)

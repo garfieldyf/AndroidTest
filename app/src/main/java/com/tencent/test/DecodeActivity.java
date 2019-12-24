@@ -1,35 +1,24 @@
 package com.tencent.test;
 
-import java.io.Closeable;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.util.Map;
 import android.app.Activity;
-import android.content.Context;
 import android.ext.barcode.BarcodeDecoder;
 import android.ext.barcode.BarcodeDecoder.Builder;
 import android.ext.barcode.BarcodeDecoder.OnDecodeListener;
 import android.ext.renderscript.RenderScriptYuvToRGB;
 import android.ext.util.FileUtils;
 import android.ext.widget.BarcodeCameraView;
-import android.ext.widget.BarcodeCameraView.OnBarcodeCameraListener;
+import android.ext.widget.BarcodeCameraView.CameraCallback;
 import android.ext.widget.BarcodeDecorView;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.MediaActionSound;
 import android.os.Bundle;
-import android.renderscript.Allocation;
-import android.renderscript.Element;
-import android.renderscript.RenderScript;
-import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.util.LogPrinter;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -41,9 +30,12 @@ import com.google.zxing.Result;
 import com.google.zxing.ResultMetadataType;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.ResultPointCallback;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Map;
 
 @SuppressWarnings("deprecation")
-public class DecodeActivity extends Activity implements OnDecodeListener, OnBarcodeCameraListener, OnClickListener, ResultPointCallback {
+public class DecodeActivity extends Activity implements OnDecodeListener, CameraCallback, OnClickListener, ResultPointCallback {
     private View mScanView;
     private TextView mResultView;
 
@@ -75,7 +67,7 @@ public class DecodeActivity extends Activity implements OnDecodeListener, OnBarc
         mCameraView = (BarcodeCameraView)findViewById(R.id.camera_view);
 //        mCameraView.setCameraZoom(30);
 //        mCameraView.setCameraFlashMode(Parameters.FLASH_MODE_TORCH);
-        mCameraView.setOnBarcodeCameraListener(this);
+        mCameraView.setCameraCallback(this);
     }
 
     @Override

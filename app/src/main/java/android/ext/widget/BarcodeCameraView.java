@@ -46,7 +46,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     private Rect mClipBounds;
     private int mPreviewWidth;
     private int mPreviewHeight;
-    private OnBarcodeCameraListener mListener;
+    private CameraCallback mCallback;
 
     public BarcodeCameraView(Context context) {
         super(context);
@@ -69,7 +69,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
      */
     public void requestPreview() {
         if (mCamera != null) {
-            mCamera.setOneShotPreviewCallback(mListener);
+            mCamera.setOneShotPreviewCallback(mCallback);
         }
     }
 
@@ -182,7 +182,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
     /**
      * Computes the bounds of the barcode clip area. <p>Note: This method recommended call
-     * in the {@link OnBarcodeCameraListener#onPreviewSizeChanged(Camera, int, int)}.</p>
+     * in the {@link CameraCallback#onPreviewSizeChanged(Camera, int, int)}.</p>
      * @param scanningBounds The coordinates of the scanning bounds on the screen in pixels.
      * @see #getBarcodeClipBounds()
      */
@@ -195,8 +195,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         mClipBounds.bottom = scanningBounds.right  * mPreviewHeight / screenSize.y;
     }
 
-    public final void setOnBarcodeCameraListener(OnBarcodeCameraListener listener) {
-        mListener = listener;
+    public final void setCameraCallback(CameraCallback callback) {
+        mCallback = callback;
     }
 
     @Override
@@ -228,8 +228,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
             }
         } catch (Exception e) {
             Log.e(getClass().getName(), e.getMessage());
-            if (mListener != null) {
-                mListener.onError(CAMERA_ERROR_OPEN_FAILED, mCamera);
+            if (mCallback != null) {
+                mCallback.onError(CAMERA_ERROR_OPEN_FAILED, mCamera);
             }
         }
     }
@@ -298,8 +298,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         mPreviewHeight = previewSize.height;
         params.setPreviewFormat(ImageFormat.NV21);
         params.setPreviewSize(mPreviewWidth, mPreviewHeight);
-        if (mListener != null) {
-            mListener.onPreviewSizeChanged(mCamera, mPreviewWidth, mPreviewHeight);
+        if (mCallback != null) {
+            mCallback.onPreviewSizeChanged(mCamera, mPreviewWidth, mPreviewHeight);
         }
 
         // Sets the camera focus mode and scene mode.
@@ -317,8 +317,8 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
 
         // Sets the camera parameters.
         mCamera.setParameters(params);
-        mCamera.setErrorCallback(mListener);
-        mCamera.setOneShotPreviewCallback(mListener);
+        mCamera.setErrorCallback(mCallback);
+        mCamera.setOneShotPreviewCallback(mCallback);
         mCamera.setDisplayOrientation(info.orientation);
 
         return autoFocus;
@@ -392,9 +392,9 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     }
 
     /**
-     * Used for being notified the barcode camera events.
+     * Used for being notified the camera device events.
      */
-    public static interface OnBarcodeCameraListener extends PreviewCallback, ErrorCallback {
+    public static interface CameraCallback extends PreviewCallback, ErrorCallback {
         /**
          * Callback method to be invoked when the camera preview size has been changed.
          * <p>Note: The preview size relative to the camera device orientation (The

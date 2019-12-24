@@ -75,6 +75,11 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         android.R.attr.autoMirrored,
     };
 
+    private static final int GRAVITY_INDEX = 0;
+    private static final int SRC_INDEX     = 1;
+    private static final int ALPHA_INDEX   = 2;
+    private static final int MIRROR_INDEX  = 3;
+
     /**
      * The {@link ConstantState} object.
      */
@@ -256,15 +261,14 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
-    @SuppressLint("ResourceType")
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
         final TypedArray a = res.obtainAttributes(attrs, IMAGE_DRAWABLE_ATTRS);
-        inflateAttributes(res, parser, attrs, theme, a.getResourceId(1 /* android.R.attr.src */, 0));
+        inflateAttributes(res, parser, attrs, theme, a.getResourceId(SRC_INDEX /* android.R.attr.src */, 0));
 
-        mState.mGravity = a.getInt(0 /* android.R.attr.gravity */, Gravity.FILL);
-        mState.mPaint.setAlpha((int)(a.getFloat(2 /* android.R.attr.alpha */, 1) * 255 + 0.5f));
-        mState.mFlags |= (IMAGE_DRAWABLE_ATTRS[3] == android.R.attr.autoMirrored ? (a.getBoolean(3 /* android.R.attr.autoMirrored */, false) ? HORIZONTAL_MIRRORED : NONE_MIRRORED) : a.getInt(3 /* R.attr.autoMirrored */, NONE_MIRRORED));
+        mState.mGravity = a.getInt(GRAVITY_INDEX /* android.R.attr.gravity */, Gravity.FILL);
+        mState.mPaint.setAlpha((int)(a.getFloat(ALPHA_INDEX /* android.R.attr.alpha */, 1) * 255 + 0.5f));
+        mState.mFlags |= (IMAGE_DRAWABLE_ATTRS[3] == android.R.attr.autoMirrored ? (a.getBoolean(MIRROR_INDEX /* android.R.attr.autoMirrored */, false) ? HORIZONTAL_MIRRORED : NONE_MIRRORED) : a.getInt(MIRROR_INDEX /* R.attr.autoMirrored */, NONE_MIRRORED));
         a.recycle();
 
         super.inflate(res, parser, attrs, theme);

@@ -81,9 +81,9 @@ import java.util.Arrays;
  *
  * new JSONTask(activity).execute(url);
  * or
- * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;JSONObject&gt; {
+ * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;String, JSONObject&gt; {
  *    {@code @Override}
- *     public void onLoadComplete(JSONObject result) {
+ *     public void onLoadComplete(String[] urls, JSONObject result) {
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
@@ -104,9 +104,14 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     public final Context mContext;
 
     /**
+     * The parameters of this task.
+     */
+    protected Params[] mParams;
+
+    /**
      * The {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      */
-    private OnLoadCompleteListener<Result> mListener;
+    private OnLoadCompleteListener<Params, Result> mListener;
 
     /**
      * Constructor
@@ -131,7 +136,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
      * Sets An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      * @param listener The <tt>OnLoadCompleteListener</tt>.
      */
-    public final void setOnLoadCompleteListener(OnLoadCompleteListener<Result> listener) {
+    public final void setOnLoadCompleteListener(OnLoadCompleteListener<Params, Result> listener) {
         mListener = listener;
     }
 
@@ -164,6 +169,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
 
     @Override
     protected Result doInBackground(Params[] params) {
+        mParams = params;
         final File cacheFile = getCacheFile(params);
         if (cacheFile == null) {
             return parseResult(params);
@@ -176,7 +182,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     @Override
     protected void onPostExecute(Result result) {
         if (mListener != null && validateOwner(mOwner)) {
-            mListener.onLoadComplete(result);
+            mListener.onLoadComplete(mParams, result);
         }
     }
 
@@ -253,11 +259,12 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     /**
      * Callback interface when an {@link AsyncLoadTask} has finished loading its data.
      */
-    public static interface OnLoadCompleteListener<Result> {
+    public static interface OnLoadCompleteListener<Params, Result> {
         /**
          * Called on the UI thread when the load is complete.
+         * @param params The parameters, passed earlier by {@link #execute}.
          * @param result A result or <tt>null</tt> of the load.
          */
-        void onLoadComplete(Result result);
+        void onLoadComplete(Params[] params, Result result);
     }
 }

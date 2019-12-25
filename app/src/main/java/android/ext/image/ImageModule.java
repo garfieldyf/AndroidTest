@@ -30,7 +30,7 @@ import android.ext.util.ClassUtils;
 import android.ext.util.ContextCompat;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
-import android.ext.util.Pools.ByteBufferPool;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
@@ -42,7 +42,6 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
-import java.nio.ByteBuffer;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -68,8 +67,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     public final Context mContext;
 
     /* package */ final Executor mExecutor;
+    /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Object[]> mParamsPool;
-    /* package */ final Pool<ByteBuffer> mBufferPool;
 
     private final FileCache mFileCache;
     private final Pool<Options> mOptionsPool;
@@ -94,7 +93,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mLoaderCache = new SparseArray<ImageLoader>(2);
         mParamsPool  = Pools.newPool(this, 48);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
-        mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> ByteBuffer.allocateDirect(16384), maxPoolSize));
+        mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
         if (fileCache instanceof SimpleFileCache) {
             executor.execute(((SimpleFileCache)fileCache)::trimToSize);
@@ -228,7 +227,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mBufferPool.clear();
             mOptionsPool.clear();
             mLoaderCache.clear();
-            ByteBufferPool.sInstance.clear();
+            ByteArrayPool.sInstance.clear();
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append('(').append(level).append("),").toString());

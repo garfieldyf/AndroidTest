@@ -10,14 +10,13 @@ import android.ext.net.DownloadRequest;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.Pools.ByteBufferPool;
+import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 import java.io.File;
 import java.net.HttpURLConnection;
-import java.nio.ByteBuffer;
 
 /**
  * Class <tt>AsyncImageTask</tt> allows to load the images from the specified
@@ -117,15 +116,14 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
     @SuppressWarnings("unchecked")
     protected Object[] doInBackground(URI... params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) == 0, "Invalid parameter - The params is null or 0-length");
-        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
+        final byte[] tempBuffer = ByteArrayPool.sInstance.obtain();
         final Object[] results  = new Object[params.length];
         try {
-            final byte[] array = buffer.array();
             for (int i = 0; i < params.length && !isCancelled(); ++i) {
-                results[i] = decodeImage(params[i], array, null);
+                results[i] = decodeImage(params[i], tempBuffer, null);
             }
         } finally {
-            ByteBufferPool.sInstance.recycle(buffer);
+            ByteArrayPool.sInstance.recycle(tempBuffer);
         }
 
         return results;

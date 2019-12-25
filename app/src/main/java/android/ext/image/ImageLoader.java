@@ -24,7 +24,6 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.ImageView.ScaleType;
 import java.io.File;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
@@ -111,9 +110,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
-        final ByteBuffer buffer = mModule.mBufferPool.obtain();
+        final byte[] buffer = mModule.mBufferPool.obtain();
         try {
-            return loadImage(task, uri, getTarget(task), params, flags, buffer.array());
+            return loadImage(task, uri, getTarget(task), params, flags, buffer);
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }

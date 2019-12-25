@@ -5,8 +5,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Printer;
 import java.lang.reflect.Array;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -163,10 +161,10 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>ByteBufferPool</tt> for managing a pool of {@link ByteBuffer}.
+     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
      */
-    public static final class ByteBufferPool {
-        public static final Pool<ByteBuffer> sInstance = new SynchronizedPool<ByteBuffer>(new ArrayPool<ByteBuffer>(() -> ByteBuffer.allocateDirect(8192), 2));
+    public static final class ByteArrayPool {
+        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 2));
     }
 
     /**
@@ -280,8 +278,6 @@ public final class Pools {
                 DebugUtils.toString(element, result.append("  "));
                 if (element.getClass().isArray()) {
                     result.append(" { length = ").append(Array.getLength(element)).append(" }");
-                } else if (element instanceof Buffer) {
-                    result.append(" { capacity = ").append(((Buffer)element).capacity()).append(" }");
                 }
 
                 printer.println(result.toString());

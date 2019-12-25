@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
-import android.ext.util.Pools.RectFPool;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -83,10 +82,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
         outPath.addOval(bounds, Direction.CW);
         final float outerRadius = Math.min(bounds.width(), bounds.height()) * 0.5f;
         if (Float.compare(mState.mInnerRadius, +0.0f) > 0 && Float.compare(mState.mInnerRadius, outerRadius) < 0) {
-            final float offset = outerRadius - mState.mInnerRadius;
-            final RectF innerBounds = RectFPool.sInstance.obtain(bounds.left + offset, bounds.top + offset, bounds.right - offset, bounds.bottom - offset);
-            outPath.addOval(innerBounds, Direction.CW);
-            RectFPool.sInstance.recycle(innerBounds);
+            outPath.addCircle(bounds.centerX(), bounds.centerY(), mState.mInnerRadius, Direction.CW);
         }
     }
 

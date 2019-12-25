@@ -1,7 +1,7 @@
 package android.ext.util;
 
 import android.content.Context;
-import android.ext.util.Pools.ByteBufferPool;
+import android.ext.util.Pools.ByteArrayPool;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLConnection;
-import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -588,11 +587,11 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final ByteBuffer buffer = ByteBufferPool.sInstance.obtain();
+        final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
-            copyStreamImpl(is, out, cancelable, buffer.array());
+            copyStreamImpl(is, out, cancelable, buffer);
         } finally {
-            ByteBufferPool.sInstance.recycle(buffer);
+            ByteArrayPool.sInstance.recycle(buffer);
         }
     }
 

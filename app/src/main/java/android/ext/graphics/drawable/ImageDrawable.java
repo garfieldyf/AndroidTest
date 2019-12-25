@@ -224,6 +224,11 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
+    public ConstantState getConstantState() {
+        return mState;
+    }
+
+    @Override
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void getOutline(Outline outline) {
         final Rect bounds = getBounds();
@@ -235,11 +240,6 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
             outline.setAlpha(getAlpha() / 255.0f);
             getOutline(outline, mBounds);
         }
-    }
-
-    @Override
-    public ConstantState getConstantState() {
-        return mState;
     }
 
     @Override

@@ -91,6 +91,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     public LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = resolveUri(uri);
+        mRequest.mFlags  = 0;
         mRequest.mBinder = this;
         mRequest.mParams = mModule.mParamsPool.obtain();
         return mRequest;
@@ -383,8 +384,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             }
 
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
-            mFlags  = 0;
-            mParams = null;
         }
     }
 

@@ -148,7 +148,7 @@ public class BarcodeDecorView extends View {
      * @see #setTextSize(int)
      */
     public void setTextSize(float textSize) {
-        if (mPaint.getTextSize() != textSize) {
+        if (Float.compare(mPaint.getTextSize(), textSize) != 0) {
             mPaint.setTextSize(textSize);
             invalidate();
         }
@@ -181,7 +181,7 @@ public class BarcodeDecorView extends View {
      * @see #setTextOffset(int)
      */
     public void setTextOffset(float offset) {
-        if (mTextOffset != offset) {
+        if (Float.compare(mTextOffset, offset) != 0) {
             mTextOffset = offset;
             invalidate();
         }

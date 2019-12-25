@@ -29,7 +29,7 @@ public class FocusManager implements OnFocusChangeListener {
      * @return The root <tt>View</tt>.
      */
     @SuppressWarnings("unchecked")
-    public <T extends ViewGroup> T getRootView() {
+    public final <T extends ViewGroup> T getRootView() {
         return (T)mRootView;
     }
 
@@ -89,7 +89,7 @@ public class FocusManager implements OnFocusChangeListener {
         return (mRootView.getFocusedChild() == null && views.add(mRootView));
     }
 
-    public void setOnChildFocusChangeListener(OnChildFocusChangeListener listener) {
+    public final void setOnChildFocusChangeListener(OnChildFocusChangeListener listener) {
         mListener = listener;
     }
 

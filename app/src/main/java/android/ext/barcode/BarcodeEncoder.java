@@ -3,7 +3,6 @@ package android.ext.barcode;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -316,8 +315,6 @@ public class BarcodeEncoder {
          * @see BarcodeBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
-        default Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints) {
-            return new BarcodeBuilder(bitMatrix).config(Config.RGB_565).build();
-        }
+        Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints);
     }
 }

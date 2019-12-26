@@ -1,18 +1,15 @@
 package android.ext.graphics.drawable;
 
-import android.annotation.TargetApi;
 import android.ext.graphics.GIFImage;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
-import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
-import android.os.Build;
 
 /**
  * Abstract class ShapeGIFDrawable
@@ -25,12 +22,6 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
      */
     public ShapeGIFDrawable(T state) {
         super(state);
-    }
-
-    @Override
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    protected void getOutline(Outline outline, RectF bounds) {
-        outline.setConvexPath(mState.mPath);
     }
 
     @Override

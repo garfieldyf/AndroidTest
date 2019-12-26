@@ -383,6 +383,7 @@ public final class DeviceUtils {
         return (heapSize != 0 ? FileUtils.formatFileSize(heapSize << 20) : "N/A");
     }
 
+    @SuppressWarnings("deprecation")
     private static StringBuilder dumpStorageInfo(StatFs statFs, StringBuilder out) {
         final long bsize, blocks, bavail;
         if (Build.VERSION.SDK_INT >= 18) {

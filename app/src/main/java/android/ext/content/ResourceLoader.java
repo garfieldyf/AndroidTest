@@ -80,8 +80,7 @@ import java.util.concurrent.Executor;
  * mLoader.load(url, new JSONLoadParams(), new LoadCompleteListener(), cookie);</pre>
  * @author Garfield
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
-public class ResourceLoader<Key, Result> extends Loader<Key> {
+public final class ResourceLoader<Key, Result> extends Loader<Key> {
     private static final int MAX_POOL_SIZE = 8;
 
     /**
@@ -125,7 +124,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
      * @param listener An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      * @param cookie An object by user-defined that gets passed into {@link OnLoadCompleteListener#onLoadComplete}.
      */
-    public void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener, Object cookie) {
+    public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener, Object cookie) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(key == null || loadParams == null || listener == null, "key == null || loadParams == null || listener == null");
         if (mState != SHUTDOWN) {
@@ -154,6 +153,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
      * if the owner released by the GC.
      * @see #setOwner(Object)
      */
+    @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
@@ -164,6 +164,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
         return new LoadTask();
     }
 
+    @SuppressWarnings("unchecked")
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -176,6 +177,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
+    @SuppressWarnings("unchecked")
     /* package */ final class LoadTask extends Task {
         /* package */ Key mKey;
         /* package */ LoadParams mLoadParams;

@@ -168,7 +168,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     protected abstract Result parseResult(Params[] params, File cacheFile) throws Exception;
 
     @Override
-    protected Result doInBackground(Params[] params) {
+    protected final Result doInBackground(Params[] params) {
         mParams = params;
         final File cacheFile = getCacheFile(params);
         if (cacheFile == null) {
@@ -180,16 +180,16 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    protected final void onProgressUpdate(Object... values) {
+        onPostExecute((Result)values[0]);
+    }
+
+    @Override
     protected void onPostExecute(Result result) {
         if (mListener != null && validateOwner(mOwner)) {
             mListener.onLoadComplete(mParams, result);
         }
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected final void onProgressUpdate(Object... values) {
-        onPostExecute((Result)values[0]);
     }
 
     private Result parseResult(Params[] params) {

@@ -25,13 +25,13 @@ import java.util.Arrays;
  *     android:bottomRightRadius="20dp" /&gt;</pre>
  * @author Garfield
  */
-public class RoundedTransitionBinder extends TransitionBinder {
+public final class RoundedTransitionBinder extends TransitionBinder {
     /**
      * The corner radii, array of 8 values. Each corner receives two
      * radius values [X, Y]. The corners are ordered <tt>top-left</tt>,
      * <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
      */
-    protected final float[] mRadii;
+    private final float[] mRadii;
 
     /**
      * Constructor

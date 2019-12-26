@@ -91,15 +91,6 @@ public final class MainApplication extends Application {
         }
 
         @Override
-        protected void onRecycle(Object[] params) {
-        }
-
-        @Override
-        protected Bitmap loadInBackground(Task task, String uri, Object[] params, int flags) {
-            return super.loadInBackground(task, uri, params, flags);
-        }
-
-        @Override
         protected Bitmap loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
             return super.loadImage(task, url, imageFile, target, params, flags, buffer);
         }

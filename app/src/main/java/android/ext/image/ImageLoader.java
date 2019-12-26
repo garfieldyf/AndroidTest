@@ -110,7 +110,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected final Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
             return loadImage(task, uri, getTarget(task), params, flags, buffer);
@@ -120,7 +120,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected void onRecycle(Object[] params) {
+    protected final void onRecycle(Object[] params) {
         Arrays.fill(params, null);  // Prevent memory leak.
         mModule.mParamsPool.recycle(params);
     }

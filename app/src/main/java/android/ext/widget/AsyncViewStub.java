@@ -107,7 +107,7 @@ public final class AsyncViewStub extends View {
      * @param listener May be <tt>null</tt>. The {@link OnInflateListener} to notify of successful inflation.
      */
     public final void inflate(Executor executor, OnInflateListener listener) {
-        new AsyncInflateTask().executeOnExecutor(executor, new Inflater(this, listener));
+        new AsyncInflateTask().executeOnExecutor(executor, new Inflater(listener));
     }
 
     @Override
@@ -142,27 +142,25 @@ public final class AsyncViewStub extends View {
     /**
      * Class <tt>Inflater</tt> used to inflate a layout resource id.
      */
-    private static final class Inflater {
-        /* package */ View result;
-        /* package */ final AsyncViewStub viewStub;
-        /* package */ final LayoutInflater inflater;
-        /* package */ final OnInflateListener listener;
+    private final class Inflater {
+        private View result;
+        private final LayoutInflater inflater;
+        private final OnInflateListener listener;
 
-        /* package */ Inflater(AsyncViewStub viewStub, OnInflateListener listener) {
-            this.viewStub = viewStub;
+        public Inflater(OnInflateListener listener) {
             this.listener = listener;
-            this.inflater = new BasicLayoutInflater(viewStub.getContext());
-            DebugUtils.__checkError(viewStub.mLayoutId == 0, "AsyncViewStub must have a valid layout resource id");
-            DebugUtils.__checkError(viewStub.getParent() == null, "AsyncViewStub must have a non-null ViewGroup parent");
+            this.inflater = new BasicLayoutInflater(getContext());
+            DebugUtils.__checkError(mLayoutId == 0, "AsyncViewStub must have a valid layout resource id");
+            DebugUtils.__checkError(getParent() == null, "AsyncViewStub must have a non-null ViewGroup parent");
         }
 
-        /* package */ final Inflater inflate() {
+        public final Inflater inflate() {
             final int priority = Process.getThreadPriority(Process.myTid());
             try {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-                result = inflater.inflate(viewStub.mLayoutId, (ViewGroup)viewStub.getParent(), false);
+                result = inflater.inflate(mLayoutId, (ViewGroup)getParent(), false);
             } catch (RuntimeException e) {
-                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(viewStub.mInflatedId) + " in the background! Retrying on the UI thread\n" + e);
+                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mInflatedId) + " in the background! Retrying on the UI thread\n" + e);
             } finally {
                 Process.setThreadPriority(priority);
             }
@@ -170,23 +168,29 @@ public final class AsyncViewStub extends View {
             return this;
         }
 
-        /* package */ final void onFinishInflate(ViewGroup parent) {
+        public final void onFinishInflate() {
+            final ViewGroup parent = (ViewGroup)getParent();
+            if (parent == null) {
+                Log.w(AsyncViewStub.class.getName(), "The AsyncViewStub (ID #0x" + Integer.toHexString(getId()) + ") has no parent, can not add the inflated view to its parent.");
+                return;
+            }
+
             if (result == null) {
                 // Failed to inflate mLayoutId in the background, inflating it on the UI thread.
-                result = inflater.inflate(viewStub.mLayoutId, parent, false);
+                result = inflater.inflate(mLayoutId, parent, false);
             }
 
             // Sets the inflated view id.
-            if (viewStub.mInflatedId != NO_ID) {
-                result.setId(viewStub.mInflatedId);
+            if (mInflatedId != NO_ID) {
+                result.setId(mInflatedId);
             }
 
             // Removes the AsyncViewStub from its parent.
-            final int index = parent.indexOfChild(viewStub);
+            final int index = parent.indexOfChild(AsyncViewStub.this);
             parent.removeViewsInLayout(index, 1);
 
             // Adds the inflated view to its parent.
-            final LayoutParams params = viewStub.getLayoutParams();
+            final LayoutParams params = getLayoutParams();
             if (params == null) {
                 parent.addView(result, index);
             } else {
@@ -194,7 +198,7 @@ public final class AsyncViewStub extends View {
             }
 
             if (listener != null) {
-                listener.onFinishInflate(viewStub, result, viewStub.mLayoutId);
+                listener.onFinishInflate(AsyncViewStub.this, result, mLayoutId);
             }
         }
     }
@@ -250,10 +254,7 @@ public final class AsyncViewStub extends View {
 
         @Override
         protected void onPostExecute(Inflater inflater) {
-            final ViewGroup parent = (ViewGroup)inflater.viewStub.getParent();
-            if (parent != null) {
-                inflater.onFinishInflate(parent);
-            }
+            inflater.onFinishInflate();
         }
     }
 }

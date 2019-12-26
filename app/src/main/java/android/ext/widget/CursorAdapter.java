@@ -132,7 +132,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
 
     /**
      * Equivalent to calling <tt>notifyItemChanged(id, null)</tt>.
-     * @param id The stable ID of the item.
+     * @param id The row ID of the item.
      * @see #notifyItemChanged(long, Object)
      */
     public final void notifyItemChanged(long id) {
@@ -140,9 +140,9 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
     }
 
     /**
-     * Notify any registered observers that the item's stable ID equals the <em>id</em>
-     * has changed with an optional payload object.
-     * @param id The stable ID of the item.
+     * Notify any registered observers that the item's row ID equals the specified
+     * <em>id</em> has changed.
+     * @param id The row ID of the item.
      * @param payload Optional parameter, pass to {@link #notifyItemChanged(int, Object)}.
      * @see #notifyItemChanged(long)
      */
@@ -155,15 +155,15 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
         }
 
         final LinearLayoutManager layout = (LinearLayoutManager)layoutManager;
-        int firstPos = layout.findFirstVisibleItemPosition();
-        final int lastPos = layout.findLastVisibleItemPosition();
-        if (firstPos == NO_POSITION || lastPos == NO_POSITION) {
+        int startPos = layout.findFirstVisibleItemPosition();
+        final int endPos = layout.findLastVisibleItemPosition();
+        if (startPos == NO_POSITION || endPos == NO_POSITION) {
             return;
         }
 
-        for (; firstPos <= lastPos; ++firstPos) {
-            if (mCursor.moveToPosition(firstPos) && mCursor.getLong(mRowIDColumn) == id) {
-                postNotifyItemRangeChanged(firstPos, 1, payload);
+        for (; startPos <= endPos; ++startPos) {
+            if (mCursor.moveToPosition(startPos) && mCursor.getLong(mRowIDColumn) == id) {
+                postNotifyItemRangeChanged(startPos, 1, payload);
                 break;
             }
         }

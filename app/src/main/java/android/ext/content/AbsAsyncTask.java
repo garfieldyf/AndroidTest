@@ -36,7 +36,6 @@ import java.lang.ref.WeakReference;
  * new DownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
 public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
     /* package */ WeakReference<Object> mOwner;
 
@@ -72,6 +71,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * @return The owner object or <tt>null</tt> if the owner released by the GC.
      * @see #setOwner(Object)
      */
+    @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
@@ -83,6 +83,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * the owner activity has been finished or destroyed or release by the GC.
      * @see #setOwner(Object)
      */
+    @SuppressWarnings("unchecked")
     public final <T extends Activity> T getOwnerActivity() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         final T activity = (T)mOwner.get();

@@ -94,7 +94,7 @@ public class BarcodeEncoder {
      */
     public final void startEncode(String contents, BarcodeFormat format, int width, int height, Executor executor, OnEncodeListener listener) {
         DebugUtils.__checkError(executor == null, "executor == null");
-        new EncodeTask().executeOnExecutor(executor, new Encoder(this, contents, format, width, height, mHints, listener));
+        new EncodeTask().executeOnExecutor(executor, new Encoder(contents, format, width, height, mHints, listener));
     }
 
     /**
@@ -111,7 +111,7 @@ public class BarcodeEncoder {
      */
     public final void startEncode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, Executor executor, OnEncodeListener listener) {
         DebugUtils.__checkError(executor == null, "executor == null");
-        new EncodeTask().executeOnExecutor(executor, new Encoder(this, contents, format, width, height, hints, listener));
+        new EncodeTask().executeOnExecutor(executor, new Encoder(contents, format, width, height, hints, listener));
     }
 
     /**
@@ -138,30 +138,28 @@ public class BarcodeEncoder {
     /**
      * Class <tt>Encoder</tt> used to encode the contents to a barcode image.
      */
-    private static final class Encoder {
+    private final class Encoder {
         /* package */ Bitmap result;
         /* package */ BitMatrix bitMatrix;
         /* package */ final int width;
         /* package */ final int height;
         /* package */ final String contents;
         /* package */ final BarcodeFormat format;
-        /* package */ final BarcodeEncoder encoder;
         /* package */ final OnEncodeListener listener;
         /* package */ final Map<EncodeHintType, ?> hints;
 
-        /* package */ Encoder(BarcodeEncoder encoder, String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, OnEncodeListener listener) {
+        public Encoder(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, OnEncodeListener listener) {
             this.hints    = hints;
             this.width    = width;
             this.height   = height;
             this.format   = format;
-            this.encoder  = encoder;
             this.contents = contents;
             this.listener = listener;
             DebugUtils.__checkError(listener == null, "listener == null");
         }
 
-        /* package */ final Encoder encode() {
-            bitMatrix = encoder.encode(contents, format, width, height, hints);
+        public final Encoder encode() {
+            bitMatrix = BarcodeEncoder.this.encode(contents, format, width, height, hints);
             if (bitMatrix != null) {
                 result = listener.convertToBitmap(bitMatrix, hints);
             }

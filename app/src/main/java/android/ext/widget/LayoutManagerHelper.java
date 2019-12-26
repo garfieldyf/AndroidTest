@@ -47,8 +47,8 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Scroll horizontally on the screen. <p>Note: This method recommended call in the
-     * {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * Scroll horizontally the child of the <tt>RecyclerView</tt> be positioned onto the screen.
+     * <p>Note: This method recommended call in the {@link LayoutManager#requestChildRectangleOnScreen}.</p>
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
@@ -85,8 +85,8 @@ public final class LayoutManagerHelper {
     }
 
     /**
-     * Scroll vertically on the screen. <p>Note: This method recommended call in the
-     * {@link LayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean, boolean)}.</p>
+     * Scroll vertically the child of the <tt>RecyclerView</tt> be positioned onto the screen.
+     * <p>Note: This method recommended call in the {@link LayoutManager#requestChildRectangleOnScreen}.</p>
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.

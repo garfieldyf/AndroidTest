@@ -8,44 +8,46 @@ import android.view.View;
 import java.util.ArrayList;
 
 /**
- * Class FocusLinearLayoutManager
+ * Class FocusGridLayoutManager
  * @author Garfield
  */
-public class FocusLinearLayoutManager extends LinearLayoutManager {
+public class FocusGridLayoutManager extends GridLayoutManager {
     protected final LayoutFocusManager mFocusManager;
 
     /**
      * Constructor
-     * <p>Creates a vertical <tt>FocusLinearLayoutManager</tt>.</p>
+     * <p>Creates a vertical <tt>FocusGridLayoutManager</tt>.</p>
      * @param context The <tt>Context</tt>.
-     * @see #FocusLinearLayoutManager(Context, int, boolean)
-     * @see #FocusLinearLayoutManager(Context, AttributeSet, int, int)
+     * @param spanCount The number of columns in the grid.
+     * @see #FocusGridLayoutManager(Context, int, int, boolean)
+     * @see #FocusGridLayoutManager(Context, AttributeSet, int, int)
      */
-    public FocusLinearLayoutManager(Context context) {
-        super(context);
+    public FocusGridLayoutManager(Context context, int spanCount) {
+        super(context, spanCount);
         mFocusManager = new LayoutFocusManager(this);
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param spanCount The number of columns in the grid.
      * @param orientation Layout orientation. Should be {@link #HORIZONTAL} or {@link #VERTICAL}.
      * @param reverseLayout When set to <tt>true</tt>, layouts from end to start.
-     * @see #FocusLinearLayoutManager(Context)
-     * @see #FocusLinearLayoutManager(Context, AttributeSet, int, int)
+     * @see #FocusGridLayoutManager(Context, int)
+     * @see #FocusGridLayoutManager(Context, AttributeSet, int, int)
      */
-    public FocusLinearLayoutManager(Context context, int orientation, boolean reverseLayout) {
-        super(context, orientation, reverseLayout);
+    public FocusGridLayoutManager(Context context, int spanCount, int orientation, boolean reverseLayout) {
+        super(context, spanCount, orientation, reverseLayout);
         mFocusManager = new LayoutFocusManager(this);
     }
 
     /**
      * Constructor
-     * <p>Creates a <tt>FocusLinearLayoutManager</tt> is set in XML by RecyclerView attribute "layoutManager".</p>
-     * @see #FocusLinearLayoutManager(Context)
-     * @see #FocusLinearLayoutManager(Context, int, boolean)
+     * <p>Creates a <tt>FocusGridLayoutManager</tt> is set in XML by RecyclerView attribute "layoutManager".</p>
+     * @see #FocusGridLayoutManager(Context, int)
+     * @see #FocusGridLayoutManager(Context, int, int, boolean)
      */
-    public FocusLinearLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public FocusGridLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mFocusManager = new LayoutFocusManager(this);
     }

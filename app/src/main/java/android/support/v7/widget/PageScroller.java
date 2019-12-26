@@ -131,8 +131,8 @@ public class PageScroller {
     }
 
     /**
-     * Scroll horizontally on the screen. <p>Note: This method recommended call in the
-     * {@link LinearLayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean)}.</p>
+     * Scroll horizontally the child of the <tt>RecyclerView</tt> be positioned onto the screen.
+     * <p>Note: This method recommended call in the {@link LinearLayoutManager#requestChildRectangleOnScreen}.</p>
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
@@ -174,8 +174,8 @@ public class PageScroller {
     }
 
     /**
-     * Scroll vertically on the screen. <p>Note: This method recommended call in the
-     * {@link LinearLayoutManager#requestChildRectangleOnScreen(RecyclerView, View, Rect, boolean)}.</p>
+     * Scroll vertically the child of the <tt>RecyclerView</tt> be positioned onto the screen.
+     * <p>Note: This method recommended call in the {@link LinearLayoutManager#requestChildRectangleOnScreen}.</p>
      * @param parent The {@link RecyclerView}.
      * @param child The child making the request.
      * @param rect The rectangle in the child's coordinates the child wishes to be on the screen.
@@ -218,7 +218,7 @@ public class PageScroller {
 
     /**
      * Returns the adapter position of visible view from <tt>fromIndex</tt> to <tt>toIndex</tt>.
-     * <p>Note: This method recommended call in the {@link LinearLayoutManager#findOneVisibleChild(int, int, boolean, boolean)}.</p>
+     * <p>Note: This method recommended call in the {@link LinearLayoutManager#findOneVisibleChild}.</p>
      */
     public View findOneVisibleChild(int fromIndex, int toIndex, boolean completelyVisible, boolean acceptPartiallyVisible) {
         mLayout.ensureLayoutState();

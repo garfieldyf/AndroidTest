@@ -11,8 +11,8 @@ import android.view.View;
  * Class PageGridLayoutManager
  * @author Garfield
  */
-public final class PageGridLayoutManager extends GridLayoutManager {
-    private final PageScroller mScroller;
+public class PageGridLayoutManager extends GridLayoutManager {
+    protected final PageScroller mScroller;
 
     /**
      * Creates a vertical <tt>PageGridLayoutManager</tt>.
@@ -30,8 +30,7 @@ public final class PageGridLayoutManager extends GridLayoutManager {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param spanCount The number of columns in the grid.
-     * @param orientation Layout orientation. Should be {@link LinearLayoutManager#HORIZONTAL HORIZONTAL}
-     * or {@link LinearLayoutManager#VERTICAL VERTICAL}.
+     * @param orientation Layout orientation. Should be {@link #HORIZONTAL} or {@link #VERTICAL}.
      * @param reverseLayout When set to <tt>true</tt>, layouts from end to start.
      * @param pageSize The page size in pixels.
      * @see #PageGridLayoutManager(Context, int, int)
@@ -117,11 +116,6 @@ public final class PageGridLayoutManager extends GridLayoutManager {
         // Returns the currently focused view when searching for a focusable view has failed.
         // This operation can be supported the RecyclerView has a fixed item count.
         return focused;
-    }
-
-    @Override
-    public boolean requestChildRectangleOnScreen(RecyclerView parent, View child, Rect rect, boolean immediate) {
-        return (mOrientation == HORIZONTAL ? mScroller.scrollHorizontally(parent, child, rect, immediate) : mScroller.scrollVertically(parent, child, rect, immediate));
     }
 
     public boolean requestChildRectangleOnScreen(RecyclerView parent, View child, Rect rect, boolean immediate, boolean focusedChildVisible) {

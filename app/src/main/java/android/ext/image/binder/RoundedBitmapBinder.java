@@ -9,7 +9,6 @@ import android.graphics.Bitmap;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import java.util.Arrays;
 
 /**
@@ -77,12 +76,10 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
-        if (bitmap == null) {
-            view.setScaleType(ScaleType.CENTER);
-            view.setImageDrawable(ImageModule.getPlaceholder(params));
-        } else {
-            view.setScaleType(ScaleType.FIT_XY);
+        if (bitmap != null) {
             view.setImageDrawable(new RoundedBitmapDrawable(bitmap, mRadii));
+        } else {
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
         }
     }
 }

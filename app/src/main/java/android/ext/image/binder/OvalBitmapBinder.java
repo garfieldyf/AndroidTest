@@ -5,7 +5,6 @@ import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 
 /**
  * Class <tt>OvalBitmapBinder</tt> used to transforms a {@link Bitmap}
@@ -25,11 +24,9 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
         if (bitmap != null) {
-            view.setScaleType(ScaleType.FIT_XY);
             view.setImageDrawable(new OvalBitmapDrawable(bitmap));
         } else {
-            view.setScaleType(ScaleType.CENTER);
-            view.setImageDrawable(ImageModule.getPlaceholder(params));
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
         }
     }
 }

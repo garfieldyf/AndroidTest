@@ -71,16 +71,16 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
 
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
-        final Drawable placeholder = ImageModule.getPlaceholder(params);
-        DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
         final ImageView view = (ImageView)target;
         if (bitmap == null) {
-            view.setImageDrawable(placeholder);
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
         } else {
             final Drawable drawable = getDrawable(view, bitmap);
             if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
                 view.setImageDrawable(drawable);
             } else {
+                final Drawable placeholder = ImageModule.getPlaceholder(view.getResources(), params);
+                DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
                 final TransitionDrawable transition = new TransitionDrawable(new Drawable[] { placeholder, drawable });
                 view.setImageDrawable(transition);
                 transition.setCrossFadeEnabled(mCrossFade);

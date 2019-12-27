@@ -268,7 +268,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return An object by user-defined.
      * @see #getParameters(Object[])
-     * @see #getPlaceholder(Object[])
+     * @see #getPlaceholder(Resources, Object[])
      */
     public static <T> T getCookie(Object[] params) {
         return (T)params[COOKIE];
@@ -279,21 +279,31 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The <tt>Parameters</tt>.
      * @see #getCookie(Object[])
-     * @see #getPlaceholder(Object[])
+     * @see #getPlaceholder(Resources, Object[])
      */
     public static Parameters getParameters(Object[] params) {
-        return (Parameters)params[PARAMETERS];
+        final Object parameters = params[PARAMETERS];
+        return (parameters != null ? (Parameters)parameters : Parameters.defaultParameters());
     }
 
     /**
      * Returns the placeholder drawable associated with the <em>params</em>.
+     * @param res The <tt>Resources</tt>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
-     * @return The placeholder drawable.
+     * @return The placeholder <tt>Drawable</tt> or <tt>null</tt>.
      * @see #getCookie(Object[])
      * @see #getParameters(Object[])
      */
-    public static Drawable getPlaceholder(Object[] params) {
-        return (Drawable)params[PLACEHOLDER];
+    @SuppressWarnings("deprecation")
+    public static Drawable getPlaceholder(Resources res, Object[] params) {
+        final Object placeholder = params[PLACEHOLDER];
+        if (placeholder instanceof Integer) {
+            return res.getDrawable((int)placeholder);
+        } else if (placeholder instanceof Drawable) {
+            return (Drawable)placeholder;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -310,26 +320,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             DebugUtils.__checkStartMethodTracing();
             mResources.append(id, result = XmlResources.load(mContext, id));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads xml resource - ID #0x" + Integer.toHexString(id));
-        }
-
-        return result;
-    }
-
-    /**
-     * Return a <tt>Drawable</tt> object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The resource id of the <tt>Drawable</tt>.
-     * @return The <tt>Drawable</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     */
-    @SuppressWarnings("deprecation")
-    /* package */ final Object getDrawable(int id) {
-        DebugUtils.__checkUIThread("getDrawable");
-        Object result = mResources.get(id, null);
-        if (result == null) {
-            DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = mContext.getResources().getDrawable(id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the drawable - ID #0x" + Integer.toHexString(id));
         }
 
         return result;

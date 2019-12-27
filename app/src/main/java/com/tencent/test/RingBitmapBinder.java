@@ -19,10 +19,10 @@ public class RingBitmapBinder implements Binder<String, Object, Bitmap> {
     @Override
     public void bindValue(String uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
-        if (bitmap == null) {
-            view.setImageDrawable(ImageModule.getPlaceholder(params));
-        } else {
+        if (bitmap != null) {
             view.setImageDrawable(new RingBitmapDrawable(bitmap, mInnerRadius));
+        } else {
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
         }
     }
 }

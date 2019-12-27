@@ -9,7 +9,6 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.image.binder.ImageBinder;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
@@ -19,10 +18,10 @@ import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.Optional;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.widget.ImageView;
-import android.widget.ImageView.ScaleType;
 import java.io.File;
 import java.util.Arrays;
 
@@ -100,12 +99,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
         final ImageView view = (ImageView)target;
-        if (value != null) {
-            view.setScaleType(ScaleType.FIT_XY);
-            ImageBinder.setViewImage(view, value);
+        if (value instanceof Bitmap) {
+            view.setImageBitmap((Bitmap)value);
+        } else if (value instanceof Drawable) {
+            view.setImageDrawable((Drawable)value);
         } else {
-            view.setScaleType(ScaleType.CENTER);
-            view.setImageDrawable((Drawable)params[PLACEHOLDER]);
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
         }
     }
 
@@ -327,7 +326,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #placeholder(Drawable)
          */
         public final LoadRequest placeholder(int id) {
-            mParams[PLACEHOLDER] = mLoader.mModule.getDrawable(id);
+            mParams[PLACEHOLDER] = id;
             return this;
         }
 
@@ -379,10 +378,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            if (mParams[PARAMETERS] == null) {
-                mParams[PARAMETERS] = Parameters.defaultParameters();
-            }
-
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
         }
     }

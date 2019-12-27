@@ -43,6 +43,17 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         return mState.mBitmap;
     }
 
+//    /**
+//     * Sets the <em>bitmap</em> used by this drawable to render,
+//     * do not call this method directly.
+//     * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
+//     */
+//    public final void setBitmap(Bitmap bitmap) {
+//        mFlags |= FLAG_GRAVITY;
+//        mState.setBitmap(bitmap);
+//        invalidateSelf(mState.mShader, true);
+//    }
+
     /**
      * Returns the mipmap hint is enabled on this drawable's bitmap.
      * @return <tt>true</tt> if the mipmap hint is enabled,
@@ -145,8 +156,10 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
          * @see #BitmapState(BitmapState)
          */
         public BitmapState(Bitmap bitmap) {
-            setBitmap(bitmap);
             mPath = new Path();
+            if (bitmap != null) {
+                setBitmap(bitmap);
+            }
         }
 
         /**
@@ -162,10 +175,9 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         }
 
         /* package */ final void setBitmap(Bitmap bitmap) {
-            if (bitmap != null) {
-                mBitmap = bitmap;
-                mShader = new BitmapShader(bitmap, TileMode.CLAMP, TileMode.CLAMP);
-            }
+            DebugUtils.__checkError(bitmap == null, "bitmap == null");
+            mBitmap = bitmap;
+            mShader = new BitmapShader(bitmap, TileMode.CLAMP, TileMode.CLAMP);
         }
 
         private Shader getShader() {

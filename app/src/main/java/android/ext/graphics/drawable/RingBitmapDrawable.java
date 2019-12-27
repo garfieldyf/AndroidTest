@@ -42,7 +42,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
      */
     public RingBitmapDrawable(Bitmap bitmap, float innerRadius) {
         super(new RingBitmapState(bitmap, innerRadius));
-        invalidateSelf(true);
+        invalidateSelf(mState.mShader, true);
     }
 
     /**
@@ -62,7 +62,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
     public void setInnerRadius(float innerRadius) {
         if (Float.compare(mState.mInnerRadius, innerRadius) != 0) {
             mState.mInnerRadius = innerRadius;
-            invalidateSelf(true);
+            invalidateSelf(mState.mShader, true);
         }
     }
 
@@ -101,7 +101,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         super.inflateAttributes(res, parser, attrs, theme, id);
         mState.mInnerRadius = XmlResources.loadInnerRadius(res, attrs);
-        invalidateSelf(true);
+        invalidateSelf(mState.mShader, true);
     }
 
     /**

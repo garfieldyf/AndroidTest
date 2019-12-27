@@ -39,7 +39,7 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
      */
     public OvalBitmapDrawable(Bitmap bitmap) {
         super(new OvalBitmapState(bitmap));
-        invalidateSelf(true);
+        invalidateSelf(mState.mShader, true);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     @Override
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         super.inflateAttributes(res, parser, attrs, theme, id);
-        invalidateSelf(true);
+        invalidateSelf(mState.mShader, true);
     }
 
     /**

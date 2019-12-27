@@ -1,6 +1,7 @@
 package android.ext.graphics.drawable;
 
 import android.ext.graphics.GIFImage;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -81,8 +82,7 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
          */
         public ShapeGIFState(ShapeGIFState state) {
             super(state);
-            mPath   = new Path(state.mPath);
-            mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+            mPath = new Path(state.mPath);
             if (mPaint.getShader() != null) {
                 mPaint.setShader(mShader);
             }
@@ -90,11 +90,10 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
 
         @Override
         /* package */ void setImage(GIFImage image) {
-            if (image != null) {
-                mImage  = image;
-                mCanvas = image.createBitmapCanvas();
-                mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
-            }
+            DebugUtils.__checkError(image == null, "image == null");
+            mImage  = image;
+            mCanvas = image.createBitmapCanvas();
+            mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
         }
     }
 }

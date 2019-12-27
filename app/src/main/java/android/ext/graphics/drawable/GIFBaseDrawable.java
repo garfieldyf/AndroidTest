@@ -249,8 +249,10 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
          * @see #GIFBaseState(GIFBaseState)
          */
         public GIFBaseState(GIFImage image) {
-            setImage(image);
             mFlags = FLAG_AUTO_START;
+            if (image != null) {
+                setImage(image);
+            }
         }
 
         /**
@@ -260,15 +262,13 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
          */
         public GIFBaseState(GIFBaseState state) {
             super(state);
-            mImage  = state.mImage;
-            mCanvas = state.mImage.createBitmapCanvas();
+            setImage(state.mImage);
         }
 
         /* package */ void setImage(GIFImage image) {
-            if (image != null) {
-                mImage  = image;
-                mCanvas = image.createBitmapCanvas();
-            }
+            DebugUtils.__checkError(image == null, "image == null");
+            mImage  = image;
+            mCanvas = image.createBitmapCanvas();
         }
     }
 

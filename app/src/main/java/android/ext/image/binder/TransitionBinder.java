@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.ImageModule;
+import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -19,43 +20,52 @@ import android.widget.ImageView;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;TransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
- *     android:duration="@android:integer/config_longAnimTime" /&gt;</pre>
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     android:duration="@android:integer/config_longAnimTime"
+ *     app:crossFade="true" /&gt;</pre>
  * @author Garfield
  */
 public class TransitionBinder implements Binder<Object, Object, Bitmap> {
-    private static final int[] TRANSITION_BINDER_ATTRS = {
-        android.R.attr.duration
-    };
-
     /**
      * The length of the transition in milliseconds.
      */
     protected final int mDuration;
 
     /**
+     * The cross fade of the drawables.
+     */
+    protected final boolean mCrossFade;
+
+    /**
      * Constructor
      * @param durationMillis The length of the transition in milliseconds.
+     * @param crossFade Enables or disables the cross fade of the drawables.
      * @see #TransitionBinder(Context, AttributeSet)
+     * @see TransitionDrawable#setCrossFadeEnabled(boolean)
      */
-    public TransitionBinder(int durationMillis) {
-        mDuration = durationMillis;
+    public TransitionBinder(int durationMillis, boolean crossFade) {
+        mCrossFade = crossFade;
+        mDuration  = durationMillis;
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #TransitionBinder(int)
+     * @see #TransitionBinder(int, boolean)
      */
     public TransitionBinder(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, TRANSITION_BINDER_ATTRS);
-        mDuration = a.getInt(0 /* android.R.attr.duration */, 300);
+        final String packageName = context.getPackageName();
+        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(packageName, "TransitionBinder"));
+        mCrossFade = a.getBoolean((int)ClassUtils.getFieldValue(packageName, "TransitionBinder_crossFade"), false);
+        mDuration  = a.getInt((int)ClassUtils.getFieldValue(packageName, "TransitionBinder_android_duration"), 300);
         a.recycle();
     }
 
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { duration = ").append(mDuration)
+            .append(", crossFade = ").append(mCrossFade)
             .append(" }").toString());
     }
 
@@ -73,7 +83,7 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
             } else {
                 final TransitionDrawable transition = new TransitionDrawable(new Drawable[] { placeholder, drawable });
                 view.setImageDrawable(transition);
-                transition.setCrossFadeEnabled(true);
+                transition.setCrossFadeEnabled(mCrossFade);
                 transition.startTransition(mDuration);
             }
         }

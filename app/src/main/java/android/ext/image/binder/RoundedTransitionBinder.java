@@ -17,12 +17,14 @@ import java.util.Arrays;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedTransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
  *     android:duration="@android:integer/config_longAnimTime"
  *     android:radius="20dp"
  *     android:topLeftRadius="20dp"
  *     android:topRightRadius="20dp"
  *     android:bottomLeftRadius="20dp"
- *     android:bottomRightRadius="20dp" /&gt;</pre>
+ *     android:bottomRightRadius="20dp"
+ *     app:crossFade="true" /&gt;</pre>
  * @author Garfield
  */
 public final class RoundedTransitionBinder extends TransitionBinder {
@@ -35,27 +37,29 @@ public final class RoundedTransitionBinder extends TransitionBinder {
 
     /**
      * Constructor
-     * @param radii The corner radii, array of 8 values. Each corner receives two radius values [X, Y]. The
-     * corners are ordered <tt>top-left</tt>, <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
-     * @param durationMillis The length of the transition in milliseconds.
-     * @see #RoundedTransitionBinder(Context, AttributeSet)
-     * @see #RoundedTransitionBinder(float, float, float, float, int)
-     */
-    public RoundedTransitionBinder(float[] radii, int durationMillis) {
-        super(durationMillis);
-        mRadii = radii;
-    }
-
-    /**
-     * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #RoundedTransitionBinder(float[], int)
-     * @see #RoundedTransitionBinder(float, float, float, float, int)
+     * @see #RoundedTransitionBinder(float[], int, boolean)
+     * @see #RoundedTransitionBinder(float, float, float, float, int, boolean)
      */
     public RoundedTransitionBinder(Context context, AttributeSet attrs) {
         super(context, attrs);
         mRadii = XmlResources.loadCornerRadii(context.getResources(), attrs);
+    }
+
+    /**
+     * Constructor
+     * @param radii The corner radii, array of 8 values. Each corner receives two radius values [X, Y]. The
+     * corners are ordered <tt>top-left</tt>, <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
+     * @param durationMillis The length of the transition in milliseconds.
+     * @param crossFade Enables or disables the cross fade of the drawables.
+     * @see #RoundedTransitionBinder(Context, AttributeSet)
+     * @see #RoundedTransitionBinder(float, float, float, float, int, boolean)
+     * @see TransitionDrawable#setCrossFadeEnabled(boolean)
+     */
+    public RoundedTransitionBinder(float[] radii, int durationMillis, boolean crossFade) {
+        super(durationMillis, crossFade);
+        mRadii = radii;
     }
 
     /**
@@ -65,11 +69,13 @@ public final class RoundedTransitionBinder extends TransitionBinder {
      * @param bottomLeftRadius The bottom-left corner radius.
      * @param bottomRightRadius The bottom-right corner radius.
      * @param durationMillis The length of the transition in milliseconds.
-     * @see #RoundedTransitionBinder(float[], int)
+     * @param crossFade Enables or disables the cross fade of the drawables.
      * @see #RoundedTransitionBinder(Context, AttributeSet)
+     * @see #RoundedTransitionBinder(float[], int, boolean)
+     * @see TransitionDrawable#setCrossFadeEnabled(boolean)
      */
-    public RoundedTransitionBinder(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius, int durationMillis) {
-        super(durationMillis);
+    public RoundedTransitionBinder(float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius, int durationMillis, boolean crossFade) {
+        super(durationMillis, crossFade);
         mRadii = new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius };
     }
 
@@ -77,6 +83,7 @@ public final class RoundedTransitionBinder extends TransitionBinder {
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { duration = ").append(mDuration)
+            .append(", crossFade = ").append(mCrossFade)
             .append(", radii = ").append(Arrays.toString(mRadii))
             .append(" }").toString());
     }

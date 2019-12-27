@@ -24,6 +24,12 @@
         <attr name="scale" format="fraction" />
     </declare-styleable>
 
+    <!-- TransitionBinder styleable -->
+    <declare-styleable name="TransitionBinder">
+        <attr name="android:duration" />
+        <attr name="crossFade" format="boolean" />
+    </declare-styleable>
+
     <!-- ImageLoader styleable -->
     <declare-styleable name="ImageLoader">
         <attr name="decoder" format="string" />

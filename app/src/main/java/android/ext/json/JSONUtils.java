@@ -192,7 +192,7 @@ public final class JSONUtils {
 
     /**
      * Parses a JSON data from the specified <em>uri</em>.
-     * <h3>Accepts the following URI schemes:</h3>
+     * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>

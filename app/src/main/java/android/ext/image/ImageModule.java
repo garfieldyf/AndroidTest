@@ -240,8 +240,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     @Override
     public final ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
-        if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
-            throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
+        if (className.equals("image-loader") && (className = parser.getAttributeValue(null, "class")) == null) {
+            throw new XmlPullParserException(parser.getPositionDescription() + ": The <image-loader> tag requires a valid 'class' attribute");
         }
 
         final String packageName = context.getPackageName();

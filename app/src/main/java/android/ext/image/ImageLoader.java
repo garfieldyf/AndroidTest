@@ -34,7 +34,7 @@ import java.util.Arrays;
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
- * &lt;[ ImageLoader | loader ]
+ * &lt;[ ImageLoader | image-loader ]
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:flags="[ none | noFileCache | noMemoryCache ]"

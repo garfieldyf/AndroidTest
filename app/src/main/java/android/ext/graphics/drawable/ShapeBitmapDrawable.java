@@ -43,16 +43,14 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         return mState.mBitmap;
     }
 
-//    /**
-//     * Sets the <em>bitmap</em> used by this drawable to render,
-//     * do not call this method directly.
-//     * @param bitmap The {@link Bitmap}. Never <tt>null</tt>.
-//     */
-//    public final void setBitmap(Bitmap bitmap) {
-//        mFlags |= FLAG_GRAVITY;
-//        mState.setBitmap(bitmap);
-//        invalidateSelf(mState.mShader, true);
-//    }
+    /**
+     * Called on the <tt>ImageBinder</tt> internal, do not call this method directly.
+     */
+    public final void setBitmap(Bitmap bitmap) {
+        mFlags |= FLAG_GRAVITY;
+        mState.setBitmap(bitmap);
+        invalidateSelf(mState.mShader, true);
+    }
 
     /**
      * Returns the mipmap hint is enabled on this drawable's bitmap.

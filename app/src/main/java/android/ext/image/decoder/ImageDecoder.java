@@ -10,9 +10,9 @@ import android.graphics.BitmapFactory.Options;
  * Class <tt>ImageDecoder</tt> used to decode the image data to a <tt>Bitmap</tt> or a GIF image.
  * @author Garfield
  */
-public class ImageDecoder extends BitmapDecoder<Object> {
+public final class ImageDecoder extends BitmapDecoder<Object> {
     /**
-     * The MIME type of the gif image.
+     * The MIME type of the GIF image.
      */
     public static final String GIF_MIME_TYPE = "image/gif";
 

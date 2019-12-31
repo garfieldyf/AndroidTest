@@ -28,6 +28,7 @@ import android.ext.database.DatabaseUtils;
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
+import android.ext.image.ImageLoader;
 import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
@@ -1317,6 +1318,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //                    .into(image);
 //            } else {
                 MainApplication.sInstance.load(R.xml.image_loader, itemData)
+//                    .flags(ImageLoader.FLAG_DUMP_OPTIONS)
                     .parameters(R.xml.size_params)
 //                    .binder(R.xml.ring_bitmap_binder)
                     .binder(R.xml.oval_transition_binder)

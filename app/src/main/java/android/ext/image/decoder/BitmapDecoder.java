@@ -52,6 +52,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.
+        BitmapDecoder.__checkDumpOptions(opts, flags);
         return (Image)decodeBitmap(uri, flags, opts);
     }
 
@@ -67,7 +68,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
-            BitmapDecoder.__checkDumpOptions(opts, flags);
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
@@ -94,7 +94,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
                .append("\n  outWidth  = ").append(opts.outWidth)
                .append("\n  outHeight = ").append(opts.outHeight)
                .append("\n  outMimeType = ").append(opts.outMimeType)
-               .append("\n  inTempStorage = ").append(opts.inTempStorage)
+               .append("\n  inTempStorage = ").append(opts.inTempStorage).append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
                .append("\n  inScaled = ").append(opts.inScaled)
                .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
                .append("\n}").toString());

@@ -29,6 +29,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
      * Constructor
      * <p>The default constructor used by {@link Resources#getDrawable(int)},
      * do not call this method directly.</p>
+     * @hide
      */
     @Keep
     public RingBitmapDrawable() {

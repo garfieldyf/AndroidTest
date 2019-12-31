@@ -24,6 +24,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
      * Constructor
      * <p>The default constructor used by {@link Resources#getDrawable(int)},
      * do not call this method directly.</p>
+     * @hide
      */
     @Keep
     public RoundedGIFDrawable() {

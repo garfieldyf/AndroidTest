@@ -82,6 +82,7 @@ public class SimpleFileCache implements FileCache, ScanCallback {
     /**
      * Remove the cache files until the total of remaining files is
      * at or below the maximum size, do not call this method directly.
+     * @hide
      */
     public void trimToSize() {
         final int priority = Process.getThreadPriority(Process.myTid());

@@ -24,6 +24,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      * Constructor
      * <p>The default constructor used by {@link Resources#getDrawable(int)},
      * do not call this method directly.</p>
+     * @hide
      */
     @Keep
     public RoundedBitmapDrawable() {

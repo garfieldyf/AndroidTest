@@ -44,7 +44,8 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     /**
-     * Called on the <tt>ImageBinder</tt> internal, do not call this method directly.
+     * Called on the <tt>Binder</tt> internal, do not call this method directly.
+     * @hide
      */
     public final void setBitmap(Bitmap bitmap) {
         mFlags |= FLAG_GRAVITY;

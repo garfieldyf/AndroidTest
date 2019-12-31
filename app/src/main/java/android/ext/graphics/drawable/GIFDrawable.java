@@ -81,6 +81,7 @@ public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
      * Constructor
      * <p>The default constructor used by {@link Resources#getDrawable(int)},
      * do not call this method directly.</p>
+     * @hide
      */
     @Keep
     public GIFDrawable() {

@@ -33,6 +33,7 @@ public final class UIHandler extends Handler {
 
     /**
      * Called on the {@link Task} internal, do not call this method directly.
+     * @hide
      */
     public final void finish(Task task, Object result) {
         final Message msg = Message.obtain(this, task);
@@ -43,6 +44,7 @@ public final class UIHandler extends Handler {
 
     /**
      * Called on the {@link Task} internal, do not call this method directly.
+     * @hide
      */
     public final void setProgress(Task task, Object value) {
         final Message msg = Message.obtain(this, task);
@@ -53,6 +55,7 @@ public final class UIHandler extends Handler {
 
     /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
+     * @hide
      */
     public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
         final Message msg = Message.obtain(this, handler);

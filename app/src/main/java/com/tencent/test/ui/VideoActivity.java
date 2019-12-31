@@ -1,13 +1,10 @@
 package com.tencent.test.ui;
 
 import android.app.Activity;
-import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.text.style.ImageSpan;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.widget.ImageView;
 import android.widget.TextView;
 import com.tencent.test.R;
 
@@ -22,9 +19,20 @@ public class VideoActivity extends Activity {
     private void setVideoContent() {
         setContentView(R.layout.activity_video);
 
-        final ImageView view = (ImageView)findViewById(R.id.image);
-        final RoundedBitmapDrawable drawable = new RoundedBitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.image), 30);
-        view.setImageDrawable(drawable);
+//        final GridImageView view = (GridImageView)findViewById(R.id.image);
+//        final Resources res = getResources();
+//        view.addDrawable(res.getDrawable(R.drawable.video));
+//        view.addDrawable(res.getDrawable(R.drawable.ticket_exchange));
+//        view.addDrawable(res.getDrawable(R.drawable.personal_card));
+//        view.addDrawable(new RoundedBitmapDrawable(BitmapFactory.decodeResource(res, R.drawable.image), 10));
+//        view.addDrawable(new OvalBitmapDrawable(BitmapFactory.decodeResource(res, R.drawable.ic_image)));
+//        view.addDrawable(res.getDrawable(R.drawable.personal));
+//        view.addDrawable(res.getDrawable(R.drawable.tool_local));
+//        view.addDrawable(res.getDrawable(R.drawable.indicator_area_green));
+
+        //android.R.attr.content
+//        final RoundedBitmapDrawable drawable = new RoundedBitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.image), 30);
+//        view.setImageDrawable(drawable);
     }
 
     private void setSpanTextContent() {

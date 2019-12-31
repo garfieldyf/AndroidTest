@@ -3,4 +3,15 @@
 
     <integer name="max_Cache_Size">100</integer>
 
+    <integer-array  name="grid_image_view_contents">
+        <item>@drawable/video</item>
+        <item>@drawable/ticket_exchange</item>
+        <item>@drawable/personal_card</item>
+        <item>@drawable/image</item>
+        <item>@drawable/ic_image</item>
+        <item>@drawable/personal</item>
+        <item>@drawable/tool_local</item>
+        <item>@drawable/indicator_area_green</item>
+    </integer-array>
+
 </resources>

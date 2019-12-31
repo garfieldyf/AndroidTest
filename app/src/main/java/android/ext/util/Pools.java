@@ -213,7 +213,7 @@ public final class Pools {
     /**
      * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static class ArrayPool<T> implements Pool<T> {
+    private static final class ArrayPool<T> implements Pool<T> {
         private int size;
         private final Object[] elements;
         private final Factory<T> factory;

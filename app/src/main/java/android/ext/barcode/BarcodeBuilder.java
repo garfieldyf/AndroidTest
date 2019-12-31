@@ -251,7 +251,7 @@ public final class BarcodeBuilder {
         return result;
     }
 
-    private void drawLogo(Canvas canvas, int canvasWidth, int canvasHeight) {
+    private void drawLogo(Canvas canvas, int bitmapWidth, int bitmapHeight) {
         final int width, height;
         if (logoWidth > 0 && logoHeight > 0) {
             width  = logoWidth;
@@ -263,12 +263,12 @@ public final class BarcodeBuilder {
                 width  = incWidth;
                 height = incHeight;
             } else {
-                height = width = (int)(canvasWidth * 0.25f);
+                height = width = (int)(bitmapWidth * 0.25f);
             }
         }
 
         final Rect bounds = RectPool.sInstance.obtain();
-        final Rect container = new Rect(0, 0, canvasWidth, canvasHeight);
+        final Rect container = new Rect(0, 0, bitmapWidth, bitmapHeight);
         Gravity.apply(Gravity.CENTER, width, height, container, 0, 0, bounds);
         logo.setBounds(bounds);
         logo.draw(canvas);

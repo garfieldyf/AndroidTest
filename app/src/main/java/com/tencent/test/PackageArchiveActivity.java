@@ -5,16 +5,13 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.ext.content.AbsAsyncTask;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.content.pm.PackageIconLoader;
-import android.ext.content.pm.PackageUtils.PackageItemIcon;
-import android.ext.content.pm.PackageUtils.PackageParser;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.PackageUtils.PackageItemIcon;
+import android.ext.util.PackageUtils.PackageParser;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
-import android.util.LogPrinter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -26,7 +23,6 @@ import java.util.List;
 public class PackageArchiveActivity extends Activity {
     /* package */ ListView mPackageList;
     /* package */ PackageAdapter mAdapter;
-    /* package */ PackageIconLoader mIconLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +33,6 @@ public class PackageArchiveActivity extends Activity {
         DebugUtils.stopMethodTracing("yf", "setContentView");
 
         DebugUtils.startMethodTracing();
-        mIconLoader  = new PackageIconLoader(this, MainApplication.sInstance.getExecutor(), 64);
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);
@@ -48,9 +43,6 @@ public class PackageArchiveActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        mIconLoader.dump(this, new LogPrinter(Log.INFO, "packages"));
-        mIconLoader.shutdown();
     }
 
     private final class PackageAdapter extends BaseListAdapter<PackageInfo> implements Binder<String, ApplicationInfo, PackageItemIcon> {
@@ -73,7 +65,7 @@ public class PackageArchiveActivity extends Activity {
         protected void bindView(PackageInfo pi, int position, View view) {
             final ViewHolder holder = (ViewHolder)view.getTag();
             holder.packageName.setText(pi.packageName);
-            mIconLoader.loadIcon(pi.applicationInfo, holder, this);
+//            mIconLoader.loadIcon(pi.applicationInfo, holder, this);
         }
 
         @Override

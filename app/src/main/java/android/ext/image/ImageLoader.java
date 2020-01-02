@@ -9,7 +9,6 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -33,7 +32,7 @@ import java.util.Arrays;
  * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
- * &lt;[ ImageLoader | image-loader ]
+ * &lt;[ ImageLoader | loader ]
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:flags="[ none | noFileCache | noMemoryCache ]"
@@ -41,7 +40,7 @@ import java.util.Arrays;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<Object, Object, Object> {
+public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {
     /**
      * If set the image loader will be dump the {@link Options} when
      * it will be load image. <p>This flag can be used DEBUG mode.</p>
@@ -96,7 +95,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
+    public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
         if (value instanceof Bitmap) {
             view.setImageBitmap((Bitmap)value);
@@ -108,10 +107,11 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected final Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
-            return loadImage(task, uri, getTarget(task), params, flags, buffer);
+            final Object target = getTarget(task);
+            return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -124,21 +124,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Called on a background thread to load an image from the specified <em>uri</em>.
-     * @param task The current {@link Task} whose executing this method.
-     * @param uri The uri to load.
-     * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
-     * @param params The parameters, passed earlier by {@link #load}.
-     * @param flags Loading flags, passed earlier by {@link #load}.
-     * @param buffer The temporary byte array to used for loading image data.
-     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
-     * @see #loadImage(Task, String, File, Object, Object[], int, byte[])
-     */
-    protected Image loadImage(Task task, URI uri, Object target, Object[] params, int flags, byte[] buffer) {
-        return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
-    }
-
-    /**
      * Called on a background thread to load an image from the specified <em>url</em>.
      * @param task The current {@link Task} whose executing this method.
      * @param url The url to load.
@@ -148,7 +133,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param flags Loading flags, passed earlier by {@link #load}.
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image object, or <tt>null</tt> if the load failed or cancelled.
-     * @see #loadImage(Task, URI, Object, Object[], int, byte[])
      */
     protected Image loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
         try {
@@ -159,6 +143,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);
             return null;
         }
+    }
+
+    /**
+     * Constructor
+     */
+    /* package */ ImageLoader(ImageModule module, Cache imageCache) {
+        super(module.mExecutor, imageCache);
+
+        mModule  = module;
+        mLoader  = null;
+        mDecoder = null;
+        mRequest = new LoadRequest(this);
     }
 
     /**
@@ -300,7 +296,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * Sets the {@link Parameters} to decode image.
          * @param id The xml resource id of the <tt>Parameters</tt>.
          * @return This request.
-         * @see #parameters(Parameters)
+         * @see #parameters(Object)
          */
         public final LoadRequest parameters(int id) {
             mParams[PARAMETERS] = mLoader.mModule.getResource(id);
@@ -308,12 +304,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         /**
-         * Sets the {@link Parameters} to decode image.
-         * @param parameters The <tt>Parameters</tt> to decode.
+         * Sets the {@link Object} to decode image.
+         * @param parameters The <tt>Object</tt> to decode.
          * @return This request.
          * @see #parameters(int)
          */
-        public final LoadRequest parameters(Parameters parameters) {
+        public final LoadRequest parameters(Object parameters) {
             mParams[PARAMETERS] = parameters;
             return this;
         }

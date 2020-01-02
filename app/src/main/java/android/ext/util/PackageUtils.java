@@ -1,4 +1,4 @@
-package android.ext.content.pm;
+package android.ext.util;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,15 +10,9 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
-import android.ext.util.ArrayUtils;
 import android.ext.util.ArrayUtils.Filter;
-import android.ext.util.Cancelable;
-import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
-import android.ext.util.Optional;
-import android.ext.util.StringUtils;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -237,10 +231,6 @@ public final class PackageUtils {
                 // kill my process after unmounting usb disk.
                 assets.close();
             }
-        }
-
-        public StringBuilder dump(StringBuilder out) {
-            return out.append(getClass().getSimpleName() + " { lable = ").append(label).append(", icon = ").append(icon).append(" }");
         }
 
         /**

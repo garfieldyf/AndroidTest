@@ -38,10 +38,8 @@ public final class ClassUtils {
     }
 
     /**
-     * Returns the <em>packageName</em>.R.styleable.<em>name</em> field value.
-     * @param packageName The package name.
-     * @param name The name of field.
-     * @return The value of the <em>name</em> field.
+     * Returns the <em>packageName</em>.R.styleable.<em>name</em> field value, do not call this method directly.
+     * @hide
      */
     public static Object getFieldValue(String packageName, String name) {
         try {

@@ -17,9 +17,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.annotation.CursorField;
 import android.ext.cache.Cache;
 import android.ext.content.ResourceLoader;
-import android.ext.content.pm.PackageUtils;
-import android.ext.content.pm.PackageUtils.PackageItemIcon;
-import android.ext.content.pm.PackageUtils.PackageParser;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.database.AsyncQueryHandler;
 import android.ext.database.AsyncSQLiteHandler;
@@ -28,7 +25,6 @@ import android.ext.database.DatabaseUtils;
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
-import android.ext.image.ImageLoader;
 import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
@@ -46,6 +42,8 @@ import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
+import android.ext.util.PackageUtils;
+import android.ext.util.PackageUtils.PackageParser;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
@@ -546,10 +544,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         List<PackageInfo> infos = new PackageParser(this).parse("/sdcard/apks");
         PackageUtils.dumpPackageInfos(new LogPrinter(Log.INFO, "yf"), infos);
-        for (PackageInfo info : infos) {
-            final PackageItemIcon icon = new PackageItemIcon(this, info.applicationInfo);
-            Log.i("yf", icon.dump(new StringBuilder()).toString());
-        }
     }
     
     private void testDimension() {

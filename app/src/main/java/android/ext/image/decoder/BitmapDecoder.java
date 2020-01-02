@@ -40,9 +40,12 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     @Override
     @SuppressWarnings("unchecked")
     protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
+        Parameters parameters = ImageModule.getParameters(params);
+        if (parameters == null) {
+            parameters = Parameters.defaultParameters();
+        }
+
         // Computes the sample size.
-        final Parameters parameters = ImageModule.getParameters(params);
-        DebugUtils.__checkError(parameters == null, "parameters == null");
         opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(target, opts);

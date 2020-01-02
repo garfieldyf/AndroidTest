@@ -240,8 +240,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     @Override
     public final ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
-        if (className.equals("image-loader") && (className = parser.getAttributeValue(null, "class")) == null) {
-            throw new XmlPullParserException(parser.getPositionDescription() + ": The <image-loader> tag requires a valid 'class' attribute");
+        if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
+            throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
         }
 
         final String packageName = context.getPackageName();
@@ -255,11 +255,16 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         final FileCache fileCache = ((flags & FLAG_NO_FILE_CACHE) == 0 ? mFileCache : null);
 
         // Creates the image loader.
-        final ImageLoader.ImageDecoder decoder = createImageDecoder(name, imageCache);
-        if (className.equals("ImageLoader")) {
-            return new ImageLoader(this, imageCache, fileCache, decoder);
-        } else {
-            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, decoder);
+        if (className.equals("IconLoader")) {
+            return new IconLoader(this, imageCache);
+        } else if (className.equals("ImageLoader")) {
+            return new ImageLoader(this, imageCache, fileCache, createImageDecoder(name, imageCache));
+        }
+
+        try {
+            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
+        } catch (Exception e) {
+            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
         }
     }
 
@@ -275,15 +280,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Returns the {@link Parameters} associated with the <em>params</em>.
+     * Returns the parameters associated with the <em>params</em>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
-     * @return The <tt>Parameters</tt>.
+     * @return The parameters or <tt>null</tt>.
      * @see #getCookie(Object[])
      * @see #getPlaceholder(Resources, Object[])
      */
-    public static Parameters getParameters(Object[] params) {
-        final Object parameters = params[PARAMETERS];
-        return (parameters != null ? (Parameters)parameters : Parameters.defaultParameters());
+    public static <T> T getParameters(Object[] params) {
+        return (T)params[PARAMETERS];
     }
 
     /**
@@ -333,12 +337,12 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             } else {
                 return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
             }
-        } else {
-            try {
-                return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class }, mContext, mOptionsPool);
-            } catch (Exception e) {
-                return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
-            }
+        }
+
+        try {
+            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class }, mContext, mOptionsPool);
+        } catch (Exception e) {
+            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         }
     }
 

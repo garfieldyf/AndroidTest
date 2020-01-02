@@ -1,12 +1,8 @@
 package com.tencent.test;
 
 import android.app.Application;
-import android.content.Context;
 import android.content.pm.PackageInfo;
-import android.ext.cache.Cache;
-import android.ext.cache.FileCache;
 import android.ext.concurrent.ThreadPool;
-import android.ext.content.pm.PackageUtils;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageLoader.LoadRequest;
@@ -14,14 +10,11 @@ import android.ext.image.ImageModule;
 import android.ext.image.ImageModule.Builder;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
-import android.graphics.Bitmap;
 import android.util.Log;
 import android.util.LogPrinter;
-import android.util.Printer;
-import com.tencent.temp.SimpleFileCache2;
-import java.io.File;
 import java.util.concurrent.Executor;
 
 public final class MainApplication extends Application {
@@ -29,7 +22,7 @@ public final class MainApplication extends Application {
 
     private ThreadPool mThreadPool;
     private PackageInfo mPackageInfo;
-    private ImageModule<String, Bitmap> mImageModule;
+    private ImageModule<String, Object> mImageModule;
 
     @Override
     public void onCreate() {
@@ -41,10 +34,11 @@ public final class MainApplication extends Application {
 
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
-        mImageModule = new Builder<String, Bitmap>(this)
+        mImageModule = new Builder<String, Object>(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
-//            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
+            .setImageSize(128)
             .setFileSize(500)
+//            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
             .build();
 
         //AsyncTask.setDefaultExecutor(mThreadPool);
@@ -59,6 +53,10 @@ public final class MainApplication extends Application {
     
     public final PackageInfo myPackageInfo() {
         return mPackageInfo;
+    }
+
+    public ImageLoader<String, Object> with(int id) {
+        return mImageModule.with(id);
     }
 
     public final LoadRequest load(int id, String uri) {
@@ -83,27 +81,6 @@ public final class MainApplication extends Application {
 
     public static String[] obtainUrls() {
         return Urls;
-    }
-
-    static final class MyImageLoader extends ImageLoader<String, Bitmap> {
-        public MyImageLoader(ImageModule<String, Bitmap> module, Cache<String, Bitmap> imageCache, FileCache fileCache, ImageDecoder<Bitmap> decoder) {
-            super(module, imageCache, fileCache, decoder);
-        }
-
-        @Override
-        protected Bitmap loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
-            return super.loadImage(task, url, imageFile, target, params, flags, buffer);
-        }
-
-        @Override
-        public synchronized void shutdown() {
-            super.shutdown();
-        }
-
-        @Override
-        public void dump(Context context, Printer printer) {
-            super.dump(context, printer);
-        }
     }
 
     private static final String[] Urls = {

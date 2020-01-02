@@ -37,7 +37,7 @@ public class IconLoader extends AsyncLoader<String, ResolveInfo, PackageItemIcon
      * Constructor
      * @param context The {@link Context}.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @param cache The {@link Cache} to store the loaded icons and labels.
+     * @param cache May be <tt>null</tt>. The {@link Cache} to store the loaded icons.
      * @see #IconLoader(Context, Executor, int)
      */
     public IconLoader(Context context, Executor executor, Cache<String, PackageItemIcon> cache) {

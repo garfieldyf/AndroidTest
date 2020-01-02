@@ -15,7 +15,6 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
-import android.ext.util.Optional;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
@@ -63,7 +62,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     protected ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, Optional.ofNullable(imageCache), 48);
+        super(module.mExecutor, imageCache, 48);
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;

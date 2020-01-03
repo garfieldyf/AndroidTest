@@ -34,7 +34,7 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
                 ((OvalBitmapDrawable)drawable).setBitmap(bitmap);
 
                 // Clear the ImageView's content to force update the
-                // ImageView internal mDrawableWidth and mDrawableHeight.
+                // ImageView's mDrawableWidth and mDrawableHeight.
                 view.setImageDrawable(null);
                 view.setImageDrawable(drawable);
                 DebugUtils.__checkDebug(true, "OvalBitmapBinder", "OvalBitmapDrawable.setBitmap()");

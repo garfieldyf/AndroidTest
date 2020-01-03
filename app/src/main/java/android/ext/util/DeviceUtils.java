@@ -124,7 +124,9 @@ public final class DeviceUtils {
         DebugUtils.dumpSummary(printer, infos, 110, " System Informations ", (Object[])null);
 
         infos.setLength(0);
-        infos.append("  model = ").append(Build.MANUFACTURER).append(" ").append(Build.MODEL)
+        infos.append("  model = ").append(Build.MODEL)
+             .append(", brand = ").append(Build.BRAND)
+             .append(", manufacturer = ").append(Build.MANUFACTURER)
              .append("\n  cpu info [ ").append("model = ").append(Build.HARDWARE)
              .append(", core = ").append(cpuCore)
              .append(", abis = ").append(Arrays.toString(getSupportedABIs()))

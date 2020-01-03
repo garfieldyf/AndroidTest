@@ -304,7 +304,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         /**
-         * Sets the {@link Object} to decode image.
+         * Sets the parameters to decode image.
          * @param parameters The <tt>Object</tt> to decode.
          * @return This request.
          * @see #parameters(int)

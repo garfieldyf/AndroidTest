@@ -301,13 +301,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     @SuppressWarnings("deprecation")
     public static Drawable getPlaceholder(Resources res, Object[] params) {
         final Object placeholder = params[PLACEHOLDER];
-        if (placeholder instanceof Integer) {
-            return res.getDrawable((int)placeholder);
-        } else if (placeholder instanceof Drawable) {
-            return (Drawable)placeholder;
-        } else {
-            return null;
-        }
+        return (placeholder instanceof Integer ? res.getDrawable((int)placeholder) : (Drawable)placeholder);
     }
 
     /**
@@ -339,11 +333,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             }
         }
 
-        try {
-            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class }, mContext, mOptionsPool);
-        } catch (Exception e) {
-            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
-        }
+        return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
     }
 
     private static int computeBufferPoolMaxSize(Executor executor) {

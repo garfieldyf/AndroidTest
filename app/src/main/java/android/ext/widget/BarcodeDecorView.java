@@ -226,12 +226,9 @@ public class BarcodeDecorView extends View {
         invalidate();
 
         // Computes the coordinates of the mScanningBounds on the screen.
-        final Rect scanningBounds = new Rect(mScanningBounds);
-        final int[] location = new int[2];
-        getLocationOnScreen(location);
-        scanningBounds.offset(location[0], location[1]);
-
-        return scanningBounds;
+        final int[] offset = new int[2];
+        getLocationOnScreen(offset);
+        return new Rect(mScanningBounds.left + offset[0], mScanningBounds.top + offset[1], mScanningBounds.right + offset[0], mScanningBounds.bottom + offset[1]);
     }
 
     /**

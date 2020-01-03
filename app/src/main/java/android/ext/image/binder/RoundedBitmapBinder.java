@@ -5,7 +5,6 @@ import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.image.ImageModule;
-import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -78,24 +77,26 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
-        if (bitmap == null) {
-            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
+        if (bitmap != null) {
+            setImageBitmap(view, view.getDrawable(), bitmap, mRadii);
         } else {
-            final Drawable d = view.getDrawable();
-            if (d instanceof RoundedBitmapDrawable) {
-                // Sets the RoundedBitmapDrawable's internal bitmap.
-                final RoundedBitmapDrawable drawable = (RoundedBitmapDrawable)d;
-                drawable.setBitmap(bitmap);
-                drawable.setCornerRadii(mRadii);
+            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
+        }
+    }
 
-                // Clear the ImageView's content to force update the
-                // ImageView's mDrawableWidth and mDrawableHeight.
-                view.setImageDrawable(null);
-                view.setImageDrawable(drawable);
-                DebugUtils.__checkDebug(true, "RoundedBitmapBinder", "RoundedBitmapDrawable.setBitmap()");
-            } else {
-                view.setImageDrawable(new RoundedBitmapDrawable(bitmap, mRadii));
-            }
+    /* package */ static void setImageBitmap(ImageView view, Drawable oldDrawable, Bitmap bitmap, float[] radii) {
+        if (oldDrawable instanceof RoundedBitmapDrawable) {
+            // Sets the RoundedBitmapDrawable's internal bitmap.
+            final RoundedBitmapDrawable drawable = (RoundedBitmapDrawable)oldDrawable;
+            drawable.setBitmap(bitmap);
+            drawable.setCornerRadii(radii);
+
+            // Clear the ImageView's content to force update the
+            // ImageView's mDrawableWidth and mDrawableHeight.
+            view.setImageDrawable(null);
+            view.setImageDrawable(drawable);
+        } else {
+            view.setImageDrawable(new RoundedBitmapDrawable(bitmap, radii));
         }
     }
 }

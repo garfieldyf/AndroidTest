@@ -74,19 +74,25 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
         final ImageView view = (ImageView)target;
         if (bitmap == null) {
             view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            setImageBitmap(view, bitmap);
         } else {
-            final Drawable drawable = getDrawable(view, bitmap);
-            if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-                view.setImageDrawable(drawable);
-            } else {
-                final Drawable placeholder = ImageModule.getPlaceholder(view.getResources(), params);
-                DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
-                final TransitionDrawable transition = new TransitionDrawable(new Drawable[] { placeholder, drawable });
-                view.setImageDrawable(transition);
-                transition.setCrossFadeEnabled(mCrossFade);
-                transition.startTransition(mDuration);
-            }
+            final Drawable placeholder = ImageModule.getPlaceholder(view.getResources(), params);
+            DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
+            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { placeholder, getDrawable(view, bitmap) });
+            view.setImageDrawable(drawable);
+            drawable.setCrossFadeEnabled(mCrossFade);
+            drawable.startTransition(mDuration);
         }
+    }
+
+    /**
+     * Sets a {@link Bitmap} as the content of the <em>view</em>.
+     * Subclasses should override this method to set the bitmap.
+     * The default implementation invoke <em>view.setImageBitmap(bitmap)</em>.
+     */
+    protected void setImageBitmap(ImageView view, Bitmap bitmap) {
+        view.setImageBitmap(bitmap);
     }
 
     /**

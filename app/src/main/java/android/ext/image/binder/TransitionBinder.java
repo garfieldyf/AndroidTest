@@ -103,4 +103,16 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
     protected Drawable getDrawable(ImageView view, Bitmap bitmap) {
         return new BitmapDrawable(view.getResources(), bitmap);
     }
+
+    /**
+     * Return the view's drawable, or <tt>null</tt> if no drawable has been assigned.
+     */
+    /* package */ static Drawable getDrawable(ImageView view) {
+        Drawable drawable = view.getDrawable();
+        if (drawable instanceof TransitionDrawable) {
+            drawable = ((TransitionDrawable)drawable).getDrawable(1);
+        }
+
+        return drawable;
+    }
 }

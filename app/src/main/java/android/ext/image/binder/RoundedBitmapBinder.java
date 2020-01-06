@@ -91,8 +91,7 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
             drawable.setBitmap(bitmap);
             drawable.setCornerRadii(radii);
 
-            // Clear the ImageView's content to force update the
-            // ImageView's mDrawableWidth and mDrawableHeight.
+            // Clear the ImageView's content to force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
         } else {

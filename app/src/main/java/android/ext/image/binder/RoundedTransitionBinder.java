@@ -5,7 +5,6 @@ import android.ext.content.res.XmlResources;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.widget.ImageView;
@@ -96,11 +95,6 @@ public final class RoundedTransitionBinder extends TransitionBinder {
 
     @Override
     protected void setImageBitmap(ImageView view, Bitmap bitmap) {
-        Drawable drawable = view.getDrawable();
-        if (drawable instanceof TransitionDrawable) {
-            drawable = ((TransitionDrawable)drawable).getDrawable(1);
-        }
-
-        RoundedBitmapBinder.setImageBitmap(view, drawable, bitmap, mRadii);
+        RoundedBitmapBinder.setImageBitmap(view, getDrawable(view), bitmap, mRadii);
     }
 }

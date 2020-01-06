@@ -4,7 +4,6 @@ import android.content.Context;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -49,11 +48,6 @@ public final class OvalTransitionBinder extends TransitionBinder {
 
     @Override
     protected void setImageBitmap(ImageView view, Bitmap bitmap) {
-        Drawable drawable = view.getDrawable();
-        if (drawable instanceof TransitionDrawable) {
-            drawable = ((TransitionDrawable)drawable).getDrawable(1);
-        }
-
-        OvalBitmapBinder.setImageBitmap(view, drawable, bitmap);
+        OvalBitmapBinder.setImageBitmap(view, getDrawable(view), bitmap);
     }
 }

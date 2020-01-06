@@ -51,6 +51,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
         mFlags |= FLAG_GRAVITY;
         mState.setBitmap(bitmap);
         invalidateSelf(mState.mShader, true);
+        DebugUtils.__checkDebug(true, getClass().getName(), "setBitmap() - " + bitmap);
     }
 
     /**

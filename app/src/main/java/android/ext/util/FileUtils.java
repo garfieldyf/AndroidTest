@@ -94,7 +94,10 @@ public final class FileUtils {
 
         if (StringUtils.getLength(name) > 0) {
             cacheDir = new File(cacheDir, name);
-            mkdirs(cacheDir.getPath(), 0);
+            final int errno = mkdirs(cacheDir.getPath(), 0);
+            if (errno != 0) {
+                Log.e(FileUtils.class.getName(), "mkdirs failed: errno = " + errno);
+            }
         }
 
         return cacheDir;
@@ -118,7 +121,10 @@ public final class FileUtils {
         File cacheDir = context.getExternalCacheDir();
         if (cacheDir != null && StringUtils.getLength(name) > 0) {
             cacheDir = new File(cacheDir, name);
-            mkdirs(cacheDir.getPath(), 0);
+            final int errno = mkdirs(cacheDir.getPath(), 0);
+            if (errno != 0) {
+                Log.e(FileUtils.class.getName(), "mkdirs failed: errno = " + errno);
+            }
         }
 
         return cacheDir;

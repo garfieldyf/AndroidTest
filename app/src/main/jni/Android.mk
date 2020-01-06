@@ -45,6 +45,7 @@ endif
 
 ifeq ($(NDK_DEBUG),1)
 LOCAL_CPPFLAGS += -D_CRT_DEBUG_DUMP
+LOCAL_LDLIBS   += -llog
 else
 LOCAL_CPPFLAGS += -O3 -finline-functions -felide-constructors -funswitch-loops
 endif
@@ -94,7 +95,6 @@ LOCAL_CPPFLAGS   += -fvisibility=hidden -Wall -Wunused -Wcomment -Wparentheses -
                     -Wunused-function -Wunused-parameter -Wuninitialized -Wreturn-type -Wformat -Wshadow -Wunused-value -Wpointer-arith \
                     -DPACKAGE_UTILITIES=\"$(PACKAGE_UTILITIES)\" -DPACKAGE_GRAPHICS=\"$(PACKAGE_GRAPHICS)\"
 LOCAL_MODULE     := $(LOCAL_MODULE_NAME)
-LOCAL_LDLIBS     += -llog
 LOCAL_SRC_FILES  += main.cpp
 
 include $(BUILD_SHARED_LIBRARY)

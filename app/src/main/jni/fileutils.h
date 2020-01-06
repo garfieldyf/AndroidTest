@@ -237,12 +237,7 @@ JNIEXPORT_METHOD(jint) mkdirs(JNIEnv* env, jclass /*clazz*/, jstring path, jint 
     AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", EINVAL);
 
     const JNI::jstring_t jpath(env, path);
-    const jint errnum = ((flags & FLAG_IGNORE_FILENAME) ? createDirectory(jpath): __NS::createDirectory(jpath, jpath.length));
-    if (errnum != 0) {
-        LOG_ERROR("FileUtils", "mkdirs failed: errno = %d, error = %s\n", errnum, ::strerror(errnum));
-    }
-
-    return errnum;
+    return ((flags & FLAG_IGNORE_FILENAME) ? createDirectory(jpath): __NS::createDirectory(jpath, jpath.length));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

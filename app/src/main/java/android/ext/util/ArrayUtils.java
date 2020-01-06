@@ -364,7 +364,8 @@ public final class ArrayUtils {
      * @return The new array.
      */
     public static <T> T copyOf(Object srcArray, int length, int newLength) {
-        DebugUtils.__checkError(newLength < length, "newLength < length");
+        DebugUtils.__checkError(srcArray == null, "srcArray == null");
+        DebugUtils.__checkError(newLength < length, "newLength = " + newLength + " < length = " + length);
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
         System.arraycopy(srcArray, 0, newArray, 0, length);
         return (T)newArray;

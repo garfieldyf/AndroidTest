@@ -35,6 +35,13 @@ public final class ByteArrayBuffer extends OutputStream {
     }
 
     /**
+     * Removes all contents from this buffer, leaving it empty.
+     */
+    public final void clear() {
+        size = 0;
+    }
+
+    /**
      * Returns the number of bytes in this buffer.
      * @return The number of bytes in this buffer.
      * @see #array()
@@ -51,23 +58,6 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     public final byte[] array() {
         return data;
-    }
-
-    /**
-     * Removes all contents from this buffer, leaving it empty.
-     * @see #reset()
-     */
-    public final void clear() {
-        size = 0;
-        data = EMPTY_BYTE_ARRAY;
-    }
-
-    /**
-     * Resets this buffer the underlying byte array size to 0.
-     * @see #clear()
-     */
-    public final void reset() {
-        size = 0;
     }
 
     /**
@@ -217,10 +207,10 @@ public final class ByteArrayBuffer extends OutputStream {
 
     public final void dump(Printer printer) {
         printer.println(new StringBuilder(128)
-               .append("ByteArrayBuffer [ size = ").append(size).append('(').append(FileUtils.formatFileSize(size)).append(')')
-               .append(", capacity = ").append(data.length).append('(').append(FileUtils.formatFileSize(data.length)).append(')')
-               .append(", remaining = ").append(data.length - size).append('(').append(FileUtils.formatFileSize(data.length - size)).append(')')
-               .append(" ]").toString());
+            .append("ByteArrayBuffer [ size = ").append(size).append('(').append(FileUtils.formatFileSize(size)).append(')')
+            .append(", capacity = ").append(data.length).append('(').append(FileUtils.formatFileSize(data.length)).append(')')
+            .append(", remaining = ").append(data.length - size).append('(').append(FileUtils.formatFileSize(data.length - size)).append(')')
+            .append(" ]").toString());
     }
 
     private void expandCapacity(int expandCount, boolean growUp) {

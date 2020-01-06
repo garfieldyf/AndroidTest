@@ -163,7 +163,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
                 // Computes the sample size.
                 opts.inMutable = mParameters.mutable;
                 opts.inPreferredConfig = mParameters.config;
-                mParameters.computeSampleSize(null, opts);
+                mParameters.computeSampleSize(opts);
             }
 
             // Decodes the bitmap pixels.

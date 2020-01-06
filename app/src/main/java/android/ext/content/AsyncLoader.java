@@ -182,15 +182,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Returns the target associated with the <em>task</em>.
-     * @param task The {@link Task}.
-     * @return The <tt>Object</tt> target.
-     */
-    protected final Object getTarget(Task task) {
-        return (task != null ? ((LoadTask)task).mTarget : null);
-    }
-
-    /**
      * Called on the UI thread to recycle the <em>params</em>.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
      */

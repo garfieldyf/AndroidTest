@@ -125,7 +125,7 @@ public class PackageActivity extends Activity {
 
     /* package */ final class IconDecoder implements ImageDecoder<Bitmap> {
         @Override
-        public Bitmap decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
+        public Bitmap decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
             final Drawable icon = ((PackageItemInfo)params[0]).loadIcon(getPackageManager());
             return ((BitmapDrawable)icon).getBitmap();
         }

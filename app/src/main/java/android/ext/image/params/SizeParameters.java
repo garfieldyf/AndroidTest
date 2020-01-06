@@ -3,12 +3,12 @@ package android.ext.image.params;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
 import android.util.Printer;
-import android.view.View;
 
 /**
  * Class <tt>SizeParameters</tt> is an implementation of a {@link Parameters}.
@@ -17,27 +17,27 @@ import android.view.View;
  * &lt;SizeParameters
  *      xmlns:android="http://schemas.android.com/apk/res/android"
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      android:minWidth="200dp"
- *      android:minHeight="300dp"
+ *      android:width="200dp"
+ *      android:height="300dp"
  *      app:mutable="true"
  *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
 public class SizeParameters extends Parameters {
     private static final int[] SIZE_PARAMETERS_ATTRS = {
-        android.R.attr.minWidth,
-        android.R.attr.minHeight,
+        android.R.attr.height,
+        android.R.attr.width,
     };
 
     /**
-     * The minimum width to decode, in pixels.
+     * The desired width to decode, in pixels.
      */
-    public final int minWidth;
+    public final int width;
 
     /**
-     * The minimum height to decode, in pixels.
+     * The desired height to decode, in pixels.
      */
-    public final int minHeight;
+    public final int height;
 
     /**
      * Constructor
@@ -50,9 +50,10 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.value = context.getResources().getDisplayMetrics().densityDpi;
-        this.minWidth  = a.getDimensionPixelOffset(0 /* android.R.attr.minWidth */, 0);
-        this.minHeight = a.getDimensionPixelOffset(1 /* android.R.attr.minHeight */, 0);
+        this.value  = context.getResources().getDisplayMetrics().densityDpi;
+        this.width  = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
+        this.height = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
+        DebugUtils.__checkError(width <= 0 || height <= 0, "The tag requires a valid 'width' or 'height' attribute");
         a.recycle();
     }
 
@@ -60,15 +61,16 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
-     * @param minWidth The minimum width to decode, in pixels.
-     * @param minHeight The minimum height to decode, in pixels.
+     * @param width The desired width to decode, in pixels.
+     * @param height The desired height to decode, in pixels.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Context context, Config config, int minWidth, int minHeight, boolean mutable) {
+    public SizeParameters(Context context, Config config, int width, int height, boolean mutable) {
         super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
-        this.minWidth  = minWidth;
-        this.minHeight = minHeight;
+        this.width  = width;
+        this.height = height;
+        DebugUtils.__checkError(width <= 0 || height <= 0, "width <= 0 || height <= 0");
     }
 
     @Override
@@ -77,25 +79,15 @@ public class SizeParameters extends Parameters {
     }
 
     @Override
-    public void computeSampleSize(Object target, Options opts) {
+    public void computeSampleSize(Options opts) {
         /*
          * Scale width and height.
          *      scaleX = opts.outWidth  / width;
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
-        final int width, height;
-        if (target instanceof View) {
-            final View view = (View)target;
-            width  = Math.max(view.getWidth(),  minWidth);
-            height = Math.max(view.getHeight(), minHeight);
-        } else {
-            width  = minWidth;
-            height = minHeight;
-        }
-
         opts.inSampleSize = 1;
-        if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
+        if (opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             final int screenDensity = (int)value;
             opts.inTargetDensity = screenDensity;
@@ -109,8 +101,8 @@ public class SizeParameters extends Parameters {
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", minWidth = ").append(minWidth)
-            .append(", minHeight = ").append(minHeight)
+            .append(", width = ").append(width)
+            .append(", height = ").append(height)
             .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());

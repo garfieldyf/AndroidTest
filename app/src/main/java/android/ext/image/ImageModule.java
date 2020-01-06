@@ -185,8 +185,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     public final void dump(Printer printer) {
         Pools.dumpPool(mParamsPool, printer);
-        Pools.dumpPool(mBufferPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
+        Pools.dumpPool(mBufferPool, printer);
+        Pools.dumpPool(ByteArrayPool.sInstance, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 

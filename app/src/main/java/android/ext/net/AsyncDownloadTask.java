@@ -80,8 +80,8 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
-     * @see #download(String, int, byte[])
-     * @see #download(OutputStream, byte[])
+     * @see #download(String, int)
+     * @see #download(OutputStream)
      */
     @Override
     public Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
@@ -99,12 +99,11 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     /**
      * Downloads the resource from the remote server write to the specified <em>out</em>.
      * @param out The {@link OutputStream} to write the resource.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
-    protected final void download(OutputStream out, byte[] tempBuffer) throws IOException {
-        mRequest.downloadImpl(out, this, tempBuffer);
+    protected final void download(OutputStream out) throws IOException {
+        mRequest.downloadImpl(out, this, null);
     }
 
     /**
@@ -112,18 +111,17 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * <p>Note: This method will be create the necessary directories.</p>
      * @param filename The file name to write the resource, must be absolute file path.
      * @param statusCode The response code returned by the remote server.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
-    protected final void download(String filename, int statusCode, byte[] tempBuffer) throws IOException {
+    protected final void download(String filename, int statusCode) throws IOException {
         switch (statusCode) {
         case HTTP_OK:
-            mRequest.downloadImpl(filename, this, tempBuffer, false);
+            mRequest.downloadImpl(filename, this, null, false);
             break;
 
         case HTTP_PARTIAL:
-            mRequest.downloadImpl(filename, this, tempBuffer, true);
+            mRequest.downloadImpl(filename, this, null, true);
             break;
         }
     }

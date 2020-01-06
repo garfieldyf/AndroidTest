@@ -148,7 +148,7 @@ public final class GIFImage {
 
     /**
      * Draw this GIF image the specified frame into the <em>bitmapCanvas</em>.
-     * The bitmap canvas can be call {@link #createBitmapCanvas()} to create.
+     * The bitmap canvas can be created by {@link #createBitmapCanvas()}.
      * @param bitmapCanvas The mutable <tt>Bitmap</tt> used to draw the frame.
      * @param frameIndex The specified frame to be drawn. The valid frame range
      * is 0 to {@link #getFrameCount} - 1.

@@ -121,15 +121,14 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    /* package */ int connect(byte[] tempBuffer) throws IOException {
+    /* package */ int connect() throws IOException {
         __checkDumpHeaders(true);
         if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
             connectImpl();
             postData(mData);
         } else if (mData instanceof File) {
             connectImpl();
-            postData((File)mData, tempBuffer);
+            postData((File)mData);
         } else if (mData instanceof byte[]) {
             connectImpl();
             postData((byte[])mData, (int)mParams[0], (int)mParams[1]);
@@ -139,7 +138,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             postData(data, 0, data.length);
         } else if (mData instanceof InputStream) {
             connectImpl();
-            postData((InputStream)mData, tempBuffer);
+            postData((InputStream)mData);
         } else if (mData instanceof PostCallback) {
             connectImpl();
             ((PostCallback)mData).onPostData(mConnection, mParams);
@@ -165,10 +164,10 @@ public final class DownloadPostRequest extends DownloadRequest {
     /**
      * Posts the <tt>File</tt> contents to the remote HTTP server.
      */
-    private void postData(File file, byte[] tempBuffer) throws IOException {
+    private void postData(File file) throws IOException {
         final InputStream is = new FileInputStream(file);
         try {
-            postData(is, tempBuffer);
+            postData(is);
         } finally {
             is.close();
         }
@@ -177,10 +176,10 @@ public final class DownloadPostRequest extends DownloadRequest {
     /**
      * Posts the <tt>InputStream</tt> contents to the remote HTTP server.
      */
-    private void postData(InputStream is, byte[] tempBuffer) throws IOException {
+    private void postData(InputStream is) throws IOException {
         final OutputStream os = mConnection.getOutputStream();
         try {
-            FileUtils.copyStream(is, os, null, tempBuffer);
+            FileUtils.copyStream(is, os, null, null);
         } finally {
             os.close();
         }

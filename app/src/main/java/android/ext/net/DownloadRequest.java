@@ -289,7 +289,7 @@ public class DownloadRequest {
      */
     public final <T> T download(Cancelable cancelable) throws IOException {
         try {
-            return (connect(null) == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
+            return (connect() == HTTP_OK ? this.<T>downloadImpl(cancelable) : null);
         } finally {
             disconnect();
         }
@@ -310,7 +310,7 @@ public class DownloadRequest {
      */
     public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
-            final int statusCode = connect(tempBuffer);
+            final int statusCode = connect();
             switch (statusCode) {
             case HTTP_OK:
                 downloadImpl(filename, cancelable, tempBuffer, false);
@@ -341,7 +341,7 @@ public class DownloadRequest {
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         try {
-            final int statusCode = connect(tempBuffer);
+            final int statusCode = connect();
             if (statusCode == HTTP_OK || statusCode == HTTP_PARTIAL) {
                 downloadImpl(out, cancelable, tempBuffer);
             }
@@ -366,7 +366,7 @@ public class DownloadRequest {
     @SuppressWarnings("unchecked")
     public final <Params, Result> Result download(DownloadCallback<Params, Result> callback, Params... params) throws Exception {
         try {
-            return callback.onDownload(mConnection, connect(null), params);
+            return callback.onDownload(mConnection, connect(), params);
         } finally {
             disconnect();
         }
@@ -375,7 +375,7 @@ public class DownloadRequest {
     /**
      * Connects to the remote server with the arguments supplied to this request.
      */
-    /* package */ int connect(byte[] tempBuffer) throws IOException {
+    /* package */ int connect() throws IOException {
         __checkDumpHeaders(true);
         mConnection.connect();
         __checkDumpHeaders(false);

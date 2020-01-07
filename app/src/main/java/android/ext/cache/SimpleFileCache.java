@@ -20,7 +20,6 @@ import java.util.Arrays;
  * @author Garfield
  */
 public class SimpleFileCache implements FileCache, ScanCallback {
-    private int mSize;
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -55,6 +54,15 @@ public class SimpleFileCache implements FileCache, ScanCallback {
     }
 
     /**
+     * Clears this cache and deletes all cache files from the filesystem.
+     */
+    public void clear() {
+        DebugUtils.__checkStartMethodTracing();
+        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
+    }
+
+    /**
      * Returns the maximum size in this cache in user-defined units.
      * @return The maximum size.
      */
@@ -71,27 +79,18 @@ public class SimpleFileCache implements FileCache, ScanCallback {
     }
 
     /**
-     * Clears this cache and deletes all cache files from the filesystem.
-     */
-    public void clear() {
-        DebugUtils.__checkStartMethodTracing();
-        FileUtils.deleteFiles(mCacheDir.getPath(), false);
-        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
-    }
-
-    /**
      * Remove the cache files until the total of remaining files is
      * at or below the maximum size, do not call this method directly.
      * @hide
      */
-    public void trimToSize() {
+    public final void trimToSize() {
         final int priority = Process.getThreadPriority(Process.myTid());
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            mSize = 0;
-            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, null);
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + mSize + ", maxSize = " + mMaxSize);
+            final MutableInt size = new MutableInt();
+            FileUtils.scanFiles(mCacheDir.getPath(), this, FLAG_IGNORE_HIDDEN_FILE | FLAG_SCAN_FOR_DESCENDENTS, size);
+            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size.value + ", maxSize = " + mMaxSize);
         } finally {
             Process.setThreadPriority(priority);
         }
@@ -122,10 +121,11 @@ public class SimpleFileCache implements FileCache, ScanCallback {
     @Override
     public int onScanFile(String path, int type, Object cookie) {
         if (type == Dirent.DT_REG) {
-            if (mSize < mMaxSize) {
-                final int size = sizeOf(path);
-                DebugUtils.__checkError(size < 0, "Negative size: " + path);
-                mSize += size;
+            final MutableInt size = (MutableInt)cookie;
+            if (size.value < mMaxSize) {
+                final int result = sizeOf(path);
+                DebugUtils.__checkError(result < 0, "Negative size: " + path);
+                size.value += result;
             } else {
                 FileUtils.deleteFiles(path, false);
                 DebugUtils.__checkDebug(true, "SimpleFileCache", "delete cache file - " + path);
@@ -190,5 +190,12 @@ public class SimpleFileCache implements FileCache, ScanCallback {
 
         outResults[0] = fileCount;
         outResults[1] = fileLength;
+    }
+
+    /**
+     * Class <tt>MutableInt</tt> wrapper for the primitive type <tt>int</tt>.
+     */
+    /* package */ static final class MutableInt {
+        public int value;
     }
 }

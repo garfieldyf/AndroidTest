@@ -342,11 +342,29 @@ public final class DatabaseUtils {
     }
 
     /**
+     * Parses an object from the specified <em>cursor</em>.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor
+     * must be move to the correct position.
+     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
+     * @return An new object.
+     * @throws ReflectiveOperationException if the object cannot be created.
+     * @see #parse(Cursor, Class)
+     */
+    public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
+        DebugUtils.__checkError(cursor == null || clazz == null, "cursor == null || clazz == null");
+        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
+        final T instance = ClassUtils.newInstance(clazz, null, (Object[])null);
+        setCursorFields(cursor, instance, getCursorFields(clazz));
+        return instance;
+    }
+
+    /**
      * Parses a <tt>Cursor</tt>'s data to a <tt>List</tt> from the specified <em>cursor</em>.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @return A new <tt>List</tt>.
      * @throws ReflectiveOperationException if the elements cannot be created.
+     * @see #parseObject(Cursor, Class)
      */
     public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || componentType == null, "cursor == null || componentType == null");
@@ -356,11 +374,11 @@ public final class DatabaseUtils {
         if (count > 0) {
             cursor.moveToPosition(-1);
             final List<Pair<Field, String>> cursorFields = getCursorFields(componentType);
-            final Constructor<? extends T> constructor = ClassUtils.getConstructor(componentType, (Class[])null);
+            final Constructor<? extends T> ctor = ClassUtils.getConstructor(componentType, (Class<?>[])null);
             while (cursor.moveToNext()) {
-                final T object = constructor.newInstance((Object[])null);
-                setCursorFields(cursor, object, cursorFields);
-                result.add(object);
+                final T instance = ctor.newInstance((Object[])null);
+                setCursorFields(cursor, instance, cursorFields);
+                result.add(instance);
             }
         }
 

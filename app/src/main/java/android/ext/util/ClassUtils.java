@@ -32,9 +32,23 @@ public final class ClassUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T newInstance(String className, Class<?>[] parameterTypes, Object... args) throws ReflectiveOperationException {
-        final Constructor<?> constructor = Class.forName(className).getDeclaredConstructor(parameterTypes);
-        constructor.setAccessible(true);
-        return (T)constructor.newInstance(args);
+        final Constructor<?> ctor = Class.forName(className).getDeclaredConstructor(parameterTypes);
+        ctor.setAccessible(true);
+        return (T)ctor.newInstance(args);
+    }
+
+    /**
+     * Returns a new instance with the specified <em>clazz</em> and <em>args</em>.
+     * @param clazz The <tt>Class</tt> which is declared the constructor.
+     * @param parameterTypes The parameter types of the constructor.
+     * @param args The arguments of the constructor.
+     * @return A new instance.
+     * @throws ReflectiveOperationException if an error occurs while creating an instance.
+     */
+    public static <T> T newInstance(Class<? extends T> clazz, Class<?>[] parameterTypes, Object... args) throws ReflectiveOperationException {
+        final Constructor<? extends T> ctor = clazz.getDeclaredConstructor(parameterTypes);
+        ctor.setAccessible(true);
+        return ctor.newInstance(args);
     }
 
     /**

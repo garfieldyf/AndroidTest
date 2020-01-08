@@ -1,7 +1,6 @@
 package android.ext.graphics.drawable;
 
 import android.ext.graphics.GIFImage;
-import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -90,9 +89,7 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
 
         @Override
         /* package */ void setImage(GIFImage image) {
-            DebugUtils.__checkError(image == null, "image == null");
-            mImage  = image;
-            mCanvas = image.createBitmapCanvas();
+            super.setImage(image);
             mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
         }
     }

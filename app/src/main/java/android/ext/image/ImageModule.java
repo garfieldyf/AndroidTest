@@ -262,10 +262,11 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             return new ImageLoader(this, imageCache, fileCache, createImageDecoder(name, imageCache));
         }
 
-        try {
-            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
-        } catch (Exception e) {
-            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
+        final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
+        if (IconLoader.class.isAssignableFrom(clazz)) {
+            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
+        } else {
+            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
         }
     }
 

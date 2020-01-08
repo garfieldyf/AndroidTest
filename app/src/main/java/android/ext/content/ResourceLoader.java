@@ -113,7 +113,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
     public ResourceLoader(Activity ownerActivity, Executor executor) {
         super(executor, MAX_POOL_SIZE);
         mOwner = new WeakReference<Object>(ownerActivity);
-        mContext = ContextCompat.getContext(ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**

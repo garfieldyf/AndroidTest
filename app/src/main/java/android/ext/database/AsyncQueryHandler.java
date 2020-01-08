@@ -49,7 +49,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public AsyncQueryHandler(Activity ownerActivity, Executor executor) {
         super(executor, ownerActivity);
-        mContext = ContextCompat.getContext(ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**

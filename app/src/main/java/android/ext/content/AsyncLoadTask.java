@@ -129,7 +129,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
      */
     public AsyncLoadTask(Activity ownerActivity) {
         super(ownerActivity);
-        mContext = ContextCompat.getContext(ownerActivity);
+        mContext = ownerActivity.getApplicationContext();
     }
 
     /**

@@ -31,6 +31,35 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     }
 
     /**
+     * Equivalent to calling <tt>notifyItemChanged(id, null)</tt>.
+     * @param id The id of the item.
+     * @see #notifyItemChanged(long, Object)
+     */
+    public final void notifyItemChanged(long id) {
+        notifyItemChanged(id, null);
+    }
+
+    /**
+     * Notify any registered observers that the item's id equals the specified <em>id</em>
+     * has changed. If {@link #hasStableIds()} would return <tt>false</tt> then invoking
+     * this method has no effect.
+     * @param id The id of the item.
+     * @param payload Optional parameter, pass to {@link #notifyItemChanged(int, Object)}.
+     * @see #notifyItemChanged(long)
+     */
+    public final void notifyItemChanged(long id, Object payload) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final ViewHolder holder = mRecyclerView.findViewHolderForItemId(id);
+        if (holder != null) {
+            final int position = holder.getAdapterPosition();
+            DebugUtils.__checkWarning(position == RecyclerView.NO_POSITION, "BaseAdapter", "The item has no position - id = " + id);
+            if (position != RecyclerView.NO_POSITION) {
+                postNotifyItemRangeChanged(position, 1, payload);
+            }
+        }
+    }
+
+    /**
      * Like as {@link #notifyDataSetChanged()}. If the recycler view is computing
      * a layout then this method will be post the change using a <tt>Handler</tt>.
      */

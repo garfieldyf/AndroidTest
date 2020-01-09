@@ -10,8 +10,6 @@ import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.provider.BaseColumns;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.view.View;
 
@@ -128,45 +126,6 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
         }
 
         return oldCursor;
-    }
-
-    /**
-     * Equivalent to calling <tt>notifyItemChanged(id, null)</tt>.
-     * @param id The row ID of the item.
-     * @see #notifyItemChanged(long, Object)
-     */
-    public final void notifyItemChanged(long id) {
-        notifyItemChanged(id, null);
-    }
-
-    /**
-     * Notify any registered observers that the item's row ID equals the specified
-     * <em>id</em> has changed.
-     * @param id The row ID of the item.
-     * @param payload Optional parameter, pass to {@link #notifyItemChanged(int, Object)}.
-     * @see #notifyItemChanged(long)
-     */
-    public void notifyItemChanged(long id, Object payload) {
-        DebugUtils.__checkError(mRowIDColumn == -1, "The cursor has no rowID column.");
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        final LayoutManager layoutManager = mRecyclerView.getLayoutManager();
-        if (mCursor == null || id == NO_ID || !(layoutManager instanceof LinearLayoutManager)) {
-            return;
-        }
-
-        final LinearLayoutManager layout = (LinearLayoutManager)layoutManager;
-        int startPos = layout.findFirstVisibleItemPosition();
-        final int endPos = layout.findLastVisibleItemPosition();
-        if (startPos == NO_POSITION || endPos == NO_POSITION) {
-            return;
-        }
-
-        for (; startPos <= endPos; ++startPos) {
-            if (mCursor.moveToPosition(startPos) && mCursor.getLong(mRowIDColumn) == id) {
-                postNotifyItemRangeChanged(startPos, 1, payload);
-                break;
-            }
-        }
     }
 
     /**

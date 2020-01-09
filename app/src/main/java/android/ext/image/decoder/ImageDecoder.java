@@ -20,8 +20,8 @@ public final class ImageDecoder extends BitmapDecoder<Object> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param optionsPool The <tt>Options</tt> {@link Pool} to decode image.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to
-     * reuse the bitmap when decoding bitmap.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse
+     * the bitmap when decoding bitmap.
      */
     public ImageDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool, bitmapPool);

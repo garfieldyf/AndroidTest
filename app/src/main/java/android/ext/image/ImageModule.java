@@ -327,15 +327,13 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
-        if (TextUtils.isEmpty(className)) {
-            if (imageCache instanceof LruImageCache) {
-                return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
-            } else {
-                return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
-            }
+        if (TextUtils.isEmpty(className) || className.equals("BitmapDecoder")) {
+            return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+        } else if (className.equals("ImageDecoder")) {
+            return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
+        } else {
+            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         }
-
-        return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
     }
 
     private static int computeBufferPoolMaxSize(Executor executor) {

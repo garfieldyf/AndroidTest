@@ -29,8 +29,8 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to
-     * reuse the bitmap when decoding bitmap.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse
+     * the bitmap when decoding bitmap.
      */
     public BitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool);

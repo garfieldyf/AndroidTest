@@ -36,7 +36,7 @@ import java.util.Arrays;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:flags="[ none | noFileCache | noMemoryCache ]"
- *      app:decoder="classFullName" /&gt;</pre>
+ *      app:decoder="[ BitmapDecoder | ImageDecoder | classFullName ]" /&gt;</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })

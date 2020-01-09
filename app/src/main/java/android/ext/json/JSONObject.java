@@ -62,8 +62,8 @@ public class JSONObject implements Map<String, Object> {
      */
     @Override
     public JSONObject put(String name, Object value) {
-        JSONUtils.__checkDouble(value);
         DebugUtils.__checkError(name == null, "name == null");
+        JSONUtils.__checkDouble(value);
         values.put(name, value);
         return this;
     }

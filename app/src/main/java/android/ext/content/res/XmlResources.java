@@ -124,14 +124,8 @@ public final class XmlResources {
 
     /**
      * Inflates a new object from the XML data.
-     * @param context The <tt>Context</tt>.
-     * @param parser The {@link XmlPullParser} to parsing the XML data.
-     * The parser is must be move to the first start tag position.
-     * @return The newly object.
-     * @throws XmlPullParserException if the XML data cannot be parsed.
-     * @throws ReflectiveOperationException if the constructor cannot be invoked.
      */
-    public static Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+    private static Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String name = parser.getName();
         if (name.equals("binder") || name.equals("parameters")) {
             final String tagName = name;

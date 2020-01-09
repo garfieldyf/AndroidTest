@@ -31,7 +31,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends Drawable {
-    /* ------------------ mState.mFlags ------------------ */
+    /* ------------- mState.mFlags 0xFF000000 ------------- */
     /**
      * Indicates the drawable none mirrored.
      */
@@ -52,7 +52,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
      */
     private static final int MIRRORED_MASK = 0xC0000000;
 
-    /* --------------------- mFlags --------------------- */
+    /* --------------- mFlags 0xFF000000 --------------- */
     private static final int FLAG_PATH = 0x20000000;
 
     /**

@@ -28,10 +28,13 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         android.R.attr.autoStart,
     };
 
-    private static final int FLAG_RUNNING = 0x04000000;     // mFlags
-    private static final int FLAG_SCHED   = 0x08000000;     // mFlags
-    private static final int FLAG_ONESHOT = 0x04000000;     // mState.mFlags
-    private static final int FLAG_AUTO_START = 0x08000000;  // mState.mFlags
+    /* ------------- mFlags 0x00FF0000 ------------- */
+    private static final int FLAG_RUNNING = 0x00400000;
+    private static final int FLAG_SCHED   = 0x00800000;
+
+    /* ---------- mState.mFlags 0x00FF0000 ---------- */
+    private static final int FLAG_ONESHOT    = 0x00400000;
+    private static final int FLAG_AUTO_START = 0x00800000;
 
     /**
      * The current frame index to draw.

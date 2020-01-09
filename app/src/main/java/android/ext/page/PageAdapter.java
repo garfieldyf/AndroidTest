@@ -352,29 +352,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
 //        }
 //    }
-//
-//    /**
-//     * Removes the page at the specified <em>pageIndex</em> from this adapter. This
-//     * method will be call {@link #notifyItemRangeRemoved(int, int)} when the page
-//     * was removed.
-//     * @param pageIndex The index of the page to remove.
-//     * @return The previous <tt>Page</tt> at the <em>pageIndex</em> or <tt>null</tt>
-//     * if there was no page.
-//     */
-//    public Page<E> removePage(int pageIndex) {
-//        DebugUtils.__checkUIThread("removePage");
-//        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
-//
-//        final Page<E> oldPage = mPageCache.remove(pageIndex);
-//        if (oldPage != null) {
-//            final int itemCount = oldPage.getCount();
-//            mItemCount -= itemCount;
-//            mLoadStates.clear(pageIndex);
-//            postNotifyItemRangeRemoved(getPositionForPage(pageIndex), itemCount);
-//        }
-//
-//        return oldPage;
-//    }
 
     /**
      * Returns the item count in the specified page.

@@ -24,9 +24,9 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
-    /* package */ WeakReference<Object> mOwner;
     /* package */ final Executor mExecutor;
     /* package */ final Pool<Object> mTaskPool;
+    /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -77,11 +77,9 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     }
 
     /**
-     * Called on the UI thread when this handler handle messages.
-     * <p><b>Note: Do not call this method directly.</b></p>
-     * @param message The message.
-     * @param token The token to identify the operation.
-     * @param result The result.
+     * Called on the UI thread when this handler handle
+     * messages, do not call this method directly.
+     * @hide
      */
     public void dispatchMessage(int message, int token, Object result) {
         switch (message) {

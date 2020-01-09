@@ -31,22 +31,22 @@ namespace BitmapUtils {
 //
 
 template <typename THandler>
-__STATIC_INLINE__ jboolean handleBitmap(JNIEnv* env, jobject jbitmap, THandler handler)
+__STATIC_INLINE__ jboolean handleBitmap(JNIEnv* env, jobject bitmap, THandler handler)
 {
     assert(env);
-    assert(jbitmap);
+    assert(bitmap);
 
     void* pixels = NULL;
     AndroidBitmapInfo info;
-    __NS::Bitmap bitmap(env, jbitmap);
+    __NS::Bitmap jbitmap(env, bitmap);
 
     // Gets the bitmap info and lock pixels.
-    const jboolean successful = (bitmap.getBitmapInfo(info) == ANDROID_BITMAP_RESULT_SUCCESS && bitmap.lockPixels(pixels) == ANDROID_BITMAP_RESULT_SUCCESS);
+    const jboolean successful = (jbitmap.getBitmapInfo(info) == ANDROID_BITMAP_RESULT_SUCCESS && jbitmap.lockPixels(pixels) == ANDROID_BITMAP_RESULT_SUCCESS);
     if (successful)
     {
-        assert_log(info.width > 0 && info.height > 0, "The bitmap width and height must be > 0");
-        assert_log(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888, "The bitmap pixel format must be ARGB_8888");
-        assert_log(env->CallBooleanMethod(jbitmap, JNI::jclass_t(env, jbitmap).getMethodID("isMutable", "()Z")), "The bitmap must be a mutable bitmap");
+    #ifndef NDEBUG
+        jbitmap.checkMutable(info);
+    #endif  // NDEBUG
 
         handler(pixels, info.width, info.height);
     }

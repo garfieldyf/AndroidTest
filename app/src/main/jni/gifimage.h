@@ -160,7 +160,7 @@ JNIEXPORT_METHOD(jboolean) nativeDraw(JNIEnv* env, jclass /*clazz*/, jobject bit
         __NS::GIFImage* image = reinterpret_cast<__NS::GIFImage*>(nativeImage);
         assert_log(info.width >= image->getWidth(), "The bitmap canvas width must be >= GIF image width - canvasWidth = %d, imageWidth = %u", info.width, image->getWidth());
         assert_log(info.height >= image->getHeight(), "The bitmap canvas height must be >= GIF image height - canvasHeight = %d, imageHeight = %u", info.height, image->getHeight());
-        assert_log(info.format == ANDROID_BITMAP_FORMAT_RGBA_8888, "The bitmap canvas pixel format must be ARGB_8888");
+        jbitmapCanvas.checkMutable(info);
 
         image->draw((uint32_t*)canvas, frameIndex);
     }

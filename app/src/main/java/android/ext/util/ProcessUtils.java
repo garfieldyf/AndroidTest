@@ -239,10 +239,10 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the device info (e.g. brand, mode, version, abis and package name)
+         * Writes the device info (e.g. mode, brand, version, abis and package name)
          * to the <em>writer</em>.<p>The device info such as the following:</p><pre>
-         * "brand": "BRAND",
          * "model": "MODEL",
+         * "brand": "BRAND",
          * "sdk": 19,
          * "version": "4.4.4",
          * "abis": "armeabi-v7a, armeabi",
@@ -254,8 +254,8 @@ public final class ProcessUtils {
          * @see #writeTo(JsonWriter, Cursor)
          */
         public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
-            return writer.name("brand").value(Build.BRAND)
-                .name("model").value(Build.MODEL)
+            return writer.name("model").value(Build.MODEL)
+                .name("brand").value(Build.BRAND)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
                 .name("abis").value(getSupportedABIs())
@@ -335,7 +335,7 @@ public final class ProcessUtils {
                 // Writes the uncaught exception to log file.
                 final long now = System.currentTimeMillis();
                 ps.println("========================================================================================================================");
-                ps.format("Model : %s %s (sdk = %d, version = %s, cpu abis = %s)\n", Build.MANUFACTURER, Build.MODEL, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
+                ps.format("Model : %s (brand = %s, sdk = %d, version = %s, cpu abis = %s)\n", Build.MODEL, Build.BRAND, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
                 ps.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
                 ps.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
                 ps.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());

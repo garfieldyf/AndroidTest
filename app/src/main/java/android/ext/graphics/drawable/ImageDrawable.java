@@ -7,11 +7,9 @@ import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.ext.graphics.DrawUtils;
 import android.ext.util.Pools.MatrixPool;
-import android.ext.util.Pools.RectFPool;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
-import android.graphics.Matrix.ScaleToFit;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -405,14 +403,11 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
             final int height = getIntrinsicHeight();
             DrawUtils.applyGravity(mState.mGravity, width, height, bounds, outBounds);
 
-            // Computes the scale value that map the source
-            // rectangle to the destination rectangle.
-            final RectF src = RectFPool.sInstance.obtain(0, 0, width, height);
+            // Computes the translate and scale.
             final Matrix matrix = MatrixPool.sInstance.obtain();
-            matrix.setRectToRect(src, outBounds, ScaleToFit.FILL);
+            matrix.setTranslate(outBounds.left, outBounds.top);
+            matrix.preScale(outBounds.width() / width, outBounds.height() / height);
             shader.setLocalMatrix(matrix);
-
-            RectFPool.sInstance.recycle(src);
             MatrixPool.sInstance.recycle(matrix);
         }
 

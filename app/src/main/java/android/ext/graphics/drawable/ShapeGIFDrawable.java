@@ -53,7 +53,7 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
      * has been changed or if {@link #invalidateSelf(boolean)}
      * is called explicitly. The input <em>outPath</em> is empty.
      * @param bounds The new bounds of the path.
-     * @param outPath The empty path to be build.
+     * @param outPath The path to be build.
      */
     protected abstract void getConvexPath(RectF bounds, Path outPath);
 

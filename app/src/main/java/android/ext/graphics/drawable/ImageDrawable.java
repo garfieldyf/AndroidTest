@@ -351,7 +351,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         canvas.restoreToCount(saveCount);
     }
 
-    /* ----------------------- ShapeXXXDrawable API ----------------------- */
+    /* ------------------------ ShapeXXXDrawable internal API ------------------------ */
 
     /**
      * Defines by the <tt>ShapeXXXDrawable</tt>.
@@ -372,24 +372,6 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         }
 
         invalidateSelf();
-    }
-
-    /**
-     * Called to get this drawable to populate the {@link Outline} that defines its drawing area.
-     */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    /* package */ final void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
-        if (radii == null) {
-            outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
-        } else {
-            final float radius = radii[0];
-            if (radiusEquals(radii, 1, radius)) {
-                // Round rect all corner radii are equals, for efficiency, and to enable clipping.
-                outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
-            } else {
-                outline.setConvexPath(path);
-            }
-        }
     }
 
     /**
@@ -419,9 +401,10 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         }
     }
 
+    /* ----------------------- RoundedXXXDrawable internal API ----------------------- */
+
     /**
-     * Compares the specified <em>radius</em> to equals
-     * the each element in the <em>radii</em> array.
+     * Compares the specified <em>radius</em> to equals the each element in the <em>radii</em> array.
      */
     /* package */ static boolean radiusEquals(float[] radii, int start, float radius) {
         if (radii != null && radii.length >= 8) {
@@ -433,6 +416,24 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
         }
 
         return true;
+    }
+
+    /**
+     * Called to get this drawable to populate the {@link Outline} that defines its drawing area.
+     */
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    /* package */ final void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
+        if (radii == null) {
+            outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
+        } else {
+            final float radius = radii[0];
+            if (radiusEquals(radii, 1, radius)) {
+                // Round rect all corner radii are equals, for efficiency, and to enable clipping.
+                outline.setRoundRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom, radius);
+            } else {
+                outline.setConvexPath(path);
+            }
+        }
     }
 
     /**

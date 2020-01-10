@@ -146,7 +146,7 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
 }
 
 #ifdef __NDK_STLP__
-__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint flags, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
+__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
     assert(path);
@@ -191,7 +191,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jint f
     return errnum;
 }
 #else
-static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint flags, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
+static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
     assert(filter);
@@ -215,7 +215,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jint fl
                 break;
             } else if (entry->d_type == DT_DIR) {
                 // Scans the sub directory.
-                errnum = scanDescendentFiles(env, filePath, flags, filter, callback, cookie, result);
+                errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result);
                 if (errnum != 0 || result == SC_STOP)
                     break;
             }
@@ -272,16 +272,18 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || callback == NULL, "dirPath == null || dirPath.length() == 0 || callback == null", EINVAL);
 
-    jint errnum;
     const JNI::jstring_t jdirPath(env, dirPath);
+    int (*filter)(const struct dirent*) = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter);
+
+    jint errnum;
     if (flags & FLAG_SCAN_FOR_DESCENDENTS)
     {
         jint result;
-        errnum = scanDescendentFiles(env, jdirPath, flags, ((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter), callback, cookie, result);
+        errnum = scanDescendentFiles(env, jdirPath, filter, callback, cookie, result);
     }
     else
     {
-        __NS::Directory<> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter);
+        __NS::Directory<> dir(filter);
         if ((errnum = dir.open(jdirPath)) == 0)
         {
             char filePath[MAX_PATH];

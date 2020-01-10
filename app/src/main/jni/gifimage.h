@@ -151,26 +151,11 @@ JNIEXPORT_METHOD(jboolean) nativeDraw(JNIEnv* env, jclass /*clazz*/, jobject bit
 
     void* canvas = NULL;
     __NS::Bitmap jbitmapCanvas(env, bitmapCanvas);
-
-#ifndef NDEBUG
-    AndroidBitmapInfo info;
-    const jboolean result = (jbitmapCanvas.getBitmapInfo(info) == ANDROID_BITMAP_RESULT_SUCCESS && jbitmapCanvas.lockPixels(canvas) == ANDROID_BITMAP_RESULT_SUCCESS);
-    if (result)
-    {
-        __NS::GIFImage* image = reinterpret_cast<__NS::GIFImage*>(nativeImage);
-        assert_log(info.width >= image->getWidth(), "The bitmap canvas width must be >= GIF image width - canvasWidth = %d, imageWidth = %u", info.width, image->getWidth());
-        assert_log(info.height >= image->getHeight(), "The bitmap canvas height must be >= GIF image height - canvasHeight = %d, imageHeight = %u", info.height, image->getHeight());
-        jbitmapCanvas.checkMutable(info);
-
-        image->draw((uint32_t*)canvas, frameIndex);
-    }
-#else
-    const jboolean result = (jbitmapCanvas.lockPixels(canvas) == ANDROID_BITMAP_RESULT_SUCCESS);
-    if (result)
+    const jboolean successful = (jbitmapCanvas.lockPixels(canvas) == ANDROID_BITMAP_RESULT_SUCCESS);
+    if (successful)
         reinterpret_cast<__NS::GIFImage*>(nativeImage)->draw((uint32_t*)canvas, frameIndex);
-#endif  // NDEBUG
 
-    return result;
+    return successful;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

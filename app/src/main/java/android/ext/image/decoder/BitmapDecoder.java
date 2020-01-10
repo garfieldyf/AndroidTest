@@ -56,18 +56,17 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
         // Decodes the image pixels.
         BitmapDecoder.__checkDumpOptions(opts, flags);
-        return (Image)decodeBitmap(uri, flags, opts);
+        return (Image)decodeBitmap(uri, opts);
     }
 
     /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
-    protected Bitmap decodeBitmap(Object uri, int flags, Options opts) throws Exception {
+    protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);

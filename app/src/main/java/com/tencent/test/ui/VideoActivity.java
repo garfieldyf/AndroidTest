@@ -1,7 +1,9 @@
 package com.tencent.test.ui;
 
 import android.app.Activity;
+import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
+import android.ext.text.style.AnimatedImageSpan;
 import android.ext.text.style.ImageSpan;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -43,6 +45,8 @@ public class VideoActivity extends Activity {
         ImageView view = (ImageView)findViewById(R.id.image);
         RoundedBitmapDrawable drawable = new RoundedBitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.image), 40);
         view.setImageDrawable(drawable);
+
+        setGIFText(R.id.face, "欢迎光临！");
     }
 
     @Override
@@ -57,6 +61,16 @@ public class VideoActivity extends Activity {
         builder.append('@');
         ImageSpan span = new ImageSpan(getResources(), R.drawable.playing_7);
         builder.setSpan(span, start, builder.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+        view.setText(builder);
+    }
+
+    private void setGIFText(int id, String text) {
+        final TextView view = (TextView)findViewById(id);
+        SpannableStringBuilder builder = new SpannableStringBuilder("@").append(text);
+
+        AnimatedImageSpan span = AnimatedImageSpan.newGIFImageSpan(view, R.drawable.mood);
+        span.setPadding(10, 10);
+        builder.setSpan(span, 0, 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
         view.setText(builder);
     }
 }

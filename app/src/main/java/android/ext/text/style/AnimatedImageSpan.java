@@ -1,8 +1,11 @@
 package android.ext.text.style;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.ext.graphics.drawable.GIFDrawable;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Drawable.Callback;
+import android.os.SystemClock;
 import android.view.View;
 import java.lang.ref.WeakReference;
 
@@ -10,56 +13,65 @@ import java.lang.ref.WeakReference;
  * Class AnimatedImageSpan
  * @author Garfield
  */
-public class AnimatedImageSpan extends ImageSpan implements Runnable {
-    private int mFrameIndex;
-    private boolean mScheduleNext;
+public class AnimatedImageSpan extends ImageSpan implements Callback {
     private final WeakReference<View> mView;
 
     /**
-     * Constructor
+     * Rerturns an {@link AnimatedImageSpan} with given the resource <em>id</em>.
      * @param view The {@link View}.
      * @param id The resource id of the {@link AnimationDrawable}.
-     * @see #AnimatedImageSpan(View, AnimationDrawable)
+     * @return The <tt>AnimatedImageSpan</tt>.
+     * @see #newGIFImageSpan(View, int)
      */
-    @SuppressWarnings("deprecation")
-    public AnimatedImageSpan(View view, int id) {
-        this(view, (AnimationDrawable)view.getResources().getDrawable(id));
+    @SuppressWarnings("unchecked")
+    public static AnimatedImageSpan newAnimatedImageSpan(View view, int id) {
+        return new AnimatedImageSpan(view, (AnimationDrawable)view.getResources().getDrawable(id));
+    }
+
+    /**
+     * Rerturns an {@link AnimatedImageSpan} with given the resource <em>id</em>.
+     * @param view The {@link View}.
+     * @param id The resource id of the GIF image.
+     * @return The <tt>AnimatedImageSpan</tt>.
+     * @see #newAnimatedImageSpan(View, int)
+     */
+    public static AnimatedImageSpan newGIFImageSpan(View view, int id) {
+        return new AnimatedImageSpan(view, GIFDrawable.decode(view.getResources(), id));
     }
 
     /**
      * Constructor
      * @param view The {@link View}.
-     * @param drawable The {@link AnimationDrawable}.
-     * @see #AnimatedImageSpan(View, int)
+     * @param drawable The {@link Animatable} drawable.
      */
-    public AnimatedImageSpan(View view, AnimationDrawable drawable) {
+    public <T extends Drawable & Animatable> AnimatedImageSpan(View view, T drawable) {
         super(drawable);
         mView = new WeakReference<View>(view);
+        drawable.setCallback(this);
+        drawable.start();
     }
 
     @Override
-    public void run() {
-        final View view = getView();
-        if (view != null) {
-            mFrameIndex = (mFrameIndex + 1) % ((AnimationDrawable)mDrawable).getNumberOfFrames();
-            mScheduleNext = false;
+    public void invalidateDrawable(Drawable who) {
+        final View view = mView.get();
+        if (view != null && view.getParent() != null) {
             view.invalidate();
         }
     }
 
     @Override
-    public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        final AnimationDrawable drawable = (AnimationDrawable)mDrawable;
-        draw(canvas, drawable.getFrame(mFrameIndex), (int)x, top, bottom);
-        final View view = getView();
-        if (view != null && !mScheduleNext) {
-            mScheduleNext = true;
-            view.postDelayed(this, drawable.getDuration(mFrameIndex));
+    public void unscheduleDrawable(Drawable who, Runnable what) {
+        final View view = mView.get();
+        if (view != null && view.getParent() != null) {
+            view.removeCallbacks(what);
         }
     }
 
-    private View getView() {
+    @Override
+    public void scheduleDrawable(Drawable who, Runnable what, long when) {
         final View view = mView.get();
-        return (view != null && view.getParent() != null ? view : null);
+        if (view != null && view.getParent() != null) {
+            view.postDelayed(what, when - SystemClock.uptimeMillis());
+        }
     }
 }

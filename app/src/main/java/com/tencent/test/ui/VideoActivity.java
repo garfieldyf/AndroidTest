@@ -1,14 +1,24 @@
 package com.tencent.test.ui;
 
 import android.app.Activity;
+import android.ext.graphics.BitmapUtils;
+import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.text.style.AnimatedImageSpan;
 import android.ext.text.style.ImageSpan;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
+import android.graphics.ImageFormat;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import com.tencent.test.R;
@@ -17,7 +27,8 @@ public class VideoActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setSpanTextContent();
+        setSurfaceContent();
+//        setSpanTextContent();
 //        setVideoContent();
     }
 
@@ -47,6 +58,27 @@ public class VideoActivity extends Activity {
         view.setImageDrawable(drawable);
 
         setGIFText(R.id.face, "欢迎光临！");
+    }
+
+    private void setSurfaceContent() {
+        setContentView(R.layout.activity_surface_view);
+        final SurfaceView view = (SurfaceView)findViewById(R.id.surface_view);
+        final SurfaceHolder holder = view.getHolder();
+        holder.setFormat(PixelFormat.RGBA_8888);
+        holder.setFixedSize(401, 200);
+
+        view.postDelayed(() -> {
+            Log.i("abcd", "vw = " + view.getWidth() + ", vh = " + view.getHeight());
+//            GIFImage.nativeDraw(holder.getSurface());
+        }, 500);
+
+        ImageView imageView = (ImageView)findViewById(R.id.gray_image);
+        final Options opts = new Options();
+        opts.inMutable = true;
+        opts.inPreferredConfig = Config.ARGB_8888;
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.rgb, opts);
+        BitmapUtils.grayBitmap(bitmap);
+        imageView.setImageBitmap(bitmap);
     }
 
     @Override

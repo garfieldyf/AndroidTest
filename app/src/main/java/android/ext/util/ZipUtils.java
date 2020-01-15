@@ -229,7 +229,7 @@ public final class ZipUtils {
         // Uncompress the ZIP entry with check CRC32.
         crc.reset();
         int readBytes;
-        while ((readBytes = is.read(buffer, 0, buffer.length)) > 0) {
+        while ((readBytes = is.read(buffer, 0, buffer.length)) != -1) {
             if (cancelable.isCancelled()) {
                 return;
             }

@@ -298,7 +298,7 @@ public class DownloadRequest {
     /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
      * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The file name to write the resource, must be absolute file path.
+     * @param filename The file to write the resource, must be absolute file path.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
      * none. If the download was cancelled before it completed normally the file's contents is undefined.
      * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.

@@ -158,7 +158,7 @@ public final class CryptoUtils {
         final byte[] buffer = ByteArrayPool.sInstance.obtain();
         try {
             int readBytes;
-            while ((readBytes = source.read(buffer, 0, buffer.length)) > 0) {
+            while ((readBytes = source.read(buffer, 0, buffer.length)) != -1) {
                 cipher.update(buffer, 0, readBytes);
             }
 

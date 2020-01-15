@@ -109,7 +109,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     /**
      * Downloads the resource from the remote server write to the specified file.
      * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The file name to write the resource, must be absolute file path.
+     * @param filename The file to write the resource, must be absolute file path.
      * @param statusCode The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])

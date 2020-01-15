@@ -175,7 +175,7 @@ public final class ByteArrayBuffer extends OutputStream {
                 }
             }
 
-            if ((readBytes = is.read(data, size, count)) <= 0) {
+            if ((readBytes = is.read(data, size, count)) == -1) {
                 break;
             }
 

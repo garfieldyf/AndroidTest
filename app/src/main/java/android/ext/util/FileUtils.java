@@ -574,7 +574,7 @@ public final class FileUtils {
      */
     /* package */ static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
-            if ((readBytes = is.read(buffer, offset, buffer.length - offset)) <= 0) {
+            if ((readBytes = is.read(buffer, offset, buffer.length - offset)) == -1) {
                 // Writes the last remaining bytes of the buffer.
                 out.write(buffer, 0, offset);
                 break;

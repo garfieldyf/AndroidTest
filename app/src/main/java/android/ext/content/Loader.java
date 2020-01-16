@@ -109,7 +109,7 @@ public abstract class Loader<Key> implements Factory<Object> {
         return (task != null && task.cancel(mayInterruptIfRunning));
     }
 
-    public void dump(Context context, Printer printer) {
+    public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
         final int size = mRunningTasks.size();

@@ -163,7 +163,7 @@ public final class ProcessUtils {
          * @param context The <tt>Context</tt>.
          */
         public CrashDatabase(Context context) {
-            super(context, "crash.db", null, 1);
+            super(ContextCompat.getContext(context), "crash.db", null, 1);
         }
 
         /**
@@ -231,7 +231,7 @@ public final class ProcessUtils {
          * May be returned earlier by {@link CrashDatabase#query(long)}.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see #writeDeviceInfo(Context, JsonWriter)
+         * @see #writeDeviceInfo(JsonWriter, String)
          * @see DatabaseUtils#writeCursor(JsonWriter, Cursor, String[])
          */
         public static JsonWriter writeTo(JsonWriter writer, Cursor cursor) throws IOException {
@@ -247,19 +247,19 @@ public final class ProcessUtils {
          * "version": "4.4.4",
          * "abis": "armeabi-v7a, armeabi",
          * "package": "com.xxxx"</pre>
-         * @param context The <tt>Context</tt>.
          * @param writer The {@link JsonWriter} to write to.
+         * @param packageName The application's package name.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          * @see #writeTo(JsonWriter, Cursor)
          */
-        public static JsonWriter writeDeviceInfo(Context context, JsonWriter writer) throws IOException {
+        public static JsonWriter writeDeviceInfo(JsonWriter writer, String packageName) throws IOException {
             return writer.name("model").value(Build.MODEL)
                 .name("brand").value(Build.BRAND)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
                 .name("abis").value(getSupportedABIs())
-                .name("package").value(context.getPackageName());
+                .name("package").value(packageName);
         }
 
         private static String getSupportedABIs() {

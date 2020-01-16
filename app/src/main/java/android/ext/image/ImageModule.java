@@ -196,7 +196,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         dumpCache(printer, res, mLoaderCache, "ImageLoader");
 
         for (int i = mLoaderCache.size() - 1; i >= 0; --i) {
-            mLoaderCache.valueAt(i).dump(mContext, printer);
+            mLoaderCache.valueAt(i).dump(printer);
         }
     }
 

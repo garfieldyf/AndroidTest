@@ -1,18 +1,17 @@
 package android.ext.page;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.DebugUtils;
 import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
-import android.util.ArrayMap;
 import android.util.Printer;
 import android.view.View;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -30,9 +29,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private final int mInitialSize;
     private final int mPrefetchDistance;
 
-    private int mItemCount;
-    private final BitSet mLoadStates;
-    private final Cache<Integer, Page<E>> mPageCache;
+    /* package */ int mItemCount;
+    /* package */ final BitSet mLoadStates;
+    /* package */ Cache<Integer, Page<E>> mPageCache;
 
     /**
      * Constructor
@@ -45,7 +44,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #PageAdapter(int, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
-        this(0, initialSize, pageSize, prefetchDistance);
+        this(new ArrayMapCache<Integer, Page<E>>(8), initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -54,15 +53,28 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param maxPageCount The maximum number of pages to allow in the page cache.
      * @param initialSize The item count of the first page (pageIndex = 0).
      * @param pageSize The item count of the each page (pageIndex > 0).
-     * @param prefetchDistance Defines how far to the first or last item in the
-     * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
-     * this adapter will not prefetch data.
+     * @param prefetchDistance Defines how far to the first or last item in the page
+     * to this adapter should prefetch the data. Pass <tt>0</tt> indicates this adapter
+     * will not prefetch data.
      * @see #PageAdapter(int, int, int)
      */
     public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
+        this(maxPageCount > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPageCount) : new ArrayMapCache<Integer, Page<E>>(8), initialSize, pageSize, prefetchDistance);
+    }
+
+    /**
+     * Constructor
+     * @param pageCache The page {@link Cache}.
+     * @param initialSize The item count of the first page (pageIndex = 0).
+     * @param pageSize The item count of the each page (pageIndex > 0).
+     * @param prefetchDistance Defines how far to the first or last item in the
+     * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
+     * this adapter will not prefetch data.
+     */
+    /* package */ PageAdapter(Cache<Integer, Page<E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
         DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
-        mPageCache   = (maxPageCount > 0 ? new LruPageCache(maxPageCount) : new ArrayPageCache<E>());
+        mPageCache   = pageCache;
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
@@ -244,7 +256,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
                 startPosition = (pageIndex - 1) * mPageSize + mInitialSize;
             }
 
-            // Loads the page data and marks the page loading state.
+            // Loads the page data and sets the page loading state.
             mLoadStates.set(pageIndex);
             page = loadPage(pageIndex, startPosition, itemCount);
             if (Pages.getCount(page) > 0) {
@@ -420,16 +432,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Called when a {@link Page} removed by this adapter.
-     * @param pageIndex The index of the page.
-     * @param oldPage The removed {@link Page}.
-     */
-    protected void onPageRemoved(int pageIndex, Page<E> oldPage) {
-    }
-
-    /**
      * Prefetch the {@link Page} with the given <em>pageIndex</em> and <em>position</em>.
-     * The default implementation load the previous and next page data from the current page.
+     * The default implementation load the previous and next page near by the current page.
      * @param pageIndex The index of the current page.
      * @param position The index of the item in the page.
      * @param prefetchDistance Defines how far to the first or last item in the page.
@@ -462,61 +466,4 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The <tt>Page</tt>, or <tt>null</tt>.
      */
     protected abstract Page<E> loadPage(int pageIndex, int startPosition, int itemCount);
-
-    /**
-     * Class <tt>LruPageCache</tt> is an implementation of a {@link SimpleLruCache}.
-     */
-    private final class LruPageCache extends SimpleLruCache<Integer, Page<E>> {
-        public LruPageCache(int maxSize) {
-            super(maxSize);
-        }
-
-        @Override
-        public void clear() {
-            trimToSize(-1);
-        }
-
-        @Override
-        protected void entryRemoved(boolean evicted, Integer pageIndex, Page<E> oldPage, Page<E> newPage) {
-            if (evicted || oldPage != newPage) {
-                onPageRemoved(pageIndex, oldPage);
-            }
-        }
-    }
-
-    /**
-     * Class <tt>ArrayPageCache</tt> is an implementation of a {@link Cache}.
-     */
-    private static final class ArrayPageCache<E> implements Cache<Integer, Page<E>> {
-        private final ArrayMap<Integer, Page<E>> mPages;
-
-        public ArrayPageCache() {
-            mPages = new ArrayMap<Integer, Page<E>>(8);
-        }
-
-        @Override
-        public void clear() {
-            mPages.clear();
-        }
-
-        @Override
-        public Page<E> remove(Integer pageIndex) {
-            return mPages.remove(pageIndex);
-        }
-
-        @Override
-        public Page<E> get(Integer pageIndex) {
-            return mPages.get(pageIndex);
-        }
-
-        @Override
-        public Page<E> put(Integer pageIndex, Page<E> page) {
-            return mPages.put(pageIndex, page);
-        }
-
-        @Override
-        public Map<Integer, Page<E>> snapshot() {
-            return new ArrayMap<Integer, Page<E>>(mPages);
-        }
-    }
 }

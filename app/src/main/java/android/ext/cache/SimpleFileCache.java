@@ -146,7 +146,7 @@ public class SimpleFileCache implements FileCache, ScanCallback {
         return 1;
     }
 
-    /* package */ final void dump(Context context, Printer printer) {
+    /* package */ final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(256);
         final File[] files = mCacheDir.listFiles();
         final int size = ArrayUtils.getSize(files);

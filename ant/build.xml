@@ -21,8 +21,8 @@
     <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
-    <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/recyclerview/recyclerview-v7.jar" />
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
+    <property name="recyclerview.v7.jar.path" value="${sdk.dir}/extras/android/support/v7/recyclerview\libs\android-support-v7-recyclerview.jar" />
 
     <condition property="compile.barcode">
         <istrue value="${compile_barcode}" />

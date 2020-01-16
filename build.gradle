@@ -36,7 +36,6 @@ def readLocalProperties() {
     // libs.dir=E\:\\Include\\java
     ext.libsDir = properties.getProperty('libs.dir')
     ext.androidStubDir = ext.libsDir + '/android/src'
-    ext.focusLayoutDir = ext.libsDir + '/focus-layout/src'
     is.close()
 }
 

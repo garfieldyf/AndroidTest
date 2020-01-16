@@ -27,8 +27,8 @@ public class VideoActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setSurfaceContent();
-//        setSpanTextContent();
+//        setSurfaceContent();
+        setSpanTextContent();
 //        setVideoContent();
     }
 

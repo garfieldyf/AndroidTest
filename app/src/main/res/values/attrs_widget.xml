@@ -40,4 +40,9 @@
         </attr>
     </declare-styleable>
 
+    <!-- FocusDrawable styleable -->
+    <declare-styleable name="FocusDrawable">
+        <attr name="focus" format="reference|color" />
+    </declare-styleable>
+
 </resources>

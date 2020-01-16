@@ -4,7 +4,6 @@ buildscript {
     repositories {
         maven { url "https://maven.aliyun.com/repository/google" }
         maven { url "https://maven.aliyun.com/repository/jcenter" }
-        google()
     }
 
     dependencies {
@@ -34,7 +33,10 @@ def readLocalProperties() {
     final InputStream is = rootProject.file('local.properties').newDataInputStream()
     Properties properties = new Properties()
     properties.load(is)
+    // libs.dir=E\:\\Include\\java
     ext.libsDir = properties.getProperty('libs.dir')
+    ext.androidStubDir = ext.libsDir + '/android/src'
+    ext.focusLayoutDir = ext.libsDir + '/focus-layout/src'
     is.close()
 }
 

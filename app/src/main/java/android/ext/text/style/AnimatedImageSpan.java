@@ -23,7 +23,7 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
      * @return The <tt>AnimatedImageSpan</tt>.
      * @see #newGIFImageSpan(View, int)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("deprecation")
     public static AnimatedImageSpan newAnimatedImageSpan(View view, int id) {
         return new AnimatedImageSpan(view, (AnimationDrawable)view.getResources().getDrawable(id));
     }

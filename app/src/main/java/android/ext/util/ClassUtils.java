@@ -55,9 +55,10 @@ public final class ClassUtils {
      * Returns the <em>packageName</em>.R.styleable.<em>name</em> field value, do not call this method directly.
      * @hide
      */
-    public static Object getFieldValue(String packageName, String name) {
+    @SuppressWarnings("unchecked")
+    public static <T> T getFieldValue(String packageName, String name) {
         try {
-            return Class.forName(packageName + ".R$styleable").getField(name).get(null);
+            return (T)Class.forName(packageName + ".R$styleable").getField(name).get(null);
         } catch (Throwable e) {
             throw new AssertionError(e);
         }

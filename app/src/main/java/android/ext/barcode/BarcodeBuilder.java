@@ -125,6 +125,7 @@ public final class BarcodeBuilder {
      * @see #logo(Drawable, int, int)
      * @see #logo(Resources, int, int)
      */
+    @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int id) {
         this.logo = res.getDrawable(id);
         return this;
@@ -140,6 +141,7 @@ public final class BarcodeBuilder {
      * @see #logo(Resources, int)
      * @see #logo(Drawable, int, int)
      */
+    @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int logoId, int sizeId) {
         this.logo = res.getDrawable(logoId);
         this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(sizeId);

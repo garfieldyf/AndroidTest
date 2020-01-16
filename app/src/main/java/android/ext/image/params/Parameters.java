@@ -62,10 +62,10 @@ public class Parameters {
      */
     public Parameters(Context context, AttributeSet attrs) {
         final String packageName = context.getPackageName();
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(packageName, "Parameters"));
-        this.value   = fixSampleSize(a.getInt((int)ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
-        this.config  = a.getInt((int)ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
-        this.mutable = a.getBoolean((int)ClassUtils.getFieldValue(packageName, "Parameters_mutable"), false);
+        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "Parameters"));
+        this.value   = fixSampleSize(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
+        this.config  = a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
+        this.mutable = a.getBoolean(ClassUtils.getFieldValue(packageName, "Parameters_mutable"), false);
         a.recycle();
     }
 

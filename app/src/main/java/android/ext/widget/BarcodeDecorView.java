@@ -51,23 +51,23 @@ public class BarcodeDecorView extends View {
         final String packageName = context.getPackageName();
         final DisplayMetrics dm  = getResources().getDisplayMetrics();
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, (int[])ClassUtils.getFieldValue(packageName, "BarcodeDecorView"));
-        mMaskColor    = a.getColor((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_maskColor"), 0x80000000);
-        mBorderColor  = a.getColor((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_borderColor"), 0xff808080);
-        mCornerColor  = a.getColor((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_cornerColor"), 0xff80ff00);
+        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "BarcodeDecorView"));
+        mMaskColor    = a.getColor(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_maskColor"), 0x80000000);
+        mBorderColor  = a.getColor(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_borderColor"), 0xff808080);
+        mCornerColor  = a.getColor(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_cornerColor"), 0xff80ff00);
         mCornerWidth  = getDimension(packageName, "BarcodeDecorView_cornerWidth", a, 15, TypedValue.COMPLEX_UNIT_DIP, dm);
         mCornerHeight = getDimension(packageName, "BarcodeDecorView_cornerHeight", a, 3, TypedValue.COMPLEX_UNIT_DIP, dm);
 
-        mText = a.getText((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_android_text"));
-        mTextColor  = a.getColor((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_android_textColor"), 0xffa4a4a4);
+        mText = a.getText(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_android_text"));
+        mTextColor  = a.getColor(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_android_textColor"), 0xffa4a4a4);
         mTextOffset = getDimension(packageName, "BarcodeDecorView_textOffset", a, 20, TypedValue.COMPLEX_UNIT_DIP, dm);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setTextSize(getDimension(packageName, "BarcodeDecorView_android_textSize", a, 15, TypedValue.COMPLEX_UNIT_SP, dm));
         mPaint.setStrokeWidth(getDimension(packageName, "BarcodeDecorView_borderWidth", a, 1, TypedValue.COMPLEX_UNIT_DIP, dm));
 
-        mScanningIndicator = a.getDrawable((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_scanningIndicator"));
-        mScanningIndicatorHeight = a.getDimensionPixelOffset((int)ClassUtils.getFieldValue(packageName, "BarcodeDecorView_scanningIndicatorHeight"), 0);
+        mScanningIndicator = a.getDrawable(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_scanningIndicator"));
+        mScanningIndicatorHeight = a.getDimensionPixelOffset(ClassUtils.getFieldValue(packageName, "BarcodeDecorView_scanningIndicatorHeight"), 0);
 
         if (mScanningIndicatorHeight <= 0 && mScanningIndicator != null) {
             mScanningIndicatorHeight = mScanningIndicator.getIntrinsicHeight();
@@ -269,6 +269,7 @@ public class BarcodeDecorView extends View {
      * @see #getScanningIndicator()
      * @see #setScanningIndicator(Drawable)
      */
+    @SuppressWarnings("deprecation")
     public final void setScanningIndicator(int resId) {
         setScanningIndicator(getResources().getDrawable(resId));
     }
@@ -373,7 +374,7 @@ public class BarcodeDecorView extends View {
     }
 
     private static float getDimension(String packageName, String name, TypedArray array, float defaultValue, int unit, DisplayMetrics dm) {
-        final float value = array.getDimension((int)ClassUtils.getFieldValue(packageName, name), 0);
+        final float value = array.getDimension(ClassUtils.getFieldValue(packageName, name), 0);
         return (Float.compare(value, +0.0f) != 0 ? value : TypedValue.applyDimension(unit, defaultValue, dm));
     }
 }

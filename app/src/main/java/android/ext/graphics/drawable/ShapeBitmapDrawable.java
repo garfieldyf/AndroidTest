@@ -48,7 +48,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
      * @hide
      */
     public final void setBitmap(Bitmap bitmap) {
-        mFlags |= FLAG_GRAVITY;
+        mFlags |= FLAG_BOUNDS;
         mState.setBitmap(bitmap);
         invalidateSelf(mState.mShader, true);
         DebugUtils.__checkDebug(true, getClass().getName(), "setBitmap() - " + bitmap);

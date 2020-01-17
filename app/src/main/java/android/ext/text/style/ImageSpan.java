@@ -52,8 +52,9 @@ public class ImageSpan extends ReplacementSpan {
 
     @Override
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
+        final int left = (int)x + mPaddingLeft;
         final int dy = (bottom - top - mDrawable.getIntrinsicHeight()) / 2;
-        mDrawable.setBounds((int)x + mPaddingLeft + 1, top + dy + 1, (int)x + mPaddingLeft + mDrawable.getIntrinsicWidth() - 1, bottom - dy - 1);
+        mDrawable.setBounds(left + 1, top + dy + 1, left + mDrawable.getIntrinsicWidth() - 1, bottom - dy - 1);
         mDrawable.draw(canvas);
     }
 }

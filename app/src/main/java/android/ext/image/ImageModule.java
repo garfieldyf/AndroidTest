@@ -42,6 +42,7 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import java.nio.ByteOrder;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +85,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      */
     /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+        DebugUtils.__checkDebug(true, "JNI_OnLoad", "java byteOrder = " + ByteOrder.nativeOrder());
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
         mContext  = ContextCompat.getContext(context);
         mExecutor = executor;

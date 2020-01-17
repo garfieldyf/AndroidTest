@@ -42,10 +42,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void* /*reserved*/)
     verify(vm->GetEnv((void**)&env, JNI_VERSION_1_4), JNI_OK);
 
 #ifndef NDEBUG
-    const int num = 0x12345678;
+    const uint32_t num = 0x12345678;
     const char* byteOrders[] = { "BIG_ENDIAN", "LITTLE_ENDIAN" };
-    const int index = (*((const char*)&num) == 0x12 ? 0 : 1);
-    LOGD("sdk = %d, sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, byteOrder = %s\n", ::android_get_device_api_level(), sizeof(void*), sizeof(int), sizeof(long), byteOrders[index]);
+    const uint32_t index = (*((const char*)&num) == 0x12 ? 0 : 1);
+    LOGD("sdk = %d, sizeof(void*) = %zu, sizeof(int) = %zu, sizeof(long) = %zu, sizeof(Color) = %zu, native byteOrder = %s\n", ::android_get_device_api_level(), sizeof(void*), sizeof(int), sizeof(long), sizeof(__NS::Color), byteOrders[index]);
 #endif  // NDEBUG
 
 #ifdef __BUILD_GIFIMAGE__

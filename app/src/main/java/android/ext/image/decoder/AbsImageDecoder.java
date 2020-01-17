@@ -13,7 +13,7 @@ import android.util.Log;
  * Abstract class <tt>AbsImageDecoder</tt>
  * @author Garfield
  */
-public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Object> {
+public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -50,7 +50,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @see #decodeImage(Object, Object[], int, Options)
      */
     @Override
-    public Object decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
+    public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
             // Decodes the image bounds.

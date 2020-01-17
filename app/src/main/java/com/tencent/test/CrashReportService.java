@@ -100,7 +100,7 @@ public final class CrashReportService extends Service {
             final JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
             try {
                 writer.beginObject();
-                CrashDatabase.writeDeviceInfo(CrashReportService.this, writer);
+                CrashDatabase.writeDeviceInfo(writer, getPackageName());
                 CrashDatabase.writeTo(writer.name("crashes"), (Cursor)params[0]);
                 writer.endObject();
             } finally {

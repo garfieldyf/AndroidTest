@@ -33,7 +33,8 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
      * @see #PagedList(Collection)
      */
     public PagedList() {
-        this(0);
+        mPages = EMPTY_OBJECT_ARRAY;
+        mPositions = EMPTY_INT_ARRAY;
     }
 
     /**

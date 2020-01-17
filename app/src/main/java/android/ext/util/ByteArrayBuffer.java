@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 /**
- * Class ByteArrayBuffer
+ * Like as <tt>ByteArrayOutputStream</tt>, but this class is <b>not</b> thread-safely.
  * @author Garfield
  */
 public final class ByteArrayBuffer extends OutputStream {
@@ -66,7 +66,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #array()
      */
     public final byte[] toByteArray() {
-        return (size > 0 ? ArrayUtils.<byte[]>copyOf(data, size, size) : EMPTY_BYTE_ARRAY);
+        return ArrayUtils.copyOf(data, size, size);
     }
 
     /**

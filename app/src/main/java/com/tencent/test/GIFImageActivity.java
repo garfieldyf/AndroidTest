@@ -43,7 +43,7 @@ public class GIFImageActivity extends Activity {
         super.onDestroy();
 
         final Printer printer = new LogPrinter(Log.DEBUG, "aaaa");
-        mImageLoader.dump(this, printer);
+        mImageLoader.dump(printer);
         mImageLoader.shutdown();
     }
 

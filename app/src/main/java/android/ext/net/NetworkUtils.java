@@ -19,7 +19,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Formatter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -204,14 +203,16 @@ public final class NetworkUtils {
      * @see #dumpResponseHeaders(URLConnection, Printer)
      */
     public static void dumpRequestHeaders(URLConnection conn, Printer printer) {
-        final Map<String, List<String>> headers = new HashMap<String, List<String>>(conn.getRequestProperties());
-        headers.put("Read-Timeout", Collections.singletonList(Integer.toString(conn.getReadTimeout())));
-        headers.put("Connect-Timeout", Collections.singletonList(Integer.toString(conn.getConnectTimeout())));
+        final Map<String, Object> extraHeaders = new HashMap<String, Object>();
+        extraHeaders.put("Read-Timeout", Collections.singletonList(conn.getReadTimeout()));
+        extraHeaders.put("Connect-Timeout", Collections.singletonList(conn.getConnectTimeout()));
         if (conn instanceof HttpURLConnection) {
-            headers.put("Redirects", Collections.singletonList(Boolean.toString(((HttpURLConnection)conn).getInstanceFollowRedirects())));
+            final HttpURLConnection connection = (HttpURLConnection)conn;
+            extraHeaders.put("Method", Collections.singletonList(connection.getRequestMethod()));
+            extraHeaders.put("Redirects", Collections.singletonList(connection.getInstanceFollowRedirects()));
         }
 
-        dumpHeaders(conn, printer, " %s Request Headers ", headers);
+        dumpHeaders(printer, conn.getURL(), " %s Request Headers ", conn.getRequestProperties(), extraHeaders);
     }
 
     /**
@@ -221,26 +222,32 @@ public final class NetworkUtils {
      * @see #dumpRequestHeaders(URLConnection, Printer)
      */
     public static void dumpResponseHeaders(URLConnection conn, Printer printer) {
-        dumpHeaders(conn, printer, " %s Response Headers ", conn.getHeaderFields());
+        dumpHeaders(printer, conn.getURL(), " %s Response Headers ", conn.getHeaderFields(), null);
     }
 
     /**
      * Prints the contents of the connection headers.
      */
-    private static void dumpHeaders(URLConnection conn, Printer printer, String format, Map<String, List<String>> headers) {
-        final URL url = conn.getURL();
-        final StringBuilder result = new StringBuilder(80);
-        DebugUtils.dumpSummary(printer, result, 80, format, url.getProtocol().toUpperCase(Locale.getDefault()));
-        result.setLength(0);
-        printer.println(result.append("  URL = ").append(url.toString()).toString());
-
+    private static void dumpHeaders(Printer printer, StringBuilder result, Map<String, ?> headers) {
         if (ArrayUtils.getSize(headers) > 0) {
-            for (Entry<String, List<String>> header : headers.entrySet()) {
+            for (Entry<String, ?> header : headers.entrySet()) {
                 result.setLength(0);
-                result.append("  ").append(header.getKey()).append(" = ").append(header.getValue().toString());
+                result.append("  ").append(header.getKey()).append(" = ").append(header.getValue());
                 printer.println(result.toString());
             }
         }
+    }
+
+    /**
+     * Prints the contents of the connection headers.
+     */
+    private static void dumpHeaders(Printer printer, URL url, String format, Map<String, ?> headers, Map<String, ?> extraHeaders) {
+        final StringBuilder result = new StringBuilder(80);
+        DebugUtils.dumpSummary(printer, result, 80, format, url.getProtocol().toUpperCase(Locale.getDefault()));
+        printer.println("  URL = " + url.toString());
+
+        dumpHeaders(printer, result, headers);
+        dumpHeaders(printer, result, extraHeaders);
     }
 
     /**

@@ -218,7 +218,7 @@ public final class AsyncViewStub extends View {
          * @param context The <tt>Context</tt>.
          */
         public BasicLayoutInflater(Context context) {
-            super(context.getApplicationContext());
+            super(context);
         }
 
         @Override

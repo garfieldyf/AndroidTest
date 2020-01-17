@@ -29,7 +29,7 @@ public final class JsonLoader {
     public static class URLLoadParams implements LoadParams<String, JSONObject> {
         @Override
         public DownloadRequest newDownloadRequest(Context context, String url) throws Exception {
-            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
+            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).accept("*/*");
         }
 
         @Override

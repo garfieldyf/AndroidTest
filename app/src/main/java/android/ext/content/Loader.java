@@ -1,6 +1,5 @@
 package android.ext.content;
 
-import android.content.Context;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;

@@ -4,6 +4,7 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
+import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -29,9 +30,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private final int mInitialSize;
     private final int mPrefetchDistance;
 
-    /* package */ int mItemCount;
-    /* package */ final BitSet mLoadStates;
-    /* package */ Cache<Integer, Page<E>> mPageCache;
+    private int mItemCount;
+    private final BitSet mLoadStates;
+    private final Cache<Integer, List<E>> mPageCache;
 
     /**
      * Constructor
@@ -44,7 +45,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #PageAdapter(int, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
-        this(new ArrayMapCache<Integer, Page<E>>(8), initialSize, pageSize, prefetchDistance);
+        this(0, initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -59,22 +60,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #PageAdapter(int, int, int)
      */
     public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
-        this(maxPageCount > 0 ? new SimpleLruCache<Integer, Page<E>>(maxPageCount) : new ArrayMapCache<Integer, Page<E>>(8), initialSize, pageSize, prefetchDistance);
-    }
-
-    /**
-     * Constructor
-     * @param pageCache The page {@link Cache}.
-     * @param initialSize The item count of the first page (pageIndex = 0).
-     * @param pageSize The item count of the each page (pageIndex > 0).
-     * @param prefetchDistance Defines how far to the first or last item in the
-     * page to this adapter should prefetch the data. Pass <tt>0</tt> indicates
-     * this adapter will not prefetch data.
-     */
-    /* package */ PageAdapter(Cache<Integer, Page<E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
         DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
-        mPageCache   = pageCache;
+        mPageCache   = (maxPageCount > 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount) : new ArrayMapCache<Integer, List<E>>(8));
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
@@ -105,7 +93,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the item when the
+     * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the item when the
      * item was not present.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
@@ -117,12 +105,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
         final int pageIndex = Pages.getOriginalPage(combinedPosition);
-        final Page<E> page  = getPage(pageIndex);
+        final List<E> page  = getPage(pageIndex);
         if (mPrefetchDistance > 0) {
             prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
         }
 
-        return (page != null ? page.getItem((int)combinedPosition) : null);
+        return (page != null ? page.get((int)combinedPosition) : null);
     }
 
     /**
@@ -154,7 +142,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Equivalent to calling <tt>setItem(position, value, null)</tt>.
      * @param position The adapter position of the item in this adapter.
-     * @param value The value to set. Never <tt>null</tt>.
+     * @param value The value to set.
      * @return The previous item at the specified <em>position</em>
      * or <tt>null</tt> if the item not found.
      * @see #setItem(int, E, Object)
@@ -169,21 +157,20 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when
      * the item was not present.</p>
      * @param position The adapter position of the item in this adapter.
-     * @param value The value to set. Never <tt>null</tt>.
+     * @param value The value to set.
      * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
      * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
      * @see #setItem(int, E)
      */
     public E setItem(int position, E value, Object payload) {
         DebugUtils.__checkUIThread("setItem");
-        DebugUtils.__checkError(value == null, "value == null");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
 
         E previous = null;
         final long combinedPosition = getPageForPosition(position);
-        final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
+        final List<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
         if (page != null) {
-            previous = page.setItem((int)combinedPosition, value);
+            previous = page.set((int)combinedPosition, value);
             postNotifyItemRangeChanged(position, 1, payload);
         }
 
@@ -203,8 +190,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("peekItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final Page<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
-        return (page != null ? page.getItem((int)combinedPosition) : null);
+        final List<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
+        return (page != null ? page.get((int)combinedPosition) : null);
     }
 
     /**
@@ -234,17 +221,18 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns the {@link Page} associated with the specified <em>pageIndex</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to obtain the page when the
-     * page was not present.</p>
+     * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
+     * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the page
+     * when the page was not present.</p>
      * @param pageIndex The index of the page.
-     * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
+     * @return The page at the specified index, or <tt>null</tt> if there was not present.
      * @see #peekPage(int)
      */
-    public Page<E> getPage(int pageIndex) {
+    @SuppressWarnings("unchecked")
+    public List<E> getPage(int pageIndex) {
         DebugUtils.__checkUIThread("getPage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
-        Page<E> page = mPageCache.get(pageIndex);
+        List<E> page = mPageCache.get(pageIndex);
         if (page == null && !mLoadStates.get(pageIndex)) {
             // Computes the startPosition and itemCount to load.
             final int startPosition, itemCount;
@@ -258,8 +246,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
             // Loads the page data and sets the page loading state.
             mLoadStates.set(pageIndex);
-            page = loadPage(pageIndex, startPosition, itemCount);
-            if (Pages.getCount(page) > 0) {
+            page = (List<E>)loadPage(pageIndex, startPosition, itemCount);
+            if (ArrayUtils.getSize(page) > 0) {
                 // Clears the page loading state.
                 mLoadStates.clear(pageIndex);
                 mPageCache.put(pageIndex, page);
@@ -270,97 +258,71 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns the {@link Page} associated with the specified <em>pageIndex</em> in this adapter.
-     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int)} when
-     * the page was not present.</p>
+     * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
+     * <p>Unlike {@link #getPage}, this method do not call {@link #loadPage(int, int, int)}
+     * when the page was not present.</p>
      * @param pageIndex The index of the page.
-     * @return The <tt>Page</tt> at the specified index, or <tt>null</tt> if there was not present.
+     * @return The page at the specified index, or <tt>null</tt> if there was not present.
      * @see #getPage(int)
      */
-    public Page<E> peekPage(int pageIndex) {
+    public List<E> peekPage(int pageIndex) {
         DebugUtils.__checkUIThread("peekPage");
         return mPageCache.get(pageIndex);
     }
 
     /**
-     * Equivalent to calling <tt>setPage(pageIndex, Pages.newPage(pageData), null)</tt>.
-     * @param pageIndex The index of the page.
-     * @param pageData May be <tt>null</tt>. The page data to add.
-     * @see Pages#newPage(List)
-     * @see #setPage(int, Page)
-     * @see #setPage(int, Page, Object)
-     */
-    public final void setPage(int pageIndex, List<?> pageData) {
-        setPage(pageIndex, Pages.newPage(pageData), null);
-    }
-
-    /**
      * Equivalent to calling <tt>setPage(pageIndex, page, null)</tt>.
      * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
-     * @see #setPage(int, List)
-     * @see #setPage(int, Page, Object)
+     * @param page May be <tt>null</tt>. The page to add.
+     * @see #setPage(int, List, Object)
      */
-    public final void setPage(int pageIndex, Page<? extends E> page) {
+    public final void setPage(int pageIndex, List<?> page) {
         setPage(pageIndex, page, null);
     }
 
     /**
-     * Sets the {@link Page} at the specified <em>pageIndex</em> in this adapter.
-     * This method will be call {@link #notifyItemRangeChanged(int, int, Object)}
+     * Sets the page at the specified <em>pageIndex</em> in this adapter. This
+     * method will be call {@link #notifyItemRangeChanged(int, int, Object)}
      * when the <em>page</em> has added. <p>This is useful when asynchronously
      * loading to prevent blocking the UI.</p>
      * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
+     * @param page May be <tt>null</tt>. The page to add.
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
      * @see #setPage(int, List)
-     * @see #setPage(int, Page)
      */
     @SuppressWarnings("unchecked")
-    public void setPage(int pageIndex, Page<? extends E> page, Object payload) {
+    public void setPage(int pageIndex, List<?> page, Object payload) {
         DebugUtils.__checkUIThread("setPage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
 
         // Clears the page loading state when the page is load complete.
         mLoadStates.clear(pageIndex);
-        final int itemCount = Pages.getCount(page);
+        final int itemCount = ArrayUtils.getSize(page);
         if (itemCount > 0) {
-            mPageCache.put(pageIndex, (Page<E>)page);
+            mPageCache.put(pageIndex, (List<E>)page);
             postNotifyItemRangeChanged(getPositionForPage(pageIndex), itemCount, payload);
         }
     }
 
 //    /**
-//     * Equivalent to calling <tt>addPage(pageIndex, Pages.newPage(pageData))</tt>.
-//     * @param pageIndex The index of the page.
-//     * @param pageData May be <tt>null</tt>. The page data to add.
-//     * @see Pages#newPage(List)
-//     * @see #addPage(int, Page)
-//     */
-//    public final void addPage(int pageIndex, List<?> pageData) {
-//        addPage(pageIndex, Pages.newPage(pageData));
-//    }
-//
-//    /**
-//     * Adds the {@link Page} at the specified <em>pageIndex</em> in this adapter.
-//     * This method will be call {@link #notifyItemRangeInserted(int, int)} when
-//     * the <em>page</em> has added. <p>This is useful when asynchronously loading
+//     * Adds the page at the specified <em>pageIndex</em> in this adapter. This
+//     * method will be call {@link #notifyItemRangeInserted(int, int)} when the
+//     * <em>page</em> has added. <p>This is useful when asynchronously loading
 //     * to prevent blocking the UI.</p>
 //     * @param pageIndex The index of the page.
-//     * @param page May be <tt>null</tt>. The <tt>Page</tt> to add.
-//     * @see #addPage(int, List)
+//     * @param page May be <tt>null</tt>. The page to add.
 //     */
 //    @SuppressWarnings("unchecked")
-//    public void addPage(int pageIndex, Page<? extends E> page) {
+//    public void addPage(int pageIndex, List<?> page) {
 //        DebugUtils.__checkUIThread("addPage");
 //        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
 //
 //        // Clears the page loading state when the page is load complete.
 //        mLoadStates.clear(pageIndex);
-//        final int itemCount = Pages.getCount(page);
+//        final int itemCount = ArrayUtils.getSize(page);
 //        if (itemCount > 0) {
 //            mItemCount += itemCount;
-//            mPageCache.put(pageIndex, (Page<E>)page);
+//            mPageCache.put(pageIndex, (List<E>)page);
 //            postNotifyItemRangeInserted(getPositionForPage(pageIndex), itemCount);
 //        }
 //    }
@@ -416,24 +378,24 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("dump");
         final StringBuilder result = new StringBuilder(128);
         final Formatter formatter  = new Formatter(result);
-        final Set<Entry<Integer, Page<E>>> entries = mPageCache.snapshot().entrySet();
+        final Set<Entry<Integer, List<E>>> entries = mPageCache.snapshot().entrySet();
 
         DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
         result.setLength(0);
         printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
 
-        for (Entry<Integer, Page<E>> entry : entries) {
-            final Page<E> page = entry.getValue();
+        for (Entry<Integer, List<E>> entry : entries) {
+            final List<E> page = entry.getValue();
             result.setLength(0);
 
             formatter.format("    Page %-2d ==> ", entry.getKey());
-            printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+            printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.size()).append(" }").toString());
         }
     }
 
     /**
-     * Prefetch the {@link Page} with the given <em>pageIndex</em> and <em>position</em>.
-     * The default implementation load the previous and next page near by the current page.
+     * Prefetch the page with the given <em>pageIndex</em> and <em>position</em>. The
+     * default implementation load the previous and next page near by the current page.
      * @param pageIndex The index of the current page.
      * @param position The index of the item in the page.
      * @param prefetchDistance Defines how far to the first or last item in the page.
@@ -455,15 +417,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns the {@link Page} at the given the <em>pageIndex</em>. Subclasses
-     * must implement this method to return <tt>Page</tt> for a particular page.
-     * <p>If you want to asynchronously load the page data to prevent blocking
-     * the UI, it is possible to return <tt>null</tt> and at a later time call
-     * {@link #setPage(int, Page, Object)}.<p>
+     * Returns a page at the given the <em>pageIndex</em>. Subclasses must implement
+     * this method to return <tt>List</tt> for a particular page. <p>If you want to
+     * asynchronously load the page data to prevent blocking the UI, it is possible
+     * to return <tt>null</tt> and at a later time call {@link #setPage}.<p>
      * @param pageIndex The index of the page whose data should be returned.
      * @param startPosition The starting position of the page within this adapter.
      * @param itemCount The number of items to load.
-     * @return The <tt>Page</tt>, or <tt>null</tt>.
+     * @return The page, or <tt>null</tt>.
      */
-    protected abstract Page<E> loadPage(int pageIndex, int startPosition, int itemCount);
+    protected abstract List<?> loadPage(int pageIndex, int startPosition, int itemCount);
 }

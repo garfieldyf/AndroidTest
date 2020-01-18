@@ -15,7 +15,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.annotation.CursorField;
-import android.ext.cache.Cache;
 import android.ext.content.ResourceLoader;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.database.AsyncQueryHandler;
@@ -29,8 +28,6 @@ import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
 import android.ext.net.NetworkUtils;
-import android.ext.page.Page;
-import android.ext.page.PageAdapter;
 import android.ext.page.PagedList;
 import android.ext.page.Pages;
 import android.ext.util.ArrayUtils;
@@ -69,7 +66,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
@@ -313,13 +309,13 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        BitmapUtils.dumpBitmap(this, "yf", bitmap);
     }
 
-    private static Page<String> buildPage(int index, int count) {
+    private static List<String> buildPage(int index, int count) {
         final ArrayList<String> data = new ArrayList<String>(count);
         for (int i = 0; i < count; ++i) {
             data.add("page_" + index + "_" + i);
         }
 
-        return Pages.newPage(data);
+        return data;
     }
 
     private static void forEach(Printer printer, PagedList<String> list) {
@@ -338,13 +334,13 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         }
     }
 
-    private static void addPage(PagedList<String> list, Page<String> page) {
+    private static void addPage(PagedList<String> list, List<String> page) {
         addPage(list, list.getPageCount(), page);
     }
 
-    private static void addPage(PagedList<String> list, int index, Page<String> page) {
-        final int count = Pages.getCount(page);
-        if (count > 0) {
+    private static void addPage(PagedList<String> list, int index, List<String> page) {
+        final int size = ArrayUtils.getSize(page);
+        if (size > 0) {
             final int positionStart;
             if (index == list.getPageCount()) {
                 positionStart = list.size();
@@ -354,25 +350,25 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
             list.addPage(index, page);
             Log.i("yf", " ");
-            Log.i("yf", "notifyItemRangeInserted - positionStart = " + positionStart + ", itemCount = " + count);
+            Log.i("yf", "notifyItemRangeInserted - positionStart = " + positionStart + ", itemCount = " + size);
         }
     }
 
-    private static void setPage(PagedList<String> list, int index, Page<String> page) {
-        final int count = Pages.getCount(page);
-        if (count > 0) {
+    private static void setPage(PagedList<String> list, int index, List<String> page) {
+        final int size = ArrayUtils.getSize(page);
+        if (size > 0) {
             final int positionStart = list.getPositionForPage(index);
             list.setPage(index, page);
             Log.i("yf", " ");
-            Log.i("yf", "notifyItemRangeChanged - positionStart = " + positionStart + ", itemCount = " + count);
+            Log.i("yf", "notifyItemRangeChanged - positionStart = " + positionStart + ", itemCount = " + size);
         }
     }
 
     private static void removePage(PagedList<String> list, int index) {
-        final Page<?> page = list.getPage(index);
+        final List<?> page = list.getPage(index);
         final int positionStart = list.removePage(index);
         Log.i("yf", " ");
-        Log.i("yf", "notifyItemRangeRemoved - positionStart = " + positionStart + ", itemCount = " + page.getCount());
+        Log.i("yf", "notifyItemRangeRemoved - positionStart = " + positionStart + ", itemCount = " + page.size());
     }
 
     private static void indexOf(PagedList<String> list) {
@@ -1434,38 +1430,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         @Override
         public String toString() {
             return super.toString();
-        }
-    }
-
-    private static final class JSONPageAdapter extends PageAdapter<JSONObject, ViewHolder> {
-        public JSONPageAdapter() {
-            super(30, 10, 5);
-        }
-
-        public JSONPageAdapter(Cache<Integer, Page<JsonObject>> pageCache) {
-            super(30, 10, 5);
-        }
-
-        public static void dumpPage(Printer printer) {
-            final JSONArray data = new JSONArray();
-            data.add(0, new JsonObject());
-            data.add(1, new JsonObject());
-            data.add(2, new JsonObject());
-            data.add(3, new JsonObject());
-        }
-
-        @Override
-        public Page<JSONObject> loadPage(int page, int offset, int count) {
-            return null;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
         }
     }
 }

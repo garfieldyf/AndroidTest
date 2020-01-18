@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Formatter;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Class <tt>PagedList</tt> allows to adding data by page. This class
@@ -20,11 +21,11 @@ import java.util.Iterator;
 public class PagedList<E> extends AbstractList<E> implements Cloneable {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
     private static final int[] EMPTY_INT_ARRAY = new int[0];
-    private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
+    private static final List[] EMPTY_LIST_ARRAY = new List[0];
 
     /* package */ int mItemCount;
     /* package */ int mPageCount;
-    /* package */ Object[] mPages;
+    /* package */ List[] mPages;
     /* package */ int[] mPositions;
 
     /**
@@ -33,41 +34,41 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
      * @see #PagedList(Collection)
      */
     public PagedList() {
-        mPages = EMPTY_OBJECT_ARRAY;
+        mPages = EMPTY_LIST_ARRAY;
         mPositions = EMPTY_INT_ARRAY;
     }
 
     /**
      * Constructor
-     * @param capacity The initial capacity of the page.
+     * @param capacity The initial capacity of this <tt>PagedList</tt>.
      * @see #PagedList()
      * @see #PagedList(Collection)
      */
     public PagedList(int capacity) {
         DebugUtils.__checkError(capacity < 0, "capacity < 0");
         if (capacity == 0) {
-            mPages = EMPTY_OBJECT_ARRAY;
+            mPages = EMPTY_LIST_ARRAY;
             mPositions = EMPTY_INT_ARRAY;
         } else {
-            mPages = new Object[capacity];
+            mPages = new List[capacity];
             mPositions = new int[capacity];
         }
     }
 
     /**
      * Constructor
-     * @param pages The collection of {@link Page}s to add.
+     * @param pages The collection of pages to add.
      * @see #PagedList()
      * @see #PagedList(int)
      */
-    public PagedList(Collection<? extends Page<? extends E>> pages) {
+    public PagedList(Collection<? extends List<?>> pages) {
         this(pages.size());
 
         // Adds the page collection to mPages.
-        for (Page<? extends E> page : pages) {
+        for (List<?> page : pages) {
             mPages[mPageCount] = page;
             mPositions[mPageCount++] = mItemCount;
-            mItemCount += page.getCount();
+            mItemCount += page.size();
         }
     }
 
@@ -93,13 +94,13 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
     @Override
     public E get(int position) {
         final long combinedPosition = getPageForPosition(position);
-        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).getItem((int)combinedPosition);
+        return (E)mPages[Pages.getOriginalPage(combinedPosition)].get((int)combinedPosition);
     }
 
     @Override
     public E set(int position, E value) {
         final long combinedPosition = getPageForPosition(position);
-        return ((Page<E>)mPages[Pages.getOriginalPage(combinedPosition)]).setItem((int)combinedPosition, value);
+        return (E)mPages[Pages.getOriginalPage(combinedPosition)].set((int)combinedPosition, value);
     }
 
     /**
@@ -112,34 +113,34 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
     }
 
     /**
-     * Returns the {@link Page} at the specified <em>pageIndex</em> in this <tt>PagedList</tt>.
+     * Returns the page at the specified <em>pageIndex</em> in this <tt>PagedList</tt>.
      * @param pageIndex The index of the page.
-     * @return The {@link Page} at the specified <em>pageIndex</em>.
+     * @return The {@link List} at the specified <em>pageIndex</em>.
      * @see #getPageCount()
-     * @see #setPage(int, Page)
+     * @see #setPage(int, List)
      */
-    public <T extends Page<E>> T getPage(int pageIndex) {
+    public List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex = " + pageIndex + ", pageCount = " + mPageCount);
-        return (T)mPages[pageIndex];
+        return mPages[pageIndex];
     }
 
     /**
      * Replaces the page at the specified <em>pageIndex</em> in this
      * <tt>PagedList</tt> with the specified <em>page</em>.
      * @param pageIndex The index at which to put the <em>page</em>.
-     * @param page The {@link Page} to put.
-     * @return The previous <tt>Page</tt> at the <em>pageIndex</em>.
+     * @param page The {@link List} to put.
+     * @return The previous page at the <em>pageIndex</em>.
      * @see #getPage(int)
      */
-    public Page<E> setPage(int pageIndex, Page<? extends E> page) {
-        DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-count");
+    public List<E> setPage(int pageIndex, List<?> page) {
+        DebugUtils.__checkError(ArrayUtils.getSize(page) == 0, "The page is null or 0-size");
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex = " + pageIndex + ", pageCount = " + mPageCount);
-        final Page<E> oldPage = (Page<E>)mPages[pageIndex];
+        final List<E> oldPage = mPages[pageIndex];
         mPages[pageIndex] = page;
 
-        final int countDelta = page.getCount() - oldPage.getCount();
-        if (countDelta != 0) {
-            mItemCount += countDelta;
+        final int sizeDelta = page.size() - oldPage.size();
+        if (sizeDelta != 0) {
+            mItemCount += sizeDelta;
             DebugUtils.__checkError(mItemCount < 0, "Error: The PagedList's itemCount(" + mItemCount + ") < 0");
             computePositions(pageIndex);
         }
@@ -149,11 +150,11 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
     /**
      * Adds the specified <em>page</em> at the end of this <tt>PagedList</tt>.
-     * @param page The {@link Page} to add.
-     * @see #addPage(int, Page)
+     * @param page The {@link List} to add.
+     * @see #addPage(int, List)
      */
-    public void addPage(Page<? extends E> page) {
-        DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-count");
+    public void addPage(List<?> page) {
+        DebugUtils.__checkError(ArrayUtils.getSize(page) == 0, "The page is null or 0-size");
         if (mPageCount == mPages.length) {
             final int newLength = mPageCount + ARRAY_CAPACITY_INCREMENT;
             mPages = ArrayUtils.copyOf(mPages, mPageCount, newLength);
@@ -162,7 +163,7 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
         mPages[mPageCount] = page;
         mPositions[mPageCount++] = mItemCount;
-        mItemCount += page.getCount();
+        mItemCount += page.size();
     }
 
     /**
@@ -170,11 +171,11 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
      * is inserted before the current page at the specified <em>pageIndex</em>. If the <em>pageIndex</em> is equal to the page
      * count of this <tt>PagedList</tt>, the <em>page</em> is added at the end.
      * @param pageIndex The index at which to insert.
-     * @param page The {@link Page} to add.
-     * @see #addPage(Page)
+     * @param page The {@link List} to add.
+     * @see #addPage(List)
      */
-    public void addPage(int pageIndex, Page<? extends E> page) {
-        DebugUtils.__checkError(Pages.getCount(page) == 0, "The page is null or 0-count");
+    public void addPage(int pageIndex, List<?> page) {
+        DebugUtils.__checkError(ArrayUtils.getSize(page) == 0, "The page is null or 0-size");
         DebugUtils.__checkError(pageIndex < 0 || pageIndex > mPageCount, "Invalid pageIndex = " + pageIndex + ", pageCount = " + mPageCount);
         if (pageIndex == mPageCount) {
             addPage(page);
@@ -189,8 +190,8 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
             ++mPageCount;
             mPages[pageIndex] = page;
+            mItemCount += page.size();
             computePositions(pageIndex);
-            mItemCount += page.getCount();
         }
     }
 
@@ -201,7 +202,7 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
      */
     public int removePage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0 || pageIndex >= mPageCount, "Invalid pageIndex = " + pageIndex + ", pageCount = " + mPageCount);
-        mItemCount -= ((Page<?>)mPages[pageIndex]).getCount();
+        mItemCount -= mPages[pageIndex].size();
         System.arraycopy(mPages, pageIndex + 1, mPages, pageIndex, --mPageCount - pageIndex);
         mPages[mPageCount] = null;  // Prevent memory leak.
 
@@ -251,13 +252,13 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
         DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ size = %d, pageCount = %d ] ", getClass().getSimpleName(), mItemCount, mPageCount);
 
         for (int i = 0; i < mPageCount; ++i) {
-            final Page<?> page = (Page<?>)mPages[i];
+            final List page = mPages[i];
             result.setLength(0);
 
             final int startPos = mPositions[i];
-            final int count = page.getCount();
+            final int size = page.size();
             formatter.format("  Page %-2d ==> ", i);
-            printer.println(DebugUtils.toString(page, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + count - 1).append(", count = ").append(count).append(" }").toString());
+            printer.println(DebugUtils.toString(page, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + size - 1).append(", count = ").append(size).append(" }").toString());
         }
     }
 
@@ -273,23 +274,10 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public int indexOf(Object value) {
-        if (value != null) {
-            for (int i = 0; i < mPageCount; ++i) {
-                final Page<?> page = (Page<?>)mPages[i];
-                for (int j = 0, count = page.getCount(); j < count; ++j) {
-                    if (value.equals(page.getItem(j))) {
-                        return mPositions[i] + j;
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < mPageCount; ++i) {
-                final Page<?> page = (Page<?>)mPages[i];
-                for (int j = 0, count = page.getCount(); j < count; ++j) {
-                    if (page.getItem(j) == null) {
-                        return mPositions[i] + j;
-                    }
-                }
+        for (int i = 0; i < mPageCount; ++i) {
+            final int index = mPages[i].indexOf(value);
+            if (index != -1) {
+                return mPositions[i] + index;
             }
         }
 
@@ -298,23 +286,10 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public int lastIndexOf(Object value) {
-        if (value != null) {
-            for (int i = mPageCount - 1; i >= 0; --i) {
-                final Page<?> page = (Page<?>)mPages[i];
-                for (int j = page.getCount() - 1; j >= 0; --j) {
-                    if (value.equals(page.getItem(j))) {
-                        return mPositions[i] + j;
-                    }
-                }
-            }
-        } else {
-            for (int i = mPageCount - 1; i >= 0; --i) {
-                final Page<?> page = (Page<?>)mPages[i];
-                for (int j = page.getCount() - 1; j >= 0; --j) {
-                    if (page.getItem(j) == null) {
-                        return mPositions[i] + j;
-                    }
-                }
+        for (int i = mPageCount - 1; i >= 0; --i) {
+            final int index = mPages[i].lastIndexOf(value);
+            if (index != -1) {
+                return mPositions[i] + index;
             }
         }
 
@@ -363,9 +338,9 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
 
     private Object[] copyTo(Object[] contents) {
         for (int i = 0, index = 0; i < mPageCount; ++i) {
-            final Page<?> page = (Page<?>)mPages[i];
-            for (int j = 0, count = page.getCount(); j < count; ++j) {
-                contents[index++] = page.getItem(j);
+            final List page = mPages[i];
+            for (int j = 0, size = page.size(); j < size; ++j) {
+                contents[index++] = page.get(j);
             }
         }
 
@@ -373,17 +348,17 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
     }
 
     private int computePositions(int pageIndex) {
-        final int result = mPositions[pageIndex];
+        final int result  = mPositions[pageIndex];
         for (int position = result; pageIndex < mPageCount; ++pageIndex) {
             mPositions[pageIndex] = position;
-            position += ((Page<?>)mPages[pageIndex]).getCount();
+            position += mPages[pageIndex].size();
         }
 
         return result;
     }
 
-    private Object[] newPageArray(int pageIndex, int newLength) {
-        final Object[] newPages = new Object[newLength];
+    private List[] newPageArray(int pageIndex, int newLength) {
+        final List[] newPages = new List[newLength];
         System.arraycopy(mPages, 0, newPages, 0, pageIndex);
         System.arraycopy(mPages, pageIndex, newPages, pageIndex + 1, mPageCount - pageIndex);
         return newPages;
@@ -405,10 +380,10 @@ public class PagedList<E> extends AbstractList<E> implements Cloneable {
         public E next() {
             DebugUtils.__checkError(mPosition >= mItemCount, "NoSuchElementException");
             final int position = mPositions[mPageIndex];
-            final Page<E> page = (Page<E>)mPages[mPageIndex];
-            final E value = page.getItem(mPosition - position);
+            final List<E> page = mPages[mPageIndex];
+            final E value = page.get(mPosition - position);
 
-            if (++mPosition >= position + page.getCount()) {
+            if (++mPosition >= position + page.size()) {
                 ++mPageIndex;
             }
 

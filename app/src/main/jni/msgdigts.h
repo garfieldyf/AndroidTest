@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // msgdigts.h
 //
-// Copyright(c) 2019, Garfield. All rights reserved.
-// Author  : Garfield
-// Version : 2.0
+// Author : Garfield
 // Creation Date : 2012/12/10
 
 #ifndef __MSGDIGTS_H__

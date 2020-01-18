@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // main.cpp
 //
-// Copyright(c) 2019, Garfield. All rights reserved.
-// Author  : Garfield
-// Version : 1.0
+// Author : Garfield
 // Creation Date : 2012/4/16
 
 #ifdef __BUILD_GIFIMAGE__

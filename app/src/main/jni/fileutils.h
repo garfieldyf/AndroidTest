@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // fileutils.h
 //
-// Copyright(c) 2019, Garfield. All rights reserved.
-// Author  : Garfield
-// Version : 4.0
+// Author : Garfield
 // Creation Date : 2012/5/23
 
 #ifndef __FILEUTILS_H__

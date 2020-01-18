@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // procutils.h
 //
-// Copyright(c) 2019, Garfield. All rights reserved.
-// Author  : Garfield
-// Version : 2.0
+// Author : Garfield
 // Creation Date : 2012/4/16
 
 #ifndef __PROCUTILS_H__

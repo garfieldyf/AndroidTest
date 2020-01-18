@@ -1,9 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // bmputils.h
 //
-// Copyright(c) 2019, Garfield. All rights reserved.
-// Author  : Garfield
-// Version : 1.0
+// Author : Garfield
 // Creation Date : 2013/6/8
 
 #ifndef __BITMAPUTILS_H__

@@ -85,7 +85,7 @@ public final class ProcessUtils {
      * @return The <tt>RunningAppProcessInfo</tt> of the <em>pid</em> or <tt>null</tt>.
      */
     public static RunningAppProcessInfo getRunningProcessInfo(Context context, int pid) {
-        final List<RunningAppProcessInfo> infos = ((ActivityManager)ContextCompat.getContext(context).getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
+        final List<RunningAppProcessInfo> infos = ((ActivityManager)context.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE)).getRunningAppProcesses();
         for (int i = 0, size = ArrayUtils.getSize(infos); i < size; ++i) {
             final RunningAppProcessInfo info = infos.get(i);
             if (info.pid == pid) {
@@ -163,7 +163,7 @@ public final class ProcessUtils {
          * @param context The <tt>Context</tt>.
          */
         public CrashDatabase(Context context) {
-            super(ContextCompat.getContext(context), "crash.db", null, 1);
+            super(context, "crash.db", null, 1);
         }
 
         /**
@@ -281,7 +281,7 @@ public final class ProcessUtils {
         private final UncaughtExceptionHandler mDefaultHandler;
 
         public CrashHandler(Context context) {
-            mContext = ContextCompat.getContext(context);
+            mContext = context.getApplicationContext();
             mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
             Thread.setDefaultUncaughtExceptionHandler(this);
         }

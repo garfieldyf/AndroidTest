@@ -108,7 +108,7 @@ public final class DeviceUtils {
     }
 
     public static void dumpSystemInfo(Context context, Printer printer) {
-        context = ContextCompat.getContext(context);
+        context = context.getApplicationContext();
         final WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
         final Display display  = wm.getDefaultDisplay();
 

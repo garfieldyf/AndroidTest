@@ -84,7 +84,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
 
         @Override
         public void clear() {
-            for (int i = 0, size = mPages.size(); i < size; ++i) {
+            for (int i = mPages.size() - 1; i >= 0; --i) {
                 onPageRemoved(mPages.keyAt(i), mPages.valueAt(i));
             }
 

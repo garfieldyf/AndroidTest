@@ -27,7 +27,6 @@ import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
-import android.ext.util.ContextCompat;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.ByteArrayPool;
@@ -87,7 +86,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
         DebugUtils.__checkDebug(true, "JNI_OnLoad", "java byteOrder = " + ByteOrder.nativeOrder());
         final int maxPoolSize = computeBufferPoolMaxSize(executor);
-        mContext  = ContextCompat.getContext(context);
+        mContext  = context.getApplicationContext();
         mExecutor = executor;
         mFileCache   = fileCache;
         mImageCache  = imageCache;

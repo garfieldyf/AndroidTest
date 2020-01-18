@@ -4,7 +4,6 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
-import android.ext.util.ContextCompat;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
@@ -119,7 +118,7 @@ public abstract class AsyncLoadTask<Params, Result> extends AbsAsyncTask<Params,
      * @see #AsyncLoadTask(Activity)
      */
     public AsyncLoadTask(Context context) {
-        mContext = ContextCompat.getContext(context);
+        mContext = context.getApplicationContext();
     }
 
     /**

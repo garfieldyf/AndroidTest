@@ -136,54 +136,6 @@ public class BarcodeEncoder {
     }
 
     /**
-     * Class <tt>Encoder</tt> used to encode the contents to a barcode image.
-     */
-    private final class Encoder {
-        /* package */ Bitmap result;
-        /* package */ BitMatrix bitMatrix;
-        /* package */ final int width;
-        /* package */ final int height;
-        /* package */ final String contents;
-        /* package */ final BarcodeFormat format;
-        /* package */ final OnEncodeListener listener;
-        /* package */ final Map<EncodeHintType, ?> hints;
-
-        public Encoder(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, OnEncodeListener listener) {
-            this.hints    = hints;
-            this.width    = width;
-            this.height   = height;
-            this.format   = format;
-            this.contents = contents;
-            this.listener = listener;
-            DebugUtils.__checkError(listener == null, "listener == null");
-        }
-
-        public final Encoder encode() {
-            bitMatrix = BarcodeEncoder.this.encode(contents, format, width, height, hints);
-            if (bitMatrix != null) {
-                result = listener.convertToBitmap(bitMatrix, hints);
-            }
-
-            return this;
-        }
-    }
-
-    /**
-     * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
-     */
-    /* package */ static final class EncodeTask extends AsyncTask<Encoder, Object, Encoder> {
-        @Override
-        protected Encoder doInBackground(Encoder[] encoders) {
-            return encoders[0].encode();
-        }
-
-        @Override
-        protected void onPostExecute(Encoder encoder) {
-            encoder.listener.onEncodeComplete(encoder.bitMatrix, encoder.result);
-        }
-    }
-
-    /**
      * Class <tt>Builder</tt> to creates the barcode encoder hints.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
@@ -314,5 +266,58 @@ public class BarcodeEncoder {
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
         Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints);
+    }
+
+    /**
+     * Class <tt>Encoder</tt> used to encode the contents to a barcode image.
+     */
+    private final class Encoder {
+        private Bitmap mResult;
+        private final int mWidth;
+        private final int mHeight;
+        private BitMatrix mBitMatrix;
+        private final String mContents;
+        private OnEncodeListener mListener;
+        private final BarcodeFormat mFormat;
+        private final Map<EncodeHintType, ?> mHints;
+
+        public Encoder(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, OnEncodeListener listener) {
+            mHints    = hints;
+            mWidth    = width;
+            mHeight   = height;
+            mFormat   = format;
+            mContents = contents;
+            mListener = listener;
+            DebugUtils.__checkError(listener == null, "listener == null");
+        }
+
+        public final Encoder encode() {
+            mBitMatrix = BarcodeEncoder.this.encode(mContents, mFormat, mWidth, mHeight, mHints);
+            if (mBitMatrix != null) {
+                mResult = mListener.convertToBitmap(mBitMatrix, mHints);
+            }
+
+            return this;
+        }
+
+        public final void onEncodeComplete() {
+            mListener.onEncodeComplete(mBitMatrix, mResult);
+            mListener = null;    // Prevent memory leak.
+        }
+    }
+
+    /**
+     * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
+     */
+    /* package */ static final class EncodeTask extends AsyncTask<Encoder, Object, Encoder> {
+        @Override
+        protected Encoder doInBackground(Encoder[] encoders) {
+            return encoders[0].encode();
+        }
+
+        @Override
+        protected void onPostExecute(Encoder encoder) {
+            encoder.onEncodeComplete();
+        }
     }
 }

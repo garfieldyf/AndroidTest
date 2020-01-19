@@ -238,29 +238,6 @@ public class BarcodeDecoder {
     }
 
     /**
-     * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
-     */
-    /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
-        @Override
-        protected Object[] doInBackground(Object[] params) {
-            /*
-             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
-             */
-            DebugUtils.__checkError(params.length != 4, "params.length != 4");
-            params[3] = ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
-            return params;
-        }
-
-        @Override
-        protected void onPostExecute(Object[] result) {
-            /*
-             * result - { BarcodeDecoder, LuminanceSource, OnDecodeListener, Result }
-             */
-            ((OnDecodeListener)result[2]).onDecodeComplete((LuminanceSource)result[1], (Result)result[3]);
-        }
-    }
-
-    /**
      * Class <tt>Builder</tt> to creates the barcode decoder hints.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
@@ -387,5 +364,29 @@ public class BarcodeDecoder {
          * <tt>null</tt> otherwise.
          */
         void onDecodeComplete(LuminanceSource source, Result result);
+    }
+
+    /**
+     * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
+     */
+    /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
+        @Override
+        protected Object[] doInBackground(Object[] params) {
+            /*
+             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
+             */
+            DebugUtils.__checkError(params.length != 4, "params.length != 4");
+            params[3] = ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
+            return params;
+        }
+
+        @Override
+        protected void onPostExecute(Object[] result) {
+            /*
+             * result - { BarcodeDecoder, LuminanceSource, OnDecodeListener, Result }
+             */
+            ((OnDecodeListener)result[2]).onDecodeComplete((LuminanceSource)result[1], (Result)result[3]);
+            result[2] = null;   // Prevent memory leak.
+        }
     }
 }

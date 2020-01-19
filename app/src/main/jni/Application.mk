@@ -7,7 +7,7 @@ APP_ABI := armeabi-v7a arm64-v8a
 APP_PLATFORM := android-16
 APP_CPPFLAGS += -std=c++11
 
-ifeq ($(NDK_STL),1)
+ifeq ($(NDK_STL), 1)
 APP_STL := c++_static
 else
 APP_CPPFLAGS += -fno-rtti -fno-exceptions

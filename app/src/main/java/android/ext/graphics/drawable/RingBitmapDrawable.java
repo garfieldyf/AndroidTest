@@ -26,9 +26,8 @@ import org.xmlpull.v1.XmlPullParserException;
  */
 public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.RingBitmapState> {
     /**
-     * Constructor
-     * <p>The default constructor used by {@link Resources#getDrawable(int)},
-     * do not call this method directly.</p>
+     * The default constructor used by {@link Resources#getDrawable(int)},
+     * do not call this method directly.
      * @hide
      */
     @Keep

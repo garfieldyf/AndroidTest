@@ -9,6 +9,7 @@ import android.ext.util.DebugUtils;
 import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
+import android.view.View;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
@@ -96,6 +97,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * item was not present.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
     public E getItem(int position) {
@@ -112,10 +114,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(int)
+     * @see #getItem(ViewHolder)
+     */
+    public final E getItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != NO_POSITION ? getItem(position) : null);
+    }
+
+    /**
      * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(int)
+     * @see #getItem(View)
      */
     public final E getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
@@ -166,6 +183,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * when the item was not present.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(View)
      * @see #peekItem(ViewHolder)
      */
     public E peekItem(int position) {
@@ -177,10 +195,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Equivalent to calling <tt>peekItem(recyclerView.getChildAdapterPosition(view))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #peekItem(int)
+     * @see #peekItem(ViewHolder)
+     */
+    public final E peekItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
+        return (position != NO_POSITION ? peekItem(position) : null);
+    }
+
+    /**
      * Equivalent to calling <tt>peekItem(viewHolder.getAdapterPosition())</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #peekItem(int)
+     * @see #peekItem(View)
      */
     public final E peekItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();

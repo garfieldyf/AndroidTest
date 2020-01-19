@@ -11,6 +11,7 @@ import android.ext.util.FileUtils;
 import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.provider.BaseColumns;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.view.View;
 
 /**
  * Abstract class CursorAdapter
@@ -57,9 +58,25 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
      * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not present
      * or can not move to the specified adapter position.
      * @see #getItem(int)
+     * @see #getItem(View)
      */
     public final Cursor getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
+        return (position != NO_POSITION ? getItem(position) : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child))</tt>.
+     * @param child The child of the <tt>RecyclerView</tt> to query for the
+     * <tt>ViewHolder</tt>'s adapter position.
+     * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not present or can not move
+     * to the specified adapter position.
+     * @see #getItem(int)
+     * @see #getItem(ViewHolder)
+     */
+    public final Cursor getItem(View child) {
+        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        final int position = mRecyclerView.getChildAdapterPosition(child);
         return (position != NO_POSITION ? getItem(position) : null);
     }
 
@@ -69,6 +86,7 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
      * @param position The position of the cursor.
      * @return The <tt>Cursor</tt>, or <tt>null</tt> if there was not
      * present or can not move to the specified <em>position</em>.
+     * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
     public Cursor getItem(int position) {
@@ -191,20 +209,12 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
     }
 
     /**
-     * Called when this adapter receives a local broadcast.
-     * @param context The <tt>Context</tt>.
-     * @param intent The <tt>Intent</tt> being received.
-     */
-    protected void onContentChanged(Context context, Intent intent) {
-    }
-
-    /**
      * Class <tt>CursorReceiver</tt> is an implementation of a {@link DatabaseReceiver}.
      */
     /* package */ final class CursorReceiver extends DatabaseReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            onContentChanged(context, intent);
+            onContentChanged(intent, intent.getData(), true);
         }
     }
 }

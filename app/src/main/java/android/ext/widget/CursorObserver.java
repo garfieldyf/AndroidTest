@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
@@ -109,12 +110,12 @@ public final class CursorObserver extends ContentObserver {
 
     @Override
     public void onChange(boolean selfChange) {
-        mClient.onContentChanged(selfChange, null);
+        mClient.onContentChanged(null, null, selfChange);
     }
 
     @Override
     public void onChange(boolean selfChange, Uri uri) {
-        mClient.onContentChanged(selfChange, uri);
+        mClient.onContentChanged(null, uri, selfChange);
     }
 
     /**
@@ -123,11 +124,13 @@ public final class CursorObserver extends ContentObserver {
     public static interface CursorObserverClient {
         /**
          * Called when the {@link CursorObserver} receives a change notification.
-         * @param selfChange <tt>true</tt> if this is a self-change notification.
+         * @param intent The <tt>Intent</tt> being received from a local broadcast
+         * receiver, or <tt>null</tt>.
          * @param uri The Uri of the changed content, or <tt>null</tt> if unknown.
+         * @param selfChange <tt>true</tt> if this is a self-change notification.
          * @see ContentObserver#onChange(boolean, Uri)
          */
-        default void onContentChanged(boolean selfChange, Uri uri) {
+        default void onContentChanged(Intent intent, Uri uri, boolean selfChange) {
         }
     }
 }

@@ -3,6 +3,7 @@ package android.ext.widget;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
+import android.ext.util.DebugUtils;
 import android.net.Uri;
 import android.os.Handler;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Class <tt>CursorObserver</tt> is an implementation of a {@link ContentObserver}.
  * @author Garfield
  */
-public class CursorObserver extends ContentObserver {
+public final class CursorObserver extends ContentObserver {
     private static final int STATE_REGISTERED   = 1;
     private static final int STATE_UNREGISTERED = 0;
 
@@ -49,8 +50,9 @@ public class CursorObserver extends ContentObserver {
      * @param cursor The <tt>Cursor</tt> will be register to.
      * @see #unregister(Cursor)
      */
-    public void register(Cursor cursor) {
+    public final void register(Cursor cursor) {
         if (mState.compareAndSet(STATE_UNREGISTERED, STATE_REGISTERED)) {
+            DebugUtils.__checkDebug(true, "CursorObserver", "register to Cursor");
             cursor.registerContentObserver(this);
         }
     }
@@ -61,8 +63,9 @@ public class CursorObserver extends ContentObserver {
      * @param cursor The <tt>Cursor</tt> will be unregister to.
      * @see #register(Cursor)
      */
-    public void unregister(Cursor cursor) {
+    public final void unregister(Cursor cursor) {
         if (mState.compareAndSet(STATE_REGISTERED, STATE_UNREGISTERED)) {
+            DebugUtils.__checkDebug(true, "CursorObserver", "unregister to Cursor");
             cursor.unregisterContentObserver(this);
         }
     }
@@ -79,8 +82,9 @@ public class CursorObserver extends ContentObserver {
      * to the exact URI specified by uri will cause notifications to be sent.
      * @see #unregister(Context)
      */
-    public void register(Context context, Uri uri, boolean notifyForDescendents) {
+    public final void register(Context context, Uri uri, boolean notifyForDescendents) {
         if (mState.compareAndSet(STATE_UNREGISTERED, STATE_REGISTERED)) {
+            DebugUtils.__checkDebug(true, "CursorObserver", "register to ContentResolver");
             context.getContentResolver().registerContentObserver(uri, notifyForDescendents, this);
         }
     }
@@ -91,8 +95,9 @@ public class CursorObserver extends ContentObserver {
      * @param context The <tt>Context</tt>.
      * @see #register(Context, Uri, boolean)
      */
-    public void unregister(Context context) {
+    public final void unregister(Context context) {
         if (mState.compareAndSet(STATE_REGISTERED, STATE_UNREGISTERED)) {
+            DebugUtils.__checkDebug(true, "CursorObserver", "unregister to ContentResolver");
             context.getContentResolver().unregisterContentObserver(this);
         }
     }
@@ -103,8 +108,8 @@ public class CursorObserver extends ContentObserver {
     }
 
     @Override
-    public final void onChange(boolean selfChange) {
-        onChange(selfChange, null);
+    public void onChange(boolean selfChange) {
+        mClient.onContentChanged(selfChange, null);
     }
 
     @Override

@@ -1,9 +1,10 @@
 package com.tencent.temp;
 
+import android.content.Intent;
 import android.database.Cursor;
+import android.ext.database.CursorObserver;
+import android.ext.database.CursorObserver.CursorObserverClient;
 import android.ext.util.FileUtils;
-import android.ext.widget.CursorObserver;
-import android.ext.widget.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.util.SparseArray;
@@ -326,7 +327,7 @@ public abstract class ExpandableCursorAdapter extends BaseExpandableListAdapter 
         }
 
         @Override
-        public void onContentChanged(boolean selfChange, Uri uri) {
+        public void onContentChanged(Intent intent, Uri uri, boolean selfChange) {
             final int groupPosition = findGroupPosition(this);
             if (groupPosition >= 0) {
                 final Cursor cursor = getChildrenCursor(groupPosition, uri);

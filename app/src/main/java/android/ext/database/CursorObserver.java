@@ -1,10 +1,11 @@
-package android.ext.widget;
+package android.ext.database;
 
 import android.content.Context;
 import android.content.Intent;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
+import android.ext.widget.UIHandler;
 import android.net.Uri;
 import android.os.Handler;
 import java.util.concurrent.atomic.AtomicInteger;

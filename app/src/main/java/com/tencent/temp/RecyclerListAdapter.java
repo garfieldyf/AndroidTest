@@ -2,7 +2,7 @@ package com.tencent.temp;
 
 import android.content.Context;
 import android.database.DataSetObserver;
-import android.ext.widget.CursorObserver.CursorObserverClient;
+import android.ext.database.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;

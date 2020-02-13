@@ -1,8 +1,8 @@
 package com.tencent.temp;
 
 import android.content.Context;
-import android.ext.widget.CursorObserver;
-import android.ext.widget.CursorObserver.CursorObserverClient;
+import android.ext.database.CursorObserver;
+import android.ext.database.CursorObserver.CursorObserverClient;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;

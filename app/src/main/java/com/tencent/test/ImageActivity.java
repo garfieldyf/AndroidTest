@@ -61,6 +61,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.Uri.Builder;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
@@ -1218,6 +1219,33 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
     }
 
+    private static Builder buildUri(String baseUri) {
+        return Uri.parse(baseUri).buildUpon()
+            .appendQueryParameter("isBackYingHome", "false")
+            .appendQueryParameter("from", "com.bestv.ott");
+    }
+
+    private void start() {
+        try {
+//            String uri = "wasuott://tv/home?from=other";
+            String uri = "wasuott://tv/my_yingshi";
+            uri = "wasuott://tv/search?url=tv/v3/search";
+            uri = "wasuott://tv/yingshi_detail";//?id=xxx&isfull=xxx&fullback=xxx&subItem=xxx&from=xxx";
+            uri = "wasuott://tv/actor_detail";//?personId=xxx&from=xxx&picUrl=";
+            uri = "wasuott://tv/usercenter?url=tv/v3/user/info?index=0";//&from=XXX";
+            final Uri data = buildUri(uri)
+//                .appendQueryParameter("personId", "14000")
+                .build();
+
+            final Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(data);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (Exception e) {
+            Log.e("abcd", e.getMessage(), e);
+        }
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         switch (position) {
@@ -1231,6 +1259,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             break;
 
         case 1:
+//            start();
 //             throw new NullPointerException("This is test!");
             startActivity(new Intent(this, RecyclerViewActivity.class));
 //            PackageUtils.installPackage(this, new File("/sdcard/apks/vst_4.0.5_dangbei.apk"), "com.tencent.test.fileprovider");

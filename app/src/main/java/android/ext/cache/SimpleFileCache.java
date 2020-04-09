@@ -43,15 +43,6 @@ public class SimpleFileCache implements FileCache {
     }
 
     /**
-     * Clears this cache and deletes all cache files from the filesystem.
-     */
-    public void clear() {
-        DebugUtils.__checkStartMethodTracing();
-        FileUtils.deleteFiles(mCacheDir.getPath(), false);
-        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
-    }
-
-    /**
      * Returns the maximum number of files allow in this cache.
      * @return The maximum number of files.
      */
@@ -97,6 +88,13 @@ public class SimpleFileCache implements FileCache {
     @Override
     public File getCacheDir() {
         return mCacheDir;
+    }
+
+    @Override
+    public void clear() {
+        DebugUtils.__checkStartMethodTracing();
+        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
     }
 
     @Override

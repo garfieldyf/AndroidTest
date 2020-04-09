@@ -43,9 +43,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * to this adapter should prefetch the data. Pass <tt>0</tt> indicates this adapter
      * will not prefetch data.
      * @see #PageAdapter(int, int, int, int)
+     * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
-        this(0, initialSize, pageSize, prefetchDistance);
+        this(new ArrayMapCache<Integer, List<E>>(8), initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -58,11 +59,29 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * to this adapter should prefetch the data. Pass <tt>0</tt> indicates this adapter
      * will not prefetch data.
      * @see #PageAdapter(int, int, int)
+     * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
+        this(maxPageCount > 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount) : new ArrayMapCache<Integer, List<E>>(8), initialSize, pageSize, prefetchDistance);
+    }
+
+    /**
+     * Constructor
+     * <p>Creates a <tt>PageAdapter</tt> with a <em>pageCache</em></p>
+     * @param pageCache The page {@link Cache}.
+     * @param initialSize The item count of the first page (pageIndex = 0).
+     * @param pageSize The item count of the each page (pageIndex > 0).
+     * @param prefetchDistance Defines how far to the first or last item in the page
+     * to this adapter should prefetch the data. Pass <tt>0</tt> indicates this adapter
+     * will not prefetch data.
+     * @see #PageAdapter(int, int, int)
+     * @see #PageAdapter(int, int, int, int)
+     */
+    public PageAdapter(Cache<Integer, List<E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
+        DebugUtils.__checkError(pageCache == null, "pageCache == null");
         DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
         DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
-        mPageCache   = (maxPageCount > 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount) : new ArrayMapCache<Integer, List<E>>(8));
+        mPageCache   = pageCache;
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
@@ -423,7 +442,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * to return <tt>null</tt> and at a later time call {@link #setPage}.<p>
      * @param pageIndex The index of the page whose data should be returned.
      * @param startPosition The starting position of the page within this adapter.
-     * @param itemCount The number of items to load.
+     * @param itemCount The number of items should be returned.
      * @return The page, or <tt>null</tt>.
      */
     protected abstract List<?> loadPage(int pageIndex, int startPosition, int itemCount);

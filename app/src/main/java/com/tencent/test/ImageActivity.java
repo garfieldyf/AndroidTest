@@ -1224,6 +1224,21 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             .appendQueryParameter("from", "com.bestv.ott");
     }
 
+    private void load() {
+        Uri contentUri = Uri.parse("content://com.cibn.tv.provider.YingshiProvider/favor_list");
+        Cursor cursor = null;
+        try {
+            cursor = getContentResolver().query(contentUri, null, null, null, null);
+            if (cursor != null) {
+                android.database.DatabaseUtils.dumpCursor(cursor);
+            }
+        } catch (Exception e) {
+            Log.e("abcd", e.getMessage(), e);
+        } finally {
+            FileUtils.close(cursor);
+        }
+    }
+
     private void start() {
         try {
 //            String uri = "wasuott://tv/home?from=other";
@@ -1258,7 +1273,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             break;
 
         case 1:
-//            start();
+            load();
 //             throw new NullPointerException("This is test!");
             startActivity(new Intent(this, RecyclerViewActivity.class));
 //            PackageUtils.installPackage(this, new File("/sdcard/apks/vst_4.0.5_dangbei.apk"), "com.tencent.test.fileprovider");

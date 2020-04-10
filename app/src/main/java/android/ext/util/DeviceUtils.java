@@ -9,7 +9,6 @@ import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
-import android.os.Process;
 import android.os.StatFs;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
@@ -95,8 +94,11 @@ public final class DeviceUtils {
      * Tests the current device in a low memory situation. If the total
      * memory size of the current device less 800 MB return <tt>true</tt>.
      */
-    public static boolean isLowMemory() {
-        return (Process.getTotalMemory() < 838860800L /* 800 MB */);
+    public static boolean isLowMemory(Context context) {
+        final ActivityManager am = (ActivityManager)context.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+        final MemoryInfo info = new MemoryInfo();
+        am.getMemoryInfo(info);
+        return (info.totalMem < (1024 * 1024 * 800L) /* 800 MB */);
     }
 
     /**

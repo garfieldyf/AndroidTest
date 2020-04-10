@@ -36,16 +36,19 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
 
     @Override
     public V remove(K key) {
+        DebugUtils.__checkError(key == null, "key == null");
         return map.remove(key);
     }
 
     @Override
     public V get(K key) {
+        DebugUtils.__checkError(key == null, "key == null");
         return map.get(key);
     }
 
     @Override
     public V put(K key, V value) {
+        DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
         return map.put(key, value);
     }
 

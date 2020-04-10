@@ -28,8 +28,6 @@ import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
 import android.ext.net.NetworkUtils;
-import android.ext.page.PagedList;
-import android.ext.page.Pages;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.DebugUtils;
@@ -45,6 +43,7 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.ProcessUtils.CrashDatabase;
+import android.ext.util.SectionList;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.ext.util.ZipUtils;
@@ -319,7 +318,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         return data;
     }
 
-    private static void forEach(Printer printer, PagedList<String> list) {
+    private static void forEach(Printer printer, SectionList<String> list) {
 //        final Object[] result = list.toArray();
 //        for (Object object : result) {
 //            printer.println(object.toString());
@@ -330,49 +329,49 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         }
 
         for (int i = 0; i < list.size(); ++i) {
-            final long combinedPosition = list.getPageForPosition(i);
-            printer.println("pos = " + i + ", page = " + Pages.getOriginalPage(combinedPosition) + ", index = " + Pages.getOriginalPosition(combinedPosition) + ", item = " + list.get(i));
+            final long combinedPosition = list.getSectionForPosition(i);
+            printer.println("pos = " + i + ", page = " + SectionList.getOriginalSection(combinedPosition) + ", index = " + SectionList.getOriginalPosition(combinedPosition) + ", item = " + list.get(i));
         }
     }
 
-    private static void addPage(PagedList<String> list, List<String> page) {
-        addPage(list, list.getPageCount(), page);
+    private static void addPage(SectionList<String> list, List<String> page) {
+        addPage(list, list.getSectionCount(), page);
     }
 
-    private static void addPage(PagedList<String> list, int index, List<String> page) {
+    private static void addPage(SectionList<String> list, int index, List<String> page) {
         final int size = ArrayUtils.getSize(page);
         if (size > 0) {
             final int positionStart;
-            if (index == list.getPageCount()) {
+            if (index == list.getSectionCount()) {
                 positionStart = list.size();
             } else {
-                positionStart = list.getPositionForPage(index);
+                positionStart = list.getPositionForSection(index);
             }
 
-            list.addPage(index, page);
+            list.addSection(index, page);
             Log.i("yf", " ");
             Log.i("yf", "notifyItemRangeInserted - positionStart = " + positionStart + ", itemCount = " + size);
         }
     }
 
-    private static void setPage(PagedList<String> list, int index, List<String> page) {
+    private static void setPage(SectionList<String> list, int index, List<String> page) {
         final int size = ArrayUtils.getSize(page);
         if (size > 0) {
-            final int positionStart = list.getPositionForPage(index);
-            list.setPage(index, page);
+            final int positionStart = list.getPositionForSection(index);
+            list.setSection(index, page);
             Log.i("yf", " ");
             Log.i("yf", "notifyItemRangeChanged - positionStart = " + positionStart + ", itemCount = " + size);
         }
     }
 
-    private static void removePage(PagedList<String> list, int index) {
-        final List<?> page = list.getPage(index);
-        final int positionStart = list.removePage(index);
+    private static void removePage(SectionList<String> list, int index) {
+        final List<?> page = list.getSection(index);
+        final int positionStart = list.removeSection(index);
         Log.i("yf", " ");
         Log.i("yf", "notifyItemRangeRemoved - positionStart = " + positionStart + ", itemCount = " + page.size());
     }
 
-    private static void indexOf(PagedList<String> list) {
+    private static void indexOf(SectionList<String> list) {
         int index = list.indexOf("page_2_0");
         Log.i("yf", "page_2_0 index = " + index);
 
@@ -400,7 +399,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     private void testPagedList() {
         final LogPrinter printer = new LogPrinter(Log.INFO, "yf");
-        PagedList<String> list = new PagedList<String>(Arrays.asList(buildPage(0, 11), buildPage(1, 9)));
+        SectionList<String> list = new SectionList<String>(Arrays.asList(buildPage(0, 11), buildPage(1, 9)));
         list.dump(printer);
 
         addPage(list, buildPage(2, 10));

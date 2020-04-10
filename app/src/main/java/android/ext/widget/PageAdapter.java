@@ -1,4 +1,4 @@
-package android.ext.page;
+package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.cache.ArrayMapCache;
@@ -6,7 +6,6 @@ import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
-import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;
@@ -123,7 +122,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final int pageIndex = Pages.getOriginalPage(combinedPosition);
+        final int pageIndex = getOriginalPage(combinedPosition);
         final List<E> page  = getPage(pageIndex);
         if (mPrefetchDistance > 0) {
             prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
@@ -187,7 +186,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
         E previous = null;
         final long combinedPosition = getPageForPosition(position);
-        final List<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
+        final List<E> page = mPageCache.get(getOriginalPage(combinedPosition));
         if (page != null) {
             previous = page.set((int)combinedPosition, value);
             postNotifyItemRangeChanged(position, 1, payload);
@@ -209,7 +208,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("peekItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final List<E> page = mPageCache.get(Pages.getOriginalPage(combinedPosition));
+        final List<E> page = mPageCache.get(getOriginalPage(combinedPosition));
         return (page != null ? page.get((int)combinedPosition) : null);
     }
 
@@ -364,8 +363,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param position The adapter position of the item.
      * @return The combined position of the page.
      * @see #getPositionForPage(int)
-     * @see Pages#getOriginalPage(long)
-     * @see Pages#getOriginalPosition(long)
+     * @see #getOriginalPage(long)
+     * @see #getOriginalPosition(long)
      */
     public final long getPageForPosition(int position) {
         DebugUtils.__checkError(position < 0, "position < 0");
@@ -391,6 +390,28 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public final int getPositionForPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
         return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize : 0);
+    }
+
+    /**
+     * Returns the index of the page with the given the <em>combinedPosition</em>.
+     * @param combinedPosition The combined position, returned earlier by {@link #getPageForPosition}.
+     * @return The index of the page.
+     * @see #getOriginalPosition(long)
+     */
+    public static int getOriginalPage(long combinedPosition) {
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
+        return (int)(combinedPosition >> 32);
+    }
+
+    /**
+     * Returns the index of the item in the page with the given the <em>combinedPosition</em>.
+     * @param combinedPosition The combined position, returned earlier by {@link #getPageForPosition}.
+     * @return The index of the item in the page.
+     * @see #getOriginalPage(long)
+     */
+    public static int getOriginalPosition(long combinedPosition) {
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
+        return (int)combinedPosition;
     }
 
     public final void dump(Printer printer) {

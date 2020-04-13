@@ -3,9 +3,10 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
+import android.ext.page.Page;
+import android.ext.page.PageAdapter;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.ext.widget.PageAdapter;
 import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -25,8 +26,6 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import java.util.AbstractList;
-import java.util.List;
 
 public class RecyclerViewActivity extends Activity {
     private static final int ITEM_TYPE_TITLE = 0;
@@ -129,14 +128,14 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public List<String> loadPage(int page, int startPosition, int itemCount) {
+        public Page<String> loadPage(int page, int startPosition, int itemCount) {
             Log.i("PageAdapter", "page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
             new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sInstance.getExecutor(), startPosition, itemCount);
             return null;
         }
     }
 
-    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, List<String>> {
+    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, Page<String>> {
         private int page;
 
         public LoadTask(RecyclerViewActivity activity, int page) {
@@ -145,7 +144,7 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        protected List<String> doInBackground(Integer... params) {
+        protected Page<String> doInBackground(Integer... params) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -156,7 +155,7 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(List<String> result) {
+        protected void onPostExecute(Page<String> result) {
             final RecyclerViewActivity activity = getOwnerActivity();
             if (activity != null) {
                 activity.mAdapter.setPage(page, result);
@@ -165,7 +164,7 @@ public class RecyclerViewActivity extends Activity {
         }
     }
 
-    private static final class DataPage extends AbstractList<String> {
+    private static final class DataPage implements Page<String> {
         private final String[] mData;
         private final int mOffset;
         private final int mCount;
@@ -177,13 +176,18 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public int size() {
+        public int getCount() {
             return mCount;
         }
 
         @Override
-        public String get(int position) {
+        public String getItem(int position) {
             return mData[position + mOffset];
+        }
+
+        @Override
+        public String setItem(int position, String value) {
+            return null;
         }
     }
 

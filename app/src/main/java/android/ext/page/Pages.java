@@ -53,6 +53,17 @@ public final class Pages {
     }
 
     /**
+     * Returns a new {@link Page} to hold the <tt>data</tt>, handling <tt>null</tt> <em>data</em>.
+     * @param data An array of the page data.
+     * @return A new <tt>Page</tt> or <tt>null</tt>.
+     * @see ArrayPage
+     */
+    @SuppressWarnings("unchecked")
+    public static <E> Page<E> newPage(E... data) {
+        return (ArrayUtils.getSize(data) > 0 ? new ArrayPage<E>(data) : null);
+    }
+
+    /**
      * Class <tt>ListPage</tt> is an implementation of a {@link Page}.
      */
     public static class ListPage<E> implements Page<E> {
@@ -84,6 +95,43 @@ public final class Pages {
         @Override
         public E setItem(int position, E value) {
             return mData.set(position, value);
+        }
+    }
+
+    /**
+     * Class <tt>ArrayPage</tt> is an implementation of a {@link Page}.
+     */
+    public static class ArrayPage<E> implements Page<E> {
+        /**
+         * The array of the page data.
+         */
+        protected final E[] mData;
+
+        /**
+         * Constructor
+         * @param data An array of the page data.
+         */
+        @SuppressWarnings("unchecked")
+        public ArrayPage(E... data) {
+            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.length == 0");
+            mData = data;
+        }
+
+        @Override
+        public int getCount() {
+            return mData.length;
+        }
+
+        @Override
+        public E getItem(int position) {
+            return mData[position];
+        }
+
+        @Override
+        public E setItem(int position, E value) {
+            final E previous = mData[position];
+            mData[position] = value;
+            return previous;
         }
     }
 

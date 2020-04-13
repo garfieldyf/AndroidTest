@@ -111,15 +111,28 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Equivalent to calling <tt>getItem(position, null)</tt>.
+     * @param position The adapter position of the item in this adapter.
+     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @see #getItem(View)
+     * @see #getItem(int, E)
+     * @see #getItem(ViewHolder)
+     */
+    public final E getItem(int position) {
+        return getItem(position, null);
+    }
+
+    /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
      * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the item when the
      * item was not present.</p>
      * @param position The adapter position of the item in this adapter.
-     * @return The item at the specified position, or <tt>null</tt> if there was not present.
+     * @return The item at the specified position, or <em>fallback</em> if there was not present.
+     * @see #getItem(int)
      * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
-    public E getItem(int position) {
+    public E getItem(int position, E fallback) {
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
@@ -129,7 +142,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
         }
 
-        return (page != null ? page.getItem((int)combinedPosition) : null);
+        return (page != null ? page.getItem((int)combinedPosition) : fallback);
     }
 
     /**
@@ -138,12 +151,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * <tt>ViewHolder</tt>'s adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(int)
+     * @see #getItem(int, E)
      * @see #getItem(ViewHolder)
      */
     public final E getItem(View child) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int position = mRecyclerView.getChildAdapterPosition(child);
-        return (position != NO_POSITION ? getItem(position) : null);
+        return (position != NO_POSITION ? getItem(position, null) : null);
     }
 
     /**
@@ -152,10 +166,11 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(int)
      * @see #getItem(View)
+     * @see #getItem(int, E)
      */
     public final E getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
-        return (position != NO_POSITION ? getItem(position) : null);
+        return (position != NO_POSITION ? getItem(position, null) : null);
     }
 
     /**
@@ -247,7 +262,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The page at the specified index, or <tt>null</tt> if there was not present.
      * @see #peekPage(int)
      */
-    @SuppressWarnings("unchecked")
     public Page<E> getPage(int pageIndex) {
         DebugUtils.__checkUIThread("getPage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
@@ -323,7 +337,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #setPage(int, Page)
      * @see #setPage(int, List)
      */
-    @SuppressWarnings("unchecked")
     public void setPage(int pageIndex, Page<E> page, Object payload) {
         DebugUtils.__checkUIThread("setPage");
         DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
@@ -357,7 +370,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //     * @param page May be <tt>null</tt>. The page to add.
 //     * @see #addPage(int, List)
 //     */
-//    @SuppressWarnings("unchecked")
 //    public void addPage(int pageIndex, Page<E> page) {
 //        DebugUtils.__checkUIThread("addPage");
 //        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");

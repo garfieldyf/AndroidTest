@@ -43,13 +43,8 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = new OvalBitmapState(mState);
-        }
-
-        return this;
+    protected ConstantState copyConstantState() {
+        return new OvalBitmapState(mState);
     }
 
     @Override

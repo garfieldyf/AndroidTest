@@ -1273,7 +1273,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             break;
 
         case 1:
-            load();
+            //load();
 //             throw new NullPointerException("This is test!");
             startActivity(new Intent(this, RecyclerViewActivity.class));
 //            PackageUtils.installPackage(this, new File("/sdcard/apks/vst_4.0.5_dangbei.apk"), "com.tencent.test.fileprovider");

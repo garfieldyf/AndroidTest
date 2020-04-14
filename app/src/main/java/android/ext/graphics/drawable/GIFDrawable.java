@@ -96,13 +96,8 @@ public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = new GIFImageState(mState);
-        }
-
-        return this;
+    protected ConstantState copyConstantState() {
+        return new GIFImageState(mState);
     }
 
     /**

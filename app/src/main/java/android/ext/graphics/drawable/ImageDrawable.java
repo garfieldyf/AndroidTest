@@ -54,14 +54,14 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     private static final int FLAG_PATH = 0x20000000;
 
     /**
-     * If set the drawable's bounds has been changed.
-     */
-    protected static final int FLAG_BOUNDS = 0x40000000;
-
-    /**
      * If set the drawable is mutated.
      */
-    protected static final int FLAG_MUTATED = 0x80000000;
+    private static final int FLAG_MUTATED = 0x40000000;
+
+    /**
+     * If set the drawable's bounds has been changed.
+     */
+    /* package */ static final int FLAG_BOUNDS = 0x80000000;
 
     /**
      * The image drawable attributes.
@@ -222,6 +222,17 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
+    @SuppressWarnings("unchecked")
+    public Drawable mutate() {
+        if ((mFlags & FLAG_MUTATED) == 0) {
+            mFlags |= FLAG_MUTATED;
+            mState = (T)copyConstantState();
+        }
+
+        return this;
+    }
+
+    @Override
     public ConstantState getConstantState() {
         return mState;
     }
@@ -284,6 +295,13 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     @Override
     protected void onBoundsChange(Rect bounds) {
         addBoundsFlags();
+    }
+
+    /**
+     * Returns a copy of this drawable's {@link ConstantState}.
+     */
+    protected ConstantState copyConstantState() {
+        return mState;
     }
 
     /**

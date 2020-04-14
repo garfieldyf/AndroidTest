@@ -384,7 +384,7 @@ public final class DeviceUtils {
 
     private static String getAppHeapSize(String key) {
         final long heapSize = SystemProperties.getLong(key, 0);
-        return (heapSize != 0 ? FileUtils.formatFileSize(heapSize << 20) : "N/A");
+        return (heapSize != 0 ? FileUtils.formatFileSize(heapSize << 20) : SystemProperties.get(key, "N/A"));
     }
 
     @SuppressWarnings("deprecation")

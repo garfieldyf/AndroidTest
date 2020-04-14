@@ -137,13 +137,8 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = new RoundedGIFState(mState);
-        }
-
-        return this;
+    protected ConstantState copyConstantState() {
+        return new RoundedGIFState(mState);
     }
 
     @Override

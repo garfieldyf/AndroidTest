@@ -137,13 +137,8 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = new RoundedBitmapState(mState);
-        }
-
-        return this;
+    protected ConstantState copyConstantState() {
+        return new RoundedBitmapState(mState);
     }
 
     @Override

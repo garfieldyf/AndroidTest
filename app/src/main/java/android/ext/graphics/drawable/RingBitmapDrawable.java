@@ -67,13 +67,8 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
     }
 
     @Override
-    public Drawable mutate() {
-        if ((mFlags & FLAG_MUTATED) == 0) {
-            mFlags |= FLAG_MUTATED;
-            mState = new RingBitmapState(mState);
-        }
-
-        return this;
+    protected ConstantState copyConstantState() {
+        return new RingBitmapState(mState);
     }
 
     @Override

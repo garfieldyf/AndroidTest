@@ -122,6 +122,11 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
     }
 
     @Override
+    public Drawable mutate() {
+        return this;
+    }
+
+    @Override
     public ConstantState getConstantState() {
         return null;
     }

@@ -7,14 +7,12 @@ import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public class SimpleFileCache implements FileCache, Comparator<File> {
+public final class SimpleFileCache implements FileCache {
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -87,30 +85,6 @@ public class SimpleFileCache implements FileCache, Comparator<File> {
         }
     }
 
-//    /**
-//     * Remove the cache files until the total of remaining files is
-//     * at or below the maximum size, do not call this method directly.
-//     * @hide
-//     */
-//    public final void trimToSize() {
-//        final int priority = Process.getThreadPriority(Process.myTid());
-//        try {
-//            DebugUtils.__checkStartMethodTracing();
-//            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-//            final File[] files = mCacheDir.listFiles();
-//            final int size = ArrayUtils.getSize(files);
-//            if (size > 0) {
-//                Arrays.sort(files, this);
-//                for (int i = mMaxSize; i < size; ++i) {
-//                    files[i].delete();
-//                }
-//            }
-//            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", delete file count = " + (size - mMaxSize) : ""));
-//        } finally {
-//            Process.setThreadPriority(priority);
-//        }
-//    }
-
     @Override
     public File getCacheDir() {
         return mCacheDir;
@@ -138,11 +112,6 @@ public class SimpleFileCache implements FileCache, Comparator<File> {
     public File remove(String key) {
         final File cacheFile = new File(mCacheDir, key);
         return (cacheFile.delete() ? cacheFile : null);
-    }
-
-    @Override
-    public int compare(File one, File another) {
-        return (Long.compare(another.lastModified(), one.lastModified()));
     }
 
     /* package */ final void dump(Printer printer) {

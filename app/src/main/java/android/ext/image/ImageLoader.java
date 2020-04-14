@@ -122,6 +122,19 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mModule.mParamsPool.recycle(params);
     }
 
+//    /**
+//     * Called on a background thread to load an image from the specified <em>uri</em>.
+//     * @param task The current {@link Task} whose executing this method.
+//     * @param uri The uri to load, passed earlier by {@link #load}.
+//     * @param params The parameters, passed earlier by {@link #load}.
+//     * @param flags Loading flags, passed earlier by {@link #load}.
+//     * @param buffer The temporary byte array to used for loading image data.
+//     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
+//     */
+//    protected Image loadImage(Task task, URI uri, Object[] params, int flags, byte[] buffer) {
+//        return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+//    }
+
     /**
      * Called on a background thread to load an image from the specified <em>url</em>.
      * @param task The current {@link Task} whose executing this method.

@@ -57,7 +57,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
         return new ArrayMap<K, V>(map);
     }
 
-    /* package */ final void dump(Printer printer) {
+    public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(196);
         final int size = map.size();
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);

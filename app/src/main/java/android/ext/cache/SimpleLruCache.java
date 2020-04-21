@@ -156,7 +156,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         return map.put(key, value);
     }
 
-    /* package */ void dump(Context context, Printer printer) {
+    public void dump(Context context, Printer printer) {
         final StringBuilder result = new StringBuilder(256);
         final Set<Entry<K, V>> entries = snapshot().entrySet();
 

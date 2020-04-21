@@ -114,7 +114,7 @@ public final class SimpleFileCache implements FileCache {
         return (cacheFile.delete() ? cacheFile : null);
     }
 
-    /* package */ final void dump(Printer printer) {
+    public final void dump(Printer printer) {
         final String[] names = mCacheDir.list();
         final int size = ArrayUtils.getSize(names);
 

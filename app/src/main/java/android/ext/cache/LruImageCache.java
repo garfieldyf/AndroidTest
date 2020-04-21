@@ -76,7 +76,7 @@ public final class LruImageCache<K> implements Cache<K, Object> {
         return mBitmapCache.getBitmapPool();
     }
 
-    /* package */ final void dump(Context context, Printer printer) {
+    public final void dump(Context context, Printer printer) {
         Caches.dumpCache(mBitmapCache, context, printer);
         Caches.dumpCache(mImageCache, context, printer);
     }

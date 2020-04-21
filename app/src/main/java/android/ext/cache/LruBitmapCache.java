@@ -41,7 +41,7 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
     }
 
     @Override
-    /* package */ void dump(Context context, Printer printer) {
+    public void dump(Context context, Printer printer) {
         final Set<Entry<K, Bitmap>> entries = snapshot().entrySet();
         final StringBuilder result = new StringBuilder(384);
 

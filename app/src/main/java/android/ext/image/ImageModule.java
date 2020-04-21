@@ -338,8 +338,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     private static int computeBufferPoolMaxSize(Executor executor) {
-        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 4);
-        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize + 1);
+        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 8);
+        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize);
     }
 
     private static String toString(int level) {

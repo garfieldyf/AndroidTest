@@ -1,6 +1,9 @@
 package com.tencent.test;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.ext.barcode.BarcodeDecoder;
 import android.ext.barcode.BarcodeDecoder.Builder;
 import android.ext.barcode.BarcodeDecoder.OnDecodeListener;
@@ -17,6 +20,9 @@ import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.MediaActionSound;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
+import android.support.v4.content.ContextCompat;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
@@ -35,7 +41,7 @@ import java.io.OutputStream;
 import java.util.Map;
 
 @SuppressWarnings("deprecation")
-public class DecodeActivity extends Activity implements OnDecodeListener, CameraCallback, OnClickListener, ResultPointCallback {
+public class DecodeActivity extends Activity implements OnDecodeListener, CameraCallback, OnClickListener, ResultPointCallback, OnRequestPermissionsResultCallback {
     private View mScanView;
     private TextView mResultView;
 
@@ -49,6 +55,8 @@ public class DecodeActivity extends Activity implements OnDecodeListener, Camera
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.decode);
+
+        requestPermission();
 
         mYuvToRGB = new RenderScriptYuvToRGB(this);
         mActionSound = new MediaActionSound();
@@ -76,6 +84,49 @@ public class DecodeActivity extends Activity implements OnDecodeListener, Camera
 
         mYuvToRGB.close();
         mActionSound.release();
+    }
+
+    private static final String[] permissions = {
+        android.Manifest.permission.CAMERA,
+    };
+
+    private static final int PERMISSIONS_CAMERA = 1;
+
+    private void requestPermission() {
+        // Here, thisActivity is the current activity
+        if (ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissions[0])) {
+                ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_CAMERA);
+            } else {
+                ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_CAMERA);
+            }
+        } else {
+            Toast.makeText(this,"您已经申请了权限!",Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == PERMISSIONS_CAMERA) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "授权成功", Toast.LENGTH_LONG).show();
+            } else {
+                showWaringDialog();
+            }
+        }
+    }
+
+    private void showWaringDialog() {
+        AlertDialog dialog = new AlertDialog.Builder(this)
+            .setTitle("警告！")
+            .setMessage("请前往设置->应用->PermissionDemo->权限中打开相关权限，否则功能无法正常运行！")
+            .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // 一般情况下如果用户不授权的话，功能是无法运行的，做退出处理
+                    finish();
+                }
+            }).show();
     }
 
     @Override

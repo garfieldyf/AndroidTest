@@ -129,7 +129,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     public void setGravity(int gravity) {
         if (mState.mGravity != gravity) {
             mState.mGravity = gravity;
-            addBoundsFlags();
+            invalidateBounds();
             invalidateSelf();
         }
     }
@@ -294,7 +294,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
 
     @Override
     protected void onBoundsChange(Rect bounds) {
-        addBoundsFlags();
+        invalidateBounds();
     }
 
     /**
@@ -348,10 +348,11 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     /**
-     * Adds the <tt>FLAG_BOUNDS</tt> constant. If paint shader
-     * is not <tt>null</tt> adds the <tt>FLAG_PATH</tt> constant.
+     * Invalidate this drawable's drawing bounds.
+     * {@link #computeDrawingBounds(Rect, RectF)}
+     * will be called at some point in the future.
      */
-    private void addBoundsFlags() {
+    private void invalidateBounds() {
         mFlags |= FLAG_BOUNDS;
         if (mState.mPaint.getShader() != null) {
             mFlags |= FLAG_PATH;
@@ -440,7 +441,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
      * Called to get this drawable to populate the {@link Outline} that defines its drawing area.
      */
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    /* package */ final void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
+    /* package */ static void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
         if (radii == null) {
             outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
         } else {

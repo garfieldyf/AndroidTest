@@ -126,7 +126,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     /**
      * Invalidate this drawable. If the <em>invalidatePath</em> parameter is <tt>true</tt>,
      * {@link #getConvexPath(RectF, Path)} will be called at some point in the future.
-     * @param invalidatePath Whether the path for this drawable should be invalidated as well.
+     * @param invalidatePath Whether the path for this drawable should be rebuild as well.
      */
     protected final void invalidateSelf(boolean invalidatePath) {
         invalidateSelf(mState.mShader, invalidatePath);

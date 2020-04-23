@@ -23,7 +23,6 @@
 // scanFiles()
 // compareFile()
 // deleteFiles()
-// getFileLength()
 // getFileStatus()
 // createFile()
 // createUniqueFile()
@@ -358,8 +357,8 @@ JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, 
 // Class:     FileUtils
 // Method:    getFileLength
 // Signature: (Ljava/lang/String;)J
-
-JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring file)
+/*
+JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass clazz, jstring file)
 {
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
@@ -367,6 +366,7 @@ JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring fil
     struct stat buf;
     return (::stat(JNI::jstring_t(env, file), &buf) == 0 ? (jlong)buf.st_size : 0);
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
@@ -473,7 +473,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "mkdirs", "(Ljava/lang/String;I)I", (void*)mkdirs },
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
-        { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
+        //{ "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

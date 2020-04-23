@@ -96,7 +96,7 @@ public final class FileUtils {
             cacheDir = new File(cacheDir, name);
             final int errno = mkdirs(cacheDir.getPath(), 0);
             if (errno != 0) {
-                Log.e(FileUtils.class.getName(), "mkdirs failed: errno = " + errno);
+                Log.e(FileUtils.class.getName(), "mkdirs '" + cacheDir + "' failed: errno = " + errno);
             }
         }
 
@@ -123,7 +123,7 @@ public final class FileUtils {
             cacheDir = new File(cacheDir, name);
             final int errno = mkdirs(cacheDir.getPath(), 0);
             if (errno != 0) {
-                Log.e(FileUtils.class.getName(), "mkdirs failed: errno = " + errno);
+                Log.e(FileUtils.class.getName(), "mkdirs '" + cacheDir + "' failed: errno = " + errno);
             }
         }
 
@@ -378,13 +378,13 @@ public final class FileUtils {
         return (path != null ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
     }
 
-    /**
-     * Returns the length with the specified <em>file</em> in bytes. The result for a
-     * directory is not defined.
-     * @param file The file path, must be absolute file path.
-     * @return The number of bytes or <tt>0</tt> if the <em>file</em> does not exist.
-     */
-    public static native long getFileLength(String file);
+//    /**
+//     * Returns the length with the specified <em>file</em> in bytes. The result for a
+//     * directory is not defined.
+//     * @param file The file path, must be absolute file path.
+//     * @return The number of bytes or <tt>0</tt> if the <em>file</em> does not exist.
+//     */
+//    public static native long getFileLength(String file);
 
     /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>

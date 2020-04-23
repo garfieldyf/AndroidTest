@@ -450,7 +450,8 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                writeBlob(writer.name(name), cursor.getBlob(columnIndex));
+                DebugUtils.__checkError(true, "Unsupported blob field");
+//                writeBlob(writer.name(name), cursor.getBlob(columnIndex));
                 break;
             }
         }
@@ -458,14 +459,14 @@ public final class DatabaseUtils {
         return writer.endObject();
     }
 
-    private static void writeBlob(JsonWriter writer, byte[] blob) throws IOException {
-        writer.beginArray();
-        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
-            writer.value(blob[i]);
-        }
-
-        writer.endArray();
-    }
+//    private static void writeBlob(JsonWriter writer, byte[] blob) throws IOException {
+//        writer.beginArray();
+//        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
+//            writer.value(blob[i]);
+//        }
+//
+//        writer.endArray();
+//    }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();

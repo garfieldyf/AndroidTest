@@ -5,8 +5,9 @@ import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
 
 /**
- * Class <tt>IconLoader</tt> allows to load the icon from the URI
- * on a background thread and bind it to target on the UI thread.
+ * Class <tt>IconLoader</tt> allows to load the icon associated with the
+ * {@link ResolveInfo} on a background thread and bind it to target on
+ * the UI thread.
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;[ IconLoader | loader ]

@@ -125,7 +125,7 @@ public final class LayoutManagerHelper {
     /**
      * Class <tt>MarginItemDecoration</tt> is an implementation of an {@link ItemDecoration}.
      */
-    public static final class MarginItemDecoration extends ItemDecoration {
+    public static class MarginItemDecoration extends ItemDecoration {
         /**
          * The left margin in pixels of the children.
          */
@@ -195,8 +195,8 @@ public final class LayoutManagerHelper {
         }
 
         public final void dump(Printer printer) {
-            printer.println(new StringBuilder(80)
-                .append("MarginItemDecoration { leftMargin = ").append(leftMargin)
+            printer.println(new StringBuilder(80).append(getClass().getSimpleName())
+                .append(" { leftMargin = ").append(leftMargin)
                 .append(", topMargin = ").append(topMargin)
                 .append(", rightMargin = ").append(rightMargin)
                 .append(", bottomMargin = ").append(bottomMargin)

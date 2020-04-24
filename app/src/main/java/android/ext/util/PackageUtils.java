@@ -1,5 +1,7 @@
 package android.ext.util;
 
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
+import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -70,6 +72,22 @@ public final class PackageUtils {
         } else {
             throw new IllegalStateException("Missing ComponentInfo!");
         }
+    }
+
+    /**
+     * Tests if the application has been install as an update to a built-in system application.
+     * @param ai The {@link ApplicationInfo}.
+     */
+    public static boolean isUpdatedSystemApp(ApplicationInfo ai) {
+        return ((ai.flags & FLAG_UPDATED_SYSTEM_APP) != 0);
+    }
+
+    /**
+     * Tests if the application is a system application or install as an update to a built-in system application.
+     * @param ai The {@link ApplicationInfo}.
+     */
+    public static boolean isSystemApp(ApplicationInfo ai) {
+        return ((ai.flags & (FLAG_SYSTEM | FLAG_UPDATED_SYSTEM_APP)) != 0);
     }
 
     /**
@@ -167,8 +185,8 @@ public final class PackageUtils {
                 result.setLength(0);
                 printer.println(result.append("  package = ").append(info.packageName)
                     .append(", version = ").append(info.versionName)
-                    .append(", system = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0)
-                    .append(", updatedSystem = ").append((info.applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0)
+                    .append(", system = ").append((info.applicationInfo.flags & FLAG_SYSTEM) != 0)
+                    .append(", updatedSystem = ").append((info.applicationInfo.flags & FLAG_UPDATED_SYSTEM_APP) != 0)
                     .append(", sourceDir = ").append(info.applicationInfo.publicSourceDir)
                     .toString());
             }
@@ -406,7 +424,7 @@ public final class PackageUtils {
 
         @Override
         public boolean accept(ApplicationInfo applicationInfo) {
-            return (!mPackages.contains(applicationInfo.packageName) && (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0);
+            return (!mPackages.contains(applicationInfo.packageName) && (applicationInfo.flags & FLAG_SYSTEM) == 0);
         }
     }
 

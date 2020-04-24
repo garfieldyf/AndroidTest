@@ -943,12 +943,13 @@ public final class FileUtils {
         }
 
         public final void dump(Printer printer) {
-            printer.println(new StringBuilder(256)
-                .append("Stat { mode = ").append(Integer.toOctalString(mode))
+            final String[] type = toType(mode);
+            printer.println(new StringBuilder(256).append(getClass().getSimpleName())
+                .append(" { mode = ").append(Integer.toOctalString(mode))
                 .append(", uid = ").append(uid).append(", gid = ").append(gid)
-                .append(", type = ").append(Integer.toOctalString(mode & S_IFMT))
+                .append(", type = ").append(type[0]).append('(').append(Integer.toOctalString(mode & S_IFMT)).append(')')
                 .append(", size = ").append(size).append('(').append(formatFileSize(size)).append(')')
-                .append(", perm = ").append(toCharType(mode & S_IFMT))
+                .append(", perm = ").append(type[1])
                 .append((mode & S_IRUSR) == S_IRUSR ? 'r' : '-')
                 .append((mode & S_IWUSR) == S_IWUSR ? 'w' : '-')
                 .append((mode & S_ISUID) == S_ISUID ? 's' : ((mode & S_IXUSR) == S_IXUSR ? 'x' : '-'))
@@ -999,31 +1000,6 @@ public final class FileUtils {
             return 0;
         }
 
-        private static char toCharType(int type) {
-            switch (type) {
-            case S_IFIFO:
-                return 'p';
-
-            case S_IFCHR:
-                return 'c';
-
-            case S_IFDIR:
-                return 'd';
-
-            case S_IFBLK:
-                return 'b';
-
-            case S_IFLNK:
-                return 'l';
-
-            case S_IFSOCK:
-                return 's';
-
-            default:
-                return '-';
-            }
-        }
-
         public static final Creator<Stat> CREATOR = new Creator<Stat>() {
             @Override
             public Stat createFromParcel(Parcel source) {
@@ -1037,12 +1013,37 @@ public final class FileUtils {
                 return new Stat[size];
             }
         };
+
+        private static String[] toType(int mode) {
+            switch (mode & S_IFMT) {
+            case S_IFIFO:
+                return new String[] { "S_IFIFO", "p" };
+
+            case S_IFCHR:
+                return new String[] { "S_IFCHR", "c" };
+
+            case S_IFDIR:
+                return new String[] { "S_IFDIR", "d" };
+
+            case S_IFBLK:
+                return new String[] { "S_IFBLK", "b" };
+
+            case S_IFLNK:
+                return new String[] { "S_IFLNK", "l" };
+
+            case S_IFSOCK:
+                return new String[] { "S_IFSOCK", "s" };
+
+            default:
+                return new String[] { "S_IFREG", "-" };
+            }
+        }
     }
 
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Comparable<Dirent> {
+    public static class Dirent implements Comparable<Dirent>, Parcelable {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1099,6 +1100,7 @@ public final class FileUtils {
          * @param path The absolute file path.
          * If the file can not be found on the filesystem, The
          * {@link #type} of this <tt>Dirent</tt> is {@link #DT_UNKNOWN}.
+         * @see #Dirent(Parcel)
          * @see #Dirent(String, int)
          * @see #Dirent(String, String, int)
          */
@@ -1111,9 +1113,23 @@ public final class FileUtils {
 
         /**
          * Constructor
+         * @param source The {@link Parcel}.
+         * @see #Dirent(String)
+         * @see #Dirent(String, int)
+         * @see #Dirent(String, String, int)
+         */
+        public Dirent(Parcel source) {
+            DebugUtils.__checkError(source == null, "source == null");
+            this.path = source.readString();
+            this.type = source.readInt();
+        }
+
+        /**
+         * Constructor
          * @param path The absolute file path.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          * @see #Dirent(String)
+         * @see #Dirent(Parcel)
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
@@ -1129,6 +1145,7 @@ public final class FileUtils {
          * @param name The file's name of this <tt>Dirent</tt>.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          * @see #Dirent(String)
+         * @see #Dirent(Parcel)
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
@@ -1264,6 +1281,17 @@ public final class FileUtils {
             return false;
         }
 
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeString(path);
+            dest.writeInt(type);
+        }
+
         /**
          * @see #compareToIgnoreCase(Dirent)
          */
@@ -1312,12 +1340,6 @@ public final class FileUtils {
             return Dirent::compareToIgnoreCase;
         }
 
-        private static int getFileType(String path) {
-            final Stat stat = new Stat();
-            FileUtils.stat(path, stat);
-            return ((stat.mode & Stat.S_IFMT) >> 12);
-        }
-
         public final void dump(Printer printer) {
             final String parent = getParent();
             final String mimeType  = getMimeType();
@@ -1325,12 +1347,30 @@ public final class FileUtils {
             printer.println(new StringBuilder(256).append(getClass().getSimpleName())
                    .append(" { path = ").append(path)
                    .append(", type = ").append(type).append('(').append(toString(type)).append(')')
-                   .append(", parent = ").append(parent != null ? parent : "N/A")
+                   .append(", parent = ").append(parent != null ? parent : "")
                    .append(", name = ").append(getName())
-                   .append(", extension = ").append(extension != null ? extension : "N/A")
-                   .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
+                   .append(", extension = ").append(extension != null ? extension : "")
+                   .append(", mimeType = ").append(mimeType != null ? mimeType : "")
                    .append(", hidden = ").append(isHidden())
                    .append(" }").toString());
+        }
+
+        public static final Creator<Dirent> CREATOR = new Creator<Dirent>() {
+            @Override
+            public Dirent createFromParcel(Parcel source) {
+                return new Dirent(source);
+            }
+
+            @Override
+            public Dirent[] newArray(int size) {
+                return new Dirent[size];
+            }
+        };
+
+        private static int getFileType(String path) {
+            final Stat stat = new Stat();
+            FileUtils.stat(path, stat);
+            return ((stat.mode & Stat.S_IFMT) >> 12);
         }
 
         private static String toString(int type) {

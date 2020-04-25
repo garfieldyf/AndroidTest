@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteException;
 import android.database.sqlite.SQLiteProgram;
 import android.database.sqlite.SQLiteStatement;
 import android.ext.annotation.CursorField;
+import android.ext.json.JSONArray;
+import android.ext.json.JSONObject;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.ClassUtils;
@@ -386,15 +388,87 @@ public final class DatabaseUtils {
     }
 
     /**
+     * Converts the specified <em>cursor's</em> contents to a {@link JSONArray}.
+     * The position is restored after converting.
+     * @param cursor The {@link Cursor} from which to get the data.
+     * @param columnNames The name of the columns which the values to write.
+     * @return The <tt>JSONArray</tt>.
+     * @see #toJSONObject(Cursor, String[], int[])
+     */
+    public static JSONArray toJSONArray(Cursor cursor, String... columnNames) {
+        final JSONArray result = new JSONArray();
+        if (cursor.getCount() > 0) {
+            // Gets the column indexes from column names.
+            final int[] columnIndexes = new int[columnNames.length];
+            for (int i = 0; i < columnNames.length; ++i) {
+                columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
+            }
+
+            final int position = cursor.getPosition();
+            try {
+                cursor.moveToPosition(-1);
+                while (cursor.moveToNext()) {
+                    result.add(toJSONObject(cursor, columnNames, columnIndexes));
+                }
+            } finally {
+                cursor.moveToPosition(position);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Converts the specified <em>cursor</em> current row to a {@link JSONObject}.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor
+     * must be move to the correct position.
+     * @param names The name of the properties to write.
+     * @param columnIndexes The index of the columns which the values to write.
+     * The <em>columnIndexes</em> length must be equals the <em>names</em> length.
+     * @return The <tt>JSONObject</tt>.
+     * @see #toJSONArray(Cursor, String[])
+     */
+    public static JSONObject toJSONObject(Cursor cursor, String[] names, int... columnIndexes) {
+        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
+        final JSONObject result = new JSONObject();
+        for (int i = 0; i < columnIndexes.length; ++i) {
+            final int columnIndex = columnIndexes[i];
+            final String name = names[i];
+            switch (cursor.getType(columnIndex)) {
+            case Cursor.FIELD_TYPE_INTEGER:
+                result.put(name, cursor.getLong(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_FLOAT:
+                result.put(name, cursor.getDouble(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_STRING:
+                result.put(name, cursor.getString(columnIndex));
+                break;
+
+            case Cursor.FIELD_TYPE_BLOB:
+                DebugUtils.__checkError(true, "Unsupported blob field");
+//                result.put(name, toJSONArray(cursor.getBlob(columnIndex)));
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
+     * The position is restored after writing.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param columnNames The name of the columns which the values to write.
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
-     * @see #writeCursorRow(JsonWriter, Cursor, int[], String[])
+     * @see #writeCursorRow(JsonWriter, Cursor, String[], int[])
      */
-    public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String[] columnNames) throws IOException {
+    public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String... columnNames) throws IOException {
         writer.beginArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -404,9 +478,14 @@ public final class DatabaseUtils {
             }
 
             // Writes the cursor contents into writer.
-            cursor.moveToPosition(-1);
-            while (cursor.moveToNext()) {
-                writeCursorRow(writer, cursor, columnIndexes, columnNames);
+            final int position = cursor.getPosition();
+            try {
+                cursor.moveToPosition(-1);
+                while (cursor.moveToNext()) {
+                    writeCursorRow(writer, cursor, columnNames, columnIndexes);
+                }
+            } finally {
+                cursor.moveToPosition(position);
             }
         }
 
@@ -418,25 +497,21 @@ public final class DatabaseUtils {
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data. The cursor
      * must be move to the correct position.
+     * @param names The name of the properties which the names to write.
      * @param columnIndexes The index of the columns which the values to write.
-     * @param names The name of the properties which the names to write. The
-     * <em>names</em> length must be equals the <em>columnIndexes</em> length.
+     * The <em>columnIndexes</em> length must be equals the <em>names</em> length.
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
-    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, int[] columnIndexes, String... names) throws IOException {
+    public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, String[] names, int... columnIndexes) throws IOException {
         DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
         DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
-            final String name = names[i];
             final int columnIndex = columnIndexes[i];
+            final String name = names[i];
             switch (cursor.getType(columnIndex)) {
-            case Cursor.FIELD_TYPE_NULL:
-                writer.name(name).nullValue();
-                break;
-
             case Cursor.FIELD_TYPE_INTEGER:
                 writer.name(name).value(cursor.getLong(columnIndex));
                 break;
@@ -458,6 +533,15 @@ public final class DatabaseUtils {
 
         return writer.endObject();
     }
+
+//    private static JSONArray toJSONArray(byte[] blob) {
+//        final JSONArray result = new JSONArray();
+//        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
+//            result.add(blob[i]);
+//        }
+//
+//        return result;
+//    }
 
 //    private static void writeBlob(JsonWriter writer, byte[] blob) throws IOException {
 //        writer.beginArray();

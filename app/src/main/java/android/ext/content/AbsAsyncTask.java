@@ -34,6 +34,9 @@ import java.lang.ref.WeakReference;
  * }
  *
  * new DownloadTask(activity).execute(url);</pre>
+ * @see AbsAsyncTask#setOwner(Object)
+ * @see AbsAsyncTask#getOwner()
+ * @see AbsAsyncTask#getOwnerActivity()
  * @author Garfield
  */
 public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
@@ -61,6 +64,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * Sets the object that owns this task.
      * @param owner The owner object.
      * @see #getOwner()
+     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
@@ -70,6 +74,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * Returns the object that owns this task.
      * @return The owner object or <tt>null</tt> if the owner released by the GC.
      * @see #setOwner(Object)
+     * @see #getOwnerActivity()
      */
     @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
@@ -81,6 +86,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * Alias of {@link #getOwner()}.
      * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
      * the owner activity has been finished or destroyed or release by the GC.
+     * @see #getOwner()
      * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")

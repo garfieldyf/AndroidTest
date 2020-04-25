@@ -146,11 +146,17 @@ public final class DeviceUtils {
         }
         printer.println(infos.toString());
 
-        // Dumps sdk, version and mac infos.
+        // Dumps sdk, version, abis, and mac infos.
         infos.setLength(0);
         infos.append("  sdk = ").append(Build.VERSION.SDK_INT)
-             .append("\n  version = ").append(Build.VERSION.RELEASE)
-             .append("\n  wlan = ").append(NetworkUtils.getMacAddress(NetworkUtils.WLAN, "N/A"))
+             .append("\n  version = ").append(Build.VERSION.RELEASE);
+
+        if (Build.VERSION.SDK_INT > 20) {
+            infos.append("\n  abis32 = ").append(Arrays.toString(Build.SUPPORTED_32_BIT_ABIS))
+                 .append("\n  abis64 = ").append(Arrays.toString(Build.SUPPORTED_64_BIT_ABIS));
+        }
+
+        infos.append("\n  wlan = ").append(NetworkUtils.getMacAddress(NetworkUtils.WLAN, "N/A"))
              .append("\n  eth0 = ").append(NetworkUtils.getMacAddress(NetworkUtils.ETHERNET, "N/A"));
         printer.println(infos.toString());
 

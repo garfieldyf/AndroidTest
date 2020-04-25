@@ -62,6 +62,11 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ static final int PLACEHOLDER = 2;
 
     /**
+     * The maximum number of tasks.
+     */
+    /* package */ static final int MAX_POOL_SIZE = 48;
+
+    /**
      * The application <tt>Context</tt>.
      */
     public final Context mContext;
@@ -92,7 +97,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(this, 48);
+        mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);

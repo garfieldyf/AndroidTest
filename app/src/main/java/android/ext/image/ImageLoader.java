@@ -1,6 +1,7 @@
 package android.ext.image;
 
 import static android.ext.image.ImageModule.COOKIE;
+import static android.ext.image.ImageModule.MAX_POOL_SIZE;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PLACEHOLDER;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -61,7 +62,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     protected ImageLoader(ImageModule<URI, Image> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, imageCache, 48);
+        super(module.mExecutor, imageCache, MAX_POOL_SIZE);
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;

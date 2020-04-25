@@ -273,6 +273,28 @@ public final class ArrayUtils {
     }
 
     /**
+     * Compares the two byte arrays, from indexes offset to end (offset + length).
+     * @param array1 The first <tt>byte</tt> array.
+     * @param offset1 The starting index of the content in <em>array1</em>.
+     * @param array2 The second <tt>byte</tt> array.
+     * @param offset2 The starting index of the content in <em>array2</em>.
+     * @param length The number of bytes to be compared.
+     * @return <tt>true</tt> if both arrays are equal, <tt>false</tt> otherwise.
+     */
+    public static boolean equals(byte[] array1, int offset1, byte[] array2, int offset2, int length) {
+        DebugUtils.__checkError(array1 == null || array2 == null, "array1 == null || array2 == null");
+        DebugUtils.__checkRange(offset1, length, array1.length);
+        DebugUtils.__checkRange(offset2, length, array2.length);
+        for (int i = 0; i < length; ++i) {
+            if (array1[offset1 + i] != array2[offset2 + i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Filters the specified <em>collection</em> using the specified <em>filter</em>.
      * @param collection The collection to filter.
      * @param filter The {@link Filter}.

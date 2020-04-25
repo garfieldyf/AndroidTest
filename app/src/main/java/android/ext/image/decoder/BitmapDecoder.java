@@ -3,11 +3,11 @@ package android.ext.image.decoder;
 import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
+import android.ext.cache.Caches;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
-import android.ext.util.Optional;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
@@ -34,7 +34,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      */
     public BitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool);
-        mBitmapPool = Optional.ofNullable(bitmapPool);
+        mBitmapPool = (bitmapPool != null ? bitmapPool : Caches.emptyBitmapPool());
     }
 
     @Override

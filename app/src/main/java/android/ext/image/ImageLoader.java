@@ -385,6 +385,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         public final void into(Object target) {
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
         }
+
+        /**
+         * preloads the image with the arguments supplied to this request.
+         */
+//        public final void preload() {
+//            if (mLoader.getCache() != Caches.emptyCache()) {
+//                DebugUtils.__checkError(mUri == null, "mUri == null");
+//                mLoader.load(mUri, mUri, mFlags, AsyncLoader.emptyBinder(), mParams);
+//            }
+//        }
     }
 
     /**

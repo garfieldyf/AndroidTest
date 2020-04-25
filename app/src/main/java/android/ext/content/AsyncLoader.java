@@ -1,8 +1,8 @@
 package android.ext.content;
 
 import android.ext.cache.Cache;
+import android.ext.cache.Caches;
 import android.ext.util.DebugUtils;
-import android.ext.util.Optional;
 import java.util.concurrent.Executor;
 
 /**
@@ -40,7 +40,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
         super(executor, 32);
-        mCache = Optional.ofNullable(cache);
+        mCache = (cache != null ? cache : Caches.emptyCache());
     }
 
     /**
@@ -52,7 +52,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache, int maxPoolSize) {
         super(executor, maxPoolSize);
-        mCache = Optional.ofNullable(cache);
+        mCache = (cache != null ? cache : Caches.emptyCache());
     }
 
     /**
@@ -154,7 +154,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @return The value mapped by <em>key</em> or <tt>null</tt>
      * if there was no mapping.
      */
-    public Value remove(Key key) {
+    public final Value remove(Key key) {
         return mCache.remove(key);
     }
 

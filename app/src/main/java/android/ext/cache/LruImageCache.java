@@ -2,7 +2,6 @@ package android.ext.cache;
 
 import android.content.Context;
 import android.ext.util.DebugUtils;
-import android.ext.util.Optional;
 import android.graphics.Bitmap;
 import android.util.ArrayMap;
 import android.util.Printer;
@@ -36,8 +35,8 @@ public final class LruImageCache<K> implements Cache<K, Object> {
      * @see #LruImageCache(float, int, int)
      */
     public LruImageCache(Cache<K, Bitmap> bitmapCache, Cache<K, Object> imageCache) {
-        mImageCache  = Optional.ofNullable(imageCache);
-        mBitmapCache = Optional.ofNullable(bitmapCache);
+        mImageCache  = (imageCache != null ? imageCache : Caches.emptyCache());
+        mBitmapCache = (bitmapCache != null ? bitmapCache : Caches.emptyCache());
     }
 
     @Override

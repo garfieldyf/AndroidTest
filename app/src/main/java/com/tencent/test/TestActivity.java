@@ -1,7 +1,7 @@
 package com.tencent.test;
 
 import android.app.Activity;
-import android.ext.graphics.drawable.InvertedBitmapDrawable;
+import android.ext.graphics.drawable.InvertedDrawable;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
@@ -35,10 +35,10 @@ public class TestActivity extends Activity {
             public void run() {
                 final int alpha = 225;
                 final float percent = 0.9f;
-                mImageLeft.setImageDrawable(new InvertedBitmapDrawable(center, alpha, percent, Gravity.LEFT));
-                mImageTop.setImageDrawable(new InvertedBitmapDrawable(center, alpha, percent, Gravity.TOP));
-                mImageRight.setImageDrawable(new InvertedBitmapDrawable(center, alpha, percent, Gravity.RIGHT));
-                mImageBottom.setImageDrawable(new InvertedBitmapDrawable(center, alpha, percent, Gravity.BOTTOM));
+                mImageLeft.setImageDrawable(new InvertedDrawable(center, alpha, percent, Gravity.LEFT));
+                mImageTop.setImageDrawable(new InvertedDrawable(center, alpha, percent, Gravity.TOP));
+                mImageRight.setImageDrawable(new InvertedDrawable(center, alpha, percent, Gravity.RIGHT));
+                mImageBottom.setImageDrawable(new InvertedDrawable(center, alpha, percent, Gravity.BOTTOM));
             }
         });
 
@@ -46,7 +46,7 @@ public class TestActivity extends Activity {
 //        view.post(new Runnable() {
 //            @Override
 //            public void run() {
-//                mImageBottom.setImageDrawable(new InvertedBitmapDrawable(view, alpha, percent, Gravity.BOTTOM));
+//                mImageBottom.setImageDrawable(new InvertedDrawable(view, alpha, percent, Gravity.BOTTOM));
 //            }
 //        });
     }
@@ -67,6 +67,6 @@ public class TestActivity extends Activity {
 
     private void reset(ImageView imageView) {
         final View view = findViewById(R.id.image_frame);
-        ((InvertedBitmapDrawable)imageView.getDrawable()).setView(view);
+        ((InvertedDrawable)imageView.getDrawable()).setView(view);
     }
 }

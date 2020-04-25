@@ -14,10 +14,10 @@ import android.view.Gravity;
 import android.view.View;
 
 /**
- * Class InvertedBitmapDrawable
+ * Class InvertedDrawable
  * @author Garfield
  */
-public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable.InvertedBitmapState> {
+public class InvertedDrawable extends ImageDrawable<InvertedDrawable.InvertedBitmapState> {
     /**
      * Constructor
      * @param bitmap The original {@link Bitmap} to create the inverted bitmap.
@@ -26,9 +26,9 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
      * width or height.
      * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
      * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
-     * @see #InvertedBitmapDrawable(View, int, float, int)
+     * @see #InvertedDrawable(View, int, float, int)
      */
-    public InvertedBitmapDrawable(Bitmap bitmap, int alpha, float percent, int direction) {
+    public InvertedDrawable(Bitmap bitmap, int alpha, float percent, int direction) {
         super(new InvertedBitmapState(bitmap, bitmap.getWidth(), bitmap.getHeight(), alpha, percent, direction));
     }
 
@@ -40,9 +40,9 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
      * width or height.
      * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
      * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
-     * @see #InvertedBitmapDrawable(Bitmap, int, float, int)
+     * @see #InvertedDrawable(Bitmap, int, float, int)
      */
-    public InvertedBitmapDrawable(View view, int alpha, float percent, int direction) {
+    public InvertedDrawable(View view, int alpha, float percent, int direction) {
         super(new InvertedBitmapState(view, view.getWidth(), view.getHeight(), alpha, percent, direction));
     }
 
@@ -169,7 +169,7 @@ public class InvertedBitmapDrawable extends ImageDrawable<InvertedBitmapDrawable
             mBitmap.eraseColor(Color.TRANSPARENT);
             DrawUtils.drawInvertedBitmap(canvas, source, width, height, mAlpha, mPercent, mDirection, mPaint);
             canvas.setBitmap(null);
-            DebugUtils.__checkStopMethodTracing("InvertedBitmapDrawable", "setContent");
+            DebugUtils.__checkStopMethodTracing("InvertedDrawable", "setContent");
         }
     }
 }

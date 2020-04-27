@@ -11,6 +11,11 @@ import android.support.annotation.Keep;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
+/**
+ * Class <tt>RingBitmapBinder</tt> used to transforms a {@link Bitmap}
+ * to a {@link RingBitmapDrawable} to bind the {@link ImageView}.
+ * @author Garfield
+ */
 public final class RingBitmapBinder implements Binder<String, Object, Bitmap> {
     private final float mInnerRadius;
 
@@ -32,8 +37,7 @@ public final class RingBitmapBinder implements Binder<String, Object, Bitmap> {
                 drawable.setBitmap(bitmap);
                 drawable.setInnerRadius(mInnerRadius);
 
-                // Clear the ImageView's content to force update the
-                // ImageView's mDrawableWidth and mDrawableHeight.
+                // Clear the ImageView's content to force update the ImageView's mDrawable.
                 view.setImageDrawable(null);
                 view.setImageDrawable(drawable);
             } else {

@@ -9,11 +9,11 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Class <tt>DynamicClassLoader</tt> used to loads the DEX files that containing classes
- * and resources. This can be used to execute code not installed as part of an application.
+ * Class <tt>DexLoader</tt> used to loads the DEX files that containing classes and
+ * resources. This can be used to execute code not installed as part of an application.
  * @author Garfield
  */
-public class DynamicClassLoader {
+public class DexLoader {
     private final ClassLoader mClassLoader;
 
     /**
@@ -24,11 +24,28 @@ public class DynamicClassLoader {
      * @param dexOutputDir The directory where optimized DEX files should be written.
      * This should be a writable directory.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #DynamicClassLoader(Context, String, String, String, String[])
-     * @see #getCodeCacheDir(Context, String)
+     * @see #DexLoader(Context, String, String, String[])
+     * @see #DexLoader(Context, String, String, String, String[])
      */
-    public DynamicClassLoader(Context context, String dexPath, String dexOutputDir) {
-        this(context, dexPath, dexOutputDir, null, (String[])null);
+    public DexLoader(Context context, String dexPath) {
+        this(context, dexPath, getCodeCacheDir(context, dexPath), null, (String[])null);
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param dexPath The list of jar/apk files containing classes and resources,
+     * delimited by {@link File#pathSeparator}, which defaults to ":" on Android.
+     * @param librarySearchPath The list of directories containing native libraries,
+     * delimited by {@link File#pathSeparator}; may be <tt>null</tt>.
+     * @param libraryNames The list of names containing the native libraries to load;
+     * may be <tt>null</tt>.
+     * @throws RuntimeException if an error occurs while loading libraries.
+     * @see #DexLoader(Context, String)
+     * @see #DexLoader(Context, String, String, String, String[])
+     */
+    public DexLoader(Context context, String dexPath, String librarySearchPath, String[] libraryNames) {
+        this(context, dexPath, getCodeCacheDir(context, dexPath), librarySearchPath, libraryNames);
     }
 
     /**
@@ -44,13 +61,13 @@ public class DynamicClassLoader {
      * If no native libraries to load, you can pass <em>(String[])null</em> instead of
      * allocating an empty array.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #DynamicClassLoader(Context, String, String)
-     * @see #getCodeCacheDir(Context, String)
+     * @see #DexLoader(Context, String)
+     * @see #DexLoader(Context, String, String, String[])
      */
-    public DynamicClassLoader(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
+    public DexLoader(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
         mClassLoader = new DexClassLoader(dexPath, dexOutputDir, librarySearchPath, context.getClassLoader());
         try {
-            load(libraryNames);
+            loadLibraries(libraryNames);
         } catch (Throwable e) {
             throw new RuntimeException("Couldn't load libraries - " + Arrays.toString(libraryNames), e);
         }
@@ -71,7 +88,7 @@ public class DynamicClassLoader {
      * @param libraryNames The list of names containing the shared libraries to load.
      * @throws Exception if the shared libraries can not be loaded.
      */
-    public void load(String... libraryNames) throws Exception {
+    public void loadLibraries(String... libraryNames) throws Exception {
         if (ArrayUtils.getSize(libraryNames) > 0) {
             final Runtime runtime = Runtime.getRuntime();
             final Method method = Runtime.class.getDeclaredMethod("loadLibrary", String.class, ClassLoader.class);
@@ -113,15 +130,11 @@ public class DynamicClassLoader {
     }
 
     /**
-     * Returns the absolute path to the application specific files directory on
-     * the filesystem designed for storing cached code. <p>The result path such
-     * as <tt>"/data/data/packagename/files/name"</tt></p>
-     * @param context The <tt>Context</tt>.
-     * @param name The name of the directory to retrieve.
-     * @return The path of the cached code directory.
+     * Returns a directory of the optimized DEX files.
+     * The result path such as <tt>"dexPath.optdex"</tt>
      */
-    public static String getCodeCacheDir(Context context, String name) {
-        final String result = new File(context.getFilesDir(), name).getPath();
+    private static String getCodeCacheDir(Context context, String dexPath) {
+        final String result = dexPath + ".optdex";
         FileUtils.mkdirs(result, 0);
         return result;
     }

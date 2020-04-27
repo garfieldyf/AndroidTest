@@ -84,7 +84,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import com.tencent.temp.BaseListAdapter;
-import com.tencent.temp.DynamicClassLoader;
+import com.tencent.temp.DexLoader;
 import com.tencent.temp.JsonLoader;
 import com.tencent.temp.JsonLoader.JsonLoadParams;
 import com.tencent.test.JSONTest.Permission;
@@ -693,10 +693,10 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     private void testDex() {
         String librarySearchPath = "/data/data/com.tencent.test/cache/dex";
         String dexPath = "/data/data/com.tencent.test/cache/dex/TVSecurityTest.apk";
-        String dexOutputDir = DynamicClassLoader.getCodeCacheDir(this, "optDex");
+        //String dexOutputDir = DexLoader.getCodeCacheDir(this, "optDex");
 
         try {
-            final DynamicClassLoader factory = new DynamicClassLoader(this, dexPath, dexOutputDir, librarySearchPath, "funshion");
+            final DexLoader factory = new DexLoader(this, dexPath, librarySearchPath, new String[] { "funshion" });
             int error = (int)factory.loadClass("com.funshion.util.FileUtils").getDeclaredMethod("access", String.class, int.class).invoke(null, dexPath + "1", 0);
             Log.i("yf", "error = " + error);
 

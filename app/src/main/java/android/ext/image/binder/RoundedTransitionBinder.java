@@ -89,7 +89,7 @@ public final class RoundedTransitionBinder extends TransitionBinder {
     }
 
     @Override
-    protected Drawable getDrawable(ImageView view, Bitmap bitmap) {
+    protected Drawable newDrawable(ImageView view, Bitmap bitmap) {
         return new RoundedBitmapDrawable(bitmap, mRadii);
     }
 

@@ -79,11 +79,20 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
         } else {
             final Drawable placeholder = ImageModule.getPlaceholder(view.getResources(), params);
             DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
-            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { placeholder, getDrawable(view, bitmap) });
+            final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { placeholder, newDrawable(view, bitmap) });
             view.setImageDrawable(drawable);
             drawable.setCrossFadeEnabled(mCrossFade);
             drawable.startTransition(mDuration);
         }
+    }
+
+    /**
+     * Converts a {@link Bitmap} to a {@link Drawable}. Subclasses
+     * should override this method to convert the drawable. The
+     * default implementation returns a <tt>BitmapDrawable</tt>.
+     */
+    protected Drawable newDrawable(ImageView view, Bitmap bitmap) {
+        return new BitmapDrawable(view.getResources(), bitmap);
     }
 
     /**
@@ -93,15 +102,6 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
      */
     protected void setImageBitmap(ImageView view, Bitmap bitmap) {
         view.setImageBitmap(bitmap);
-    }
-
-    /**
-     * Converts a {@link Bitmap} to a {@link Drawable}. Subclasses
-     * should override this method to convert the drawable. The
-     * default implementation returns a <tt>BitmapDrawable</tt>.
-     */
-    protected Drawable getDrawable(ImageView view, Bitmap bitmap) {
-        return new BitmapDrawable(view.getResources(), bitmap);
     }
 
     /**

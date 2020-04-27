@@ -355,9 +355,9 @@ public final class DatabaseUtils {
     public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || clazz == null, "cursor == null || clazz == null");
         DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
-        final T instance = ClassUtils.newInstance(clazz, null, (Object[])null);
-        setCursorFields(cursor, instance, getCursorFields(clazz));
-        return instance;
+        final T result = ClassUtils.newInstance(clazz, null, (Object[])null);
+        setCursorFields(cursor, result, getCursorFields(clazz));
+        return result;
     }
 
     /**
@@ -378,9 +378,9 @@ public final class DatabaseUtils {
             final List<Pair<Field, String>> cursorFields = getCursorFields(componentType);
             final Constructor<? extends T> ctor = ClassUtils.getConstructor(componentType, (Class<?>[])null);
             while (cursor.moveToNext()) {
-                final T instance = ctor.newInstance((Object[])null);
-                setCursorFields(cursor, instance, cursorFields);
-                result.add(instance);
+                final T object = ctor.newInstance((Object[])null);
+                setCursorFields(cursor, object, cursorFields);
+                result.add(object);
             }
         }
 
@@ -388,14 +388,14 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Converts the specified <em>cursor's</em> contents to a {@link JSONArray}.
-     * The position is restored after converting.
+     * Converts the specified <em>cursor's</em> data to a {@link JSONArray}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param columnNames The name of the columns which the values to write.
      * @return The <tt>JSONArray</tt>.
      * @see #toJSONObject(Cursor, String[], int[])
      */
     public static JSONArray toJSONArray(Cursor cursor, String... columnNames) {
+        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
         final JSONArray result = new JSONArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -404,14 +404,9 @@ public final class DatabaseUtils {
                 columnIndexes[i] = cursor.getColumnIndexOrThrow(columnNames[i]);
             }
 
-            final int position = cursor.getPosition();
-            try {
-                cursor.moveToPosition(-1);
-                while (cursor.moveToNext()) {
-                    result.add(toJSONObject(cursor, columnNames, columnIndexes));
-                }
-            } finally {
-                cursor.moveToPosition(position);
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                result.add(toJSONObject(cursor, columnNames, columnIndexes));
             }
         }
 
@@ -459,8 +454,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Writes the specified <em>cursor's</em> contents into a {@link JsonWriter}.
-     * The position is restored after writing.
+     * Writes the specified <em>cursor's</em> data into a {@link JsonWriter}.
      * @param writer The {@link JsonWriter}.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param columnNames The name of the columns which the values to write.
@@ -469,6 +463,7 @@ public final class DatabaseUtils {
      * @see #writeCursorRow(JsonWriter, Cursor, String[], int[])
      */
     public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String... columnNames) throws IOException {
+        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
         writer.beginArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -478,14 +473,9 @@ public final class DatabaseUtils {
             }
 
             // Writes the cursor contents into writer.
-            final int position = cursor.getPosition();
-            try {
-                cursor.moveToPosition(-1);
-                while (cursor.moveToNext()) {
-                    writeCursorRow(writer, cursor, columnNames, columnIndexes);
-                }
-            } finally {
-                cursor.moveToPosition(position);
+            cursor.moveToPosition(-1);
+            while (cursor.moveToNext()) {
+                writeCursorRow(writer, cursor, columnNames, columnIndexes);
             }
         }
 
@@ -556,7 +546,8 @@ public final class DatabaseUtils {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();
         for (Class<?> kclass = clazz; kclass != Object.class; kclass = kclass.getSuperclass()) {
             final Field[] fields = kclass.getDeclaredFields();
-            for (Field field : fields) {
+            for (int i = 0; i < fields.length; ++i) {
+                final Field field = fields[i];
                 final CursorField cursorField = field.getAnnotation(CursorField.class);
                 if (cursorField != null) {
                     DebugUtils.__checkError((field.getModifiers() & (Modifier.FINAL | Modifier.STATIC)) != 0, "Unsupported static or final field - " + field.toString());

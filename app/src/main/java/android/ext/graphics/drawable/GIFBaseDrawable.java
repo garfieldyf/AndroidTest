@@ -62,6 +62,20 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         return mState.mImage;
     }
 
+//    /**
+//     * Called on the <tt>Binder</tt> internal, do not call this method directly.
+//     * @hide
+//     */
+//    public final void setImage(GIFImage image) {
+//        if (mState.mImage != image) {
+//            mFlags |= FLAG_BOUNDS;
+//            mState.setImage(image);
+//            mFrameIndex = 0;
+//            invalidateSelf();
+//            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
+//        }
+//    }
+
     /**
      * Returns the number of frames of this drawable.
      * @return The frame count, must be >= 1.
@@ -206,7 +220,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
             mState.mFlags |= FLAG_ONESHOT;
         }
 
-        mState.setImage(GIFImage.decode(res, id));
+        mState.initialize(GIFImage.decode(res, id));
         mState.setFlags(a.getBoolean(1 /* android.R.attr.autoStart */, true), FLAG_AUTO_START);
         DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
         a.recycle();
@@ -254,7 +268,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         public GIFBaseState(GIFImage image) {
             mFlags = FLAG_AUTO_START;
             if (image != null) {
-                setImage(image);
+                initialize(image);
             }
         }
 
@@ -265,14 +279,28 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
          */
         public GIFBaseState(GIFBaseState state) {
             super(state);
-            setImage(state.mImage);
+            initialize(state.mImage);
         }
 
-        /* package */ void setImage(GIFImage image) {
+        /* package */ void initialize(GIFImage image) {
             DebugUtils.__checkError(image == null, "image == null");
             mImage  = image;
             mCanvas = image.createBitmapCanvas();
         }
+
+//        /* package */ boolean setImage(GIFImage image) {
+//            DebugUtils.__checkError(image == null, "image == null");
+//            mImage = image;
+//            if (mCanvas == null || mCanvas.getAllocationByteCount() < image.width * image.height * BitmapUtils.getBytesPerPixel(mCanvas.getConfig())) {
+//                mCanvas = image.createBitmapCanvas();
+//                return true;
+//            } else {
+//                mCanvas.reconfigure(image.width, image.height, mCanvas.getConfig());
+//                mCanvas.eraseColor(Color.TRANSPARENT);
+//                DebugUtils.__checkDebug(true, getClass().getName(), "The bitmap canvas resize - width = " + image.width + ", height = " + image.height);
+//                return false;
+//            }
+//        }
     }
 
     /**

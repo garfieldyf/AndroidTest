@@ -88,9 +88,19 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
         }
 
         @Override
-        /* package */ void setImage(GIFImage image) {
-            super.setImage(image);
+        /* package */ void initialize(GIFImage image) {
+            super.initialize(image);
             mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
         }
+
+//        @Override
+//        /* package */ boolean setImage(GIFImage image) {
+//            final boolean result = super.setImage(image);
+//            if (result) {
+//                mShader = new BitmapShader(mCanvas, TileMode.CLAMP, TileMode.CLAMP);
+//            }
+//
+//            return result;
+//        }
     }
 }

@@ -51,7 +51,7 @@ LOCAL_CPPFLAGS += -O3 -finline-functions -felide-constructors -funswitch-loops
 endif
 
 ifeq ($(all), 1)
-LOCAL_CPPFLAGS += -D__BUILD_GIFIMAGE__ -D__BUILD_FILEUTILS__ -D__BUILD_BITMAPUTILS__ -D__BUILD_MESSAGEDIGESTS__
+LOCAL_CPPFLAGS += -D__BUILD_GIFIMAGE__ -D__BUILD_FILEUTILS__ -D__BUILD_PROCUTILS__ -D__BUILD_BITMAPUTILS__ -D__BUILD_MESSAGEDIGESTS__
 LOCAL_LDLIBS   += -landroid -ljnigraphics
 LOCAL_STATIC_LIBRARIES += $(LOCAL_MD_MODULE) $(LOCAL_GIF_MODULE) $(LOCAL_IMGALGTH_MODULE)
 else
@@ -64,6 +64,10 @@ endif
 ifeq ($(fileutils), 1)
 LOCAL_CPPFLAGS += -D__BUILD_FILEUTILS__
 LOCAL_LDLIBS   += -landroid
+endif
+
+ifeq ($(processutils), 1)
+LOCAL_CPPFLAGS += -D__BUILD_PROCUTILS__
 endif
 
 ifeq ($(bitmaputils), 1)

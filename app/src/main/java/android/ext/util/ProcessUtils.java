@@ -31,43 +31,43 @@ import java.util.concurrent.Executor;
  * @author Garfield
  */
 public final class ProcessUtils {
-//    /**
-//     * Returns the current process group id.
-//     * @return The group id.
-//     */
-//    public static native int myGid();
-//
-//    /**
-//     * Returns the current process user name.
-//     * @return The user name if the operation succeeded,
-//     * <tt>null</tt> otherwise.
-//     * @see #myGroupName()
-//     */
-//    public static native String myUserName();
-//
-//    /**
-//     * Returns the current process group name.
-//     * @return The group name if the operation succeeded,
-//     * <tt>null</tt> otherwise.
-//     * @see #myUserName()
-//     */
-//    public static native String myGroupName();
-//
-//    /**
-//     * Returns the user name assigned to a particular <em>uid</em>.
-//     * @param uid The user id.
-//     * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
-//     * @see #getGroupName(int)
-//     */
-//    public static native String getUserName(int uid);
-//
-//    /**
-//     * Returns the group name assigned to a particular <em>gid</em>.
-//     * @param gid The group id.
-//     * @return The group name if the operation succeeded, <tt>null</tt> otherwise.
-//     * @see #getUserName(int)
-//     */
-//    public static native String getGroupName(int gid);
+    /**
+     * Returns the current process group id.
+     * @return The group id.
+     */
+    public static native int myGid();
+
+    /**
+     * Returns the current process user name.
+     * @return The user name if the operation succeeded,
+     * <tt>null</tt> otherwise.
+     * @see #myGroupName()
+     */
+    public static native String myUserName();
+
+    /**
+     * Returns the current process group name.
+     * @return The group name if the operation succeeded,
+     * <tt>null</tt> otherwise.
+     * @see #myUserName()
+     */
+    public static native String myGroupName();
+
+    /**
+     * Returns the user name assigned to a particular <em>uid</em>.
+     * @param uid The user id.
+     * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
+     * @see #getGroupName(int)
+     */
+    public static native String getUserName(int uid);
+
+    /**
+     * Returns the group name assigned to a particular <em>gid</em>.
+     * @param gid The group id.
+     * @return The group name if the operation succeeded, <tt>null</tt> otherwise.
+     * @see #getUserName(int)
+     */
+    public static native String getGroupName(int gid);
 
     /**
      * Returns the current process name.

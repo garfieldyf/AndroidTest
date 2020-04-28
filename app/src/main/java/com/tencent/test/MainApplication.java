@@ -85,6 +85,7 @@ public final class MainApplication extends Application {
 
     private static final String[] Urls = {
         UriUtils.getResourceUri("tv.fun.appstore", "drawable/pkg_icon_game"),
+        UriUtils.getResourceUri(BuildConfig.APPLICATION_ID, R.drawable.video),
         "http://img.funshion.com/pictures/ott/img/34750a/8038da/poster_1A2KAUEJO3EFA.png",
         "http://img.funshion.com/pictures/ott/img/53391f/8f14e4/poster_1A3E0HTJ7CMIK.png",
         "http://img.funshion.com/pictures/ott/img/4e72de/072b03/poster_1AHG0S3HBRTJ9.png",

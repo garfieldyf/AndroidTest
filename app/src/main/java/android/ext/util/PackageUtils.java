@@ -146,7 +146,7 @@ public final class PackageUtils {
      */
     public static List<ApplicationInfo> getInstalledApplications(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<ApplicationInfo> result = pm.getInstalledApplications(flags);
-        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -160,7 +160,7 @@ public final class PackageUtils {
         final Intent intent = new Intent(Intent.ACTION_MAIN);
         intent.addCategory(Intent.CATEGORY_LAUNCHER);
         final List<ResolveInfo> result = pm.queryIntentActivities(intent, flags);
-        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -173,7 +173,7 @@ public final class PackageUtils {
      */
     public static List<ResolveInfo> queryIntentActivities(PackageManager pm, Intent intent, int flags, Filter<ResolveInfo> filter) {
         final List<ResolveInfo> result = pm.queryIntentActivities(intent, flags);
-        return (filter != null && result != null ? ArrayUtils.filter(result, filter) : result);
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     public static void dumpPackageInfos(Printer printer, Collection<PackageInfo> infos) {
@@ -186,7 +186,7 @@ public final class PackageUtils {
                 printer.println(result.append("  package = ").append(info.packageName)
                     .append(", version = ").append(info.versionName)
                     .append(", system = ").append((info.applicationInfo.flags & FLAG_SYSTEM) != 0)
-                    .append(", updatedSystem = ").append((info.applicationInfo.flags & FLAG_UPDATED_SYSTEM_APP) != 0)
+                    .append(", updatedSystem = ").append(isUpdatedSystemApp(info.applicationInfo))
                     .append(", sourceDir = ").append(info.applicationInfo.publicSourceDir)
                     .toString());
             }

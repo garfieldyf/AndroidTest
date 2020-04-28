@@ -86,6 +86,7 @@ public final class ArrayUtils {
      * @see #indexOf(Object[], int, int, Object)
      */
     public static int indexOf(Object[] array, Object value) {
+        DebugUtils.__checkError(array == null, "array == null");
         return indexOf(array, 0, array.length, value);
     }
 
@@ -101,6 +102,7 @@ public final class ArrayUtils {
      * @see #indexOf(Object[], Object)
      */
     public static int indexOf(Object[] array, int start, int end, Object value) {
+        DebugUtils.__checkError(array == null, "array == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (; start < end; ++start) {
@@ -131,6 +133,7 @@ public final class ArrayUtils {
      * @see #indexOf(List, int, int, Filter)
      */
     public static <T> int indexOf(T[] array, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkError(array == null || filter == null, "array == null || filter == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         for (; start < end; ++start) {
             if (filter.accept(array[start])) {
@@ -153,6 +156,7 @@ public final class ArrayUtils {
      * @see #indexOf(T[], int, int, Filter)
      */
     public static <T> int indexOf(List<T> list, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkError(list == null || filter == null, "list == null || filter == null");
         DebugUtils.__checkRange(start, end - start, list.size());
         final ListIterator<T> itor = list.listIterator(start);
         for (; start < end; ++start) {
@@ -174,6 +178,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(Object[], int, int, Object)
      */
     public static int lastIndexOf(Object[] array, Object value) {
+        DebugUtils.__checkError(array == null, "array == null");
         return lastIndexOf(array, 0, array.length, value);
     }
 
@@ -189,6 +194,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(Object[], Object)
      */
     public static int lastIndexOf(Object[] array, int start, int end, Object value) {
+        DebugUtils.__checkError(array == null, "array == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (--end; end >= start; --end) {
@@ -219,6 +225,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(List, int, int, Filter)
      */
     public static <T> int lastIndexOf(T[] array, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkError(array == null || filter == null, "array == null || filter == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         for (--end; end >= start; --end) {
             if (filter.accept(array[end])) {
@@ -241,6 +248,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(T[], int, int, Filter)
      */
     public static <T> int lastIndexOf(List<T> list, int start, int end, Filter<? super T> filter) {
+        DebugUtils.__checkError(list == null || filter == null, "list == null || filter == null");
         DebugUtils.__checkRange(start, end - start, list.size());
         final ListIterator<T> itor = list.listIterator(end);
         for (; start < end; ++start) {
@@ -263,12 +271,14 @@ public final class ArrayUtils {
      * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > list.size()</tt>
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
-        DebugUtils.__checkRange(start, end - start, list.size());
-        final List<T> subList = list.subList(start, end);
-        if (comparator != null) {
-            Collections.sort(subList, comparator);
-        } else {
-            Collections.sort((List<Comparable>)subList);
+        if (ArrayUtils.getSize(list) > 0) {
+            DebugUtils.__checkRange(start, end - start, list.size());
+            final List<T> subList = list.subList(start, end);
+            if (comparator != null) {
+                Collections.sort(subList, comparator);
+            } else {
+                Collections.sort((List<Comparable>)subList);
+            }
         }
     }
 
@@ -301,10 +311,12 @@ public final class ArrayUtils {
      * @return The <em>collection</em>.
      */
     public static <E, T extends Collection<? super E>> T filter(T collection, Filter<? super E> filter) {
-        final Iterator<E> itor = (Iterator<E>)collection.iterator();
-        while (itor.hasNext()) {
-            if (!filter.accept(itor.next())) {
-                itor.remove();
+        if (ArrayUtils.getSize(collection) > 0) {
+            final Iterator<E> itor = (Iterator<E>)collection.iterator();
+            while (itor.hasNext()) {
+                if (!filter.accept(itor.next())) {
+                    itor.remove();
+                }
             }
         }
 
@@ -320,6 +332,7 @@ public final class ArrayUtils {
      * @see #insert(LinkedList, T, Comparator)
      */
     public static <T extends Comparable<? super T>> void insert(LinkedList<T> list, T value) {
+        DebugUtils.__checkError(list == null, "list == null");
         final T last = list.peekLast();
         if (last == null || value.compareTo(last) >= 0) {
             list.addLast(value);
@@ -348,6 +361,7 @@ public final class ArrayUtils {
      * @see #insert(LinkedList, T)
      */
     public static <T> void insert(LinkedList<? extends T> list, T value, Comparator<? super T> comparator) {
+        DebugUtils.__checkError(list == null, "list == null");
         final T last = list.peekLast();
         if (last == null || comparator.compare(value, last) >= 0) {
             ((LinkedList<T>)list).addLast(value);

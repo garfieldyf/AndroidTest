@@ -22,10 +22,9 @@ public class InvertedDrawable extends ImageDrawable<InvertedDrawable.InvertedBit
      * Constructor
      * @param bitmap The original {@link Bitmap} to create the inverted bitmap.
      * @param alpha The alpha component [0..255] of the inverted bitmap.
-     * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em>
-     * width or height.
-     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
-     * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
+     * @param percent The percentage, expressed as a percentage of the <em>bitmap's</em> width or height.
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
+     * or {@link Gravity#BOTTOM}.
      * @see #InvertedDrawable(View, int, float, int)
      */
     public InvertedDrawable(Bitmap bitmap, int alpha, float percent, int direction) {
@@ -34,12 +33,11 @@ public class InvertedDrawable extends ImageDrawable<InvertedDrawable.InvertedBit
 
     /**
      * Constructor
-     * @param view The {@link View} to create the inverted bitmap.
+     * @param view The {@link View} to create the inverted bitmap, The <em>view</em> must be layout.
      * @param alpha The alpha component [0..255] of the inverted bitmap.
-     * @param percent The percentage, expressed as a percentage of the <em>view's</em>
-     * width or height.
-     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP},
-     * {@link Gravity#RIGHT} or {@link Gravity#BOTTOM}.
+     * @param percent The percentage, expressed as a percentage of the <em>view's</em> width or height.
+     * @param direction The direction. One of {@link Gravity#LEFT}, {@link Gravity#TOP}, {@link Gravity#RIGHT}
+     * or {@link Gravity#BOTTOM}.
      * @see #InvertedDrawable(Bitmap, int, float, int)
      */
     public InvertedDrawable(View view, int alpha, float percent, int direction) {

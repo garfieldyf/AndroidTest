@@ -60,6 +60,11 @@ public class GridImageView extends View {
         invalidate();
     }
 
+    public void addDrawable(int index, Drawable drawable) {
+        mDrawables.add(index, drawable);
+        invalidate();
+    }
+
     public Drawable getDrawable(int index) {
         return mDrawables.get(index);
     }
@@ -67,6 +72,21 @@ public class GridImageView extends View {
     public void setDrawable(int index, Drawable drawable) {
         mDrawables.set(index, drawable);
         invalidate();
+    }
+
+    public Drawable removeDrawable(int index) {
+        final Drawable result = mDrawables.remove(index);
+        invalidate();
+        return result;
+    }
+
+    public boolean removeDrawable(Drawable drawable) {
+        final boolean result = mDrawables.remove(drawable);
+        if (result) {
+            invalidate();
+        }
+
+        return result;
     }
 
     public int getColumnCount() {
@@ -118,11 +138,7 @@ public class GridImageView extends View {
             ++rowCount;
         }
 
-        for (int i = 0, index = 0, top = getPaddingTop(); i < rowCount; ++i) {
-            if (top >= bottom) {
-                return;
-            }
-
+        for (int i = 0, index = 0, top = getPaddingTop(); i < rowCount && top < bottom; ++i) {
             for (int j = 0, left = x; j < mColumnCount; ++j) {
                 if (index >= size) {
                     return;

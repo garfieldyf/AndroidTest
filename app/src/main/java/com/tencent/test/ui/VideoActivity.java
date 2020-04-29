@@ -19,8 +19,10 @@ import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.tencent.temp.GridImageView;
 import com.tencent.test.R;
 
 public class VideoActivity extends Activity {
@@ -28,14 +30,15 @@ public class VideoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setSurfaceContent();
-        setSpanTextContent();
-//        setVideoContent();
+//        setSpanTextContent();
+        setVideoContent();
     }
 
     private void setVideoContent() {
         setContentView(R.layout.activity_video);
 
 //        final GridImageView view = (GridImageView)findViewById(R.id.image);
+//        view.setDrawable(4, null);
 //        final Resources res = getResources();
 //        view.addDrawable(res.getDrawable(R.drawable.video));
 //        view.addDrawable(res.getDrawable(R.drawable.ticket_exchange));
@@ -84,6 +87,11 @@ public class VideoActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    public void onColumnCountChanged(View v) {
+        final GridImageView view = (GridImageView)findViewById(R.id.image);
+        view.setColumnCount(2);
     }
 
     private void setText(int id, String text) {

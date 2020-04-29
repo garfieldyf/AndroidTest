@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.tencent.temp.PackageIconLoader xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:flags="noMemoryCache" />

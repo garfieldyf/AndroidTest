@@ -164,6 +164,14 @@ public final class GIFImage {
     }
 
     /**
+     * Returns the minimum number of bytes that can
+     * be used to store the bitmap canvas pixels.
+     */
+    public final int getBitmapCanvasBytes() {
+        return width * height * 4;
+    }
+
+    /**
      * Returns a mutable {@link Bitmap} to draw this GIF image frames.
      * @return The <tt>Bitmap</tt>.
      * @see #draw(Bitmap, int)

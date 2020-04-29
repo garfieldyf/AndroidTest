@@ -290,8 +290,9 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
 //        /* package */ boolean setImage(GIFImage image) {
 //            DebugUtils.__checkError(image == null, "image == null");
+//            DebugUtils.__checkError(mCanvas == null, "mCanvas == null");
 //            mImage = image;
-//            if (mCanvas == null || image.getBitmapCanvasBytes() > mCanvas.getAllocationByteCount()) {
+//            if (image.getBitmapCanvasBytes() > mCanvas.getAllocationByteCount()) {
 //                mCanvas = image.createBitmapCanvas();
 //                return true;
 //            } else {

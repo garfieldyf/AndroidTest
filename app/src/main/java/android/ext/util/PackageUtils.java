@@ -1,7 +1,5 @@
 package android.ext.util;
 
-import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
-import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -75,19 +73,19 @@ public final class PackageUtils {
     }
 
     /**
+     * Tests if the application is installed in the device's system image.
+     * @param ai The {@link ApplicationInfo}.
+     */
+    public static boolean isSystemApp(ApplicationInfo ai) {
+        return ((ai.flags & ApplicationInfo.FLAG_SYSTEM) != 0);
+    }
+
+    /**
      * Tests if the application has been install as an update to a built-in system application.
      * @param ai The {@link ApplicationInfo}.
      */
     public static boolean isUpdatedSystemApp(ApplicationInfo ai) {
-        return ((ai.flags & FLAG_UPDATED_SYSTEM_APP) != 0);
-    }
-
-    /**
-     * Tests if the application is a system application or install as an update to a built-in system application.
-     * @param ai The {@link ApplicationInfo}.
-     */
-    public static boolean isSystemApp(ApplicationInfo ai) {
-        return ((ai.flags & (FLAG_SYSTEM | FLAG_UPDATED_SYSTEM_APP)) != 0);
+        return ((ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
     }
 
     /**
@@ -185,7 +183,7 @@ public final class PackageUtils {
                 result.setLength(0);
                 printer.println(result.append("  package = ").append(info.packageName)
                     .append(", version = ").append(info.versionName)
-                    .append(", system = ").append((info.applicationInfo.flags & FLAG_SYSTEM) != 0)
+                    .append(", system = ").append(isSystemApp(info.applicationInfo))
                     .append(", updatedSystem = ").append(isUpdatedSystemApp(info.applicationInfo))
                     .append(", sourceDir = ").append(info.applicationInfo.publicSourceDir)
                     .toString());
@@ -209,12 +207,18 @@ public final class PackageUtils {
 
         /**
          * Constructor
+         * @see #PackageItemIcon(Drawable, CharSequence)
+         * @see #PackageItemIcon(Context, ApplicationInfo)
+         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon() {
         }
 
         /**
          * Constructor
+         * @see #PackageItemIcon()
+         * @see #PackageItemIcon(Context, ApplicationInfo)
+         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
@@ -223,6 +227,9 @@ public final class PackageUtils {
 
         /**
          * Constructor
+         * @see #PackageItemIcon()
+         * @see #PackageItemIcon(Drawable, CharSequence)
+         * @see #PackageItemIcon(Context, ApplicationInfo)
          */
         public PackageItemIcon(PackageManager pm, ResolveInfo info) {
             this.icon  = info.loadIcon(pm);
@@ -235,6 +242,9 @@ public final class PackageUtils {
          * @param info The {@link ApplicationInfo} must be a package archive file's
          * application info and {@link ApplicationInfo#publicSourceDir publicSourceDir}
          * must be contains the archive file full path.
+         * @see #PackageItemIcon()
+         * @see #PackageItemIcon(Drawable, CharSequence)
+         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public PackageItemIcon(Context context, ApplicationInfo info) {
@@ -424,7 +434,7 @@ public final class PackageUtils {
 
         @Override
         public boolean accept(ApplicationInfo applicationInfo) {
-            return (!mPackages.contains(applicationInfo.packageName) && (applicationInfo.flags & FLAG_SYSTEM) == 0);
+            return (!mPackages.contains(applicationInfo.packageName) && !isSystemApp(applicationInfo));
         }
     }
 

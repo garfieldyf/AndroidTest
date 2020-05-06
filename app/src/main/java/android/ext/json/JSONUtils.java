@@ -348,12 +348,6 @@ public final class JSONUtils {
         checkDouble(value, "");
     }
 
-    /* package */ static void __checkDouble(double value) {
-        if (Double.isInfinite(value) || Double.isNaN(value)) {
-            throw new AssertionError("Forbidden numeric value: " + value);
-        }
-    }
-
     /* package */ static void __checkDouble(Collection<?> values) {
         final Iterator<?> iter = values.iterator();
         for (int i = 0; iter.hasNext(); ++i) {

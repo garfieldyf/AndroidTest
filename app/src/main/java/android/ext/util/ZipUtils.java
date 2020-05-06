@@ -212,12 +212,12 @@ public final class ZipUtils {
             is = file.getInputStream(entry);
             os = new FileOutputStream(filename);
 
-            if (entry.getCrc() <= 0) {
-                // Uncompress the ZIP entry.
-                FileUtils.copyStreamImpl(is, os, cancelable, buffer);
-            } else {
+            if (entry.getCrc() != -1) {
                 // Uncompress the ZIP entry with check CRC32.
                 uncompress(entry, is, os, crc, cancelable, buffer);
+            } else {
+                // Uncompress the ZIP entry.
+                FileUtils.copyStreamImpl(is, os, cancelable, buffer);
             }
         } finally {
             FileUtils.close(is);

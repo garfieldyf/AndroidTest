@@ -123,7 +123,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     @Override
     /* package */ int connect() throws IOException {
         __checkDumpHeaders(true);
-        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
+        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof org.json.JSONObject || mData instanceof org.json.JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
             connectImpl();
             postData(mData);
         } else if (mData instanceof File) {

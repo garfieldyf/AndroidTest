@@ -68,10 +68,10 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 //     */
 //    public final void setImage(GIFImage image) {
 //        if (mState.mImage != image) {
-//            mFlags |= FLAG_BOUNDS;
+//            mFlags = (mFlags | FLAG_BOUNDS) & ~FLAG_RUNNING;
 //            mState.setImage(image);
 //            mFrameIndex = 0;
-//            invalidateSelf();
+//            unscheduleSelf(this);
 //            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
 //        }
 //    }

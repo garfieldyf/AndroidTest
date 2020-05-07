@@ -243,7 +243,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         @Override
         public void run() {
             if (!mDatabase.isOpen()) {
-                Log.w(getClass().getName(), "The SQLiteDatabase was closed.");
+                Log.w(AsyncSQLiteHandler.class.getName(), "The SQLiteDatabase was closed.");
                 return;
             }
 

@@ -106,7 +106,7 @@ public final class Caches {
         @Override
         public void put(Bitmap bitmap) {
             DebugUtils.__checkError(bitmap == null, "bitmap == null");
-            DebugUtils.__checkWarning(bitmap.isRecycled(), "EmptyBitmapPool", "The " + bitmap + " is recycled, couldn't to reused.");
+            DebugUtils.__checkWarning(bitmap.isRecycled(), "EmptyBitmapPool", "The " + bitmap + " is recycled, couldn't recycle to reused.");
             DebugUtils.__checkWarning(!bitmap.isMutable(), "EmptyBitmapPool", "The " + bitmap + " is immutable, couldn't recycle to reused.");
         }
     }

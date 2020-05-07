@@ -4,6 +4,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import android.ext.content.AbsAsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
+import android.ext.util.ByteArrayBuffer;
 import android.util.Log;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -80,6 +81,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @param params The parameters of this task, passed earlier by {@link #execute(Params[])}.
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
+     * @see #download()
      * @see #download(String, int)
      * @see #download(OutputStream)
      */
@@ -95,6 +97,18 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @throws Exception if an error occurs while opening the connection.
      */
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
+
+    /**
+     * Downloads the resource from the remote server write to the {@link ByteArrayBuffer}.
+     * @return The <tt>ByteArrayBuffer</tt> to store the resource.
+     * @throws IOException if an error occurs while downloading to the resource.
+     * @see #onDownload(URLConnection, int, Params[])
+     */
+    protected final ByteArrayBuffer download() throws IOException {
+        final ByteArrayBuffer result = new ByteArrayBuffer();
+        mRequest.downloadImpl(result, this, null);
+        return result;
+    }
 
     /**
      * Downloads the resource from the remote server write to the specified <em>out</em>.

@@ -1,6 +1,13 @@
 package com.tencent.test;
 
+import android.ext.net.AsyncDownloadTask;
+import android.ext.net.DownloadRequest;
+import android.ext.util.ByteArrayBuffer;
+import android.util.Log;
+import android.util.LogPrinter;
 import java.io.FileWriter;
+import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.util.List;
 import java.util.RandomAccess;
 import android.app.Activity;
@@ -15,6 +22,35 @@ import android.net.Uri;
 import android.util.JsonWriter;
 
 public final class JSONTest {
+    public static void testDownload() {
+        new DownloadTask().executeOnExecutor(MainApplication.sInstance.getExecutor(), "http://111.170.234.234/app.znds.com/down/20190902/dptvb_1.0_dangbei.apk");
+    }
+
+    /* package */ static final class DownloadTask extends AsyncDownloadTask<String, Object, ByteArrayBuffer> {
+        @Override
+        protected DownloadRequest newDownloadRequest(String[] urls) throws Exception {
+            return new DownloadRequest(urls[0]).readTimeout(30000).connectTimeout(30000);
+        }
+
+        @Override
+        public ByteArrayBuffer onDownload(URLConnection conn, int statusCode, String[] urls) throws Exception {
+            ByteArrayBuffer result = null;
+            Log.i("abcd", "begin download");
+            if (statusCode == HttpURLConnection.HTTP_OK) {
+                result = new ByteArrayBuffer(4000000);
+                download(result);
+            }
+
+            if (result != null) {
+                result.dump(new LogPrinter(Log.INFO, "abcd"));
+            } else {
+                Log.i("abcd", "download failed!");
+            }
+
+            return result;
+        }
+    }
+
     public static class Permission implements RandomAccess {
         @CursorField("_id")
         private long mId;

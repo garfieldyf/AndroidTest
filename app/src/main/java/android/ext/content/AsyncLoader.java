@@ -184,6 +184,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Called on the UI thread to recycle the <em>params</em>.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
+     * @hide
      */
     protected void onRecycle(Params[] params) {
     }
@@ -270,8 +271,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
-            // Recycles this task to avoid potential memory
-            // leaks, Even the loader has been shut down.
+            // Recycles this task to avoid potential memory leaks.
             onRecycle(params);
             clearForRecycle();
             mKey = null;

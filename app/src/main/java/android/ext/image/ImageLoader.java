@@ -4,6 +4,7 @@ import static android.ext.image.ImageModule.COOKIE;
 import static android.ext.image.ImageModule.MAX_POOL_SIZE;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PLACEHOLDER;
+import static android.ext.image.ImageModule.getPlaceholder;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.content.Context;
 import android.ext.cache.Cache;
@@ -103,7 +104,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         } else if (value instanceof Drawable) {
             view.setImageDrawable((Drawable)value);
         } else {
-            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
+            view.setImageDrawable(getPlaceholder(view.getResources(), params));
         }
     }
 

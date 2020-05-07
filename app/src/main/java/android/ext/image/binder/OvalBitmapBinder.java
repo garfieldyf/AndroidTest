@@ -1,8 +1,8 @@
 package android.ext.image.binder;
 
+import static android.ext.image.ImageModule.getPlaceholder;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
-import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
@@ -27,7 +27,7 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
         if (bitmap != null) {
             setImageBitmap(view, view.getDrawable(), bitmap);
         } else {
-            view.setImageDrawable(ImageModule.getPlaceholder(view.getResources(), params));
+            view.setImageDrawable(getPlaceholder(view.getResources(), params));
         }
     }
 

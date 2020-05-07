@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
-import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -269,12 +268,7 @@ public class SyncMessenger implements ServiceConnection {
             return result;
         }
 
-        public static final Pool<SyncHandler> POOL = Pools.synchronizedPool(Pools.newPool(new Factory<SyncMessenger.SyncHandler>() {
-            @Override
-            public SyncMessenger.SyncHandler newInstance() {
-                return new SyncMessenger.SyncHandler();
-            }
-        }, 2));
+        public static final Pool<SyncHandler> POOL = Pools.synchronizedPool(Pools.newPool(SyncHandler::new, 2));
 
         static {
             final HandlerThread thread = new HandlerThread("SyncMessenger");

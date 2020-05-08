@@ -8,7 +8,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.database.DatabaseUtils;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Process;
 import android.text.format.DateFormat;
@@ -24,7 +23,6 @@ import java.io.StringWriter;
 import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Class ProcessUtils
@@ -94,13 +92,6 @@ public final class ProcessUtils {
         }
 
         return null;
-    }
-
-    /**
-     * Equivalent to calling <tt>AsyncTask.setDefaultExecutor(exec)</tt>.
-     */
-    public static void setDefaultExecutor(Executor exec) {
-        AsyncTask.setDefaultExecutor(exec);
     }
 
     /**

@@ -459,7 +459,7 @@ public final class FileUtils {
      */
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {
-            ((ByteArrayBuffer)out).readFrom(is, cancelable);
+            ((ByteArrayBuffer)out).readFrom(is, is.available(), cancelable);
         } else if (is instanceof FileInputStream && out instanceof FileOutputStream) {
             copyStreamImpl((FileInputStream)is, (FileOutputStream)out, Optional.ofNullable(cancelable));
         } else if (buffer == null) {

@@ -35,9 +35,9 @@ public final class ByteArrayBuffer extends OutputStream {
     }
 
     /**
-     * Removes all contents from this buffer, leaving it empty.
+     * Resets this buffer to the beginning of the underlying byte array.
      */
-    public final void clear() {
+    public final void reset() {
         size = 0;
     }
 
@@ -136,7 +136,7 @@ public final class ByteArrayBuffer extends OutputStream {
     /**
      * Writes the <tt>ByteBuffer</tt> remaining contents to this buffer.
      * @param buffer The <tt>ByteBuffer</tt> to read the contents.
-     * @see #readFrom(InputStream, Cancelable)
+     * @see #readFrom(InputStream, int, Cancelable)
      */
     public final void readFrom(ByteBuffer buffer) {
         DebugUtils.__checkError(buffer == null, "buffer == null");
@@ -151,26 +151,26 @@ public final class ByteArrayBuffer extends OutputStream {
     /**
      * Writes the specified <tt>InputStream</tt> contents to this buffer.
      * @param is The <tt>InputStream</tt> to read the contents.
-     * @param cancelable A {@link Cancelable} can be check the operation is
-     * cancelled, or <tt>null</tt> if none. If the operation was cancelled
-     * before it completed normally this buffer's contents is undefined.
+     * @param contentLength May be <tt>0</tt>. The <tt>InputStream</tt> contents length in bytes.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt>
+     * if none. If the operation was cancelled before it completed normally this buffer's contents is undefined.
      * @throws IOException if an error occurs while read from <em>is</em>.
      * @see #readFrom(ByteBuffer)
      */
-    public final void readFrom(InputStream is, Cancelable cancelable) throws IOException {
+    public final void readFrom(InputStream is, int contentLength, Cancelable cancelable) throws IOException {
         // Expands this buffer capacity.
         DebugUtils.__checkError(is == null, "is == null");
-        expandCapacity(is.available(), false);
+        expandCapacity(contentLength, false);
         cancelable = Optional.ofNullable(cancelable);
 
         // Reads the all bytes from the InputStream.
-        int count, readBytes, expandCount = 256;
+        int count, readBytes, expandCount = 1024;
         while (!cancelable.isCancelled()) {
             if ((count = data.length - size) <= 0) {
                 count = expandCount;
                 expandCapacity(count, true);
 
-                if (expandCount < 8192) {
+                if (expandCount < 16384) {
                     expandCount <<= 1;  // expandCount * 2
                 }
             }

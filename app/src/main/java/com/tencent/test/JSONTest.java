@@ -1,8 +1,18 @@
 package com.tencent.test;
 
+import android.app.Activity;
+import android.content.Context;
+import android.database.Cursor;
+import android.ext.annotation.CursorField;
+import android.ext.database.DatabaseUtils;
 import android.ext.net.AsyncDownloadTask;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ByteArrayBuffer;
+import android.ext.util.DebugUtils;
+import android.ext.util.FileUtils;
+import android.ext.util.ProcessUtils.CrashDatabase;
+import android.net.Uri;
+import android.util.JsonWriter;
 import android.util.Log;
 import android.util.LogPrinter;
 import java.io.FileWriter;
@@ -10,16 +20,6 @@ import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.RandomAccess;
-import android.app.Activity;
-import android.content.Context;
-import android.database.Cursor;
-import android.ext.annotation.CursorField;
-import android.ext.database.DatabaseUtils;
-import android.ext.util.DebugUtils;
-import android.ext.util.FileUtils;
-import android.ext.util.ProcessUtils.CrashDatabase;
-import android.net.Uri;
-import android.util.JsonWriter;
 
 public final class JSONTest {
     public static void testDownload() {
@@ -37,8 +37,7 @@ public final class JSONTest {
             ByteArrayBuffer result = null;
             Log.i("abcd", "begin download");
             if (statusCode == HttpURLConnection.HTTP_OK) {
-                result = new ByteArrayBuffer(4000000);
-                download(result);
+                result = download();
             }
 
             if (result != null) {

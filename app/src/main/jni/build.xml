@@ -35,7 +35,7 @@
     <!-- target -post-compile -->
     <target name="-post-compile">
         <copy todir="${out.dir}" overwrite="true">
-            <fileset dir="${lib.dir}" />
+            <fileset dir="${lib.dir}" includes="**/*.so" />
         </copy>
 
         <echo level="info">Deletes temp files...</echo>

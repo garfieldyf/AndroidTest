@@ -4,6 +4,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
 import android.ext.json.JSONUtils;
 import android.ext.util.ArrayUtils;
+import android.ext.util.ByteArrayBuffer;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
 import android.util.JsonReader;
@@ -409,7 +410,11 @@ public class DownloadRequest {
     /* package */ final void downloadImpl(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
         final InputStream is = mConnection.getInputStream();
         try {
-            FileUtils.copyStream(is, out, cancelable, tempBuffer);
+            if (out instanceof ByteArrayBuffer) {
+                ((ByteArrayBuffer)out).readFrom(is, mConnection.getContentLength(), cancelable);
+            } else {
+                FileUtils.copyStream(is, out, cancelable, tempBuffer);
+            }
         } finally {
             is.close();
         }

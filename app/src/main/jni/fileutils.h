@@ -72,10 +72,10 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
 {
     assert(filename);
 
-    stdutil::char_sequence path;
-    __NS::splitPath(filename, path);
+    stdutil::char_sequence dirPath;
+    __NS::splitPath(filename, dirPath);
 
-    return (path.empty() ? EINVAL : __NS::createDirectory(path.data, path.size));
+    return (dirPath.empty() ? EINVAL : __NS::createDirectory(dirPath.data, dirPath.size));
 }
 
 __STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)

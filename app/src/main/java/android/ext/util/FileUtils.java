@@ -699,30 +699,6 @@ public final class FileUtils {
      */
     public static class Stat implements Parcelable {
         /**
-         * The permission of read, write and execute by all users.
-         * Same as <em>S_IRWXU | S_IRWXG | S_IRWXO</em>.
-         */
-        public static final int S_IRWXA = 00777;
-
-        /**
-         * The default permissions.
-         * Same as <em>S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH</em>.
-         */
-        public static final int S_IRWXD = 00775;
-
-        /**
-         * The permission of read, write by all users.
-         * Same as <em>S_IRWXU | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH</em>.
-         */
-        public static final int S_IRWDA = 00766;
-
-        /**
-         * The permission of read, execute by all users.
-         * Same as <em>S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH</em>.
-         */
-        public static final int S_IRXDA = 00755;
-
-        /**
          * The permission of read, write and execute by owner.
          */
         public static final int S_IRWXU = 00700;

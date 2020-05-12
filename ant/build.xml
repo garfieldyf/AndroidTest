@@ -24,6 +24,10 @@
     <property name="support.v4.jar.path" value="${sdk.dir}/extras/android/support/v7/appcompat/libs/android-support-v4.jar" />
     <property name="recyclerview.v7.jar.path" value="${sdk.dir}/extras/android/support/v7/recyclerview\libs\android-support-v7-recyclerview.jar" />
 
+    <condition property="compile.foucs">
+        <istrue value="true" />
+    </condition>
+
     <condition property="compile.barcode">
         <istrue value="${compile_barcode}" />
     </condition>
@@ -49,6 +53,12 @@
         </replace>
     </target>
 
+    <!-- target -remove-foucs-if -->
+    <target name="-remove-foucs-if" unless="compile.foucs">
+        <echo level="info">Remove foucs source files...</echo>
+        <delete dir="${src.dir}/${ndk.dir}/focus" />
+    </target>
+
     <!-- target -remove-barcode-if -->
     <target name="-remove-barcode-if" unless="compile.barcode">
         <echo level="info">Remove barcode source files...</echo>
@@ -56,6 +66,9 @@
         <delete file="${src.dir}/${ndk.dir}/widget/BarcodeDecorView.java" />
         <delete file="${src.dir}/${ndk.dir}/widget/BarcodeCameraView.java" />
     </target>
+
+    <!-- target -remove -->
+    <target name="-remove" depends="-remove-foucs-if, -remove-barcode-if" />
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">
@@ -192,16 +205,16 @@
     </target>
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -remove-barcode-if, -set-debug-mode, -compile-jar, -post-compile" />
+    <target name="debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -remove-barcode-if, -set-release-mode, -compile-jar, -post-compile" />
+    <target name="release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -post-compile" />
 
     <!-- target compile-debug -->
-    <target name="compile-debug" depends="-clean, -copy, -remove-barcode-if, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="compile-debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target compile-release -->
-    <target name="compile-release" depends="-clean, -copy, -remove-barcode-if, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="compile-release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all -->
     <target name="all">

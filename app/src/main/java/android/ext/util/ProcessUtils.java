@@ -280,17 +280,17 @@ public final class ProcessUtils {
         @Override
         public void uncaughtException(Thread thread, Throwable e) {
             try {
-                final PackageInfo pi = PackageUtils.myPackageInfo(mContext, 0);
-                if (pi.versionName == null) {
-                    pi.versionName = "";
+                final PackageInfo info = PackageUtils.myPackageInfo(mContext, 0);
+                if (info.versionName == null) {
+                    info.versionName = "";
                 }
 
                 String processName = myProcessName(mContext);
                 if (processName == null) {
-                    processName = pi.applicationInfo.processName;
+                    processName = info.applicationInfo.processName;
                 }
 
-                this.writeUncaughtException(pi, processName, thread, e);
+                this.writeUncaughtException(info, processName, thread, e);
             } catch (Throwable ex) {
                 Log.e(ProcessUtils.class.getName(), "Couldn't write crash infos", ex);
             } finally {
@@ -305,12 +305,12 @@ public final class ProcessUtils {
          * Writes the crash infos to the "crash.db.crashes" table.
          */
         @SuppressWarnings("unused")
-        private void storeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) {
+        private void storeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {
                 final StringWriter stackTrace = new StringWriter(2048);
                 e.printStackTrace(new PrintWriter(stackTrace));
-                DatabaseUtils.executeInsert(db.getWritableDatabase(), "INSERT INTO crashes VALUES(?,?,?,?,?,?,?)", System.currentTimeMillis(), pi.versionCode, pi.versionName, processName, thread.getName(), e.getClass().getName(), stackTrace.toString());
+                DatabaseUtils.executeInsert(db.getWritableDatabase(), "INSERT INTO crashes VALUES(?,?,?,?,?,?,?)", System.currentTimeMillis(), info.versionCode, info.versionName, processName, thread.getName(), e.getClass().getName(), stackTrace.toString());
             } finally {
                 db.close();
             }
@@ -319,7 +319,7 @@ public final class ProcessUtils {
         /**
          * Writes the crash infos to "/storage/emulated/0/Android/data/<em>packagename</em>/files/crashes.log"
          */
-        private void writeUncaughtException(PackageInfo pi, String processName, Thread thread, Throwable e) throws FileNotFoundException {
+        private void writeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             // Open the log file.
             final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
             try {
@@ -328,7 +328,7 @@ public final class ProcessUtils {
                 ps.println("========================================================================================================================");
                 ps.format("Model : %s (brand = %s, sdk = %d, version = %s, cpu abis = %s)\n", Build.MODEL, Build.BRAND, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
                 ps.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
-                ps.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", pi.packageName, pi.versionCode, pi.versionName);
+                ps.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", info.packageName, info.versionCode, info.versionName);
                 ps.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());
                 e.printStackTrace(ps);
                 ps.println();

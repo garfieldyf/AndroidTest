@@ -44,11 +44,9 @@ public final class UriUtils {
         if (FileUtils.isAbsolutePath(uriString)) {
             return new FileInputStream(uriString);
         } else if ("file://".regionMatches(true, 0, uriString, 0, 7)) {
-            // Skips the prefix 'file://'
-            return new FileInputStream(uriString.substring(7));
+            return new FileInputStream(uriString.substring(7) /* Skips 'file://' */);
         } else if ("android.asset://".regionMatches(true, 0, uriString, 0, 16)) {
-            // Skips the prefix 'android.asset://'
-            return context.getAssets().open(uriString.substring(16), AssetManager.ACCESS_STREAMING);
+            return context.getAssets().open(uriString.substring(16) /* Skips 'android.asset://' */, AssetManager.ACCESS_STREAMING);
         } else {
             return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
         }

@@ -42,6 +42,16 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
         setCursor(cursor);
     }
 
+    @Override
+    public int getItemCount() {
+        return (mCursor != null ? mCursor.getCount() : 0);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return (mCursor != null && mRowIDColumn != -1 && mCursor.moveToPosition(position) ? mCursor.getLong(mRowIDColumn) : NO_ID);
+    }
+
     /**
      * Returns the cursor associated with this adapter.
      * @return The <tt>Cursor</tt>, or <tt>null</tt> if
@@ -155,11 +165,11 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
      * @param context The <tt>Context</tt>.
      * @param scheme The <tt>Intent</tt> data scheme to match. May be <tt>"databasename.tablename"</tt>
      * @param path May be <tt>null</tt>. The path to match.
-     * @see #unregisterReceiver(Context)
+     * @see #unregisterDatabaseReceiver(Context)
      * @see DatabaseReceiver
      */
-    public final void registerReceiver(Context context, String scheme, String path) {
-        DebugUtils.__checkUIThread("registerReceiver");
+    public final void registerDatabaseReceiver(Context context, String scheme, String path) {
+        DebugUtils.__checkUIThread("registerDatabaseReceiver");
         if (mReceiver == null) {
             mReceiver = new CursorReceiver();
             mReceiver.register(context, scheme, path);
@@ -169,25 +179,15 @@ public abstract class CursorAdapter<VH extends ViewHolder> extends BaseAdapter<V
     /**
      * Unregister a receiver that has previously been registered with this adapter.
      * @param context The <tt>Context</tt>.
-     * @see #registerReceiver(Context, String, String)
+     * @see #registerDatabaseReceiver(Context, String, String)
      * @see DatabaseReceiver
      */
-    public final void unregisterReceiver(Context context) {
-        DebugUtils.__checkUIThread("unregisterReceiver");
+    public final void unregisterDatabaseReceiver(Context context) {
+        DebugUtils.__checkUIThread("unregisterDatabaseReceiver");
         if (mReceiver != null) {
             mReceiver.unregister(context);
             mReceiver = null;
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return (mCursor != null ? mCursor.getCount() : 0);
-    }
-
-    @Override
-    public long getItemId(int position) {
-        return (mCursor != null && mRowIDColumn != -1 && mCursor.moveToPosition(position) ? mCursor.getLong(mRowIDColumn) : NO_ID);
     }
 
     private void setCursor(Cursor cursor) {

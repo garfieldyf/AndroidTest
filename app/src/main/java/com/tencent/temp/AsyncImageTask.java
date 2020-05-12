@@ -183,7 +183,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
     protected Object downloadImage(String url, byte[] tempBuffer) {
         final File imageFile = new File(FileUtils.getCacheDir(mContext, null), Integer.toString(Thread.currentThread().hashCode()));
         try {
-            final int statusCode = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).download(imageFile.getPath(), this, tempBuffer);
+            final int statusCode = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).download(imageFile, this, tempBuffer);
             return (statusCode == HttpURLConnection.HTTP_OK && !isCancelled() ? decodeImage(imageFile, tempBuffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);

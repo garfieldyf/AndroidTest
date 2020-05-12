@@ -10,6 +10,7 @@ import android.ext.util.FileUtils;
 import android.util.JsonReader;
 import android.util.Log;
 import android.util.LogPrinter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -284,6 +285,7 @@ public class DownloadRequest {
      * @return If the download succeeded return a <tt>JSONObject</tt> or <tt>JSONArray</tt> object, If the download was
      * cancelled before it completed normally the returned value is undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
+     * @see #download(File, Cancelable, byte[])
      * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
@@ -298,38 +300,6 @@ public class DownloadRequest {
 
     /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
-     * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The file to write the resource, must be absolute file path.
-     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
-     * none. If the download was cancelled before it completed normally the file's contents is undefined.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
-     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
-     * @throws IOException if an error occurs while downloading the resource.
-     * @see #download(Cancelable)
-     * @see #download(DownloadCallback, Object[])
-     * @see #download(OutputStream, Cancelable, byte[])
-     */
-    public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        try {
-            final int statusCode = connect();
-            switch (statusCode) {
-            case HTTP_OK:
-                downloadImpl(filename, cancelable, tempBuffer, false);
-                break;
-
-            case HTTP_PARTIAL:
-                downloadImpl(filename, cancelable, tempBuffer, true);
-                break;
-            }
-
-            return statusCode;
-        } finally {
-            disconnect();
-        }
-    }
-
-    /**
-     * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param out The {@link OutputStream} to write the resource.
      * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if none.
      * If the download was cancelled before it completed normally the <em>out's</em> contents is undefined.
@@ -337,6 +307,7 @@ public class DownloadRequest {
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
+     * @see #download(File, Cancelable, byte[])
      * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      */
@@ -355,12 +326,63 @@ public class DownloadRequest {
 
     /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param file The file to write the resource, must be absolute file path.
+     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
+     * none. If the download was cancelled before it completed normally the file's contents is undefined.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
+     * @throws IOException if an error occurs while downloading the resource.
+     * @see #download(Cancelable)
+     * @see #download(String, Cancelable, byte[])
+     * @see #download(DownloadCallback, Object[])
+     * @see #download(OutputStream, Cancelable, byte[])
+     */
+    public final int download(File file, Cancelable cancelable, byte[] tempBuffer) throws IOException {
+        try {
+            final int statusCode = connect();
+            switch (statusCode) {
+            case HTTP_OK:
+                downloadImpl(file, cancelable, tempBuffer, false);
+                break;
+
+            case HTTP_PARTIAL:
+                downloadImpl(file, cancelable, tempBuffer, true);
+                break;
+            }
+
+            return statusCode;
+        } finally {
+            disconnect();
+        }
+    }
+
+    /**
+     * Equivalent to calling <tt>download(new File(filename), cancelable, tempBuffer)</tt>.
+     * @param filename The file to write the resource, must be absolute file path.
+     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
+     * none. If the download was cancelled before it completed normally the file's contents is undefined.
+     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
+     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
+     * @throws IOException if an error occurs while downloading the resource.
+     * @see #download(Cancelable)
+     * @see #download(File, Cancelable, byte[])
+     * @see #download(DownloadCallback, Object[])
+     * @see #download(OutputStream, Cancelable, byte[])
+     */
+    public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
+        return download(new File(filename), cancelable, tempBuffer);
+    }
+
+    /**
+     * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param callback The {@link DownloadCallback} to used to downloads.
      * @param params The parameters passed into {@link DownloadCallback#onDownload}. If no parameters,
      * you can pass <em>(Params[])null</em> instead of allocating an empty array.
      * @return A result, defined by the subclass of the <tt>DownloadCallback</tt>.
      * @throws Exception if an error occurs while downloading the resource.
      * @see #download(Cancelable)
+     * @see #download(File, Cancelable, byte[])
      * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
@@ -423,9 +445,9 @@ public class DownloadRequest {
     /**
      * Downloads the file from the remote server with the arguments supplied to this request.
      */
-    /* package */ final void downloadImpl(String filename, Cancelable cancelable, byte[] tempBuffer, boolean append) throws IOException {
-        FileUtils.mkdirs(filename, FileUtils.FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(filename, append);
+    /* package */ final void downloadImpl(File file, Cancelable cancelable, byte[] tempBuffer, boolean append) throws IOException {
+        FileUtils.mkdirs(file.getPath(), FileUtils.FLAG_IGNORE_FILENAME);
+        final OutputStream os = new FileOutputStream(file, append);
         try {
             downloadImpl(os, cancelable, tempBuffer);
         } finally {

@@ -151,7 +151,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
             request.__checkDumpHeaders = false;
-            return (request.download(imageFile.getPath(), task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
+            return (request.download(imageFile, task, buffer) == HTTP_OK && !isTaskCancelled(task) ? mDecoder.decodeImage(imageFile, params, flags, buffer) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);
             return null;

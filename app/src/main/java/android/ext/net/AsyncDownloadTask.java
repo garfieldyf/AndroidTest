@@ -6,6 +6,7 @@ import android.ext.content.AbsAsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.ByteArrayBuffer;
 import android.util.Log;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLConnection;
@@ -82,7 +83,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
      * @return A result, defined by the subclass of this task.
      * @throws Exception if an error occurs while downloading the resource.
      * @see #download()
-     * @see #download(String, int)
+     * @see #download(File, int)
      * @see #download(OutputStream)
      */
     @Override
@@ -123,19 +124,19 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsy
     /**
      * Downloads the resource from the remote server write to the specified file.
      * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The file to write the resource, must be absolute file path.
+     * @param file The file to write the resource, must be absolute file path.
      * @param statusCode The response code returned by the remote server.
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
-    protected final void download(String filename, int statusCode) throws IOException {
+    protected final void download(File file, int statusCode) throws IOException {
         switch (statusCode) {
         case HTTP_OK:
-            mRequest.downloadImpl(filename, this, null, false);
+            mRequest.downloadImpl(file, this, null, false);
             break;
 
         case HTTP_PARTIAL:
-            mRequest.downloadImpl(filename, this, null, true);
+            mRequest.downloadImpl(file, this, null, true);
             break;
         }
     }

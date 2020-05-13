@@ -22,6 +22,7 @@ import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.image.ImageLoader.LoadRequest;
 import android.ext.image.binder.GIFImageBinder;
 import android.ext.image.binder.RoundedBitmapBinder;
+import android.ext.image.binder.RoundedGIFImageBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
@@ -397,6 +398,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 ((TransitionBinder)object).dump(printer, result);
             } else if (object instanceof RoundedBitmapBinder) {
                 ((RoundedBitmapBinder)object).dump(printer, result);
+            } else if (object instanceof RoundedGIFImageBinder) {
+                ((RoundedGIFImageBinder)object).dump(printer, result);
             } else {
                 printer.println(DebugUtils.toString(object, result).toString());
             }

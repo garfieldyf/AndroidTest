@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RoundedGIFImageBinder xmlns:android="http://schemas.android.com/apk/res/android"
+    android:autoStart="false"
+    android:bottomLeftRadius="30dp"
+    android:bottomRightRadius="40dp"
+    android:oneshot="true"
+    android:topLeftRadius="10dp"
+    android:topRightRadius="20dp" />

@@ -1,11 +1,9 @@
 package android.ext.image.binder;
 
-import static android.ext.graphics.drawable.GIFBaseDrawable.GIF_DRAWABLE_ATTRS;
 import static android.ext.image.ImageModule.getPlaceholder;
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.graphics.drawable.Drawable;
@@ -44,12 +42,10 @@ public final class GIFImageBinder implements Binder<Object, Object, GIFImage> {
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #GIFImageBinder(boolean, boolean)
      */
-    @SuppressLint("ResourceType")
     public GIFImageBinder(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, GIF_DRAWABLE_ATTRS);
-        mOneShot   = a.getBoolean(0 /* android.R.attr.oneshot */, false);
-        mAutoStart = a.getBoolean(1 /* android.R.attr.autoStart */, true);
-        a.recycle();
+        final boolean[] results = XmlResources.loadAnimationAttrs(context.getResources(), attrs);
+        mOneShot   = results[0]; // android.R.attr.oneshot
+        mAutoStart = results[1]; // android.R.attr.autoStart
     }
 
     public final void dump(Printer printer, StringBuilder result) {

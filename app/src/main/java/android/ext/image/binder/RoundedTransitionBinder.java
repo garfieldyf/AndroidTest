@@ -28,11 +28,6 @@ import java.util.Arrays;
  * @author Garfield
  */
 public final class RoundedTransitionBinder extends TransitionBinder {
-    /**
-     * The corner radii, array of 8 values. Each corner receives two
-     * radius values [X, Y]. The corners are ordered <tt>top-left</tt>,
-     * <tt>top-right</tt>, <tt>bottom-right</tt>, <tt>bottom-left</tt>.
-     */
     private final float[] mRadii;
 
     /**

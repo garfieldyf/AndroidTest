@@ -1,9 +1,8 @@
 package android.ext.graphics.drawable;
 
-import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
-import android.content.res.TypedArray;
+import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -24,11 +23,6 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> extends ImageDrawable<T> implements Runnable, Animatable {
-    public static final int[] GIF_DRAWABLE_ATTRS = {
-        android.R.attr.oneshot,
-        android.R.attr.autoStart,
-    };
-
     /* ------------- mFlags 0x00FF0000 ------------- */
     private static final int FLAG_RUNNING = 0x00400000;
     private static final int FLAG_SCHED   = 0x00800000;
@@ -214,17 +208,15 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     }
 
     @Override
-    @SuppressLint("ResourceType")
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
-        final TypedArray a = res.obtainAttributes(attrs, GIF_DRAWABLE_ATTRS);
-        if (a.getBoolean(0 /* android.R.attr.oneshot */, false)) {
+        final boolean[] results = XmlResources.loadAnimationAttrs(res, attrs);
+        if (results[0] /* android.R.attr.oneshot */) {
             mState.mFlags |= FLAG_ONESHOT;
         }
 
         mState.initialize(GIFImage.decode(res, id));
-        mState.setFlags(a.getBoolean(1 /* android.R.attr.autoStart */, true), FLAG_AUTO_START);
+        mState.setFlags(results[1] /* android.R.attr.autoStart */, FLAG_AUTO_START);
         DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
-        a.recycle();
     }
 
     /**

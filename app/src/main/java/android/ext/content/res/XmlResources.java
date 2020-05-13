@@ -9,6 +9,7 @@ import android.content.res.XmlResourceParser;
 import android.ext.image.binder.GIFImageBinder;
 import android.ext.image.binder.OvalTransitionBinder;
 import android.ext.image.binder.RoundedBitmapBinder;
+import android.ext.image.binder.RoundedGIFImageBinder;
 import android.ext.image.binder.RoundedTransitionBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
@@ -124,6 +125,22 @@ public final class XmlResources {
     }
 
     /**
+     * Called on the <tt>Binder</tt> internal, do not call this method directly.
+     * @hide
+     */
+    @SuppressLint("ResourceType")
+    public static boolean[] loadAnimationAttrs(Resources res, AttributeSet attrs) {
+        final TypedArray a = res.obtainAttributes(attrs, ANIMATION_ATTRS);
+        final boolean[] results = new boolean[] {
+            a.getBoolean(0 /* android.R.attr.oneshot */, false),
+            a.getBoolean(1 /* android.R.attr.autoStart */, true),
+        };
+
+        a.recycle();
+        return results;
+    }
+
+    /**
      * Inflates a new object from the XML data.
      */
     private static Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
@@ -160,6 +177,9 @@ public final class XmlResources {
         case "OvalTransitionBinder":
             return new OvalTransitionBinder(context, attrs);
 
+        case "RoundedGIFImageBinder":
+            return new RoundedGIFImageBinder(context, attrs);
+
         case "RoundedTransitionBinder":
             return new RoundedTransitionBinder(context, attrs);
 
@@ -183,6 +203,14 @@ public final class XmlResources {
          */
         T inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException;
     }
+
+    /**
+     * The animation attributes.
+     */
+    private static final int[] ANIMATION_ATTRS = {
+        android.R.attr.oneshot,
+        android.R.attr.autoStart,
+    };
 
     /**
      * The inner radius attributes.

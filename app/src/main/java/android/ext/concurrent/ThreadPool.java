@@ -27,7 +27,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads) {
-        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-thread-", Process.THREAD_PRIORITY_BACKGROUND);
+        this(maxThreads, 60, TimeUnit.SECONDS, "Pool-", Process.THREAD_PRIORITY_BACKGROUND);
     }
 
     /**
@@ -44,7 +44,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @see #computeMaximumThreads()
      */
     public ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
-        this(maxThreads, keepAliveTime, unit, "Pool-thread-", priority);
+        this(maxThreads, keepAliveTime, unit, "Pool-", priority);
     }
 
     /**
@@ -75,14 +75,14 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return A {@link ThreadPool} instance.
      */
     public static ThreadPool createImageThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
-        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-thread-", priority);
+        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-", priority);
     }
 
     /**
      * Constructor
      */
     /* package */ ThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, String namePrefix, int priority) {
-        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix, priority));
+        super(maxThreads, maxThreads, keepAliveTime, unit, new LinkedBlockingQueue<Runnable>(), new PriorityThreadFactory(namePrefix + maxThreads + "-thread-", priority));
         allowCoreThreadTimeOut(true);
     }
 

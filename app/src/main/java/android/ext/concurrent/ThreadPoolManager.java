@@ -45,7 +45,7 @@ public class ThreadPoolManager extends ThreadPool {
      * @see #ThreadPoolManager(int)
      */
     public ThreadPoolManager(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
-        super(maxThreads, keepAliveTime, unit, "PoolM-thread-", priority);
+        super(maxThreads, keepAliveTime, unit, "PoolM-", priority);
         mRunningTasks = new LinkedList<Task>();
     }
 

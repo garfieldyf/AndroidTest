@@ -289,18 +289,16 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
             mCanvas = image.createBitmapCanvas();
         }
 
-        /* package */ boolean setImage(GIFImage image) {
+        /* package */ void setImage(GIFImage image) {
             DebugUtils.__checkError(image == null, "image == null");
             DebugUtils.__checkError(mCanvas == null, "mCanvas == null");
             mImage = image;
             if (image.getBitmapCanvasBytes() > mCanvas.getAllocationByteCount()) {
                 mCanvas = image.createBitmapCanvas();
-                return true;
             } else {
                 mCanvas.reconfigure(image.width, image.height, mCanvas.getConfig());
                 mCanvas.eraseColor(Color.TRANSPARENT);
                 DebugUtils.__checkDebug(true, getClass().getName(), "The bitmap canvas resize - width = " + image.width + ", height = " + image.height);
-                return false;
             }
         }
     }

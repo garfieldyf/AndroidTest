@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.ext.image.binder.GIFImageBinder;
 import android.ext.image.binder.OvalTransitionBinder;
 import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.RoundedTransitionBinder;
@@ -147,6 +148,9 @@ public final class XmlResources {
             return new ScaleParameters(context, attrs);
 
         /* ---------------- binders ----------------- */
+        case "GIFImageBinder":
+            return new GIFImageBinder(context, attrs);
+
         case "TransitionBinder":
             return new TransitionBinder(context, attrs);
 

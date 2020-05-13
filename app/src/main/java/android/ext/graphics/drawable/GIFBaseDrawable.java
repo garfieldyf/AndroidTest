@@ -24,7 +24,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> extends ImageDrawable<T> implements Runnable, Animatable {
-    private static final int[] GIF_DRAWABLE_ATTRS = {
+    public static final int[] GIF_DRAWABLE_ATTRS = {
         android.R.attr.oneshot,
         android.R.attr.autoStart,
     };
@@ -63,19 +63,19 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         return mState.mImage;
     }
 
-//    /**
-//     * Called on the <tt>Binder</tt> internal, do not call this method directly.
-//     * @hide
-//     */
-//    public final void setImage(GIFImage image) {
-//        if (mState.mImage != image) {
-//            mFlags = (mFlags | FLAG_BOUNDS) & ~FLAG_RUNNING;
-//            mState.setImage(image);
-//            mFrameIndex = 0;
-//            unscheduleSelf(this);
-//            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
-//        }
-//    }
+    /**
+     * Called on the <tt>Binder</tt> internal, do not call this method directly.
+     * @hide
+     */
+    public final void setImage(GIFImage image) {
+        if (mState.mImage != image) {
+            mFlags = (mFlags | FLAG_BOUNDS) & ~FLAG_RUNNING;
+            mState.setImage(image);
+            mFrameIndex = 0;
+            unscheduleSelf(this);
+            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
+        }
+    }
 
     /**
      * Returns the number of frames of this drawable.

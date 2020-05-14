@@ -12,7 +12,7 @@ import java.io.File;
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public final class SimpleFileCache implements FileCache {
+public final class SimpleFileCache implements FileCache, Runnable {
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -64,27 +64,6 @@ public final class SimpleFileCache implements FileCache {
         return result;
     }
 
-    /**
-     * Remove the cache files until the total of remaining files is
-     * at or below the maximum size, do not call this method directly.
-     * @hide
-     */
-    public final void trimToSize() {
-        final int priority = Process.getThreadPriority(Process.myTid());
-        try {
-            DebugUtils.__checkStartMethodTracing();
-            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            final String[] names = mCacheDir.list();
-            final int size = ArrayUtils.getSize(names);
-            for (int i = mMaxSize; i < size; ++i) {
-                new File(mCacheDir, names[i]).delete();
-            }
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", delete file count = " + (size - mMaxSize) : ""));
-        } finally {
-            Process.setThreadPriority(priority);
-        }
-    }
-
     @Override
     public File getCacheDir() {
         return mCacheDir;
@@ -112,6 +91,23 @@ public final class SimpleFileCache implements FileCache {
     public File remove(String key) {
         final File cacheFile = new File(mCacheDir, key);
         return (cacheFile.delete() ? cacheFile : null);
+    }
+
+    @Override
+    public final void run() {
+        final int priority = Process.getThreadPriority(Process.myTid());
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            final String[] names = mCacheDir.list();
+            final int size = ArrayUtils.getSize(names);
+            for (int i = mMaxSize; i < size; ++i) {
+                new File(mCacheDir, names[i]).delete();
+            }
+            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", delete file count = " + (size - mMaxSize) : ""));
+        } finally {
+            Process.setThreadPriority(priority);
+        }
     }
 
     public final void dump(Printer printer) {

@@ -101,9 +101,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
-        if (fileCache instanceof SimpleFileCache) {
-            executor.execute(((SimpleFileCache)fileCache)::trimToSize);
-        }
     }
 
     /**
@@ -193,7 +190,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         Pools.dumpPool(mParamsPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
-        Pools.dumpPool(ByteArrayPool.sInstance, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 
@@ -235,6 +231,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mOptionsPool.clear();
             mLoaderCache.clear();
             ByteArrayPool.sInstance.clear();
+
+            if (mFileCache instanceof SimpleFileCache) {
+                mExecutor.execute((Runnable)mFileCache);
+            }
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append('(').append(level).append("),").toString());

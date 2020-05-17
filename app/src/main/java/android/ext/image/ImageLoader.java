@@ -44,8 +44,8 @@ import java.util.Arrays;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {
     /**
-     * If set the image loader will be dump the {@link Options} when
-     * it will be load image. <p>This flag can be used DEBUG mode.</p>
+     * If set the image loader will be dump the {@link Options} when it will
+     * be load image. (flags 0x00FF0000) <p>This flag can be used DEBUG mode.</p>
      */
     public static final int FLAG_DUMP_OPTIONS = 0x00400000;
 
@@ -393,7 +393,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
 //        public final void preload() {
 //            if (mLoader.getCache() != Caches.emptyCache()) {
-//                DebugUtils.__checkError(mUri == null, "mUri == null");
+//                DebugUtils.__checkError(mUri == null, "uri == null");
 //                mLoader.load(mUri, mUri, mFlags, AsyncLoader.emptyBinder(), mParams);
 //            }
 //        }

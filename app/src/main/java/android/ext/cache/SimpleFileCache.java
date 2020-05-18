@@ -84,11 +84,13 @@ public final class SimpleFileCache implements FileCache, Runnable {
 
     @Override
     public File put(String key, File cacheFile) {
+        DebugUtils.__checkError(key == null || cacheFile == null, "key == null || cacheFile == null");
         return null;
     }
 
     @Override
     public File remove(String key) {
+        DebugUtils.__checkError(key == null, "key == null");
         final File cacheFile = new File(mCacheDir, key);
         return (cacheFile.delete() ? cacheFile : null);
     }

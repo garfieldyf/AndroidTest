@@ -160,6 +160,29 @@ public final class DatabaseUtils {
     }
 
     /**
+     * Query the given SQL statement, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
+     * @param db The <tt>SQLiteDatabase</tt>.
+     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
+     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
+     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values from
+     * <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass <em>(String[])null</em>
+     * instead of allocating an empty array.
+     * @return A new object, or <tt>null</tt>.
+     * @see #parseObject(Cursor, Class)
+     */
+    public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
+        final Cursor cursor = db.rawQuery(sql, selectionArgs);
+        try {
+            return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
+        } catch (Exception e) {
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
+            return null;
+        } finally {
+            cursor.close();
+        }
+    }
+
+    /**
      * Executes a statement that returns a 1 by 1 table with a blob value.
      * @param db The <tt>SQLiteDatabase</tt>.
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.

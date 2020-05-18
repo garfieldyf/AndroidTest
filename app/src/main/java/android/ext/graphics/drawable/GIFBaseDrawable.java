@@ -202,6 +202,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
                 } else if ((mFlags & FLAG_SCHED) == 0) {
                     mFlags |= FLAG_SCHED;
                     scheduleSelf(this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
+                    DebugUtils.__checkDebug(true, getClass().getName(), "scheduleSelf - frame = " + mFrameIndex);
                 }
             }
         }
@@ -240,7 +241,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         }
 
         // Dispatch the animation is end.
-        DebugUtils.__checkDebug(true, "GIFBaseDrawable", "The " + this + " is end.");
+        DebugUtils.__checkDebug(true, getClass().getName(), "The " + this + " is end.");
         if (mCallback != null) {
             mCallback.onAnimationEnd(this);
         }

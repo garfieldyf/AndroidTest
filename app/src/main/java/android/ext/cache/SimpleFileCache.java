@@ -15,6 +15,7 @@ import java.io.File;
 public final class SimpleFileCache implements FileCache, Runnable {
     private final int mMaxSize;
     private final File mCacheDir;
+    private final File[] mFilePool;
 
     /**
      * Constructor
@@ -27,6 +28,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
         DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
+        mFilePool = new File[512];
     }
 
     /**
@@ -37,9 +39,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
      * @see #SimpleFileCache(File, int)
      */
     public SimpleFileCache(Context context, String name, int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
-        mMaxSize  = maxSize;
-        mCacheDir = FileUtils.getCacheDir(context, name);
+        this(FileUtils.getCacheDir(context, name), maxSize);
     }
 
     /**
@@ -58,7 +58,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
         long result = 0;
         final String[] names = mCacheDir.list();
         for (int i = ArrayUtils.getSize(names) - 1; i >= 0; --i) {
-            result += new File(mCacheDir, names[i]).length();
+            result += get(names[i]).length();
         }
 
         return result;
@@ -77,9 +77,19 @@ public final class SimpleFileCache implements FileCache, Runnable {
     }
 
     @Override
-    public File get(String key) {
+    public synchronized File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        return new File(mCacheDir, key);
+        int hashCode = key.hashCode();
+        hashCode ^= (hashCode >>> 20) ^ (hashCode >>> 12);
+        hashCode ^= (hashCode >>> 7) ^ (hashCode >>> 4);
+        final int index = hashCode & (mFilePool.length - 1);
+
+        File cacheFile = mFilePool[index];
+        if (cacheFile == null || !cacheFile.getPath().endsWith(key)) {
+            mFilePool[index] = cacheFile = new File(mCacheDir, key);
+        }
+
+        return cacheFile;
     }
 
     @Override
@@ -91,7 +101,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
     @Override
     public File remove(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        final File cacheFile = new File(mCacheDir, key);
+        final File cacheFile = get(key);
         return (cacheFile.delete() ? cacheFile : null);
     }
 
@@ -121,9 +131,16 @@ public final class SimpleFileCache implements FileCache, Runnable {
             length += new File(mCacheDir, names[i]).length();
         }
 
+        int count = 0;
+        for (File file : mFilePool) {
+            if (file != null) {
+                ++count;
+            }
+        }
+
         final StringBuilder result = new StringBuilder(100);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping SimpleFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
         result.setLength(0);
-        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).toString());
+        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).append(", poolSize = ").append(count).toString());
     }
 }

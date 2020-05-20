@@ -89,14 +89,15 @@ public final class ByteArrayBuffer extends OutputStream {
     }
 
     /**
-     * Returns the contents of this buffer as a string converted
-     * according to the encoding declared in <em>charsetName</em>.
-     * @param charsetName The charset name of this buffer contents.
+     * Returns the contents of this buffer as a string converted to
+     * the given the <em>charset</em>.
+     * @param charset The {@link Charset} that defines the character
+     * converter of this buffer contents.
      * @return This buffer contents as an encoded string.
      * @see #toString()
      */
-    public String toString(String charsetName) {
-        return new String(data, 0, size, Charset.forName(charsetName));
+    public String toString(Charset charset) {
+        return new String(data, 0, size, charset);
     }
 
     /**

@@ -17,6 +17,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
@@ -201,7 +202,7 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the data to the remote HTTP server.
      */
     private void postData(Object data) throws IOException {
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream()));
+        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8));
         try {
             JSONUtils.writeObject(writer, data);
         } finally {

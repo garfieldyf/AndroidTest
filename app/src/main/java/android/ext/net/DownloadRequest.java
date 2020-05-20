@@ -21,6 +21,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -418,7 +419,7 @@ public class DownloadRequest {
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      */
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream()));
+        final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream(), StandardCharsets.UTF_8));
         try {
             return JSONUtils.parse(reader, cancelable);
         } finally {

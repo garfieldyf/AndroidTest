@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -165,7 +166,7 @@ public final class JSONUtils {
      */
     public static <T> T parse(byte[] buf, int offset, int length, Cancelable cancelable) throws IOException {
         DebugUtils.__checkRange(offset, length, buf.length);
-        return parse(new JsonReader(new InputStreamReader(new ByteArrayInputStream(buf, offset, length))), cancelable);
+        return parse(new JsonReader(new InputStreamReader(new ByteArrayInputStream(buf, offset, length), StandardCharsets.UTF_8)), cancelable);
     }
 
     /**
@@ -208,7 +209,7 @@ public final class JSONUtils {
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri)));
+        final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri), StandardCharsets.UTF_8));
         try {
             return parse(reader, cancelable);
         } finally {
@@ -262,7 +263,7 @@ public final class JSONUtils {
      */
     public static void writeObject(String jsonFile, Object object) throws IOException {
         FileUtils.mkdirs(jsonFile, FileUtils.FLAG_IGNORE_FILENAME);
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile)));
+        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8));
         try {
             writeObject(writer, object);
         } finally {

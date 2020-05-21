@@ -24,6 +24,7 @@
 // compareFile()
 // deleteFiles()
 // getFileStatus()
+// getFileLength()
 // createFile()
 // createUniqueFile()
 
@@ -472,7 +473,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "mkdirs", "(Ljava/lang/String;I)I", (void*)mkdirs },
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
-        //{ "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
+        { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

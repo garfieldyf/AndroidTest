@@ -7,6 +7,7 @@ import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
@@ -77,19 +78,21 @@ public final class SimpleFileCache implements FileCache, Runnable {
     }
 
     @Override
-    public synchronized File get(String key) {
+    public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
         int hashCode = key.hashCode();
         hashCode ^= (hashCode >>> 20) ^ (hashCode >>> 12);
         hashCode ^= (hashCode >>> 7) ^ (hashCode >>> 4);
         final int index = hashCode & (mFilePool.length - 1);
 
-        File cacheFile = mFilePool[index];
-        if (cacheFile == null || !cacheFile.getPath().endsWith(key)) {
-            mFilePool[index] = cacheFile = new File(mCacheDir, key);
-        }
+        synchronized (mFilePool) {
+            File cacheFile = mFilePool[index];
+            if (cacheFile == null || !cacheFile.getPath().endsWith(key)) {
+                mFilePool[index] = cacheFile = new File(mCacheDir, key);
+            }
 
-        return cacheFile;
+            return cacheFile;
+        }
     }
 
     @Override
@@ -111,6 +114,10 @@ public final class SimpleFileCache implements FileCache, Runnable {
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            synchronized (mFilePool) {
+                Arrays.fill(mFilePool, null);
+            }
+
             final String[] names = mCacheDir.list();
             final int size = ArrayUtils.getSize(names);
             for (int i = mMaxSize; i < size; ++i) {

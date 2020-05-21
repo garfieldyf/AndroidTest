@@ -25,7 +25,7 @@
     <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/support-v7/android-support-v7-recyclerview.jar" />
 
     <condition property="compile.foucs">
-        <istrue value="true" />
+        <istrue value="${compile_foucs}" />
     </condition>
 
     <condition property="compile.barcode">

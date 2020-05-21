@@ -120,44 +120,76 @@ public final class DebugUtils {
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkStartMethodTracing() {
         startMethodTracing();
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkStopMethodTracing(String tag, String prefix) {
         stopMethodTracing(tag, prefix);
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkUIThread(String method) {
         if (Looper.getMainLooper() != Looper.myLooper()) {
             throw new AssertionError("The " + method + " method must be invoked on the UI thread.");
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkError(boolean reportError, String message) {
         if (reportError) {
             throw new AssertionError(message);
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkRange(int offset, int length, int arrayLength) {
         if ((offset | length) < 0 || arrayLength - offset < length) {
             throw new AssertionError("Index out of bounds - [ offset = " + offset + ", length = " + length + ", array length = " + arrayLength + " ]");
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkDebug(boolean reportDebug, String tag, String message) {
         if (reportDebug) {
             Log.d(tag, message);
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkWarning(boolean reportWarning, String tag, String message) {
         if (reportWarning) {
             Log.w(tag, "WARNING: " + message);
         }
     }
 
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
     public static void __checkMemoryLeaks(Class<?> clazz) {
         if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {
             final String className = clazz.getName();

@@ -1,1 +1,1 @@
-ant all -Dcompile_barcode=true
+ant all -Dcompile_foucs=true -Dcompile_barcode=true

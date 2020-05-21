@@ -33,7 +33,7 @@ public interface FileCache {
     /**
      * Returns the cache file of the mapping with the specified <em>key</em>
      * in this cache. If no mapping for the specified <em>key</em> is found,
-     * returns a <tt>File</tt> contains the absolute path of the cache file.
+     * returns a {@link File} contains the absolute path of the cache file.
      * @param key The key to find.
      * @return The cache <tt>File</tt>. Never <tt>null</tt>.
      * @see #put(String, File)

@@ -36,6 +36,10 @@ import java.util.Map.Entry;
  * @author Garfield
  */
 public class DownloadRequest {
+    /**
+     * Used on the DEBUG mode.
+     * @hide
+     */
     public boolean __checkDumpHeaders = true;
     /* package */ final URLConnection mConnection;
 

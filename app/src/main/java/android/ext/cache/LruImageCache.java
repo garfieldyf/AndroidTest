@@ -8,7 +8,7 @@ import android.util.Printer;
 import java.util.Map;
 
 /**
- * Class <tt>LruImageCache</tt> is an implementation of a {@link LruCache}.
+ * Class <tt>LruImageCache</tt> is an implementation of a {@link Cache}.
  * @author Garfield
  */
 public final class LruImageCache<K> implements Cache<K, Object> {

@@ -20,7 +20,10 @@ allprojects {
         maven { url "https://maven.aliyun.com/repository/jcenter" }
     }
 
-    readLocalProperties()
+    //readLocalProperties()
+
+    ext.libsDir = System.getenv('LOCAL_LIBS_PATH')
+    ext.androidStubDir = ext.libsDir + '/android/src'
 
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
@@ -29,6 +32,7 @@ allprojects {
     }
 }
 
+/*
 def readLocalProperties() {
     final InputStream is = rootProject.file('local.properties').newDataInputStream()
     Properties properties = new Properties()
@@ -38,6 +42,7 @@ def readLocalProperties() {
     ext.androidStubDir = ext.libsDir + '/android/src'
     is.close()
 }
+*/
 
 task clean(type: Delete) {
     delete rootProject.buildDir

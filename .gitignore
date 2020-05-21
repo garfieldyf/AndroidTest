@@ -17,5 +17,3 @@
 /tmp
 /app/build
 /app/src/main/jniLibs
-/app/src/main/res/drawable-hdpi
-/app/src/main/res/drawable-nodpi

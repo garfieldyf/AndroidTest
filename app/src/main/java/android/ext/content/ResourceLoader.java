@@ -80,6 +80,7 @@ import java.util.concurrent.Executor;
  * @author Garfield
  */
 public final class ResourceLoader<Key, Result> extends Loader<Key> {
+    private static final String TAG = "ResourceLoader";
     private static final int MAX_POOL_SIZE = 8;
 
     /**
@@ -128,7 +129,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         DebugUtils.__checkError(key == null || loadParams == null || listener == null, "key == null || loadParams == null || listener == null");
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
-            DebugUtils.__checkDebug(task != null && !task.isCancelled(), "ResourceLoader", "The task is already running - key = " + key);
+            DebugUtils.__checkDebug(task != null && !task.isCancelled(), TAG, "The task is already running - key = " + key);
             if (task == null || task.isCancelled()) {
                 final LoadTask newTask = obtain(key, loadParams, cookie, listener);
                 mRunningTasks.put(key, newTask);
@@ -178,9 +179,9 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         try {
             DebugUtils.__checkStartMethodTracing();
             result = loadParams.parseResult(context, key, null, cancelable);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + key);
+            DebugUtils.__checkStopMethodTracing(TAG, "parse result - key = " + key);
         } catch (Exception e) {
-            Log.e(ResourceLoader.class.getName(), "Couldn't parse result - key = " + key + "\n" + e);
+            Log.e(TAG, "Couldn't parse result - key = " + key + "\n" + e);
         }
 
         return result;
@@ -193,9 +194,9 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
             result = loadParams.parseResult(context, key, cacheFile, cancelable);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
+            DebugUtils.__checkStopMethodTracing(TAG, "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
         } catch (Exception e) {
-            Log.w(ResourceLoader.class.getName(), "Couldn't load resource from the cache - " + cacheFile);
+            Log.w(TAG, "Couldn't load resource from the cache - " + cacheFile);
         } finally {
             Process.setThreadPriority(priority);
         }
@@ -212,20 +213,22 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(context, key, new File(tempFile), cancelable);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
-                if (result != null) {
+                DebugUtils.__checkStopMethodTracing(TAG, DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
+                if (result != null && !cancelable.isCancelled()) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile, cacheFile);
+                    Log.d(TAG, "Save the cache file = " + cacheFile + ", hitCache = " + hitCache);
                 }
             }
         } catch (Exception e) {
-            Log.e(ResourceLoader.class.getName(), "Couldn't load resource - key = " + key + "\n" + e);
+            FileUtils.deleteFiles(tempFile, false);
+            Log.e(TAG, "Couldn't load resource - key = " + key + "\n" + e);
         }
 
         if (hitCache && result == null) {
             // If the cache file is hit and parse the temp file failed,
             // cancel the task and delete the temp file, do not update UI.
-            DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
+            DebugUtils.__checkDebug(true, TAG, "cancel task - key = " + key);
             cancelable.cancel(false);
             FileUtils.deleteFiles(tempFile, false);
         }
@@ -244,20 +247,19 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
 
         @Override
         public Object doInBackground(Object params) {
-            waitResumeIfPaused();
             final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
             if (cacheFile == null) {
                 return parseResult(mContext, mKey, mLoadParams, this);
-            } else {
-                final Object result = loadFromCache(mContext, mKey, mLoadParams, this, cacheFile);
-                final boolean hitCache = (result != null);
-                if (hitCache) {
-                    // Loads from the cache file succeeded, update UI.
-                    setProgress(result);
-                }
-
-                return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile.getPath(), hitCache));
             }
+
+            final Object result = loadFromCache(mContext, mKey, mLoadParams, this, cacheFile);
+            final boolean hitCache = (result != null);
+            if (hitCache) {
+                // Loads from the cache file succeeded, update UI.
+                setProgress(result);
+            }
+
+            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile.getPath(), hitCache));
         }
 
         @Override

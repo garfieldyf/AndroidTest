@@ -16,8 +16,8 @@
 
     <property name="api.level" value="22" />
     <property name="sdk.version" value="5.1.1" />
-    <property name="sdk.dir" value="${env.ANDROID_HOME}" />
-    <property name="libs.jar.dir" value="${env.LOCAL_LIBS_PATH}" />
+    <property name="sdk.dir" value="${env.ANDROID_SDK_ROOT}" />
+    <property name="libs.jar.dir" value="${env.LOCAL_LIBS_ROOT}" />
     <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
     <property name="android.stubs.jar.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
     <property name="support.v4.jar.path" value="${libs.jar.dir}/support-v7/android-support-v4.jar" />

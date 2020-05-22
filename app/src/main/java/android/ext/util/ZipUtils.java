@@ -36,12 +36,9 @@ public final class ZipUtils {
      * @see #uncompress(InputStream, OutputStream, Cancelable)
      */
     public static void compress(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final GZIPOutputStream gzip = new GZIPOutputStream(out);
-        try {
+        try (final GZIPOutputStream gzip = new GZIPOutputStream(out)) {
             FileUtils.copyStream(is, gzip, cancelable, null);
             gzip.finish();
-        } finally {
-            gzip.close();
         }
     }
 
@@ -56,12 +53,9 @@ public final class ZipUtils {
      * @see #uncompress(InputStream, OutputStream, Cancelable)
      */
     public static void compress(byte[] data, int offset, int count, OutputStream out) throws IOException {
-        final GZIPOutputStream gzip = new GZIPOutputStream(out);
-        try {
+        try (final GZIPOutputStream gzip = new GZIPOutputStream(out)) {
             gzip.write(data, offset, count);
             gzip.finish();
-        } finally {
-            gzip.close();
         }
     }
 
@@ -77,11 +71,8 @@ public final class ZipUtils {
      * @see #compress(InputStream, OutputStream, Cancelable)
      */
     public static void uncompress(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final GZIPInputStream gzip = new GZIPInputStream(is);
-        try {
+        try (final GZIPInputStream gzip = new GZIPInputStream(is)) {
             FileUtils.copyStream(gzip, out, cancelable, null);
-        } finally {
-            gzip.close();
         }
     }
 
@@ -195,23 +186,14 @@ public final class ZipUtils {
             os.putNextEntry(new ZipEntry(name));
 
             // Copy the file's contents to ZipOutputStream.
-            final InputStream is = new FileInputStream(dirent.path);
-            try {
+            try (final InputStream is = new FileInputStream(dirent.path)) {
                 FileUtils.copyStreamImpl(is, os, cancelable, buffer);
-            } finally {
-                is.close();
             }
         }
     }
 
     private static void uncompress(ZipFile file, ZipEntry entry, File filename, CRC32 crc, Cancelable cancelable, byte[] buffer) throws IOException {
-        InputStream is  = null;
-        OutputStream os = null;
-        try {
-            // Opens the InputStream and OutputStream.
-            is = file.getInputStream(entry);
-            os = new FileOutputStream(filename);
-
+        try (InputStream is = file.getInputStream(entry); OutputStream os = new FileOutputStream(filename)) {
             if (entry.getCrc() != -1) {
                 // Uncompress the ZIP entry with check CRC32.
                 uncompress(entry, is, os, crc, cancelable, buffer);
@@ -219,9 +201,6 @@ public final class ZipUtils {
                 // Uncompress the ZIP entry.
                 FileUtils.copyStreamImpl(is, os, cancelable, buffer);
             }
-        } finally {
-            FileUtils.close(is);
-            FileUtils.close(os);
         }
     }
 

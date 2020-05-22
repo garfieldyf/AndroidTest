@@ -423,11 +423,8 @@ public class DownloadRequest {
      * Downloads the JSON data from the remote server with the arguments supplied to this request.
      */
     /* package */ final <T> T downloadImpl(Cancelable cancelable) throws IOException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream(), StandardCharsets.UTF_8));
-        try {
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(mConnection.getInputStream(), StandardCharsets.UTF_8))) {
             return JSONUtils.parse(reader, cancelable);
-        } finally {
-            reader.close();
         }
     }
 
@@ -435,15 +432,12 @@ public class DownloadRequest {
      * Downloads the resource from the remote server with the arguments supplied to this request.
      */
     /* package */ final void downloadImpl(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        final InputStream is = mConnection.getInputStream();
-        try {
+        try (final InputStream is = mConnection.getInputStream()) {
             if (out instanceof ByteArrayBuffer) {
                 ((ByteArrayBuffer)out).readFrom(is, mConnection.getContentLength(), cancelable);
             } else {
                 FileUtils.copyStream(is, out, cancelable, tempBuffer);
             }
-        } finally {
-            is.close();
         }
     }
 
@@ -452,11 +446,8 @@ public class DownloadRequest {
      */
     /* package */ final void downloadImpl(File file, Cancelable cancelable, byte[] tempBuffer, boolean append) throws IOException {
         FileUtils.mkdirs(file.getPath(), FileUtils.FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(file, append);
-        try {
+        try (final OutputStream os = new FileOutputStream(file, append)) {
             downloadImpl(os, cancelable, tempBuffer);
-        } finally {
-            os.close();
         }
     }
 

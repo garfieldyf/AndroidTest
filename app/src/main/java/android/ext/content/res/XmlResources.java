@@ -50,8 +50,7 @@ public final class XmlResources {
      * @see XmlResourceInflater#inflate(Context, XmlPullParser)
      */
     public static <T> T load(Context context, int id, XmlResourceInflater<T> inflater) throws NotFoundException {
-        final XmlResourceParser parser = context.getResources().getXml(id);
-        try {
+        try (final XmlResourceParser parser = context.getResources().getXml(id)) {
             // Moves to the first start tag position.
             int type;
             while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
@@ -66,8 +65,6 @@ public final class XmlResources {
             return inflater.inflate(context, parser);
         } catch (Exception e) {
             throw (NotFoundException)new NotFoundException("Couldn't load resources - ID #0x" + Integer.toHexString(id)).initCause(e);
-        } finally {
-            parser.close();
         }
     }
 

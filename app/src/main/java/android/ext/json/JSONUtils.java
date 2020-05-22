@@ -209,11 +209,8 @@ public final class JSONUtils {
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException {
-        final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri), StandardCharsets.UTF_8));
-        try {
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri), StandardCharsets.UTF_8))) {
             return parse(reader, cancelable);
-        } finally {
-            reader.close();
         }
     }
 
@@ -263,11 +260,8 @@ public final class JSONUtils {
      */
     public static void writeObject(String jsonFile, Object object) throws IOException {
         FileUtils.mkdirs(jsonFile, FileUtils.FLAG_IGNORE_FILENAME);
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8));
-        try {
+        try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8))) {
             writeObject(writer, object);
-        } finally {
-            writer.close();
         }
     }
 

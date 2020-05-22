@@ -249,15 +249,10 @@ public final class PackageUtils {
          */
         public PackageItemIcon(Context context, ApplicationInfo info) {
             DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
-            final AssetManager assets = new AssetManager();
-            try {
+            try (final AssetManager assets = new AssetManager()) {
                 // Adds an additional archive file to the assets.
                 assets.addAssetPath(info.publicSourceDir);
                 initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), info);
-            } finally {
-                // Close the assets to avoid ProcessKiller
-                // kill my process after unmounting usb disk.
-                assets.close();
             }
         }
 

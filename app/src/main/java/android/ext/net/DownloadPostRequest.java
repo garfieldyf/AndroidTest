@@ -166,11 +166,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the <tt>File</tt> contents to the remote HTTP server.
      */
     private void postData(File file) throws IOException {
-        final InputStream is = new FileInputStream(file);
-        try {
+        try (final InputStream is = new FileInputStream(file)) {
             postData(is);
-        } finally {
-            is.close();
         }
     }
 
@@ -178,11 +175,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the <tt>InputStream</tt> contents to the remote HTTP server.
      */
     private void postData(InputStream is) throws IOException {
-        final OutputStream os = mConnection.getOutputStream();
-        try {
+        try (final OutputStream os = mConnection.getOutputStream()) {
             FileUtils.copyStream(is, os, null, null);
-        } finally {
-            os.close();
         }
     }
 
@@ -190,11 +184,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the byte array to the remote HTTP server.
      */
     private void postData(byte[] data, int offset, int count) throws IOException {
-        final OutputStream os = mConnection.getOutputStream();
-        try {
+        try (final OutputStream os = mConnection.getOutputStream()) {
             os.write(data, offset, count);
-        } finally {
-            os.close();
         }
     }
 
@@ -202,11 +193,8 @@ public final class DownloadPostRequest extends DownloadRequest {
      * Posts the data to the remote HTTP server.
      */
     private void postData(Object data) throws IOException {
-        final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8));
-        try {
+        try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8))) {
             JSONUtils.writeObject(writer, data);
-        } finally {
-            writer.close();
         }
     }
 

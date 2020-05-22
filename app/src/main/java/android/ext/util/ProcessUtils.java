@@ -321,8 +321,7 @@ public final class ProcessUtils {
          */
         private void writeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             // Open the log file.
-            final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true));
-            try {
+            try (final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true))) {
                 // Writes the uncaught exception to log file.
                 final long now = System.currentTimeMillis();
                 ps.println("========================================================================================================================");
@@ -332,8 +331,6 @@ public final class ProcessUtils {
                 ps.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());
                 e.printStackTrace(ps);
                 ps.println();
-            } finally {
-                ps.close();
             }
         }
     }

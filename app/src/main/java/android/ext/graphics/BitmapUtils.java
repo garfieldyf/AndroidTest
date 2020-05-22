@@ -112,11 +112,8 @@ public final class BitmapUtils {
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static Bitmap decodeBitmap(Context context, Object uri, Options opts) throws IOException {
-        final InputStream is = UriUtils.openInputStream(context, uri);
-        try {
+        try (final InputStream is = UriUtils.openInputStream(context, uri)) {
             return BitmapFactory.decodeStream(is, null, opts);
-        } finally {
-            is.close();
         }
     }
 

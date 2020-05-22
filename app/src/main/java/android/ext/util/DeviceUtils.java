@@ -465,9 +465,7 @@ public final class DeviceUtils {
     }
 
     private static int readCpuFrequency(int coreIndex, String filename) {
-        InputStream is = null;
-        try {
-            is = new FileInputStream("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/" + filename);
+        try (final InputStream is = new FileInputStream("/sys/devices/system/cpu/cpu" + coreIndex + "/cpufreq/" + filename)) {
             final byte[] data = new byte[24];
             int byteCount = is.read(data, 0, data.length);
             if (data[byteCount - 1] == '\n') {
@@ -477,8 +475,6 @@ public final class DeviceUtils {
             return Integer.parseInt(new String(data, 0, byteCount));
         } catch (Exception e) {
             return -1;
-        } finally {
-            FileUtils.close(is);
         }
     }
 

@@ -417,11 +417,8 @@ public final class FileUtils {
      */
     public static void copyFile(Context context, Object uri, String outFile, Cancelable cancelable) throws IOException {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(outFile);
-        try {
+        try (final OutputStream os = new FileOutputStream(outFile)) {
             readFile(context, uri, os, cancelable);
-        } finally {
-            os.close();
         }
     }
 
@@ -438,11 +435,8 @@ public final class FileUtils {
      */
     public static void copyStream(InputStream is, String outFile, Cancelable cancelable) throws IOException {
         FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
-        final OutputStream os = new FileOutputStream(outFile);
-        try {
+        try (final OutputStream os = new FileOutputStream(outFile)) {
             copyStream(is, os, cancelable, null);
-        } finally {
-            os.close();
         }
     }
 
@@ -505,11 +499,8 @@ public final class FileUtils {
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static void readFile(Context context, Object uri, OutputStream out, Cancelable cancelable) throws IOException {
-        final InputStream is = UriUtils.openInputStream(context, uri);
-        try {
+        try (final InputStream is = UriUtils.openInputStream(context, uri)) {
             copyStream(is, out, cancelable, null);
-        } finally {
-            is.close();
         }
     }
 
@@ -605,9 +596,7 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
-        final FileChannel source = is.getChannel();
-        final FileChannel target = out.getChannel();
-        try {
+        try (final FileChannel source = is.getChannel(); final FileChannel target = out.getChannel()) {
             DebugUtils.__checkStartMethodTracing();
             long writtenBytes, position = 0, size = source.size();
             while (size > 0 && !cancelable.isCancelled()) {
@@ -616,9 +605,6 @@ public final class FileUtils {
                 position += writtenBytes;
             }
             DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
-        } finally {
-            FileUtils.close(source);
-            FileUtils.close(target);
         }
     }
 

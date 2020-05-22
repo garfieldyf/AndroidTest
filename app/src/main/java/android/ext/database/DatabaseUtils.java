@@ -58,14 +58,11 @@ public final class DatabaseUtils {
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
      */
     public static Long simpleQueryLong(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final SQLiteStatement prog = db.compileStatement(sql);
-        try {
+        try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.simpleQueryForLong();
         } catch (SQLiteException e) {
             return null;
-        } finally {
-            prog.close();
         }
     }
 
@@ -101,14 +98,11 @@ public final class DatabaseUtils {
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
      */
     public static String simpleQueryString(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final SQLiteStatement prog = db.compileStatement(sql);
-        try {
+        try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.simpleQueryForString();
         } catch (SQLiteException e) {
             return null;
-        } finally {
-            prog.close();
         }
     }
 
@@ -141,9 +135,8 @@ public final class DatabaseUtils {
      * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
      */
     public static InputStream simpleQuery(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final SQLiteStatement prog = db.compileStatement(sql);
         InputStream result = null;
-        try {
+        try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             final ParcelFileDescriptor fd = prog.simpleQueryForBlobFileDescriptor();
             if (fd != null) {
@@ -152,8 +145,6 @@ public final class DatabaseUtils {
             }
         } catch (SQLiteException e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query blob - " + sql, e);
-        } finally {
-            prog.close();
         }
 
         return result;
@@ -171,14 +162,11 @@ public final class DatabaseUtils {
      * @see #parseObject(Cursor, Class)
      */
     public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
-        final Cursor cursor = db.rawQuery(sql, selectionArgs);
-        try {
+        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
             return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
-        } finally {
-            cursor.close();
         }
     }
 
@@ -218,12 +206,9 @@ public final class DatabaseUtils {
      * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
      */
     public static void simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) throws IOException {
-        final InputStream is = simpleQuery(db, sql, bindArgs);
-        if (is != null) {
-            try {
+        try (final InputStream is = simpleQuery(db, sql, bindArgs)) {
+            if (is != null) {
                 FileUtils.copyStream(is, out, null, null);
-            } finally {
-                is.close();
             }
         }
     }
@@ -257,14 +242,11 @@ public final class DatabaseUtils {
      * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
-        final Cursor cursor = db.rawQuery(sql, selectionArgs);
-        try {
+        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
             return parse(cursor, componentType);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
-        } finally {
-            cursor.close();
         }
     }
 
@@ -284,15 +266,11 @@ public final class DatabaseUtils {
      * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Cursor cursor = null;
-        try {
-            cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder);
+        try (Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
             return (cursor != null ? parse(cursor, componentType) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
             return null;
-        } finally {
-            FileUtils.close(cursor);
         }
     }
 
@@ -309,12 +287,9 @@ public final class DatabaseUtils {
      * @see #executeUpdateDelete(SQLiteDatabase, String, Object[])
      */
     public static long executeInsert(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final SQLiteStatement prog = db.compileStatement(sql);
-        try {
+        try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.executeInsert();
-        } finally {
-            prog.close();
         }
     }
 
@@ -331,12 +306,9 @@ public final class DatabaseUtils {
      * @see #executeInsert(SQLiteDatabase, String, Object[])
      */
     public static int executeUpdateDelete(SQLiteDatabase db, String sql, Object... bindArgs) {
-        final SQLiteStatement prog = db.compileStatement(sql);
-        try {
+        try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.executeUpdateDelete();
-        } finally {
-            prog.close();
         }
     }
 
@@ -614,9 +586,7 @@ public final class DatabaseUtils {
 
     private static Object simpleQuery(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         Object result = null;
-        Cursor cursor = null;
-        try {
-            cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null);
+        try (Cursor cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 switch (cursor.getType(0)) {
                 case Cursor.FIELD_TYPE_INTEGER:
@@ -634,8 +604,6 @@ public final class DatabaseUtils {
             }
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query uri - " + uri, e);
-        } finally {
-            FileUtils.close(cursor);
         }
 
         return result;

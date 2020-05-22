@@ -113,15 +113,11 @@ public final class GIFImage {
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static GIFImage decode(Context context, Object uri, byte[] tempStorage) {
-        InputStream is = null;
-        try {
-            is = UriUtils.openInputStream(context, uri);
+        try (InputStream is = UriUtils.openInputStream(context, uri)) {
             return decode(is, tempStorage);
         } catch (Exception e) {
             Log.e(GIFImage.class.getName(), "Couldn't decode from - " + uri, e);
             return null;
-        } finally {
-            FileUtils.close(is);
         }
     }
 

@@ -376,13 +376,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     private static void dumpCache(Printer printer, Resources res, SparseArray cache, String cacheName) {
-        final int size = cache.size();
-        if (size == 0) {
-            return;
-        }
-
         final StringBuilder result = new StringBuilder(130);
         final TypedValue value = new TypedValue();
+        final int size = cache.size();
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s cache [ size = %d ] ", cacheName, size);
         for (int i = 0; i < size; ++i) {
             res.getValue(cache.keyAt(i), value, true);

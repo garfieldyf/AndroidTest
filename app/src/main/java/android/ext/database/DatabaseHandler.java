@@ -5,6 +5,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.util.Printer;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
@@ -69,6 +70,10 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
+    }
+
+    public final void dump(Printer printer) {
+        Pools.dumpPool(mTaskPool, printer);
     }
 
     @Override

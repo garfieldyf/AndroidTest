@@ -134,39 +134,6 @@
         </copy>
     </target>
 
-    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
-    <!-- target -obfuscate -->
-    <target name="-obfuscate">
-        <!-- add proguard tasks -->
-        <property name="proguard.dir" value="${sdk.dir}/tools/proguard" />
-        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
-
-        <proguard>
-            -include        "${basedir}/../app/proguard.txt"
-            -injars         ${out.file.dir}/${out.file.name}
-            -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
-            -dump           "${out.file.dir}/dump.txt"
-            -printseeds     "${out.file.dir}/seeds.txt"
-            -printusage     "${out.file.dir}/usage.txt"
-            -printmapping   "${out.file.dir}/mapping.txt"
-        </proguard>
-    </target>
-
-    <!-- target -compile-dex -->
-    <target name="-compile-dex">
-        <property name="dx.dir" value="${sdk.dir}/build-tools/29.0.0" />
-        <property name="dex.file.name" value="${ant.project.name}-dex.jar" />
-
-        <!-- compile dex file -->
-        <echo level="info">dx --dex --min-sdk-version=24 --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
-        <exec executable="cmd.exe">
-            <arg line="/C ${dx.dir}/dx.bat --dex --min-sdk-version=24 --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
-        </exec>
-        <echo level="info">Install: ${out.file.dir}/${dex.file.name}</echo>
-    </target>
-    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
-
     <!-- target -post-compile -->
     <target name="-post-compile">
         <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ant.project.name}_widget.xml" />
@@ -228,4 +195,37 @@
         <antcall target="compile-release" />
         <antcall target="compile-so" />
     </target>
+
+    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
+    <!-- target -obfuscate -->
+    <target name="-obfuscate">
+        <!-- add proguard tasks -->
+        <property name="proguard.dir" value="${sdk.dir}/tools/proguard" />
+        <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
+
+        <proguard>
+            -include        "${basedir}/../app/proguard.txt"
+            -injars         ${out.file.dir}/${out.file.name}
+            -outjars        "${out.file.dir}/${out.file.name}"
+            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
+            -dump           "${out.file.dir}/dump.txt"
+            -printseeds     "${out.file.dir}/seeds.txt"
+            -printusage     "${out.file.dir}/usage.txt"
+            -printmapping   "${out.file.dir}/mapping.txt"
+        </proguard>
+    </target>
+
+    <!-- target -compile-dex -->
+    <target name="-compile-dex">
+        <property name="dx.dir" value="${sdk.dir}/build-tools/29.0.0" />
+        <property name="dex.file.name" value="${ant.project.name}-dex.jar" />
+
+        <!-- compile dex file -->
+        <echo level="info">dx --dex --min-sdk-version=24 --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
+        <exec executable="cmd.exe">
+            <arg line="/C ${dx.dir}/dx.bat --dex --min-sdk-version=24 --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
+        </exec>
+        <echo level="info">Install: ${out.file.dir}/${dex.file.name}</echo>
+    </target>
+    <!-- +++++++++++++++++++++++++++++++++ optional ant task +++++++++++++++++++++++++++++++++ -->
 </project>

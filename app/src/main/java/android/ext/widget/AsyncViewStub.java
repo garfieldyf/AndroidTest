@@ -160,7 +160,7 @@ public final class AsyncViewStub extends View {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mView = mInflater.inflate(mLayoutId, (ViewGroup)getParent(), false);
             } catch (RuntimeException e) {
-                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mInflatedId) + " in the background! Retrying on the UI thread\n" + e);
+                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread\n" + e);
             } finally {
                 Process.setThreadPriority(priority);
             }

@@ -366,6 +366,28 @@ public class JSONArray implements List<Object>, RandomAccess {
     }
 
     @Override
+    public boolean addAll(Collection<?> collection) {
+        JSONUtils.__checkDouble(collection);
+        return values.addAll(collection);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<?> collection) {
+        JSONUtils.__checkDouble(collection);
+        return values.addAll(index, collection);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> collection) {
+        return values.removeAll(collection);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection) {
+        return values.retainAll(collection);
+    }
+
+    @Override
     public int indexOf(Object value) {
         return values.indexOf(value);
     }
@@ -373,6 +395,16 @@ public class JSONArray implements List<Object>, RandomAccess {
     @Override
     public int lastIndexOf(Object value) {
         return values.lastIndexOf(value);
+    }
+
+    @Override
+    public boolean contains(Object value) {
+        return values.contains(value);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> collection) {
+        return values.containsAll(collection);
     }
 
     @Override
@@ -403,38 +435,6 @@ public class JSONArray implements List<Object>, RandomAccess {
     @Override
     public List<Object> subList(int start, int end) {
         return values.subList(start, end);
-    }
-
-    @Override
-    public boolean contains(Object value) {
-        return values.contains(value);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> collection) {
-        return values.containsAll(collection);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> collection) {
-        return values.retainAll(collection);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> collection) {
-        return values.removeAll(collection);
-    }
-
-    @Override
-    public boolean addAll(Collection<?> collection) {
-        JSONUtils.__checkDouble(collection);
-        return values.addAll(collection);
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<?> collection) {
-        JSONUtils.__checkDouble(collection);
-        return values.addAll(index, collection);
     }
 
     @Override

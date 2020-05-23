@@ -90,6 +90,35 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     }
 
     @Override
+    public boolean add(E value) {
+        if (mSectionCount == 0) {
+            final List<E> section = new ArrayList<E>();
+            section.add(value);
+            addSection(section);
+        } else {
+            ++mItemCount;
+            mSections[mSectionCount - 1].add(value);
+        }
+
+        return true;
+    }
+
+    @Override
+    public void add(int position, E value) {
+        DebugUtils.__checkError(position < 0 || position > mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
+        if (position == mItemCount) {
+            add(value);
+        } else {
+            final long combinedPosition = getSectionForPosition(position);
+            final int sectionIndex = getOriginalSection(combinedPosition);
+
+            ++mItemCount;
+            mSections[sectionIndex].add((int)combinedPosition, value);
+            computePositions(sectionIndex);
+        }
+    }
+
+    @Override
     public E get(int position) {
         final long combinedPosition = getSectionForPosition(position);
         return (E)mSections[getOriginalSection(combinedPosition)].get((int)combinedPosition);
@@ -99,6 +128,188 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     public E set(int position, E value) {
         final long combinedPosition = getSectionForPosition(position);
         return (E)mSections[getOriginalSection(combinedPosition)].set((int)combinedPosition, value);
+    }
+
+    @Override
+    public boolean remove(Object value) {
+        final int index = indexOf(value);
+        if (index != -1) {
+            remove(index);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public E remove(int position) {
+        final long combinedPosition = getSectionForPosition(position);
+        final int sectionIndex = getOriginalSection(combinedPosition);
+        final List section = mSections[sectionIndex];
+        final E value = section.remove((int)combinedPosition);
+
+        --mItemCount;
+        if (section.size() == 0) {
+            removeSection(sectionIndex);
+        } else {
+            computePositions(sectionIndex);
+        }
+
+        return value;
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends E> collection) {
+        final int size = ArrayUtils.getSize(collection);
+        if (size == 0) {
+            return false;
+        }
+
+        if (mSectionCount == 0) {
+            final List<E> section = new ArrayList<E>();
+            section.addAll(collection);
+            addSection(section);
+        } else {
+            mItemCount += size;
+            mSections[mSectionCount - 1].addAll(collection);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean addAll(int position, Collection<? extends E> collection) {
+        DebugUtils.__checkError(position < 0 || position > mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
+        if (position == mItemCount) {
+            return addAll(collection);
+        }
+
+        final int size = ArrayUtils.getSize(collection);
+        if (size == 0) {
+            return false;
+        }
+
+        final long combinedPosition = getSectionForPosition(position);
+        final int sectionIndex = getOriginalSection(combinedPosition);
+
+        mItemCount += size;
+        mSections[sectionIndex].addAll((int)combinedPosition, collection);
+        computePositions(sectionIndex);
+        return true;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> collection) {
+        super.removeAll(collection);
+        if (ArrayUtils.getSize(collection) == 0) {
+            return false;
+        }
+
+        boolean result = false;
+        for (Object value : collection) {
+            final int index = indexOf(value);
+            if (index != -1) {
+                remove(index);
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int indexOf(Object value) {
+        for (int i = 0; i < mSectionCount; ++i) {
+            final int index = mSections[i].indexOf(value);
+            if (index != -1) {
+                return mPositions[i] + index;
+            }
+        }
+
+        return -1;
+    }
+
+    @Override
+    public int lastIndexOf(Object value) {
+        for (int i = mSectionCount - 1; i >= 0; --i) {
+            final int index = mSections[i].lastIndexOf(value);
+            if (index != -1) {
+                return mPositions[i] + index;
+            }
+        }
+
+        return -1;
+    }
+
+    @Override
+    public boolean contains(Object value) {
+        return (indexOf(value) != -1);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> collection) {
+        super.containsAll(collection);
+        if (ArrayUtils.getSize(collection) == 0) {
+            return false;
+        }
+
+        for (Object value : collection) {
+            if (indexOf(value) == -1) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public Iterator<E> iterator() {
+        return new SectionListIterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        return copyTo(new Object[mItemCount]);
+    }
+
+    @Override
+    public <T> T[] toArray(T[] contents) {
+        if (contents.length < mItemCount) {
+            contents = (T[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
+        }
+
+        if (copyTo(contents).length > mItemCount) {
+            contents[mItemCount] = null;
+        }
+
+        return contents;
+    }
+
+    @Override
+    public SectionList<E> clone() {
+        try {
+            final SectionList<E> result = (SectionList<E>)super.clone();
+            result.mSections  = mSections.clone();
+            result.mPositions = mPositions.clone();
+            return result;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return System.identityHashCode(this);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        return (this == object);
     }
 
     /**
@@ -127,20 +338,24 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * <tt>SectionList</tt> with the specified <em>section</em>.
      * @param sectionIndex The index at which to put the <em>section</em>.
      * @param section The {@link List} to put.
-     * @return The previous section at the <em>sectionIndex</em>.
+     * @return The previous section at the <em>sectionIndex</em> or <tt>null</tt>
+     * if the <em>section</em> is empty.
      * @see #getSection(int)
      */
     public List<E> setSection(int sectionIndex, List<?> section) {
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "The section is null or 0-size");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mSectionCount);
-        final List<E> oldSection = mSections[sectionIndex];
-        mSections[sectionIndex] = section;
+        final int size = ArrayUtils.getSize(section);
+        List<E> oldSection = null;
+        if (size > 0) {
+            oldSection = mSections[sectionIndex];
+            mSections[sectionIndex] = section;
 
-        final int sizeDelta = section.size() - oldSection.size();
-        if (sizeDelta != 0) {
-            mItemCount += sizeDelta;
-            DebugUtils.__checkError(mItemCount < 0, "Error: The SectionList's itemCount(" + mItemCount + ") < 0");
-            computePositions(sectionIndex);
+            final int sizeDelta = size - oldSection.size();
+            if (sizeDelta != 0) {
+                mItemCount += sizeDelta;
+                DebugUtils.__checkError(mItemCount < 0, "Error: The SectionList's itemCount(" + mItemCount + ") < 0");
+                computePositions(sectionIndex);
+            }
         }
 
         return oldSection;
@@ -149,10 +364,16 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     /**
      * Adds the specified <em>section</em> at the end of this <tt>SectionList</tt>.
      * @param section The {@link List} to add.
+     * @return <tt>true</tt> if the <em>section</em> added or <tt>false</tt> if the
+     * <em>section</em> is empty.
      * @see #addSection(int, List)
      */
-    public void addSection(List<?> section) {
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "The section is null or 0-size");
+    public boolean addSection(List<?> section) {
+        final int size = ArrayUtils.getSize(section);
+        if (size == 0) {
+            return false;
+        }
+
         if (mSectionCount == mSections.length) {
             final int newLength = mSectionCount + ARRAY_CAPACITY_INCREMENT;
             mSections  = ArrayUtils.copyOf(mSections, mSectionCount, newLength);
@@ -161,7 +382,8 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
         mSections[mSectionCount] = section;
         mPositions[mSectionCount++] = mItemCount;
-        mItemCount += section.size();
+        mItemCount += size;
+        return true;
     }
 
     /**
@@ -170,33 +392,52 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * count of this <tt>SectionList</tt>, the <em>section</em> is added at the end.
      * @param sectionIndex The index at which to insert.
      * @param section The {@link List} to add.
+     * @return <tt>true</tt> if the <em>section</em> added or <tt>false</tt> if the <em>section</em> is empty.
      * @see #addSection(List)
      */
-    public void addSection(int sectionIndex, List<?> section) {
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "The section is null or 0-size");
+    public boolean addSection(int sectionIndex, List<?> section) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mSectionCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mSectionCount);
         if (sectionIndex == mSectionCount) {
-            addSection(section);
-        } else {
-            if (mSectionCount < mSections.length) {
-                System.arraycopy(mSections, sectionIndex, mSections, sectionIndex + 1, mSectionCount - sectionIndex);
-            } else {
-                final int newLength = mSectionCount + ARRAY_CAPACITY_INCREMENT;
-                mSections  = newSectionArray(sectionIndex, newLength);
-                mPositions = ArrayUtils.copyOf(mPositions, mSectionCount, newLength);
-            }
-
-            ++mSectionCount;
-            mSections[sectionIndex] = section;
-            mItemCount += section.size();
-            computePositions(sectionIndex);
+            return addSection(section);
         }
+
+        final int size = ArrayUtils.getSize(section);
+        if (size == 0) {
+            return false;
+        }
+
+        if (mSectionCount < mSections.length) {
+            System.arraycopy(mSections, sectionIndex, mSections, sectionIndex + 1, mSectionCount - sectionIndex);
+        } else {
+            final int newLength = mSectionCount + ARRAY_CAPACITY_INCREMENT;
+            mSections  = newSectionArray(sectionIndex, newLength);
+            mPositions = ArrayUtils.copyOf(mPositions, mSectionCount, newLength);
+        }
+
+        ++mSectionCount;
+        mSections[sectionIndex] = section;
+        mItemCount += size;
+        computePositions(sectionIndex);
+        return true;
+    }
+
+    /**
+     * Removes the first occurrence of the specified <em>section</em> from this <tt>SectionList</tt>.
+     * @param section The section to remove.
+     * @return The start position of the <em>section</em> in this <tt>SectionList</tt> or <tt>-1</tt>
+     * if the <em>section</em> was not found.
+     * @see #removeSection(int)
+     */
+    public int removeSection(List<?> section) {
+        final int sectionIndex = indexOfSection(section);
+        return (sectionIndex != -1 ? removeSection(sectionIndex) : -1);
     }
 
     /**
      * Removes the section at the specified <em>sectionIndex</em> from this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section to remove.
      * @return The start position of the removed section in this <tt>SectionList</tt>.
+     * @see #removeSection(List)
      */
     public int removeSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mSectionCount);
@@ -208,6 +449,40 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         DebugUtils.__checkError(mItemCount < 0, "Error: The SectionList's itemCount(" + mItemCount + ") < 0");
         DebugUtils.__checkError(mSectionCount < 0, "Error: The SectionList's sectionCount(" + mSectionCount + ") < 0");
         return computePositions(sectionIndex);
+    }
+
+    /**
+     * Searches this <tt>SectionList</tt> for the specified <em>section</em> and returns the
+     * index of the first occurrence.
+     * @param section The section to search.
+     * @return The index of the first occurrence of the <em>section</em> or <tt>-1</tt> if the
+     * <em>section</em> was not found.
+     */
+     public int indexOfSection(List<?> section) {
+        for (int i = 0; i < mSectionCount; ++i) {
+            if (mSections[i].equals(section)) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    /**
+     * Searches this <tt>SectionList</tt> for the specified <em>section</em> and returns the
+     * index of the last occurrence.
+     * @param section The section to search.
+     * @return The index of the last occurrence of the <em>section</em> or <tt>-1</tt> if the
+     * <em>section</em> was not found.
+     */
+    public int lastIndexOfSection(List<?> section) {
+        for (int i = mSectionCount - 1; i >= 0; --i) {
+            if (mSections[i].equals(section)) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     /**
@@ -280,80 +555,6 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
             formatter.format("  Section %-2d ==> ", i);
             printer.println(DebugUtils.toString(section, result).append(" { startPos = ").append(startPos).append(", endPos = ").append(startPos + size - 1).append(", count = ").append(size).append(" }").toString());
         }
-    }
-
-    @Override
-    public Iterator<E> iterator() {
-        return new SectionListIterator();
-    }
-
-    @Override
-    public boolean contains(Object value) {
-        return (indexOf(value) != -1);
-    }
-
-    @Override
-    public int indexOf(Object value) {
-        for (int i = 0; i < mSectionCount; ++i) {
-            final int index = mSections[i].indexOf(value);
-            if (index != -1) {
-                return mPositions[i] + index;
-            }
-        }
-
-        return -1;
-    }
-
-    @Override
-    public int lastIndexOf(Object value) {
-        for (int i = mSectionCount - 1; i >= 0; --i) {
-            final int index = mSections[i].lastIndexOf(value);
-            if (index != -1) {
-                return mPositions[i] + index;
-            }
-        }
-
-        return -1;
-    }
-
-    @Override
-    public SectionList<E> clone() {
-        try {
-            final SectionList<E> result = (SectionList<E>)super.clone();
-            result.mSections  = mSections.clone();
-            result.mPositions = mPositions.clone();
-            return result;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return System.identityHashCode(this);
-    }
-
-    @Override
-    public boolean equals(Object object) {
-        return (this == object);
-    }
-
-    @Override
-    public Object[] toArray() {
-        return copyTo(new Object[mItemCount]);
-    }
-
-    @Override
-    public <T> T[] toArray(T[] contents) {
-        if (contents.length < mItemCount) {
-            contents = (T[])Array.newInstance(contents.getClass().getComponentType(), mItemCount);
-        }
-
-        if (copyTo(contents).length > mItemCount) {
-            contents[mItemCount] = null;
-        }
-
-        return contents;
     }
 
     private Object[] copyTo(Object[] contents) {

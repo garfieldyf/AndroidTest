@@ -257,18 +257,19 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private void testComputeFileSizes() {
-        final File dir = new File("/sdcard/Android/data/tv.fun.foods/cache");
+        final File dir = new File("/sdcard/Android/data/com.tencent.test");
+        final int size = 1;
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < size; ++i) {
             DebugUtils.startMethodTracing();
             long l = computeFiles(dir);
-            DebugUtils.stopMethodTracing("yf", "computeFiles     = " + l);
+            DebugUtils.stopMethodTracing("abcd", "java   computeFileBytes = " + l);
         }
 
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < size; ++i) {
             DebugUtils.startMethodTracing();
-            long l = FileUtils.computeFileBytes(dir);
-            DebugUtils.stopMethodTracing("yf", "computeFileBytes = " + l);
+            long l = FileUtils.computeFiles(dir.getPath());
+            DebugUtils.stopMethodTracing("abcd", "native computeFileBytes = " + l);
         }
     }
 

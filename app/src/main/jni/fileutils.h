@@ -23,8 +23,8 @@
 // scanFiles()
 // compareFile()
 // deleteFiles()
+// computeFiles()
 // getFileStatus()
-// getFileLength()
 // createFile()
 // createUniqueFile()
 
@@ -144,6 +144,43 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
 }
 
 #ifdef __NDK_STLP__
+__STATIC_INLINE__ jlong computeFileBytes(const char* path)
+{
+    assert(path);
+
+    std::list<std::string> dirPaths;
+    dirPaths.push_back(path);
+
+    jlong result = 0;
+    do
+    {
+        // Retrieves the dirPath from the dirPaths front.
+        std::string dirPath(std::move(dirPaths.front()));
+        dirPaths.pop_front();
+
+        __NS::Directory<> dir(__NS::defaultFilter);
+        if (dir.open(dirPath.c_str()) == 0)
+        {
+            struct stat buf;
+            char filePath[MAX_PATH];
+            const int length = buildPath(filePath, dirPath.c_str(), dirPath.size());
+
+            for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
+            {
+                ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+                if (entry->d_type == DT_DIR) {
+                    // If filePath is a directory adds it to dirPaths.
+                    dirPaths.push_back(filePath);
+                } else if (::stat(filePath, &buf) == 0) {
+                    result += (jlong)buf.st_size;
+                }
+            }
+        }
+    } while (!dirPaths.empty());
+
+    return result;
+}
+
 __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
@@ -189,6 +226,32 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, int (*
     return errnum;
 }
 #else
+__STATIC_INLINE__ jlong computeFileBytes(const char* dirPath)
+{
+    assert(dirPath);
+
+    jlong result = 0;
+    __NS::Directory<> dir(__NS::defaultFilter);
+    if (dir.open(dirPath) == 0)
+    {
+        struct stat buf;
+        char filePath[MAX_PATH];
+        const int length = buildPath(filePath, dirPath);
+
+        for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
+        {
+            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            if (entry->d_type == DT_DIR) {
+                result += computeFileBytes(filePath);
+            } else if (::stat(filePath, &buf) == 0) {
+                result += (jlong)buf.st_size;
+            }
+        }
+    }
+
+    return result;
+}
+
 static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, int (*filter)(const struct dirent*), jobject callback, jobject cookie, jint& result)
 {
     assert(env);
@@ -356,16 +419,17 @@ JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, 
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    getFileLength
+// Method:    computeFiles
 // Signature: (Ljava/lang/String;)J
 
-JNIEXPORT_METHOD(jlong) getFileLength(JNIEnv* env, jclass /*clazz*/, jstring file)
+JNIEXPORT_METHOD(jlong) computeFiles(JNIEnv* env, jclass /*clazz*/, jstring file)
 {
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
 
     struct stat buf;
-    return (::stat(JNI::jstring_t(env, file), &buf) == 0 ? (jlong)buf.st_size : 0);
+    JNI::jstring_t jfile(env, file);
+    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile) : (jlong)buf.st_size)) : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -473,7 +537,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "mkdirs", "(Ljava/lang/String;I)I", (void*)mkdirs },
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
-        { "getFileLength", "(Ljava/lang/String;)J", (void*)getFileLength },
+        { "computeFiles", "(Ljava/lang/String;)J", (void*)computeFiles },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },

@@ -46,6 +46,21 @@ public final class FileUtils {
     public static final int FLAG_SCAN_FOR_DESCENDENTS = 0x02;
 
     /**
+     * Closes the object and releases any system resources associated with it. If the
+     * object is <tt>null</tt> or already closed then invoking this method has no effect.
+     * @param c An AutoCloseable is a source or destination of data that can be closed.
+     */
+    public static void close(AutoCloseable c) {
+        if (c != null) {
+            try {
+                c.close();
+            } catch (Exception e) {
+                Log.e(FileUtils.class.getName(), "Couldn't close - " + c.getClass().getName(), e);
+            }
+        }
+    }
+
+    /**
      * Returns the absolute path to the directory in which the application can place
      * its own files on the filesystem. <p>If the external storage mounted the result
      * path such as <tt>"/storage/emulated/0/Android/data/packagename/files/name"</tt>,
@@ -131,21 +146,6 @@ public final class FileUtils {
     }
 
     /**
-     * Closes the object and releases any system resources associated with it. If the
-     * object is <tt>null</tt> or already closed then invoking this method has no effect.
-     * @param c An AutoCloseable is a source or destination of data that can be closed.
-     */
-    public static void close(AutoCloseable c) {
-        if (c != null) {
-            try {
-                c.close();
-            } catch (Exception e) {
-                Log.e(FileUtils.class.getName(), "Couldn't close - " + c.getClass().getName(), e);
-            }
-        }
-    }
-
-    /**
      * Tests if the <em>path</em> is an absolute path.
      * @param path The path to test.
      * @return <tt>true</tt> if the path is an absolute path, <tt>false</tt> otherwise.
@@ -163,126 +163,6 @@ public final class FileUtils {
     public static boolean isHidden(String path) {
         final int length = StringUtils.getLength(path);
         return (length > 0 && path.charAt(length - 1) != '/' && path.charAt(path.lastIndexOf('/') + 1) == '.');
-    }
-
-    /**
-     * Creates the directory with the specified <em>path</em>.
-     * @param path The path to create, must be absolute file path.
-     * @param flags Creating flags. Pass 0 or {@link #FLAG_IGNORE_FILENAME}.
-     * @return Returns <tt>0</tt> if the necessary directory has been
-     * created or the target directory already exists, Otherwise returns
-     * an error code. See {@link ErrnoException}.
-     */
-    public static native int mkdirs(String path, int flags);
-
-    /**
-     * Returns the file status (include mode, uid, gid, size, etc.) with the specified
-     * <em>path</em>. This operation is supported for both file and directory.
-     * @param path The file or directory path, must be absolute file path.
-     * @return A {@link Stat} object if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #stat(String, Stat)
-     */
-    public static Stat stat(String path) {
-        final Stat stat = new Stat();
-        return (stat(path, stat) == 0 ? stat : null);
-    }
-
-    /**
-     * Returns the file status (include mode, uid, gid, size, etc.) with the specified
-     * <em>path</em>. This operation is supported for both file and directory.
-     * @param path The file or directory path, must be absolute file path.
-     * @param outStat The {@link Stat} to store the result.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error
-     * code. See {@link ErrnoException}.
-     * @see #stat(String)
-     */
-    public static native int stat(String path, Stat outStat);
-
-    /**
-     * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
-     * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
-     * @param dirPath The directory path, must be absolute file path.
-     * @param callback The {@link ScanCallback} used to scan.
-     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE}
-     * and {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-     */
-    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
-
-    /**
-     * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
-     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
-     * part of the list.</p>
-     * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
-     * @see #listFiles(String, int, Collection)
-     */
-    public static List<Dirent> listFiles(String dirPath, int flags) {
-        final List<Dirent> result = new ArrayList<Dirent>();
-        return (scanFiles(dirPath, FileUtils::onScanFile, flags, result) == 0 ? result : null);
-    }
-
-    /**
-     * Returns a <tt>Collection</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
-     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as part
-     * of the list.</p>
-     * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
-     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param outDirents A <tt>Collection</tt> to store the {@link Dirent} objects.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-     * @see #listFiles(String, int)
-     */
-    public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
-        return scanFiles(dirPath, FileUtils::onScanFile, flags, outDirents);
-    }
-
-    /**
-     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
-     * @param sizeBytes The size value to be formatted, in bytes.
-     * @return A formatted string with the <em>sizeBytes</em>.
-     */
-    public static String formatFileSize(long sizeBytes) {
-        float result = sizeBytes;
-        char suffix = 'B';
-        if (result > 900) {
-            suffix = 'K';
-            result = result / 1024;
-        }
-
-        if (result > 900) {
-            suffix = 'M';
-            result = result / 1024;
-        }
-
-        if (result > 900) {
-            suffix = 'G';
-            result = result / 1024;
-        }
-
-        if (result > 900) {
-            suffix = 'T';
-            result = result / 1024;
-        }
-
-        if (result > 900) {
-            suffix = 'P';
-            result = result / 1024;
-        }
-
-        final StringBuilder format = new StringBuilder(8).append("%.0f %c");
-        if (suffix != 'B') {
-            format.append('B');
-        }
-
-        if (result < 100) {
-            format.setCharAt(2, '2');
-        }
-
-        return String.format(format.toString(), result, suffix);
     }
 
     /**
@@ -379,12 +259,90 @@ public final class FileUtils {
     }
 
     /**
-     * Returns the length with the specified <em>file</em> in bytes. The result for
-     * a directory is not defined.
-     * @param file The file path, must be absolute file path.
-     * @return The number of bytes or <tt>0</tt> if the <em>file</em> does not exist.
+     * Formats a content size to be in the form of bytes, kilobytes, megabytes, etc.
+     * @param sizeBytes The size value to be formatted, in bytes.
+     * @return A formatted string with the <em>sizeBytes</em>.
      */
-    public static native long getFileLength(String file);
+    public static String formatFileSize(long sizeBytes) {
+        float result = sizeBytes;
+        char suffix = 'B';
+        if (result > 900) {
+            suffix = 'K';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'M';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'G';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'T';
+            result = result / 1024;
+        }
+
+        if (result > 900) {
+            suffix = 'P';
+            result = result / 1024;
+        }
+
+        final StringBuilder format = new StringBuilder(8).append("%.0f %c");
+        if (suffix != 'B') {
+            format.append('B');
+        }
+
+        if (result < 100) {
+            format.setCharAt(2, '2');
+        }
+
+        return String.format(format.toString(), result, suffix);
+    }
+
+    /**
+     * Creates the directory with the specified <em>path</em>.
+     * @param path The path to create, must be absolute file path.
+     * @param flags Creating flags. Pass 0 or {@link #FLAG_IGNORE_FILENAME}.
+     * @return Returns <tt>0</tt> if the necessary directory has been
+     * created or the target directory already exists, Otherwise returns
+     * an error code. See {@link ErrnoException}.
+     */
+    public static native int mkdirs(String path, int flags);
+
+    /**
+     * Returns the file status (include mode, uid, gid, size, etc.) with the specified
+     * <em>path</em>. This operation is supported for both file and directory.
+     * @param path The file or directory path, must be absolute file path.
+     * @return A {@link Stat} object if the operation succeeded, <tt>null</tt> otherwise.
+     * @see #stat(String, Stat)
+     */
+    public static Stat stat(String path) {
+        final Stat stat = new Stat();
+        return (stat(path, stat) == 0 ? stat : null);
+    }
+
+    /**
+     * Returns the file status (include mode, uid, gid, size, etc.) with the specified
+     * <em>path</em>. This operation is supported for both file and directory.
+     * @param path The file or directory path, must be absolute file path.
+     * @param outStat The {@link Stat} to store the result.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error
+     * code. See {@link ErrnoException}.
+     * @see #stat(String)
+     */
+    public static native int stat(String path, Stat outStat);
+
+    /**
+     * Returns the total number of bytes with specified <em>file</em>. if <em>file</em>
+     * is a directory, all sub files will be computed.
+     * @param file The file or directory to compute, must be absolute file path.
+     * @return The total number of bytes or <tt>0</tt> if the file does not exist.
+     */
+    public static native long computeFiles(String file);
 
     /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
@@ -396,6 +354,93 @@ public final class FileUtils {
      * an error code. See {@link ErrnoException}.
      */
     public static native int moveFile(String src, String dst);
+
+    /**
+     * Compares the two specified file's contents are equal.
+     * @param file1 The first file to compare, must be absolute file path.
+     * @param file2 The second file to compare, must be absolute file path.
+     * @return <tt>true</tt> if file1's contents and file2's contents are equal,
+     * <tt>false</tt> otherwise.
+     */
+    public static native boolean compareFile(String file1, String file2);
+
+    /**
+     * Deletes a file or directory with specified <em>path</em>. if <em>path</em>
+     * is a directory, all sub files and directories will be deleted.
+     * @param path The file or directory to delete, must be absolute file path.
+     * @param deleteSelf Whether to delete the <em>path</em> itself. If the
+     * <em>path</em> is a file, this parameter will be ignored.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an
+     * error code. See {@link ErrnoException}.
+     */
+    public static native int deleteFiles(String path, boolean deleteSelf);
+
+    /**
+     * Creates a file with the specified <em>filename</em>. If the file was
+     * created the file's length is the <em>length</em> and the content is
+     * empty. If the specified file already exists, it can be overrided to.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param filename The filename to create, must be absolute file path.
+     * @param length The desired file length in bytes.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
+     * an error code. See {@link ErrnoException}.
+     * @see #createUniqueFile(String, long)
+     */
+    public static native int createFile(String filename, long length);
+
+    /**
+     * Creates a unique file with the specified <em>filename</em>. If the file
+     * was created the file's length is the <em>length</em> and the content is
+     * empty. <p>Note: This method will be create the necessary directories.</p>
+     * @param filename The original filename to create, must be absolute file path.
+     * @param length The desired file length in bytes.
+     * @return Returns the unique filename (include file path), or <tt>null</tt>
+     * if the file could't be created.
+     * @see #createFile(String, long)
+     */
+    public static native String createUniqueFile(String filename, long length);
+
+    /**
+     * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
+     * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
+     * @param dirPath The directory path, must be absolute file path.
+     * @param callback The {@link ScanCallback} used to scan.
+     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE}
+     * and {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
+     */
+    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
+
+    /**
+     * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
+     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
+     * part of the list.</p>
+     * @param dirPath The directory path, must be absolute file path.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
+     * @see #listFiles(String, int, Collection)
+     */
+    public static List<Dirent> listFiles(String dirPath, int flags) {
+        final List<Dirent> result = new ArrayList<Dirent>();
+        return (scanFiles(dirPath, FileUtils::onScanFile, flags, result) == 0 ? result : null);
+    }
+
+    /**
+     * Returns a <tt>Collection</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
+     * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as part
+     * of the list.</p>
+     * @param dirPath The directory path, must be absolute file path.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @param outDirents A <tt>Collection</tt> to store the {@link Dirent} objects.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
+     * @see #listFiles(String, int)
+     */
+    public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
+        return scanFiles(dirPath, FileUtils::onScanFile, flags, outDirents);
+    }
 
     /**
      * Copies the specified file contents to the specified <em>outFile</em>.
@@ -505,62 +550,6 @@ public final class FileUtils {
     }
 
     /**
-     * Returns the length in bytes with specified <em>file</em>. if <em>file</em>
-     * is a directory, all sub files will be computed.
-     * @param file The file or directory to compute, must be absolute file path.
-     * @return The total number of bytes or <tt>0</tt> if the file does not exist.
-     */
-    public static long computeFileBytes(File file) {
-        DebugUtils.__checkError(file == null, "file == null");
-        return (file.isDirectory() ? computeFiles(file) : file.length());
-    }
-
-    /**
-     * Compares the two specified file's contents are equal.
-     * @param file1 The first file to compare, must be absolute file path.
-     * @param file2 The second file to compare, must be absolute file path.
-     * @return <tt>true</tt> if file1's contents and file2's contents are equal,
-     * <tt>false</tt> otherwise.
-     */
-    public static native boolean compareFile(String file1, String file2);
-
-    /**
-     * Deletes a file or directory with specified <em>path</em>. if <em>path</em>
-     * is a directory, all sub files and directories will be deleted.
-     * @param path The file or directory to delete, must be absolute file path.
-     * @param deleteSelf Whether to delete the <em>path</em> itself. If the
-     * <em>path</em> is a file, this parameter will be ignored.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an
-     * error code. See {@link ErrnoException}.
-     */
-    public static native int deleteFiles(String path, boolean deleteSelf);
-
-    /**
-     * Creates a file with the specified <em>filename</em>. If the file was
-     * created the file's length is the <em>length</em> and the content is
-     * empty. If the specified file already exists, it can be overrided to.
-     * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The filename to create, must be absolute file path.
-     * @param length The desired file length in bytes.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
-     * an error code. See {@link ErrnoException}.
-     * @see #createUniqueFile(String, long)
-     */
-    public static native int createFile(String filename, long length);
-
-    /**
-     * Creates a unique file with the specified <em>filename</em>. If the file
-     * was created the file's length is the <em>length</em> and the content is
-     * empty. <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The original filename to create, must be absolute file path.
-     * @param length The desired file length in bytes.
-     * @return Returns the unique filename (include file path), or <tt>null</tt>
-     * if the file could't be created.
-     * @see #createFile(String, long)
-     */
-    public static native String createUniqueFile(String filename, long length);
-
-    /**
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     /* package */ static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
@@ -606,17 +595,6 @@ public final class FileUtils {
             }
             DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
         }
-    }
-
-    private static long computeFiles(File dir) {
-        long result = 0;
-        final String[] filenames = dir.list();
-        for (int i = 0, size = ArrayUtils.getSize(filenames); i < size; ++i) {
-            final File file = new File(dir, filenames[i]);
-            result += (file.isDirectory() ? computeFiles(file) : file.length());
-        }
-
-        return result;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

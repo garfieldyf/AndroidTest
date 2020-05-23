@@ -5,7 +5,6 @@ import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
-import android.support.v4.graphics.BitmapCompat;
 import android.util.Printer;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -37,7 +36,7 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
 
     @Override
     protected int sizeOf(K key, Bitmap value) {
-        return BitmapCompat.getAllocationByteCount(value);
+        return value.getAllocationByteCount();
     }
 
     @Override

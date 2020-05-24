@@ -64,9 +64,12 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
         // Adds the section collection to mSections.
         for (List<?> section : sections) {
-            mSections[mSectionCount] = section;
-            mPositions[mSectionCount++] = mItemCount;
-            mItemCount += section.size();
+            final int size = ArrayUtils.getSize(section);
+            if (size > 0) {
+                mSections[mSectionCount] = section;
+                mPositions[mSectionCount++] = mItemCount;
+                mItemCount += size;
+            }
         }
     }
 
@@ -92,7 +95,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     @Override
     public boolean add(E value) {
         if (mSectionCount == 0) {
-            final List<E> section = new ArrayList<E>();
+            final List<E> section = createSection();
             section.add(value);
             addSection(section);
         } else {
@@ -166,7 +169,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         }
 
         if (mSectionCount == 0) {
-            final List<E> section = new ArrayList<E>();
+            final List<E> section = createSection();
             section.addAll(collection);
             addSection(section);
         } else {
@@ -422,22 +425,9 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     }
 
     /**
-     * Removes the first occurrence of the specified <em>section</em> from this <tt>SectionList</tt>.
-     * @param section The section to remove.
-     * @return The start position of the <em>section</em> in this <tt>SectionList</tt> or <tt>-1</tt>
-     * if the <em>section</em> was not found.
-     * @see #removeSection(int)
-     */
-    public int removeSection(List<?> section) {
-        final int sectionIndex = indexOfSection(section);
-        return (sectionIndex != -1 ? removeSection(sectionIndex) : -1);
-    }
-
-    /**
      * Removes the section at the specified <em>sectionIndex</em> from this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section to remove.
      * @return The start position of the removed section in this <tt>SectionList</tt>.
-     * @see #removeSection(List)
      */
     public int removeSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mSectionCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mSectionCount);
@@ -449,40 +439,6 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         DebugUtils.__checkError(mItemCount < 0, "Error: The SectionList's itemCount(" + mItemCount + ") < 0");
         DebugUtils.__checkError(mSectionCount < 0, "Error: The SectionList's sectionCount(" + mSectionCount + ") < 0");
         return computePositions(sectionIndex);
-    }
-
-    /**
-     * Searches this <tt>SectionList</tt> for the specified <em>section</em> and returns the
-     * index of the first occurrence.
-     * @param section The section to search.
-     * @return The index of the first occurrence of the <em>section</em> or <tt>-1</tt> if the
-     * <em>section</em> was not found.
-     */
-     public int indexOfSection(List<?> section) {
-        for (int i = 0; i < mSectionCount; ++i) {
-            if (mSections[i].equals(section)) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
-    /**
-     * Searches this <tt>SectionList</tt> for the specified <em>section</em> and returns the
-     * index of the last occurrence.
-     * @param section The section to search.
-     * @return The index of the last occurrence of the <em>section</em> or <tt>-1</tt> if the
-     * <em>section</em> was not found.
-     */
-    public int lastIndexOfSection(List<?> section) {
-        for (int i = mSectionCount - 1; i >= 0; --i) {
-            if (mSections[i].equals(section)) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     /**
@@ -539,6 +495,14 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     public static int getOriginalPosition(long combinedPosition) {
         DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
         return (int)combinedPosition;
+    }
+
+    /**
+     * Returns a new section to add to this <tt>SectionList</tt>.
+     * The default implementation returns a new {@link ArrayList}.
+     */
+    protected List<?> createSection() {
+        return new ArrayList();
     }
 
     public final void dump(Printer printer) {

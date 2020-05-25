@@ -43,7 +43,6 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.ProcessUtils.CrashDatabase;
-import android.ext.util.SectionList;
 import android.ext.util.StringUtils;
 import android.ext.util.UriUtils;
 import android.ext.util.ZipUtils;
@@ -194,6 +193,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testJSONArray();
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
         //testFileCopy();
+//        TestSectionList.testList();
 
         testJsonLoader();
     }
@@ -309,114 +309,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        BitmapUtils.dumpBitmap(this, "yf", bitmap);
     }
 
-    private static List<String> buildPage(int index, int count) {
-        final ArrayList<String> data = new ArrayList<String>(count);
-        for (int i = 0; i < count; ++i) {
-            data.add("page_" + index + "_" + i);
-        }
-
-        return data;
-    }
-
-    private static void forEach(Printer printer, SectionList<String> list) {
-//        final Object[] result = list.toArray();
-//        for (Object object : result) {
-//            printer.println(object.toString());
-//        }
-
-        for (String s : list) {
-            printer.println(s);
-        }
-
-        for (int i = 0; i < list.size(); ++i) {
-            final long combinedPosition = list.getSectionForPosition(i);
-            printer.println("pos = " + i + ", page = " + SectionList.getOriginalSection(combinedPosition) + ", index = " + SectionList.getOriginalPosition(combinedPosition) + ", item = " + list.get(i));
-        }
-    }
-
-    private static void addPage(SectionList<String> list, List<String> page) {
-        addPage(list, list.getSectionCount(), page);
-    }
-
-    private static void addPage(SectionList<String> list, int index, List<String> page) {
-        final int size = ArrayUtils.getSize(page);
-        if (size > 0) {
-            final int positionStart;
-            if (index == list.getSectionCount()) {
-                positionStart = list.size();
-            } else {
-                positionStart = list.getPositionForSection(index);
-            }
-
-            list.addSection(index, page);
-            Log.i("yf", " ");
-            Log.i("yf", "notifyItemRangeInserted - positionStart = " + positionStart + ", itemCount = " + size);
-        }
-    }
-
-    private static void setPage(SectionList<String> list, int index, List<String> page) {
-        final int size = ArrayUtils.getSize(page);
-        if (size > 0) {
-            final int positionStart = list.getPositionForSection(index);
-            list.setSection(index, page);
-            Log.i("yf", " ");
-            Log.i("yf", "notifyItemRangeChanged - positionStart = " + positionStart + ", itemCount = " + size);
-        }
-    }
-
-    private static void removePage(SectionList<String> list, int index) {
-        final List<?> page = list.getSection(index);
-        final int positionStart = list.removeSection(index);
-        Log.i("yf", " ");
-        Log.i("yf", "notifyItemRangeRemoved - positionStart = " + positionStart + ", itemCount = " + page.size());
-    }
-
-    private static void indexOf(SectionList<String> list) {
-        int index = list.indexOf("page_2_0");
-        Log.i("yf", "page_2_0 index = " + index);
-
-        index = list.indexOf("page_0_5");
-        Log.i("yf", "page_0_5 index = " + index);
-
-        index = list.indexOf(null);
-        Log.i("yf", "null index = " + index);
-
-        index = list.indexOf("page_0");
-        Log.i("yf", "page_0 index = " + index);
-
-        index = list.lastIndexOf("page_0_1");
-        Log.i("yf", "page_0_1 index = " + index);
-
-        index = list.lastIndexOf("page_2_7");
-        Log.i("yf", "page_2_7 index = " + index);
-
-        index = list.lastIndexOf(null);
-        Log.i("yf", "null index = " + index);
-
-        index = list.lastIndexOf("page_2");
-        Log.i("yf", "page_2 index = " + index);
-    }
-
-    private void testPagedList() {
-        final LogPrinter printer = new LogPrinter(Log.INFO, "yf");
-        SectionList<String> list = new SectionList<String>(Arrays.asList(buildPage(0, 11), buildPage(1, 9)));
-        list.dump(printer);
-
-        addPage(list, buildPage(2, 10));
-        list.dump(printer);
-
-        addPage(list, 1, buildPage(3, 5));
-        list.dump(printer);
-
-        setPage(list, 2, buildPage(5, 8));
-        list.dump(printer);
-
-        removePage(list, 1);
-        list.dump(printer);
-        forEach(printer, list);
-        indexOf(list);
-    }
-    
     private void testSemaphore() {
         // 只允许3个线程同时访问
         final Semaphore semp = new Semaphore(3);

@@ -387,6 +387,19 @@ public class JSONArray implements List<Object>, RandomAccess {
         return values.retainAll(collection);
     }
 
+//    /**
+//     * Removes from this array all of the values whose index is between
+//     * <em>fromIndex</em> , inclusive, and <em>toIndex</em>, exclusive.
+//     * If <em>fromIndex==toIndex</em>, this operation has no effect.
+//     */
+//    public void removeRange(int fromIndex, int toIndex) {
+//        if (values instanceof JSONArrayList) {
+//            ((JSONArrayList)values).removeRange(fromIndex, toIndex);
+//        } else {
+//            throw new UnsupportedOperationException();
+//        }
+//    }
+
     @Override
     public int indexOf(Object value) {
         return values.indexOf(value);
@@ -451,4 +464,29 @@ public class JSONArray implements List<Object>, RandomAccess {
     public boolean equals(Object object) {
         return (object instanceof JSONArray && values.equals(((JSONArray)object).values));
     }
+
+//    /**
+//     * Class <tt>JSONArrayList</tt> is an implementation of a {@link ArrayList}.
+//     */
+//    private static final class JSONArrayList extends ArrayList<Object> {
+//        /**
+//         * Constructor
+//         */
+//        public JSONArrayList() {
+//        }
+//
+//        /**
+//         * Constructor
+//         * @param collection The collection of elements to add.
+//         */
+//        public JSONArrayList(Collection<?> collection) {
+//            super(collection);
+//        }
+//
+//        @Override
+//        public void removeRange(int fromIndex, int toIndex) {
+//            // The removeRange is protected in the super class.
+//            super.removeRange(fromIndex, toIndex);
+//        }
+//    }
 }

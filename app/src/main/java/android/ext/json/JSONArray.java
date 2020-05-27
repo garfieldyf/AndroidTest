@@ -38,6 +38,13 @@ public class JSONArray implements List<Object>, RandomAccess {
         this.values = values;
     }
 
+    /**
+     * Constructor
+     */
+    /* package */ JSONArray(int capacity) {
+        super(capacity);
+    }
+
     @Override
     public void clear() {
         values.clear();
@@ -450,5 +457,22 @@ public class JSONArray implements List<Object>, RandomAccess {
     @Override
     public boolean equals(Object object) {
         return (object instanceof JSONArray && values.equals(((JSONArray)object).values));
+    }
+
+    /* package */ void __checkMutable() {
+    }
+
+    /**
+     * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
+     */
+    /* package */ static final class EmptyJSONArray extends JSONArray {
+        /* package */ EmptyJSONArray() {
+            super(0);
+        }
+
+        @Override
+        /* package */ void __checkMutable() {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
     }
 }

@@ -10,15 +10,12 @@ import java.util.Set;
  * Class JSONObject
  * @author Garfield
  */
-public class JSONObject implements Map<String, Object> {
-    private final Map<String, Object> values;
-
+public class JSONObject extends LinkedHashMap<String, Object> {
     /**
      * Constructor
      * @see #JSONObject(JSONObject)
      */
     public JSONObject() {
-        this.values = new LinkedHashMap<String, Object>();
     }
 
     /**
@@ -27,29 +24,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #JSONObject()
      */
     public JSONObject(JSONObject object) {
-        this.values = new LinkedHashMap<String, Object>(object.values);
-    }
-
-    /**
-     * Constructor
-     */
-    /* package */ JSONObject(Map<String, Object> values) {
-        this.values = values;
-    }
-
-    @Override
-    public void clear() {
-        values.clear();
-    }
-
-    @Override
-    public int size() {
-        return values.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return values.isEmpty();
+        super(object);
     }
 
     /**
@@ -62,9 +37,10 @@ public class JSONObject implements Map<String, Object> {
      */
     @Override
     public JSONObject put(String name, Object value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
         JSONUtils.__checkDouble(value);
-        values.put(name, value);
+        super.put(name, value);
         return this;
     }
 
@@ -75,8 +51,9 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, int value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
-        values.put(name, value);
+        super.put(name, value);
         return this;
     }
 
@@ -87,8 +64,9 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, long value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
-        values.put(name, value);
+        super.put(name, value);
         return this;
     }
 
@@ -99,8 +77,9 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, boolean value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
-        values.put(name, value);
+        super.put(name, value);
         return this;
     }
 
@@ -112,9 +91,10 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, float value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
         JSONUtils.__checkDouble(value);
-        values.put(name, value);
+        super.put(name, value);
         return this;
     }
 
@@ -126,15 +106,11 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, double value) {
+        __checkMutable();
         DebugUtils.__checkError(name == null, "name == null");
         JSONUtils.__checkDouble(value);
-        values.put(name, value);
+        super.put(name, value);
         return this;
-    }
-
-    @Override
-    public Object get(Object name) {
-        return values.get(name);
     }
 
     /**
@@ -142,7 +118,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optInt(String, int)
      */
     public int optInt(String name) {
-        return JSONUtils.toInt(values.get(name), 0);
+        return JSONUtils.toInt(get(name), 0);
     }
 
     /**
@@ -153,7 +129,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optInt(String)
      */
     public int optInt(String name, int fallback) {
-        return JSONUtils.toInt(values.get(name), fallback);
+        return JSONUtils.toInt(get(name), fallback);
     }
 
     /**
@@ -161,7 +137,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optLong(String, int)
      */
     public long optLong(String name) {
-        return JSONUtils.toLong(values.get(name), 0);
+        return JSONUtils.toLong(get(name), 0);
     }
 
     /**
@@ -172,7 +148,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optLong(String)
      */
     public long optLong(String name, long fallback) {
-        return JSONUtils.toLong(values.get(name), fallback);
+        return JSONUtils.toLong(get(name), fallback);
     }
 
     /**
@@ -180,7 +156,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optString(String, String)
      */
     public String optString(String name) {
-        return JSONUtils.toString(values.get(name), "");
+        return JSONUtils.toString(get(name), "");
     }
 
     /**
@@ -191,7 +167,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optString(String)
      */
     public String optString(String name, String fallback) {
-        return JSONUtils.toString(values.get(name), fallback);
+        return JSONUtils.toString(get(name), fallback);
     }
 
     /**
@@ -199,7 +175,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optFloat(String, float)
      */
     public float optFloat(String name) {
-        return (float)JSONUtils.toDouble(values.get(name), 0);
+        return (float)JSONUtils.toDouble(get(name), 0);
     }
 
     /**
@@ -210,7 +186,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optFloat(String)
      */
     public float optFloat(String name, float fallback) {
-        return (float)JSONUtils.toDouble(values.get(name), fallback);
+        return (float)JSONUtils.toDouble(get(name), fallback);
     }
 
     /**
@@ -218,7 +194,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optDouble(String, double)
      */
     public double optDouble(String name) {
-        return JSONUtils.toDouble(values.get(name), 0);
+        return JSONUtils.toDouble(get(name), 0);
     }
 
     /**
@@ -229,7 +205,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optDouble(String)
      */
     public double optDouble(String name, double fallback) {
-        return JSONUtils.toDouble(values.get(name), fallback);
+        return JSONUtils.toDouble(get(name), fallback);
     }
 
     /**
@@ -237,7 +213,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optBoolean(String, boolean)
      */
     public boolean optBoolean(String name) {
-        return JSONUtils.toBoolean(values.get(name), false);
+        return JSONUtils.toBoolean(get(name), false);
     }
 
     /**
@@ -248,7 +224,7 @@ public class JSONObject implements Map<String, Object> {
      * @see #optBoolean(String)
      */
     public boolean optBoolean(String name, boolean fallback) {
-        return JSONUtils.toBoolean(values.get(name), fallback);
+        return JSONUtils.toBoolean(get(name), fallback);
     }
 
     /**
@@ -258,7 +234,7 @@ public class JSONObject implements Map<String, Object> {
      * @return The <tt>JSONArray</tt> or <tt>null</tt>.
      */
     public JSONArray optJSONArray(String name) {
-        final Object value = values.get(name);
+        final Object value = get(name);
         return (value instanceof JSONArray ? (JSONArray)value : null);
     }
 
@@ -269,58 +245,33 @@ public class JSONObject implements Map<String, Object> {
      * @return The <tt>JSONObject</tt> or <tt>null</tt>.
      */
     public JSONObject optJSONObject(String name) {
-        final Object value = values.get(name);
+        final Object value = get(name);
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
     @Override
-    public Object remove(Object name) {
-        return values.remove(name);
-    }
-
-    @Override
-    public boolean containsKey(Object name) {
-        return values.containsKey(name);
-    }
-
-    @Override
-    public boolean containsValue(Object value) {
-        return values.containsValue(value);
-    }
-
-    @Override
-    public Set<String> keySet() {
-        return values.keySet();
-    }
-
-    @Override
-    public Collection<Object> values() {
-        return values.values();
-    }
-
-    @Override
-    public Set<Entry<String, Object>> entrySet() {
-        return values.entrySet();
-    }
-
-    @Override
-    public void putAll(Map<? extends String, ?> map) {
-        JSONUtils.__checkDouble(map);
-        values.putAll(map);
-    }
-
-    @Override
-    public int hashCode() {
-        return values.hashCode();
-    }
-
-    @Override
     public String toString() {
-        return JSONUtils.toJSONString(values);
+        return JSONUtils.toJSONString(this);
     }
 
     @Override
     public boolean equals(Object object) {
-        return (object instanceof JSONObject && values.equals(((JSONObject)object).values));
+        return (object instanceof JSONObject && super.equals(object);
+    }
+
+    /* package */ void __checkMutable() {
+    }
+
+    /**
+     * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
+     */
+    /* package */ static final class EmptyJSONObject extends JSONObject {
+        /* package */ EmptyJSONObject() {
+        }
+
+        @Override
+        /* package */ void __checkMutable() {
+            throw new UnsupportedOperationException("The JSONObject is immutable");
+        }
     }
 }

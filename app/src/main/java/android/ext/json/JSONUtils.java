@@ -38,7 +38,7 @@ public final class JSONUtils {
     /**
      * The <tt>0-length</tt>, immutable {@link JSONObject}.
      */
-    public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.emptyMap());
+    public static final JSONObject EMPTY_OBJECT = new EmptyJSONObject();
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},

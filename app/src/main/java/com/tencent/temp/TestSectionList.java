@@ -45,6 +45,12 @@ public final class TestSectionList {
         list.addSection(0, buildSection(1, 4));
         list.addSection(1, buildSection(3, 3));
         list.addSection(2, buildSection(4, 2));
+//        list.setSection(3, buildSection(9, 6));
+//        list.setSection(3, buildSection(10, 7));
+
+//        for (int i = 0; i < 3; ++i) {
+//            list.remove(4);
+//        }
 
 //        printer.println("remove section index = " + list.removeSection(2));
 

@@ -11,6 +11,7 @@ import java.util.List;
  * Class <tt>SectionList</tt> allows to adding or removing data by section.
  * @author Garfield
  */
+@SuppressWarnings("unchecked")
 public class SectionList<E> extends ArrayList<E> implements Cloneable {
     private static final int ARRAY_CAPACITY_INCREMENT = 12;
     private int mCount;
@@ -44,7 +45,6 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @see #SectionList()
      * @see #SectionList(int)
      */
-    @SuppressWarnings("unchecked")
     public SectionList(Collection<?> collection) {
         this(collection.size());
         addAll((Collection<? extends E>)collection);
@@ -64,6 +64,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     @Override
     public void add(int index, E value) {
+        DebugUtils.__checkError(index < 0 || index > size(), "Invalid index = " + index + ", size = " + size());
         if (index == size()) {
             add(value);
         } else {
@@ -74,15 +75,16 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     @Override
     public E remove(int index) {
+        DebugUtils.__checkError(index < 0 || index >= size(), "Invalid index = " + index + ", size = " + size());
         final int sectionIndex = getSectionForPosition(index);
-        final E value = super.remove(index);
         if (--mSizes[sectionIndex] == 0) {
-            removeSection(sectionIndex);
-        } else {
-            updateIndexes(sectionIndex);
+            // Removes the section, if the section is empty.
+            DebugUtils.__checkDebug(true, "SectionList", "remove the section = " + sectionIndex);
+            System.arraycopy(mSizes, sectionIndex + 1, mSizes, sectionIndex, --mCount - sectionIndex);
         }
 
-        return value;
+        updateIndexes(sectionIndex);
+        return super.remove(index);
     }
 
     @Override
@@ -131,7 +133,6 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public SectionList<E> clone() {
         final SectionList<E> result = (SectionList<E>)super.clone();
         result.mSizes   = mSizes.clone();
@@ -167,7 +168,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     /**
      * Returns the number of sections in this <tt>SectionList</tt>.
      * @return The number of sections in this <tt>SectionList</tt>.
-     * @see #getSection(int)
+     * @see #getSectionSize(int)
      */
     public int getSectionCount() {
         return mCount;
@@ -177,6 +178,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * Returns the number of elements in the specified section.
      * @param sectionIndex The index of the section.
      * @return The number of elements.
+     * @see #getSectionCount()
      */
     public int getSectionSize(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
@@ -189,7 +191,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * the returned section will be reflected to this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section.
      * @return The section at the specified <em>sectionIndex</em>.
-     * @see #getSectionCount()
+     * @see #setSection(int, Collection)
      */
     public List<E> getSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
@@ -198,12 +200,41 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     /**
+     * Replaces the section at the specified <em>sectionIndex</em> in this <tt>SectionList</tt>.
+     * @param sectionIndex The index of the section.
+     * @param section The section to add.
+     * @return <tt>true</tt> if this <tt>SectionList</tt> is modified, <tt>false</tt> otherwise.
+     * @see #getSection(int)
+     */
+    public boolean setSection(int sectionIndex, Collection<?> section) {
+        DebugUtils.__checkError(section == null, "section == null");
+        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
+        final int newSize = section.size();
+        if (newSize == 0) {
+            return false;
+        }
+
+        int index = mIndexes[sectionIndex], oldSize = mSizes[sectionIndex];
+        if (newSize == oldSize) {
+            for (Object value : section) {
+                set(index++, (E)value);
+            }
+        } else {
+            removeRange(index, index + oldSize);
+            super.addAll(index, (Collection<? extends E>)section);
+            mSizes[sectionIndex] = newSize;
+            updateIndexes(sectionIndex);
+        }
+
+        return true;
+    }
+
+    /**
      * Adds the specified <em>section</em> at the end of this <tt>SectionList</tt>.
      * @param section The section to add.
      * @return <tt>true</tt> if this <tt>SectionList</tt> is modified, <tt>false</tt> otherwise.
      * @see #addSection(int, Collection)
      */
-    @SuppressWarnings("unchecked")
     public boolean addSection(Collection<?> section) {
         DebugUtils.__checkError(section == null, "section == null");
         final int size = section.size();
@@ -226,7 +257,6 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @return <tt>true</tt> if this <tt>SectionList</tt> is modified, <tt>false</tt> otherwise.
      * @see #addSection(Collection)
      */
-    @SuppressWarnings("unchecked")
     public boolean addSection(int sectionIndex, Collection<?> section) {
         DebugUtils.__checkError(section == null, "section == null");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
@@ -239,12 +269,14 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             return false;
         }
 
+        // Inserts a new section at the sectionIndex.
         final int index = mIndexes[sectionIndex];
         ensureCapacity();
         System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, ++mCount - sectionIndex);
-
         mSizes[sectionIndex] = size;
         updateIndexes(sectionIndex);
+
+        // Inserts the elements at the index.
         return super.addAll(index, (Collection<? extends E>)section);
     }
 
@@ -254,14 +286,13 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @return The start index of the removed section in this <tt>SectionList</tt>.
      */
     public int removeSection(int sectionIndex) {
+        // Removes the elements from startIndex to startIndex + size
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
         final int startIndex = mIndexes[sectionIndex];
         removeRange(startIndex, startIndex + mSizes[sectionIndex]);
+
+        // Removes the section at the sectionIndex.
         System.arraycopy(mSizes, sectionIndex + 1, mSizes, sectionIndex, --mCount - sectionIndex);
-
-        DebugUtils.__checkError(size() < 0, "Error: The SectionList's size(" + size() + ") < 0");
-        DebugUtils.__checkError(mCount < 0, "Error: The SectionList's sectionCount(" + mCount + ") < 0");
-
         updateIndexes(sectionIndex);
         return startIndex;
     }

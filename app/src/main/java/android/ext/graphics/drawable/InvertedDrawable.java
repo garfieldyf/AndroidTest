@@ -125,6 +125,11 @@ public class InvertedDrawable extends ImageDrawable<InvertedDrawable.InvertedBit
     }
 
     @Override
+    public ConstantState getConstantState() {
+        return null;
+    }
+
+    @Override
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
         canvas.drawBitmap(mState.mBitmap, null, bounds, paint);
     }
@@ -158,7 +163,7 @@ public class InvertedDrawable extends ImageDrawable<InvertedDrawable.InvertedBit
 
         @Override
         public Drawable newDrawable() {
-            throw new UnsupportedOperationException("newDrawable() is not supported in InvertedBitmapState");
+            throw new UnsupportedOperationException();
         }
 
         /* package */ final void setContent(Object source, int width, int height) {

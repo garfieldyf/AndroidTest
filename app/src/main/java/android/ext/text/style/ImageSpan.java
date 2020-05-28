@@ -1,6 +1,7 @@
 package android.ext.text.style;
 
 import android.content.res.Resources;
+import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Paint.FontMetricsInt;
@@ -22,6 +23,7 @@ public class ImageSpan extends ReplacementSpan {
      * @see #ImageSpan(Resources, int)
      */
     public ImageSpan(Drawable drawable) {
+        DebugUtils.__checkError(drawable == null, "drawable == null");
         mDrawable = drawable;
     }
 
@@ -34,6 +36,7 @@ public class ImageSpan extends ReplacementSpan {
     @SuppressWarnings("deprecation")
     public ImageSpan(Resources res, int id) {
         mDrawable = res.getDrawable(id);
+        DebugUtils.__checkError(mDrawable == null, "mDrawable == null");
     }
 
     public final void setPadding(Resources res, int id) {

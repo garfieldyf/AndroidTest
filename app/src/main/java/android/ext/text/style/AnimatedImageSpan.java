@@ -1,6 +1,7 @@
 package android.ext.text.style;
 
 import android.ext.graphics.drawable.GIFDrawable;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
@@ -46,6 +47,7 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
      */
     public <T extends Drawable & Animatable> AnimatedImageSpan(View view, T drawable) {
         super(drawable);
+        DebugUtils.__checkError(view == null, "view == null");
         mView = new WeakReference<View>(view);
         drawable.setCallback(this);
         drawable.start();

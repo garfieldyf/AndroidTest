@@ -419,15 +419,15 @@ public final class ArrayUtils {
     /**
      * Copies the elements from <em>srcArray</em> into a new array.
      * @param srcArray The original array.
-     * @param length The length of the <em>srcArray</em>.
+     * @param copyLength The number of elements to copy from the <em>srcArray</em>.
      * @param newLength The length of the new array.
      * @return The new array.
      */
-    public static <T> T copyOf(Object srcArray, int length, int newLength) {
+    public static <T> T copyOf(Object srcArray, int copyLength, int newLength) {
         DebugUtils.__checkError(srcArray == null, "srcArray == null");
-        DebugUtils.__checkError(newLength < length, "newLength = " + newLength + " < length = " + length);
+        DebugUtils.__checkError(newLength < copyLength, "newLength = " + newLength + " < copyLength = " + copyLength);
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
-        System.arraycopy(srcArray, 0, newArray, 0, length);
+        System.arraycopy(srcArray, 0, newArray, 0, copyLength);
         return (T)newArray;
     }
 

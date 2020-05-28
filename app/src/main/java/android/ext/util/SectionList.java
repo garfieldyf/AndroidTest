@@ -99,8 +99,13 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     @Override
     public boolean addAll(Collection<? extends E> collection) {
         DebugUtils.__checkError(collection == null, "collection == null");
-        updateSize(collection.size());
-        return super.addAll(collection);
+        final int size = collection.size();
+        if (size > 0) {
+            updateSize(size);
+            return super.addAll(collection);
+        }
+
+        return false;
     }
 
     @Override
@@ -109,10 +114,15 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         DebugUtils.__checkError(index < 0 || index > size(), "Invalid index = " + index + ", size = " + size());
         if (index == size()) {
             return addAll(collection);
-        } else {
-            updateSize(index, collection.size());
+        }
+
+        final int size = collection.size();
+        if (size > 0) {
+            updateSize(index, size);
             return super.addAll(index, collection);
         }
+
+        return false;
     }
 
     @Override
@@ -164,7 +174,19 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     /**
+     * Returns the number of elements in the specified section.
+     * @param sectionIndex The index of the section.
+     * @return The number of elements.
+     */
+    public int getSectionSize(int sectionIndex) {
+        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
+        return mSizes[sectionIndex];
+    }
+
+    /**
      * Returns the section at the specified <em>sectionIndex</em> in this <tt>SectionList</tt>.
+     * The returns section as a view of this <tt>SectionList</tt>. Any change that occurs in
+     * the returned section will be reflected to this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section.
      * @return The section at the specified <em>sectionIndex</em>.
      * @see #getSectionCount()
@@ -219,9 +241,8 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
         final int index = mIndexes[sectionIndex];
         ensureCapacity();
-        System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, mCount - sectionIndex);
+        System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, ++mCount - sectionIndex);
 
-        ++mCount;
         mSizes[sectionIndex] = size;
         updateIndexes(sectionIndex);
         return super.addAll(index, (Collection<? extends E>)section);
@@ -246,16 +267,6 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     /**
-     * Returns the number of elements in the specified section.
-     * @param sectionIndex The index of the section.
-     * @return The number of elements.
-     */
-    public int getSectionSize(int sectionIndex) {
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
-        return mSizes[sectionIndex];
-    }
-
-    /**
      * Given a position within this <tt>SectionList</tt>, returns the index of the
      * section within the array of sections.
      * @param position The position of the element within this <tt>SectionList</tt>.
@@ -263,16 +274,16 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @see #getPositionForSection(int)
      */
     public int getSectionForPosition(int position) {
-        DebugUtils.__checkError(position < 0 || position >= size(), "Invalid index = " + position + ", size = " + size());
+        DebugUtils.__checkError(position < 0 || position >= size(), "Invalid position = " + position + ", size = " + size());
         final int sectionIndex = Arrays.binarySearch(mIndexes, 0, mCount, position);
         return (sectionIndex >= 0 ? sectionIndex : -sectionIndex - 2);
     }
 
     /**
      * Given the index of a section within the array of sections, returns the starting
-     * index of that section within this <tt>SectionList</tt>.
+     * position of that section within this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section.
-     * @return The starting index of that section within this <tt>SectionList</tt>.
+     * @return The starting position of that section within this <tt>SectionList</tt>.
      * @see #getSectionForPosition(int)
      */
     public int getPositionForSection(int sectionIndex) {
@@ -307,24 +318,20 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     private void updateSize(int size) {
-        if (size > 0) {
-            if (mCount == 0) {
-                // Adds a new section, if no section.
-                mCount = 1;
-                mSizes[0] = size;
-            } else {
-                // Updates the last section's size.
-                mSizes[mCount - 1] += size;
-            }
+        if (mCount == 0) {
+            // Adds a new section, if no section.
+            mCount = 1;
+            mSizes[0] = size;
+        } else {
+            // Updates the last section's size.
+            mSizes[mCount - 1] += size;
         }
     }
 
     private void updateSize(int index, int size) {
-        if (size > 0) {
-            final int sectionIndex = getSectionForPosition(index);
-            mSizes[sectionIndex] += size;
-            updateIndexes(sectionIndex);
-        }
+        final int sectionIndex = getSectionForPosition(index);
+        mSizes[sectionIndex] += size;
+        updateIndexes(sectionIndex);
     }
 
     private void updateIndexes(int sectionIndex) {

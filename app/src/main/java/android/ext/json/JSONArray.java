@@ -1,6 +1,7 @@
 package android.ext.json;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Class JSONArray
@@ -9,18 +10,30 @@ import java.util.ArrayList;
 public class JSONArray extends ArrayList<Object> {
     /**
      * Constructor
-     * @see #JSONArray(JSONArray)
+     * @see #JSONArray(int)
+     * @see #JSONArray(Collection)
      */
     public JSONArray() {
     }
 
     /**
-     * Copy constructor
-     * @param array The <tt>JSONArray</tt> to copy.
+     * Constructor
+     * @param capacity The initial capacity of this array.
      * @see #JSONArray()
+     * @see #JSONArray(Collection)
      */
-    public JSONArray(JSONArray array) {
-        super(array);
+    public JSONArray(int capacity) {
+        super(capacity);
+    }
+
+    /**
+     * Constructor
+     * @param values The values to add.
+     * @see #JSONArray()
+     * @see #JSONArray(int)
+     */
+    public JSONArray(Collection<?> values) {
+        super(values);
     }
 
     /**

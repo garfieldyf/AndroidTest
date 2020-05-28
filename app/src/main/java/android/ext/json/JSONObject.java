@@ -2,6 +2,7 @@ package android.ext.json;
 
 import android.ext.util.DebugUtils;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Class JSONObject
@@ -10,18 +11,30 @@ import java.util.HashMap;
 public class JSONObject extends HashMap<String, Object> {
     /**
      * Constructor
-     * @see #JSONObject(JSONObject)
+     * @see #JSONObject(int)
+     * @see #JSONObject(Map)
      */
     public JSONObject() {
     }
 
     /**
-     * Copy constructor
-     * @param object The <tt>JSONObject</tt> to copy.
+     * Constructor
+     * @param capacity The initial capacity of this object.
      * @see #JSONObject()
+     * @see #JSONObject(Map)
      */
-    public JSONObject(JSONObject object) {
-        super(object);
+    public JSONObject(int capacity) {
+        super(capacity);
+    }
+
+    /**
+     * Constructor
+     * @param values The values to add.
+     * @see #JSONObject()
+     * @see #JSONObject(int)
+     */
+    public JSONObject(Map<? extends String, ?> values) {
+        super(values);
     }
 
     /**

@@ -18,7 +18,6 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,12 +32,12 @@ public final class JSONUtils {
     /**
      * The <tt>0-length</tt>, immutable {@link JSONArray}.
      */
-    public static final JSONArray EMPTY_ARRAY = new JSONArray(Collections.emptyList());
+    public static final JSONArray EMPTY_ARRAY = new EmptyJSONArray();
 
     /**
      * The <tt>0-length</tt>, immutable {@link JSONObject}.
      */
-    public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.emptyMap());
+    public static final JSONObject EMPTY_OBJECT = new EmptyJSONObject();
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
@@ -339,32 +338,9 @@ public final class JSONUtils {
         }
     }
 
-    /* package */ static void __checkDouble(Object value) {
-        checkDouble(value, "");
-    }
-
-    /* package */ static void __checkDouble(Collection<?> values) {
-        final Iterator<?> iter = values.iterator();
-        for (int i = 0; iter.hasNext(); ++i) {
-            checkDouble(iter.next(), ", index = " + i);
-        }
-    }
-
-    /* package */ static void __checkDouble(Map<? extends String, ?> values) {
-        for (Entry<? extends String, ?> entry : values.entrySet()) {
-            final String name  = entry.getKey();
-            final Object value = entry.getValue();
-            DebugUtils.__checkError(name == null, "name == null, value = " + value);
-            checkDouble(value, ", name = " + name);
-        }
-    }
-
-    private static void checkDouble(Object value, String suffix) {
-        if (value instanceof Number) {
-            final double d = ((Number)value).doubleValue();
-            if (Double.isInfinite(d) || Double.isNaN(d)) {
-                throw new AssertionError("Forbidden numeric value: " + value + suffix);
-            }
+    /* package */ static void __checkDouble(double d) {
+        if (Double.isInfinite(d) || Double.isNaN(d)) {
+            throw new AssertionError("Forbidden numeric value: " + d);
         }
     }
 
@@ -507,6 +483,18 @@ public final class JSONUtils {
         }
 
         return writer.endObject();
+    }
+
+    /**
+     * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
+     */
+    /* package */ static final class EmptyJSONArray extends JSONArray {
+    }
+
+    /**
+     * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
+     */
+    /* package */ static final class EmptyJSONObject extends JSONObject {
     }
 
     /**

@@ -202,7 +202,19 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         JSONArray array = makeArray(4, "item");
 //        JsonUtils.addAll(array, makeArray(3, "add"));
 //        JsonUtils.addAll(array, 3, makeArray(3, "insert"));
-        Log.i("yf", array.toString());
+        Log.i("abcd", array.toString());
+
+        JSONObject object = new JSONObject()
+            .put("name", "tom")
+            .put("age", 24)
+            .put("sex", true);
+        Log.d("abcd", object.toString());
+        final Object clone = object.clone();
+        Log.d("abcd", clone.getClass().getName());
+        Log.d("abcd", array.clone().getClass().getName());
+        Log.d("abcd", JSONUtils.EMPTY_OBJECT.clone().getClass().getName());
+//        JSONUtils.EMPTY_ARRAY.add(1);
+//        JSONUtils.EMPTY_OBJECT.put("aaa", 2);
     }
 
     private void testFileCopy() {

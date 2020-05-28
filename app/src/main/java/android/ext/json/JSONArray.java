@@ -1,25 +1,17 @@
 package android.ext.json;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.RandomAccess;
 
 /**
  * Class JSONArray
  * @author Garfield
  */
-public class JSONArray implements List<Object>, RandomAccess {
-    private final List<Object> values;
-
+public class JSONArray extends ArrayList<Object> {
     /**
      * Constructor
      * @see #JSONArray(JSONArray)
      */
     public JSONArray() {
-        this.values = new ArrayList<Object>();
     }
 
     /**
@@ -28,42 +20,7 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @see #JSONArray()
      */
     public JSONArray(JSONArray array) {
-        this.values = new ArrayList<Object>(array.values);
-    }
-
-    /**
-     * Constructor
-     */
-    /* package */ JSONArray(List<Object> values) {
-        this.values = values;
-    }
-
-    @Override
-    public void clear() {
-        values.clear();
-    }
-
-    @Override
-    public int size() {
-        return values.size();
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return values.isEmpty();
-    }
-
-    /**
-     * Adds <em>value</em> to the end of this array.
-     * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
-     * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
-     * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
-     * @return Always return <tt>true</tt>.
-     */
-    @Override
-    public boolean add(Object value) {
-        JSONUtils.__checkDouble(value);
-        return values.add(value);
+        super(array);
     }
 
     /**
@@ -72,7 +29,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int value) {
-        values.add(value);
+        __checkMutable();
+        super.add(value);
         return this;
     }
 
@@ -82,7 +40,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(long value) {
-        values.add(value);
+        __checkMutable();
+        super.add(value);
         return this;
     }
 
@@ -92,7 +51,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(boolean value) {
-        values.add(value);
+        __checkMutable();
+        super.add(value);
         return this;
     }
 
@@ -103,8 +63,9 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(float value) {
+        __checkMutable();
         JSONUtils.__checkDouble(value);
-        values.add(value);
+        super.add(value);
         return this;
     }
 
@@ -115,22 +76,10 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(double value) {
+        __checkMutable();
         JSONUtils.__checkDouble(value);
-        values.add(value);
+        super.add(value);
         return this;
-    }
-
-    /**
-     * Inserts <em>value</em> into this array at the specified <em>index</em>.
-     * @param index The index at which to insert.
-     * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
-     * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
-     * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
-     */
-    @Override
-    public void add(int index, Object value) {
-        JSONUtils.__checkDouble(value);
-        values.add(index, value);
     }
 
     /**
@@ -140,7 +89,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int index, int value) {
-        values.add(index, value);
+        __checkMutable();
+        super.add(index, value);
         return this;
     }
 
@@ -151,7 +101,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int index, long value) {
-        values.add(index, value);
+        __checkMutable();
+        super.add(index, value);
         return this;
     }
 
@@ -162,7 +113,8 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int index, boolean value) {
-        values.add(index, value);
+        __checkMutable();
+        super.add(index, value);
         return this;
     }
 
@@ -174,8 +126,9 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int index, float value) {
+        __checkMutable();
         JSONUtils.__checkDouble(value);
-        values.add(index, value);
+        super.add(index, value);
         return this;
     }
 
@@ -187,8 +140,9 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return This array.
      */
     public JSONArray add(int index, double value) {
+        __checkMutable();
         JSONUtils.__checkDouble(value);
-        values.add(index, value);
+        super.add(index, value);
         return this;
     }
 
@@ -199,7 +153,7 @@ public class JSONArray implements List<Object>, RandomAccess {
      * @return The value at <em>index</em> or <tt>null</tt>.
      */
     public Object opt(int index) {
-        return (index >= 0 && index < values.size() ? values.get(index) : null);
+        return (index >= 0 && index < size() ? get(index) : null);
     }
 
     /**
@@ -338,22 +292,6 @@ public class JSONArray implements List<Object>, RandomAccess {
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
-    @Override
-    public Object get(int index) {
-        return values.get(index);
-    }
-
-    @Override
-    public Object set(int index, Object value) {
-        JSONUtils.__checkDouble(value);
-        return values.set(index, value);
-    }
-
-    @Override
-    public boolean remove(Object value) {
-        return values.remove(value);
-    }
-
     /**
      * Removes and returns the value at <em>index</em>, or <tt>null</tt>
      * if this array has no value at <em>index</em>.
@@ -362,131 +300,33 @@ public class JSONArray implements List<Object>, RandomAccess {
      */
     @Override
     public Object remove(int index) {
-        return (index >= 0 && index < values.size() ? values.remove(index) : null);
+        return (index >= 0 && index < size() ? super.remove(index) : null);
     }
 
+    /**
+     * Removes from this array all of the values whose index is between
+     * <em>fromIndex</em> , inclusive, and <em>toIndex</em>, exclusive.
+     * If <em>fromIndex==toIndex</em>, this operation has no effect.
+     */
     @Override
-    public boolean addAll(Collection<?> collection) {
-        JSONUtils.__checkDouble(collection);
-        return values.addAll(collection);
-    }
-
-    @Override
-    public boolean addAll(int index, Collection<?> collection) {
-        JSONUtils.__checkDouble(collection);
-        return values.addAll(index, collection);
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> collection) {
-        return values.removeAll(collection);
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> collection) {
-        return values.retainAll(collection);
-    }
-
-//    /**
-//     * Removes from this array all of the values whose index is between
-//     * <em>fromIndex</em> , inclusive, and <em>toIndex</em>, exclusive.
-//     * If <em>fromIndex==toIndex</em>, this operation has no effect.
-//     */
-//    public void removeRange(int fromIndex, int toIndex) {
-//        if (values instanceof JSONArrayList) {
-//            ((JSONArrayList)values).removeRange(fromIndex, toIndex);
-//        } else {
-//            throw new UnsupportedOperationException();
-//        }
-//    }
-
-    @Override
-    public int indexOf(Object value) {
-        return values.indexOf(value);
-    }
-
-    @Override
-    public int lastIndexOf(Object value) {
-        return values.lastIndexOf(value);
-    }
-
-    @Override
-    public boolean contains(Object value) {
-        return values.contains(value);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> collection) {
-        return values.containsAll(collection);
-    }
-
-    @Override
-    public Iterator<Object> iterator() {
-        return values.iterator();
-    }
-
-    @Override
-    public ListIterator<Object> listIterator() {
-        return values.listIterator();
-    }
-
-    @Override
-    public ListIterator<Object> listIterator(int index) {
-        return values.listIterator(index);
-    }
-
-    @Override
-    public Object[] toArray() {
-        return values.toArray();
-    }
-
-    @Override
-    public <T> T[] toArray(T[] array) {
-        return values.toArray(array);
-    }
-
-    @Override
-    public List<Object> subList(int start, int end) {
-        return values.subList(start, end);
-    }
-
-    @Override
-    public int hashCode() {
-        return values.hashCode();
+    public void removeRange(int fromIndex, int toIndex) {
+        // The removeRange is protected in the super class.
+        super.removeRange(fromIndex, toIndex);
     }
 
     @Override
     public String toString() {
-        return JSONUtils.toJSONString(values);
+        return JSONUtils.toJSONString(this);
     }
 
     @Override
     public boolean equals(Object object) {
-        return (object instanceof JSONArray && values.equals(((JSONArray)object).values));
+        return (object instanceof JSONArray && super.equals(object));
     }
 
-//    /**
-//     * Class <tt>JSONArrayList</tt> is an implementation of a {@link ArrayList}.
-//     */
-//    private static final class JSONArrayList extends ArrayList<Object> {
-//        /**
-//         * Constructor
-//         */
-//        public JSONArrayList() {
-//        }
-//
-//        /**
-//         * Constructor
-//         * @param collection The collection of elements to add.
-//         */
-//        public JSONArrayList(Collection<?> collection) {
-//            super(collection);
-//        }
-//
-//        @Override
-//        public void removeRange(int fromIndex, int toIndex) {
-//            // The removeRange is protected in the super class.
-//            super.removeRange(fromIndex, toIndex);
-//        }
-//    }
+    private void __checkMutable() {
+        if (this instanceof JSONUtils.EmptyJSONArray) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+    }
 }

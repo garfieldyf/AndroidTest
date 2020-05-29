@@ -323,7 +323,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     public final void dump(Printer printer) {
-        final StringBuilder result = new StringBuilder(100);
+        final StringBuilder result = new StringBuilder(128);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ size = %d, sectionCount = %d ] ", getClass().getSimpleName(), size(), mCount);
         for (int i = 0; i < mCount; ++i) {
             result.setLength(0);
@@ -334,8 +334,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             final int end = start + size;
             for (int j = start; j < end; ++j) {
                 result.setLength(0);
-                result.append("    index = ").append(j).append(", value = ").append(get(j));
-                printer.println(result.toString());
+                printer.println(result.append("    index = ").append(j).append(", value = ").append(get(j)).toString());
             }
         }
     }

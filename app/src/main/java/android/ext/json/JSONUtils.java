@@ -489,12 +489,65 @@ public final class JSONUtils {
      * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
      */
     /* package */ static final class EmptyJSONArray extends JSONArray {
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean add(Object object) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public void add(int index, Object object) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean addAll(Collection<?> collection) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean addAll(int index, Collection<?> collection) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean remove(Object object) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public Object set(int index, Object object) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
+
+        @Override
+        public void ensureCapacity(int minimumCapacity) {
+            throw new UnsupportedOperationException("The JSONArray is immutable");
+        }
     }
 
     /**
      * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
      */
     /* package */ static final class EmptyJSONObject extends JSONObject {
+        @Override
+        public void clear() {
+            throw new UnsupportedOperationException("The JSONObject is immutable");
+        }
+
+        @Override
+        public Object remove(Object key) {
+            throw new UnsupportedOperationException("The JSONObject is immutable");
+        }
+
+        @Override
+        public void putAll(Map<? extends String, ?> map) {
+            throw new UnsupportedOperationException("The JSONObject is immutable");
+        }
     }
 
     /**

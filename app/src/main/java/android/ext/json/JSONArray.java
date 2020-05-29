@@ -313,6 +313,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     @Override
     public Object remove(int index) {
+        __checkMutable();
         return (index >= 0 && index < size() ? super.remove(index) : null);
     }
 
@@ -324,6 +325,7 @@ public class JSONArray extends ArrayList<Object> {
     @Override
     public void removeRange(int fromIndex, int toIndex) {
         // The removeRange is protected in the super class.
+        __checkMutable();
         super.removeRange(fromIndex, toIndex);
     }
 

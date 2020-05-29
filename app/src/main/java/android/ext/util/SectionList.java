@@ -68,8 +68,8 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         if (index == size()) {
             add(value);
         } else {
-            super.add(index, value);
             updateSize(index, 1);
+            super.add(index, value);
         }
     }
 
@@ -220,10 +220,13 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
                 set(index++, (E)value);
             }
         } else {
-            removeRange(index, index + oldSize);
-            super.addAll(index, (Collection<? extends E>)section);
+            // Updates the section size at the sectionIndex.
             mSizes[sectionIndex] = newSize;
             updateIndexes(sectionIndex);
+
+            // Updates the elements at the index.
+            removeRange(index, index + oldSize);
+            super.addAll(index, (Collection<? extends E>)section);
         }
 
         return true;
@@ -357,7 +360,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             mCount = 1;
             mSizes[0] = size;
         } else {
-            // Updates the last section's size.
+            // Updates the last section size.
             mSizes[mCount - 1] += size;
         }
     }

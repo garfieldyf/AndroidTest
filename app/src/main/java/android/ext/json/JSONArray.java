@@ -319,7 +319,7 @@ public class JSONArray extends ArrayList<Object> {
 
     /**
      * Removes from this array all of the values whose index is between
-     * <em>fromIndex</em> , inclusive, and <em>toIndex</em>, exclusive.
+     * <em>fromIndex</em>, inclusive, and <em>toIndex</em>, exclusive.
      * If <em>fromIndex==toIndex</em>, this operation has no effect.
      */
     @Override

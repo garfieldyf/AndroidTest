@@ -546,7 +546,7 @@ public final class JSONUtils {
 
         @Override
         public void putAll(Map<? extends String, ?> map) {
-            throw new AssertionError("The JSONObject is immutable");
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
         }
     }
 

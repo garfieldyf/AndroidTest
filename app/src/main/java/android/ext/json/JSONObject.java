@@ -270,7 +270,7 @@ public class JSONObject extends HashMap<String, Object> {
 
     private void __checkMutable() {
         if (this instanceof JSONUtils.EmptyJSONObject) {
-            throw new UnsupportedOperationException("The JSONObject is immutable");
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
         }
     }
 }

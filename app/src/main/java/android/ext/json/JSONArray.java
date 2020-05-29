@@ -341,7 +341,7 @@ public class JSONArray extends ArrayList<Object> {
 
     private void __checkMutable() {
         if (this instanceof JSONUtils.EmptyJSONArray) {
-            throw new UnsupportedOperationException("The JSONArray is immutable");
+            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
         }
     }
 }

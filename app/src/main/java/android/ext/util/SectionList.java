@@ -13,7 +13,7 @@ import java.util.List;
  */
 @SuppressWarnings("unchecked")
 public class SectionList<E> extends ArrayList<E> implements Cloneable {
-    private static final int ARRAY_CAPACITY_INCREMENT = 12;
+    private static final int ARRAY_CAPACITY_INCREMENT = 16;
     private int mCount;
     private int[] mSizes;
     private int[] mIndexes;
@@ -242,7 +242,12 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             return false;
         }
 
-        ensureCapacity();
+        if (mCount == mSizes.length) {
+            final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
+            mSizes   = ArrayUtils.copyOf(mSizes, mCount, newLength);
+            mIndexes = ArrayUtils.copyOf(mIndexes, mCount, newLength);
+        }
+
         mSizes[mCount] = size;
         mIndexes[mCount++] = size();
         return super.addAll((Collection<? extends E>)section);
@@ -271,8 +276,15 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
         // Inserts a new section at the sectionIndex.
         final int index = mIndexes[sectionIndex];
-        ensureCapacity();
-        System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, ++mCount - sectionIndex);
+        if (mCount == mSizes.length) {
+            final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
+            mSizes   = newSizesArray(sectionIndex, newLength);
+            mIndexes = ArrayUtils.copyOf(mIndexes, mCount, newLength);
+        } else {
+            System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, mCount - sectionIndex);
+        }
+
+        ++mCount;
         mSizes[sectionIndex] = size;
         updateIndexes(sectionIndex);
 
@@ -339,14 +351,6 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         }
     }
 
-    private void ensureCapacity() {
-        if (mCount == mSizes.length) {
-            final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
-            mSizes   = ArrayUtils.copyOf(mSizes, mCount, newLength);
-            mIndexes = ArrayUtils.copyOf(mIndexes, mCount, newLength);
-        }
-    }
-
     private void updateSize(int size) {
         if (mCount == 0) {
             // Adds a new section, if no section.
@@ -369,5 +373,12 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             mIndexes[sectionIndex] = index;
             index += mSizes[sectionIndex];
         }
+    }
+
+    private int[] newSizesArray(int sectionIndex, int newLength) {
+        final int[] newSizes = new int[newLength];
+        System.arraycopy(mSizes, 0, newSizes, 0, sectionIndex);
+        System.arraycopy(mSizes, sectionIndex, newSizes, sectionIndex + 1, mCount - sectionIndex);
+        return newSizes;
     }
 }

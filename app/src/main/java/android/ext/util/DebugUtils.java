@@ -170,8 +170,8 @@ public final class DebugUtils {
      * Called on the DEBUG mode, do not call this method directly.
      * @hide
      */
-    public static void __checkDebug(boolean reportDebug, String tag, String message) {
-        if (reportDebug) {
+    public static void __checkDebug(boolean report, String tag, String message) {
+        if (report) {
             Log.d(tag, message);
         }
     }
@@ -180,9 +180,19 @@ public final class DebugUtils {
      * Called on the DEBUG mode, do not call this method directly.
      * @hide
      */
-    public static void __checkWarning(boolean reportWarning, String tag, String message) {
-        if (reportWarning) {
+    public static void __checkWarning(boolean report, String tag, String message) {
+        if (report) {
             Log.w(tag, "WARNING: " + message);
+        }
+    }
+
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
+    public static void __checkPrint(boolean report, int priority, String tag, String message) {
+        if (report) {
+            Log.println(priority, tag, message);
         }
     }
 

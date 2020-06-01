@@ -77,13 +77,10 @@ public final class FileUtils {
     public static File getFilesDir(Context context, String name) {
         File filesDir = context.getExternalFilesDir(name);
         if (filesDir == null) {
-            filesDir = context.getFilesDir();
-            if (StringUtils.getLength(name) > 0) {
-                filesDir = new File(filesDir, name);
-                mkdirs(filesDir.getPath(), 0);
-            }
+            filesDir = mkdirs(context.getFilesDir(), name);
         }
 
+        DebugUtils.__checkDebug(true, "FileUtils", "filesDir = " + filesDir);
         return filesDir;
     }
 
@@ -103,18 +100,15 @@ public final class FileUtils {
      */
     public static File getCacheDir(Context context, String name) {
         File cacheDir = context.getExternalCacheDir();
+        if (cacheDir != null) {
+            cacheDir = mkdirs(cacheDir, name);
+        }
+
         if (cacheDir == null) {
-            cacheDir = context.getCacheDir();
+            cacheDir = mkdirs(context.getCacheDir(), name);
         }
 
-        if (StringUtils.getLength(name) > 0) {
-            cacheDir = new File(cacheDir, name);
-            final int errno = mkdirs(cacheDir.getPath(), 0);
-            if (errno != 0) {
-                Log.e(FileUtils.class.getName(), "mkdirs '" + cacheDir + "' failed: errno = " + errno);
-            }
-        }
-
+        DebugUtils.__checkDebug(true, "FileUtils", "cacheDir = " + cacheDir);
         return cacheDir;
     }
 
@@ -595,6 +589,17 @@ public final class FileUtils {
             }
             DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
         }
+    }
+
+    private static File mkdirs(File dir, String name) {
+        if (StringUtils.getLength(name) > 0) {
+            final File file = new File(dir, name);
+            final int errno = mkdirs(file.getPath(), 0);
+            DebugUtils.__checkPrint(errno != 0, Log.ERROR, "FileUtils", "mkdirs '" + dir + "' failed: errno = " + errno);
+            dir = (errno == 0 ? file : null);
+        }
+
+        return dir;
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

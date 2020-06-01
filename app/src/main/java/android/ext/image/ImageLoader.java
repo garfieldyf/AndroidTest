@@ -84,7 +84,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * <li>content ({@link #SCHEME_CONTENT})</li>
      * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
-     * @param uri The uri to load.
+     * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
      */
     public LoadRequest load(URI uri) {

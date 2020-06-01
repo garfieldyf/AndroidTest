@@ -23,18 +23,18 @@ import android.ext.util.PackageUtils.PackageItemIcon;
  *       .into(imageView);</pre>
  * @author Garfield
  */
-public final class PackageIconLoader<URI> extends IconLoader<URI> {
+public final class PackageIconLoader<URI> extends IconLoader<URI, PackageItemIcon> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
-    public PackageIconLoader(ImageModule module, Cache iconCache) {
+    public PackageIconLoader(ImageModule<URI, PackageItemIcon> module, Cache<URI, PackageItemIcon> iconCache) {
         super(module, iconCache);
     }
 
     @Override
-    protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected PackageItemIcon loadInBackground(Task task, URI uri, Object[] params, int flags) {
         return new PackageItemIcon(mModule.mContext, ImageModule.getParameters(params));
     }
 }

@@ -5,6 +5,9 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
+import android.ext.cache.LruCache;
+import android.ext.util.DebugUtils;
+import android.util.Log;
 
 /**
  * Class <tt>IconLoader</tt> allows to load the icon associated with the
@@ -23,27 +26,39 @@ import android.ext.cache.Cache;
  *       .into(imageView);</pre>
  * @author Garfield
  */
-public class IconLoader<URI> extends ImageLoader<URI, Object> {
+public class IconLoader<URI, Image> extends ImageLoader<URI, Image> {
     protected final PackageManager mPackageManager;
 
     /**
      * Constructor
      * @param module The {@link ImageModule}.
-     * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
+     * @see #IconLoader(ImageModule, Cache)
      */
-    public IconLoader(ImageModule module, Cache iconCache) {
+    public IconLoader(ImageModule<URI, Image> module) {
+        this(module, new LruCache<URI, Image>(64));
+    }
+
+    /**
+     * Constructor
+     * @param module The {@link ImageModule}.
+     * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
+     * @see #IconLoader(ImageModule)
+     */
+    public IconLoader(ImageModule<URI, Image> module, Cache<URI, Image> iconCache) {
         super(module, iconCache);
         mPackageManager = module.mContext.getPackageManager();
     }
 
     @Override
-    protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    @SuppressWarnings("unchecked")
+    protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final Object param = params[PARAMETERS];
         if (param instanceof ResolveInfo) {
-            return ((ResolveInfo)param).loadIcon(mPackageManager);
+            return (Image)((ResolveInfo)param).loadIcon(mPackageManager);
         } else if (param instanceof PackageItemInfo) {
-            return ((PackageItemInfo)param).loadIcon(mPackageManager);
+            return (Image)((PackageItemInfo)param).loadIcon(mPackageManager);
         } else {
+            DebugUtils.__checkPrint(param != null, Log.ERROR, "IconLoader", "Unsupported param - " + param.getClass().getName());
             return null;
         }
     }

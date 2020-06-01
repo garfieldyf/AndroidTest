@@ -56,7 +56,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
 
     /**
      * Equivalent to calling <tt>load(key, target, 0, binder, (Params[])null)</tt>.
-     * @param key The key to find value.
+     * @param key May be <tt>null</tt>. The key to find value.
      * @param target The <tt>Object</tt> to bind.
      * @param binder The {@link Binder} used to bind value to <em>target</em>.
      * @see #load(Key, Object, int, Binder, Params[])
@@ -69,7 +69,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Loads the value, bind it to the <em>target</em>. If the value is already cached, it
      * is bind immediately. Otherwise loads the value on a background thread. <p><b>Note:
      * This method must be invoked on the UI thread.</b></p>
-     * @param key The key to find value.
+     * @param key May be <tt>null</tt>. The key to find value.
      * @param target The <tt>Object</tt> to bind.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @param binder The {@link Binder} used to bind value to <em>target</em>.

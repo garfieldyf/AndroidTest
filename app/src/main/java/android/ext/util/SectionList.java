@@ -281,7 +281,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         final int index = mIndexes[sectionIndex];
         if (mCount == mSizes.length) {
             final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
-            mSizes   = newSizesArray(sectionIndex, newLength);
+            mSizes   = newSizeArray(sectionIndex, newLength);
             mIndexes = ArrayUtils.copyOf(mIndexes, mCount, newLength);
         } else {
             System.arraycopy(mSizes, sectionIndex, mSizes, sectionIndex + 1, mCount - sectionIndex);
@@ -378,7 +378,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         }
     }
 
-    private int[] newSizesArray(int sectionIndex, int newLength) {
+    private int[] newSizeArray(int sectionIndex, int newLength) {
         final int[] newSizes = new int[newLength];
         System.arraycopy(mSizes, 0, newSizes, 0, sectionIndex);
         System.arraycopy(mSizes, sectionIndex, newSizes, sectionIndex + 1, mCount - sectionIndex);

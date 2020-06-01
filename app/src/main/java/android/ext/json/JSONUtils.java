@@ -330,7 +330,7 @@ public final class JSONUtils {
 
     /* package */ static String toJSONString(Object value) {
         try {
-            final StringWriter out = new StringWriter();
+            final StringWriter out = new StringWriter(128);
             writeObject(new JsonWriter(out), value);
             return out.toString();
         } catch (IOException e) {

@@ -20,10 +20,7 @@ import android.support.v4.content.FileProvider;
 import android.util.Printer;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -118,20 +115,10 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the packages.
      * @return A <tt>List</tt> of {@link PackageInfo} objects.
-     * @see InstalledApplicationsFilter
      */
-    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
+    public static List<PackageInfo> getInstalledPackages(PackageManager pm, int flags, Filter<PackageInfo> filter) {
         final List<PackageInfo> result = pm.getInstalledPackages(flags);
-        if (filter != null && result != null) {
-            final Iterator<PackageInfo> itor = result.iterator();
-            while (itor.hasNext()) {
-                if (!filter.accept(itor.next().applicationInfo)) {
-                    itor.remove();
-                }
-            }
-        }
-
-        return result;
+        return (filter != null ? ArrayUtils.filter(result, filter) : result);
     }
 
     /**
@@ -140,7 +127,6 @@ public final class PackageUtils {
      * @param flags Additional option flags. See {@link PackageManager#getInstalledApplications(int)}.
      * @param filter May be <tt>null</tt>. The {@link Filter} to filtering the applications.
      * @return A <tt>List</tt> of {@link ApplicationInfo} objects.
-     * @see InstalledApplicationsFilter
      */
     public static List<ApplicationInfo> getInstalledApplications(PackageManager pm, int flags, Filter<ApplicationInfo> filter) {
         final List<ApplicationInfo> result = pm.getInstalledApplications(flags);
@@ -400,36 +386,6 @@ public final class PackageUtils {
             if (checkParseStatus) {
                 throw new AssertionError("Cannot parse: the PackageParser has already been executed (a PackageParser can be executed only once)");
             }
-        }
-    }
-
-    /**
-     * Class <tt>InstalledApplicationsFilter</tt> filtering the installed applications (excluding the system application).
-     */
-    public static final class InstalledApplicationsFilter implements Filter<ApplicationInfo> {
-        private final Collection<String> mPackages;
-
-        /**
-         * Constructor
-         * @param excludingPackages An array of package names to filter.
-         * @see #InstalledApplicationsFilter(Collection)
-         */
-        public InstalledApplicationsFilter(String... excludingPackages) {
-            mPackages = (excludingPackages != null ? Arrays.asList(excludingPackages) : Collections.<String>emptyList());
-        }
-
-        /**
-         * Constructor
-         * @param excludingPackages The <tt>Collection</tt> of package names to filter.
-         * @see #InstalledApplicationsFilter(String[])
-         */
-        public InstalledApplicationsFilter(Collection<String> excludingPackages) {
-            mPackages = (excludingPackages != null ? excludingPackages : Collections.<String>emptyList());
-        }
-
-        @Override
-        public boolean accept(ApplicationInfo applicationInfo) {
-            return (!mPackages.contains(applicationInfo.packageName) && !isSystemApp(applicationInfo));
         }
     }
 

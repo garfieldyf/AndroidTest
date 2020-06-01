@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.util.Printer;
 import java.io.File;
 import java.util.ArrayList;
@@ -225,8 +226,8 @@ public final class PackageUtils {
         /**
          * Constructor
          * @param context The <tt>Context</tt>.
-         * @param info The {@link ApplicationInfo} must be a package archive file's
-         * application info and {@link ApplicationInfo#publicSourceDir publicSourceDir}
+         * @param info The package archive file's {@link ApplicationInfo} and the
+         * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
          * must be contains the archive file full path.
          * @see #PackageItemIcon()
          * @see #PackageItemIcon(Drawable, CharSequence)
@@ -234,7 +235,7 @@ public final class PackageUtils {
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
         public PackageItemIcon(Context context, ApplicationInfo info) {
-            DebugUtils.__checkError(info.publicSourceDir == null, "The info.publicSourceDir == null");
+            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
             try (final AssetManager assets = new AssetManager()) {
                 // Adds an additional archive file to the assets.
                 assets.addAssetPath(info.publicSourceDir);
@@ -246,7 +247,7 @@ public final class PackageUtils {
          * Initializes this object with the specified <em>info</em>.
          * @param context The <tt>Context</tt>.
          * @param res The package archive file's <tt>Resources</tt>.
-         * @param info The package archive file's {@link ApplicationInfo}.
+         * @param info The package archive file's <tt>ApplicationInfo</tt>.
          */
         @SuppressWarnings("deprecation")
         protected void initialize(Context context, Resources res, ApplicationInfo info) {
@@ -263,7 +264,7 @@ public final class PackageUtils {
      *     .addParseFlags(PackageManager.GET_ACTIVITIES)
      *     .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
      *     .setCancelable(cancelable)
-     *     .parse(dirPath);</pre>
+     *     .parse(dirPath1, dirPath2, ...);</pre>
      */
     public static class PackageParser implements ScanCallback {
         private boolean __checkParseStatus;

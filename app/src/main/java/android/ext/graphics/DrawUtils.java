@@ -78,12 +78,11 @@ public final class DrawUtils {
         final RectF rect = RectFPool.sInstance.obtain();
         final Align oldAlign = paint.getTextAlign();
         paint.setTextAlign(computeText(paint, rect, left, top, right, bottom, gravity));
-
-        final float y = rect.top;
-        canvas.drawText(text, start, end, rect.left, y, paint);
-        paint.setTextAlign(oldAlign);
+        final float x = rect.left, y = rect.top;
         RectFPool.sInstance.recycle(rect);
 
+        canvas.drawText(text, start, end, x, y, paint);
+        paint.setTextAlign(oldAlign);
         return y;
     }
 

@@ -22,15 +22,6 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     }
 
     /**
-     * Called when an item in the data set of the adapter wants focus.
-     * @param position The position of the item in the data set of the adapter.
-     */
-    public final void requestItemFocus(int position) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
-        LayoutManagerHelper.requestItemFocus(mRecyclerView.getLayoutManager(), position);
-    }
-
-    /**
      * Like as {@link #notifyDataSetChanged()}. If the recycler view is computing
      * a layout then this method will be post the change using a <tt>Handler</tt>.
      */

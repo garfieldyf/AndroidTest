@@ -1,1 +1,0 @@
-ant compile-all -Dcompile_foucs=true -Dcompile_barcode=true

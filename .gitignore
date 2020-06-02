@@ -11,7 +11,7 @@
 /build
 /captures
 .externalNativeBuild
-/ant/out
+/ant
 /ant/build-funshion.bat
 /gif
 /tmp

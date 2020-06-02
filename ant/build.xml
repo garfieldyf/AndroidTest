@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="funshion" basedir="." default="compile-all">
+<project name="${module.name}" basedir="." default="compile-all">
     <!-- properties -->
     <property environment="env" />
-    <property name="author" value="yuanfeng" />
+    <property name="author" value="Garfield" />
     <property name="version" value="3.5.0" />
-    <property name="ndk.dir" value="com/funshion" />
-    <property name="java.package" value="com.funshion" />
-    <property name="out.file.name" value="${ant.project.name}.jar" />
-    <property name="source.file.name" value="${ant.project.name}-sources.jar" />
+    <property name="out.file.name" value="${module.name}.jar" />
+    <property name="source.file.name" value="${module.name}-sources.jar" />
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
@@ -35,7 +33,7 @@
     <!-- target -copy -->
     <target name="-copy">
         <!-- copy the java files -->
-        <copy todir="${src.dir}/${ndk.dir}" overwrite="true">
+        <copy todir="${src.dir}/${jni.package}" overwrite="true">
             <fileset dir="${source.dir}/java/android/ext" />
         </copy>
 
@@ -56,15 +54,18 @@
     <!-- target -remove-foucs-if -->
     <target name="-remove-foucs-if" unless="compile.foucs">
         <echo level="info">Remove foucs source files...</echo>
-        <delete dir="${src.dir}/${ndk.dir}/focus" />
+        <delete dir="${src.dir}/${jni.package}/focus" />
+        <delete file="${src.dir}/${jni.package}/widget/FocusManager.java" />
+        <delete file="${src.dir}/${jni.package}/widget/LayoutFocusManager.java" />
+        <delete file="${src.dir}/${jni.package}/widget/LayoutManagerHelper.java" />
     </target>
 
     <!-- target -remove-barcode-if -->
     <target name="-remove-barcode-if" unless="compile.barcode">
         <echo level="info">Remove barcode source files...</echo>
-        <delete dir="${src.dir}/${ndk.dir}/barcode" />
-        <delete file="${src.dir}/${ndk.dir}/widget/BarcodeDecorView.java" />
-        <delete file="${src.dir}/${ndk.dir}/widget/BarcodeCameraView.java" />
+        <delete dir="${src.dir}/${jni.package}/barcode" />
+        <delete file="${src.dir}/${jni.package}/widget/BarcodeDecorView.java" />
+        <delete file="${src.dir}/${jni.package}/widget/BarcodeCameraView.java" />
     </target>
 
     <!-- target -remove -->
@@ -91,7 +92,7 @@
 
         <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
         <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
-        <replace file="${src.dir}/${ndk.dir}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
+        <replace file="${src.dir}/${jni.package}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
     </target>
 
     <!-- target -compile-jar -->
@@ -125,7 +126,7 @@
         <!-- compile c++ files -->
         <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
             <!-- optional ndk_args NDK_STL=1 -->
-            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${ant.project.name} PACKAGE_GRAPHICS=${ndk.dir}/graphics/ PACKAGE_UTILITIES=${ndk.dir}/util/" />
+            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${module.name} PACKAGE_GRAPHICS=${jni.package}/graphics/ PACKAGE_UTILITIES=${jni.package}/util/" />
         </ant>
 
         <!-- copy so file -->
@@ -136,9 +137,9 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${ant.project.name}_widget.xml" />
+        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${module.name}_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
-        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.dir}/${ant.project.name}-proguard.txt" />
+        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.dir}/${module.name}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
@@ -150,8 +151,8 @@
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
         <echo level="info">Install: ${out.dir}/attrs_barcode_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/attrs_${ant.project.name}_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/${ant.project.name}-proguard.txt</echo>
+        <echo level="info">Install: ${out.dir}/attrs_${module.name}_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/${module.name}-proguard.txt</echo>
     </target>
 
     <!-- target -clean -->
@@ -177,22 +178,22 @@
     <!-- target release -->
     <target name="release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -post-compile" />
 
-    <!-- target compile-debug -->
-    <target name="compile-debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
+    <!-- target all-debug -->
+    <target name="all-debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
 
-    <!-- target compile-release -->
-    <target name="compile-release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
+    <!-- target all-release -->
+    <target name="all-release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
 
-    <!-- target all -->
-    <target name="all">
+    <!-- target compile-java -->
+    <target name="compile-java">
         <antcall target="debug" />
         <antcall target="release" />
     </target>
 
     <!-- target compile-all -->
     <target name="compile-all">
-        <antcall target="compile-debug" />
-        <antcall target="compile-release" />
+        <antcall target="all-debug" />
+        <antcall target="all-release" />
         <antcall target="compile-so" />
     </target>
 
@@ -218,10 +219,10 @@
     <!-- target -compile-dex -->
     <target name="-compile-dex">
         <property name="dx.dir" value="${sdk.dir}/build-tools/29.0.0" />
-        <property name="dex.file.name" value="${ant.project.name}-dex.jar" />
+        <property name="dex.file.name" value="${module.name}-dex.jar" />
 
         <!-- compile dex file -->
-        <echo level="info">dx --dex --min-sdk-version=24 --output=${ant.project.name}-dex.jar ${out.file.name}</echo>
+        <echo level="info">dx --dex --min-sdk-version=24 --output=${module.name}-dex.jar ${out.file.name}</echo>
         <exec executable="cmd.exe">
             <arg line="/C ${dx.dir}/dx.bat --dex --min-sdk-version=24 --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
         </exec>

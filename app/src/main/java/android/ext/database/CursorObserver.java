@@ -125,8 +125,8 @@ public final class CursorObserver extends ContentObserver {
     public static interface CursorObserverClient {
         /**
          * Called when the {@link CursorObserver} receives a change notification.
-         * @param intent The <tt>Intent</tt> being received from a local broadcast
-         * receiver, or <tt>null</tt>.
+         * @param intent May be <tt>null</tt>. The <tt>Intent</tt> being received
+         * from a local broadcast receiver.
          * @param uri The Uri of the changed content, or <tt>null</tt> if unknown.
          * @param selfChange <tt>true</tt> if this is a self-change notification.
          * @see ContentObserver#onChange(boolean, Uri)

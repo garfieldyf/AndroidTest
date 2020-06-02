@@ -56,7 +56,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
      * @return The total number of bytes.
      */
     public final long getCacheSize() {
-        return FileUtils.computeFiles(mCacheDir.getPath());
+        return FileUtils.computeFileSizes(mCacheDir.getPath());
     }
 
     @Override

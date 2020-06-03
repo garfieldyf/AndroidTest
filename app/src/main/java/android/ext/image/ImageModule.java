@@ -104,7 +104,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Equivalent to calling <tt>module.with(id).load(uri)</tt>.
+     * Equivalent to calling <tt>module.get(id).load(uri)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
@@ -114,11 +114,11 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      *       .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
-     * @see #with(int)
+     * @see #get(int)
      * @see ImageLoader#load(URI)
      */
     public final LoadRequest load(int id, URI uri) {
-        return with(id).load(uri);
+        return get(id).load(uri);
     }
 
     /**
@@ -130,8 +130,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @see #load(int, URI)
      * @see ImageLoader#load(URI)
      */
-    public final ImageLoader<URI, Image> with(int id) {
-        DebugUtils.__checkUIThread("with");
+    public final ImageLoader<URI, Image> get(int id) {
+        DebugUtils.__checkUIThread("get");
         ImageLoader loader = mLoaderCache.get(id, null);
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();

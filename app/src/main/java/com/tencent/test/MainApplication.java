@@ -56,7 +56,7 @@ public final class MainApplication extends Application {
     }
 
     public ImageLoader<String, Object> with(int id) {
-        return mImageModule.with(id);
+        return mImageModule.get(id);
     }
 
     public final LoadRequest load(int id, String uri) {

@@ -50,7 +50,11 @@ public final class MainApplication extends Application {
         mImageModule.dump(new LogPrinter(Log.DEBUG, "ImageModule"));
         super.onTrimMemory(level);
     }
-    
+
+    public final ImageModule<String, Object> getImageModule() {
+        return mImageModule;
+    }
+
     public final PackageInfo myPackageInfo() {
         return mPackageInfo;
     }

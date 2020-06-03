@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.database.Cursor;
@@ -600,6 +601,27 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         opts.inPreferredConfig = Config.ARGB_8888;
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_image, opts);
         BitmapUtils.grayBitmap(bitmap);
+    }
+
+    private void testLoadDex() {
+        final String apkFile = new File(getFilesDir(), "tvmaster.apk").getPath();
+        try {
+            final PackageManager pm = getPackageManager();
+            final Resources res = PackageUtils.getResourcesForArchiveFile(pm, apkFile);
+            int id;
+            Drawable drawable;
+            id = res.getIdentifier("barcolor", "drawable", "tv.fun.master");
+            drawable = res.getDrawable(id);
+            Log.i("abcd", "drawable = " + drawable);
+
+            id = res.getIdentifier("icon", "drawable", "tv.fun.master");
+            drawable = res.getDrawable(id);
+            Log.i("abcd", "drawable = " + drawable);
+
+            res.getAssets().close();
+        } catch (Exception e) {
+            Log.e("abcd", Log.getStackTraceString(e));
+        }
     }
 
     private void testDex() {

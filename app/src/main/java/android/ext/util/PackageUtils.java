@@ -8,7 +8,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
-import android.content.res.AssetManager;
 import android.content.res.Resources;
 import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
@@ -18,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Printer;
 import java.io.File;
 import java.util.ArrayList;
@@ -111,6 +111,26 @@ public final class PackageUtils {
     }
 
     /**
+     * Retrieve the application's {@link Resources} from a package archive file.
+     * <p>Note: The returned <tt>Resources</tt> internal asset manager should be
+     * close. For example: res.getAssets().close()</p>
+     * @param pm The <tt>PackageManager</tt>.
+     * @param archiveFile The full path to the archive file.
+     * @return The <tt>Resources</tt> or <tt>null</tt> if the archive file could
+     * not be loaded.
+     */
+    public static Resources getResourcesForArchiveFile(PackageManager pm, String archiveFile) {
+        try {
+            final PackageInfo pi = pm.getPackageArchiveInfo(archiveFile, 0);
+            pi.applicationInfo.publicSourceDir = archiveFile;
+            return pm.getResourcesForApplication(pi.applicationInfo);
+        } catch (Exception e) {
+            Log.e(PackageUtils.class.getName(), Log.getStackTraceString(e));
+            return null;
+        }
+    }
+
+    /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param pm The <tt>PackageManager</tt>.
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
@@ -194,18 +214,12 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @see #PackageItemIcon(Drawable, CharSequence)
-         * @see #PackageItemIcon(Context, ApplicationInfo)
-         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon() {
         }
 
         /**
          * Constructor
-         * @see #PackageItemIcon()
-         * @see #PackageItemIcon(Context, ApplicationInfo)
-         * @see #PackageItemIcon(PackageManager, ResolveInfo)
          */
         public PackageItemIcon(Drawable icon, CharSequence label) {
             this.icon  = icon;
@@ -214,9 +228,8 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @see #PackageItemIcon()
-         * @see #PackageItemIcon(Drawable, CharSequence)
-         * @see #PackageItemIcon(Context, ApplicationInfo)
+         * @param pm The <tt>PackageManager</tt>.
+         * @param info The <tt>ResolveInfo</tt>.
          */
         public PackageItemIcon(PackageManager pm, ResolveInfo info) {
             this.icon  = info.loadIcon(pm);
@@ -225,33 +238,33 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @param context The <tt>Context</tt>.
+         * @param pm The <tt>PackageManager</tt>.
          * @param info The package archive file's {@link ApplicationInfo} and the
          * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
          * must be contains the archive file full path.
-         * @see #PackageItemIcon()
-         * @see #PackageItemIcon(Drawable, CharSequence)
-         * @see #PackageItemIcon(PackageManager, ResolveInfo)
+         * @throws NameNotFoundException if the resources for the given application
+         * could not be loaded.
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
-        public PackageItemIcon(Context context, ApplicationInfo info) {
+        public PackageItemIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
             DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
-            try (final AssetManager assets = new AssetManager()) {
-                // Adds an additional archive file to the assets.
-                assets.addAssetPath(info.publicSourceDir);
-                initialize(context, new Resources(assets, context.getResources().getDisplayMetrics(), null), info);
-            }
+            final Resources res = pm.getResourcesForApplication(info);
+            initialize(pm, res, info);
+
+            // Close the assets to avoid ProcessKiller
+            // kill my process after unmounting usb disk.
+            res.getAssets().close();
         }
 
         /**
          * Initializes this object with the specified <em>info</em>.
-         * @param context The <tt>Context</tt>.
+         * @param pm The <tt>PackageManager</tt>.
          * @param res The package archive file's <tt>Resources</tt>.
          * @param info The package archive file's <tt>ApplicationInfo</tt>.
          */
         @SuppressWarnings("deprecation")
-        protected void initialize(Context context, Resources res, ApplicationInfo info) {
-            this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : context.getPackageManager().getDefaultActivityIcon());
+        protected void initialize(PackageManager pm, Resources res, ApplicationInfo info) {
+            this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());
             this.label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
         }
     }

@@ -1,5 +1,7 @@
 package com.tencent.temp;
 
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.ext.cache.Cache;
 import android.ext.image.IconLoader;
 import android.ext.image.ImageModule;
@@ -29,12 +31,16 @@ public final class PackageIconLoader<URI> extends IconLoader<URI, PackageItemIco
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
-    public PackageIconLoader(ImageModule<URI, PackageItemIcon> module, Cache<URI, PackageItemIcon> iconCache) {
+    public PackageIconLoader(ImageModule<?, ?> module, Cache<URI, PackageItemIcon> iconCache) {
         super(module, iconCache);
     }
 
     @Override
     protected PackageItemIcon loadInBackground(Task task, URI uri, Object[] params, int flags) {
-        return new PackageItemIcon(mModule.mContext, ImageModule.getParameters(params));
+        try {
+            return new PackageItemIcon(mPackageManager, ImageModule.<ApplicationInfo>getParameters(params));
+        } catch (NameNotFoundException e) {
+            return null;
+        }
     }
 }

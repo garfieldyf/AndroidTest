@@ -88,36 +88,41 @@ __STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, siz
     return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
-__STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
-{
-    assert(file1);
-    assert(file2);
-
-    struct stat buf;
-    jboolean result = JNI_FALSE;
-    if (::stat(file1, &buf) == 0)
-    {
-        const off_t length = buf.st_size;
-        result = (::stat(file2, &buf) == 0 && length == buf.st_size);
-    }
-
-    return result;
-}
-
-__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_SIZE], ssize_t& readCount)
+__STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_SIZE])
 {
     assert(!file.isEmpty());
 
-    readCount = 0;
-    ssize_t readBytes;
-    while ((readBytes = file.read(buf + readCount, _countof(buf) - readCount)) > 0)
+    ssize_t count = 0, readBytes;
+    while ((readBytes = file.read(buf + count, _countof(buf) - count)) != 0)
     {
-        readCount += readBytes;
-        if (readCount == _countof(buf))
+        if (readBytes == -1)
+        {
+            count = -1;
+            break;
+        }
+
+        count += readBytes;
+        if (count == _countof(buf))
             break;
     }
 
-    return readBytes;
+    return count;
+}
+
+__STATIC_INLINE__ jboolean compareLength(const __NS::File& file1, const __NS::File& file2)
+{
+    assert(!file1.isEmpty());
+    assert(!file2.isEmpty());
+
+    struct stat buf;
+    jboolean result = JNI_FALSE;
+    if (file1.stat(buf) == 0)
+    {
+        const off_t length = buf.st_size;
+        result = (file2.stat(buf) == 0 && length == buf.st_size);
+    }
+
+    return result;
 }
 
 __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil::char_sequence& dirPath, const char* name)
@@ -372,26 +377,22 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, file1) == 0 || JNI::getLength(env, file2) == 0, "file1 == null || file1.length() == 0 || file2 == null || file2.length() == 0", JNI_FALSE);
 
-    const JNI::jstring_t jfile1(env, file1), jfile2(env, file2);
-    jboolean result = compareLength(jfile1, jfile2);
-    if (result)
+    __NS::File f1, f2;
+    jboolean result = JNI_FALSE;
+    if (f1.open(JNI::jstring_t(env, file1), O_RDONLY) == 0 && f2.open(JNI::jstring_t(env, file2), O_RDONLY) == 0)
     {
-        __NS::File f1, f2;
-        result = (f1.open(jfile1, O_RDONLY) == 0 && f2.open(jfile2, O_RDONLY) == 0);
+        result = compareLength(f1, f2);
+        LOGD("compare length = %s\n", (result ? "true" : "false"));
         if (result)
         {
+            ssize_t count1, count2;
             uint8_t buffer1[_BUF_SIZE], buffer2[_BUF_SIZE];
-            ssize_t readBytes1, readBytes2, readCount1, readCount2;
 
-            while ((readBytes1 = readFile(f1, buffer1, readCount1)) != 0 && (readBytes2 = readFile(f2, buffer2, readCount2)) != 0)
+            while ((count1 = readFile(f1, buffer1)) != 0 && (count2 = readFile(f2, buffer2)) != 0)
             {
-            #ifndef NDEBUG
-                if (readCount1 != readCount2)
-                    LOGE("Read count are NOT equal (readCount1 = %zd, readCount2 = %zd)\n", readCount1, readCount2);
-            #endif  // NDEBUG
-
-                if (readBytes1 == -1 || readBytes2 == -1 || readCount1 != readCount2 || ::memcmp(buffer1, buffer2, readCount1) != 0)
+                if (count1 == -1 || count2 == -1 || count1 != count2 || ::memcmp(buffer1, buffer2, count1) != 0)
                 {
+                    LOGD("compare contents = false (count1 = %zd, count2 = %zd)\n", count1, count2);
                     result = JNI_FALSE;
                     break;
                 }

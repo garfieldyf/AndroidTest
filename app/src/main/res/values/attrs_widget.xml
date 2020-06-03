@@ -39,10 +39,4 @@
             <flag name="noMemoryCache" value="0x02" />
         </attr>
     </declare-styleable>
-
-    <!-- FocusDrawable styleable -->
-    <declare-styleable name="FocusDrawable">
-        <attr name="focus" format="reference|color" />
-    </declare-styleable>
-
 </resources>

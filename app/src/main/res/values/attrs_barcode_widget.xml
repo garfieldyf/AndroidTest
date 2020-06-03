@@ -17,5 +17,4 @@
         <attr name="scanningIndicator" format="reference|color" />
         <attr name="scanningIndicatorHeight" format="dimension" />
     </declare-styleable>
-
 </resources>

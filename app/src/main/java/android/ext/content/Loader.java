@@ -90,15 +90,12 @@ public abstract class Loader<Key> implements Factory<Object> {
     }
 
     /**
-     * Attempts to stop execution of the specified task. After invoking this
-     * method, you should check the value returned by {@link #isTaskCancelled(Task)}
-     * periodically from the background thread to finish the task as soon as
-     * possible. <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * Attempts to stop execution of the specified task with specified <em>key</em>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param key The key to find the task.
      * @param mayInterruptIfRunning <tt>true</tt> if the thread executing the
      * task should be interrupted, <tt>false</tt> otherwise.
-     * @return <tt>false</tt> if the task could not be cancelled, typically
-     * because it has already completed, <tt>true</tt> otherwise.
+     * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
      * @see #shutdown()
      * @see #isTaskCancelled(Task)
      */
@@ -123,13 +120,13 @@ public abstract class Loader<Key> implements Factory<Object> {
     }
 
     /**
-     * Returns <tt>true</tt> if the <em>task</em> was cancelled before it
-     * completed normally. To ensure that the <em>task</em> is cancelled
-     * as quickly as possible, you should always check the return value
+     * Returns <tt>true</tt> if the <em>task</em> was cancelled before it completed
+     * normally or this loader has been shut down. To ensure that the <em>task</em>
+     * is cancelled as quickly as possible, you should always check the return value
      * of this method, if possible (inside a loop for instance.)
      * @param task May be <tt>null</tt>. The {@link Task} to test.
-     * @return <tt>true</tt> if the <em>task</em> was cancelled or this
-     * loader has been shut down, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if the <em>task</em> was cancelled or this loader has
+     * been shut down, <tt>false</tt> otherwise.
      * @see #cancelTask(Object, boolean)
      */
     protected final boolean isTaskCancelled(Task task) {

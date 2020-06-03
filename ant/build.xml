@@ -138,6 +138,7 @@
     <!-- target -post-compile -->
     <target name="-post-compile">
         <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${module.name}_widget.xml" />
+        <copy file="${source.dir}/res/values/attrs_focus_widget.xml" tofile="${out.dir}/attrs_focus_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
         <copy file="${source.dir}/jni/proguard.txt" tofile="${out.dir}/${module.name}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
@@ -150,7 +151,6 @@
         </delete>
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
-        <echo level="info">Install: ${out.dir}/attrs_barcode_widget.xml</echo>
         <echo level="info">Install: ${out.dir}/attrs_${module.name}_widget.xml</echo>
         <echo level="info">Install: ${out.dir}/${module.name}-proguard.txt</echo>
     </target>

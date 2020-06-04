@@ -80,7 +80,8 @@ public class Parameters {
     /**
      * Computes the number of bytes that can be used to store the image's
      * pixels when decoding the image.
-     * @param opts The {@link Options} to compute byte count.
+     * @param opts The {@link Options} to compute. The <em>opts's</em>
+     * <tt>out...</tt> fields are set.
      */
     public int computeByteCount(Options opts) {
         return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(config);

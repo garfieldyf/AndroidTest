@@ -604,19 +604,30 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private void testLoadDex() {
-        final String apkFile = new File(getFilesDir(), "tvmaster.apk").getPath();
+        final String apkFile = new File(getFilesDir(), "tvmaster.apk.tmp").getPath();
         try {
             final PackageManager pm = getPackageManager();
+            final PackageInfo pi = pm.getPackageArchiveInfo(apkFile, 0);
             final Resources res = PackageUtils.getResourcesForArchiveFile(pm, apkFile);
+            final String packageName = pi.packageName;
             int id;
             Drawable drawable;
-            id = res.getIdentifier("barcolor", "drawable", "tv.fun.master");
+            String s;
+            id = res.getIdentifier("barcolor", "drawable", packageName);
             drawable = res.getDrawable(id);
             Log.i("abcd", "drawable = " + drawable);
 
-            id = res.getIdentifier("icon", "drawable", "tv.fun.master");
+            id = res.getIdentifier("icon", "drawable", packageName);
             drawable = res.getDrawable(id);
             Log.i("abcd", "drawable = " + drawable);
+
+            id = res.getIdentifier("speed_test_retry", "string", packageName);
+            s = res.getString(id);
+            Log.i("abcd", "string = " + s);
+
+            id = res.getIdentifier("connect_web_fail", "string", packageName);
+            s = res.getString(id);
+            Log.i("abcd", "string = " + s);
 
             res.getAssets().close();
         } catch (Exception e) {

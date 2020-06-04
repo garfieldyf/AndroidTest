@@ -1,12 +1,14 @@
-package android.ext.cache;
+package com.tencent.temp;
 
 import android.content.Context;
+import android.ext.cache.FileCache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
+import java.util.Arrays;
 
 /**
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
@@ -15,6 +17,7 @@ import java.io.File;
 public final class SimpleFileCache implements FileCache, Runnable {
     private final int mMaxSize;
     private final File mCacheDir;
+    private final File[] mFilePool;
 
     /**
      * Constructor
@@ -27,6 +30,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
         DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
+        mFilePool = new File[512];
     }
 
     /**
@@ -74,7 +78,19 @@ public final class SimpleFileCache implements FileCache, Runnable {
     @Override
     public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        return new File(mCacheDir, key);
+        int hashCode = key.hashCode();
+        hashCode ^= (hashCode >>> 20) ^ (hashCode >>> 12);
+        hashCode ^= (hashCode >>> 7) ^ (hashCode >>> 4);
+        final int index = hashCode & (mFilePool.length - 1);
+
+        synchronized (mFilePool) {
+            File cacheFile = mFilePool[index];
+            if (cacheFile == null || !cacheFile.getPath().endsWith(key)) {
+                mFilePool[index] = cacheFile = new File(mCacheDir, key);
+            }
+
+            return cacheFile;
+        }
     }
 
     @Override
@@ -86,7 +102,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
     @Override
     public File remove(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        final File cacheFile = new File(mCacheDir, key);
+        final File cacheFile = get(key);
         return (cacheFile.delete() ? cacheFile : null);
     }
 
@@ -96,6 +112,10 @@ public final class SimpleFileCache implements FileCache, Runnable {
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+            synchronized (mFilePool) {
+                Arrays.fill(mFilePool, null);
+            }
+
             final String[] names = mCacheDir.list();
             final int size = ArrayUtils.getSize(names);
             for (int i = mMaxSize; i < size; ++i) {
@@ -116,9 +136,16 @@ public final class SimpleFileCache implements FileCache, Runnable {
             length += new File(mCacheDir, names[i]).length();
         }
 
+        int count = 0;
+        for (File file : mFilePool) {
+            if (file != null) {
+                ++count;
+            }
+        }
+
         final StringBuilder result = new StringBuilder(100);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping SimpleFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
         result.setLength(0);
-        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).toString());
+        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).append(", poolSize = ").append(count).toString());
     }
 }

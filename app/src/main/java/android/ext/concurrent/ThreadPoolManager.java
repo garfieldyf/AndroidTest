@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -59,21 +60,23 @@ public class ThreadPoolManager extends ThreadPool {
     public boolean cancelAll(boolean mayInterruptIfRunning) {
         // Cancel and remove from pending task queue.
         boolean result = false;
-        final Iterator<Runnable> itor = getQueue().iterator();
-        while (itor.hasNext()) {
-            final Runnable task = itor.next();
-            if (task instanceof Task) {
+        final BlockingQueue<Runnable> taskQueue = getQueue();
+        if (!taskQueue.isEmpty()) {
+            for (Runnable task : taskQueue) {
                 result |= ((Task)task).cancel(false);
-                itor.remove();
             }
+
+            taskQueue.clear();
         }
 
         // Cancel and remove from running task queue.
         synchronized (mRunningTasks) {
-            final Iterator<Task> iter = mRunningTasks.iterator();
-            while (iter.hasNext()) {
-                result |= iter.next().cancel(mayInterruptIfRunning);
-                iter.remove();
+            if (!mRunningTasks.isEmpty()) {
+                for (Task task : mRunningTasks) {
+                    result |= task.cancel(mayInterruptIfRunning);
+                }
+
+                mRunningTasks.clear();
             }
         }
 
@@ -105,13 +108,10 @@ public class ThreadPoolManager extends ThreadPool {
         // Cancel and remove from pending task queue.
         final Iterator<Runnable> iter = getQueue().iterator();
         while (iter.hasNext()) {
-            final Runnable runnable = iter.next();
-            if (runnable instanceof Task) {
-                final Task task = (Task)runnable;
-                if (task.getId() == id) {
-                    iter.remove();
-                    return task.cancel(mayInterruptIfRunning);
-                }
+            final Task task = (Task)iter.next();
+            if (task.getId() == id) {
+                iter.remove();
+                return task.cancel(false);
             }
         }
 
@@ -126,19 +126,15 @@ public class ThreadPoolManager extends ThreadPool {
 
     @Override
     protected void beforeExecute(Thread thread, Runnable target) {
-        if (target instanceof Task) {
-            synchronized (mRunningTasks) {
-                mRunningTasks.add((Task)target);
-            }
+        synchronized (mRunningTasks) {
+            mRunningTasks.add((Task)target);
         }
     }
 
     @Override
     protected void afterExecute(Runnable target, Throwable throwable) {
-        if (target instanceof Task) {
-            synchronized (mRunningTasks) {
-                mRunningTasks.remove(target);
-            }
+        synchronized (mRunningTasks) {
+            mRunningTasks.remove(target);
         }
     }
 

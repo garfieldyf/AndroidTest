@@ -304,7 +304,7 @@ public final class ProcessUtils {
         /**
          * Writes the crash infos to the "crash.db.crashes" table.
          */
-        @SuppressWarnings("unused")
+        @SuppressWarnings({ "unused", "deprecation" })
         private void storeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) {
             final CrashDatabase db = new CrashDatabase(mContext);
             try {
@@ -319,6 +319,7 @@ public final class ProcessUtils {
         /**
          * Writes the crash infos to "/storage/emulated/0/Android/data/<em>packagename</em>/files/crashes.log"
          */
+        @SuppressWarnings("deprecation")
         private void writeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) throws FileNotFoundException {
             // Open the log file.
             try (final PrintStream ps = new PrintStream(new FileOutputStream(new File(mContext.getExternalFilesDir(null), "crashes.log"), true))) {

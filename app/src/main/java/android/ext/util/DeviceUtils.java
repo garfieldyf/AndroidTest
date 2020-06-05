@@ -109,6 +109,7 @@ public final class DeviceUtils {
         return (Build.VERSION.SDK_INT > 20 ? Build.SUPPORTED_ABIS : new String[] { Build.CPU_ABI, Build.CPU_ABI2 });
     }
 
+    @SuppressWarnings("deprecation")
     public static void dumpSystemInfo(Context context, Printer printer) {
         context = context.getApplicationContext();
         final WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);

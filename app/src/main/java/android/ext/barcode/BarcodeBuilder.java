@@ -75,6 +75,7 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #white(int)
      */
+    @SuppressWarnings("deprecation")
     public final BarcodeBuilder white(Resources res, int id) {
         this.white = res.getColor(id);
         return this;
@@ -98,6 +99,7 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #black(int)
      */
+    @SuppressWarnings("deprecation")
     public final BarcodeBuilder black(Resources res, int id) {
         this.black = res.getColor(id);
         return this;

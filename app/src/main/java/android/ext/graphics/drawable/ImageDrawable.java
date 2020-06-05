@@ -170,6 +170,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void setDither(boolean dither) {
         mState.mPaint.setDither(dither);
         invalidateSelf();

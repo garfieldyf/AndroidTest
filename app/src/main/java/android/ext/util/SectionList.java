@@ -1,11 +1,15 @@
 package android.ext.util;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * Class <tt>SectionList</tt> allows to adding or removing data by section.
@@ -99,6 +103,12 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     @Override
+    @TargetApi(Build.VERSION_CODES.N)
+    public boolean removeIf(Predicate<? super E> filter) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean addAll(Collection<? extends E> collection) {
         DebugUtils.__checkError(collection == null, "collection == null");
         final int size = collection.size();
@@ -129,30 +139,12 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     @Override
     public boolean removeAll(Collection<?> collection) {
-        final Iterator<?> itor = listIterator(0);
-        boolean result = false;
-        while (itor.hasNext()) {
-            if (collection.contains(itor.next())) {
-                itor.remove();
-                result = true;
-            }
-        }
-
-        return result;
+        return removeAll(collection, true);
     }
 
     @Override
     public boolean retainAll(Collection<?> collection) {
-        final Iterator<?> itor = listIterator(0);
-        boolean result = false;
-        while (itor.hasNext()) {
-            if (!collection.contains(itor.next())) {
-                itor.remove();
-                result = true;
-            }
-        }
-
-        return result;
+        return removeAll(collection, false);
     }
 
     @Override
@@ -404,6 +396,19 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
             mIndexes[sectionIndex] = index;
             index += mSizes[sectionIndex];
         }
+    }
+
+    private boolean removeAll(Collection<?> collection, boolean contains) {
+        final Iterator<?> itor = listIterator(0);
+        boolean result = false;
+        while (itor.hasNext()) {
+            if (collection.contains(itor.next()) == contains) {
+                itor.remove();
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     private int[] newSizeArray(int sectionIndex, int newLength) {

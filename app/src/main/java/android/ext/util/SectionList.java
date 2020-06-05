@@ -128,6 +128,34 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     @Override
+    public boolean removeAll(Collection<?> collection) {
+        final Iterator<?> itor = listIterator(0);
+        boolean result = false;
+        while (itor.hasNext()) {
+            if (collection.contains(itor.next())) {
+                itor.remove();
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection) {
+        final Iterator<?> itor = listIterator(0);
+        boolean result = false;
+        while (itor.hasNext()) {
+            if (!collection.contains(itor.next())) {
+                itor.remove();
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
+    @Override
     public Iterator<E> iterator() {
         return listIterator(0);
     }

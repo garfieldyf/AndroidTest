@@ -4,7 +4,6 @@ import android.content.Context;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.Optional;
 import android.ext.util.UriUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
@@ -180,10 +179,10 @@ public final class JSONUtils {
     public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
-            return (T)parseArray(reader, Optional.ofNullable(cancelable));
+            return (T)parseArray(reader, Cancelable.ofNullable(cancelable));
 
         case BEGIN_OBJECT:
-            return (T)parseObject(reader, Optional.ofNullable(cancelable));
+            return (T)parseObject(reader, Cancelable.ofNullable(cancelable));
 
         default:
             throw new AssertionError("Invalid json token - " + reader.peek());

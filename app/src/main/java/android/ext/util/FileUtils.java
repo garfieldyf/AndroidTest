@@ -494,11 +494,11 @@ public final class FileUtils {
         if (out instanceof ByteArrayBuffer) {
             ((ByteArrayBuffer)out).readFrom(is, is.available(), cancelable);
         } else if (is instanceof FileInputStream && out instanceof FileOutputStream) {
-            copyStreamImpl((FileInputStream)is, (FileOutputStream)out, Optional.ofNullable(cancelable));
+            copyStreamImpl((FileInputStream)is, (FileOutputStream)out, Cancelable.ofNullable(cancelable));
         } else if (buffer == null) {
-            copyStreamImpl(is, out, Optional.ofNullable(cancelable));
+            copyStreamImpl(is, out, Cancelable.ofNullable(cancelable));
         } else {
-            copyStreamImpl(is, out, Optional.ofNullable(cancelable), buffer);
+            copyStreamImpl(is, out, Cancelable.ofNullable(cancelable), buffer);
         }
     }
 

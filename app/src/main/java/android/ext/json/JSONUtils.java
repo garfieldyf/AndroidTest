@@ -233,7 +233,7 @@ public final class JSONUtils {
         } else if (object instanceof Object[]) {
             return writeValues(writer, Arrays.asList((Object[])object));
         } else if (object instanceof Set) {
-            return writeValues(writer, (Set<Entry<String, Object>>)object);
+            return writeSet(writer, (Set<?>)object);
         } else if (object instanceof Collection) {
             return writeValues(writer, (Collection<Object>)object);
         } else if (object instanceof Map) {
@@ -386,6 +386,7 @@ public final class JSONUtils {
                 break;
 
             case NULL:
+                // Don't skip null, because the result's size will be incorrect.
                 reader.nextNull();
                 result.add(null);
                 DebugUtils.__checkWarning(true, "JSONUtils", "The type is JsonToken.NULL, add null to JSONArray.");
@@ -444,6 +445,16 @@ public final class JSONUtils {
 
         reader.endObject();
         return result;
+    }
+
+    private static JsonWriter writeSet(JsonWriter writer, Set<?> values) throws IOException {
+        if (values.isEmpty()) {
+            return writer.nullValue();
+        } else if (values.iterator().next() instanceof Entry) {
+            return writeValues(writer, (Set<Entry<String, Object>>)values);
+        } else {
+            return writeValues(writer, (Collection<Object>)values);
+        }
     }
 
     private static JsonWriter writeValues(JsonWriter writer, org.json.JSONArray values) throws IOException {

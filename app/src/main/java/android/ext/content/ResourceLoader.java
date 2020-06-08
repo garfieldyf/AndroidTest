@@ -216,7 +216,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 if (result != null && !cancelable.isCancelled()) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile, cacheFile);
-                    DebugUtils.__checkDebug(true, "ResourceLoader", "Save the cache file = " + cacheFile + ", hitCache = " + hitCache);
+                    DebugUtils.__checkDebug(true, "ResourceLoader", "save the cache file = " + cacheFile + ", hitCache = " + hitCache);
                 }
             }
         } catch (Exception e) {

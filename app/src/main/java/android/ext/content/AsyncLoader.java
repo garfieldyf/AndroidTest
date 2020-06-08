@@ -172,16 +172,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Returns a type-safe empty {@link Binder} associated with this class.
-     * The empty <tt>Binder</tt> {@link Binder#bindValue bindValue}
-     * implementation do nothing.
-     * @return An empty <tt>Binder</tt>.
-     */
-    public static <Key, Params, Value> Binder<Key, Params, Value> emptyBinder() {
-        return (key, params, target, value, state) -> { };
-    }
-
-    /**
      * Called on the UI thread to recycle the <em>params</em>.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
      * @hide
@@ -302,5 +292,14 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
          * <tt>FLAG_XXX</tt> constants.
          */
         void bindValue(Key key, Params[] params, Object target, Value value, int state);
+
+        /**
+         * Returns a type-safe empty {@link Binder} associated with this class.
+         * The empty <tt>Binder</tt> {@link #bindValue} implementation do nothing.
+         * @return An empty <tt>Binder</tt>.
+         */
+        public static <Key, Params, Value> Binder<Key, Params, Value> emptyBinder() {
+            return (key, params, target, value, state) -> { };
+        }
     }
 }

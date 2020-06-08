@@ -388,13 +388,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             mLoader.load(mUri, target, mFlags, mBinder, mParams);
         }
 
-        /**
-         * preloads the image with the arguments supplied to this request.
-         */
+//        /**
+//         * preloads the image with the arguments supplied to this request.
+//         */
 //        public final void preload() {
+//            DebugUtils.__checkError(mUri == null, "uri == null");
+//            DebugUtils.__checkWarning(mLoader.getCache() == Caches.emptyCache(), "ImageLoader", "The image cache is empty, Calling the preload has no effect.");
 //            if (mLoader.getCache() != Caches.emptyCache()) {
-//                DebugUtils.__checkError(mUri == null, "uri == null");
-//                mLoader.load(mUri, mUri, mFlags, AsyncLoader.emptyBinder(), mParams);
+//                mLoader.load(mUri, mUri, mFlags, Binder.emptyBinder(), mParams);
 //            }
 //        }
     }

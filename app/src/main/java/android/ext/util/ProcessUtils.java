@@ -162,7 +162,7 @@ public final class ProcessUtils {
          * @return The number of the crash infos.
          */
         public final int getCount() {
-            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(_date) FROM crashes", (Object[])null).intValue();
+            return DatabaseUtils.simpleQueryLong(getWritableDatabase(), "SELECT COUNT(*) FROM crashes", (Object[])null).intValue();
         }
 
         /**
@@ -195,7 +195,7 @@ public final class ProcessUtils {
                        "stack TEXT)");
 
             db.execSQL("CREATE TRIGGER IF NOT EXISTS insert_trigger AFTER INSERT ON crashes" +
-                       " WHEN (SELECT COUNT(_date) FROM crashes) > 200" +
+                       " WHEN (SELECT COUNT(*) FROM crashes) > 200" +
                        " BEGIN" +
                            " DELETE FROM crashes WHERE _date = (SELECT MIN(_date) FROM crashes);" +
                        " END;");

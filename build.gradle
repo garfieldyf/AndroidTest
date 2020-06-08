@@ -21,9 +21,7 @@ allprojects {
     }
 
     //readLocalProperties()
-
     ext.libsDir = System.getenv('LOCAL_LIBS_ROOT')
-    ext.androidStubDir = ext.libsDir + '/android/src'
 
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {

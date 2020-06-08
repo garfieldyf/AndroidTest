@@ -25,7 +25,7 @@ android {
 
     sourceSets {
         main {
-            java.srcDirs = [rootProject.androidStubDir]
+            java.srcDirs = [rootProject.libsDir + '/android/src']
         }
     }
 }

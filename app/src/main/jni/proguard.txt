@@ -4,15 +4,15 @@
 
 # Keeps the R.styleable class fields.
 -keepclasseswithmembers class **.R$styleable {
-    <fields>;
+    public static <fields>;
 }
 
 # For native methods, including not being called methods.
--keep class **.GIFImage
--keep class **.FileUtils
--keep class **.BitmapUtils
--keep class **.ProcessUtils
--keep class **.MessageDigests
+-keep class **.util.FileUtils
+-keep class **.util.ProcessUtils
+-keep class **.util.MessageDigests
+-keep class **.graphics.GIFImage
+-keep class **.graphics.BitmapUtils
 
 -keepclassmembers class * {
     native <methods>;

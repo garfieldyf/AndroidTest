@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * Class JSONUtils
@@ -538,6 +541,26 @@ public final class JSONUtils {
         }
 
         @Override
+        public boolean removeIf(Predicate<? super Object> filter) {
+            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> collection) {
+            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> collection) {
+            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
+        }
+
+        @Override
+        public void replaceAll(UnaryOperator<Object> operator) {
+            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
+        }
+
+        @Override
         public Object set(int index, Object object) {
             throw new AssertionError("Unsupported operation - The JSONArray is immutable");
         }
@@ -558,12 +581,42 @@ public final class JSONUtils {
         }
 
         @Override
-        public Object remove(Object key) {
+        public Object putIfAbsent(String key, Object value) {
             throw new AssertionError("Unsupported operation - The JSONObject is immutable");
         }
 
         @Override
         public void putAll(Map<? extends String, ?> map) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public Object remove(Object key) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public boolean remove(Object key, Object value) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public Object replace(String key, Object value) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public boolean replace(String key, Object oldValue, Object newValue) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public void replaceAll(BiFunction<? super String, ? super Object, ?> function) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
+
+        @Override
+        public Object merge(String key, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
             throw new AssertionError("Unsupported operation - The JSONObject is immutable");
         }
     }

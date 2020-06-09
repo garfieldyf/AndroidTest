@@ -6,6 +6,7 @@ import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Printer;
@@ -21,9 +22,9 @@ import android.widget.ImageView;
  *     android:autoStart="true" /&gt;</pre>
  * @author Garfield
  */
-public final class GIFImageBinder implements Binder<Object, Object, GIFImage> {
-    private final boolean mOneShot;
-    private final boolean mAutoStart;
+public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
+    protected final boolean mOneShot;
+    protected final boolean mAutoStart;
 
     /**
      * Constructor
@@ -48,7 +49,7 @@ public final class GIFImageBinder implements Binder<Object, Object, GIFImage> {
         mAutoStart = results[1]; // android.R.attr.autoStart
     }
 
-    public final void dump(Printer printer, StringBuilder result) {
+    public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { autoStart = ").append(mAutoStart)
             .append(", oneShot = ").append(mOneShot)
@@ -58,11 +59,20 @@ public final class GIFImageBinder implements Binder<Object, Object, GIFImage> {
     @Override
     public void bindValue(Object uri, Object[] params, Object target, GIFImage image, int state) {
         final ImageView view = (ImageView)target;
-        if (image == null) {
+        if (image != null) {
+            setViewImage(view, image);
+        } else {
             view.setImageDrawable(getPlaceholder(view.getResources(), params));
-            return;
         }
+    }
 
+    /**
+     * Sets a {@link GIFImage} as the content of the {@link ImageView}.
+     * @param view The <tt>ImageView</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     */
+    protected void setViewImage(ImageView view, GIFImage image) {
+        DebugUtils.__checkError(image == null, "image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof GIFDrawable) {
             // Sets the GIFDrawable's internal image.

@@ -1,12 +1,10 @@
 package android.ext.image.binder;
 
-import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.Context;
-import android.content.res.Resources;
-import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.RoundedGIFDrawable;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.util.Printer;
@@ -28,10 +26,8 @@ import java.util.Arrays;
  *     android:bottomRightRadius="20dp" /&gt;</pre>
  * @author Garfield
  */
-public final class RoundedGIFImageBinder implements Binder<Object, Object, GIFImage> {
-    private final float[] mRadii;
-    private final boolean mOneShot;
-    private final boolean mAutoStart;
+public class RoundedGIFImageBinder extends GIFImageBinder {
+    protected final float[] mRadii;
 
     /**
      * Constructor
@@ -40,11 +36,8 @@ public final class RoundedGIFImageBinder implements Binder<Object, Object, GIFIm
      * @see #RoundedGIFImageBinder(float[], boolean, boolean)
      */
     public RoundedGIFImageBinder(Context context, AttributeSet attrs) {
-        final Resources res = context.getResources();
-        final boolean[] results = XmlResources.loadAnimationAttrs(res, attrs);
-        mRadii = XmlResources.loadCornerRadii(res, attrs);
-        mOneShot   = results[0]; // android.R.attr.oneshot
-        mAutoStart = results[1]; // android.R.attr.autoStart
+        super(context, attrs);
+        mRadii = XmlResources.loadCornerRadii(context.getResources(), attrs);
     }
 
     /**
@@ -56,12 +49,12 @@ public final class RoundedGIFImageBinder implements Binder<Object, Object, GIFIm
      * @see #RoundedGIFImageBinder(Context, AttributeSet)
      */
     public RoundedGIFImageBinder(float[] radii, boolean autoStart, boolean oneShot) {
+        super(autoStart, oneShot);
         mRadii = radii;
-        mOneShot   = oneShot;
-        mAutoStart = autoStart;
     }
 
-    public final void dump(Printer printer, StringBuilder result) {
+    @Override
+    public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { radii = ").append(Arrays.toString(mRadii))
             .append(", autoStart = ").append(mAutoStart)
@@ -70,13 +63,8 @@ public final class RoundedGIFImageBinder implements Binder<Object, Object, GIFIm
     }
 
     @Override
-    public void bindValue(Object uri, Object[] params, Object target, GIFImage image, int state) {
-        final ImageView view = (ImageView)target;
-        if (image == null) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
-            return;
-        }
-
+    protected void setViewImage(ImageView view, GIFImage image) {
+        DebugUtils.__checkError(image == null, "image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof RoundedGIFDrawable) {
             // Sets the RoundedGIFDrawable's internal image.

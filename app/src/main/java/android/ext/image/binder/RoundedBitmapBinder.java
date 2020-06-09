@@ -79,6 +79,13 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
         }
     }
 
+    /**
+     * Sets a {@link Bitmap} as the content of the {@link ImageView}.
+     * @param view The <tt>ImageView</tt>.
+     * @param drawable The <em>view's</em> old drawable or <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @param radii The corner radii, array of 8 values.
+     */
     /* package */ static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap, float[] radii) {
         if (drawable instanceof RoundedBitmapDrawable) {
             // Sets the RoundedBitmapDrawable's internal bitmap.

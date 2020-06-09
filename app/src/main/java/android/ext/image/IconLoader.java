@@ -58,7 +58,7 @@ public class IconLoader<URI, Image> extends ImageLoader<URI, Image> {
         } else if (param instanceof PackageItemInfo) {
             return (Image)((PackageItemInfo)param).loadIcon(mPackageManager);
         } else {
-            DebugUtils.__checkPrint(param != null, Log.ERROR, "IconLoader", "Unsupported param - " + param.getClass().getName());
+            DebugUtils.__checkPrint(param != null, Log.ERROR, "IconLoader", DebugUtils.toString(param, new StringBuilder("Unsupported param - ")).toString());
             return null;
         }
     }

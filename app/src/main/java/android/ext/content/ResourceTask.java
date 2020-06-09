@@ -125,7 +125,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
             return parseResult(mContext, mKey, mLoadParams, this);
         }
 
-        final Result result = loadFromCache(mContext, mKey, mLoadParams, this, cacheFile);
+        final Result result = loadFromCache(mContext, mKey, mLoadParams, cacheFile);
         final boolean hitCache = (result != null);
         if (hitCache) {
             // Loads from the cache file succeeded, update UI.

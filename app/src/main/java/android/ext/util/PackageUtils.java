@@ -112,8 +112,9 @@ public final class PackageUtils {
 
     /**
      * Retrieve the application's {@link Resources} from a package archive file.
-     * <p>Note: The returned <tt>Resources</tt> internal asset manager should be
-     * close. For example: res.getAssets().close()</p>
+     * <p>Note: To avoid ProcessKiller kill my process after unmounting usb disk.
+     * The returned <tt>Resources</tt> internal asset manager should be close.</p>
+     * <p>For example: res.getAssets().close()</p>
      * @param pm The <tt>PackageManager</tt>.
      * @param archiveFile The full path to the archive file.
      * @return The <tt>Resources</tt> or <tt>null</tt> if the archive file could

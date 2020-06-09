@@ -173,6 +173,23 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return task;
     }
 
+    /* package */ static <Key, Result> Result loadFromCache(Context context, Key key, LoadParams<Key, Result> loadParams, File cacheFile) {
+        final int priority = Process.getThreadPriority(Process.myTid());
+        Result result = null;
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
+            result = loadParams.parseResult(context, key, cacheFile, null);
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
+        } catch (Exception e) {
+            Log.w(ResourceLoader.class.getName(), "Couldn't load resource from the cache - " + cacheFile);
+        } finally {
+            Process.setThreadPriority(priority);
+        }
+
+        return result;
+    }
+
     /* package */ static <Key, Result> Result parseResult(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable) {
         Result result = null;
         try {
@@ -186,23 +203,6 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return result;
     }
 
-    /* package */ static <Key, Result> Result loadFromCache(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, File cacheFile) {
-        final int priority = Process.getThreadPriority(Process.myTid());
-        Result result = null;
-        try {
-            DebugUtils.__checkStartMethodTracing();
-            Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
-            result = loadParams.parseResult(context, key, cacheFile, cancelable);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "loadFromCache - key = " + key + ", cacheFile = " + cacheFile);
-        } catch (Exception e) {
-            Log.w(ResourceLoader.class.getName(), "Couldn't load resource from the cache - " + cacheFile);
-        } finally {
-            Process.setThreadPriority(priority);
-        }
-
-        return result;
-    }
-
     /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, String cacheFile, boolean hitCache) {
         final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
         Result result = null;
@@ -211,9 +211,9 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
             if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
-                result = loadParams.parseResult(context, key, new File(tempFile), cancelable);
+                result = loadParams.parseResult(context, key, new File(tempFile), null);
                 DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
-                if (result != null && !cancelable.isCancelled()) {
+                if (result != null) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile, cacheFile);
                     DebugUtils.__checkDebug(true, "ResourceLoader", "save the cache file = " + cacheFile + ", hitCache = " + hitCache);
@@ -224,9 +224,14 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
             Log.e(ResourceLoader.class.getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
+        /*
+         * If the cache file is hit and result is null:
+         *   1. If download failed or cancelled.
+         *   2. The cache file's contents and the temp file' contents are equal.
+         *   3. Parse the temp file failed.
+         * Cancel the task and delete the temp file, do not update UI.
+         */
         if (hitCache && result == null) {
-            // If the cache file is hit and parse the temp file failed,
-            // cancel the task and delete the temp file, do not update UI.
             DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
             cancelable.cancel(false);
             FileUtils.deleteFiles(tempFile, false);
@@ -251,7 +256,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 return parseResult(mContext, mKey, mLoadParams, this);
             }
 
-            final Object result = loadFromCache(mContext, mKey, mLoadParams, this, cacheFile);
+            final Object result = loadFromCache(mContext, mKey, mLoadParams, cacheFile);
             final boolean hitCache = (result != null);
             if (hitCache) {
                 // Loads from the cache file succeeded, update UI.

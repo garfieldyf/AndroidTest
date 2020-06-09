@@ -141,30 +141,16 @@ public final class JSONUtils {
      * Parses a JSON data from the specified JSON string.
      * @param json A JSON-encoded string.
      * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
-     * @throws IOException if an error occurs while reading the data.
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
+     * @throws IOException if an error occurs while reading the data.
+     * @see #parse(JsonReader, Cancelable)
+     * @see #parse(Context, Object, Cancelable)
      * @see #parse(byte[], int, int, Cancelable)
      */
     public static <T> T parse(String json, Cancelable cancelable) throws IOException {
         DebugUtils.__checkError(json == null, "json == null");
         return parse(new JsonReader(new StringReader(json)), cancelable);
-    }
-
-    /**
-     * Parses a JSON data from the specified <em>buf</em>.
-     * @param buf The byte array to read the data.
-     * @param offset The start position in the <em>buf</em>.
-     * @param length The number of bytes to read.
-     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
-     * @throws IOException if an error occurs while reading the data.
-     * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
-     * cancelled before it completed normally the returned value is undefined.
-     * @see #parse(String, Cancelable)
-     */
-    public static <T> T parse(byte[] buf, int offset, int length, Cancelable cancelable) throws IOException {
-        DebugUtils.__checkRange(offset, length, buf.length);
-        return parse(new JsonReader(new InputStreamReader(new ByteArrayInputStream(buf, offset, length), StandardCharsets.UTF_8)), cancelable);
     }
 
     /**
@@ -174,7 +160,9 @@ public final class JSONUtils {
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
+     * @see #parse(String, Cancelable)
      * @see #parse(Context, Object, Cancelable)
+     * @see #parse(byte[], int, int, Cancelable)
      */
     public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException {
         switch (reader.peek()) {
@@ -203,13 +191,33 @@ public final class JSONUtils {
      * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
      * cancelled before it completed normally the returned value is undefined.
      * @throws IOException if an error occurs while reading the data.
+     * @see #parse(String, Cancelable)
      * @see #parse(JsonReader, Cancelable)
+     * @see #parse(byte[], int, int, Cancelable)
      * @see UriUtils#openInputStream(Context, Object)
      */
     public static <T> T parse(Context context, Object uri, Cancelable cancelable) throws IOException {
         try (final JsonReader reader = new JsonReader(new InputStreamReader(UriUtils.openInputStream(context, uri), StandardCharsets.UTF_8))) {
             return parse(reader, cancelable);
         }
+    }
+
+    /**
+     * Parses a JSON data from the specified <em>buf</em>.
+     * @param buf The byte array to read the data.
+     * @param offset The start position in the <em>buf</em>.
+     * @param length The number of bytes to read.
+     * @param cancelable A {@link Cancelable} can be check the operation is cancelled, or <tt>null</tt> if none.
+     * @return If the operation succeeded return a {@link JSONObject} or {@link JSONArray}, If the operation was
+     * cancelled before it completed normally the returned value is undefined.
+     * @throws IOException if an error occurs while reading the data.
+     * @see #parse(String, Cancelable)
+     * @see #parse(JsonReader, Cancelable)
+     * @see #parse(Context, Object, Cancelable)
+     */
+    public static <T> T parse(byte[] buf, int offset, int length, Cancelable cancelable) throws IOException {
+        DebugUtils.__checkRange(offset, length, buf.length);
+        return parse(new JsonReader(new InputStreamReader(new ByteArrayInputStream(buf, offset, length), StandardCharsets.UTF_8)), cancelable);
     }
 
     /**

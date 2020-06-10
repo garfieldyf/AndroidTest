@@ -666,7 +666,7 @@ public final class FileUtils {
     /**
      * Class <tt>Stat</tt> is wrapper for linux structure <tt>stat</tt>.
      */
-    public static class Stat implements Parcelable {
+    public static final class Stat implements Parcelable {
         /**
          * The permission of read, write and execute by owner.
          */

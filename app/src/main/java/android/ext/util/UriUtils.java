@@ -94,6 +94,20 @@ public final class UriUtils {
     }
 
     /**
+     * Constructs a scheme is "android.resource" uri. The returned uri such as
+     * <tt>"android.resource://<em>packageName</em>/drawable/ic_launcher"</tt>.
+     * @param packageName The application's package name.
+     * @param resource Type {@link Integer} or {@link String} representation of the
+     * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
+     * @return A {@link Uri}.
+     */
+    public static Uri fromResource(String packageName, Object resource) {
+        DebugUtils.__checkError(packageName == null, "packageName == null");
+        DebugUtils.__checkError(resource == null, "resource == null");
+        return new Uri.Builder().scheme(SCHEME_ANDROID_RESOURCE).authority(packageName).path(resource.toString()).build();
+    }
+
+    /**
      * Constructs a scheme is "file" uri string. The returned
      * string such as <tt>"file:///sdcard/docs/home.html"</tt>.
      * @param path The file path.

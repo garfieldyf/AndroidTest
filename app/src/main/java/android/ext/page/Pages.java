@@ -76,7 +76,7 @@ public final class Pages {
          * Constructor
          * @param data A {@link List} of the page data.
          */
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "rawtypes" })
         public ListPage(List data) {
             DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.size() == 0");
             mData = data;

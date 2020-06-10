@@ -163,7 +163,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return new LoadTask();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -243,7 +243,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     /* package */ final class LoadTask extends Task {
         /* package */ Key mKey;
         /* package */ LoadParams mLoadParams;

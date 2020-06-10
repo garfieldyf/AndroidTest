@@ -217,7 +217,6 @@ public final class BitmapUtils {
             return 1;
 
         case RGB_565:
-        case ARGB_4444:
             return 2;
 
         case ARGB_8888:

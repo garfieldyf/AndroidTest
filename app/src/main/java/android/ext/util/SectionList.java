@@ -6,7 +6,6 @@ import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -178,7 +177,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
         }
 
         if (object instanceof SectionList) {
-            final SectionList list = (SectionList)object;
+            final SectionList<?> list = (SectionList<?>)object;
             return (mCount == list.mCount && ArrayUtils.equals(mSizes, 0, list.mSizes, 0, mCount) && ArrayUtils.equals(mIndexes, 0, list.mIndexes, 0, mCount) && super.equals(object));
         }
 

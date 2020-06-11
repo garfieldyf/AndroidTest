@@ -104,7 +104,16 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     @Override
     @TargetApi(Build.VERSION_CODES.N)
     public boolean removeIf(Predicate<? super E> filter) {
-        throw new UnsupportedOperationException();
+        final Iterator<E> itor = listIterator(0);
+        boolean result = false;
+        while (itor.hasNext()) {
+            if (filter.test(itor.next())) {
+                itor.remove();
+                result = true;
+            }
+        }
+
+        return result;
     }
 
     @Override

@@ -1284,9 +1284,9 @@ public final class FileUtils {
          */
         public int compareToIgnoreCase(Dirent another) {
             if (type != another.type) {
-                if (type == Dirent.DT_DIR) {
+                if (type == DT_DIR) {
                     return -1;
-                } else if (another.type == Dirent.DT_DIR) {
+                } else if (another.type == DT_DIR) {
                     return 1;
                 }
             }

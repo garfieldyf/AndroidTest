@@ -57,9 +57,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
-    /* package */ static final int COOKIE      = 0;
-    /* package */ static final int PARAMETERS  = 1;
-    /* package */ static final int PLACEHOLDER = 2;
+    /* package */ static final int COOKIE      = 2;
+    /* package */ static final int PARAMETERS  = 0;
+    /* package */ static final int PLACEHOLDER = 1;
 
     /**
      * The maximum number of tasks.

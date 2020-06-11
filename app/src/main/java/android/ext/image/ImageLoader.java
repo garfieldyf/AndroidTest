@@ -11,6 +11,8 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.content.res.XmlResources;
+import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -86,6 +88,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
+     * @see #loadSync(URI, int, int)
      */
     public LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
@@ -94,6 +97,21 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mRequest.mBinder = this;
         mRequest.mParams = mModule.mParamsPool.obtain();
         return mRequest;
+    }
+
+    /**
+     * Loads the image synchronously. Call this method, pass the {@link #loadInBackground}
+     * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
+     * the calling thread until it was returned.</b></p>
+     * @param uri The uri to load.
+     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
+     * @param paramsId The resource id of the {@link Parameters} to decode image.
+     * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
+     * @see #load(URI)
+     */
+    public final Image loadSync(URI uri, int flags, int paramsId) {
+        DebugUtils.__checkError(uri == null, "uri == null");
+        return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, paramsId));
     }
 
     @Override

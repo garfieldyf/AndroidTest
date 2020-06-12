@@ -5,8 +5,6 @@ package android.ext.util;
  * @author Garfield
  */
 public final class ErrnoException extends RuntimeException {
-    private static final long serialVersionUID = -6868038019772577506L;
-
     /**
      * Operation not permitted.
      */

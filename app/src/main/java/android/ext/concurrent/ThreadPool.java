@@ -61,7 +61,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return The maximum number of threads.
      */
     public static int computeMaximumThreads() {
-        return ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors() * 2 + 1, 5, 8);
+        return ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 4, 8);
     }
 
     /**

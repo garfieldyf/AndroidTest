@@ -519,7 +519,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @return The <tt>ImageModule</tt>.
          */
         public final ImageModule<URI, Image> build() {
-            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 3, 5));
+            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 3, 6));
             return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(), createFileCache());
         }
 

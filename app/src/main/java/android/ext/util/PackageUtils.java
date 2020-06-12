@@ -19,6 +19,7 @@ import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Printer;
+import java.io.Closeable;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -111,23 +112,45 @@ public final class PackageUtils {
     }
 
     /**
-     * Retrieve the application's {@link Resources} from a package archive file.
-     * <p>Note: To avoid ProcessKiller kill my process after unmounting usb disk.
-     * The returned <tt>Resources</tt> internal asset manager should be close.</p>
-     * <p>For example: res.getAssets().close()</p>
+     * Retrieve the {@link PackageArchiveInfo} from a package archive file.
      * @param pm The <tt>PackageManager</tt>.
      * @param archiveFile The full path to the archive file.
-     * @return The <tt>Resources</tt> or <tt>null</tt> if the archive file could
-     * not be loaded.
+     * @return The <tt>PackageArchiveInfo</tt> or <tt>null</tt> if the archive
+     * file could not be loaded.
      */
-    public static Resources getResourcesForArchiveFile(PackageManager pm, String archiveFile) {
+    public static PackageArchiveInfo getPackageArchiveInfo(PackageManager pm, String archiveFile) {
         try {
             final PackageInfo pi = pm.getPackageArchiveInfo(archiveFile, 0);
             pi.applicationInfo.publicSourceDir = archiveFile;
-            return pm.getResourcesForApplication(pi.applicationInfo);
+            return new PackageArchiveInfo(pi, pm.getResourcesForApplication(pi.applicationInfo));
         } catch (Exception e) {
             Log.e(PackageUtils.class.getName(), Log.getStackTraceString(e));
             return null;
+        }
+    }
+
+    /**
+     * Retrieve the {@link PackageItemIcon} from an {@link ApplicationInfo}.
+     * @param pm The <tt>PackageManager</tt>.
+     * @param info The package archive file's {@link ApplicationInfo} and the
+     * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
+     * must be contains the archive file full path.
+     * @throws NameNotFoundException if the resources for the given application
+     * could not be loaded.
+     * @see PackageManager#getPackageArchiveInfo(String, int)
+     */
+    @SuppressWarnings("deprecation")
+    public static PackageItemIcon getPackageArchiveIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
+        DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
+        final Resources res = pm.getResourcesForApplication(info);
+        try {
+            final Drawable icon = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());
+            final CharSequence label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
+            return new PackageItemIcon(icon, label);
+        } finally {
+            // Close the assets to avoid ProcessKiller
+            // kill my process after unmounting usb disk.
+            res.getAssets().close();
         }
     }
 
@@ -202,22 +225,16 @@ public final class PackageUtils {
     /**
      * Class <tt>PackageItemIcon</tt> used to store the package item's icon and label.
      */
-    public static class PackageItemIcon {
+    public static final class PackageItemIcon {
         /**
          * The package item's icon.
          */
-        public Drawable icon;
+        public final Drawable icon;
 
         /**
          * The package item's label.
          */
-        public CharSequence label;
-
-        /**
-         * Constructor
-         */
-        public PackageItemIcon() {
-        }
+        public final CharSequence label;
 
         /**
          * Constructor
@@ -236,37 +253,37 @@ public final class PackageUtils {
             this.icon  = info.loadIcon(pm);
             this.label = info.loadLabel(pm);
         }
+    }
+
+    /**
+     * Class <tt>PackageArchiveInfo</tt> containing information about the package archive.
+     */
+    public static final class PackageArchiveInfo implements Closeable {
+        /**
+         * The {@link PackageInfo} for the package archive.
+         */
+        public final PackageInfo packageInfo;
+
+        /**
+         * The {@link Resources} for the package archive.
+         */
+        public final Resources resources;
 
         /**
          * Constructor
-         * @param pm The <tt>PackageManager</tt>.
-         * @param info The package archive file's {@link ApplicationInfo} and the
-         * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
-         * must be contains the archive file full path.
-         * @throws NameNotFoundException if the resources for the given application
-         * could not be loaded.
-         * @see PackageManager#getPackageArchiveInfo(String, int)
          */
-        public PackageItemIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
-            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
-            final Resources res = pm.getResourcesForApplication(info);
-            initialize(pm, res, info);
-
-            // Close the assets to avoid ProcessKiller
-            // kill my process after unmounting usb disk.
-            res.getAssets().close();
+        public PackageArchiveInfo(PackageInfo packageInfo, Resources resources) {
+            this.resources   = resources;
+            this.packageInfo = packageInfo;
         }
 
         /**
-         * Initializes this object with the specified <em>info</em>.
-         * @param pm The <tt>PackageManager</tt>.
-         * @param res The package archive file's <tt>Resources</tt>.
-         * @param info The package archive file's <tt>ApplicationInfo</tt>.
+         * Close the internal asset manager to avoid ProcessKiller
+         * kill my process after unmounting usb disk.
          */
-        @SuppressWarnings("deprecation")
-        protected void initialize(PackageManager pm, Resources res, ApplicationInfo info) {
-            this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());
-            this.label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
+        @Override
+        public void close() {
+            resources.getAssets().close();
         }
     }
 

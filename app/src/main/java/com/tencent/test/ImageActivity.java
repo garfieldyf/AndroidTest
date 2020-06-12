@@ -39,6 +39,7 @@ import android.ext.util.FileUtils.ScanCallback;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.PackageUtils;
+import android.ext.util.PackageUtils.PackageArchiveInfo;
 import android.ext.util.PackageUtils.PackageParser;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
@@ -607,9 +608,9 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final String apkFile = new File(getFilesDir(), "tvmaster.apk.tmp").getPath();
         try {
             final PackageManager pm = getPackageManager();
-            final PackageInfo pi = pm.getPackageArchiveInfo(apkFile, 0);
-            final Resources res = PackageUtils.getResourcesForArchiveFile(pm, apkFile);
-            final String packageName = pi.packageName;
+            final PackageArchiveInfo info = PackageUtils.getPackageArchiveInfo(pm, apkFile);
+            final Resources res = info.resources;
+            final String packageName = info.packageInfo.packageName;
             int id;
             Drawable drawable;
             String s;
@@ -629,7 +630,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             s = res.getString(id);
             Log.i("abcd", "string = " + s);
 
-            res.getAssets().close();
+            info.close();
         } catch (Exception e) {
             Log.e("abcd", Log.getStackTraceString(e));
         }

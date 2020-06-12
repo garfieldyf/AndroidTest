@@ -2,7 +2,7 @@ package com.tencent.temp;
 
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.ext.cache.Cache;
-import android.ext.image.IconLoader;
+import android.ext.image.ImageLoader;
 import android.ext.image.ImageModule;
 import android.ext.util.PackageUtils;
 import android.ext.util.PackageUtils.PackageItemIcon;
@@ -25,7 +25,7 @@ import android.ext.util.PackageUtils.PackageItemIcon;
  *       .into(imageView);</pre>
  * @author Garfield
  */
-public final class PackageIconLoader<URI> extends IconLoader<URI, PackageItemIcon> {
+public final class PackageIconLoader<URI> extends ImageLoader<URI, PackageItemIcon> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
@@ -38,7 +38,7 @@ public final class PackageIconLoader<URI> extends IconLoader<URI, PackageItemIco
     @Override
     protected PackageItemIcon loadInBackground(Task task, URI uri, Object[] params, int flags) {
         try {
-            return PackageUtils.getPackageArchiveIcon(mPackageManager, ImageModule.getParameters(params));
+            return PackageUtils.getPackageArchiveIcon(mModule.mContext.getPackageManager(), ImageModule.getParameters(params));
         } catch (NameNotFoundException e) {
             return null;
         }

@@ -2,6 +2,8 @@ package com.tencent.test;
 
 import android.app.Application;
 import android.content.pm.PackageInfo;
+import android.ext.cache.Cache;
+import android.ext.cache.FileCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
@@ -13,8 +15,10 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
+import android.support.annotation.Keep;
 import android.util.Log;
 import android.util.LogPrinter;
+import java.io.File;
 import java.util.concurrent.Executor;
 
 public final class MainApplication extends Application {
@@ -85,6 +89,20 @@ public final class MainApplication extends Application {
 
     public static String[] obtainUrls() {
         return Urls;
+    }
+
+    @SuppressWarnings("unused")
+    private static final class MainImageLoader extends ImageLoader<String, Object> {
+        @Keep
+        public MainImageLoader(ImageModule<?, ?> module, Cache<String, Object> cache, FileCache fileCache, ImageDecoder<Object> decoder) {
+            super(module, cache, fileCache, decoder);
+        }
+
+        @Override
+        protected Object loadInBackground(Task task, String uri, Object[] params, int flags) {
+            Log.i("abcd", "loadInBackground - uri = " + uri);
+            return super.loadInBackground(task, uri, params, flags);
+        }
     }
 
     private static final String[] Urls = {

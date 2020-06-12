@@ -1,3 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+<loader xmlns:app="http://schemas.android.com/apk/res-auto"
+    class="com.tencent.test.MainApplication$MainImageLoader"
+    app:decoder="" />
+-->
 <ImageLoader xmlns:app="http://schemas.android.com/apk/res-auto"
     app:decoder="" />

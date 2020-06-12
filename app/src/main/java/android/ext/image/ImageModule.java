@@ -135,7 +135,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
             mLoaderCache.append(id, loader = XmlResources.load(mContext, id, this));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads the ImageLoader - ID #0x" + Integer.toHexString(id));
+            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + loader + " - ID #0x" + Integer.toHexString(id));
         }
 
         return loader;
@@ -268,9 +268,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
-        if (IconLoader.class.isAssignableFrom(clazz)) {
+        try {
             return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
-        } else {
+        } catch (ReflectiveOperationException e) {
             return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
         }
     }
@@ -324,7 +324,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         if (result == null) {
             DebugUtils.__checkStartMethodTracing();
             mResources.append(id, result = XmlResources.load(mContext, id));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads xml resource - ID #0x" + Integer.toHexString(id));
+            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + result + " - ID #0x" + Integer.toHexString(id));
         }
 
         return result;

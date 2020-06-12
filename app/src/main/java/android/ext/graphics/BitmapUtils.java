@@ -105,7 +105,7 @@ public final class BitmapUtils {
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
-     * @param opts The {@link Options} to use for decoding.
+     * @param opts May be <tt>null</tt>. The {@link Options} to use for decoding.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @throws IOException if an error occurs while decode from <em>uri</em>.
      * @see UriUtils#openInputStream(Context, Object)

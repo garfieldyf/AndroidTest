@@ -13,6 +13,7 @@ import android.os.Process;
 import android.text.format.DateFormat;
 import android.util.JsonWriter;
 import android.util.Log;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -106,7 +107,7 @@ public final class ProcessUtils {
     /**
      * Class <tt>CrashDatabase</tt> store the application crash infos.
      */
-    public static final class CrashDatabase extends SQLiteOpenHelper {
+    public static final class CrashDatabase extends SQLiteOpenHelper implements Closeable {
         /**
          * The crash date column index of the table.
          * <P>Type: INTEGER (long from System.curentTimeMillis())</P>
@@ -154,7 +155,7 @@ public final class ProcessUtils {
          * @param context The <tt>Context</tt>.
          */
         public CrashDatabase(Context context) {
-            super(context, "crash.db", null, 1);
+            super(context, "crashes.db", null, 1);
         }
 
         /**
@@ -302,17 +303,14 @@ public final class ProcessUtils {
         }
 
         /**
-         * Writes the crash infos to the "crash.db.crashes" table.
+         * Writes the crash infos to the "crashes.db.crashes" table.
          */
         @SuppressWarnings({ "unused", "deprecation" })
         private void storeUncaughtException(PackageInfo info, String processName, Thread thread, Throwable e) {
-            final CrashDatabase db = new CrashDatabase(mContext);
-            try {
+            try (final CrashDatabase db = new CrashDatabase(mContext)) {
                 final StringWriter stackTrace = new StringWriter(2048);
                 e.printStackTrace(new PrintWriter(stackTrace));
                 DatabaseUtils.executeInsert(db.getWritableDatabase(), "INSERT INTO crashes VALUES(?,?,?,?,?,?,?)", System.currentTimeMillis(), info.versionCode, info.versionName, processName, thread.getName(), e.getClass().getName(), stackTrace.toString());
-            } finally {
-                db.close();
             }
         }
 

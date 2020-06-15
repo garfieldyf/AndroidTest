@@ -9,6 +9,7 @@ import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
 import android.os.Environment;
+import android.os.Process;
 import android.os.StatFs;
 import android.os.SystemProperties;
 import android.os.storage.StorageManager;
@@ -94,11 +95,8 @@ public final class DeviceUtils {
      * Tests the current device in a low memory situation. If the total
      * memory size of the current device less 800 MB return <tt>true</tt>.
      */
-    public static boolean isLowMemory(Context context) {
-        final ActivityManager am = (ActivityManager)context.getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        final MemoryInfo info = new MemoryInfo();
-        am.getMemoryInfo(info);
-        return (info.totalMem < (1024 * 1024 * 800L) /* 800 MB */);
+    public static boolean isLowMemory() {
+        return (Process.getTotalMemory() < (1024 * 1024 * 800L) /* 800 MB */);
     }
 
     /**
@@ -394,18 +392,10 @@ public final class DeviceUtils {
         return (heapSize != 0 ? FileUtils.formatFileSize(heapSize << 20) : SystemProperties.get(key, "N/A"));
     }
 
-    @SuppressWarnings("deprecation")
     private static StringBuilder dumpStorageInfo(StatFs statFs, StringBuilder out) {
-        final long bsize, blocks, bavail;
-        if (Build.VERSION.SDK_INT >= 18) {
-            bsize  = statFs.getBlockSizeLong();
-            blocks = statFs.getBlockCountLong();
-            bavail = statFs.getAvailableBlocksLong();
-        } else {
-            bsize  = statFs.getBlockSize();
-            blocks = statFs.getBlockCount();
-            bavail = statFs.getAvailableBlocks();
-        }
+        final long bsize  = statFs.getBlockSizeLong();
+        final long blocks = statFs.getBlockCountLong();
+        final long bavail = statFs.getAvailableBlocksLong();
 
         return out.append(" total = ").append(FileUtils.formatFileSize(blocks * bsize))
                   .append(", used = ").append(FileUtils.formatFileSize((blocks - bavail) * bsize))
@@ -425,15 +415,12 @@ public final class DeviceUtils {
                 continue;
             }
 
+            final String state = volume.getState();
             dumpWhiteSpace(out, i)
-                .append(getUserLabel(context, volume))
+                .append(getUserLabel(context, volume, i))
                 .append(" [ path = ").append(path)
-                .append(", primary = ").append(volume.isPrimary());
-
-            if (Build.VERSION.SDK_INT >= 18) {
-                final String state = volume.getState();
-                out.append(", state = ").append(state != null ? state : "unknown");
-            }
+                .append(", primary = ").append(volume.isPrimary())
+                .append(", state = ").append(state != null ? state : "unknown");
 
             dumpStorageInfo(statFs, out.append(','));
         }
@@ -449,16 +436,12 @@ public final class DeviceUtils {
         return out.append("  ");
     }
 
-    private static String getUserLabel(Context context, StorageVolume volume) {
-        String userLabel = null;
-        if (Build.VERSION.SDK_INT >= 18) {
-            userLabel = volume.getUserLabel();
-        }
-
+    private static String getUserLabel(Context context, StorageVolume volume, int index) {
+        String userLabel = volume.getUserLabel();
         if (TextUtils.isEmpty(userLabel)) {
             userLabel = volume.getDescription(context);
             if (TextUtils.isEmpty(userLabel)) {
-                userLabel = "storage_" + volume.getStorageId();
+                userLabel = "storage_" + index;
             }
         }
 

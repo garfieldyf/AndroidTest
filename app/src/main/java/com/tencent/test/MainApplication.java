@@ -39,7 +39,7 @@ public final class MainApplication extends Application {
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
         mImageModule = new Builder<String, Object>(this)
-            .setScaleMemory(DeviceUtils.isLowMemory(this) ? 0 : 0.4f)
+            .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
             .setImageSize(128)
             .setFileSize(500)
 //            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))

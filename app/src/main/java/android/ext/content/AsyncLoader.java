@@ -128,9 +128,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #loadSync(Key)
      */
     public Value loadSync(Key key, int flags, Params... params) {
-        DebugUtils.__checkError(key == null, "key == null");
         DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");
-        if (mState == SHUTDOWN) {
+        if (key == null || mState == SHUTDOWN) {
             return null;
         }
 

@@ -124,7 +124,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @see #load(URI)
      */
     public final Image loadSync(URI uri, int flags, int paramsId) {
-        DebugUtils.__checkError(uri == null, "uri == null");
         return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, paramsId));
     }
 

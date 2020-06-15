@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.ext.net.NetworkUtils;
 import android.graphics.Point;
 import android.os.Build;
@@ -109,17 +110,8 @@ public final class DeviceUtils {
 
     @SuppressWarnings("deprecation")
     public static void dumpSystemInfo(Context context, Printer printer) {
-        context = context.getApplicationContext();
-        final WindowManager wm = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
-        final Display display  = wm.getDefaultDisplay();
-
-        final DisplayMetrics dm = new DisplayMetrics();
-        display.getMetrics(dm);
-
-        final Point size = new Point();
-        display.getRealSize(size);
-
         // Dumps the system infos.
+        context = context.getApplicationContext();
         final int cpuCore = Runtime.getRuntime().availableProcessors();
         final StringBuilder infos = new StringBuilder(256);
         DebugUtils.dumpSummary(printer, infos, 110, " System Informations ", (Object[])null);
@@ -160,7 +152,8 @@ public final class DeviceUtils {
         printer.println(infos.toString());
 
         // Dumps configuration infos.
-        final Configuration config = context.getResources().getConfiguration();
+        final Resources res = context.getResources();
+        final Configuration config = res.getConfiguration();
         infos.setLength(0);
         infos.append("  mcc = ").append(config.mcc)
              .append("\n  mnc = ").append(config.mnc)
@@ -175,6 +168,11 @@ public final class DeviceUtils {
         printer.println(infos.toString());
 
         // Dumps display infos.
+        final DisplayMetrics dm = res.getDisplayMetrics();
+        final Display display = ((WindowManager)context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        final Point size = new Point();
+        display.getRealSize(size);
+
         infos.setLength(0);
         infos.append("  realWidth  = ").append(size.x)
              .append("\n  realHeight = ").append(size.y)

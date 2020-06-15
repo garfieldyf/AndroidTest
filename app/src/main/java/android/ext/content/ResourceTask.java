@@ -7,6 +7,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
+import android.ext.util.DebugUtils;
 import java.io.File;
 
 /**
@@ -106,7 +107,8 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
 
     @Override
     protected void onPostExecute(Result result) {
-        if (mListener != null && validateOwner(mOwner)) {
+        DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setOnLoadCompleteListener()");
+        if (validateOwner(mOwner)) {
             mListener.onLoadComplete(mKey, mLoadParams, mCookie, result);
         }
     }

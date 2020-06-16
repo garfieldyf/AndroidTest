@@ -2,7 +2,7 @@ package android.ext.image.params;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.graphics.BitmapUtils;
+import android.ext.support.AppCompat;
 import android.ext.util.ClassUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -84,7 +84,7 @@ public class Parameters {
      * <tt>out...</tt> fields are set.
      */
     public int computeByteCount(Options opts) {
-        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * BitmapUtils.getBytesPerPixel(config);
+        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * AppCompat.getBytesPerPixel(opts);
     }
 
     public void dump(Printer printer, StringBuilder result) {
@@ -120,7 +120,7 @@ public class Parameters {
      * store the image's pixels when decoding the image.
      */
     /* package */ final int computeByteCountImpl(Options opts) {
-        final int byteCount = BitmapUtils.getBytesPerPixel(config);
+        final int byteCount = AppCompat.getBytesPerPixel(opts);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);
         } else {

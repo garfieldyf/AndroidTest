@@ -11,6 +11,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -85,21 +86,28 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     private static void __checkDumpOptions(Options opts, int flags) {
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
-            Log.d("BitmapDecoder", new StringBuilder(opts.toString()).append("\n{")
-               .append("\n  inSampleSize = ").append(opts.inSampleSize)
-               .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
-               .append("\n  inPreferredConfig  = ").append(opts.inPreferredConfig)
-               .append("\n  inMutable = ").append(opts.inMutable)
-               .append("\n  inDensity = ").append(opts.inDensity)
-               .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
-               .append("\n  inBitmap  = ").append(opts.inBitmap)
-               .append("\n  outWidth  = ").append(opts.outWidth)
-               .append("\n  outHeight = ").append(opts.outHeight)
-               .append("\n  outMimeType = ").append(opts.outMimeType)
-               .append("\n  inTempStorage = ").append(opts.inTempStorage).append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
-               .append("\n  inScaled = ").append(opts.inScaled)
-               .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
-               .append("\n}").toString());
+            final StringBuilder builder = new StringBuilder(opts.toString()).append("\n{")
+                .append("\n  inSampleSize = ").append(opts.inSampleSize)
+                .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
+                .append("\n  inPreferredConfig  = ").append(opts.inPreferredConfig)
+                .append("\n  inMutable = ").append(opts.inMutable)
+                .append("\n  inDensity = ").append(opts.inDensity)
+                .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
+                .append("\n  inBitmap  = ").append(opts.inBitmap)
+                .append("\n  outWidth  = ").append(opts.outWidth)
+                .append("\n  outHeight = ").append(opts.outHeight)
+                .append("\n  outMimeType = ").append(opts.outMimeType)
+                .append("\n  inTempStorage = ").append(opts.inTempStorage).append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
+                .append("\n  inScaled = ").append(opts.inScaled)
+                .append("\n  inScreenDensity = ").append(opts.inScreenDensity);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                builder.append("\n  outConfig = ").append(opts.outConfig)
+                    .append("\n  outColorSpace = ").append(opts.outColorSpace)
+                    .append("\n  inPreferredColorSpace = ").append(opts.inPreferredColorSpace);
+            }
+
+            Log.d("BitmapDecoder", builder.append("\n}").toString());
         }
     }
 }

@@ -1,10 +1,10 @@
 package android.ext.image.decoder;
 
+import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
 import android.ext.util.Pools.Pool;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
 
@@ -64,29 +64,9 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
         } finally {
-            recycleOptions(opts);
+            clearForRecycle(opts);
+            mOptionsPool.recycle(opts);
         }
-    }
-
-    /**
-     * Recycles the specified <em>opts</em> to the internal pool.
-     * @param opts The {@link Options} to recycle.
-     */
-    private void recycleOptions(Options opts) {
-        opts.inBitmap  = null;
-        opts.inDensity = 0;
-        opts.outWidth  = 0;
-        opts.outHeight = 0;
-        opts.inScaled  = true;
-        opts.inMutable = false;
-        opts.inSampleSize  = 0;
-        opts.outMimeType   = null;
-        opts.inTempStorage = null;
-        opts.inTargetDensity = 0;
-        opts.inScreenDensity = 0;
-        opts.inJustDecodeBounds = false;
-        opts.inPreferredConfig  = Config.ARGB_8888;
-        mOptionsPool.recycle(opts);
     }
 
     /**

@@ -92,6 +92,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
+     * <li>{@link File} (no scheme)</li>
      * <li>ftp ({@link #SCHEME_FTP})</li>
      * <li>http ({@link #SCHEME_HTTP})</li>
      * <li>https ({@link #SCHEME_HTTPS})</li>
@@ -142,7 +143,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
-            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+            final String uriString = uri.toString();
+            return (matchScheme(uriString) ? (Image)mLoader.load(task, uriString, params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -164,7 +166,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
 //     */
 //    protected Image loadImage(Task task, URI uri, Object[] params, int flags, byte[] buffer) {
-//        return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+//        final String uriString = uri.toString();
+//        return (matchScheme(uriString) ? (Image)mLoader.load(task, uriString, params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
 //    }
 
     /**
@@ -199,10 +202,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * Matches the scheme of the specified <em>uri</em>. The default implementation
      * match the "http", "https" and "ftp".
      */
-    private static boolean matchScheme(Object uri) {
+    private static boolean matchScheme(String uri) {
         DebugUtils.__checkError(uri == null, "uri == null");
-        final String uriString = uri.toString();
-        return ("http://".regionMatches(true, 0, uriString, 0, 7) || "https://".regionMatches(true, 0, uriString, 0, 8) || "ftp://".regionMatches(true, 0, uriString, 0, 6));
+        return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
     }
 
     /**

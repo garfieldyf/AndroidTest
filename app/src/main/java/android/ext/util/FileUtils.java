@@ -441,6 +441,7 @@ public final class FileUtils {
      * <p>Note: This method will be create the necessary directories.</p>
      * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
+     * <li>{@link File} (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
      * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
@@ -523,6 +524,7 @@ public final class FileUtils {
      * Reads the specified file contents into the specified <em>out</em>.
      * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
+     * <li>{@link File} (no scheme)</li>
      * <li>file ({@link #SCHEME_FILE})</li>
      * <li>content ({@link #SCHEME_CONTENT})</li>
      * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>

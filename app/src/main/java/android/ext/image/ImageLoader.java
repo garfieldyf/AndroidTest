@@ -45,10 +45,10 @@ import java.util.Arrays;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {
     /**
-     * If set the image loader will be dump the {@link Options} when it will
-     * be load image. (flags 0x00FF0000) <p>This flag can be used DEBUG mode.</p>
+     * If set the image loader will be dump the {@link Options} when
+     * it will be load image.<p>This flag can be used DEBUG mode.</p>
      */
-    public static final int FLAG_DUMP_OPTIONS = 0x00400000;
+    public static final int FLAG_DUMP_OPTIONS = 0x00400000;    /* flags 0x00FF0000 */
 
     private final Loader mLoader;
     private final LoadRequest mRequest;
@@ -329,6 +329,17 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          */
         public final LoadRequest skipMemory() {
             mFlags |= FLAG_IGNORE_MEMORY_CACHE;
+            return this;
+        }
+
+        /**
+         * Equivalent to calling <tt>flags(FLAG_DUMP_OPTIONS)</tt>.
+         * @return This request.
+         * @see #flags(int)
+         * @see #FLAG_DUMP_OPTIONS
+         */
+        public final LoadRequest dumpOptions() {
+            mFlags |= FLAG_DUMP_OPTIONS;
             return this;
         }
 

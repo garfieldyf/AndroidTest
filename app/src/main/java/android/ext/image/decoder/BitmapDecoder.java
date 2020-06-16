@@ -91,23 +91,26 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
                 .append("\n  inJustDecodeBounds = ").append(opts.inJustDecodeBounds)
                 .append("\n  inPreferredConfig  = ").append(opts.inPreferredConfig)
                 .append("\n  inMutable = ").append(opts.inMutable)
+                .append("\n  inScaled  = ").append(opts.inScaled)
                 .append("\n  inDensity = ").append(opts.inDensity)
                 .append("\n  inTargetDensity = ").append(opts.inTargetDensity)
+                .append("\n  inScreenDensity = ").append(opts.inScreenDensity)
                 .append("\n  inBitmap  = ").append(opts.inBitmap)
                 .append("\n  outWidth  = ").append(opts.outWidth)
-                .append("\n  outHeight = ").append(opts.outHeight)
-                .append("\n  outMimeType = ").append(opts.outMimeType)
-                .append("\n  inTempStorage = ").append(opts.inTempStorage).append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
-                .append("\n  inScaled = ").append(opts.inScaled)
-                .append("\n  inScreenDensity = ").append(opts.inScreenDensity);
+                .append("\n  outHeight = ").append(opts.outHeight);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 builder.append("\n  outConfig = ").append(opts.outConfig)
+                    .append("\n  outMimeType = ").append(opts.outMimeType)
                     .append("\n  outColorSpace = ").append(opts.outColorSpace)
                     .append("\n  inPreferredColorSpace = ").append(opts.inPreferredColorSpace);
+            } else {
+                builder.append("\n  outMimeType = ").append(opts.outMimeType);
             }
 
-            Log.d("BitmapDecoder", builder.append("\n}").toString());
+            Log.d("BitmapDecoder", builder.append("\n  inTempStorage = ").append(opts.inTempStorage)
+                .append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
+                .append("\n}").toString());
         }
     }
 }

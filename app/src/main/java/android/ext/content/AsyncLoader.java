@@ -18,9 +18,9 @@ import java.util.concurrent.Executor;
 @SuppressWarnings({ "unchecked", "rawtypes" })
 public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
-     * If set the loader will be ignored the memory cache when it will be load value. (flags 0x00FF0000)
+     * If set the loader will be ignored the memory cache when it will be load value.
      */
-    public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;
+    public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;    /* flags 0x00FF0000 */
 
     /**
      * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_DUMP_OPTIONS);
@@ -275,9 +275,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     public static interface Binder<Key, Params, Value> {
         /**
-         * Indicates the value load from a background thread. (state 0xFF000000)
+         * Indicates the value load from a background thread.
          */
-        int STATE_LOAD_FROM_BACKGROUND = 0x80000000;
+        int STATE_LOAD_FROM_BACKGROUND = 0x80000000;    /* state 0xFF000000 */
 
         /**
          * Binds the specified <em>value</em> to the specified <em>target</em> on the

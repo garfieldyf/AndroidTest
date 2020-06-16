@@ -19,7 +19,6 @@ import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
-import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -118,13 +117,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
      * @param uri The uri to load.
+     * @param resId The xml resource id of the {@link Parameters} to decode image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
-     * @param paramsId The resource id of the {@link Parameters} to decode image.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
      * @see #load(URI)
      */
-    public final Image loadSync(URI uri, int flags, int paramsId) {
-        return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, paramsId));
+    public final Image loadSync(URI uri, int resId, int flags) {
+        return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, resId));
     }
 
     @Override
@@ -143,7 +142,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
-            return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+            return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -165,7 +164,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //     * @return The image object, or <tt>null</tt> if the load failed or cancelled.
 //     */
 //    protected Image loadImage(Task task, URI uri, Object[] params, int flags, byte[] buffer) {
-//        return (UriUtils.matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
+//        return (matchScheme(uri) ? (Image)mLoader.load(task, uri.toString(), params, flags, buffer) : mDecoder.decodeImage(uri, params, flags, buffer));
 //    }
 
     /**
@@ -194,6 +193,16 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      */
     private static Object resolveUri(Object uri) {
         return (uri instanceof String && ((String)uri).length() == 0 ? null : uri);
+    }
+
+    /**
+     * Matches the scheme of the specified <em>uri</em>. The default implementation
+     * match the "http", "https" and "ftp".
+     */
+    private static boolean matchScheme(Object uri) {
+        DebugUtils.__checkError(uri == null, "uri == null");
+        final String uriString = uri.toString();
+        return ("http://".regionMatches(true, 0, uriString, 0, 7) || "https://".regionMatches(true, 0, uriString, 0, 8) || "ftp://".regionMatches(true, 0, uriString, 0, 6));
     }
 
     /**
@@ -413,7 +422,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //        public final void preload() {
 //            DebugUtils.__checkError(mUri == null, "uri == null");
 //            DebugUtils.__checkWarning(mLoader.getCache() == Caches.emptyCache(), "ImageLoader", "The image cache is empty, Calling the preload has no effect.");
-//            if (mLoader.getCache() != Caches.emptyCache()) {
+//            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "ImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, Calling the preload has no effect.");
+//            if (mLoader.getCache() != Caches.emptyCache() && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
 //                mLoader.load(mUri, mUri, mFlags, Binder.emptyBinder(), mParams);
 //            }
 //        }

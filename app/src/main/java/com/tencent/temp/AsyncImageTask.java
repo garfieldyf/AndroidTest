@@ -11,7 +11,6 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools.ByteArrayPool;
-import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -138,7 +137,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
      * @see #decodeImage(Object, byte[])
      */
     protected Object decodeImage(URI uri, byte[] tempBuffer, Object reserved) {
-        return (UriUtils.matchScheme(uri) ? downloadImage(uri.toString(), tempBuffer) : decodeImage(uri, tempBuffer));
+        return (matchScheme(uri) ? downloadImage(uri.toString(), tempBuffer) : decodeImage(uri, tempBuffer));
     }
 
     /**
@@ -191,5 +190,11 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
         } finally {
             imageFile.delete();
         }
+    }
+
+    private static boolean matchScheme(Object uri) {
+        DebugUtils.__checkError(uri == null, "uri == null");
+        final String uriString = uri.toString();
+        return ("http://".regionMatches(true, 0, uriString, 0, 7) || "https://".regionMatches(true, 0, uriString, 0, 8) || "ftp://".regionMatches(true, 0, uriString, 0, 6));
     }
 }

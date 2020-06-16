@@ -72,18 +72,6 @@ public final class UriUtils {
     }
 
     /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation
-     * match the "http", "https" and "ftp".
-     * @param uri The uri to match.
-     * @return <tt>true</tt> if the scheme match successful, <tt>false</tt> otherwise.
-     */
-    public static boolean matchScheme(Object uri) {
-        DebugUtils.__checkError(uri == null, "uri == null");
-        final String uriString = uri.toString();
-        return ("http://".regionMatches(true, 0, uriString, 0, 7) || "https://".regionMatches(true, 0, uriString, 0, 8) || "ftp://".regionMatches(true, 0, uriString, 0, 6));
-    }
-
-    /**
      * Constructs a scheme is "file" uri from a <em>path</em>.
      * @param path The file path.
      * @return A {@link Uri} for the given <em>path</em>.

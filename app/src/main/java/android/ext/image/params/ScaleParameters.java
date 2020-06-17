@@ -56,6 +56,7 @@ public class ScaleParameters extends Parameters {
     public ScaleParameters(Config config, float scale, boolean mutable) {
         super(DENSITY_DEVICE, config, mutable);
         this.scale = scale;
+        DebugUtils.__checkDebug(true, "ScaleParameters", "The screen density = " + DeviceUtils.toDensity((int)value));
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
     }
 

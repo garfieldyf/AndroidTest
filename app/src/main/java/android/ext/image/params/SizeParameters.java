@@ -71,6 +71,7 @@ public class SizeParameters extends Parameters {
         super(DENSITY_DEVICE, config, mutable);
         this.width  = width;
         this.height = height;
+        DebugUtils.__checkDebug(true, "SizeParameters", "The screen density = " + DeviceUtils.toDensity((int)value));
     }
 
     @Override

@@ -102,31 +102,6 @@ public final class PackageUtils {
     }
 
     /**
-     * Retrieve the {@link PackageItemIcon} from an {@link ApplicationInfo}.
-     * @param pm The <tt>PackageManager</tt>.
-     * @param info The package archive file's {@link ApplicationInfo} and the
-     * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
-     * must be contains the archive file full path.
-     * @throws NameNotFoundException if the resources for the given application
-     * could not be loaded.
-     * @see PackageManager#getPackageArchiveInfo(String, int)
-     */
-    @SuppressWarnings("deprecation")
-    public static PackageItemIcon getPackageArchiveIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
-        DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
-        final Resources res = pm.getResourcesForApplication(info);
-        try {
-            final Drawable icon = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());
-            final CharSequence label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
-            return new PackageItemIcon(icon, label);
-        } finally {
-            // Close the assets to avoid ProcessKiller
-            // kill my process after unmounting usb disk.
-            res.getAssets().close();
-        }
-    }
-
-    /**
      * Returns a <tt>List</tt> of all packages that are installed on the device.
      * @param pm The <tt>PackageManager</tt>.
      * @param flags Additional option flags. See {@link PackageManager#getInstalledPackages(int)}.
@@ -197,7 +172,7 @@ public final class PackageUtils {
     /**
      * Class <tt>PackageItemIcon</tt> used to store the package item's icon and label.
      */
-    public static final class PackageItemIcon {
+    public static class PackageItemIcon {
         /**
          * The package item's icon.
          */
@@ -225,6 +200,41 @@ public final class PackageUtils {
             this.icon  = info.loadIcon(pm);
             this.label = info.loadLabel(pm);
         }
+
+        /**
+         * Constructor
+         * @param pm The <tt>PackageManager</tt>.
+         * @param info The package archive file's {@link ApplicationInfo} and the
+         * {@link ApplicationInfo#publicSourceDir ApplicationInfo's publicSourceDir}
+         * must be contains the archive file full path.
+         * @throws NameNotFoundException if the resources for the given application
+         * could not be loaded.
+         * @see PackageManager#getPackageArchiveInfo(String, int)
+         */
+        @SuppressWarnings("deprecation")
+        public PackageItemIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
+            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
+            final Resources res = pm.getResourcesForApplication(info);
+            try {
+                this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());
+                this.label = (info.nonLocalizedLabel != null ? info.nonLocalizedLabel : StringUtils.trim(res.getText(info.labelRes, info.packageName)));
+                //initialize(pm, res, info);
+            } finally {
+                // Close the assets to avoid ProcessKiller
+                // kill my process after unmounting usb disk.
+                res.getAssets().close();
+            }
+        }
+
+//        /**
+//         * Initializes this object with the specified <em>info</em>. Subclasses should
+//         * override this method to initialize. The default implementation do nothing.
+//         * @param pm The <tt>PackageManager</tt>.
+//         * @param res The package archive file's <tt>Resources</tt>.
+//         * @param info The package archive file's <tt>ApplicationInfo</tt>.
+//         */
+//        protected void initialize(PackageManager pm, Resources res, ApplicationInfo info) {
+//        }
     }
 
     /**

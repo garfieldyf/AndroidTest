@@ -25,6 +25,7 @@ import android.view.View;
  *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
+@SuppressWarnings("deprecation")
 public class SizeParameters extends Parameters {
     private static final int[] SIZE_PARAMETERS_ATTRS = {
         android.R.attr.height,
@@ -34,12 +35,7 @@ public class SizeParameters extends Parameters {
     /**
      * The desired width to decode, in pixels.
      */
-    public final int width;
-
-    /**
-     * The desired height to decode, in pixels.
-     */
-    public final int height;
+    private final int width;
 
     /**
      * Constructor
@@ -52,9 +48,8 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.value  = context.getResources().getDisplayMetrics().densityDpi;
-        this.width  = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
-        this.height = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
+        this.width = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
+        this.value = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
         a.recycle();
     }
 
@@ -66,12 +61,10 @@ public class SizeParameters extends Parameters {
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    @SuppressWarnings("deprecation")
     public SizeParameters(Config config, int width, int height, boolean mutable) {
-        super(DENSITY_DEVICE, config, mutable);
-        this.width  = width;
-        this.height = height;
-        DebugUtils.__checkDebug(true, "SizeParameters", "The screen density = " + DeviceUtils.toDensity((int)value));
+        super(height, config, mutable);
+        this.width = width;
+        DebugUtils.__checkDebug(true, "SizeParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
     }
 
     @Override
@@ -91,19 +84,18 @@ public class SizeParameters extends Parameters {
         if (target instanceof View) {
             final View view = (View)target;
             width  = Math.max(view.getWidth(),  this.width);
-            height = Math.max(view.getHeight(), this.height);
+            height = Math.max(view.getHeight(), (int)value);
         } else {
             width  = this.width;
-            height = this.height;
+            height = (int)value;
         }
 
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The desired width = 0, the image will be decode original size.");
         opts.inSampleSize = 1;
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
-            final int screenDensity = (int)value;
-            opts.inTargetDensity = screenDensity;
-            opts.inDensity = (int)(screenDensity * scale + 0.5f);
+            opts.inTargetDensity = DENSITY_DEVICE;
+            opts.inDensity = (int)(DENSITY_DEVICE * scale + 0.5f);
         } else {
             opts.inDensity = opts.inTargetDensity = 0;
         }
@@ -114,8 +106,8 @@ public class SizeParameters extends Parameters {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", width = ").append(width)
-            .append(", height = ").append(height)
-            .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
+            .append(", height = ").append(value)
+            .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

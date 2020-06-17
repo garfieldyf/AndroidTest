@@ -22,12 +22,8 @@ import android.util.Printer;
  *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */
+@SuppressWarnings("deprecation")
 public class ScaleParameters extends Parameters {
-    /**
-     * The scale amount of the image's size to decode.
-     */
-    public final float scale;
-
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
@@ -38,9 +34,8 @@ public class ScaleParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(context.getPackageName(), "ScaleParameters"));
-        this.value = context.getResources().getDisplayMetrics().densityDpi;
-        this.scale = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
-        DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
+        this.value = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
+        DebugUtils.__checkError(Float.compare((float)value, +0.0f) < 0 || Float.compare((float)value, +1.0f) > 0, "The scale " + value + " out of range [0 - 1.0]");
         a.recycle();
     }
 
@@ -52,11 +47,9 @@ public class ScaleParameters extends Parameters {
      * @param mutable Whether to decode a mutable bitmap.
      * @see #ScaleParameters(Context, AttributeSet)
      */
-    @SuppressWarnings("deprecation")
     public ScaleParameters(Config config, float scale, boolean mutable) {
-        super(DENSITY_DEVICE, config, mutable);
-        this.scale = scale;
-        DebugUtils.__checkDebug(true, "ScaleParameters", "The screen density = " + DeviceUtils.toDensity((int)value));
+        super(scale, config, mutable);
+        DebugUtils.__checkDebug(true, "ScaleParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
     }
 
@@ -72,10 +65,10 @@ public class ScaleParameters extends Parameters {
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
         opts.inSampleSize = 1;
+        final float scale = (float)value;
         if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
-            final int screenDensity = (int)value;
-            opts.inTargetDensity = screenDensity;
-            opts.inDensity = (int)(screenDensity * (opts.outWidth / (opts.outWidth * scale)));
+            opts.inTargetDensity = DENSITY_DEVICE;
+            opts.inDensity = (int)(DENSITY_DEVICE * (opts.outWidth / (opts.outWidth * scale)));
         } else {
             opts.inDensity = opts.inTargetDensity = 0;
         }
@@ -85,8 +78,8 @@ public class ScaleParameters extends Parameters {
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", scale = ").append(scale)
-            .append(", screenDensity = ").append(DeviceUtils.toDensity((int)value))
+            .append(", scale = ").append(value)
+            .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }

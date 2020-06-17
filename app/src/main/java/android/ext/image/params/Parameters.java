@@ -98,7 +98,7 @@ public class Parameters {
 
     /**
      * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = RGB_565, mutable = false).
+     * (The default parameters sample size = 1, config = RGB_565, mutable = true).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
@@ -135,9 +135,9 @@ public class Parameters {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = false).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = true).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0, false);
+        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0, true);
     }
 }

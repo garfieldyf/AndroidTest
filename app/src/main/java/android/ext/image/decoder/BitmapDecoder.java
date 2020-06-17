@@ -47,7 +47,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         }
 
         // Computes the sample size.
-        opts.inMutable = parameters.mutable;
         opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(target, opts);
 

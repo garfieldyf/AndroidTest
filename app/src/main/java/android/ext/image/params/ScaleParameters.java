@@ -18,7 +18,6 @@ import android.util.Printer;
  * &lt;ScaleParameters
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      app:config="[ argb_8888 | rgb_565 ]"
- *      app:mutable="true"
  *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */
@@ -28,7 +27,7 @@ public class ScaleParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #ScaleParameters(Config, float, boolean)
+     * @see #ScaleParameters(Config, float)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -44,11 +43,10 @@ public class ScaleParameters extends Parameters {
      * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
      * @param scale The scale amount of the image's size to decode.
-     * @param mutable Whether to decode a mutable bitmap.
      * @see #ScaleParameters(Context, AttributeSet)
      */
-    public ScaleParameters(Config config, float scale, boolean mutable) {
-        super(scale, config, mutable);
+    public ScaleParameters(Config config, float scale) {
+        super(scale, config);
         DebugUtils.__checkDebug(true, "ScaleParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
     }
@@ -80,7 +78,6 @@ public class ScaleParameters extends Parameters {
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(value)
             .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
-            .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }
 }

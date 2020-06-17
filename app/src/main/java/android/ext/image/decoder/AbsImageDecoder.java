@@ -4,6 +4,7 @@ import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
+import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
@@ -61,6 +62,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
+            DebugUtils.__checkError(!opts.inMutable, "The opts.inMutable must be true.");
             return decodeImage(uri, target, params, flags, opts);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);

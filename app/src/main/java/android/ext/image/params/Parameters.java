@@ -17,7 +17,6 @@ import android.util.Printer;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:config="[ argb_8888 | rgb_565 ]"
- *      app:mutable="true"
  *      app:sampleSize="2"
  *      app:attribute1="value1"
  *      app:attribute2="value2"
@@ -39,33 +38,26 @@ public class Parameters {
     public final Config config;
 
     /**
-     * If set the decoder always return a mutable bitmap.
-     */
-    public final boolean mutable;
-
-    /**
      * Constructor
      * @param config The {@link Config} to decode.
      * @param sampleSize The sample size to decode.
-     * @param mutable Whether to decode a mutable bitmap.
      * @see #Parameters(Context, AttributeSet)
      */
-    public Parameters(Config config, int sampleSize, boolean mutable) {
-        this(fixSampleSize(sampleSize), config, mutable);
+    public Parameters(Config config, int sampleSize) {
+        this(fixSampleSize(sampleSize), config);
     }
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #Parameters(Config, int, boolean)
+     * @see #Parameters(Config, int)
      */
     public Parameters(Context context, AttributeSet attrs) {
         final String packageName = context.getPackageName();
         final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "Parameters"));
-        this.value   = fixSampleSize(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
-        this.config  = a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
-        this.mutable = a.getBoolean(ClassUtils.getFieldValue(packageName, "Parameters_mutable"), false);
+        this.value  = fixSampleSize(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
+        this.config = a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
         a.recycle();
     }
 
@@ -92,13 +84,12 @@ public class Parameters {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", sampleSize = ").append(value)
-            .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }
 
     /**
      * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = RGB_565, mutable = true).
+     * (The default parameters sample size = 1, config = RGB_565).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
@@ -108,12 +99,10 @@ public class Parameters {
      * Constructor
      * @param value The Object by user-defined to decode.
      * @param config The {@link Config} to decode.
-     * @param mutable Whether to decode a mutable bitmap.
      */
-    protected Parameters(Object value, Config config, boolean mutable) {
-        this.mutable = mutable;
-        this.value   = value;
-        this.config  = (config != null ? config : Config.ARGB_8888);
+    protected Parameters(Object value, Config config) {
+        this.value  = value;
+        this.config = (config != null ? config : Config.ARGB_8888);
     }
 
     /**
@@ -135,9 +124,9 @@ public class Parameters {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = true).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0, true);
+        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0);
     }
 }

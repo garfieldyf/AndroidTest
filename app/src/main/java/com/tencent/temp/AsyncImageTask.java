@@ -160,7 +160,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
                 opts.inJustDecodeBounds = false;
 
                 // Computes the sample size.
-                opts.inMutable = mParameters.mutable;
+                opts.inMutable = true;
                 opts.inPreferredConfig = mParameters.config;
                 mParameters.computeSampleSize(null, opts);
             }

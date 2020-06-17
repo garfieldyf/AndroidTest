@@ -21,7 +21,6 @@ import android.view.View;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      android:width="200dp"
  *      android:height="300dp"
- *      app:mutable="true"
  *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
@@ -41,7 +40,7 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #SizeParameters(Config, int, int, boolean)
+     * @see #SizeParameters(Config, int, int)
      */
     @SuppressLint("ResourceType")
     public SizeParameters(Context context, AttributeSet attrs) {
@@ -58,11 +57,10 @@ public class SizeParameters extends Parameters {
      * @param config The {@link Config} to decode.
      * @param width The desired width to decode, in pixels.
      * @param height The desired height to decode, in pixels.
-     * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Config config, int width, int height, boolean mutable) {
-        super(height, config, mutable);
+    public SizeParameters(Config config, int width, int height) {
+        super(height, config);
         this.width = width;
         DebugUtils.__checkDebug(true, "SizeParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
     }
@@ -108,7 +106,6 @@ public class SizeParameters extends Parameters {
             .append(", width = ").append(width)
             .append(", height = ").append(value)
             .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
-            .append(", mutable = ").append(mutable)
             .append(" }").toString());
     }
 }

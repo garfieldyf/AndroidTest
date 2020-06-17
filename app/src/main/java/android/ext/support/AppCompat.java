@@ -63,7 +63,6 @@ public final class AppCompat {
             opts.outWidth  = 0;
             opts.outHeight = 0;
             opts.inScaled  = true;
-            opts.inMutable = false;
             opts.inSampleSize  = 0;
             opts.outMimeType   = null;
             opts.inTempStorage = null;
@@ -120,7 +119,7 @@ public final class AppCompat {
         @Override
         public void clearForRecycle(Options opts) {
             super.clearForRecycle(opts);
-            opts.outConfig     = null;
+            opts.outConfig = null;
             opts.outColorSpace = null;
             opts.inPreferredColorSpace = null;
         }

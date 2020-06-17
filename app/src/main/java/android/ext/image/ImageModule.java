@@ -53,7 +53,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public final class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
+public final class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Options>, XmlResourceInflater<ImageLoader> {
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
@@ -95,8 +95,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
-        mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
+        mParamsPool  = Pools.newPool(() -> new Object[2], MAX_POOL_SIZE);
+        mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
     }
@@ -200,8 +200,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     @Override
-    public final Object[] newInstance() {
-        return new Object[2];
+    public final Options newInstance() {
+        final Options opts = new Options();
+        opts.inMutable = true;
+        return opts;
     }
 
     @Override

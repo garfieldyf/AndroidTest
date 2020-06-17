@@ -1,5 +1,6 @@
 package android.ext.image.params;
 
+import static android.util.DisplayMetrics.DENSITY_DEVICE;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.ClassUtils;
@@ -31,7 +32,7 @@ public class ScaleParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #ScaleParameters(Context, Config, float, boolean)
+     * @see #ScaleParameters(Config, float, boolean)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -51,8 +52,9 @@ public class ScaleParameters extends Parameters {
      * @param mutable Whether to decode a mutable bitmap.
      * @see #ScaleParameters(Context, AttributeSet)
      */
-    public ScaleParameters(Context context, Config config, float scale, boolean mutable) {
-        super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
+    @SuppressWarnings("deprecation")
+    public ScaleParameters(Config config, float scale, boolean mutable) {
+        super(DENSITY_DEVICE, config, mutable);
         this.scale = scale;
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
     }
@@ -63,7 +65,7 @@ public class ScaleParameters extends Parameters {
     }
 
     @Override
-    public void computeSampleSize(Options opts) {
+    public void computeSampleSize(Object target, Options opts) {
         /*
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%

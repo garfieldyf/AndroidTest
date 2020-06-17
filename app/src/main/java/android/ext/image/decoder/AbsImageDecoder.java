@@ -43,14 +43,15 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri The uri to decode.
+     * @param target The target, passed earlier by {@link ImageLoader#load}.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @param flags The flags, passed earlier by {@link ImageLoader#load}.
      * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeImage(Object, Object[], int, Options)
+     * @see #decodeImage(Object, Object, Object[], int, Options)
      */
     @Override
-    public Image decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
+    public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
             // Decodes the image bounds.
@@ -60,7 +61,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
-            return decodeImage(uri, params, flags, opts);
+            return decodeImage(uri, target, params, flags, opts);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
@@ -73,13 +74,14 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     /**
      * Decodes an image from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
+     * @param target The target, passed earlier by {@link #decodeImage}.
      * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see #decodeImage(Object, Object[], int, byte[])
+     * @see #decodeImage(Object, Object, Object[], int, byte[])
      */
-    protected abstract Image decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception;
+    protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
 }

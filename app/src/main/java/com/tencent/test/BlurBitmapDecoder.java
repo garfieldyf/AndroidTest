@@ -30,8 +30,8 @@ public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeabl
 //    }
 
     @Override
-    protected Bitmap decodeImage(Object uri, Object[] params, int flags, Options opts) throws Exception {
-        final Bitmap bitmap = super.decodeImage(uri, params, flags, opts);
+    protected Bitmap decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
+        final Bitmap bitmap = super.decodeImage(uri, target, params, flags, opts);
         mRenderScript.blur(bitmap, 10);
         return bitmap;
     }

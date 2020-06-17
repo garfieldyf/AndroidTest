@@ -57,7 +57,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
-    /* package */ static final int COOKIE      = 2;
     /* package */ static final int PARAMETERS  = 0;
     /* package */ static final int PLACEHOLDER = 1;
 
@@ -108,7 +107,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
-     *       .parameters(R.xml.decode_params)
      *       .placeholder(R.drawable.ic_placeholder)
      *       .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
@@ -203,7 +201,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     @Override
     public final Object[] newInstance() {
-        return new Object[3];
+        return new Object[2];
     }
 
     @Override
@@ -276,21 +274,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Returns an object by user-defined associated with the <em>params</em>.
-     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
-     * @return An object by user-defined.
-     * @see #getParameters(Object[])
-     * @see #getPlaceholder(Resources, Object[])
-     */
-    public static <T> T getCookie(Object[] params) {
-        return (T)params[COOKIE];
-    }
-
-    /**
      * Returns the parameters associated with the <em>params</em>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The parameters or <tt>null</tt>.
-     * @see #getCookie(Object[])
      * @see #getPlaceholder(Resources, Object[])
      */
     public static <T> T getParameters(Object[] params) {
@@ -302,7 +288,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param res The <tt>Resources</tt>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The placeholder <tt>Drawable</tt> or <tt>null</tt>.
-     * @see #getCookie(Object[])
      * @see #getParameters(Object[])
      */
     @SuppressWarnings("deprecation")

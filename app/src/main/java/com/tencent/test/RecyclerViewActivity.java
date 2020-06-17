@@ -225,7 +225,7 @@ public class RecyclerViewActivity extends Activity {
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
             MainApplication.sInstance.load(R.xml.image_loader, itemData)
                 .binder(R.xml.rounded_transition_binder)
-                .parameters(R.xml.size_params)
+//                .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
                 .into(itemView);
         }

@@ -104,7 +104,7 @@ public class GIFImageActivity extends Activity {
 //        }
 
         @Override
-        public GIFImage decodeImage(Object uri, Object[] params, int flags, byte[] tempStorage) {
+        public GIFImage decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
             return GIFImage.decode(null, uri, tempStorage);
         }
     }

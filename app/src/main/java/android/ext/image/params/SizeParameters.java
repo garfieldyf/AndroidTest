@@ -1,5 +1,6 @@
 package android.ext.image.params;
 
+import static android.util.DisplayMetrics.DENSITY_DEVICE;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +10,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
 import android.util.Printer;
+import android.view.View;
 
 /**
  * Class <tt>SizeParameters</tt> is an implementation of a {@link Parameters}.
@@ -43,7 +45,7 @@ public class SizeParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #SizeParameters(Context, Config, int, int, boolean)
+     * @see #SizeParameters(Config, int, int, boolean)
      */
     @SuppressLint("ResourceType")
     public SizeParameters(Context context, AttributeSet attrs) {
@@ -53,24 +55,22 @@ public class SizeParameters extends Parameters {
         this.value  = context.getResources().getDisplayMetrics().densityDpi;
         this.width  = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
         this.height = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
-        DebugUtils.__checkError(width <= 0 || height <= 0, "The tag requires a valid 'width' or 'height' attribute");
         a.recycle();
     }
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
      * @param config The {@link Config} to decode.
      * @param width The desired width to decode, in pixels.
      * @param height The desired height to decode, in pixels.
      * @param mutable Whether to decode a mutable bitmap.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Context context, Config config, int width, int height, boolean mutable) {
-        super(context.getResources().getDisplayMetrics().densityDpi, config, mutable);
+    @SuppressWarnings("deprecation")
+    public SizeParameters(Config config, int width, int height, boolean mutable) {
+        super(DENSITY_DEVICE, config, mutable);
         this.width  = width;
         this.height = height;
-        DebugUtils.__checkError(width <= 0 || height <= 0, "width <= 0 || height <= 0");
     }
 
     @Override
@@ -79,15 +79,26 @@ public class SizeParameters extends Parameters {
     }
 
     @Override
-    public void computeSampleSize(Options opts) {
+    public void computeSampleSize(Object target, Options opts) {
         /*
          * Scale width and height.
          *      scaleX = opts.outWidth  / width;
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
+        final int width, height;
+        if (target instanceof View) {
+            final View view = (View)target;
+            width  = Math.max(view.getWidth(),  this.width);
+            height = Math.max(view.getHeight(), this.height);
+        } else {
+            width  = this.width;
+            height = this.height;
+        }
+
+        DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The desired width = 0, the image will be decode original size.");
         opts.inSampleSize = 1;
-        if (opts.outWidth > width && opts.outHeight > height) {
+        if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             final int screenDensity = (int)value;
             opts.inTargetDensity = screenDensity;

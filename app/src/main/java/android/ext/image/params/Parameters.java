@@ -71,9 +71,10 @@ public class Parameters {
 
     /**
      * Computes a sample size for used to decode image.
+     * @param target May be <tt>null</tt>. The target to compute.
      * @param opts The {@link Options} to store the sample size.
      */
-    public void computeSampleSize(Options opts) {
+    public void computeSampleSize(Object target, Options opts) {
         opts.inSampleSize = (int)value;
     }
 
@@ -97,7 +98,7 @@ public class Parameters {
 
     /**
      * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = ARGB_8888, mutable = false).
+     * (The default parameters sample size = 1, config = RGB_565, mutable = false).
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;
@@ -134,9 +135,9 @@ public class Parameters {
     }
 
     /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = ARGB_8888, mutable = false).
+     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565, mutable = false).
      */
     private static final class DefaultParameters {
-        public static final Parameters sInstance = new Parameters(1, Config.ARGB_8888, false);
+        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0, false);
     }
 }

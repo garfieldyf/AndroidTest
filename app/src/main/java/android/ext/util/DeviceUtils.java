@@ -223,28 +223,28 @@ public final class DeviceUtils {
     public static String toDensity(int densityDpi) {
         switch (densityDpi) {
         case DisplayMetrics.DENSITY_LOW:
-            return "DENSITY_LOW";
+            return densityDpi + "(DENSITY_LOW)";
 
         case DisplayMetrics.DENSITY_MEDIUM:
-            return "DENSITY_MEDIUM";
+            return densityDpi + "(DENSITY_MEDIUM)";
 
         case DisplayMetrics.DENSITY_TV:
-            return "DENSITY_TV";
+            return densityDpi + "(DENSITY_TV)";
 
         case DisplayMetrics.DENSITY_HIGH:
-            return "DENSITY_HIGH";
+            return densityDpi + "(DENSITY_HIGH)";
 
         case DisplayMetrics.DENSITY_XHIGH:
-            return "DENSITY_XHIGH";
+            return densityDpi + "(DENSITY_XHIGH)";
 
         case DisplayMetrics.DENSITY_XXHIGH:
-            return "DENSITY_XXHIGH";
+            return densityDpi + "(DENSITY_XXHIGH)";
 
         case DisplayMetrics.DENSITY_XXXHIGH:
-            return "DENSITY_XXXHIGH";
+            return densityDpi + "(DENSITY_XXXHIGH)";
 
         default:
-            return "DENSITY_" + densityDpi;
+            return densityDpi + "(DENSITY_" + densityDpi +")";
         }
     }
 

@@ -96,7 +96,7 @@ public class SizeParameters extends Parameters {
             height = (int)value;
         }
 
-        DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The desired width = 0, the image will be decode original size.");
+        DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");
         opts.inSampleSize = 1;
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
@@ -113,7 +113,7 @@ public class SizeParameters extends Parameters {
             .append(" { config = ").append(config.name())
             .append(", width = ").append(width)
             .append(", height = ").append(value)
-            .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(" }").toString());
     }
 

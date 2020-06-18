@@ -79,7 +79,7 @@ public class ScaleParameters extends Parameters {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(value)
-            .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(" }").toString());
     }
 }

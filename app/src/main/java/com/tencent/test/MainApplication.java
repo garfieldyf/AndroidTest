@@ -41,6 +41,7 @@ public final class MainApplication extends Application {
         mImageModule = new Builder<String, Object>(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
             .setImageSize(128)
+//            .setPoolSize(20)
             .setFileSize(500)
 //            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
             .build();
@@ -108,6 +109,7 @@ public final class MainApplication extends Application {
     private static final String[] Urls = {
         UriUtils.getResourceUri("tv.fun.appstore", "drawable/pkg_icon_game"),
         UriUtils.getResourceUri(BuildConfig.APPLICATION_ID, R.drawable.video),
+        UriUtils.getResourceUri(BuildConfig.APPLICATION_ID, R.drawable.bbb),
         "http://img.funshion.com/pictures/ott/img/34750a/8038da/poster_1A2KAUEJO3EFA.png",
         "http://img.funshion.com/pictures/ott/img/53391f/8f14e4/poster_1A3E0HTJ7CMIK.png",
         "http://img.funshion.com/pictures/ott/img/4e72de/072b03/poster_1AHG0S3HBRTJ9.png",

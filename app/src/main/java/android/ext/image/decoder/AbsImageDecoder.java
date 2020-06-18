@@ -62,8 +62,8 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
-            DebugUtils.__checkError(!opts.inMutable, "The opts.inMutable must be true.");
-            return decodeImage(uri, target, params, flags, opts);
+            DebugUtils.__checkPrint(opts.outWidth <= 0, Log.ERROR, "AbsImageDecoder", "decodeImage failed - outWidth = " + opts.outWidth + ", uri = " + uri);
+            return (opts.outWidth > 0 ? decodeImage(uri, target, params, flags, opts) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;

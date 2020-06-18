@@ -86,7 +86,7 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth = " + opts.outWidth + " || opts.outHeight = " + opts.outHeight);
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "outWidth = " + opts.outWidth + ", outHeight = " + opts.outHeight);
         final int width, height;
         if (target instanceof View) {
             final View view = (View)target;
@@ -98,7 +98,6 @@ public class SizeParameters extends Parameters {
         }
 
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");
-        opts.inSampleSize = 1;
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             opts.inTargetDensity = DENSITY_DEVICE;

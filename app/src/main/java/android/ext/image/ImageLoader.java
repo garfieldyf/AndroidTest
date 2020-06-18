@@ -293,6 +293,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
                 } else {
                     // Deletes the temp file, If load failed.
                     tempFile.delete();
+                    DebugUtils.__checkWarning(true, "ImageLoader", "Loads failed - delete tempFile = " + tempFile + ", url = " + url);
                 }
             }
 

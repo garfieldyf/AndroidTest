@@ -1,6 +1,7 @@
 package android.ext.image.params;
 
 import static android.util.DisplayMetrics.DENSITY_DEVICE;
+import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -8,6 +9,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.view.View;
@@ -68,7 +70,7 @@ public class SizeParameters extends Parameters {
     public SizeParameters(Config config, int width, int height) {
         super(height, config);
         this.width = width;
-        DebugUtils.__checkDebug(true, "SizeParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
+        DebugUtils.__checkDebug(true, "SizeParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
     @Override

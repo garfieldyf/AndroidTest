@@ -1,6 +1,7 @@
 package android.ext.image.params;
 
 import static android.util.DisplayMetrics.DENSITY_DEVICE;
+import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.ClassUtils;
@@ -8,6 +9,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Printer;
 
@@ -47,8 +49,8 @@ public class ScaleParameters extends Parameters {
      */
     public ScaleParameters(Config config, float scale) {
         super(scale, config);
-        DebugUtils.__checkDebug(true, "ScaleParameters", "The screen density = " + DeviceUtils.toDensity(DENSITY_DEVICE));
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
+        DebugUtils.__checkDebug(true, "ScaleParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
     @Override

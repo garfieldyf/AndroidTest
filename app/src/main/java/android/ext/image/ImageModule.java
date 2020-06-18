@@ -59,6 +59,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     /* package */ static final int PARAMETERS  = 0;
     /* package */ static final int PLACEHOLDER = 1;
+    /* package */ static final int PARAMS_LENGTH = 2;
 
     /**
      * The maximum number of tasks.
@@ -95,7 +96,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mLoaderCache = new SparseArray<ImageLoader>(2);
-        mParamsPool  = Pools.newPool(() -> new Object[2], MAX_POOL_SIZE);
+        mParamsPool  = Pools.newPool(() -> new Object[PARAMS_LENGTH], MAX_POOL_SIZE);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
@@ -282,6 +283,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @see #getPlaceholder(Resources, Object[])
      */
     public static <T> T getParameters(Object[] params) {
+        DebugUtils.__checkError(ArrayUtils.getSize(params) == 0, "params == null || params.length == 0");
         return (T)params[PARAMETERS];
     }
 
@@ -294,6 +296,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     @SuppressWarnings("deprecation")
     public static Drawable getPlaceholder(Resources res, Object[] params) {
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "params == null || params.length < " + PARAMS_LENGTH);
         final Object placeholder = params[PLACEHOLDER];
         return (placeholder instanceof Integer ? res.getDrawable((int)placeholder) : (Drawable)placeholder);
     }

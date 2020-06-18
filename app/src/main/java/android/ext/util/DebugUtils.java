@@ -190,9 +190,19 @@ public final class DebugUtils {
      * Called on the DEBUG mode, do not call this method directly.
      * @hide
      */
-    public static void __checkPrint(boolean report, int priority, String tag, String message) {
+    public static void __checkLogError(boolean report, String tag, String message) {
         if (report) {
-            Log.println(priority, tag, message);
+            Log.e(tag, "ERROR: " + message);
+        }
+    }
+
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     * @hide
+     */
+    public static void __checkLogError(boolean report, String tag, String message, Throwable e) {
+        if (report) {
+            Log.e(tag, "ERROR: " + message, e);
         }
     }
 

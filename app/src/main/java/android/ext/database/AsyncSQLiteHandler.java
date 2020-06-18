@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler;
-import android.util.Log;
 import java.util.concurrent.Executor;
 
 /**
@@ -243,7 +242,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         @Override
         public void run() {
             if (!mDatabase.isOpen()) {
-                Log.w(AsyncSQLiteHandler.class.getName(), "The SQLiteDatabase was closed.");
+                DebugUtils.__checkWarning(true, AsyncSQLiteHandler.class.getName(), "The SQLiteDatabase was closed.");
                 return;
             }
 

@@ -227,7 +227,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
                 mCamera.autoFocus(this);
             }
         } catch (Exception e) {
-            Log.e(getClass().getName(), e.getMessage());
+            DebugUtils.__checkLogError(true, getClass().getName(), e.getMessage());
             if (mCallback != null) {
                 mCallback.onError(CAMERA_ERROR_OPEN_FAILED, mCamera);
             }
@@ -243,7 +243,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
                 mCamera.stopPreview();
                 mCamera.release();
             } catch (Exception e) {
-                Log.e(getClass().getName(), Log.getStackTraceString(e));
+                DebugUtils.__checkLogError(true, getClass().getName(), Log.getStackTraceString(e));
             } finally {
                 mCamera = null;
             }

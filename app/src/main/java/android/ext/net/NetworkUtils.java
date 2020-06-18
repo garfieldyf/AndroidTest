@@ -6,7 +6,6 @@ import android.ext.util.DebugUtils;
 import android.ext.util.StringUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.util.Log;
 import android.util.Printer;
 import java.net.HttpURLConnection;
 import java.net.Inet4Address;
@@ -132,7 +131,7 @@ public final class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname);
+            DebugUtils.__checkLogError(true, NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname);
         }
 
         return null;

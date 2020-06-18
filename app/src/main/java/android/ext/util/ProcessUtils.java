@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Process;
 import android.text.format.DateFormat;
 import android.util.JsonWriter;
-import android.util.Log;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -293,7 +292,7 @@ public final class ProcessUtils {
 
                 this.writeUncaughtException(info, processName, thread, e);
             } catch (Throwable ex) {
-                Log.e(ProcessUtils.class.getName(), "Couldn't write crash infos", ex);
+                DebugUtils.__checkLogError(true, ProcessUtils.class.getName(), "Couldn't write crash infos", ex);
             } finally {
                 // Dispatches to the default handler.
                 if (mDefaultHandler != null) {

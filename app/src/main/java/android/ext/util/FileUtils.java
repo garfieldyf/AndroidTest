@@ -55,7 +55,7 @@ public final class FileUtils {
             try {
                 c.close();
             } catch (Exception e) {
-                Log.e(FileUtils.class.getName(), "Couldn't close - " + c.getClass().getName(), e);
+                DebugUtils.__checkLogError(true, FileUtils.class.getName(), "Couldn't close - " + c.getClass().getName(), e);
             }
         }
     }
@@ -597,7 +597,7 @@ public final class FileUtils {
         if (StringUtils.getLength(name) > 0) {
             final File file = new File(dir, name);
             final int errno = mkdirs(file.getPath(), 0);
-            DebugUtils.__checkPrint(errno != 0, Log.ERROR, "FileUtils", "mkdirs '" + dir + "' failed: errno = " + errno);
+            DebugUtils.__checkLogError(errno != 0, "FileUtils", "mkdirs '" + dir + "' failed: errno = " + errno);
             dir = (errno == 0 ? file : null);
         }
 

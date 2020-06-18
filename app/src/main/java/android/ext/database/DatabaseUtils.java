@@ -603,7 +603,7 @@ public final class DatabaseUtils {
                 }
             }
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query uri - " + uri, e);
+            DebugUtils.__checkLogError(true, DatabaseUtils.class.getName(), "Couldn't query uri - " + uri, e);
         }
 
         return result;

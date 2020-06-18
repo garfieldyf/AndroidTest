@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -79,7 +78,7 @@ public class BarcodeEncoder {
         try {
             return mWriter.encode(contents, format, width, height, hints);
         } catch (Exception e) {
-            Log.e(getClass().getName(), "Couldn't encode '" + contents + "' to a barcode image.", e);
+            DebugUtils.__checkLogError(true, getClass().getName(), "Couldn't encode '" + contents + "' to a barcode image.", e);
             return null;
         }
     }

@@ -8,7 +8,6 @@ import android.graphics.Canvas;
 import android.os.AsyncTask;
 import android.os.Process;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -160,7 +159,7 @@ public final class AsyncViewStub extends View {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 mView = mInflater.inflate(mLayoutId, (ViewGroup)getParent(), false);
             } catch (RuntimeException e) {
-                Log.e(AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread\n" + e);
+                DebugUtils.__checkLogError(true, AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(mLayoutId) + " in the background! Retrying on the UI thread\n" + e);
             } finally {
                 Process.setThreadPriority(priority);
             }
@@ -171,7 +170,7 @@ public final class AsyncViewStub extends View {
         public final void onFinishInflate() {
             final ViewGroup parent = (ViewGroup)getParent();
             if (parent == null) {
-                Log.w(AsyncViewStub.class.getName(), "The AsyncViewStub (ID #0x" + Integer.toHexString(getId()) + ") has no parent, can not add the inflated view to its parent.");
+                DebugUtils.__checkWarning(true, AsyncViewStub.class.getName(), "The AsyncViewStub (ID #0x" + Integer.toHexString(getId()) + ") has no parent, can not add the inflated view to its parent.");
                 return;
             }
 

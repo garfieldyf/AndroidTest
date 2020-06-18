@@ -75,7 +75,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
-                DebugUtils.__checkPrint(true, Log.ERROR, "BitmapDecoder", "decodeBitmap failed - " + e.getMessage());
+                DebugUtils.__checkLogError(true, "BitmapDecoder", "decodeBitmap failed - " + e.getMessage());
                 opts.inBitmap = null;
                 bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
             }

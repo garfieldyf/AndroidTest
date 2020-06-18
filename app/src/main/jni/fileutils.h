@@ -234,7 +234,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, FileFi
     return errnum;
 }
 #else
-__STATIC_INLINE__ jlong computeFileBytes(const char* dirPath)
+static inline jlong computeFileBytes(const char* dirPath)
 {
     assert(dirPath);
 

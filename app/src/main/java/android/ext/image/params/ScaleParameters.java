@@ -64,6 +64,7 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth = " + opts.outWidth + " || opts.outHeight = " + opts.outHeight);
         opts.inSampleSize = 1;
         final float scale = (float)value;
         if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {

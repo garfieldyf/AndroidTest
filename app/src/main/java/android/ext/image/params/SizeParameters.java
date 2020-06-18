@@ -32,6 +32,12 @@ public class SizeParameters extends Parameters {
     };
 
     /**
+     * The default {@link Parameters} (sample size = 1,
+     * config = RGB_565) used to decode the bitmap.
+     */
+    public static final Parameters defaultParameters;
+
+    /**
      * The desired width to decode, in pixels.
      */
     private final int width;
@@ -107,5 +113,9 @@ public class SizeParameters extends Parameters {
             .append(", height = ").append(value)
             .append(", screenDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(" }").toString());
+    }
+
+    static {
+        defaultParameters = new SizeParameters(Config.RGB_565, 0, 0);
     }
 }

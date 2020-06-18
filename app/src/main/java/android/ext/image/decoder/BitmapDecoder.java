@@ -7,6 +7,7 @@ import android.ext.cache.Caches;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
+import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
@@ -43,7 +44,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         Parameters parameters = ImageModule.getParameters(params);
         if (parameters == null) {
-            parameters = Parameters.defaultParameters();
+            parameters = SizeParameters.defaultParameters;
         }
 
         // Computes the sample size.

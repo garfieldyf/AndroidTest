@@ -62,6 +62,16 @@ public class Parameters {
     }
 
     /**
+     * Constructor
+     * @param value The Object by user-defined to decode.
+     * @param config The {@link Config} to decode.
+     */
+    protected Parameters(Object value, Config config) {
+        this.value  = value;
+        this.config = (config != null ? config : Config.ARGB_8888);
+    }
+
+    /**
      * Computes a sample size for used to decode image.
      * @param target May be <tt>null</tt>. The target to compute.
      * @param opts The {@link Options} to store the sample size.
@@ -88,24 +98,6 @@ public class Parameters {
     }
 
     /**
-     * Returns the default {@link Parameters} associated with this class
-     * (The default parameters sample size = 1, config = RGB_565).
-     */
-    public static Parameters defaultParameters() {
-        return DefaultParameters.sInstance;
-    }
-
-    /**
-     * Constructor
-     * @param value The Object by user-defined to decode.
-     * @param config The {@link Config} to decode.
-     */
-    protected Parameters(Object value, Config config) {
-        this.value  = value;
-        this.config = (config != null ? config : Config.ARGB_8888);
-    }
-
-    /**
      * Computes the number of bytes that can be used to
      * store the image's pixels when decoding the image.
      */
@@ -121,12 +113,5 @@ public class Parameters {
 
     private static int fixSampleSize(int sampleSize) {
         return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
-    }
-
-    /**
-     * Class <tt>DefaultParameters</tt> (The default parameters sampleSize = 1, config = RGB_565).
-     */
-    private static final class DefaultParameters {
-        public static final Parameters sInstance = new SizeParameters(Config.RGB_565, 0, 0);
     }
 }

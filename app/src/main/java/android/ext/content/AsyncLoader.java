@@ -173,7 +173,9 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Returns the target associated with the <em>task</em>.
      * @param task The {@link Task}.
-     * @return The <tt>Object</tt> target.
+     * @return The target <tt>Object</tt> or <tt>null</tt> if
+     * loads synchronously.
+     * @hide
      */
     protected final Object getTarget(Task task) {
         return (task != null ? ((LoadTask)task).mTarget : null);
@@ -190,7 +192,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Called on a background thread to perform the actual load task.
      * @param task The current {@link Task} whose executing this method,
-     * or <tt>null</tt> if the load synchronously.
+     * or <tt>null</tt> if loads synchronously.
      * @param key The key, passed earlier by {@link #load}.
      * @param params The parameters, passed earlier by {@link #load}.
      * @param flags Loading flags, passed earlier by {@link #load}.

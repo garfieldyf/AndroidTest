@@ -204,7 +204,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
     }
 
     /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, String cacheFile, boolean hitCache) {
-        final String tempFile = cacheFile + "." + Thread.currentThread().hashCode();
+        final String tempFile = cacheFile + ".tmp";
         Result result = null;
         try {
             final int statusCode = loadParams.newDownloadRequest(context, key).download(tempFile, cancelable, null);

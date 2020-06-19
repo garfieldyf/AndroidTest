@@ -520,7 +520,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new SimpleFileCache(mContext, "._image_cache", maxSize) : null);
+                return (maxSize > 0 ? new SimpleFileCache(mContext, ".image_cache!", maxSize) : null);
             }
         }
 

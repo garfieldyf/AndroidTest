@@ -82,12 +82,9 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     return (dirPath.empty() ? EINVAL : __NS::createDirectory(dirPath.data, dirPath.size));
 }
 
-__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length = INVALID_LENGTH)
+__STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length)
 {
     assert(path);
-    if (length == INVALID_LENGTH)
-        length = ::strlen(path);
-
     return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
@@ -244,7 +241,7 @@ static inline jlong computeFileBytes(const char* dirPath)
     {
         struct stat buf;
         char filePath[MAX_PATH];
-        const int length = buildPath(filePath, dirPath);
+        const int length = buildPath(filePath, dirPath, ::strlen(dirPath));
 
         for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
         {
@@ -272,7 +269,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, FileFil
     if (errnum == 0)
     {
         char filePath[MAX_PATH];
-        const int length = buildPath(filePath, dirPath);
+        const int length = buildPath(filePath, dirPath, ::strlen(dirPath));
 
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {

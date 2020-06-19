@@ -95,7 +95,7 @@ public final class AppCompat {
     /**
      * Class <tt>AppCompatApi24</tt>
      */
-    @TargetApi(Build.VERSION_CODES.N)
+    @TargetApi(24)
     /* package */ static class AppCompatApi24 extends AppCompatImpl {
         @Override
         public void remove(Map<?, ?> map, Object key, Object value) {
@@ -115,7 +115,7 @@ public final class AppCompat {
     /**
      * Class <tt>AppCompatApi26</tt>
      */
-    @TargetApi(Build.VERSION_CODES.O)
+    @TargetApi(26)
     /* package */ static final class AppCompatApi26 extends AppCompatApi24 {
         @Override
         public void clearForRecycle(Options opts) {
@@ -135,9 +135,9 @@ public final class AppCompat {
     private static final AppCompatImpl IMPL;
 
     static {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= 26) {
             IMPL = new AppCompatApi26();
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        } else if (Build.VERSION.SDK_INT >= 24) {
             IMPL = new AppCompatApi24();
         } else {
             IMPL = new AppCompatImpl();

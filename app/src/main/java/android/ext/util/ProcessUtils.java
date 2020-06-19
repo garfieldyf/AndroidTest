@@ -254,7 +254,7 @@ public final class ProcessUtils {
         }
 
         private static String getSupportedABIs() {
-            final String[] abis = DeviceUtils.getSupportedABIs();
+            final String[] abis = DeviceUtils.SUPPORTED_ABIS;
             final StringBuilder result = new StringBuilder(48).append(abis[0]);
             for (int i = 1; i < abis.length; ++i) {
                 result.append(", ").append(abis[i]);
@@ -323,7 +323,7 @@ public final class ProcessUtils {
                 // Writes the uncaught exception to log file.
                 final long now = System.currentTimeMillis();
                 ps.println("========================================================================================================================");
-                ps.format("Model : %s (brand = %s, sdk = %d, version = %s, cpu abis = %s)\n", Build.MODEL, Build.BRAND, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.getSupportedABIs()));
+                ps.format("Model : %s (brand = %s, sdk = %d, version = %s, cpu abis = %s)\n", Build.MODEL, Build.BRAND, Build.VERSION.SDK_INT, Build.VERSION.RELEASE, Arrays.toString(DeviceUtils.SUPPORTED_ABIS));
                 ps.format("Date : %s.%03d\n", DateFormat.format("yyyy-MM-dd kk:mm:ss", now).toString(), now % 1000);
                 ps.format("Package : %s\nVersionCode : %d\nVersionName : %s\n", info.packageName, info.versionCode, info.versionName);
                 ps.format("Process : %s (pid = %d, uid = %d)\nThread : %s\n", processName, Process.myPid(), Process.myUid(), thread.getName());

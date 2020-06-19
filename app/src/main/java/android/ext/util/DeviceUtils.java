@@ -31,6 +31,11 @@ import java.util.Arrays;
 @SuppressLint("NewApi")
 public final class DeviceUtils {
     /**
+     * An ordered list of ABIs supported by this device.
+     */
+    public static final String[] SUPPORTED_ABIS;
+
+    /**
      * Returns the cpu maximum frequency on the devices.
      * @param coreIndex The cpu core index.
      * @return The cpu frequency in KHz or <tt>-1</tt>
@@ -100,14 +105,6 @@ public final class DeviceUtils {
         return (Process.getTotalMemory() < (1024 * 1024 * 800L) /* 800 MB */);
     }
 
-    /**
-     * Returns an array of ABIs supported by this device.
-     */
-    @SuppressWarnings("deprecation")
-    public static String[] getSupportedABIs() {
-        return (Build.VERSION.SDK_INT > 20 ? Build.SUPPORTED_ABIS : new String[] { Build.CPU_ABI, Build.CPU_ABI2 });
-    }
-
     @SuppressWarnings("deprecation")
     public static void dumpSystemInfo(Context context, Printer printer) {
         // Dumps the system infos.
@@ -122,7 +119,7 @@ public final class DeviceUtils {
              .append(", manufacturer = ").append(Build.MANUFACTURER)
              .append("\n  cpu info [ ").append("model = ").append(Build.HARDWARE)
              .append(", core = ").append(cpuCore)
-             .append(", abis = ").append(Arrays.toString(getSupportedABIs()))
+             .append(", abis = ").append(Arrays.toString(SUPPORTED_ABIS))
              .append(" ]");
         printer.println(infos.toString());
 
@@ -457,6 +454,14 @@ public final class DeviceUtils {
             return Integer.parseInt(new String(data, 0, byteCount));
         } catch (Exception e) {
             return -1;
+        }
+    }
+
+    static {
+        if (Build.VERSION.SDK_INT >= 21) {
+            SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
+        } else {
+            SUPPORTED_ABIS = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
         }
     }
 

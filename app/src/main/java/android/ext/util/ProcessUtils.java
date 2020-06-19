@@ -30,6 +30,11 @@ import java.util.List;
  */
 public final class ProcessUtils {
     /**
+     * Returns whether the current process is running in 64-bit mode.
+     */
+    public static native boolean is64Bit();
+
+    /**
      * Returns the current process group id.
      * @return The group id.
      */
@@ -37,16 +42,14 @@ public final class ProcessUtils {
 
     /**
      * Returns the current process user name.
-     * @return The user name if the operation succeeded,
-     * <tt>null</tt> otherwise.
+     * @return The user name if the operation succeeded, <tt>null</tt> otherwise.
      * @see #myGroupName()
      */
     public static native String myUserName();
 
     /**
      * Returns the current process group name.
-     * @return The group name if the operation succeeded,
-     * <tt>null</tt> otherwise.
+     * @return The group name if the operation succeeded, <tt>null</tt> otherwise.
      * @see #myUserName()
      */
     public static native String myGroupName();

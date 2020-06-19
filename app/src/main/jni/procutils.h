@@ -14,6 +14,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // JNI native methods in this file:
 //
+// is64Bit()
 // myGid()
 // myUserName()
 // myGroupName()
@@ -42,6 +43,16 @@ __STATIC_INLINE__ jstring getGroupNameImpl(JNIEnv* env, jint gid)
     struct group* grp = ::getgrgid(gid);
     __check_error2(grp == NULL, "Couldn't get group name - gid = %d", gid);
     return (grp != NULL ? env->NewStringUTF(grp->gr_name) : NULL);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     ProcessUtils
+// Method:    is64Bit
+// Signature: ()Z
+
+JNIEXPORT_METHOD(jboolean) constexpr is64Bit(JNIEnv* /*env*/, jclass /*clazz*/)
+{
+    return (sizeof(void*) == 8);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -109,6 +120,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
     const JNINativeMethod methods[] =
     {
         { "myGid", "()I", (void*)myGid },
+        { "is64Bit", "()Z", (void*)is64Bit },
         { "myUserName", "()Ljava/lang/String;", (void*)myUserName },
         { "myGroupName", "()Ljava/lang/String;", (void*)myGroupName },
         { "getUserName", "(I)Ljava/lang/String;", (void*)getUserName },

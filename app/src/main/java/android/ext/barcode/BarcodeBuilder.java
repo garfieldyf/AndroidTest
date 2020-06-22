@@ -22,6 +22,7 @@ import com.google.zxing.common.BitMatrix;
  *     .build();</pre>
  * @author Garfield
  */
+@SuppressWarnings("deprecation")
 public final class BarcodeBuilder {
     private Config config;
     private int white;
@@ -75,7 +76,6 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #white(int)
      */
-    @SuppressWarnings("deprecation")
     public final BarcodeBuilder white(Resources res, int id) {
         this.white = res.getColor(id);
         return this;
@@ -99,7 +99,6 @@ public final class BarcodeBuilder {
      * @return This builder.
      * @see #black(int)
      */
-    @SuppressWarnings("deprecation")
     public final BarcodeBuilder black(Resources res, int id) {
         this.black = res.getColor(id);
         return this;
@@ -127,7 +126,6 @@ public final class BarcodeBuilder {
      * @see #logo(Drawable, int, int)
      * @see #logo(Resources, int, int)
      */
-    @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int id) {
         this.logo = res.getDrawable(id);
         return this;
@@ -143,7 +141,6 @@ public final class BarcodeBuilder {
      * @see #logo(Resources, int)
      * @see #logo(Drawable, int, int)
      */
-    @SuppressWarnings("deprecation")
     public final BarcodeBuilder logo(Resources res, int logoResId, int sizeResId) {
         this.logo = res.getDrawable(logoResId);
         this.logoWidth = this.logoHeight = res.getDimensionPixelOffset(sizeResId);

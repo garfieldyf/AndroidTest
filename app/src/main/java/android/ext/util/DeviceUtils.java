@@ -28,7 +28,7 @@ import java.util.Arrays;
  * Class DeviceUtils
  * @author Garfield
  */
-@SuppressLint("NewApi")
+@SuppressWarnings("deprecation")
 public final class DeviceUtils {
     /**
      * An ordered list of ABIs supported by this device.
@@ -105,7 +105,6 @@ public final class DeviceUtils {
         return (Process.getTotalMemory() < (1024 * 1024 * 800L) /* 800 MB */);
     }
 
-    @SuppressWarnings("deprecation")
     public static void dumpSystemInfo(Context context, Printer printer) {
         // Dumps the system infos.
         context = context.getApplicationContext();
@@ -333,7 +332,6 @@ public final class DeviceUtils {
      * @param touchscreen The kind of touch screen attached to the device.
      * @return A readable representation of the <em>touchscreen</em>.
      */
-    @SuppressWarnings("deprecation")
     public static String toTouchScreen(int touchscreen) {
         switch (touchscreen) {
         case Configuration.TOUCHSCREEN_FINGER:
@@ -398,6 +396,7 @@ public final class DeviceUtils {
                   .append(" ]");
     }
 
+    @SuppressLint("NewApi")
     private static String dumpExternalStorageInfo(Context context, StatFs statFs, StringBuilder out) {
         final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
         for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
@@ -431,6 +430,7 @@ public final class DeviceUtils {
         return out.append("  ");
     }
 
+    @SuppressLint("NewApi")
     private static String getUserLabel(Context context, StorageVolume volume, int index) {
         String userLabel = volume.getUserLabel();
         if (TextUtils.isEmpty(userLabel)) {

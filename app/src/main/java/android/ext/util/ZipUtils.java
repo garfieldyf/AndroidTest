@@ -117,8 +117,8 @@ public final class ZipUtils {
             // Compresses the files.
             os.setLevel(compressionLevel);
             for (String file : files) {
-                final Dirent dirent = new Dirent(file);
-                compress(os, dirent, dirent.getName(), cancelable, buffer);
+                final File f = new File(file);
+                compress(os, f, f.getName(), cancelable, buffer);
             }
         } finally {
             ByteArrayPool.sInstance.recycle(buffer);
@@ -162,17 +162,17 @@ public final class ZipUtils {
         }
     }
 
-    private static void compress(ZipOutputStream os, Dirent dirent, String name, Cancelable cancelable, byte[] buffer) throws IOException {
-        if (dirent.isDirectory()) {
+    private static void compress(ZipOutputStream os, File file, String name, Cancelable cancelable, byte[] buffer) throws IOException {
+        if (file.isDirectory()) {
             // Adds the directory ZipEntry.
             name += "/";
             os.putNextEntry(new ZipEntry(name));
 
             // Lists the sub files.
-            final List<Dirent> dirents = dirent.listFiles(0);
-            final int size = ArrayUtils.getSize(dirents);
+            final File[] files = file.listFiles();
+            final int size = ArrayUtils.getSize(files);
             for (int i = 0; i < size && !cancelable.isCancelled(); ++i) {
-                final Dirent child = dirents.get(i);
+                final File child = files[i];
                 compress(os, child, name + child.getName(), cancelable, buffer);
             }
         } else {
@@ -180,7 +180,7 @@ public final class ZipUtils {
             os.putNextEntry(new ZipEntry(name));
 
             // Copy the file's contents to ZipOutputStream.
-            try (final InputStream is = new FileInputStream(dirent.path)) {
+            try (final InputStream is = new FileInputStream(file)) {
                 FileUtils.copyStreamImpl(is, os, cancelable, buffer);
             }
         }

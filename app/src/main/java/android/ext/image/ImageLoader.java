@@ -6,7 +6,6 @@ import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
 import static android.ext.image.ImageModule.getPlaceholder;
 import static java.net.HttpURLConnection.HTTP_OK;
-import android.content.Context;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
@@ -70,7 +69,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mRequest = new LoadRequest(this);
         mDecoder = decoder;
         mModule  = module;
-        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new URLLoader(module.mContext));
+        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new Loader());
     }
 
     /**
@@ -146,7 +145,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         try {
             final Object target = getTarget(task);
             final String uriString = uri.toString();
-            return (matchScheme(uriString) ? (Image)mLoader.load(task, uriString, target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
+            return (matchScheme(uriString) ? mLoader.load(task, uriString, target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
         } finally {
             mModule.mBufferPool.recycle(buffer);
         }
@@ -171,7 +170,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //     */
 //    protected Image loadImage(Task task, URI uri, Object target, Object[] params, int flags, byte[] buffer) {
 //        final String uriString = uri.toString();
-//        return (matchScheme(uriString) ? (Image)mLoader.load(task, uriString, target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
+//        return (matchScheme(uriString) ? mLoader.load(task, uriString, target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
 //    }
 
     /**
@@ -213,38 +212,32 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Interface <tt>Loader</tt> used to load image from the specified url.
+     * Class <tt>Loader</tt> used to load image from the specified url.
      */
-    private static interface Loader {
+    private class Loader {
+        /* package */ final String mCacheDir;
+
+        /**
+         * Constructor
+         */
+        public Loader() {
+            DebugUtils.__checkStartMethodTracing();
+            mCacheDir = FileUtils.getCacheDir(mModule.mContext, "._temp_cache!").getPath();
+            FileUtils.deleteFiles(mCacheDir, false);
+            DebugUtils.__checkStopMethodTracing("ImageLoader.Loader", "init");
+        }
+
         /**
          * Called on a background thread to load an image from the specified <em>url</em>.
          * @param task The current {@link Task} whose executing this method.
          * @param url The url to load.
-         * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
-         * @param params The parameters, passed earlier by {@link #load}.
-         * @param flags Loading flags, passed earlier by {@link #load}.
+         * @param target The <tt>Object</tt> to bind, passed earlier by {@link ImageLoader#load}.
+         * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+         * @param flags Loading flags, passed earlier by {@link ImageLoader#load}.
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image object, or <tt>null</tt> if the load failed or cancelled.
          */
-        Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer);
-    }
-
-    /**
-     * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
-     */
-    private final class URLLoader implements Loader {
-        private final File mCacheDir;
-
-        /**
-         * Constructor
-         * @param context The <tt>Context</tt>.
-         */
-        public URLLoader(Context context) {
-            mCacheDir = FileUtils.getCacheDir(context, null);
-        }
-
-        @Override
-        public Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
                 return loadImage(task, url, imageFile, target, params, flags, buffer);
@@ -257,7 +250,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader {
+    private final class FileCacheLoader extends Loader {
         private final FileCache mCache;
 
         /**
@@ -269,10 +262,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         @Override
-        public Object load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
+        public Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
-            Object result = null;
+            Image result = null;
 
             if (imageFile.exists()) {
                 // Decodes the image file, If file cache hit.
@@ -286,7 +279,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
             if (!isTaskCancelled(task)) {
                 // Loads the image from url, If the image file is not exists or decode failed.
-                final File tempFile = new File(imageFile.getPath() + "." + Thread.currentThread().hashCode());
+                final File tempFile = new File(mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
                 if ((result = loadImage(task, url, tempFile, target, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
                     // Saves the image file to file cache, If load succeeded.
                     mCache.put(hashKey, imageFile);

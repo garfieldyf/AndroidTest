@@ -4,7 +4,6 @@ import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.FileUtils.ScanCallback;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
@@ -13,8 +12,7 @@ import java.io.File;
  * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public final class SimpleFileCache implements FileCache, ScanCallback, Runnable {
-    private int mSize;
+public final class SimpleFileCache implements FileCache, Runnable {
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -98,21 +96,15 @@ public final class SimpleFileCache implements FileCache, ScanCallback, Runnable 
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            FileUtils.scanFiles(mCacheDir.getPath(), this, mSize = 0, null);
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + mSize + ", maxSize = " + mMaxSize + (mSize > mMaxSize ? ", deleteSize = " + (mSize - mMaxSize) : ""));
+            final String[] names = mCacheDir.list();
+            final int size = ArrayUtils.getSize(names);
+            for (int i = mMaxSize; i < size; ++i) {
+                new File(mCacheDir, names[i]).delete();
+            }
+            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
         } finally {
             Process.setThreadPriority(priority);
         }
-    }
-
-    @Override
-    public final int onScanFile(String path, int type, Object cookie) {
-        if (++mSize > mMaxSize || FileUtils.findFileExtension(path) != -1 /* delete temp file */) {
-            FileUtils.deleteFiles(path, false);
-            DebugUtils.__checkDebug(true, "SimpleFileCache", "deleteFile = " + path);
-        }
-
-        return SC_CONTINUE;
     }
 
     public final void dump(Printer printer) {

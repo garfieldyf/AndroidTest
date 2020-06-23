@@ -61,7 +61,7 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
         final ImageView view = (ImageView)target;
         if (image != null) {
             setViewImage(view, image);
-        } else {
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
             view.setImageDrawable(getPlaceholder(view.getResources(), params));
         }
     }

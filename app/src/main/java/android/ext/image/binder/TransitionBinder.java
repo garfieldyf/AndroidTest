@@ -72,11 +72,13 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
-        if (bitmap == null) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
-        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            setImageBitmap(view, bitmap);
-        } else {
+        if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            if (bitmap != null) {
+                setImageBitmap(view, bitmap);
+            } else {
+                view.setImageDrawable(getPlaceholder(view.getResources(), params));
+            }
+        } else if (bitmap != null) {
             final Drawable placeholder = getPlaceholder(view.getResources(), params);
             DebugUtils.__checkError(placeholder == null, "The placeholder drawable is null");
             final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { placeholder, newDrawable(view, bitmap) });

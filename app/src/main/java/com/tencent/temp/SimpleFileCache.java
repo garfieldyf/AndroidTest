@@ -121,7 +121,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
             for (int i = mMaxSize; i < size; ++i) {
                 new File(mCacheDir, names[i]).delete();
             }
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", delete file count = " + (size - mMaxSize) : ""));
+            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
         } finally {
             Process.setThreadPriority(priority);
         }

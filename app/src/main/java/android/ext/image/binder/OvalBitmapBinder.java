@@ -26,7 +26,7 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
         final ImageView view = (ImageView)target;
         if (bitmap != null) {
             setImageBitmap(view, view.getDrawable(), bitmap);
-        } else {
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
             view.setImageDrawable(getPlaceholder(view.getResources(), params));
         }
     }

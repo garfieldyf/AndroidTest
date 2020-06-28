@@ -37,7 +37,7 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
      * @param drawable The <em>view's</em> old drawable or <tt>null</tt>.
      * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
      */
-    /* package */ static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap) {
+    public static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap) {
         if (drawable instanceof OvalBitmapDrawable) {
             // Sets the OvalBitmapDrawable's internal bitmap.
             ((OvalBitmapDrawable)drawable).setBitmap(bitmap);

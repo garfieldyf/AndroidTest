@@ -63,12 +63,6 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
         mRadii = new float[] { topLeftRadius, topLeftRadius, topRightRadius, topRightRadius, bottomRightRadius, bottomRightRadius, bottomLeftRadius, bottomLeftRadius };
     }
 
-    public final void dump(Printer printer, StringBuilder result) {
-        printer.println(result.append(getClass().getSimpleName())
-            .append(" { radii = ").append(Arrays.toString(mRadii))
-            .append(" }").toString());
-    }
-
     @Override
     public void bindValue(Object uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
@@ -79,6 +73,12 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
         }
     }
 
+    public final void dump(Printer printer, StringBuilder result) {
+        printer.println(result.append(getClass().getSimpleName())
+            .append(" { radii = ").append(Arrays.toString(mRadii))
+            .append(" }").toString());
+    }
+
     /**
      * Sets a {@link Bitmap} as the content of the {@link ImageView}.
      * @param view The <tt>ImageView</tt>.
@@ -86,7 +86,7 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
      * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
      * @param radii The corner radii, array of 8 values.
      */
-    /* package */ static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap, float[] radii) {
+    public static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap, float[] radii) {
         if (drawable instanceof RoundedBitmapDrawable) {
             // Sets the RoundedBitmapDrawable's internal bitmap.
             final RoundedBitmapDrawable d = (RoundedBitmapDrawable)drawable;

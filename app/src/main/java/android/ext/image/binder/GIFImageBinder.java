@@ -49,6 +49,16 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
         mAutoStart = results[1]; // android.R.attr.autoStart
     }
 
+    @Override
+    public void bindValue(Object uri, Object[] params, Object target, GIFImage image, int state) {
+        final ImageView view = (ImageView)target;
+        if (image != null) {
+            setViewImage(view, image, mAutoStart, mOneShot);
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+        }
+    }
+
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { autoStart = ").append(mAutoStart)
@@ -56,22 +66,14 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
             .append(" }").toString());
     }
 
-    @Override
-    public void bindValue(Object uri, Object[] params, Object target, GIFImage image, int state) {
-        final ImageView view = (ImageView)target;
-        if (image != null) {
-            setViewImage(view, image);
-        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
-        }
-    }
-
     /**
      * Sets a {@link GIFImage} as the content of the {@link ImageView}.
      * @param view The <tt>ImageView</tt>.
      * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @param autoStart <tt>true</tt> if the animation should auto play.
+     * @param oneShot <tt>true</tt> if the animation should only play once.
      */
-    protected void setViewImage(ImageView view, GIFImage image) {
+    public static void setViewImage(ImageView view, GIFImage image, boolean autoStart, boolean oneShot) {
         DebugUtils.__checkError(image == null, "image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof GIFDrawable) {
@@ -89,8 +91,8 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
             }
         } else {
             final GIFDrawable drawable = new GIFDrawable(image);
-            drawable.setOneShot(mOneShot);
-            drawable.setAutoStart(mAutoStart);
+            drawable.setOneShot(oneShot);
+            drawable.setAutoStart(autoStart);
             view.setImageDrawable(drawable);
         }
     }

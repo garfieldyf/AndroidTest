@@ -1,5 +1,6 @@
 package android.ext.image.binder;
 
+import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.Context;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
@@ -54,6 +55,16 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
     }
 
     @Override
+    public void bindValue(Object uri, Object[] params, Object target, GIFImage image, int state) {
+        final ImageView view = (ImageView)target;
+        if (image != null) {
+            setViewImage(view, image, mRadii, mAutoStart, mOneShot);
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+        }
+    }
+
+    @Override
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { radii = ").append(Arrays.toString(mRadii))
@@ -62,8 +73,15 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
             .append(" }").toString());
     }
 
-    @Override
-    protected void setViewImage(ImageView view, GIFImage image) {
+    /**
+     * Sets a {@link GIFImage} as the content of the {@link ImageView}.
+     * @param view The <tt>ImageView</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @param radii The corner radii, array of 8 values.
+     * @param autoStart <tt>true</tt> if the animation should auto play.
+     * @param oneShot <tt>true</tt> if the animation should only play once.
+     */
+    public static void setViewImage(ImageView view, GIFImage image, float[] radii, boolean autoStart, boolean oneShot) {
         DebugUtils.__checkError(image == null, "image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof RoundedGIFDrawable) {
@@ -71,7 +89,7 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
             final RoundedGIFDrawable drawable = (RoundedGIFDrawable)oldDrawable;
             final boolean isRunning = drawable.isRunning();
             drawable.setImage(image);
-            drawable.setCornerRadii(mRadii);
+            drawable.setCornerRadii(radii);
 
             // Clear the ImageView's content to force update the ImageView's mDrawable.
             view.setImageDrawable(null);
@@ -81,9 +99,9 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
                 drawable.start();
             }
         } else {
-            final RoundedGIFDrawable drawable = new RoundedGIFDrawable(image, mRadii);
-            drawable.setOneShot(mOneShot);
-            drawable.setAutoStart(mAutoStart);
+            final RoundedGIFDrawable drawable = new RoundedGIFDrawable(image, radii);
+            drawable.setOneShot(oneShot);
+            drawable.setAutoStart(autoStart);
             view.setImageDrawable(drawable);
         }
     }

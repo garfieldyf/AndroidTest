@@ -21,16 +21,16 @@ import android.view.View;
  * &lt;SizeParameters
  *      xmlns:android="http://schemas.android.com/apk/res/android"
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      android:width="200dp"
- *      android:height="300dp"
+ *      android:minWidth="200dp"
+ *      android:minHeight="300dp"
  *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
  * @author Garfield
  */
 @SuppressWarnings("deprecation")
 public class SizeParameters extends Parameters {
     private static final int[] SIZE_PARAMETERS_ATTRS = {
-        android.R.attr.height,
-        android.R.attr.width,
+        android.R.attr.minWidth,
+        android.R.attr.minHeight,
     };
 
     /**
@@ -40,9 +40,9 @@ public class SizeParameters extends Parameters {
     public static final Parameters defaultParameters;
 
     /**
-     * The desired width to decode, in pixels.
+     * The minimum width to decode, in pixels.
      */
-    private final int width;
+    private final int minWidth;
 
     /**
      * Constructor
@@ -55,21 +55,21 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.width = a.getDimensionPixelOffset(1 /* android.R.attr.width */, 0);
-        this.value = a.getDimensionPixelOffset(0 /* android.R.attr.height */, 0);
+        this.minWidth = a.getDimensionPixelOffset(0 /* android.R.attr.minWidth */, 0);
+        this.value = a.getDimensionPixelOffset(1 /* android.R.attr.minHeight */, 0);
         a.recycle();
     }
 
     /**
      * Constructor
      * @param config The {@link Config} to decode.
-     * @param width The desired width to decode, in pixels.
-     * @param height The desired height to decode, in pixels.
+     * @param minWidth The minimum width to decode, in pixels.
+     * @param minHeight The minimum height to decode, in pixels.
      * @see #SizeParameters(Context, AttributeSet)
      */
-    public SizeParameters(Config config, int width, int height) {
-        super(height, config);
-        this.width = width;
+    public SizeParameters(Config config, int minWidth, int minHeight) {
+        super(minHeight, config);
+        this.minWidth = minWidth;
         DebugUtils.__checkDebug(true, "SizeParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
@@ -90,10 +90,10 @@ public class SizeParameters extends Parameters {
         final int width, height;
         if (target instanceof View) {
             final View view = (View)target;
-            width  = Math.max(view.getWidth(),  this.width);
+            width  = Math.max(view.getWidth(), minWidth);
             height = Math.max(view.getHeight(), (int)value);
         } else {
-            width  = this.width;
+            width  = minWidth;
             height = (int)value;
         }
 
@@ -111,8 +111,8 @@ public class SizeParameters extends Parameters {
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
-            .append(", width = ").append(width)
-            .append(", height = ").append(value)
+            .append(", minWidth = ").append(minWidth)
+            .append(", minHeight = ").append(value)
             .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
             .append(" }").toString());
     }

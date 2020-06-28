@@ -395,18 +395,6 @@ public final class FileUtils {
     public static native String createUniqueFile(String filename, long length);
 
     /**
-     * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
-     * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
-     * @param dirPath The directory path, must be absolute file path.
-     * @param callback The {@link ScanCallback} used to scan.
-     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE}
-     * and {@link #FLAG_SCAN_FOR_DESCENDENTS}.
-     * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
-     */
-    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
-
-    /**
      * Returns a <tt>List</tt> of {@link Dirent} objects with the sub files and directories in the <em>dirPath</em>.
      * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
      * part of the list.</p>
@@ -431,6 +419,18 @@ public final class FileUtils {
      * @see #listFiles(String, int)
      */
     public static native int listFiles(String dirPath, int flags, Collection<Dirent> outDirents);
+
+    /**
+     * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
+     * and <tt>..</tt> representing the current and parent directory are not scanned.</p>
+     * @param dirPath The directory path, must be absolute file path.
+     * @param callback The {@link ScanCallback} used to scan.
+     * @param flags The scan flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE}
+     * and {@link #FLAG_SCAN_FOR_DESCENDENTS}.
+     * @param cookie An object by user-defined that gets passed into {@link ScanCallback#onScanFile}.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
+     */
+    public static native int scanFiles(String dirPath, ScanCallback callback, int flags, Object cookie);
 
     /**
      * Copies the specified file contents to the specified <em>outFile</em>.
@@ -604,8 +604,8 @@ public final class FileUtils {
      * Called by native code.
      */
     @Keep
-    @SuppressWarnings({ "unused", "unchecked", "rawtypes" })
-    private static void addDirent(Collection collection, String name, int type) {
+    @SuppressWarnings("unused")
+    private static void addDirent(Collection<Object> collection, String name, int type) {
         collection.add(new Dirent(name, type));
     }
 

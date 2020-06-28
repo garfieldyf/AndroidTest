@@ -14,8 +14,8 @@ import android.ext.cache.LinkedBitmapPool;
 import android.ext.cache.LruBitmapCache;
 import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruCache;
+import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
-import android.ext.cache.SimpleFileCache;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
@@ -255,7 +255,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mOptionsPool.clear();
             ByteArrayPool.sInstance.clear();
 
-            if (mFileCache instanceof SimpleFileCache) {
+            if (mFileCache instanceof LruFileCache) {
                 mExecutor.execute((Runnable)mFileCache);
             }
         }
@@ -518,7 +518,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new SimpleFileCache(mContext, "._image_cache!", maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(mContext, "._image_cache!", maxSize) : null);
             }
         }
 

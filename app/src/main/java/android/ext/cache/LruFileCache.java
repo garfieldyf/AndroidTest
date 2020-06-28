@@ -7,12 +7,14 @@ import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
- * Class <tt>SimpleFileCache</tt> is an implementation of a {@link FileCache}.
+ * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public final class SimpleFileCache implements FileCache, Runnable {
+public final class LruFileCache implements FileCache, Runnable, Comparator<File> {
     private final int mMaxSize;
     private final File mCacheDir;
 
@@ -20,9 +22,9 @@ public final class SimpleFileCache implements FileCache, Runnable {
      * Constructor
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
-     * @see #SimpleFileCache(Context, String, int)
+     * @see #LruFileCache(Context, String, int)
      */
-    public SimpleFileCache(File cacheDir, int maxSize) {
+    public LruFileCache(File cacheDir, int maxSize) {
         DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
         DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
         mMaxSize  = maxSize;
@@ -34,9 +36,9 @@ public final class SimpleFileCache implements FileCache, Runnable {
      * @param context The <tt>Context</tt>.
      * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
      * @param maxSize The maximum number of files to allow in this cache.
-     * @see #SimpleFileCache(File, int)
+     * @see #LruFileCache(File, int)
      */
-    public SimpleFileCache(Context context, String name, int maxSize) {
+    public LruFileCache(Context context, String name, int maxSize) {
         this(FileUtils.getCacheDir(context, name), maxSize);
     }
 
@@ -55,7 +57,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
     public final long getCacheSize() {
         DebugUtils.__checkStartMethodTracing();
         final long result = FileUtils.computeFileSizes(mCacheDir.getPath());
-        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "getCacheSize");
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize");
         return result;
     }
 
@@ -68,13 +70,15 @@ public final class SimpleFileCache implements FileCache, Runnable {
     public void clear() {
         DebugUtils.__checkStartMethodTracing();
         FileUtils.deleteFiles(mCacheDir.getPath(), false);
-        DebugUtils.__checkStopMethodTracing("SimpleFileCache", "clear");
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
     @Override
     public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
-        return new File(mCacheDir, key);
+        final File cacheFile = new File(mCacheDir, key);
+        cacheFile.setLastModified(System.currentTimeMillis());
+        return cacheFile;
     }
 
     @Override
@@ -96,28 +100,37 @@ public final class SimpleFileCache implements FileCache, Runnable {
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            final String[] names = mCacheDir.list();
-            final int size = ArrayUtils.getSize(names);
-            for (int i = mMaxSize; i < size; ++i) {
-                new File(mCacheDir, names[i]).delete();
+            final File[] files = mCacheDir.listFiles();
+            final int size = ArrayUtils.getSize(files);
+            if (size > mMaxSize) {
+                Arrays.sort(files, this);
+                for (int i = mMaxSize; i < size; ++i) {
+                    files[i].delete();
+                    DebugUtils.__checkDebug(true, "LruFileCache", "deleteFile = " + files[i].getName());
+                }
             }
-            DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
+            DebugUtils.__checkStopMethodTracing("LruFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
         } finally {
             Process.setThreadPriority(priority);
         }
     }
 
+    @Override
+    public final int compare(File one, File another) {
+        return Long.compare(another.lastModified(), one.lastModified());
+    }
+
     public final void dump(Printer printer) {
-        final String[] names = mCacheDir.list();
-        final int size = ArrayUtils.getSize(names);
+        final File[] files = mCacheDir.listFiles();
+        final int size = ArrayUtils.getSize(files);
 
         long length = 0;
         for (int i = 0; i < size; ++i) {
-            length += new File(mCacheDir, names[i]).length();
+            length += files[i].length();
         }
 
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping SimpleFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
         result.setLength(0);
         printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).toString());
     }

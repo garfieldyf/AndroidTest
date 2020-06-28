@@ -120,6 +120,7 @@ public final class SimpleFileCache implements FileCache, Runnable {
             final int size = ArrayUtils.getSize(names);
             for (int i = mMaxSize; i < size; ++i) {
                 new File(mCacheDir, names[i]).delete();
+                DebugUtils.__checkDebug(true, "SimpleFileCache", "deleteFile = " + names[i]);
             }
             DebugUtils.__checkStopMethodTracing("SimpleFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
         } finally {
@@ -136,16 +137,15 @@ public final class SimpleFileCache implements FileCache, Runnable {
             length += new File(mCacheDir, names[i]).length();
         }
 
-        int count = 0;
+        int poolSize = 0;
         for (File file : mFilePool) {
             if (file != null) {
-                ++count;
+                ++poolSize;
             }
         }
-
         final StringBuilder result = new StringBuilder(100);
         DebugUtils.dumpSummary(printer, result, 100, " Dumping SimpleFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
         result.setLength(0);
-        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).append(", poolSize = ").append(count).toString());
+        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).append(", poolSize = ").append(poolSize).toString());
     }
 }

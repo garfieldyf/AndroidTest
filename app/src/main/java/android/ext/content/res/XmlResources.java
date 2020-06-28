@@ -102,19 +102,18 @@ public final class XmlResources {
      * @return The <em>outRadii</em>.
      * @see #loadCornerRadii(Resources, AttributeSet)
      */
-    @SuppressLint("ResourceType")
     public static float[] loadCornerRadii(Resources res, AttributeSet attrs, float[] outRadii) {
         DebugUtils.__checkError(outRadii == null || outRadii.length < 8, "outRadii == null || outRadii.length < 8");
         final TypedArray a = res.obtainAttributes(attrs, DRAWABLE_CORNERS_ATTRS);
-        final float radius = a.getDimension(0 /* android.R.attr.radius */, Float.NaN);
+        final float radius = a.getDimension(RADIUS /* android.R.attr.radius */, Float.NaN);
 
         if (Float.compare(radius, Float.NaN) != 0) {
             Arrays.fill(outRadii, radius);
         } else {
-            outRadii[0] = outRadii[1] = a.getDimension(1 /* android.R.attr.topLeftRadius */, 0);
-            outRadii[2] = outRadii[3] = a.getDimension(2 /* android.R.attr.topRightRadius */, 0);
-            outRadii[6] = outRadii[7] = a.getDimension(3 /* android.R.attr.bottomLeftRadius */, 0);
-            outRadii[4] = outRadii[5] = a.getDimension(4 /* android.R.attr.bottomRightRadius */, 0);
+            outRadii[0] = outRadii[1] = a.getDimension(TOP_LEFT /* android.R.attr.topLeftRadius */, 0);
+            outRadii[2] = outRadii[3] = a.getDimension(TOP_RIGHT /* android.R.attr.topRightRadius */, 0);
+            outRadii[6] = outRadii[7] = a.getDimension(BOTTOM_LEFT /* android.R.attr.bottomLeftRadius */, 0);
+            outRadii[4] = outRadii[5] = a.getDimension(BOTTOM_RIGHT /* android.R.attr.bottomRightRadius */, 0);
         }
 
         a.recycle();
@@ -125,12 +124,11 @@ public final class XmlResources {
      * Called on the <tt>Binder</tt> internal, do not call this method directly.
      * @hide
      */
-    @SuppressLint("ResourceType")
     public static boolean[] loadAnimationAttrs(Resources res, AttributeSet attrs) {
         final TypedArray a = res.obtainAttributes(attrs, ANIMATION_ATTRS);
         final boolean[] results = new boolean[] {
-            a.getBoolean(0 /* android.R.attr.oneshot */, false),
-            a.getBoolean(1 /* android.R.attr.autoStart */, true),
+            a.getBoolean(ONE_SHOT /* android.R.attr.oneshot */, false),
+            a.getBoolean(AUTO_START /* android.R.attr.autoStart */, true),
         };
 
         a.recycle();
@@ -209,6 +207,9 @@ public final class XmlResources {
         android.R.attr.autoStart,
     };
 
+    private static final int ONE_SHOT   = 0;
+    private static final int AUTO_START = 1;
+
     /**
      * The inner radius attributes.
      */
@@ -226,6 +227,12 @@ public final class XmlResources {
         android.R.attr.bottomLeftRadius,
         android.R.attr.bottomRightRadius,
     };
+
+    private static final int RADIUS       = 0;
+    private static final int TOP_LEFT     = 1;
+    private static final int TOP_RIGHT    = 2;
+    private static final int BOTTOM_LEFT  = 3;
+    private static final int BOTTOM_RIGHT = 4;
 
     /**
      * This utility class cannot be instantiated.

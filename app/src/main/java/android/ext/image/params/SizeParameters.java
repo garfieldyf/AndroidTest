@@ -33,6 +33,9 @@ public class SizeParameters extends Parameters {
         android.R.attr.minHeight,
     };
 
+    private static final int MIN_WIDTH  = 0;
+    private static final int MIN_HEIGHT = 1;
+
     /**
      * The default {@link Parameters} (sample size = 1,
      * config = RGB_565) used to decode the bitmap.
@@ -50,13 +53,12 @@ public class SizeParameters extends Parameters {
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #SizeParameters(Config, int, int)
      */
-    @SuppressLint("ResourceType")
     public SizeParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.minWidth = a.getDimensionPixelOffset(0 /* android.R.attr.minWidth */, 0);
-        this.value = a.getDimensionPixelOffset(1 /* android.R.attr.minHeight */, 0);
+        this.minWidth = a.getDimensionPixelOffset(MIN_WIDTH /* android.R.attr.minWidth */, 0);
+        this.value = a.getDimensionPixelOffset(MIN_HEIGHT /* android.R.attr.minHeight */, 0);
         a.recycle();
     }
 

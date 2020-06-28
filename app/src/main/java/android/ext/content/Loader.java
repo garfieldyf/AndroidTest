@@ -46,6 +46,7 @@ public abstract class Loader<Key> implements Factory<Object> {
      */
     public synchronized void shutdown() {
         DebugUtils.__checkUIThread("shutdown");
+        DebugUtils.__checkDebug(true, getClass().getName(), "shutdown()");
         mState = SHUTDOWN;
         cancelAll();
         notifyAll();

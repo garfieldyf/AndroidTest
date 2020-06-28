@@ -79,7 +79,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private final Pool<Options> mOptionsPool;
     private final Cache<URI, Image> mImageCache;
     private final SparseArray<Object> mResources;
-    private final SparseArray<ImageLoader> mLoaderCache;
 
     /**
      * Constructor
@@ -95,7 +94,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mFileCache   = fileCache;
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
-        mLoaderCache = new SparseArray<ImageLoader>(2);
         mParamsPool  = Pools.newPool(() -> new Object[PARAMS_LENGTH], MAX_POOL_SIZE);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(this, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
@@ -130,10 +128,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     public final ImageLoader<URI, Image> get(int id) {
         DebugUtils.__checkUIThread("get");
-        ImageLoader loader = mLoaderCache.get(id, null);
+        ImageLoader loader = (ImageLoader)mResources.get(id, null);
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
-            mLoaderCache.append(id, loader = XmlResources.load(mContext, id, this));
+            mResources.append(id, loader = XmlResources.load(mContext, id, this));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + loader + " - ID #0x" + Integer.toHexString(id));
         }
 
@@ -148,7 +146,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     public final void pause(int id) {
         DebugUtils.__checkUIThread("pause");
-        final ImageLoader loader = mLoaderCache.get(id, null);
+        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
         if (loader != null) {
             loader.pause();
         }
@@ -162,7 +160,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     public final void resume(int id) {
         DebugUtils.__checkUIThread("resume");
-        final ImageLoader loader = mLoaderCache.get(id, null);
+        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
         if (loader != null) {
             loader.resume();
         }
@@ -191,12 +189,35 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
 
+        final StringBuilder result = new StringBuilder(130);
         final Resources res = mContext.getResources();
-        dumpCache(printer, res, mResources, "Resources");
-        dumpCache(printer, res, mLoaderCache, "ImageLoader");
+        final TypedValue value = new TypedValue();
+        final int size = mResources.size();
+        DebugUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
+        for (int i = 0; i < size; ++i) {
+            res.getValue(mResources.keyAt(i), value, true);
+            final Object object = mResources.valueAt(i);
 
-        for (int i = mLoaderCache.size() - 1; i >= 0; --i) {
-            mLoaderCache.valueAt(i).dump(printer);
+            result.setLength(0);
+            result.append("  ").append(value.string).append(" ==> ");
+            if (object instanceof Parameters) {
+                ((Parameters)object).dump(printer, result);
+            } else if (object instanceof GIFImageBinder) {
+                ((GIFImageBinder)object).dump(printer, result);
+            } else if (object instanceof TransitionBinder) {
+                ((TransitionBinder)object).dump(printer, result);
+            } else if (object instanceof RoundedBitmapBinder) {
+                ((RoundedBitmapBinder)object).dump(printer, result);
+            } else {
+                printer.println(DebugUtils.toString(object, result).toString());
+            }
+        }
+
+        for (int i = 0; i < size; ++i) {
+            final Object object = mResources.valueAt(i);
+            if (object instanceof ImageLoader) {
+                ((ImageLoader<?, ?>)object).dump(printer);
+            }
         }
     }
 
@@ -221,15 +242,17 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
-            for (int i = mLoaderCache.size() - 1; i >= 0; --i) {
-                mLoaderCache.valueAt(i).shutdown();
+            for (int i = mResources.size() - 1; i >= 0; --i) {
+                final Object value = mResources.valueAt(i);
+                if (value instanceof ImageLoader) {
+                    ((ImageLoader<?, ?>)value).shutdown();
+                }
             }
 
             mResources.clear();
             mParamsPool.clear();
             mBufferPool.clear();
             mOptionsPool.clear();
-            mLoaderCache.clear();
             ByteArrayPool.sInstance.clear();
 
             if (mFileCache instanceof SimpleFileCache) {
@@ -361,31 +384,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
         default:
             return Integer.toString(level);
-        }
-    }
-
-    private static void dumpCache(Printer printer, Resources res, SparseArray cache, String cacheName) {
-        final StringBuilder result = new StringBuilder(130);
-        final TypedValue value = new TypedValue();
-        final int size = cache.size();
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s cache [ size = %d ] ", cacheName, size);
-        for (int i = 0; i < size; ++i) {
-            res.getValue(cache.keyAt(i), value, true);
-            final Object object = cache.valueAt(i);
-
-            result.setLength(0);
-            result.append("  ").append(value.string).append(" ==> ");
-            if (object instanceof Parameters) {
-                ((Parameters)object).dump(printer, result);
-            } else if (object instanceof GIFImageBinder) {
-                ((GIFImageBinder)object).dump(printer, result);
-            } else if (object instanceof TransitionBinder) {
-                ((TransitionBinder)object).dump(printer, result);
-            } else if (object instanceof RoundedBitmapBinder) {
-                ((RoundedBitmapBinder)object).dump(printer, result);
-            } else {
-                printer.println(DebugUtils.toString(object, result).toString());
-            }
         }
     }
 

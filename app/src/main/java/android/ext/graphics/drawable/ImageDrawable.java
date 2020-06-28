@@ -17,7 +17,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.Gravity;
 import java.io.IOException;
@@ -239,7 +238,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     public void getOutline(Outline outline) {
         final Rect bounds = getBounds();
         if (bounds.isEmpty()) {
@@ -271,7 +270,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     public void inflate(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
         final TypedArray a = res.obtainAttributes(attrs, IMAGE_DRAWABLE_ATTRS);
         inflateAttributes(res, parser, attrs, theme, a.getResourceId(SRC_INDEX /* android.R.attr.src */, 0));
@@ -318,7 +317,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
      * @param outline The empty <tt>Outline</tt> to be populated.
      * @param bounds The frame of the contents of this drawable.
      */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     protected void getOutline(Outline outline, RectF bounds) {
         outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
     }
@@ -441,7 +440,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     /**
      * Called to get this drawable to populate the {@link Outline} that defines its drawing area.
      */
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     /* package */ static void getOutline(Outline outline, float[] radii, Path path, RectF bounds) {
         if (radii == null) {
             outline.setRect((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);

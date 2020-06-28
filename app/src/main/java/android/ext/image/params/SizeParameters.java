@@ -70,7 +70,7 @@ public class SizeParameters extends Parameters {
     public SizeParameters(Config config, int minWidth, int minHeight) {
         super(minHeight, config);
         this.minWidth = minWidth;
-        DebugUtils.__checkDebug(true, "SizeParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
+        DebugUtils.__checkDebug(true, "SizeParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= 24 ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
     @Override

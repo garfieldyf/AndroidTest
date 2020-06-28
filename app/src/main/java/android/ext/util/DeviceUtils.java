@@ -458,7 +458,7 @@ public final class DeviceUtils {
     }
 
     static {
-        if (Build.VERSION.SDK_INT >= 21) {
+        if (Build.VERSION.SDK_INT > 20) {
             SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
         } else {
             SUPPORTED_ABIS = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };

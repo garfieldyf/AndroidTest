@@ -13,7 +13,6 @@ import android.graphics.Path.Direction;
 import android.graphics.Path.FillType;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
 import java.io.IOException;
@@ -87,7 +86,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     protected void getOutline(Outline outline, RectF bounds) {
         outline.setOval((int)bounds.left, (int)bounds.top, (int)bounds.right, (int)bounds.bottom);
     }

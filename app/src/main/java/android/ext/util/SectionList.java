@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import android.annotation.TargetApi;
-import android.os.Build;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -102,7 +101,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.N)
+    @TargetApi(24)
     public boolean removeIf(Predicate<? super E> filter) {
         final Iterator<E> itor = listIterator(0);
         boolean result = false;

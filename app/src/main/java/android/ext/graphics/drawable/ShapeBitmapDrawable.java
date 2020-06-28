@@ -16,7 +16,6 @@ import android.graphics.Shader;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
@@ -113,7 +112,7 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(21)
     protected void inflateAttributes(Resources res, XmlPullParser parser, AttributeSet attrs, Theme theme, int id) throws XmlPullParserException, IOException {
         final Drawable drawable = res.getDrawable(id, theme);
         DebugUtils.__checkError(!(drawable instanceof BitmapDrawable), parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");

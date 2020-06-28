@@ -99,7 +99,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
                 .append("\n  outWidth  = ").append(opts.outWidth)
                 .append("\n  outHeight = ").append(opts.outHeight);
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= 26) {
                 builder.append("\n  outConfig = ").append(opts.outConfig)
                     .append("\n  outMimeType = ").append(opts.outMimeType)
                     .append("\n  outColorSpace = ").append(opts.outColorSpace)

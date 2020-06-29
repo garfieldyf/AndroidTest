@@ -260,7 +260,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             }
         }
 
-        DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append('(').append(level).append("),").toString());
+        DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append(',').toString());
     }
 
     @Override
@@ -362,25 +362,25 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private static String toString(int level) {
         switch (level) {
         case TRIM_MEMORY_COMPLETE:
-            return "TRIM_MEMORY_COMPLETE";
+            return level + "(TRIM_MEMORY_COMPLETE)";
 
         case TRIM_MEMORY_MODERATE:
-            return "TRIM_MEMORY_MODERATE";
+            return level + "(TRIM_MEMORY_MODERATE)";
 
         case TRIM_MEMORY_BACKGROUND:
-            return "TRIM_MEMORY_BACKGROUND";
+            return level + "(TRIM_MEMORY_BACKGROUND)";
 
         case TRIM_MEMORY_UI_HIDDEN:
-            return "TRIM_MEMORY_UI_HIDDEN";
+            return level + "(TRIM_MEMORY_UI_HIDDEN)";
 
         case TRIM_MEMORY_RUNNING_LOW:
-            return "TRIM_MEMORY_RUNNING_LOW";
+            return level + "(TRIM_MEMORY_RUNNING_LOW)";
 
         case TRIM_MEMORY_RUNNING_CRITICAL:
-            return "TRIM_MEMORY_RUNNING_CRITICAL";
+            return level + "(TRIM_MEMORY_RUNNING_CRITICAL)";
 
         case TRIM_MEMORY_RUNNING_MODERATE:
-            return "TRIM_MEMORY_RUNNING_MODERATE";
+            return level + "(TRIM_MEMORY_RUNNING_MODERATE)";
 
         default:
             return Integer.toString(level);

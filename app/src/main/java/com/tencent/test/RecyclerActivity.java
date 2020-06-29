@@ -2,12 +2,8 @@ package com.tencent.test;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.ext.content.AsyncLoader.Binder;
-import android.ext.graphics.GIFImage;
-import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PageGridLayoutManager;
@@ -95,6 +91,7 @@ public class RecyclerActivity extends Activity implements OnPageChangeListener {
         public ImageAdapter(RecyclerView view) {
             super(view, FLAG_ITEM_FOCUSABLE);
             mUrls = Arrays.asList(MainApplication.obtainUrls());
+            Log.d("LruFileCache", "count = " + mUrls.size());
         }
 
         @Override
@@ -107,6 +104,7 @@ public class RecyclerActivity extends Activity implements OnPageChangeListener {
             holder.text.setText(Integer.toString(position));
             MainApplication.sInstance.load(R.xml.image_loader, mUrls.get(position))
                 .binder(R.xml.transition_binder)
+                .placeholder(R.drawable.ic_placeholder)
                 .into(holder.image);
         }
 
@@ -130,30 +128,7 @@ public class RecyclerActivity extends Activity implements OnPageChangeListener {
         }
     }
 
-    static final class GIFImageBinder implements Binder<String, Object, Object> {
-        public GIFImageBinder() {
-        }
-
-//        @Override
-//        public void bindValue(String uri, LoadParams<Object> params, Object value, int state) {
-//            if (value instanceof GIFImage) {
-//                ((ImageView)params.target).setImageDrawable(new GIFDrawable((GIFImage)value));
-//            } else {
-//                super.bindValue(uri, params, value, state);
-//            }
-//        }
-
-        @Override
-        public void bindValue(String uri, Object[] params, Object target, Object value, int state) {
-            if (value instanceof GIFImage) {
-                ((ImageView)target).setImageDrawable(new GIFDrawable((GIFImage)value));
-            } else {
-                ((ImageView)target).setImageBitmap((Bitmap)value);
-            }
-        }
-    }
-
-    static final String[] URLs = {
+    private static final String[] URLs = {
         "/sdcard/welcome.gif",
         "android.resource://com.tencent.test/raw/wind",
         "android.resource://com.tencent.test/raw/timg1",

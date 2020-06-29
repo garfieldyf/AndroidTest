@@ -56,12 +56,14 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
+     * @see #simpleQueryLong(ContentResolver, Uri, String, String, String[])
      */
     public static Long simpleQueryLong(SQLiteDatabase db, String sql, Object... bindArgs) {
         try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.simpleQueryForLong();
         } catch (SQLiteException e) {
+            DebugUtils.__checkLogError(true, DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
         }
     }
@@ -76,6 +78,7 @@ public final class DatabaseUtils {
      * @param selectionArgs You may include ? in selection, which will be replaced
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
+     * @see #simpleQueryLong(SQLiteDatabase, String, Object[])
      */
     public static Long simpleQueryLong(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
@@ -96,12 +99,14 @@ public final class DatabaseUtils {
      * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
      * pass <em>(Object[])null</em> instead of allocating an empty array.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
+     * @see #simpleQueryString(ContentResolver, Uri, String, String, String[])
      */
     public static String simpleQueryString(SQLiteDatabase db, String sql, Object... bindArgs) {
         try (final SQLiteStatement prog = db.compileStatement(sql)) {
             bindArgs(prog, bindArgs);
             return prog.simpleQueryForString();
         } catch (SQLiteException e) {
+            DebugUtils.__checkLogError(true, DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
         }
     }
@@ -116,10 +121,54 @@ public final class DatabaseUtils {
      * @param selectionArgs You may include ? in selection, which will be replaced
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The result of the query, or <tt>null</tt> if the query returns 0 rows.
+     * @see #simpleQueryString(SQLiteDatabase, String, Object[])
      */
     public static String simpleQueryString(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
         return (result != null ? result.toString() : null);
+    }
+
+    /**
+     * Query the given SQL statement, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
+     * @param db The <tt>SQLiteDatabase</tt>.
+     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
+     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
+     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values from
+     * <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass <em>(String[])null</em>
+     * instead of allocating an empty array.
+     * @return A new object, or <tt>null</tt>.
+     * @see #simpleQuery(ContentResolver, Class, Uri, String, String, String[])
+     * @see #parseObject(Cursor, Class)
+     */
+    public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
+        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
+            return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
+        } catch (Exception e) {
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
+            return null;
+        }
+    }
+
+    /**
+     * Query the given <em>uri</em>, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
+     * @param resolver The <tt>ContentResolver</tt>.
+     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
+     * @param uri The URI, using the content:// scheme, for the content to retrieve.
+     * @param column The column to query.
+     * @param selection A filter declaring which row to return, formatted as an SQL WHERE clause (excluding the WHERE itself).
+     * @param selectionArgs You may include ? in selection, which will be replaced by the values from <em>selectionArgs</em>.
+     * The values will be bound as Strings.
+     * @return A new object, or <tt>null</tt>.
+     * @see #simpleQuery(SQLiteDatabase, Class, String, String[])
+     * @see #parseObject(Cursor, Class)
+     */
+    public static <T> T simpleQuery(ContentResolver resolver, Class<? extends T> clazz, Uri uri, String column, String selection, String[] selectionArgs) {
+        try (final Cursor cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null)) {
+            return (cursor != null && cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
+        } catch (Exception e) {
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + uri, e);
+            return null;
+        }
     }
 
     /**
@@ -144,30 +193,10 @@ public final class DatabaseUtils {
                 result = new AutoCloseInputStream(fd);
             }
         } catch (SQLiteException e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query blob - " + sql, e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
         }
 
         return result;
-    }
-
-    /**
-     * Query the given SQL statement, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
-     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values from
-     * <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass <em>(String[])null</em>
-     * instead of allocating an empty array.
-     * @return A new object, or <tt>null</tt>.
-     * @see #parseObject(Cursor, Class)
-     */
-    public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
-        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
-            return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
-            return null;
-        }
     }
 
     /**
@@ -188,7 +217,7 @@ public final class DatabaseUtils {
             simpleQueryBlob(db, result, sql, bindArgs);
             return result;
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query blob - " + sql, e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
             return null;
         }
     }
@@ -239,6 +268,7 @@ public final class DatabaseUtils {
      * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
      * <em>(String[])null</em> instead of allocating an empty array.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
+     * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
      * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
@@ -251,7 +281,7 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Query the given URI, returning a new <tt>List</tt> with the specified <em>componentType</em>.
+     * Query the given <em>uri</em>, returning a new <tt>List</tt> with the specified <em>componentType</em>.
      * @param resolver The <tt>ContentResolver</tt>.
      * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @param uri The URI, using the content:// scheme, for the content to retrieve.
@@ -263,13 +293,14 @@ public final class DatabaseUtils {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @return A new <tt>List</tt>, or <tt>null</tt>.
+     * @see #query(SQLiteDatabase, Class, String, String[])
      * @see #parse(Cursor, Class)
      */
     public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         try (Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
             return (cursor != null ? parse(cursor, componentType) : null);
         } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query from - " + uri, e);
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + uri, e);
             return null;
         }
     }
@@ -586,7 +617,7 @@ public final class DatabaseUtils {
 
     private static Object simpleQuery(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         Object result = null;
-        try (Cursor cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null)) {
+        try (final Cursor cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 switch (cursor.getType(0)) {
                 case Cursor.FIELD_TYPE_INTEGER:
@@ -603,7 +634,7 @@ public final class DatabaseUtils {
                 }
             }
         } catch (Exception e) {
-            DebugUtils.__checkLogError(true, DatabaseUtils.class.getName(), "Couldn't query uri - " + uri, e);
+            DebugUtils.__checkLogError(true, DatabaseUtils.class.getName(), "Couldn't query - " + uri, e);
         }
 
         return result;

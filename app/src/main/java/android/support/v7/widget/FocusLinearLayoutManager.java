@@ -56,7 +56,7 @@ public class FocusLinearLayoutManager extends LinearLayoutManager {
      * @see #setFocusedItem(View)
      */
     public int getFocusedItem() {
-        return mFocusManager.getFocusedChild();
+        return mFocusManager.getFocusedItem();
     }
 
     /**
@@ -66,7 +66,7 @@ public class FocusLinearLayoutManager extends LinearLayoutManager {
      * @see #getFocusedItem()
      */
     public int setFocusedItem(View child) {
-        return mFocusManager.setFocusedChild(child);
+        return mFocusManager.setFocusedItem(child);
     }
 
     /**
@@ -74,7 +74,7 @@ public class FocusLinearLayoutManager extends LinearLayoutManager {
      * @param position The position of the item in the data set of the adapter.
      */
     public void requestItemFocus(int position) {
-        mFocusManager.requestChildFocus(position);
+        mFocusManager.requestItemFocus(position);
     }
 
     @Override

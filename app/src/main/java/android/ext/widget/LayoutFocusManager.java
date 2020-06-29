@@ -25,9 +25,9 @@ public final class LayoutFocusManager implements OnFocusChangeListener {
     /**
      * Returns the adapter position of the item view which has focus.
      * @return The adapter position of the item view.
-     * @see #setFocusedChild(View)
+     * @see #setFocusedItem(View)
      */
-    public int getFocusedChild() {
+    public int getFocusedItem() {
         return mPosition;
     }
 
@@ -35,9 +35,9 @@ public final class LayoutFocusManager implements OnFocusChangeListener {
      * Sets the item view which has focus.
      * @param child The item view which has focus.
      * @return The adapter position of the <em>child</em>.
-     * @see #getFocusedChild()
+     * @see #getFocusedItem()
      */
-    public int setFocusedChild(View child) {
+    public int setFocusedItem(View child) {
         return (mPosition = (child != null ? mLayout.getPosition(child) : 0));
     }
 
@@ -45,7 +45,7 @@ public final class LayoutFocusManager implements OnFocusChangeListener {
      * Called when an item in the data set of the adapter wants focus.
      * @param position The position of the item in the data set of the adapter.
      */
-    public void requestChildFocus(int position) {
+    public void requestItemFocus(int position) {
         mPosition = position;
         if (!requestChildFocus()) {
             mLayout.scrollToPosition(mPosition);

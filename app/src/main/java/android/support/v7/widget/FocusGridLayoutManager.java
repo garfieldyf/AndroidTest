@@ -58,7 +58,7 @@ public class FocusGridLayoutManager extends GridLayoutManager {
      * @see #setFocusedItem(View)
      */
     public int getFocusedItem() {
-        return mFocusManager.getFocusedChild();
+        return mFocusManager.getFocusedItem();
     }
 
     /**
@@ -68,7 +68,7 @@ public class FocusGridLayoutManager extends GridLayoutManager {
      * @see #getFocusedItem()
      */
     public int setFocusedItem(View child) {
-        return mFocusManager.setFocusedChild(child);
+        return mFocusManager.setFocusedItem(child);
     }
 
     /**
@@ -76,7 +76,7 @@ public class FocusGridLayoutManager extends GridLayoutManager {
      * @param position The position of the item in the data set of the adapter.
      */
     public void requestItemFocus(int position) {
-        mFocusManager.requestChildFocus(position);
+        mFocusManager.requestItemFocus(position);
     }
 
     @Override

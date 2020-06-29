@@ -1065,7 +1065,6 @@ public final class FileUtils {
          * Constructor
          * @param name The file name.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
-         * @see #Dirent(Parcel)
          */
         public Dirent(String name, int type) {
             DebugUtils.__checkError(StringUtils.getLength(name) == 0, "name == null || name.length() == 0");
@@ -1077,7 +1076,6 @@ public final class FileUtils {
         /**
          * Constructor
          * @param source The {@link Parcel}.
-         * @see #Dirent(String, int)
          */
         public Dirent(Parcel source) {
             DebugUtils.__checkError(source == null, "source == null");
@@ -1226,7 +1224,7 @@ public final class FileUtils {
         public final void dump(Printer printer) {
             final String mimeType  = getMimeType();
             final String extension = getExtension();
-            printer.println(new StringBuilder(256).append(getClass().getSimpleName())
+            printer.println(new StringBuilder(128).append(getClass().getSimpleName())
                    .append(" { name = ").append(name)
                    .append(", type = ").append(type).append('(').append(toString(type)).append(')')
                    .append(", extension = ").append(extension != null ? extension : "")

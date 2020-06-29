@@ -128,6 +128,7 @@ public final class AppCompat {
         @Override
         public int getBytesPerPixel(Options opts) {
             DebugUtils.__checkError(opts.outConfig == null && opts.inPreferredConfig == null, "opts.outConfig == null && opts.inPreferredConfig == null");
+            DebugUtils.__checkDebug(true, "AppCompat", "getBytesPerPixel - outConfig = " + opts.outConfig);
             return BitmapUtils.getBytesPerPixel(opts.outConfig != null ? opts.outConfig : opts.inPreferredConfig);
         }
     }

@@ -116,7 +116,7 @@ public abstract class Loader<Key> implements Factory<Object> {
             DebugUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
             for (Entry<Key, Task> entry : mRunningTasks.entrySet()) {
                 result.setLength(0);
-                printer.println(DebugUtils.toSimpleString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
+                printer.println(DebugUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
             }
         }
     }

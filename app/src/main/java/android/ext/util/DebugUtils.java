@@ -112,14 +112,6 @@ public final class DebugUtils {
         }
     }
 
-    public static StringBuilder toSimpleString(Object object, StringBuilder result) {
-        if (object == null) {
-            return result.append("null");
-        } else {
-            return result.append(object.getClass().getSimpleName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
-        }
-    }
-
     /**
      * Called on the DEBUG mode, do not call this method directly.
      * @hide

@@ -72,7 +72,6 @@ public class SizeParameters extends Parameters {
     public SizeParameters(Config config, int minWidth, int minHeight) {
         super(minHeight, config);
         this.minWidth = minWidth;
-        DebugUtils.__checkDebug(true, "SizeParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= 24 ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
     @Override
@@ -88,7 +87,7 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "outWidth = " + opts.outWidth + ", outHeight = " + opts.outHeight);
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth <= 0 || opts.outHeight <= 0");
         final int width, height;
         if (target instanceof View) {
             final View view = (View)target;
@@ -111,12 +110,17 @@ public class SizeParameters extends Parameters {
 
     @Override
     public void dump(Printer printer, StringBuilder result) {
-        printer.println(result.append(getClass().getSimpleName())
+        result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", minWidth = ").append(minWidth)
             .append(", minHeight = ").append(value)
-            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
-            .append(" }").toString());
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE));
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            result.append(", deviceDensityStable = ").append(DeviceUtils.toDensity(DENSITY_DEVICE_STABLE));
+        }
+
+        printer.println(result.append(" }").toString());
     }
 
     static {

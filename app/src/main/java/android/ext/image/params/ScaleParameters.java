@@ -50,7 +50,6 @@ public class ScaleParameters extends Parameters {
     public ScaleParameters(Config config, float scale) {
         super(scale, config);
         DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
-        DebugUtils.__checkDebug(true, "ScaleParameters", "deviceDensity = " + DeviceUtils.toDensity(DENSITY_DEVICE) + (Build.VERSION.SDK_INT >= 24 ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : ""));
     }
 
     @Override
@@ -64,7 +63,7 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "outWidth = " + opts.outWidth + ", outHeight = " + opts.outHeight);
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth <= 0 || opts.outHeight <= 0");
         final float scale = (float)value;
         if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
             opts.inTargetDensity = DENSITY_DEVICE;
@@ -76,10 +75,15 @@ public class ScaleParameters extends Parameters {
 
     @Override
     public void dump(Printer printer, StringBuilder result) {
-        printer.println(result.append(getClass().getSimpleName())
+        result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(value)
-            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE))
-            .append(" }").toString());
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE));
+
+        if (Build.VERSION.SDK_INT >= 24) {
+            result.append(", deviceDensityStable = ").append(DeviceUtils.toDensity(DENSITY_DEVICE_STABLE));
+        }
+
+        printer.println(result.append(" }").toString());
     }
 }

@@ -26,6 +26,7 @@ import android.ext.image.binder.TransitionBinder;
 import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
+import android.ext.image.params.SizeParameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
@@ -212,6 +213,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 printer.println(DebugUtils.toString(object, result).toString());
             }
         }
+
+        result.setLength(0);
+        SizeParameters.defaultParameters.dump(printer, result.append("  default == > "));
 
         for (int i = 0; i < size; ++i) {
             final Object object = mResources.valueAt(i);

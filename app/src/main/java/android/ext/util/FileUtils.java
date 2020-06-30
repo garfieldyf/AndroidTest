@@ -331,14 +331,6 @@ public final class FileUtils {
     public static native int stat(String path, Stat outStat);
 
     /**
-     * Returns the total number of bytes with specified <em>file</em>. if <em>file</em>
-     * is a directory, all sub files will be computed.
-     * @param file The file or directory to compute, must be absolute file path.
-     * @return The total number of bytes or <tt>0</tt> if the file does not exist.
-     */
-    public static native long computeFileSizes(String file);
-
-    /**
      * Moves the <em>src</em> file to <em>dst</em> file. If the <em>dst</em>
      * file already exists, it will be override to. <p>Note: This method
      * will be create the necessary directories.</p>
@@ -350,6 +342,14 @@ public final class FileUtils {
     public static native int moveFile(String src, String dst);
 
     /**
+     * Returns the total number of bytes with specified <em>file</em>. if <em>file</em>
+     * is a directory, all sub files will be computed.
+     * @param file The file or directory to compute, must be absolute file path.
+     * @return The total number of bytes or <tt>0</tt> if the file does not exist.
+     */
+    public static native long computeFileSizes(String file);
+
+    /**
      * Compares the two specified file's contents are equal.
      * @param file1 The first file to compare, must be absolute file path.
      * @param file2 The second file to compare, must be absolute file path.
@@ -357,6 +357,18 @@ public final class FileUtils {
      * <tt>false</tt> otherwise.
      */
     public static native boolean compareFile(String file1, String file2);
+
+    /**
+     * Creates a file with the specified <em>filename</em>. If the file was
+     * created the file's length is the <em>length</em> and the content is
+     * empty. If the specified file already exists, it can be overrided to.
+     * <p>Note: This method will be create the necessary directories.</p>
+     * @param filename The filename to create, must be absolute file path.
+     * @param length The desired file length in bytes.
+     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
+     * an error code. See {@link ErrnoException}.
+     */
+    public static native int createFile(String filename, long length);
 
     /**
      * Deletes a file or directory with specified <em>path</em>. if <em>path</em>
@@ -370,19 +382,6 @@ public final class FileUtils {
     public static native int deleteFiles(String path, boolean deleteSelf);
 
     /**
-     * Creates a file with the specified <em>filename</em>. If the file was
-     * created the file's length is the <em>length</em> and the content is
-     * empty. If the specified file already exists, it can be overrided to.
-     * <p>Note: This method will be create the necessary directories.</p>
-     * @param filename The filename to create, must be absolute file path.
-     * @param length The desired file length in bytes.
-     * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns
-     * an error code. See {@link ErrnoException}.
-     * @see #createUniqueFile(String, long)
-     */
-    public static native int createFile(String filename, long length);
-
-    /**
      * Creates a unique file with the specified <em>filename</em>. If the file
      * was created the file's length is the <em>length</em> and the content is
      * empty. <p>Note: This method will be create the necessary directories.</p>
@@ -390,7 +389,6 @@ public final class FileUtils {
      * @param length The desired file length in bytes.
      * @return Returns the unique filename (include file path), or <tt>null</tt>
      * if the file could't be created.
-     * @see #createFile(String, long)
      */
     public static native String createUniqueFile(String filename, long length);
 

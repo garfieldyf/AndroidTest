@@ -22,10 +22,10 @@
 // moveFile()
 // listFiles()
 // scanFiles()
-// compareFile()
-// deleteFiles()
-// getFileStatus()
 // createFile()
+// deleteFiles()
+// compareFile()
+// getFileStatus()
 // computeFileSizes()
 // createUniqueFile()
 
@@ -392,6 +392,46 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
+// Method:    createFile
+// Signature: (Ljava/lang/String;J)I
+
+JNIEXPORT_METHOD(jint) createFile(JNIEnv* env, jclass /*clazz*/, jstring filename, jlong length)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, filename) == 0, "filename == null || filename.length() == 0", EINVAL);
+
+    const JNI::jstring_t jfilename(env, filename);
+    jint errnum = createDirectory(jfilename);
+    if (errnum == 0)
+    {
+        __NS::File file;
+        if ((errnum = file.open(jfilename)) == 0)
+        {
+            if (length > 0 && (errnum = file.truncate(length)) != 0)
+                ::remove(jfilename);    // Deletes file, if truncate failure.
+        }
+    }
+
+    return errnum;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
+// Method:    deleteFiles
+// Signature: (Ljava/lang/String;Z)I
+
+JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, jboolean deleteSelf)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", EINVAL);
+
+    struct stat buf;
+    const JNI::jstring_t jpath(env, path);
+    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
 // Method:    compareFile
 // Signature: (Ljava/lang/String;Ljava/lang/String;)Z
 
@@ -428,36 +468,6 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    deleteFiles
-// Signature: (Ljava/lang/String;Z)I
-
-JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, jboolean deleteSelf)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, path) == 0, "path == null || path.length() == 0", EINVAL);
-
-    struct stat buf;
-    const JNI::jstring_t jpath(env, path);
-    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
-// Method:    computeFileSizes
-// Signature: (Ljava/lang/String;)J
-
-JNIEXPORT_METHOD(jlong) computeFileSizes(JNIEnv* env, jclass /*clazz*/, jstring file)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
-
-    struct stat buf;
-    JNI::jstring_t jfile(env, file);
-    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile) : (jlong)buf.st_size)) : 0);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
 // Method:    stat
 // Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$Stat;)I
 
@@ -478,27 +488,17 @@ JNIEXPORT_METHOD(jint) getFileStatus(JNIEnv* env, jclass clazz, jstring path, jo
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    createFile
-// Signature: (Ljava/lang/String;J)I
+// Method:    computeFileSizes
+// Signature: (Ljava/lang/String;)J
 
-JNIEXPORT_METHOD(jint) createFile(JNIEnv* env, jclass /*clazz*/, jstring filename, jlong length)
+JNIEXPORT_METHOD(jlong) computeFileSizes(JNIEnv* env, jclass /*clazz*/, jstring file)
 {
     assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, filename) == 0, "filename == null || filename.length() == 0", EINVAL);
+    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
 
-    const JNI::jstring_t jfilename(env, filename);
-    jint errnum = createDirectory(jfilename);
-    if (errnum == 0)
-    {
-        __NS::File file;
-        if ((errnum = file.open(jfilename)) == 0)
-        {
-            if (length > 0 && (errnum = file.truncate(length)) != 0)
-                ::remove(jfilename);    // Deletes file, if truncate failure.
-        }
-    }
-
-    return errnum;
+    struct stat buf;
+    const JNI::jstring_t jfile(env, file);
+    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile) : (jlong)buf.st_size)) : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

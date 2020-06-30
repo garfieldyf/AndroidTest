@@ -419,16 +419,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         /**
-         * Sets the maximum number of bitmaps to allow in the internal {@link BitmapPool}.
-         * @param size The maximum number of bitmaps.
-         * @return This builder.
-         */
-        public final Builder<URI, Image> setPoolSize(int size) {
-            mPoolSize = size;
-            return this;
-        }
-
-        /**
          * Sets the maximum number of bytes to allow in the internal bitmap cache.
          * @param size The maximum number of bytes.
          * @return This builder.
@@ -478,6 +468,16 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          */
         public final Builder<URI, Image> setFileCache(FileCache cache) {
             mFileCache = cache;
+            return this;
+        }
+
+        /**
+         * Sets the maximum number of bitmaps to allow in the internal {@link BitmapPool}.
+         * @param size The maximum number of bitmaps.
+         * @return This builder.
+         */
+        public final Builder<URI, Image> setBitmapPoolSize(int size) {
+            mPoolSize = size;
             return this;
         }
 

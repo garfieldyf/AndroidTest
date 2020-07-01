@@ -67,9 +67,6 @@ static jmethodID _addDirentID;
 // Class ScanCallback method IDs.
 static jmethodID _onScanFileID;
 
-// typedef FileFilter.
-typedef int (*FileFilter) (const struct dirent*);
-
 ///////////////////////////////////////////////////////////////////////////////
 // Global functions
 //
@@ -125,6 +122,49 @@ __STATIC_INLINE__ jboolean compareLength(const __NS::File& file1, const __NS::Fi
     }
 
     return result;
+}
+
+template <typename _Filter>
+__STATIC_INLINE__ jint listFilesImpl(JNIEnv* env, jclass clazz, const char* path, jobject outDirents)
+{
+    assert(env);
+    assert(path);
+    assert(outDirents);
+
+    __NS::Directory<_Filter> dir;
+    jint errnum = dir.open(path);
+    if (errnum == 0)
+    {
+        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
+            env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef_t(env, entry->d_name).get(), (jint)entry->d_type);
+    }
+
+    return errnum;
+}
+
+template <typename _Filter>
+__STATIC_INLINE__ jint scanFilesImpl(JNIEnv* env, const char* path, jobject callback, jobject cookie)
+{
+    assert(env);
+    assert(path);
+    assert(callback);
+
+    __NS::Directory<_Filter> dir;
+    jint errnum = dir.open(path);
+    if (errnum == 0)
+    {
+        char filePath[MAX_PATH];
+        const int length = buildPath(filePath, path, ::strlen(path));
+
+        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
+        {
+            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE)
+                break;
+        }
+    }
+
+    return errnum;
 }
 
 __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil::char_sequence& dirPath, const char* name)
@@ -188,11 +228,11 @@ __STATIC_INLINE__ jlong computeFileBytes(const char* path)
     return result;
 }
 
-__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, FileFilter filter, jobject callback, jobject cookie, jint& result)
+template <typename _Filter>
+__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jobject callback, jobject cookie, jint& result)
 {
     assert(env);
     assert(path);
-    assert(filter);
     assert(callback);
 
     std::list<std::string> dirPaths;
@@ -205,7 +245,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, FileFi
         std::string dirPath(std::move(dirPaths.front()));
         dirPaths.pop_front();
 
-        __NS::Directory<FileFilter> dir(filter);
+        __NS::Directory<_Filter> dir;
         if ((errnum = dir.open(dirPath.c_str())) == 0)
         {
             char filePath[MAX_PATH];
@@ -259,14 +299,14 @@ static inline jlong computeFileBytes(const char* dirPath)
     return result;
 }
 
-static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, FileFilter filter, jobject callback, jobject cookie, jint& result)
+template <typename _Filter>
+static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jobject callback, jobject cookie, jint& result)
 {
     assert(env);
-    assert(filter);
     assert(dirPath);
     assert(callback);
 
-    __NS::Directory<FileFilter> dir(filter);
+    __NS::Directory<_Filter> dir;
     jint errnum = dir.open(dirPath);
     if (errnum == 0)
     {
@@ -283,7 +323,7 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, FileFil
                 break;
             } else if (entry->d_type == DT_DIR) {
                 // Scans the sub directory.
-                errnum = scanDescendentFiles(env, filePath, filter, callback, cookie, result);
+                errnum = scanDescendentFiles<_Filter>(env, filePath, callback, cookie, result);
                 if (errnum != 0 || result == SC_STOP)
                     break;
             }
@@ -340,15 +380,8 @@ JNIEXPORT_METHOD(jint) listFiles(JNIEnv* env, jclass clazz, jstring dirPath, jin
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || outDirents == NULL, "dirPath == null || dirPath.length() == 0 || outDirents == null", EINVAL);
 
-    __NS::Directory<FileFilter> dir((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter);
-    jint errnum = dir.open(JNI::jstring_t(env, dirPath));
-    if (errnum == 0)
-    {
-        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-            env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef_t(env, entry->d_name).get(), (jint)entry->d_type);
-    }
-
-    return errnum;
+    const JNI::jstring_t jdirPath(env, dirPath);
+    return ((flags & FLAG_IGNORE_HIDDEN_FILE) ? listFilesImpl<__NS::IgnoreHiddenFilter>(env, clazz, jdirPath, outDirents) : listFilesImpl<__NS::DefaultFilter>(env, clazz, jdirPath, outDirents));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -361,33 +394,11 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || callback == NULL, "dirPath == null || dirPath.length() == 0 || callback == null", EINVAL);
 
+    jint result;
     const JNI::jstring_t jdirPath(env, dirPath);
-    FileFilter filter = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? __NS::ignoreHiddenFilter : __NS::defaultFilter);
-
-    jint errnum;
-    if (flags & FLAG_SCAN_FOR_DESCENDENTS)
-    {
-        jint result;
-        errnum = scanDescendentFiles(env, jdirPath, filter, callback, cookie, result);
-    }
-    else
-    {
-        __NS::Directory<FileFilter> dir(filter);
-        if ((errnum = dir.open(jdirPath)) == 0)
-        {
-            char filePath[MAX_PATH];
-            const int length = buildPath(filePath, jdirPath.str(), jdirPath.length);
-
-            for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-            {
-                ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
-                if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE)
-                    break;
-            }
-        }
-    }
-
-    return errnum;
+    return ((flags & FLAG_SCAN_FOR_DESCENDENTS)
+            ? ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, callback, cookie, result))
+            : ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, callback, cookie)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

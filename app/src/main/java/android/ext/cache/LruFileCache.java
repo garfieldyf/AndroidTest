@@ -76,6 +76,13 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     }
 
     @Override
+    public File remove(String key) {
+        DebugUtils.__checkError(key == null, "key == null");
+        final File cacheFile = new File(mCacheDir, key);
+        return (cacheFile.delete() ? cacheFile : null);
+    }
+
+    @Override
     public File get(String key) {
         DebugUtils.__checkError(key == null, "key == null");
         final File cacheFile = new File(mCacheDir, key);
@@ -87,13 +94,6 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     public File put(String key, File cacheFile) {
         DebugUtils.__checkError(key == null || cacheFile == null, "key == null || cacheFile == null");
         return null;
-    }
-
-    @Override
-    public File remove(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
-        final File cacheFile = new File(mCacheDir, key);
-        return (cacheFile.delete() ? cacheFile : null);
     }
 
     @Override
@@ -119,6 +119,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
 
     @Override
     public final int compare(File one, File another) {
+        // Sort by descending order.
         return Long.compare(another.lastModified(), one.lastModified());
     }
 

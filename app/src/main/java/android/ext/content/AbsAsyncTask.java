@@ -98,6 +98,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
 
     /**
      * Validates the owner <em>ownerRef</em> is valid.
+     * @hide
      */
     public static boolean validateOwner(WeakReference<Object> ownerRef) {
         if (ownerRef != null) {

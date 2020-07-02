@@ -97,16 +97,16 @@ public class BarcodeDecoder {
 
     /**
      * This method begins an asynchronous decode the barcode image from the bitmap pixels.
+     * @param executor The <tt>Executor</tt> to executing decode.
      * @param pixels The array of colors representing the pixels of the bitmap.
      * @param width The width of the bitmap in pixels.
      * @param height The height of the bitmap in pixels.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param listener The {@link OnDecodeListener} used for being notified
      * when the barcode image was decoded.
-     * @see #startDecode(byte[], int, int, Rect, Executor, OnDecodeListener)
-     * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
+     * @see #startDecode(Executor, byte[], int, int, Rect, OnDecodeListener)
+     * @see #startDecode(Executor, byte[], int, int, int, int, int, int, OnDecodeListener)
      */
-    public final void startDecode(int[] pixels, int width, int height, Executor executor, OnDecodeListener listener) {
+    public final void startDecode(Executor executor, int[] pixels, int width, int height, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, RGBLuminanceSource, OnDecodeListener, null }
          */
@@ -116,17 +116,17 @@ public class BarcodeDecoder {
 
     /**
      * This method begins an asynchronous decode the barcode image from the camera device.
+     * @param executor The <tt>Executor</tt> to executing decode.
      * @param data The array of YUV data returned from the camera device.
      * @param width The <em>data</em> width in pixels.
      * @param height The <em>data</em> height in pixels.
      * @param clipBounds The <tt>Rect</tt> expressing the barcode clip area.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param listener The {@link OnDecodeListener} used for being notified when
      * the barcode image was decoded.
-     * @see #startDecode(int[], int, int, Executor, OnDecodeListener)
-     * @see #startDecode(byte[], int, int, int, int, int, int, Executor, OnDecodeListener)
+     * @see #startDecode(Executor, int[], int, int, OnDecodeListener)
+     * @see #startDecode(Executor, byte[], int, int, int, int, int, int, OnDecodeListener)
      */
-    public final void startDecode(byte[] data, int width, int height, Rect clipBounds, Executor executor, OnDecodeListener listener) {
+    public final void startDecode(Executor executor, byte[] data, int width, int height, Rect clipBounds, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */
@@ -136,6 +136,7 @@ public class BarcodeDecoder {
 
     /**
      * This method begins an asynchronous decode the barcode image from the camera device.
+     * @param executor The <tt>Executor</tt> to executing decode.
      * @param data The array of YUV data returned from the camera device.
      * @param width The <em>data</em> width in pixels.
      * @param height The <em>data</em> height in pixels.
@@ -143,13 +144,12 @@ public class BarcodeDecoder {
      * @param top The top side of the rectangle expressing the barcode clip area.
      * @param right The right side of the rectangle expressing the barcode clip area.
      * @param bottom The bottom side of the rectangle expressing the barcode clip area.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param listener The {@link OnDecodeListener} used for being notified when the
      * barcode image was decoded.
-     * @see #startDecode(int[], int, int, Executor, OnDecodeListener)
-     * @see #startDecode(byte[], int, int, Rect, Executor, OnDecodeListener)
+     * @see #startDecode(Executor, int[], int, int, OnDecodeListener)
+     * @see #startDecode(Executor, byte[], int, int, Rect, OnDecodeListener)
      */
-    public final void startDecode(byte[] data, int width, int height, int left, int top, int right, int bottom, Executor executor, OnDecodeListener listener) {
+    public final void startDecode(Executor executor, byte[] data, int width, int height, int left, int top, int right, int bottom, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */

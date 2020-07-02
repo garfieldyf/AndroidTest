@@ -11,6 +11,7 @@ import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -22,34 +23,118 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 /**
- * Class BarcodeEncoder
+ * Class <tt>BarcodeEncoder</tt> used to encodes the contents to a barcode image.
+ * <h3>Usage</h3>
+ * <p>Here is an example:</p><pre>
+ * final BarcodeEncoder encoder = new BarcodeEncoder()
+ *     .setMargin(0)
+ *     .setCharset("UTF-8")
+ *     .setErrorCorrection(ErrorCorrectionLevel.H);
+ *
+ * encoder.startEncode(executor, contents, format, width, height, listener);</pre>
  * @author Garfield
  */
 public class BarcodeEncoder {
-    private Map<EncodeHintType, ?> mHints;
-    private final MultiFormatWriter mWriter;
+    /* package */ final MultiFormatWriter mWriter;
+    /* package */ final Map<EncodeHintType, Object> mHints;
 
     /**
      * Constructor
-     * @see #BarcodeEncoder(Map)
      */
     public BarcodeEncoder() {
         mWriter = new MultiFormatWriter();
+        mHints  = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
     }
 
     /**
-     * Constructor
-     * @param hints The additional parameters to supply to this encoder.
-     * @see #BarcodeEncoder()
-     * @see Builder
+     * Returns the additional parameters with this encoder.
+     * @return The additional parameters.
      */
-    public BarcodeEncoder(Map<EncodeHintType, ?> hints) {
-        mHints  = hints;
-        mWriter = new MultiFormatWriter();
+    public final Map<EncodeHintType, Object> getHints() {
+        return mHints;
     }
 
     /**
-     * Encodes an barcode image with the specified <em>contents</em> synchronously.
+     * Sets the margin, in pixels, to use when generating the barcode.
+     * @param margin The margin, in pixels.
+     * @return This encoder.
+     * @see EncodeHintType#MARGIN
+     */
+    public final BarcodeEncoder setMargin(int margin) {
+        mHints.put(EncodeHintType.MARGIN, Integer.toString(margin));
+        return this;
+    }
+
+    /**
+     * Sets the exact version of QR code to be encoded.
+     * @param version The version to set.
+     * @return This encoder.
+     * @see EncodeHintType#QR_VERSION
+     */
+    public final BarcodeEncoder setVersion(int version) {
+        mHints.put(EncodeHintType.QR_VERSION, Integer.toString(version));
+        return this;
+    }
+
+    /**
+     * Sets the character encoding to use when encoding.
+     * @param charsetName The charset name to set.
+     * @return This encoder.
+     * @see EncodeHintType#CHARACTER_SET
+     */
+    public final BarcodeEncoder setCharset(String charsetName) {
+        mHints.put(EncodeHintType.CHARACTER_SET, charsetName);
+        return this;
+    }
+
+    /**
+     * Sets the required number of layers for an Aztec code.
+     * @param layers The number of layers to set.
+     * @return This encoder.
+     * @see EncodeHintType#AZTEC_LAYERS
+     */
+    public final BarcodeEncoder setAztecLayers(int layers) {
+        mHints.put(EncodeHintType.AZTEC_LAYERS, Integer.toString(layers));
+        return this;
+    }
+
+    /**
+     * Sets the matrix shape for Data Matrix.
+     * @param hint The {@link SymbolShapeHint} to set.
+     * @return This encoder.
+     * @see EncodeHintType#DATA_MATRIX_SHAPE
+     */
+    public final BarcodeEncoder setDataMatrixShape(SymbolShapeHint hint) {
+        mHints.put(EncodeHintType.DATA_MATRIX_SHAPE, hint);
+        return this;
+    }
+
+    /**
+     * Sets the error correction level.
+     * @param level The error correction level to set.
+     * @return This encoder.
+     * @see EncodeHintType#ERROR_CORRECTION
+     * @see #setErrorCorrection(ErrorCorrectionLevel)
+     */
+    public final BarcodeEncoder setErrorCorrection(int level) {
+        mHints.put(EncodeHintType.ERROR_CORRECTION, Integer.toString(level));
+        return this;
+    }
+
+    /**
+     * Sets the error correction level.
+     * @param level The {@link ErrorCorrectionLevel} to set.
+     * @return This encoder.
+     * @see EncodeHintType#ERROR_CORRECTION
+     * @see #setErrorCorrection(int)
+     */
+    public final BarcodeEncoder setErrorCorrection(ErrorCorrectionLevel level) {
+        mHints.put(EncodeHintType.ERROR_CORRECTION, level);
+        return this;
+    }
+
+    /**
+     * Encodes a barcode image with the specified <em>contents</em> synchronously.
      * <p><b>Note: This method will block the calling thread until it was returned.</b></p>
      * @param contents The contents to encode.
      * @param format The {@link BarcodeFormat} to encode.
@@ -57,29 +142,10 @@ public class BarcodeEncoder {
      * @param height The preferred height in pixels.
      * @return The {@link BitMatrix} representing encoded barcode image if succeeded,
      * <tt>null</tt> otherwise.
-     * @see #encode(String, BarcodeFormat, int, int, Map)
-     * @see BarcodeBuilder
      */
-    public final BitMatrix encode(String contents, BarcodeFormat format, int width, int height) {
-        return encode(contents, format, width, height, mHints);
-    }
-
-    /**
-     * Encodes an barcode image with the specified <em>contents</em> synchronously.
-     * <p><b>Note: This method will block the calling thread until it was returned.</b></p>
-     * @param contents The contents to encode.
-     * @param format The {@link BarcodeFormat} to encode.
-     * @param width The preferred width in pixels.
-     * @param height The preferred height in pixels.
-     * @param hints The additional parameters to supply to this encoder.
-     * @return The {@link BitMatrix} representing encoded barcode image if succeeded,
-     * <tt>null</tt> otherwise.
-     * @see #encode(String, BarcodeFormat, int, int)
-     * @see BarcodeBuilder
-     */
-    public BitMatrix encode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints) {
+    public BitMatrix encode(String contents, BarcodeFormat format, int width, int height) {
         try {
-            return mWriter.encode(contents, format, width, height, hints);
+            return mWriter.encode(contents, format, width, height, mHints);
         } catch (Exception e) {
             DebugUtils.__checkLogError(true, getClass().getName(), "Couldn't encode '" + contents + "' to a barcode image.", e);
             return null;
@@ -87,45 +153,20 @@ public class BarcodeEncoder {
     }
 
     /**
-     * This method begins an asynchronous encode an barcode image with the specified <em>contents</em>.
+     * This method begins an asynchronous encode a barcode image with the specified <em>contents</em>.
+     * @param executor The <tt>Executor</tt> to executing encode.
      * @param contents The contents to encode.
      * @param format The {@link BarcodeFormat} to encode.
      * @param width The preferred width in pixels.
      * @param height The preferred height in pixels.
-     * @param executor The <tt>Executor</tt> to executing encode.
-     * @param listener The {@link OnEncodeListener} used for being
-     * notified when the contents was encoded an barcode image.
-     * @see #startEncode(String, BarcodeFormat, int, int, Map, Executor, OnEncodeListener)
+     * @param listener The {@link OnEncodeListener} used for being notified when the contents was encoded a barcode image.
      */
-    public final void startEncode(String contents, BarcodeFormat format, int width, int height, Executor executor, OnEncodeListener listener) {
+    public void startEncode(Executor executor, String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
         DebugUtils.__checkError(executor == null, "executor == null");
-        new EncodeTask().executeOnExecutor(executor, new Encoder(contents, format, width, height, mHints, listener));
-    }
-
-    /**
-     * This method begins an asynchronous encode an barcode image with the specified <em>contents</em>.
-     * @param contents The contents to encode.
-     * @param format The {@link BarcodeFormat} to encode.
-     * @param width The preferred width in pixels.
-     * @param height The preferred height in pixels.
-     * @param hints The additional parameters to supply to this encoder.
-     * @param executor The <tt>Executor</tt> to executing encode.
-     * @param listener The {@link OnEncodeListener} used for being
-     * notified when the contents was encoded an barcode image.
-     * @see #startEncode(String, BarcodeFormat, int, int, Executor, OnEncodeListener)
-     */
-    public final void startEncode(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, Executor executor, OnEncodeListener listener) {
-        DebugUtils.__checkError(executor == null, "executor == null");
-        new EncodeTask().executeOnExecutor(executor, new Encoder(contents, format, width, height, hints, listener));
-    }
-
-    /**
-     * Sets the additional parameters to supply to this encoder.
-     * @param hints The parameters to set.
-     * @see Builder
-     */
-    public final void setHints(Map<EncodeHintType, ?> hints) {
-        mHints = hints;
+        /*
+         * params - { contents, format, width, height }
+         */
+        new EncodeTask(listener).executeOnExecutor(executor, contents, format, width, height);
     }
 
     /**
@@ -141,115 +182,38 @@ public class BarcodeEncoder {
     }
 
     /**
-     * Class <tt>Builder</tt> to creates the barcode encoder hints.
-     * <h3>Usage</h3>
-     * <p>Here is an example:</p><pre>
-     * final Map&lt;EncodeHintType, Object&gt; hints = new BarcodeEncoder.Builder()
-     *     .charset("UTF-8")
-     *     .margin(0)
-     *     .errorCorrection(ErrorCorrectionLevel.H)
-     *     .build();</pre>
+     * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    public static final class Builder {
-        private final Map<EncodeHintType, Object> mHints;
+    private final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
+        private OnEncodeListener mListener;
 
         /**
          * Constructor
+         * @param listener The {@link OnEncodeListener} used for being
+         * notified when the contents was encoded a barcode image.
          */
-        public Builder() {
-            mHints = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
+        public EncodeTask(OnEncodeListener listener) {
+            mListener = listener;
         }
 
-        /**
-         * Sets the margin, in pixels, to use when generating the barcode.
-         * @param margin The margin, in pixels.
-         * @return This builder.
-         * @see EncodeHintType#MARGIN
-         */
-        public final Builder margin(int margin) {
-            mHints.put(EncodeHintType.MARGIN, Integer.toString(margin));
-            return this;
+        @Override
+        protected Pair<BitMatrix, Bitmap> doInBackground(Object[] params) {
+            /*
+             * params - { contents, format, width, height }
+             */
+            final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (int)params[2], (int)params[3]);
+            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, mHints) : null));
         }
 
-        /**
-         * Sets the exact version of QR code to be encoded.
-         * @param version The version to set.
-         * @return This builder.
-         * @see EncodeHintType#QR_VERSION
-         */
-        public final Builder version(int version) {
-            mHints.put(EncodeHintType.QR_VERSION, Integer.toString(version));
-            return this;
-        }
-
-        /**
-         * Sets the required number of layers for an Aztec code.
-         * @param layers The number of layers to set.
-         * @return This builder.
-         * @see EncodeHintType#AZTEC_LAYERS
-         */
-        public final Builder aztecLayers(int layers) {
-            mHints.put(EncodeHintType.AZTEC_LAYERS, Integer.toString(layers));
-            return this;
-        }
-
-        /**
-         * Sets the character encoding to use when encoding.
-         * @param charsetName The charset name to set.
-         * @return This builder.
-         * @see EncodeHintType#CHARACTER_SET
-         */
-        public final Builder charset(String charsetName) {
-            mHints.put(EncodeHintType.CHARACTER_SET, charsetName);
-            return this;
-        }
-
-        /**
-         * Sets the matrix shape for Data Matrix.
-         * @param hint The {@link SymbolShapeHint} to set.
-         * @return This builder.
-         * @see EncodeHintType#DATA_MATRIX_SHAPE
-         */
-        public final Builder dataMatrixShape(SymbolShapeHint hint) {
-            mHints.put(EncodeHintType.DATA_MATRIX_SHAPE, hint);
-            return this;
-        }
-
-        /**
-         * Sets the error correction level.
-         * @param level The {@link ErrorCorrectionLevel} to set.
-         * @return This builder.
-         * @see EncodeHintType#ERROR_CORRECTION
-         * @see #errorCorrection(int)
-         */
-        public final Builder errorCorrection(ErrorCorrectionLevel level) {
-            mHints.put(EncodeHintType.ERROR_CORRECTION, level);
-            return this;
-        }
-
-        /**
-         * Sets the error correction level.
-         * @param level The error correction level to set.
-         * @return This builder.
-         * @see EncodeHintType#ERROR_CORRECTION
-         * @see #errorCorrection(ErrorCorrectionLevel)
-         */
-        public final Builder errorCorrection(int level) {
-            mHints.put(EncodeHintType.ERROR_CORRECTION, Integer.toString(level));
-            return this;
-        }
-
-        /**
-         * Creates a barcode encoder hints with the arguments supplied to this builder.
-         * @return The barcode encoder hints.
-         */
-        public final Map<EncodeHintType, Object> build() {
-            return mHints;
+        @Override
+        protected void onPostExecute(Pair<BitMatrix, Bitmap> result) {
+            mListener.onEncodeComplete(result.first, result.second);
+            mListener = null;    // Prevent memory leak.
         }
     }
 
     /**
-     * Used for being notified when the contents was encoded an barcode image.
+     * Used for being notified when the contents was encoded a barcode image.
      */
     public static interface OnEncodeListener {
         /**
@@ -275,59 +239,6 @@ public class BarcodeEncoder {
             final int margin = (int)(20.0f * DENSITY_DEVICE / DENSITY_DEFAULT);
             DebugUtils.__checkDebug(true, "BarcodeEncoder", "deviceDensity = " + DENSITY_DEVICE + (Build.VERSION.SDK_INT >= 24 ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : "") + ", defaultDensity = " + DENSITY_DEFAULT + ", margin = " + margin);
             return new BarcodeBuilder(bitMatrix).config(Config.RGB_565).margins(margin).build();
-        }
-    }
-
-    /**
-     * Class <tt>Encoder</tt> used to encode the contents to a barcode image.
-     */
-    private final class Encoder {
-        private Bitmap mResult;
-        private final int mWidth;
-        private final int mHeight;
-        private BitMatrix mBitMatrix;
-        private final String mContents;
-        private OnEncodeListener mListener;
-        private final BarcodeFormat mFormat;
-        private final Map<EncodeHintType, ?> mHints;
-
-        public Encoder(String contents, BarcodeFormat format, int width, int height, Map<EncodeHintType, ?> hints, OnEncodeListener listener) {
-            mHints    = hints;
-            mWidth    = width;
-            mHeight   = height;
-            mFormat   = format;
-            mContents = contents;
-            mListener = listener;
-            DebugUtils.__checkError(listener == null, "listener == null");
-        }
-
-        public final Encoder encode() {
-            mBitMatrix = BarcodeEncoder.this.encode(mContents, mFormat, mWidth, mHeight, mHints);
-            if (mBitMatrix != null) {
-                mResult = mListener.convertToBitmap(mBitMatrix, mHints);
-            }
-
-            return this;
-        }
-
-        public final void onEncodeComplete() {
-            mListener.onEncodeComplete(mBitMatrix, mResult);
-            mListener = null;    // Prevent memory leak.
-        }
-    }
-
-    /**
-     * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
-     */
-    /* package */ static final class EncodeTask extends AsyncTask<Encoder, Object, Encoder> {
-        @Override
-        protected Encoder doInBackground(Encoder[] encoders) {
-            return encoders[0].encode();
-        }
-
-        @Override
-        protected void onPostExecute(Encoder encoder) {
-            encoder.onEncodeComplete();
         }
     }
 }

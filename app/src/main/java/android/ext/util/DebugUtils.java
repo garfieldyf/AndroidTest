@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 import android.util.Printer;
 import java.lang.reflect.Modifier;
@@ -219,14 +220,14 @@ public final class DebugUtils {
 
         public TraceLocal(Thread thread) {
             this.thread   = thread;
-            this.nanoTime = System.nanoTime();
+            this.nanoTime = SystemClock.elapsedRealtimeNanos();
             sTraceLocal.set(this);
         }
 
         public static long uptimeNanos() {
             final TraceLocal local = sTraceLocal.get();
             DebugUtils.__checkError(local == null || local.thread != Thread.currentThread(), "Only the original thread that called startMethodTracing() can be call stopMethodTracing().");
-            return System.nanoTime() - local.nanoTime;
+            return SystemClock.elapsedRealtimeNanos() - local.nanoTime;
         }
     }
 

@@ -143,7 +143,7 @@ __STATIC_INLINE__ jint listFilesImpl(JNIEnv* env, jclass clazz, const char* path
 }
 
 template <typename _Filter>
-__STATIC_INLINE__ jint scanFilesImpl(JNIEnv* env, const char* path, jobject callback, jobject cookie)
+__STATIC_INLINE__ jint scanFilesImpl(JNIEnv* env, const char* path, size_t length, jobject callback, jobject cookie)
 {
     assert(env);
     assert(path);
@@ -154,11 +154,11 @@ __STATIC_INLINE__ jint scanFilesImpl(JNIEnv* env, const char* path, jobject call
     if (errnum == 0)
     {
         char filePath[MAX_PATH];
-        const int length = buildPath(filePath, path, ::strlen(path));
+        const int offset = buildPath(filePath, path, length);
 
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
-            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
             if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE)
                 break;
         }
@@ -191,7 +191,7 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
 }
 
 #ifdef __NDK_STLP__
-__STATIC_INLINE__ jlong computeFileBytes(const char* path)
+__STATIC_INLINE__ jlong computeFileBytes(const char* path, size_t /*length*/)
 {
     assert(path);
 
@@ -210,11 +210,11 @@ __STATIC_INLINE__ jlong computeFileBytes(const char* path)
         {
             struct stat buf;
             char filePath[MAX_PATH];
-            const int length = buildPath(filePath, dirPath.c_str(), dirPath.size());
+            const int offset = buildPath(filePath, dirPath.c_str(), dirPath.size());
 
             for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
             {
-                ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+                ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
                 if (entry->d_type == DT_DIR) {
                     // If filePath is a directory adds it to dirPaths.
                     dirPaths.push_back(filePath);
@@ -229,7 +229,7 @@ __STATIC_INLINE__ jlong computeFileBytes(const char* path)
 }
 
 template <typename _Filter>
-__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jobject callback, jobject cookie, jint& result)
+__STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, size_t /*length*/, jobject callback, jobject cookie, jint& result)
 {
     assert(env);
     assert(path);
@@ -249,11 +249,11 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jobjec
         if ((errnum = dir.open(dirPath.c_str())) == 0)
         {
             char filePath[MAX_PATH];
-            const int length = buildPath(filePath, dirPath.c_str(), dirPath.size());
+            const int offset = buildPath(filePath, dirPath.c_str(), dirPath.size());
 
             for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
             {
-                ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+                ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
                 result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie);
                 if (result == SC_STOP) {
                     dirPaths.clear();
@@ -273,7 +273,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, jobjec
     return errnum;
 }
 #else
-static inline jlong computeFileBytes(const char* dirPath)
+static inline jlong computeFileBytes(const char* dirPath, size_t length)
 {
     assert(dirPath);
 
@@ -283,13 +283,14 @@ static inline jlong computeFileBytes(const char* dirPath)
     {
         struct stat buf;
         char filePath[MAX_PATH];
-        const int length = buildPath(filePath, dirPath, ::strlen(dirPath));
+        const int offset = buildPath(filePath, dirPath, length);
 
         for (struct dirent* entry; dir.read(entry) == 0 && entry != NULL; )
         {
-            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            const size_t size = ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
             if (entry->d_type == DT_DIR) {
-                result += computeFileBytes(filePath);
+                assert(::strlen(filePath) == (size + offset));
+                result += computeFileBytes(filePath, size + offset);
             } else if (::stat(filePath, &buf) == 0) {
                 result += (jlong)buf.st_size;
             }
@@ -300,7 +301,7 @@ static inline jlong computeFileBytes(const char* dirPath)
 }
 
 template <typename _Filter>
-static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jobject callback, jobject cookie, jint& result)
+static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, size_t length, jobject callback, jobject cookie, jint& result)
 {
     assert(env);
     assert(dirPath);
@@ -311,11 +312,11 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jobject
     if (errnum == 0)
     {
         char filePath[MAX_PATH];
-        const int length = buildPath(filePath, dirPath, ::strlen(dirPath));
+        const int offset = buildPath(filePath, dirPath, length);
 
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
-            ::strlcpy(filePath + length, entry->d_name, _countof(filePath) - length);
+            const size_t size = ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
             result = env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie);
             if (result == SC_BREAK) {
                 continue;
@@ -323,7 +324,8 @@ static inline jint scanDescendentFiles(JNIEnv* env, const char* dirPath, jobject
                 break;
             } else if (entry->d_type == DT_DIR) {
                 // Scans the sub directory.
-                errnum = scanDescendentFiles<_Filter>(env, filePath, callback, cookie, result);
+                assert(::strlen(filePath) == (size + offset));
+                errnum = scanDescendentFiles<_Filter>(env, filePath, size + offset, callback, cookie, result);
                 if (errnum != 0 || result == SC_STOP)
                     break;
             }
@@ -397,8 +399,8 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     jint result;
     const JNI::jstring_t jdirPath(env, dirPath);
     return ((flags & FLAG_SCAN_FOR_DESCENDENTS)
-            ? ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, callback, cookie, result))
-            : ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, callback, cookie)));
+            ? ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie, result))
+            : ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie)));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -509,7 +511,7 @@ JNIEXPORT_METHOD(jlong) computeFileSizes(JNIEnv* env, jclass /*clazz*/, jstring 
 
     struct stat buf;
     const JNI::jstring_t jfile(env, file);
-    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile) : (jlong)buf.st_size)) : 0);
+    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile, jfile.length) : (jlong)buf.st_size)) : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

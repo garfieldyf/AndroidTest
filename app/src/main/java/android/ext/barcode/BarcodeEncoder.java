@@ -164,9 +164,9 @@ public class BarcodeEncoder {
     public void startEncode(Executor executor, String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
         DebugUtils.__checkError(executor == null, "executor == null");
         /*
-         * params - { contents, format, width, height }
+         * params - { BarcodeEncoder, contents, format, width, height }
          */
-        new EncodeTask(listener).executeOnExecutor(executor, contents, format, width, height);
+        new EncodeTask(listener).executeOnExecutor(executor, this, contents, format, width, height);
     }
 
     /**
@@ -184,7 +184,7 @@ public class BarcodeEncoder {
     /**
      * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
+    private static final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
         private OnEncodeListener mListener;
 
         /**
@@ -199,10 +199,11 @@ public class BarcodeEncoder {
         @Override
         protected Pair<BitMatrix, Bitmap> doInBackground(Object[] params) {
             /*
-             * params - { contents, format, width, height }
+             * params - { BarcodeEncoder, contents, format, width, height }
              */
-            final BitMatrix bitMatrix = encode((String)params[0], (BarcodeFormat)params[1], (int)params[2], (int)params[3]);
-            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, mHints) : null));
+            final BarcodeEncoder encoder = (BarcodeEncoder)params[0];
+            final BitMatrix bitMatrix = encoder.encode((String)params[1], (BarcodeFormat)params[2], (int)params[3], (int)params[4]);
+            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, encoder.mHints) : null));
         }
 
         @Override

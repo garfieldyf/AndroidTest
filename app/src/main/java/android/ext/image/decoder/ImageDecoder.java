@@ -3,6 +3,7 @@ package android.ext.image.decoder;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.GIFImage;
+import android.ext.image.params.Parameters;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
 
@@ -28,7 +29,7 @@ public final class ImageDecoder extends BitmapDecoder<Object> {
     }
 
     @Override
-    protected Object decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
-        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : super.decodeImage(uri, target, params, flags, opts));
+    protected Object decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
+        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : super.decodeImage(uri, target, parameters, flags, opts));
     }
 }

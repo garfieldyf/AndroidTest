@@ -235,7 +235,7 @@ public final class Pools {
         @Override
         public void clear() {
             if (size > 0) {
-                DebugUtils.__checkDebug(true, "ArrayPool", "clear " + elements[0].getClass().getSimpleName() + " pool - size = " + size + ", capacity = " + elements.length);
+                DebugUtils.__checkDebug(true, "ArrayPool", "clear " + elements[0].getClass().getSimpleName() + " pool - size = " + size + ", maxSize = " + elements.length);
                 Arrays.fill(elements, 0, size, null);
                 size = 0;
             }

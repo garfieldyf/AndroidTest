@@ -4,6 +4,9 @@ import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
+import android.ext.image.ImageModule;
+import android.ext.image.params.Parameters;
+import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
@@ -49,21 +52,27 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @param flags The flags, passed earlier by {@link ImageLoader#load}.
      * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeImage(Object, Object, Object[], int, Options)
+     * @see #decodeImage(Object, Object, Parameters, int, Options)
      */
     @Override
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mOptionsPool.obtain();
         try {
+            Parameters parameters = ImageModule.getParameters(params);
+            if (parameters == null) {
+                parameters = SizeParameters.defaultParameters;
+            }
+
             // Decodes the image bounds.
             opts.inTempStorage = tempStorage;
+            opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
             BitmapUtils.decodeBitmap(mContext, uri, opts);
             opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
             DebugUtils.__checkLogError(opts.outWidth <= 0, "AbsImageDecoder", "decodeImage failed - outWidth = " + opts.outWidth + ", uri = " + uri);
-            return (opts.outWidth > 0 ? decodeImage(uri, target, params, flags, opts) : null);
+            return (opts.outWidth > 0 ? decodeImage(uri, target, parameters, flags, opts) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
@@ -77,7 +86,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * Decodes an image from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      * @param target The target, passed earlier by {@link #decodeImage}.
-     * @param params The parameters, passed earlier by {@link #decodeImage}.
+     * @param parameters The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
@@ -85,5 +94,5 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      * @see #decodeImage(Object, Object, Object[], int, byte[])
      */
-    protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
+    protected abstract Image decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception;
 }

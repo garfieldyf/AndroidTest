@@ -5,12 +5,11 @@ import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.cache.Caches;
 import android.ext.graphics.BitmapUtils;
-import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
-import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.os.Build;
 import android.util.Log;
@@ -41,14 +40,8 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
-        Parameters parameters = ImageModule.getParameters(params);
-        if (parameters == null) {
-            parameters = SizeParameters.defaultParameters;
-        }
-
+    protected Image decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
         // Computes the sample size.
-        opts.inPreferredConfig = parameters.config;
         parameters.computeSampleSize(target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
@@ -56,21 +49,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.
-        BitmapDecoder.__checkDumpOptions(opts, flags);
-        return (Image)decodeBitmap(uri, opts);
-    }
-
-    /**
-     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
-     * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
-     * @param opts The {@link Options} used to decode.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the bitmap data cannot be decode.
-     * @throws Exception if an error occurs while decode from <em>uri</em>.
-     */
-    protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
+            BitmapDecoder.__checkDumpOptions(opts, flags);
             bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
@@ -81,7 +63,17 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
             }
         }
 
-        return bitmap;
+        BitmapDecoder.__checkBitmap(bitmap, opts);
+        return (Image)bitmap;
+    }
+
+    private static void __checkBitmap(Bitmap bitmap, Options opts) {
+        if (bitmap != null && Build.VERSION.SDK_INT >= 26) {
+            final Config config = bitmap.getConfig();
+            if (config != null && opts.outConfig != null && config != opts.outConfig) {
+                throw new AssertionError("The bitmap config = " + config + ", opts.outConfig = " + opts.outConfig + " are not equal.");
+            }
+        }
     }
 
     private static void __checkDumpOptions(Options opts, int flags) {
@@ -109,8 +101,8 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
             }
 
             Log.d("BitmapDecoder", builder.append("\n  inTempStorage = ").append(opts.inTempStorage)
-                .append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
-                .append("\n}").toString());
+               .append(opts.inTempStorage != null ? " { length = " + opts.inTempStorage.length + " }" : "")
+               .append("\n}").toString());
         }
     }
 }

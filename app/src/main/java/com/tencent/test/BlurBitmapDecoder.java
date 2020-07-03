@@ -1,5 +1,6 @@
 package com.tencent.test;
 
+import android.ext.image.params.Parameters;
 import java.io.Closeable;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
@@ -30,8 +31,8 @@ public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeabl
 //    }
 
     @Override
-    protected Bitmap decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
-        final Bitmap bitmap = super.decodeImage(uri, target, params, flags, opts);
+    protected Bitmap decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
+        final Bitmap bitmap = super.decodeImage(uri, target, parameters, flags, opts);
         mRenderScript.blur(bitmap, 10);
         return bitmap;
     }

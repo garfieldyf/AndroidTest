@@ -52,14 +52,14 @@ public class RecyclerViewActivity extends Activity {
         layoutManager.setSpanSizeLookup(new ItemSpanSizeLookup());
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(layoutManager);
-        mAdapter = new RecyclerAdapter(MAX_SIZE);
+        mAdapter = new RecyclerAdapter();
         mRecyclerView.setAdapter(mAdapter);
 
         mRecyclerView.setItemAnimator(null);
         mRecyclerView.addItemDecoration(new MarginItemDecoration(20, 20, 20, 20));
         mRecyclerView.addOnScrollListener(mListener);
         LayoutManagerHelper.setChildDrawingOrderCallback(mRecyclerView);
-        mAdapter.setItemCount(MAX_SIZE);
+        mAdapter.setItemCount(mData.length);
         //LayoutManagerHelper.requestChildFocus(layoutManager, 3);
     }
 
@@ -87,7 +87,7 @@ public class RecyclerViewActivity extends Activity {
     };
 
     private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
-        public RecyclerAdapter(int maxItemCount) {
+        public RecyclerAdapter() {
             super(INITIAL_SIZE, PAGE_SIZE, PREFETCH_DISTANCE);
         }
 

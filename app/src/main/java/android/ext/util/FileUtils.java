@@ -560,33 +560,8 @@ public final class FileUtils {
     }
 
     /**
-     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     * Creates the directory with the specified <em>dir</em> and <em>name</em>.
      */
-    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
-        try {
-            copyStreamImpl(is, out, cancelable, buffer);
-        } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
-        }
-    }
-
-    /**
-     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
-     */
-    private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
-        try (final FileChannel source = is.getChannel(); final FileChannel target = out.getChannel()) {
-            DebugUtils.__checkStartMethodTracing();
-            long writtenBytes, position = 0, size = source.size();
-            while (size > 0 && !cancelable.isCancelled()) {
-                writtenBytes = source.transferTo(position, size, target);
-                size -= writtenBytes;
-                position += writtenBytes;
-            }
-            DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
-        }
-    }
-
     private static File mkdirs(File dir, String name) {
         if (StringUtils.getLength(name) > 0) {
             final File file = new File(dir, name);
@@ -620,6 +595,34 @@ public final class FileUtils {
         stat.mtime   = mtime;
         stat.blocks  = blocks;
         stat.blksize = blksize;
+    }
+
+    /**
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     */
+    private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
+        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        try {
+            copyStreamImpl(is, out, cancelable, buffer);
+        } finally {
+            ByteArrayPool.sInstance.recycle(buffer);
+        }
+    }
+
+    /**
+     * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
+     */
+    private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
+        try (final FileChannel source = is.getChannel(); final FileChannel target = out.getChannel()) {
+            DebugUtils.__checkStartMethodTracing();
+            long writtenBytes, position = 0, size = source.size();
+            while (size > 0 && !cancelable.isCancelled()) {
+                writtenBytes = source.transferTo(position, size, target);
+                size -= writtenBytes;
+                position += writtenBytes;
+            }
+            DebugUtils.__checkStopMethodTracing("FileUtils", "transferTo");
+        }
     }
 
     /**

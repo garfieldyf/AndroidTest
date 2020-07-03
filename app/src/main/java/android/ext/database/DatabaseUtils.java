@@ -137,7 +137,6 @@ public final class DatabaseUtils {
      * <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass <em>(String[])null</em>
      * instead of allocating an empty array.
      * @return A new object, or <tt>null</tt>.
-     * @see #simpleQuery(ContentResolver, Class, Uri, String, String, String[])
      * @see #parseObject(Cursor, Class)
      */
     public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
@@ -145,28 +144,6 @@ public final class DatabaseUtils {
             return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
         } catch (Exception e) {
             Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
-            return null;
-        }
-    }
-
-    /**
-     * Query the given <em>uri</em>, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
-     * @param resolver The <tt>ContentResolver</tt>.
-     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
-     * @param uri The URI, using the content:// scheme, for the content to retrieve.
-     * @param column The column to query.
-     * @param selection A filter declaring which row to return, formatted as an SQL WHERE clause (excluding the WHERE itself).
-     * @param selectionArgs You may include ? in selection, which will be replaced by the values from <em>selectionArgs</em>.
-     * The values will be bound as Strings.
-     * @return A new object, or <tt>null</tt>.
-     * @see #simpleQuery(SQLiteDatabase, Class, String, String[])
-     * @see #parseObject(Cursor, Class)
-     */
-    public static <T> T simpleQuery(ContentResolver resolver, Class<? extends T> clazz, Uri uri, String column, String selection, String[] selectionArgs) {
-        try (final Cursor cursor = resolver.query(uri, new String[] { column }, selection, selectionArgs, null)) {
-            return (cursor != null && cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + uri, e);
             return null;
         }
     }

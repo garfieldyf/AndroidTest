@@ -53,7 +53,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return A newly serial <tt>Executor</tt>.
      */
     public final Executor createSerialExecutor() {
-        return new SerialExecutor(this);
+        return new SerialExecutor();
     }
 
     /**
@@ -89,13 +89,11 @@ public class ThreadPool extends ThreadPoolExecutor {
     /**
      * Class <tt>SerialExecutor</tt> is an implementation of an {@link Executor}.
      */
-    private static final class SerialExecutor implements Executor {
+    private final class SerialExecutor implements Executor {
         private Runnable mActive;
-        private final Executor mExecutor;
         private final ArrayDeque<Runnable> mTasks;
 
-        public SerialExecutor(Executor executor) {
-            mExecutor = executor;
+        public SerialExecutor() {
             mTasks = new ArrayDeque<Runnable>();
         }
 
@@ -119,7 +117,7 @@ public class ThreadPool extends ThreadPoolExecutor {
 
         private synchronized void scheduleNext() {
             if ((mActive = mTasks.pollFirst()) != null) {
-                mExecutor.execute(mActive);
+                ThreadPool.this.execute(mActive);
             }
         }
     }

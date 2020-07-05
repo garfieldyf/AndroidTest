@@ -66,7 +66,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     public final long getCacheSize() {
         DebugUtils.__checkStartMethodTracing();
         final long result = FileUtils.computeFileSizes(mCacheDir.getPath());
-        DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize");
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
     }
 

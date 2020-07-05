@@ -12,7 +12,7 @@ import java.lang.reflect.Modifier;
  */
 public final class DebugUtils {
     /**
-     * Start method tracing.
+     * Start method tracing. <p>This method can be used DEBUG mode.</p>
      * @see #stopMethodTracing(String, String)
      * @see #stopMethodTracing(String, String, char)
      */
@@ -21,29 +21,19 @@ public final class DebugUtils {
     }
 
     /**
-     * Stop method tracing.
-     * @return The method running time since call {@link #startMethodTracing()}
-     * in nanoseconds.
-     * @see #startMethodTracing()
-     * @see #printMethodTracing(String, String, long, char)
-     */
-    public static long stopMethodTracing() {
-        return TraceLocal.uptimeNanos();
-    }
-
-    /**
-     * Print the method running time to logcat since call {@link #startMethodTracing()}.
+     * Equivalent to calling <tt>stopMethodTracing(tag, prefix, 'm')</tt>.
      * @param tag Used to identify the source of a log message.
      * @param prefix The prefix to print. It usually identifies the calling method name.
      * @see #startMethodTracing()
      * @see #stopMethodTracing(String, String, char)
      */
     public static void stopMethodTracing(String tag, String prefix) {
-        printMethodTracing(tag, prefix, TraceLocal.uptimeNanos(), 'm');
+        stopMethodTracing(tag, prefix, 'm');
     }
 
     /**
      * Print the method running time to logcat since call {@link #startMethodTracing()}.
+     * <p>This method can be used DEBUG mode.</p>
      * @param tag Used to identify the source of a log message.
      * @param prefix The prefix to print. It usually identifies the calling method name.
      * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
@@ -52,22 +42,7 @@ public final class DebugUtils {
      * @see #stopMethodTracing(String, String)
      */
     public static void stopMethodTracing(String tag, String prefix, char timeUnit) {
-        printMethodTracing(tag, prefix, TraceLocal.uptimeNanos(), timeUnit);
-    }
-
-    /**
-     * Print the method running time to logcat since call {@link #startMethodTracing()}.
-     * @param tag Used to identify the source of a log message.
-     * @param prefix The prefix to print. It usually identifies the calling method name.
-     * @param nanoTime The method running time returned by {@link #stopMethodTracing()}
-     * in nanoseconds.
-     * @param timeUnit The time unit to print. Pass 'n' (nanoseconds), 'u' (microseconds)
-     * or 'm' (milliseconds).
-     * @see #startMethodTracing()
-     * @see #stopMethodTracing()
-     */
-    public static void printMethodTracing(String tag, String prefix, long nanoTime, char timeUnit) {
-        final long runningTime;
+        final long runningTime, nanoTime = TraceLocal.uptimeNanos();
         switch (timeUnit) {
         // nanoseconds
         case 'n':
@@ -126,7 +101,7 @@ public final class DebugUtils {
      * @hide
      */
     public static void __checkStopMethodTracing(String tag, String prefix) {
-        stopMethodTracing(tag, prefix);
+        stopMethodTracing(tag, prefix, 'm');
     }
 
     /**

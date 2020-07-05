@@ -73,9 +73,10 @@ public class Parameters {
     }
 
     /**
-     * Computes a sample size for used to decode image.
+     * Computes a sample size used to decode image.
      * @param target May be <tt>null</tt>. The target to compute.
-     * @param opts The {@link Options} to store the sample size.
+     * @param opts The {@link Options} to compute. The <em>opts's</em>
+     * <tt>out...</tt> fields are set.
      */
     public void computeSampleSize(Object target, Options opts) {
         opts.inSampleSize = (int)value;

@@ -87,6 +87,22 @@ __STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, siz
     return ::snprintf(outPath, _countof(outPath), (path[length - 1] == '/' ? "%s" : "%s/"), path);
 }
 
+__STATIC_INLINE__ jboolean compareLength(const char* file1, const char* file2)
+{
+    assert(file1);
+    assert(file2);
+
+    struct stat buf;
+    jboolean result = JNI_FALSE;
+    if (::stat(file1, &buf) == 0)
+    {
+        const off_t length = buf.st_size;
+        result = (::stat(file2, &buf) == 0 && length == buf.st_size);
+    }
+
+    return result;
+}
+
 __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_SIZE])
 {
     assert(!file.isEmpty());
@@ -106,22 +122,6 @@ __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_S
     }
 
     return count;
-}
-
-__STATIC_INLINE__ jboolean compareLength(const __NS::File& file1, const __NS::File& file2)
-{
-    assert(!file1.isEmpty());
-    assert(!file2.isEmpty());
-
-    struct stat buf;
-    jboolean result = JNI_FALSE;
-    if (file1.stat(buf) == 0)
-    {
-        const off_t length = buf.st_size;
-        result = (file2.stat(buf) == 0 && length == buf.st_size);
-    }
-
-    return result;
 }
 
 template <typename _Filter>
@@ -453,12 +453,14 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, file1) == 0 || JNI::getLength(env, file2) == 0, "file1 == null || file1.length() == 0 || file2 == null || file2.length() == 0", JNI_FALSE);
 
-    __NS::File f1, f2;
-    jboolean result = JNI_FALSE;
-    if (f1.open(JNI::jstring_t(env, file1), O_RDONLY) == 0 && f2.open(JNI::jstring_t(env, file2), O_RDONLY) == 0)
+    const JNI::jstring_t jfile1(env, file1);
+    const JNI::jstring_t jfile2(env, file2);
+    jboolean result = compareLength(jfile1, jfile2);
+    LOGD("compare length = %s\n", (result ? "true" : "false"));
+    if (result)
     {
-        result = compareLength(f1, f2);
-        LOGD("compare length = %s\n", (result ? "true" : "false"));
+        __NS::File f1, f2;
+        result = (f1.open(jfile1, O_RDONLY) == 0 && f2.open(jfile2, O_RDONLY) == 0);
         if (result)
         {
             ssize_t count1, count2;

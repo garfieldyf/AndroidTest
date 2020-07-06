@@ -3,9 +3,7 @@ package android.ext.cache;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
-import android.util.ArrayMap;
 import android.util.Printer;
-import java.util.Map;
 
 /**
  * Class <tt>LruImageCache</tt> is an implementation of a {@link Cache}.
@@ -63,11 +61,9 @@ public final class LruImageCache<K> implements Cache<K, Object> {
     }
 
     @Override
-    public Map<K, Object> snapshot() {
-        final Map<K, Object> result = new ArrayMap<K, Object>();
-        result.putAll(mBitmapCache.snapshot());
-        result.putAll(mImageCache.snapshot());
-        return result;
+    public void trimMemory(int level) {
+        mImageCache.trimMemory(level);
+        mBitmapCache.trimMemory(level);
     }
 
     @Override

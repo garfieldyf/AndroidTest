@@ -1,7 +1,5 @@
 package android.ext.cache;
 
-import java.util.Map;
-
 /**
  * A <tt>Cache</tt> is a data structure consisting of a set
  * of keys and values in which each key is mapped to a value.
@@ -10,7 +8,6 @@ import java.util.Map;
 public interface Cache<K, V> {
     /**
      * Removes all elements from this cache, leaving it empty.
-     * @see #remove(K)
      */
     void clear();
 
@@ -19,7 +16,6 @@ public interface Cache<K, V> {
      * @param key The key to remove.
      * @return The value mapped by <em>key</em>
      * or <tt>null</tt> if there was no mapping.
-     * @see #clear()
      */
     V remove(K key);
 
@@ -27,7 +23,6 @@ public interface Cache<K, V> {
      * Returns the value of the mapping with the specified <em>key</em>.
      * @param key The key to find.
      * @return The value or <tt>null</tt> if there was no mapping.
-     * @see #put(K, V)
      */
     V get(K key);
 
@@ -37,15 +32,17 @@ public interface Cache<K, V> {
      * @param value The value.
      * @return The previous value mapped by <em>key</em>
      * or <tt>null</tt> if there was no mapping.
-     * @see #get(K)
      */
     V put(K key, V value);
 
     /**
-     * Returns a copy of the current contents of this cache.
-     * @return A copy of this cache.
+     * Trim this cache to the appropriate level. Typically called on the
+     * {@link android.content.ComponentCallbacks2#onTrimMemory(int)}.
+     * @param level The integer represents a trim level as specified in
+     * {@link android.content.ComponentCallbacks2}.
      */
-    Map<K, V> snapshot();
+    default void trimMemory(int level) {
+    }
 
     /**
      * Returns the {@link BitmapPool} associated with this cache.

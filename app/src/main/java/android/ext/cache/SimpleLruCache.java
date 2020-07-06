@@ -1,5 +1,8 @@
 package android.ext.cache;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.util.Printer;
@@ -51,17 +54,12 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     /**
      * Clears this cache, but do not call {@link #entryRemoved} on each removed entry.
-     * @see #trimToSize(int)
      */
     @Override
     public void clear() {
         map.clear();
     }
 
-    /**
-     * @see #put(K, V)
-     * @see #remove(K)
-     */
     @Override
     public V get(K key) {
         DebugUtils.__checkError(key == null, "key == null");
@@ -75,8 +73,6 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @param value The value.
      * @return The previous value mapped by <em>key</em> or <tt>null</tt>
      * if there was no mapping.
-     * @see #get(K)
-     * @see #remove(K)
      */
     @Override
     public V put(K key, V value) {
@@ -86,14 +82,10 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
             entryRemoved(false, key, previous, value);
         }
 
-        trimToSize(maxSize);
+        trimToSize(maxSize, false);
         return previous;
     }
 
-    /**
-     * @see #get(K)
-     * @see #put(K, V)
-     */
     @Override
     public V remove(K key) {
         DebugUtils.__checkError(key == null, "key == null");
@@ -106,6 +98,21 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
     }
 
     @Override
+    public void trimMemory(int level) {
+        if (level >= TRIM_MEMORY_BACKGROUND) {
+            // Entering list of cached background apps, clear this cache.
+            clear();
+        } else if (level >= TRIM_MEMORY_UI_HIDDEN || level == TRIM_MEMORY_RUNNING_CRITICAL) {
+            // The app's UI is no longer visible, or app is in the foreground but system is running critically low on memory.
+            // Remove the oldest half of this cache.
+            trimToSize(maxSize / 2, true);
+        }
+    }
+
+    /**
+     * Returns a copy of the current contents of this cache.
+     * @return A copy of this cache.
+     */
     public Map<K, V> snapshot() {
         return new LinkedHashMap<K, V>(map);
     }
@@ -115,16 +122,17 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * at or below the requested size.
      * @param maxSize The maximum size of the cache. May be <tt>-1</tt>
      * to evict all entries.
-     * @see #clear()
+     * @param evicted If <tt>true</tt> the entry is being removed to make
+     * space, <tt>false</tt> otherwise.
      */
-    public void trimToSize(int maxSize) {
+    protected void trimToSize(int maxSize, boolean evicted) {
         final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
         while (itor.hasNext() && map.size() > maxSize) {
             final Entry<K, V> toEvict = itor.next();
             final K key = toEvict.getKey();
             final V value = toEvict.getValue();
             itor.remove();
-            entryRemoved(true, key, value, null);
+            entryRemoved(evicted, key, value, null);
         }
     }
 

@@ -3,7 +3,6 @@ package android.ext.cache;
 import android.ext.util.DebugUtils;
 import android.util.ArrayMap;
 import android.util.Printer;
-import java.util.Map;
 
 /**
  * Class <tt>ArrayMapCache</tt> is an implementation of a {@link Cache}.
@@ -50,11 +49,6 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     public V put(K key, V value) {
         DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
         return map.put(key, value);
-    }
-
-    @Override
-    public Map<K, V> snapshot() {
-        return new ArrayMap<K, V>(map);
     }
 
     public final void dump(Printer printer) {

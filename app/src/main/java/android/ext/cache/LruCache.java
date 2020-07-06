@@ -51,7 +51,12 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     }
 
     @Override
-    public void trimToSize(int maxSize) {
+    public synchronized Map<K, V> snapshot() {
+        return new LinkedHashMap<K, V>(map);
+    }
+
+    @Override
+    protected void trimToSize(int maxSize, boolean evicted) {
         K key;
         V value;
         while (true) {
@@ -69,13 +74,8 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
                 size -= result;
             }
 
-            entryRemoved(true, key, value, null);
+            entryRemoved(evicted, key, value, null);
         }
-    }
-
-    @Override
-    public synchronized Map<K, V> snapshot() {
-        return new LinkedHashMap<K, V>(map);
     }
 
     /**

@@ -6,8 +6,6 @@ import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.Printer;
-import java.util.Collections;
-import java.util.Map;
 
 /**
  * Class Caches
@@ -50,15 +48,6 @@ public final class Caches {
      */
     private static final class EmptyCache implements Cache<Object, Object> {
         public static final EmptyCache sInstance = new EmptyCache();
-
-        /**
-         * Always returns an empty (<tt>0-size</tt>), immutable {@link Map}.
-         * @return An immutable <tt>Map</tt>.
-         */
-        @Override
-        public Map<Object, Object> snapshot() {
-            return Collections.emptyMap();
-        }
 
         @Override
         public void clear() {

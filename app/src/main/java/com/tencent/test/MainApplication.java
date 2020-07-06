@@ -41,7 +41,7 @@ public final class MainApplication extends Application {
         mImageModule = new Builder<String, Object>(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
             .setImageSize(128)
-//            .setPoolSize(20)
+//            .setBitmapPoolSize(20)
             .setFileSize(1000)
 //            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
             .build();

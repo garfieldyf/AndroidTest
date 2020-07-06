@@ -44,15 +44,14 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
     }
 
     @Override
-    public BitmapPool getBitmapPool() {
-        return mBitmapPool;
+    public void trimMemory(int level) {
+        super.trimMemory(level);
+        mBitmapPool.clear();
     }
 
     @Override
-    protected void entryRemoved(boolean evicted, K key, Bitmap oldValue, Bitmap newValue) {
-        if (evicted || oldValue != newValue) {
-            mBitmapPool.put(oldValue);
-        }
+    public BitmapPool getBitmapPool() {
+        return mBitmapPool;
     }
 
     @Override
@@ -60,6 +59,13 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
         super.dump(context, printer);
         if (mBitmapPool instanceof LinkedBitmapPool) {
             ((LinkedBitmapPool)mBitmapPool).dump(context, printer);
+        }
+    }
+
+    @Override
+    protected void entryRemoved(boolean evicted, K key, Bitmap oldValue, Bitmap newValue) {
+        if (!evicted && oldValue != newValue) {
+            mBitmapPool.put(oldValue);
         }
     }
 }

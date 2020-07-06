@@ -18,6 +18,7 @@ import android.ext.util.FileUtils;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
+import android.text.TextUtils;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -29,6 +30,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -447,8 +449,7 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                DebugUtils.__checkError(true, "Unsupported blob field");
-//                result.put(name, toJSONArray(cursor.getBlob(columnIndex)));
+                result.put(name, toBigInteger(cursor.getBlob(columnIndex)));
                 break;
             }
         }
@@ -518,8 +519,7 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                DebugUtils.__checkError(true, "Unsupported blob field");
-//                writeBlob(writer.name(name), cursor.getBlob(columnIndex));
+                writer.name(name).value(toString(cursor.getBlob(columnIndex)));
                 break;
             }
         }
@@ -527,23 +527,13 @@ public final class DatabaseUtils {
         return writer.endObject();
     }
 
-//    private static JSONArray toJSONArray(byte[] blob) {
-//        final JSONArray result = new JSONArray();
-//        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
-//            result.add(blob[i]);
-//        }
-//
-//        return result;
-//    }
+    private static BigInteger toBigInteger(byte[] blob) {
+        return (ArrayUtils.getSize(blob) > 0 ? new BigInteger(blob) : null);
+    }
 
-//    private static void writeBlob(JsonWriter writer, byte[] blob) throws IOException {
-//        writer.beginArray();
-//        for (int i = 0, size = ArrayUtils.getSize(blob); i < size; ++i) {
-//            writer.value(blob[i]);
-//        }
-//
-//        writer.endArray();
-//    }
+    private static String toString(byte[] blob) {
+        return (ArrayUtils.getSize(blob) > 0 ? new BigInteger(blob).toString() : null);
+    }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {
         final List<Pair<Field, String>> cursorFields = new ArrayList<Pair<Field, String>>();

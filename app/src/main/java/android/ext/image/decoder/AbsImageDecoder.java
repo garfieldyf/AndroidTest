@@ -2,15 +2,18 @@ package android.ext.image.decoder;
 
 import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
-import android.ext.graphics.BitmapUtils;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
+import android.ext.util.UriUtils;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.util.Log;
+import java.io.InputStream;
 
 /**
  * Abstract class <tt>AbsImageDecoder</tt>
@@ -67,7 +70,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             opts.inTempStorage = tempStorage;
             opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
-            BitmapUtils.decodeBitmap(mContext, uri, opts);
+            decodeBitmap(uri, opts);
             opts.inJustDecodeBounds = false;
 
             // Decodes the image pixels.
@@ -79,6 +82,28 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         } finally {
             clearForRecycle(opts);
             mOptionsPool.recycle(opts);
+        }
+    }
+
+    /**
+     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
+     * <h3>The default implementation accepts the following URI schemes:</h3>
+     * <ul><li>path (no scheme)</li>
+     * <li>{@link File} (no scheme)</li>
+     * <li>file ({@link #SCHEME_FILE})</li>
+     * <li>content ({@link #SCHEME_CONTENT})</li>
+     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
+     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
+     * @param context The <tt>Context</tt>.
+     * @param uri The uri to decode.
+     * @param opts May be <tt>null</tt>. The {@link Options} to use for decoding.
+     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
+     * @throws Exception if an error occurs while decode from <em>uri</em>.
+     * @see UriUtils#openInputStream(Context, Object)
+     */
+    protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
+        try (final InputStream is = UriUtils.openInputStream(mContext, uri)) {
+            return BitmapFactory.decodeStream(is, null, opts);
         }
     }
 

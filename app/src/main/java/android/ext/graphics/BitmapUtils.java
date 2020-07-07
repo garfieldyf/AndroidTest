@@ -6,11 +6,8 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools.MatrixPool;
 import android.ext.util.Pools.RectFPool;
-import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
-import android.graphics.BitmapFactory.Options;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
@@ -19,8 +16,6 @@ import android.graphics.RectF;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Class BitmapUtils
@@ -94,28 +89,6 @@ public final class BitmapUtils {
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */
     public static native boolean mirrorBitmap(Bitmap bitmap, boolean horizontal);
-
-    /**
-     * Decodes a {@link Bitmap} from the specified <em>uri</em>.
-     * <h3>The default implementation accepts the following URI schemes:</h3>
-     * <ul><li>path (no scheme)</li>
-     * <li>{@link File} (no scheme)</li>
-     * <li>file ({@link #SCHEME_FILE})</li>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
-     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
-     * @param context The <tt>Context</tt>.
-     * @param uri The uri to decode.
-     * @param opts May be <tt>null</tt>. The {@link Options} to use for decoding.
-     * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @throws IOException if an error occurs while decode from <em>uri</em>.
-     * @see UriUtils#openInputStream(Context, Object)
-     */
-    public static Bitmap decodeBitmap(Context context, Object uri, Options opts) throws IOException {
-        try (final InputStream is = UriUtils.openInputStream(context, uri)) {
-            return BitmapFactory.decodeStream(is, null, opts);
-        }
-    }
 
     /**
      * Creates a mutable scaled <tt>Bitmap</tt> from given the <tt>Bitmap</tt>.

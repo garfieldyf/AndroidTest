@@ -4,7 +4,6 @@ import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.cache.Caches;
-import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
@@ -53,13 +52,13 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
             BitmapDecoder.__checkDumpOptions(opts, flags);
-            bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
+            bitmap = decodeBitmap(uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 DebugUtils.__checkLogError(true, "BitmapDecoder", "decodeBitmap failed - " + e.getMessage());
                 opts.inBitmap = null;
-                bitmap = BitmapUtils.decodeBitmap(mContext, uri, opts);
+                bitmap = decodeBitmap(uri, opts);
             }
         }
 

@@ -156,7 +156,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
             if (mParameters != null) {
                 // Decodes the bitmap bounds.
                 opts.inJustDecodeBounds = true;
-                BitmapUtils.decodeBitmap(mContext, uri, opts);
+                //BitmapUtils.decodeBitmap(mContext, uri, opts);
                 opts.inJustDecodeBounds = false;
 
                 // Computes the sample size.
@@ -166,7 +166,7 @@ public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Obje
             }
 
             // Decodes the bitmap pixels.
-            return BitmapUtils.decodeBitmap(mContext, uri, opts);
+            return null;//BitmapUtils.decodeBitmap(mContext, uri, opts);
         } catch (Exception e) {
             Log.e(BitmapUtils.class.getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;

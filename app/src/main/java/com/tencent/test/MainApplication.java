@@ -18,7 +18,6 @@ import android.ext.util.UriUtils;
 import android.support.annotation.Keep;
 import android.util.Log;
 import android.util.LogPrinter;
-import java.io.File;
 import java.util.concurrent.Executor;
 
 public final class MainApplication extends Application {

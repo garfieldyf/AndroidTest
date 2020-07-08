@@ -191,13 +191,17 @@ public final class BitmapUtils {
             return 1;
 
         case RGB_565:
+        case ARGB_4444:
             return 2;
 
         case ARGB_8888:
             return 4;
 
+        case RGBA_F16:
+            return 8;
+
         default:
-            throw new IllegalArgumentException("Unknown the bitmap config - " + config);
+            throw new IllegalArgumentException("Unsupported the bitmap config - " + config);
         }
     }
 

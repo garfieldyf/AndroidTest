@@ -1,6 +1,7 @@
 package com.tencent.test;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -198,6 +199,20 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        TestSectionList.testList();
 
         testJsonLoader();
+    }
+
+    @TargetApi(26)
+    private void decode() {
+        final Options opts = new Options();
+        opts.inMutable = true;
+        final Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.image, opts);
+        BitmapUtils.dumpBitmap(this, "ImageModule", bitmap);
+
+        opts.inMutable = false;
+        //opts.inBitmap = bitmap;
+        opts.inPreferredConfig = Config.HARDWARE;
+        final Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.ic_image, opts);
+        BitmapUtils.dumpBitmap(this, "ImageModule", bitmap2);
     }
 
     private void testJSONArray() {

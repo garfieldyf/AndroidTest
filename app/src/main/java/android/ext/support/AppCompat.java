@@ -11,7 +11,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.content.FileProvider;
 import java.io.File;
-import java.util.Map;
 
 /**
  * Class AppCompat
@@ -46,14 +45,6 @@ public final class AppCompat {
     }
 
     /**
-     * Called on the <tt>Loader</tt> internal, do not call this method directly.
-     * @hide
-     */
-    public static void remove(Map<?, ?> map, Object key, Object value) {
-        IMPL.remove(map, key, value);
-    }
-
-    /**
      * Class <tt>AppCompatImpl</tt>
      */
     /* package */ static class AppCompatImpl {
@@ -63,6 +54,7 @@ public final class AppCompat {
             opts.outWidth  = 0;
             opts.outHeight = 0;
             opts.inScaled  = true;
+            opts.inMutable = false;
             opts.inSampleSize  = 0;
             opts.outMimeType   = null;
             opts.inTempStorage = null;
@@ -75,12 +67,6 @@ public final class AppCompat {
         public int getBytesPerPixel(Options opts) {
             DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
             return BitmapUtils.getBytesPerPixel(opts.inPreferredConfig);
-        }
-
-        public void remove(Map<?, ?> map, Object key, Object value) {
-            if (map.get(key) == value) {
-                map.remove(key);
-            }
         }
 
         public void installPackage(Context context, String authority, File packageFile) {
@@ -97,11 +83,6 @@ public final class AppCompat {
      */
     @TargetApi(24)
     /* package */ static class AppCompatApi24 extends AppCompatImpl {
-        @Override
-        public void remove(Map<?, ?> map, Object key, Object value) {
-            map.remove(key, value);
-        }
-
         @Override
         public void installPackage(Context context, String authority, File packageFile) {
             DebugUtils.__checkError(packageFile == null, "packageFile == null");

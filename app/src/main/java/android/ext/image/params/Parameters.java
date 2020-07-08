@@ -7,6 +7,7 @@ import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Printer;
 
@@ -17,7 +18,7 @@ import android.util.Printer;
  * &lt;[ Parameters | parameters ]
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
- *      app:config="[ argb_8888 | rgb_565 ]"
+ *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]"
  *      app:sampleSize="2"
  *      app:attribute1="value1"
  *      app:attribute2="value2"
@@ -25,8 +26,10 @@ import android.util.Printer;
  * @author Garfield
  */
 public class Parameters {
-    private static final int RGB_565   = 0;
-    private static final int ARGB_8888 = 1;
+    private static final int ARGB_8888 = 0;
+    private static final int RGB_565   = 1;
+    private static final int HARDWARE  = 2;
+    private static final int RGBA_F16  = 3;
 
     /**
      * The Object by user-defined to decode.
@@ -58,7 +61,7 @@ public class Parameters {
         final String packageName = context.getPackageName();
         final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "Parameters"));
         this.value  = fixSampleSize(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
-        this.config = a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888) == RGB_565 ? Config.RGB_565 : Config.ARGB_8888;
+        this.config = parseConfig(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888));
         a.recycle();
     }
 
@@ -68,8 +71,16 @@ public class Parameters {
      * @param config The {@link Config} to decode.
      */
     protected Parameters(Object value, Config config) {
+        DebugUtils.__checkError(config == null, "config == null");
         this.value  = value;
-        this.config = (config != null ? config : Config.ARGB_8888);
+        this.config = config;
+    }
+
+    /**
+     * Return whether the decoded <tt>Bitmap</tt> will be mutable.
+     */
+    public boolean isMutable() {
+        return (Build.VERSION.SDK_INT < 26 || config != Config.HARDWARE);
     }
 
     /**
@@ -113,6 +124,26 @@ public class Parameters {
         } else {
             final float scale = (float)opts.inTargetDensity / opts.inDensity;
             return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
+        }
+    }
+
+    private static Config parseConfig(int config) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            switch (config) {
+            case RGB_565:
+                return Config.RGB_565;
+
+            case HARDWARE:
+                return Config.HARDWARE;
+
+            case RGBA_F16:
+                return Config.RGBA_F16;
+
+            default:
+                return Config.ARGB_8888;
+            }
+        } else {
+            return (config == RGB_565 ? Config.RGB_565 : Config.ARGB_8888);
         }
     }
 

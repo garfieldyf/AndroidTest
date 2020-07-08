@@ -19,7 +19,7 @@ import android.util.Printer;
  * <p>Here is a xml resource example:</p><pre>
  * &lt;ScaleParameters
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      app:config="[ argb_8888 | rgb_565 ]"
+ *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]"
  *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */

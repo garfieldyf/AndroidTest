@@ -2,7 +2,6 @@ package android.ext.image.params;
 
 import static android.util.DisplayMetrics.DENSITY_DEVICE;
 import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
@@ -23,7 +22,7 @@ import android.view.View;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      android:minWidth="200dp"
  *      android:minHeight="300dp"
- *      app:config="[ argb_8888 | rgb_565 ]" /&gt;</pre>
+ *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]" /&gt;</pre>
  * @author Garfield
  */
 @SuppressWarnings("deprecation")

@@ -68,6 +68,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
 
             // Decodes the image bounds.
             opts.inTempStorage = tempStorage;
+            opts.inMutable = parameters.isMutable();
             opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
             decodeBitmap(uri, opts);

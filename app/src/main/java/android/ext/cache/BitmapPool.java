@@ -2,7 +2,9 @@ package android.ext.cache;
 
 import android.ext.image.params.Parameters;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 
 /**
  * An interface for a pool that allows users to reuse {@link Bitmap} objects.
@@ -36,6 +38,6 @@ public interface BitmapPool {
      * @return The <tt>Bitmap</tt> or <tt>null</tt> if there is no match the bitmap.
      */
     default Bitmap get(Parameters parameters, Options opts) {
-        return get(parameters.computeByteCount(opts));
+        return (Build.VERSION.SDK_INT >= 26 && opts.inPreferredConfig == Config.HARDWARE ? null : get(parameters.computeByteCount(opts)));
     }
 }

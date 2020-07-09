@@ -1,4 +1,4 @@
-package android.ext.image.decoder;
+package com.tencent.temp;
 
 import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
@@ -56,6 +56,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
      * @return The image object, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeImage(Object, Object, Parameters, int, Options)
+     * @see UriUtils#openInputStream(Context, Object)
      */
     @Override
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
@@ -88,19 +89,11 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
 
     /**
      * Decodes a {@link Bitmap} from the specified <em>uri</em>.
-     * <h3>The default implementation accepts the following URI schemes:</h3>
-     * <ul><li>path (no scheme)</li>
-     * <li>{@link File} (no scheme)</li>
-     * <li>file ({@link #SCHEME_FILE})</li>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
-     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param context The <tt>Context</tt>.
      * @param uri The uri to decode.
      * @param opts May be <tt>null</tt>. The {@link Options} to use for decoding.
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
-     * @see UriUtils#openInputStream(Context, Object)
      */
     protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         try (final InputStream is = UriUtils.openInputStream(mContext, uri)) {

@@ -77,7 +77,7 @@ public class Parameters {
     }
 
     /**
-     * Return whether the decoded <tt>Bitmap</tt> will be mutable.
+     * Return whether the decoder decoded <tt>Bitmap</tt> will be mutable.
      */
     public boolean isMutable() {
         return (Build.VERSION.SDK_INT < 26 || config != Config.HARDWARE);

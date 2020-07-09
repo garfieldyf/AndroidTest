@@ -31,6 +31,11 @@ import java.util.Arrays;
 @SuppressWarnings("deprecation")
 public final class DeviceUtils {
     /**
+     * The device's current density.
+     */
+    public static final int DEVICE_DENSITY;
+
+    /**
      * An ordered list of ABIs supported by this device.
      */
     public static final String[] SUPPORTED_ABIS;
@@ -458,9 +463,14 @@ public final class DeviceUtils {
     }
 
     static {
-        if (Build.VERSION.SDK_INT > 20) {
+        if (Build.VERSION.SDK_INT >= 24) {
+            DEVICE_DENSITY = DisplayMetrics.DENSITY_DEVICE_STABLE;
+            SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
+        } else if (Build.VERSION.SDK_INT >= 21) {
+            DEVICE_DENSITY = DisplayMetrics.DENSITY_DEVICE;
             SUPPORTED_ABIS = Build.SUPPORTED_ABIS;
         } else {
+            DEVICE_DENSITY = DisplayMetrics.DENSITY_DEVICE;
             SUPPORTED_ABIS = new String[] { Build.CPU_ABI, Build.CPU_ABI2 };
         }
     }

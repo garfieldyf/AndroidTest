@@ -1,15 +1,12 @@
 package android.ext.barcode;
 
+import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
-import static android.util.DisplayMetrics.DENSITY_DEVICE;
-import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
 import android.content.Context;
 import android.ext.util.DebugUtils;
-import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
@@ -235,10 +232,9 @@ public class BarcodeEncoder {
          * @see BarcodeBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
-        @SuppressWarnings("deprecation")
         default Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints) {
-            final int margin = (int)(20.0f * DENSITY_DEVICE / DENSITY_DEFAULT);
-            DebugUtils.__checkDebug(true, "BarcodeEncoder", "deviceDensity = " + DENSITY_DEVICE + (Build.VERSION.SDK_INT >= 24 ? ", deviceDensityStable = " + DeviceUtils.toDensity(DENSITY_DEVICE_STABLE) : "") + ", defaultDensity = " + DENSITY_DEFAULT + ", margin = " + margin);
+            final int margin = (int)(20.0f * DEVICE_DENSITY / DENSITY_DEFAULT);
+            DebugUtils.__checkDebug(true, "BarcodeEncoder", "deviceDensity = " + DEVICE_DENSITY + ", defaultDensity = " + DENSITY_DEFAULT + ", margin = " + margin);
             return new BarcodeBuilder(bitMatrix).config(Config.RGB_565).margins(margin).build();
         }
     }

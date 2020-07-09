@@ -1,14 +1,12 @@
 package android.ext.image.params;
 
-import static android.util.DisplayMetrics.DENSITY_DEVICE;
-import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
+import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.view.View;
@@ -25,7 +23,6 @@ import android.view.View;
  *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]" /&gt;</pre>
  * @author Garfield
  */
-@SuppressWarnings("deprecation")
 public class SizeParameters extends Parameters {
     private static final int[] SIZE_PARAMETERS_ATTRS = {
         android.R.attr.minWidth,
@@ -100,8 +97,8 @@ public class SizeParameters extends Parameters {
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
-            opts.inTargetDensity = DENSITY_DEVICE;
-            opts.inDensity = (int)(DENSITY_DEVICE * scale + 0.5f);
+            opts.inTargetDensity = DEVICE_DENSITY;
+            opts.inDensity = (int)(DEVICE_DENSITY * scale + 0.5f);
         } else {
             opts.inDensity = opts.inTargetDensity = 0;
         }
@@ -109,17 +106,12 @@ public class SizeParameters extends Parameters {
 
     @Override
     public void dump(Printer printer, StringBuilder result) {
-        result.append(getClass().getSimpleName())
+        printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", minWidth = ").append(minWidth)
             .append(", minHeight = ").append(value)
-            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE));
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            result.append(", deviceDensityStable = ").append(DeviceUtils.toDensity(DENSITY_DEVICE_STABLE));
-        }
-
-        printer.println(result.append(" }").toString());
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DEVICE_DENSITY))
+            .append(" }").toString());
     }
 
     static {

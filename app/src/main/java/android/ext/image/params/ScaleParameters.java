@@ -1,7 +1,6 @@
 package android.ext.image.params;
 
-import static android.util.DisplayMetrics.DENSITY_DEVICE;
-import static android.util.DisplayMetrics.DENSITY_DEVICE_STABLE;
+import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.util.ClassUtils;
@@ -9,7 +8,6 @@ import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Printer;
 
@@ -23,7 +21,6 @@ import android.util.Printer;
  *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */
-@SuppressWarnings("deprecation")
 public class ScaleParameters extends Parameters {
     /**
      * Constructor
@@ -66,8 +63,8 @@ public class ScaleParameters extends Parameters {
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth <= 0 || opts.outHeight <= 0");
         final float scale = (float)value;
         if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
-            opts.inTargetDensity = DENSITY_DEVICE;
-            opts.inDensity = (int)(DENSITY_DEVICE * (opts.outWidth / (opts.outWidth * scale)));
+            opts.inTargetDensity = DEVICE_DENSITY;
+            opts.inDensity = (int)(DEVICE_DENSITY * (opts.outWidth / (opts.outWidth * scale)));
         } else {
             opts.inDensity = opts.inTargetDensity = 0;
         }
@@ -75,15 +72,10 @@ public class ScaleParameters extends Parameters {
 
     @Override
     public void dump(Printer printer, StringBuilder result) {
-        result.append(getClass().getSimpleName())
+        printer.println(result.append(getClass().getSimpleName())
             .append(" { config = ").append(config.name())
             .append(", scale = ").append(value)
-            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DENSITY_DEVICE));
-
-        if (Build.VERSION.SDK_INT >= 24) {
-            result.append(", deviceDensityStable = ").append(DeviceUtils.toDensity(DENSITY_DEVICE_STABLE));
-        }
-
-        printer.println(result.append(" }").toString());
+            .append(", deviceDensity = ").append(DeviceUtils.toDensity(DEVICE_DENSITY))
+            .append(" }").toString());
     }
 }

@@ -39,7 +39,7 @@ public final class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
         if (opts.inJustDecodeBounds) {
             decodeContactPhoto(resolver, (Uri)uri, opts);
             if (opts.outWidth <= 0) {
-                sPhotoLocal.set(null);  // Clear the thread local value.
+                sPhotoLocal.set(null);  // Clear the contact photo data.
                 decodePhotoBounds(resolver, (Uri)uri, opts);
             }
         } else {

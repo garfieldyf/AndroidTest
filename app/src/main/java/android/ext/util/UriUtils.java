@@ -44,10 +44,10 @@ public final class UriUtils {
         final String uriString = uri.toString();
         if (FileUtils.isAbsolutePath(uriString)) {
             return new FileInputStream(uriString);
-        } else if ("file://".regionMatches(true, 0, uriString, 0, 7)) {
-            return new FileInputStream(uriString.substring(7) /* Skips 'file://' */);
-        } else if ("android.asset://".regionMatches(true, 0, uriString, 0, 16)) {
-            return context.getAssets().open(uriString.substring(16) /* Skips 'android.asset://' */, AssetManager.ACCESS_STREAMING);
+        } else if ("file://".regionMatches(true, 0, uriString, 0, SCHEME_FILE_LENGTH)) {
+            return new FileInputStream(uriString.substring(SCHEME_FILE_LENGTH) /* Skips 'file://' */);
+        } else if ("android.asset://".regionMatches(true, 0, uriString, 0, SCHEME_ASSET_LENGTH)) {
+            return context.getAssets().open(uriString.substring(SCHEME_ASSET_LENGTH) /* Skips 'android.asset://' */, AssetManager.ACCESS_STREAMING);
         } else {
             return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
         }
@@ -88,7 +88,7 @@ public final class UriUtils {
      * @param packageName The application's package name.
      * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return A {@link Uri}.
+     * @return A {@link Uri} for the given <em>resource</em>.
      */
     public static Uri fromResource(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null, "packageName == null");
@@ -144,6 +144,9 @@ public final class UriUtils {
         DebugUtils.__checkError(resource == null, "resource == null");
         return (SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + resource);
     }
+
+    private static final int SCHEME_FILE_LENGTH  = 7;   /* file:// */
+    private static final int SCHEME_ASSET_LENGTH = 16;  /* android.asset:// */
 
     /**
      * This utility class cannot be instantiated.

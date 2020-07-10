@@ -29,7 +29,7 @@ public final class AppCompat {
     }
 
     /**
-     * Called on the <tt>AbsImageDecoder</tt> internal, do not call this method directly.
+     * Called on the <tt>BitmapDecoder</tt> internal, do not call this method directly.
      * @hide
      */
     public static void clearForRecycle(Options opts) {

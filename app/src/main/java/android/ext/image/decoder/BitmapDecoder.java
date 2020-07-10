@@ -87,6 +87,7 @@ public class BitmapDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
             opts.inMutable = parameters.isMutable();
             opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
+            BitmapDecoder.__checkOptions(opts);
             decodeBitmap(uri, opts);
             opts.inJustDecodeBounds = false;
 
@@ -156,8 +157,14 @@ public class BitmapDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
         }
     }
 
+    private static void __checkOptions(Options opts) {
+        if (Build.VERSION.SDK_INT >= 26 && opts.inMutable && opts.inPreferredConfig == Config.HARDWARE) {
+            throw new AssertionError("Bitmaps with Config.HARWARE are always immutable");
+        }
+    }
+
     private static void __checkBitmap(Bitmap bitmap, Options opts) {
-        if (bitmap != null && Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26 && bitmap != null) {
             final Config config = bitmap.getConfig();
             if (config != null && opts.outConfig != null && config != opts.outConfig) {
                 throw new AssertionError("The bitmap config = " + config + ", opts.outConfig = " + opts.outConfig + " are not equal.");

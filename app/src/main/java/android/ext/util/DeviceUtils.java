@@ -1,6 +1,6 @@
 package android.ext.util;
 
-import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
 import android.content.Context;
@@ -401,7 +401,7 @@ public final class DeviceUtils {
                   .append(" ]");
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(24)
     private static String dumpExternalStorageInfo(Context context, StatFs statFs, StringBuilder out) {
         final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
         for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
@@ -435,7 +435,7 @@ public final class DeviceUtils {
         return out.append("  ");
     }
 
-    @SuppressLint("NewApi")
+    @TargetApi(24)
     private static String getUserLabel(Context context, StorageVolume volume, int index) {
         String userLabel = volume.getUserLabel();
         if (TextUtils.isEmpty(userLabel)) {

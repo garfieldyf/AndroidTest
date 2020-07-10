@@ -80,6 +80,7 @@ public class Parameters {
      * Return whether the decoded <tt>Bitmap</tt> will be mutable.
      */
     public boolean isMutable() {
+        // Bitmaps with Config.HARWARE are always immutable.
         return (Build.VERSION.SDK_INT < 26 || config != Config.HARDWARE);
     }
 

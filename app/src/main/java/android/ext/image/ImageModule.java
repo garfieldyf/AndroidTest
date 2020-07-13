@@ -24,6 +24,7 @@ import android.ext.image.binder.GIFImageBinder;
 import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.TransitionBinder;
 import android.ext.image.decoder.BitmapDecoder;
+import android.ext.image.decoder.ContactPhotoDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
@@ -347,11 +348,21 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
-        if (TextUtils.isEmpty(className) || className.equals("BitmapDecoder")) {
+        if (TextUtils.isEmpty(className)) {
             return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
-        } else if (className.equals("ImageDecoder")) {
+        }
+
+        switch (className) {
+        case "BitmapDecoder":
+            return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+
+        case "ImageDecoder":
             return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
-        } else {
+
+        case "ContactPhotoDecoder":
+            return new ContactPhotoDecoder(mContext, mOptionsPool, bitmapPool);
+
+        default:
             return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         }
     }

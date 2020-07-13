@@ -33,21 +33,21 @@ public class BitmapDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
     public final Context mContext;
 
     /**
-     * The {@link BitmapPool} used to decode the bitmap.
+     * The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
     protected final BitmapPool mBitmapPool;
 
     /**
-     * The <tt>Options</tt> {@link Pool} to decode bitmap.
+     * The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
      */
     private final Pool<Options> mOptionsPool;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse
-     * the bitmap when decoding bitmap.
+     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap
+     * when decoding bitmap.
      */
     public BitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         mContext = context.getApplicationContext();

@@ -10,8 +10,10 @@ import android.ext.util.DebugUtils;
 import android.ext.util.Pools.Pool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
+import android.os.Build;
 import android.util.Log;
 import java.io.InputStream;
 
@@ -26,14 +28,14 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
     public final Context mContext;
 
     /**
-     * The <tt>Options</tt> {@link Pool} to decode image.
+     * The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
      */
     private final Pool<Options> mOptionsPool;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode image.
+     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
      */
     public AbsImageDecoder(Context context, Pool<Options> optionsPool) {
         mOptionsPool = optionsPool;
@@ -72,6 +74,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             opts.inMutable = parameters.isMutable();
             opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
+            AbsImageDecoder.__checkOptions(opts);
             decodeBitmap(uri, opts);
             opts.inJustDecodeBounds = false;
 
@@ -84,6 +87,12 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
         } finally {
             clearForRecycle(opts);
             mOptionsPool.recycle(opts);
+        }
+    }
+
+    private static void __checkOptions(Options opts) {
+        if (Build.VERSION.SDK_INT >= 26 && opts.inMutable && opts.inPreferredConfig == Config.HARDWARE) {
+            throw new AssertionError("Bitmaps with Config.HARWARE are always immutable");
         }
     }
 

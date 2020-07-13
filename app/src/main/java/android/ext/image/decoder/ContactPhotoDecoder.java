@@ -1,34 +1,31 @@
-package com.tencent.temp;
+package android.ext.image.decoder;
 
 import android.content.ContentResolver;
 import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.database.DatabaseUtils;
-import android.ext.image.decoder.BitmapDecoder;
 import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.net.Uri;
 import android.provider.ContactsContract.Contacts.Photo;
-import android.support.annotation.Keep;
 import java.io.InputStream;
 
 /**
  * Class <tt>ContactPhotoDecoder</tt> used to decode the contact photo data to a {@link Bitmap}.
  * @author Garfield
  */
-public final class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
+public class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
     private static final ThreadLocal<byte[]> sPhotoLocal = new ThreadLocal<byte[]>();
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse
-     * the bitmap when decoding bitmap.
+     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap
+     * when decoding bitmap.
      */
-    @Keep
     public ContactPhotoDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool, bitmapPool);
     }

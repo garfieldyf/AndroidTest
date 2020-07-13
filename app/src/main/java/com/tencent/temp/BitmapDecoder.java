@@ -21,16 +21,16 @@ import android.util.Log;
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     /**
-     * The {@link BitmapPool} used to decode the bitmap.
+     * The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
     protected final BitmapPool mBitmapPool;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param optionsPool The <tt>Options</tt> {@link Pool} to decode bitmap.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse
-     * the bitmap when decoding bitmap.
+     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap
+     * when decoding bitmap.
      */
     public BitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
         super(context, optionsPool);
@@ -48,26 +48,26 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.
-        Bitmap bitmap = null;
+        Bitmap result = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
             BitmapDecoder.__checkDumpOptions(opts, flags);
-            bitmap = decodeBitmap(uri, opts);
+            result = decodeBitmap(uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 DebugUtils.__checkLogError(true, "BitmapDecoder", "decodeBitmap failed - " + e.getMessage());
                 opts.inBitmap = null;
-                bitmap = decodeBitmap(uri, opts);
+                result = decodeBitmap(uri, opts);
             }
         }
 
-        BitmapDecoder.__checkBitmap(bitmap, opts);
-        return (Image)bitmap;
+        BitmapDecoder.__checkBitmap(result, opts);
+        return (Image)result;
     }
 
     private static void __checkBitmap(Bitmap bitmap, Options opts) {
-        if (bitmap != null && Build.VERSION.SDK_INT >= 26) {
+        if (Build.VERSION.SDK_INT >= 26 && bitmap != null) {
             final Config config = bitmap.getConfig();
             if (config != null && opts.outConfig != null && config != opts.outConfig) {
                 throw new AssertionError("The bitmap config = " + config + ", opts.outConfig = " + opts.outConfig + " are not equal.");

@@ -17,6 +17,7 @@ import android.ext.cache.LruCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
+import android.ext.content.Loader.Task;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.image.ImageLoader.LoadRequest;
@@ -66,7 +67,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /**
      * The maximum number of tasks.
      */
-    /* package */ static final int MAX_POOL_SIZE = 48;
+    private static final int MAX_POOL_SIZE = 48;
 
     /**
      * The application <tt>Context</tt>.
@@ -74,6 +75,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     public final Context mContext;
 
     /* package */ final Executor mExecutor;
+    /* package */ final Pool<Task> mTaskPool;
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Object[]> mParamsPool;
 
@@ -96,6 +98,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mFileCache   = fileCache;
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
+        mTaskPool    = ImageLoader.newTaskPool(MAX_POOL_SIZE);
         mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
@@ -186,6 +189,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     public final void dump(Printer printer) {
         Pools.dumpPool(mParamsPool, printer);
+        Pools.dumpPool(mTaskPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
@@ -252,6 +256,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 }
             }
 
+            mTaskPool.clear();
             mResources.clear();
             mParamsPool.clear();
             mBufferPool.clear();

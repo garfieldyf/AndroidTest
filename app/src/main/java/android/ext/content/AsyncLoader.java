@@ -3,6 +3,8 @@ package android.ext.content;
 import android.ext.cache.Cache;
 import android.ext.cache.Caches;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools;
+import android.ext.util.Pools.Pool;
 import java.util.concurrent.Executor;
 
 /**
@@ -36,21 +38,22 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache May be <tt>null</tt>. The {@link Cache} to store the loaded values.
-     * @see #AsyncLoader(Executor, Cache, int)
+     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
+     * @see #AsyncLoader(Executor, Cache, Pool)
      */
-    public AsyncLoader(Executor executor, Cache<Key, Value> cache) {
-        this(executor, cache, 32);
+    public AsyncLoader(Executor executor, Cache<Key, Value> cache, int maxPoolSize) {
+        this(executor, cache, newTaskPool(maxPoolSize));
     }
 
     /**
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache May be <tt>null</tt>. The {@link Cache} to store the loaded values.
-     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
-     * @see #AsyncLoader(Executor, Cache)
+     * @param taskPool The {@link Task} {@link Pool} to reused the <tt>Task</tt>.
+     * @see #AsyncLoader(Executor, Cache, int)
      */
-    public AsyncLoader(Executor executor, Cache<Key, Value> cache, int maxPoolSize) {
-        super(executor, maxPoolSize);
+    public AsyncLoader(Executor executor, Cache<Key, Value> cache, Pool<Task> taskPool) {
+        super(executor, taskPool);
         mCache = (cache != null ? cache : Caches.emptyCache());
     }
 
@@ -165,9 +168,13 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         return mCache;
     }
 
-    @Override
-    public final Object newInstance() {
-        return new LoadTask();
+    /**
+     * Returns a new {@link Task} {@link Pool}.
+     * @param maxSize The maximum number of tasks in the pool.
+     * @return An newly created <tt>Task Pool</tt>.
+     */
+    public static Pool<Task> newTaskPool(int maxSize) {
+        return Pools.newPool(LoadTask::new, maxSize);
     }
 
     /**
@@ -224,6 +231,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder binder) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
+        task.mLoader = this;
         task.mFlags  = flags;
         task.mParams = params;
         task.mBinder = binder;
@@ -244,20 +252,21 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    /* package */ final class LoadTask extends Task {
-        /* package */ Key mKey;
+    /* package */ static final class LoadTask extends Task {
+        /* package */ Object mKey;
         /* package */ int mFlags;
         /* package */ Object mTarget;
         /* package */ Binder mBinder;
+        /* package */ AsyncLoader mLoader;
 
         @Override
         public Object doInBackground(Object params) {
-            waitResumeIfPaused();
-            Value value = null;
-            if (!isTaskCancelled(this)) {
-                value = loadInBackground(this, mKey, (Params[])params, mFlags);
+            mLoader.waitResumeIfPaused();
+            Object value = null;
+            if (!mLoader.isTaskCancelled(this)) {
+                value = mLoader.loadInBackground(this, mKey, (Object[])params, mFlags);
                 if (value != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
-                    mCache.put(mKey, value);
+                    mLoader.mCache.put(mKey, value);
                 }
             }
 
@@ -266,18 +275,18 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
 
         @Override
         public void onPostExecute(Object value) {
-            final Params[] params = (Params[])mParams;
-            if (!isTaskCancelled(mTarget, this)) {
+            final Object[] params = (Object[])mParams;
+            if (!mLoader.isTaskCancelled(mTarget, this)) {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
             // Recycles this task to avoid potential memory leaks.
-            onRecycle(params);
+            mLoader.onRecycle(params);
             clearForRecycle();
             mKey = null;
             mTarget = null;
             mBinder = null;
-            mTaskPool.recycle(this);
+            mLoader.mTaskPool.recycle(this);
         }
     }
 

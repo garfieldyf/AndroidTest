@@ -1,5 +1,6 @@
 package android.ext.content;
 
+import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -17,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * An abstract class that performs asynchronous loading of data.
  * @author Garfield
  */
-public abstract class Loader<Key> implements Factory<Object> {
+public abstract class Loader<Key> implements Factory<Task> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
     /* package */ static final int SHUTDOWN = 2;
@@ -25,7 +26,7 @@ public abstract class Loader<Key> implements Factory<Object> {
     /* package */ volatile int mState;
     /* package */ final Executor mExecutor;
 
-    /* package */ final Pool<Object> mTaskPool;
+    /* package */ final Pool<Task> mTaskPool;
     /* package */ final Map<Key, Task> mRunningTasks;
 
     /**
@@ -35,6 +36,16 @@ public abstract class Loader<Key> implements Factory<Object> {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
         mTaskPool = Pools.newPool(this, maxPoolSize);
+        mRunningTasks = new HashMap<Key, Task>();
+    }
+
+    /**
+     * Constructor
+     */
+    /* package */ Loader(Executor executor, Pool<Task> taskPool) {
+        DebugUtils.__checkMemoryLeaks(getClass());
+        mExecutor = executor;
+        mTaskPool = taskPool;
         mRunningTasks = new HashMap<Key, Task>();
     }
 
@@ -108,16 +119,22 @@ public abstract class Loader<Key> implements Factory<Object> {
 
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
-        Pools.dumpPool(mTaskPool, printer);
+        final StringBuilder result = new StringBuilder(80);
+        printer.println(DebugUtils.toString(mTaskPool, result.append("  taskPool ==> ")).toString());
         final int size = mRunningTasks.size();
         if (size > 0) {
-            final StringBuilder result = new StringBuilder(80);
+            result.setLength(0);
             DebugUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
             for (Entry<Key, Task> entry : mRunningTasks.entrySet()) {
                 result.setLength(0);
                 printer.println(DebugUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
             }
         }
+    }
+
+    @Override
+    public Task newInstance() {
+        throw new RuntimeException("Must be implementation!");
     }
 
     /**

@@ -1,6 +1,5 @@
 package android.ext.image;
 
-import static android.ext.image.ImageModule.MAX_POOL_SIZE;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
@@ -64,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
     protected ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
-        super(module.mExecutor, imageCache, MAX_POOL_SIZE);
+        super(module.mExecutor, imageCache, module.mTaskPool);
 
         mRequest = new LoadRequest(this);
         mDecoder = decoder;
@@ -78,7 +77,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      */
     protected ImageLoader(ImageModule<?, ?> module, Cache imageCache) {
-        super(module.mExecutor, imageCache);
+        super(module.mExecutor, imageCache, module.mTaskPool);
 
         mModule  = module;
         mLoader  = null;

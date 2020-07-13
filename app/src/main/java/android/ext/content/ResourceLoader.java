@@ -159,7 +159,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
     }
 
     @Override
-    public final Object newInstance() {
+    public final Task newInstance() {
         return new LoadTask();
     }
 

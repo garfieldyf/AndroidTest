@@ -29,8 +29,8 @@ public class SizeParameters extends Parameters {
         android.R.attr.minHeight,
     };
 
-    private static final int MIN_WIDTH  = 0;
-    private static final int MIN_HEIGHT = 1;
+    private static final int MIN_WIDTH_INDEX  = 0;
+    private static final int MIN_HEIGHT_INDEX = 1;
 
     /**
      * The default {@link Parameters} (sample size = 1,
@@ -53,8 +53,8 @@ public class SizeParameters extends Parameters {
         super(context, attrs);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, SIZE_PARAMETERS_ATTRS);
-        this.minWidth = a.getDimensionPixelOffset(MIN_WIDTH /* android.R.attr.minWidth */, 0);
-        this.value = a.getDimensionPixelOffset(MIN_HEIGHT /* android.R.attr.minHeight */, 0);
+        this.minWidth = a.getDimensionPixelOffset(MIN_WIDTH_INDEX /* android.R.attr.minWidth */, 0);
+        this.value = a.getDimensionPixelOffset(MIN_HEIGHT_INDEX /* android.R.attr.minHeight */, 0);
         a.recycle();
     }
 

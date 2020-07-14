@@ -223,7 +223,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             DebugUtils.__checkStartMethodTracing();
             mCacheDir = FileUtils.getCacheDir(mModule.mContext, "._temp_cache!").getPath();
             FileUtils.deleteFiles(mCacheDir, false);
-            DebugUtils.__checkStopMethodTracing("ImageLoader.Loader", "init");
+            DebugUtils.__checkStopMethodTracing("ImageLoader", "ImageLoader.Loader <init>");
         }
 
         /**

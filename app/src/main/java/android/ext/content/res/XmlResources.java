@@ -1,6 +1,5 @@
 package android.ext.content.res;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -105,15 +104,15 @@ public final class XmlResources {
     public static float[] loadCornerRadii(Resources res, AttributeSet attrs, float[] outRadii) {
         DebugUtils.__checkError(outRadii == null || outRadii.length < 8, "outRadii == null || outRadii.length < 8");
         final TypedArray a = res.obtainAttributes(attrs, DRAWABLE_CORNERS_ATTRS);
-        final float radius = a.getDimension(RADIUS /* android.R.attr.radius */, Float.NaN);
+        final float radius = a.getDimension(RADIUS_INDEX /* android.R.attr.radius */, Float.NaN);
 
         if (Float.compare(radius, Float.NaN) != 0) {
             Arrays.fill(outRadii, radius);
         } else {
-            outRadii[0] = outRadii[1] = a.getDimension(TOP_LEFT /* android.R.attr.topLeftRadius */, 0);
-            outRadii[2] = outRadii[3] = a.getDimension(TOP_RIGHT /* android.R.attr.topRightRadius */, 0);
-            outRadii[6] = outRadii[7] = a.getDimension(BOTTOM_LEFT /* android.R.attr.bottomLeftRadius */, 0);
-            outRadii[4] = outRadii[5] = a.getDimension(BOTTOM_RIGHT /* android.R.attr.bottomRightRadius */, 0);
+            outRadii[0] = outRadii[1] = a.getDimension(TOP_LEFT_INDEX /* android.R.attr.topLeftRadius */, 0);
+            outRadii[2] = outRadii[3] = a.getDimension(TOP_RIGHT_INDEX /* android.R.attr.topRightRadius */, 0);
+            outRadii[6] = outRadii[7] = a.getDimension(BOTTOM_LEFT_INDEX /* android.R.attr.bottomLeftRadius */, 0);
+            outRadii[4] = outRadii[5] = a.getDimension(BOTTOM_RIGHT_INDEX /* android.R.attr.bottomRightRadius */, 0);
         }
 
         a.recycle();
@@ -127,8 +126,8 @@ public final class XmlResources {
     public static boolean[] loadAnimationAttrs(Resources res, AttributeSet attrs) {
         final TypedArray a = res.obtainAttributes(attrs, ANIMATION_ATTRS);
         final boolean[] results = new boolean[] {
-            a.getBoolean(ONE_SHOT /* android.R.attr.oneshot */, false),
-            a.getBoolean(AUTO_START /* android.R.attr.autoStart */, true),
+            a.getBoolean(ONE_SHOT_INDEX /* android.R.attr.oneshot */, false),
+            a.getBoolean(AUTO_START_INDEX /* android.R.attr.autoStart */, true),
         };
 
         a.recycle();
@@ -207,8 +206,8 @@ public final class XmlResources {
         android.R.attr.autoStart,
     };
 
-    private static final int ONE_SHOT   = 0;
-    private static final int AUTO_START = 1;
+    private static final int ONE_SHOT_INDEX   = 0;
+    private static final int AUTO_START_INDEX = 1;
 
     /**
      * The inner radius attributes.
@@ -228,11 +227,11 @@ public final class XmlResources {
         android.R.attr.bottomRightRadius,
     };
 
-    private static final int RADIUS       = 0;
-    private static final int TOP_LEFT     = 1;
-    private static final int TOP_RIGHT    = 2;
-    private static final int BOTTOM_LEFT  = 3;
-    private static final int BOTTOM_RIGHT = 4;
+    private static final int RADIUS_INDEX       = 0;
+    private static final int TOP_LEFT_INDEX     = 1;
+    private static final int TOP_RIGHT_INDEX    = 2;
+    private static final int BOTTOM_LEFT_INDEX  = 3;
+    private static final int BOTTOM_RIGHT_INDEX = 4;
 
     /**
      * This utility class cannot be instantiated.

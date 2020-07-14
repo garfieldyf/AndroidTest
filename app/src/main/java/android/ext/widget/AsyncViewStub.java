@@ -29,9 +29,9 @@ public final class AsyncViewStub extends View {
         android.R.attr.inflatedId,
     };
 
-    private static final int ID     = 0;
-    private static final int LAYOUT = 1;
-    private static final int INFLATED_ID = 2;
+    private static final int ID_INDEX     = 0;
+    private static final int LAYOUT_INDEX = 1;
+    private static final int INFLATED_ID_INDEX = 2;
 
     /* package */ int mLayoutId;
     /* package */ int mInflatedId;
@@ -48,9 +48,9 @@ public final class AsyncViewStub extends View {
         super(context);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, VIEW_STUB_ATTRS, defStyleAttr, 0);
-        setId(a.getResourceId(ID /* android.R.attr.id */, NO_ID));
-        mLayoutId   = a.getResourceId(LAYOUT /* android.R.attr.layout */, 0);
-        mInflatedId = a.getResourceId(INFLATED_ID /* android.R.attr.inflatedId */, NO_ID);
+        setId(a.getResourceId(ID_INDEX /* android.R.attr.id */, NO_ID));
+        mLayoutId   = a.getResourceId(LAYOUT_INDEX /* android.R.attr.layout */, 0);
+        mInflatedId = a.getResourceId(INFLATED_ID_INDEX /* android.R.attr.inflatedId */, NO_ID);
         a.recycle();
 
         setVisibility(GONE);

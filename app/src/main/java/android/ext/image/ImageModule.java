@@ -220,7 +220,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         result.setLength(0);
-        SizeParameters.defaultParameters.dump(printer, result.append("  default == > "));
+        SizeParameters.defaultParameters.dump(printer, result.append("  default ==> "));
 
         for (int i = 0; i < size; ++i) {
             final Object object = mResources.valueAt(i);
@@ -556,9 +556,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 maxSize = (int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f);
             }
 
-            if (maxSize == 0) {
+            if (maxSize <= 0) {
                 return null;
-            } else if (mImageSize == 0) {
+            } else if (mImageSize <= 0) {
                 return createBitmapCache(maxSize);
             } else {
                 return new LruImageCache(createBitmapCache(maxSize), new LruCache(mImageSize));

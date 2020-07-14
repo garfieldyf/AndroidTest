@@ -253,8 +253,8 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
     /* package */ static final class LoadTask extends Task {
-        /* package */ Object mKey;
         /* package */ int mFlags;
+        /* package */ Object mKey;
         /* package */ Object mTarget;
         /* package */ Binder mBinder;
         /* package */ AsyncLoader mLoader;

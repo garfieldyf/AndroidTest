@@ -27,9 +27,9 @@ import java.util.Set;
 public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> {
     private final int mPageSize;
     private final int mInitialSize;
-    private final int mPrefetchDistance;
 
     private int mItemCount;
+    private final Adapter mAdapter;
     private final BitSet mLoadStates;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -85,7 +85,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
-        mPrefetchDistance = prefetchDistance;
+        mAdapter = (prefetchDistance > 0 ? new PrefetchAdapter(prefetchDistance) : new Adapter());
     }
 
     /**
@@ -135,14 +135,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public E getItem(int position, E fallback) {
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
-        final long combinedPosition = getPageForPosition(position);
-        final int pageIndex = Pages.getOriginalPage(combinedPosition);
-        final Page<E> page  = getPage(pageIndex);
-        if (mPrefetchDistance > 0) {
-            prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
-        }
-
-        return (page != null ? page.getItem((int)combinedPosition) : fallback);
+        return mAdapter.getItem(position, fallback);
     }
 
     /**
@@ -486,4 +479,41 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The page, or <tt>null</tt>.
      */
     protected abstract Page<E> loadPage(int pageIndex, int startPosition, int itemCount);
+
+    /**
+     * Class <tt>Adapter</tt>
+     */
+    /* package */ class Adapter {
+        public E getItem(int position, E fallback) {
+            final long combinedPosition = getPageForPosition(position);
+            final Page<E> page = getPage(Pages.getOriginalPage(combinedPosition));
+            return (page != null ? page.getItem((int)combinedPosition) : fallback);
+        }
+    }
+
+    /**
+     * Class <tt>PrefetchAdapter</tt> is an implementation of a {@link Adapter}.
+     */
+    private final class PrefetchAdapter extends Adapter {
+        private final int mPrefetchDistance;
+
+        /**
+         * Constructor
+         * @param prefetchDistance Defines how far to the first or last
+         * item in the page to this adapter should prefetch the data.
+         */
+        public PrefetchAdapter(int prefetchDistance) {
+            mPrefetchDistance = prefetchDistance;
+        }
+
+        @Override
+        public E getItem(int position, E fallback) {
+            final long combinedPosition = getPageForPosition(position);
+            final int pageIndex = Pages.getOriginalPage(combinedPosition);
+            final Page<E> page  = getPage(pageIndex);
+            prefetchPage(pageIndex, (int)combinedPosition, mPrefetchDistance);
+
+            return (page != null ? page.getItem((int)combinedPosition) : fallback);
+        }
+    }
 }

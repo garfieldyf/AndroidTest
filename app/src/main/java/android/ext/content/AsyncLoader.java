@@ -82,8 +82,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     public void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
-        DebugUtils.__checkError(target == null, "target == null");
-        DebugUtils.__checkError(binder == null, "binder == null");
+        DebugUtils.__checkError(target == null || binder == null, "target == null || binder == null");
         DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");
         if (mState != SHUTDOWN) {
             if (key == null) {

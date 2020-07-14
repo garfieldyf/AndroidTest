@@ -89,7 +89,7 @@ public final class ZipUtils {
      * @see #uncompress(String, String, Cancelable)
      */
     public static void compress(String zipFile, int compressionLevel, Cancelable cancelable, String... files) throws IOException {
-        DebugUtils.__checkError(files == null, "Invalid parameter - The files is null");
+        DebugUtils.__checkError(files == null, "Invalid parameter - files == null");
         compress(zipFile, compressionLevel, Arrays.asList(files), cancelable);
     }
 
@@ -107,7 +107,7 @@ public final class ZipUtils {
      * @see #uncompress(String, String, Cancelable)
      */
     public static void compress(String zipFile, int compressionLevel, Collection<String> files, Cancelable cancelable) throws IOException {
-        DebugUtils.__checkError(files == null, "Invalid parameter - The files is null");
+        DebugUtils.__checkError(files == null, "Invalid parameter - files == null");
         // Creates the necessary directories.
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
         cancelable = Cancelable.ofNullable(cancelable);

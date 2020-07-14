@@ -25,8 +25,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      * @see #LruFileCache(Context, String, int)
      */
     public LruFileCache(File cacheDir, int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
-        DebugUtils.__checkError(cacheDir == null, "cacheDir == null");
+        DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
     }

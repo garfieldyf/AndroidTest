@@ -18,7 +18,6 @@ import android.ext.util.FileUtils;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
-import android.text.TextUtils;
 import android.util.JsonWriter;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -430,7 +429,7 @@ public final class DatabaseUtils {
      */
     public static JSONObject toJSONObject(Cursor cursor, String[] names, int... columnIndexes) {
         DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
         final JSONObject result = new JSONObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];
@@ -500,7 +499,7 @@ public final class DatabaseUtils {
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, String[] names, int... columnIndexes) throws IOException {
         DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length != names.length");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];

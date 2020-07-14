@@ -21,8 +21,8 @@ public final class Pools {
      * @return An newly created <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
-    public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
-        return new ArrayPool<T>(factory, maxSize);
+    public static <E> Pool<E> newPool(Factory<E> factory, int maxSize) {
+        return new ArrayPool<E>(factory, maxSize);
     }
 
     /**
@@ -32,8 +32,8 @@ public final class Pools {
      * @return A synchronized <tt>Pool</tt>.
      * @see #newPool(Factory, int)
      */
-    public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
-        return new SynchronizedPool<T>(pool);
+    public static <E> Pool<E> synchronizedPool(Pool<E> pool) {
+        return new SynchronizedPool<E>(pool);
     }
 
     public static void dumpPool(Pool<?> pool, Printer printer) {
@@ -47,7 +47,7 @@ public final class Pools {
     /**
      * The <tt>Pool</tt> interface for managing a pool of objects.
      */
-    public static interface Pool<T> {
+    public static interface Pool<E> {
         /**
          * Removes all elements from this <tt>Pool</tt>, leaving it empty.
          */
@@ -56,36 +56,36 @@ public final class Pools {
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
-         * longer be used, The caller should be call {@link #recycle(T)} to
+         * longer be used, The caller should be call {@link #recycle(E)} to
          * recycles the element. When this <tt>Pool</tt> is empty, should be
          * call {@link Factory#newInstance()} to create a new element.
          * @return The element.
          */
-        T obtain();
+        E obtain();
 
         /**
          * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
          * calling this function you must not ever touch the <em>element</em> again.
          * @param element The element to recycle.
          */
-        void recycle(T element);
+        void recycle(E element);
     }
 
     /**
      * The <tt>Factory</tt> interface used to create a new object.
      */
-    public static interface Factory<T> {
+    public static interface Factory<E> {
         /**
          * Creates a new instance.
          * @return A new instance.
          */
-        T newInstance();
+        E newInstance();
     }
 
     /**
      * Class <tt>RectPool</tt> is an <b>one-size</b> {@link Rect} pool.
      */
-    public static final class RectPool extends AbstractPool<Rect> {
+    public static final class RectPool extends SimplePool<Rect> {
         public static final RectPool sInstance = new RectPool();
 
         /**
@@ -115,7 +115,7 @@ public final class Pools {
     /**
      * Class <tt>RectFPool</tt> is an <b>one-size</b> {@link RectF} pool.
      */
-    public static final class RectFPool extends AbstractPool<RectF> {
+    public static final class RectFPool extends SimplePool<RectF> {
         public static final RectFPool sInstance = new RectFPool();
 
         /**
@@ -145,7 +145,7 @@ public final class Pools {
     /**
      * Class <tt>MatrixPool</tt> is an <b>one-size</b> {@link Matrix} pool.
      */
-    public static final class MatrixPool extends AbstractPool<Matrix> {
+    public static final class MatrixPool extends SimplePool<Matrix> {
         public static final MatrixPool sInstance = new MatrixPool();
 
         /**
@@ -168,29 +168,29 @@ public final class Pools {
     }
 
     /**
-     * Class <tt>AbstractPool</tt> is an implementation of a {@link Pool}.
+     * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static abstract class AbstractPool<T> {
-        private final AtomicReference<T> referent;
+    private static abstract class SimplePool<E> {
+        private final AtomicReference<E> referent;
 
         /**
          * Constructor
          */
-        public AbstractPool() {
-            this.referent = new AtomicReference<T>();
+        public SimplePool() {
+            this.referent = new AtomicReference<E>();
         }
 
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
-         * longer be used, The caller should be call {@link #recycle(T)} to
+         * longer be used, The caller should be call {@link #recycle(E)} to
          * recycles the element.
          * @return The element.
-         * @see #recycle(T)
+         * @see #recycle(E)
          */
-        public final T obtain() {
-            final T result = referent.getAndSet(null);
-            return (result != null ? result : newInstance());
+        public final E obtain() {
+            final E element = referent.getAndSet(null);
+            return (element != null ? element : newInstance());
         }
 
         /**
@@ -199,35 +199,33 @@ public final class Pools {
          * @param element The element to recycle.
          * @see #obtain()
          */
-        public final void recycle(T element) {
-            referent.compareAndSet(null, element);
+        public final void recycle(E element) {
+            DebugUtils.__checkError(element == null, "element == null");
+            referent.set(element);
         }
 
         /**
          * Creates a new instance.
          * @return A new instance.
          */
-        /* package */ abstract T newInstance();
+        /* package */ abstract E newInstance();
     }
 
     /**
      * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ArrayPool<T> implements Pool<T> {
+    private static final class ArrayPool<E> implements Pool<E> {
         private int size;
         private final Object[] elements;
-        private final Factory<T> factory;
+        private final Factory<E> factory;
 
         /**
          * Constructor
-         * @param factory The {@link Factory} to create
-         * a new element when this pool is empty.
-         * @param maxSize The maximum number of elements
-         * to allow in this pool.
+         * @param factory The {@link Factory} to create a new element when this pool is empty.
+         * @param maxSize The maximum number of elements to allow in this pool.
          */
-        public ArrayPool(Factory<T> factory, int maxSize) {
-            DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
-            DebugUtils.__checkError(factory == null, "factory == null");
+        public ArrayPool(Factory<E> factory, int maxSize) {
+            DebugUtils.__checkError(factory == null || maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
             this.factory  = factory;
             this.elements = new Object[maxSize];
         }
@@ -243,20 +241,13 @@ public final class Pools {
 
         @Override
         @SuppressWarnings("unchecked")
-        public T obtain() {
-            final T result;
-            if (size > 0) {
-                result = (T)elements[--size];
-                elements[size] = null;
-            } else {
-                result = factory.newInstance();
-            }
-
-            return result;
+        public E obtain() {
+            return (size > 0 ? (E)elements[--size] : factory.newInstance());
         }
 
         @Override
-        public void recycle(T element) {
+        public void recycle(E element) {
+            DebugUtils.__checkError(element == null, "element == null");
             __checkInPool(element);
             if (size < elements.length) {
                 elements[size++] = element;
@@ -297,15 +288,15 @@ public final class Pools {
     /**
      * Class <tt>SynchronizedPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class SynchronizedPool<T> implements Pool<T> {
-        private final Pool<T> pool;
+    private static final class SynchronizedPool<E> implements Pool<E> {
+        private final Pool<E> pool;
 
         /**
          * Constructor
          * <p>Creates a new synchronized pool.</p>
          * @param pool The {@link Pool}.
          */
-        public SynchronizedPool(Pool<T> pool) {
+        public SynchronizedPool(Pool<E> pool) {
             this.pool = pool;
             DebugUtils.__checkError(pool == null, "pool == null");
         }
@@ -316,12 +307,12 @@ public final class Pools {
         }
 
         @Override
-        public synchronized T obtain() {
+        public synchronized E obtain() {
             return pool.obtain();
         }
 
         @Override
-        public synchronized void recycle(T element) {
+        public synchronized void recycle(E element) {
             pool.recycle(element);
         }
 

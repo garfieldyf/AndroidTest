@@ -26,7 +26,7 @@ public final class Pages {
      * @see PageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPage(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition(" + combinedPosition + ") < 0");
         return (int)(combinedPosition >> 32);
     }
 
@@ -38,7 +38,7 @@ public final class Pages {
      * @see PageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPosition(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition(" + combinedPosition + ") < 0");
         return (int)combinedPosition;
     }
 

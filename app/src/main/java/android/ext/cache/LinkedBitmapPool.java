@@ -25,7 +25,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
      * @param maxSize The maximum number of bitmaps to allow in this pool.
      */
     public LinkedBitmapPool(int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
+        DebugUtils.__checkError(maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
         mMaxSize = maxSize;
         mBitmaps = new LinkedList<Bitmap>();
     }

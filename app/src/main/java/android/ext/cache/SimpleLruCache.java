@@ -29,7 +29,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @param maxSize The maximum number of values to allow in this cache.
      */
     public SimpleLruCache(int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize <= 0");
+        DebugUtils.__checkError(maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
         this.maxSize = maxSize;
         this.map = new LinkedHashMap<K, V>(0, 0.75f, true);
     }

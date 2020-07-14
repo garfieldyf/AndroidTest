@@ -99,10 +99,10 @@ public class Parameters {
      * pixels when decoding the image.
      * @param opts The {@link Options} to compute. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
+     * @return The number of bytes.
      */
     public int computeByteCount(Options opts) {
-        DebugUtils.__checkError(opts.inSampleSize <= 0, "opts.inSampleSize <= 0");
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth <= 0 || opts.outHeight <= 0");
+        DebugUtils.__checkError(opts.inSampleSize <= 0 || opts.outWidth <= 0 || opts.outHeight <= 0, "opts.inSampleSize(" + opts.inSampleSize + ") <= 0 || opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
         return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * AppCompat.getBytesPerPixel(opts);
     }
 
@@ -118,7 +118,7 @@ public class Parameters {
      * store the image's pixels when decoding the image.
      */
     /* package */ final int computeByteCountImpl(Options opts) {
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth <= 0 || opts.outHeight <= 0");
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
         final int byteCount = AppCompat.getBytesPerPixel(opts);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);

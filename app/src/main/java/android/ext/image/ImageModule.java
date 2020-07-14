@@ -314,7 +314,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @see #getPlaceholder(Resources, Object[])
      */
     public static <T> T getParameters(Object[] params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) < (PARAMETERS + 1), "params == null || params.length < " + (PARAMETERS + 1));
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < (PARAMETERS + 1), "params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + (PARAMETERS + 1));
         return (T)params[PARAMETERS];
     }
 
@@ -327,7 +327,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     @SuppressWarnings("deprecation")
     public static Drawable getPlaceholder(Resources res, Object[] params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) < (PLACEHOLDER + 1), "params == null || params.length < " + (PLACEHOLDER + 1));
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < (PLACEHOLDER + 1), "params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + (PLACEHOLDER + 1));
         final Object placeholder = params[PLACEHOLDER];
         return (placeholder instanceof Integer ? res.getDrawable((int)placeholder) : (Drawable)placeholder);
     }
@@ -547,7 +547,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 maxSize = (int)mImageCache;
             } else {
                 final float scaleMemory = (float)mImageCache;
-                DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory >= 1.0");
+                DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory(" + scaleMemory + ") >= 1.0");
                 maxSize = (int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f);
             }
 

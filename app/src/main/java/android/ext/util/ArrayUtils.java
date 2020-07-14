@@ -385,7 +385,7 @@ public final class ArrayUtils {
      * @see #insert(LinkedList, T)
      */
     public static <T> void insert(LinkedList<? extends T> list, T value, Comparator<? super T> comparator) {
-        DebugUtils.__checkError(list == null, "list == null");
+        DebugUtils.__checkError(list == null || comparator == null, "list == null || comparator == null");
         final T last = list.peekLast();
         if (last == null || comparator.compare(value, last) >= 0) {
             ((LinkedList<T>)list).addLast(value);

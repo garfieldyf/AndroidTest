@@ -91,8 +91,7 @@ public final class UriUtils {
      * @return A {@link Uri} for the given <em>resource</em>.
      */
     public static Uri fromResource(String packageName, Object resource) {
-        DebugUtils.__checkError(packageName == null, "packageName == null");
-        DebugUtils.__checkError(resource == null, "resource == null");
+        DebugUtils.__checkError(packageName == null || resource == null, "packageName == null || resource == null");
         return new Uri.Builder().scheme(SCHEME_ANDROID_RESOURCE).authority(packageName).path(resource.toString()).build();
     }
 
@@ -140,8 +139,7 @@ public final class UriUtils {
      * @see #getResourceUri(Context, Object)
      */
     public static String getResourceUri(String packageName, Object resource) {
-        DebugUtils.__checkError(packageName == null, "packageName == null");
-        DebugUtils.__checkError(resource == null, "resource == null");
+        DebugUtils.__checkError(packageName == null || resource == null, "packageName == null || resource == null");
         return (SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + resource);
     }
 

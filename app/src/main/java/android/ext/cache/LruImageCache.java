@@ -77,7 +77,7 @@ public final class LruImageCache<K> implements Cache<K, Object> {
     }
 
     private static <K> Cache<K, Bitmap> createBitmapCache(float scaleMemory, int maxPoolSize) {
-        DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory >= 1.0");
+        DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory(" + scaleMemory + ") >= 1.0");
         return (Float.compare(scaleMemory, +0.0f) > 0 ? (maxPoolSize > 0 ? new LruBitmapCache2<K>(scaleMemory, maxPoolSize) : new LruBitmapCache<K>(scaleMemory)) : null);
     }
 }

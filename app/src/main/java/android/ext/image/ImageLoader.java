@@ -152,7 +152,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected final void onRecycle(Object[] params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "params == null || params.length < " + PARAMS_LENGTH);
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + PARAMS_LENGTH);
         Arrays.fill(params, null);  // Prevent memory leak.
         mModule.mParamsPool.recycle(params);
     }

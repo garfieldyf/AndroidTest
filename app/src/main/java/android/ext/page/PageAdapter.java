@@ -78,8 +78,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     @SuppressWarnings("unchecked")
     public PageAdapter(Cache<Integer, ? extends Page<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
-        DebugUtils.__checkError(pageCache == null, "pageCache == null");
-        DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "pageSize <= 0 || initialSize <= 0");
+        DebugUtils.__checkError(pageCache == null || pageSize <= 0 || initialSize <= 0, "pageCache == null || pageSize(" + pageSize + ") <= 0 || initialSize(" + initialSize + ") <= 0");
         DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "prefetchDistance = " + prefetchDistance + " greater than pageSize = " + Math.min(pageSize, initialSize));
         mPageCache   = (Cache<Integer, Page<E>>)pageCache;
         mPageSize    = pageSize;
@@ -103,7 +102,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
-        DebugUtils.__checkError(itemCount < 0, "itemCount < 0");
+        DebugUtils.__checkError(itemCount < 0, "itemCount(" + itemCount + ") < 0");
         mPageCache.clear();
         mLoadStates.clear();
         mItemCount = itemCount;
@@ -257,7 +256,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public Page<E> getPage(int pageIndex) {
         DebugUtils.__checkUIThread("getPage");
-        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+        DebugUtils.__checkError(pageIndex < 0, "pageIndex(" + pageIndex + ") < 0");
         Page<E> page = mPageCache.get(pageIndex);
         if (page == null && !mLoadStates.get(pageIndex)) {
             // Computes the startPosition and itemCount to load.
@@ -332,7 +331,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public void setPage(int pageIndex, Page<E> page, Object payload) {
         DebugUtils.__checkUIThread("setPage");
-        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+        DebugUtils.__checkError(pageIndex < 0, "pageIndex(" + pageIndex + ") < 0");
 
         // Clears the page loading state when the page is load complete.
         mLoadStates.clear(pageIndex);
@@ -365,7 +364,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 //     */
 //    public void addPage(int pageIndex, Page<E> page) {
 //        DebugUtils.__checkUIThread("addPage");
-//        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+//        DebugUtils.__checkError(pageIndex < 0, "pageIndex(" + pageIndex + ") < 0");
 //
 //        // Clears the page loading state when the page is load complete.
 //        mLoadStates.clear(pageIndex);
@@ -383,7 +382,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The item count.
      */
     public final int getPageSize(int pageIndex) {
-        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+        DebugUtils.__checkError(pageIndex < 0, "pageIndex(" + pageIndex + ") < 0");
         return (pageIndex > 0 ? mPageSize : mInitialSize);
     }
 
@@ -399,7 +398,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see Pages#getOriginalPosition(long)
      */
     public final long getPageForPosition(int position) {
-        DebugUtils.__checkError(position < 0, "position < 0");
+        DebugUtils.__checkError(position < 0, "position(" + position + ") < 0");
         final int pageIndex, itemIndex, offset = position - mInitialSize;
         if (offset < 0) {
             pageIndex = 0;
@@ -420,7 +419,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getPageForPosition(int)
      */
     public final int getPositionForPage(int pageIndex) {
-        DebugUtils.__checkError(pageIndex < 0, "pageIndex < 0");
+        DebugUtils.__checkError(pageIndex < 0, "pageIndex(" + pageIndex + ") < 0");
         return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize : 0);
     }
 

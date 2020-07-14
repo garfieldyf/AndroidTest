@@ -350,7 +350,7 @@ public final class PackageUtils {
          * @see #parse(String[])
          */
         public final int parse(Collection<PackageInfo> outInfos, String... dirPaths) {
-            DebugUtils.__checkError(dirPaths == null, "Invalid parameter - The dirPaths is null");
+            DebugUtils.__checkError(dirPaths == null, "Invalid parameter - dirPaths == null");
             this.__checkParseStatus();
             int result  = 0;
             mCancelable = Cancelable.ofNullable(mCancelable);

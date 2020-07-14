@@ -94,7 +94,7 @@ public final class NetworkUtils {
      */
     public static byte[] toMacAddress(String inAddress, byte[] outAddress) {
         DebugUtils.__checkError(!Pattern.matches("([A-Fa-f0-9]{2}[-:\\s]){5}[A-Fa-f0-9]{2}", inAddress), "Invalid MAC address: " + inAddress);
-        DebugUtils.__checkError(outAddress == null || outAddress.length < 6, "outAddress == null || outAddress.length < 6");
+        DebugUtils.__checkError(ArrayUtils.getSize(outAddress) < 6, "outAddress.length(" + ArrayUtils.getSize(outAddress) + ") < 6");
         final int inLength  = StringUtils.getLength(inAddress);
         final int outLength = ArrayUtils.getSize(outAddress);
         for (int i = 0, j = 0; i < outLength && j < inLength; ++i, j += 3) {
@@ -156,7 +156,7 @@ public final class NetworkUtils {
      * @see #formatMacAddress(byte[])
      */
     public static Appendable formatMacAddress(Appendable out, byte[] macAddress, char separator) {
-        DebugUtils.__checkError(macAddress == null || macAddress.length < 6, "macAddress == null || macAddress.length < 6");
+        DebugUtils.__checkError(ArrayUtils.getSize(macAddress) < 6, "macAddress.length(" + ArrayUtils.getSize(macAddress) + ") < 6");
         return new Formatter(out).format("%02x%c%02x%c%02x%c%02x%c%02x%c%02x", macAddress[0], separator, macAddress[1], separator, macAddress[2], separator, macAddress[3], separator, macAddress[4], separator, macAddress[5]).out();
     }
 

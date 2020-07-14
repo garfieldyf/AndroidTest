@@ -48,7 +48,6 @@ public class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
             // Decode the contact's thumbnail photo.
             final byte[] data = sPhotoLocal.get();
             if (data != null) {
-                if (opts.inBitmap == null) sPhotoLocal.set(null);
                 return BitmapFactory.decodeByteArray(data, 0, data.length, opts);
             }
         }
@@ -64,6 +63,7 @@ public class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
         if (data != null) {
             BitmapFactory.decodeByteArray(data, 0, data.length, opts);
             if (opts.outWidth > 0) {
+                // Save the contact photo data.
                 sPhotoLocal.set(data);
             }
         }

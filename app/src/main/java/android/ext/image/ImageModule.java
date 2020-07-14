@@ -92,7 +92,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      */
     /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
-        final int maxPoolSize = computeBufferPoolMaxSize(executor);
+        final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
         mExecutor = executor;
         mFileCache   = fileCache;
@@ -370,11 +370,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         default:
             return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
         }
-    }
-
-    private static int computeBufferPoolMaxSize(Executor executor) {
-        final int maxPoolSize = (executor instanceof ThreadPoolExecutor ? ((ThreadPoolExecutor)executor).getMaximumPoolSize() : 8);
-        return (maxPoolSize == Integer.MAX_VALUE ? 12 : maxPoolSize);
     }
 
     private static String toString(int level) {

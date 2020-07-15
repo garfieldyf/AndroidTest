@@ -1,21 +1,20 @@
 package com.tencent.test;
 
-import android.ext.image.params.Parameters;
-import java.io.Closeable;
-import android.content.Context;
 import android.ext.cache.BitmapPool;
+import android.ext.image.ImageModule;
 import android.ext.image.decoder.BitmapDecoder;
+import android.ext.image.params.Parameters;
 import android.ext.renderscript.RenderScriptBlur;
-import android.ext.util.Pools.Pool;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
+import java.io.Closeable;
 
 public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeable {
     private RenderScriptBlur mRenderScript;
 
-    public BlurBitmapDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
-        super(context, optionsPool, bitmapPool);
-        mRenderScript = new RenderScriptBlur(mContext);
+    public BlurBitmapDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
+        super(module, bitmapPool);
+        mRenderScript = new RenderScriptBlur(module.mContext);
     }
 
     @Override

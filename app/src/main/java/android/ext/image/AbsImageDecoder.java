@@ -1,13 +1,11 @@
-package com.tencent.temp;
+package android.ext.image;
 
-import static android.ext.support.AppCompat.clearForRecycle;
 import android.content.Context;
-import android.ext.image.ImageLoader;
-import android.ext.image.ImageModule;
+import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
+import android.ext.support.AppCompat;
 import android.ext.util.DebugUtils;
-import android.ext.util.Pools.Pool;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -21,25 +19,18 @@ import java.io.InputStream;
  * Abstract class <tt>AbsImageDecoder</tt>
  * @author Garfield
  */
-public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder<Image> {
+public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
     /**
-     * The application <tt>Context</tt>.
+     * The {@link ImageModule}.
      */
-    public final Context mContext;
-
-    /**
-     * The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
-     */
-    private final Pool<Options> mOptionsPool;
+    protected final ImageModule<?, ?> mModule;
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
+     * @param module The {@link ImageModule}.
      */
-    public AbsImageDecoder(Context context, Pool<Options> optionsPool) {
-        mOptionsPool = optionsPool;
-        mContext = context.getApplicationContext();
+    public AbsImageDecoder(ImageModule<?, ?> module) {
+        mModule = module;
     }
 
     /**
@@ -62,7 +53,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      */
     @Override
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
-        final Options opts = mOptionsPool.obtain();
+        final Options opts = mModule.mOptionsPool.obtain();
         try {
             Parameters parameters = ImageModule.getParameters(params);
             if (parameters == null) {
@@ -85,8 +76,8 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
         } finally {
-            clearForRecycle(opts);
-            mOptionsPool.recycle(opts);
+            AppCompat.clearForRecycle(opts);
+            mModule.mOptionsPool.recycle(opts);
         }
     }
 
@@ -105,7 +96,7 @@ public abstract class AbsImageDecoder<Image> implements ImageLoader.ImageDecoder
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
     protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
-        try (final InputStream is = UriUtils.openInputStream(mContext, uri)) {
+        try (final InputStream is = UriUtils.openInputStream(mModule.mContext, uri)) {
             return BitmapFactory.decodeStream(is, null, opts);
         }
     }

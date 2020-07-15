@@ -1,10 +1,9 @@
 package android.ext.image.decoder;
 
 import android.content.ContentResolver;
-import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.database.DatabaseUtils;
-import android.ext.util.Pools.Pool;
+import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
@@ -14,25 +13,26 @@ import java.io.InputStream;
 
 /**
  * Class <tt>ContactPhotoDecoder</tt> used to decode the contact photo data to a {@link Bitmap}.
+ * @param <Image> Must be <tt>Bitmap</tt> or <tt>Object</tt> that will be decode
+ * the result type.
  * @author Garfield
  */
-public class ContactPhotoDecoder extends BitmapDecoder<Bitmap> {
+public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
     private static final ThreadLocal<byte[]> sPhotoLocal = new ThreadLocal<byte[]>();
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap
-     * when decoding bitmap.
+     * @param module The {@link ImageModule}.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
+     * to reuse the bitmap when decoding bitmap.
      */
-    public ContactPhotoDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
-        super(context, optionsPool, bitmapPool);
+    public ContactPhotoDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
+        super(module, bitmapPool);
     }
 
     @Override
     protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
-        final ContentResolver resolver = mContext.getContentResolver();
+        final ContentResolver resolver = mModule.mContext.getContentResolver();
         if (opts.inJustDecodeBounds) {
             decodeContactPhoto(resolver, (Uri)uri, opts);
             if (opts.outWidth <= 0) {

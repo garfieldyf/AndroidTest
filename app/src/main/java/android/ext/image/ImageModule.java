@@ -77,10 +77,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ final Executor mExecutor;
     /* package */ final Pool<Task> mTaskPool;
     /* package */ final Pool<byte[]> mBufferPool;
+    /* package */ final Pool<Options> mOptionsPool;
     /* package */ final Pool<Object[]> mParamsPool;
 
     private final FileCache mFileCache;
-    private final Pool<Options> mOptionsPool;
     private final Cache<URI, Image> mImageCache;
     private final SparseArray<Object> mResources;
 
@@ -354,21 +354,21 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
         final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
         if (TextUtils.isEmpty(className)) {
-            return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+            return new BitmapDecoder(this, bitmapPool);
         }
 
         switch (className) {
         case "BitmapDecoder":
-            return new BitmapDecoder(mContext, mOptionsPool, bitmapPool);
+            return new BitmapDecoder(this, bitmapPool);
 
         case "ImageDecoder":
-            return new ImageDecoder(mContext, mOptionsPool, bitmapPool);
+            return new ImageDecoder(this, bitmapPool);
 
         case "ContactPhotoDecoder":
-            return new ContactPhotoDecoder(mContext, mOptionsPool, bitmapPool);
+            return new ContactPhotoDecoder(this, bitmapPool);
 
         default:
-            return ClassUtils.newInstance(className, new Class[] { Context.class, Pool.class, BitmapPool.class }, mContext, mOptionsPool, bitmapPool);
+            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
         }
     }
 

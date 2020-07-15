@@ -1,10 +1,9 @@
 package android.ext.image.decoder;
 
-import android.content.Context;
 import android.ext.cache.BitmapPool;
 import android.ext.graphics.GIFImage;
+import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
-import android.ext.util.Pools.Pool;
 import android.graphics.BitmapFactory.Options;
 
 /**
@@ -19,17 +18,16 @@ public final class ImageDecoder extends BitmapDecoder<Object> {
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param optionsPool The {@link Options} {@link Pool} to reused the <tt>Options</tt>.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap
-     * when decoding bitmap.
+     * @param module The {@link ImageModule}.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
+     * to reuse the bitmap when decoding bitmap.
      */
-    public ImageDecoder(Context context, Pool<Options> optionsPool, BitmapPool bitmapPool) {
-        super(context, optionsPool, bitmapPool);
+    public ImageDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
+        super(module, bitmapPool);
     }
 
     @Override
     protected Object decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
-        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mContext, uri, opts.inTempStorage) : super.decodeImage(uri, target, parameters, flags, opts));
+        return (GIF_MIME_TYPE.equalsIgnoreCase(opts.outMimeType) ? GIFImage.decode(mModule.mContext, uri, opts.inTempStorage) : super.decodeImage(uri, target, parameters, flags, opts));
     }
 }

@@ -242,7 +242,15 @@ public final class Pools {
         @Override
         @SuppressWarnings("unchecked")
         public E obtain() {
-            return (size > 0 ? (E)elements[--size] : factory.newInstance());
+            final E element;
+            if (size > 0) {
+                element = (E)elements[--size];
+                elements[size] = null;
+            } else {
+                element = factory.newInstance();
+            }
+
+            return element;
         }
 
         @Override

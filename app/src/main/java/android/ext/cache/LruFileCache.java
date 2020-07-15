@@ -1,6 +1,6 @@
 package android.ext.cache;
 
-import android.content.Context;
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -9,6 +9,7 @@ import android.util.Printer;
 import java.io.File;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.Executor;
 
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
@@ -17,28 +18,19 @@ import java.util.Comparator;
 public final class LruFileCache implements FileCache, Runnable, Comparator<File> {
     private final int mMaxSize;
     private final File mCacheDir;
+    private final Executor mExecutor;
 
     /**
      * Constructor
+     * @param executor The {@link Executor}.
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
-     * @see #LruFileCache(Context, String, int)
      */
-    public LruFileCache(File cacheDir, int maxSize) {
+    public LruFileCache(Executor executor, File cacheDir, int maxSize) {
         DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param name A relative path within the cache directory, such as <tt>"file_cache"</tt>.
-     * @param maxSize The maximum number of files to allow in this cache.
-     * @see #LruFileCache(File, int)
-     */
-    public LruFileCache(Context context, String name, int maxSize) {
-        this(FileUtils.getCacheDir(context, name), maxSize);
+        mExecutor = executor;
     }
 
     /**
@@ -93,6 +85,15 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     public File put(String key, File cacheFile) {
         DebugUtils.__checkError(key == null || cacheFile == null, "key == null || cacheFile == null");
         return null;
+    }
+
+    @Override
+    public void trimMemory(int level) {
+        if (level >= TRIM_MEMORY_UI_HIDDEN) {
+            // The app's UI is no longer visible.
+            // Remove the oldest files of this cache.
+            mExecutor.execute(this);
+        }
     }
 
     @Override

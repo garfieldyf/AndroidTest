@@ -32,6 +32,7 @@ import android.ext.image.params.SizeParameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.FileUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
@@ -248,6 +249,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mImageCache.trimMemory(level);
         }
 
+        if (mFileCache != null) {
+            mFileCache.trimMemory(level);
+        }
+
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             for (int i = mResources.size() - 1; i >= 0; --i) {
                 final Object value = mResources.valueAt(i);
@@ -262,10 +267,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mBufferPool.clear();
             mOptionsPool.clear();
             ByteArrayPool.sInstance.clear();
-
-            if (mFileCache instanceof LruFileCache) {
-                mExecutor.execute((Runnable)mFileCache);
-            }
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append(',').toString());
@@ -521,17 +522,18 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          */
         public final ImageModule<URI, Image> build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, 4));
-            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(), createFileCache());
+            final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
+            return new ImageModule(mContext, executor, createImageCache(), createFileCache(executor));
         }
 
-        private FileCache createFileCache() {
+        private FileCache createFileCache(Executor executor) {
             if (mFileCache == null) {
                 return null;
             } else if (mFileCache instanceof FileCache) {
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(mContext, "._image_cache!", maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
             }
         }
 

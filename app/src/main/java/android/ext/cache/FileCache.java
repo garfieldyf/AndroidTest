@@ -43,4 +43,13 @@ public interface FileCache {
      * @see #get(String)
      */
     File put(String key, File cacheFile);
+
+    /**
+     * Trim this cache to the appropriate level. Typically called on the
+     * {@link android.content.ComponentCallbacks2#onTrimMemory(int)}.
+     * @param level The integer represents a trim level as specified in
+     * {@link android.content.ComponentCallbacks2}.
+     */
+    default void trimMemory(int level) {
+    }
 }

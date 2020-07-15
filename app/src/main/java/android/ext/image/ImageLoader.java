@@ -41,7 +41,6 @@ import java.util.Arrays;
  *      app:decoder="[ BitmapDecoder | ImageDecoder | ContactPhotoDecoder | classFullName ]" /&gt;</pre>
  * @author Garfield
  */
-@SuppressWarnings({ "unchecked", "rawtypes" })
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {
     /**
      * If set the image loader will be dump the {@link Options} when
@@ -65,7 +64,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     protected ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
-        mRequest = new LoadRequest(this);
+        mRequest = new LoadRequest();
         mDecoder = decoder;
         mModule  = module;
         mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new Loader());
@@ -76,13 +75,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param module The {@link ImageModule}.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      */
-    protected ImageLoader(ImageModule<?, ?> module, Cache imageCache) {
+    protected ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
         mModule  = module;
         mLoader  = null;
         mDecoder = null;
-        mRequest = new LoadRequest(this);
+        mRequest = new LoadRequest();
     }
 
     /**
@@ -197,7 +196,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Resolves an empty (0-length) string to <tt>null</tt>.
      */
-    private static Object resolveUri(Object uri) {
+    private static <URI> URI resolveUri(URI uri) {
         return (uri instanceof String && ((String)uri).length() == 0 ? null : uri);
     }
 
@@ -296,19 +295,17 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
      */
-    public static final class LoadRequest {
-        /* package */ Object mUri;
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public final class LoadRequest {
+        /* package */ URI mUri;
         /* package */ int mFlags;
         /* package */ Binder mBinder;
         /* package */ Object[] mParams;
-        /* package */ final ImageLoader mLoader;
 
         /**
          * Constructor
-         * @param loader The {@link ImageLoader}.
          */
-        /* package */ LoadRequest(ImageLoader loader) {
-            mLoader = loader;
+        /* package */ LoadRequest() {
         }
 
         /**
@@ -351,7 +348,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #parameters(Object)
          */
         public final LoadRequest parameters(int id) {
-            mParams[PARAMETERS] = mLoader.mModule.getResource(id);
+            mParams[PARAMETERS] = mModule.getResource(id);
             return this;
         }
 
@@ -395,7 +392,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #binder(Binder)
          */
         public final LoadRequest binder(int id) {
-            mBinder = (Binder)mLoader.mModule.getResource(id);
+            mBinder = (Binder)mModule.getResource(id);
             return this;
         }
 
@@ -415,7 +412,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param target The <tt>Object</tt> to bind.
          */
         public final void into(Object target) {
-            mLoader.load(mUri, target, mFlags, mBinder, mParams);
+            load(mUri, target, mFlags, mBinder, mParams);
         }
 
 //        /**

@@ -41,7 +41,7 @@ public final class IconLoader<URI> extends ImageLoader<URI, Object> {
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      * @see #IconLoader(ImageModule)
      */
-    public IconLoader(ImageModule<?, ?> module, Cache<URI, ?> iconCache) {
+    public IconLoader(ImageModule<?, ?> module, Cache<URI, Object> iconCache) {
         super(module, iconCache);
         mPackageManager = module.mContext.getPackageManager();
     }

@@ -102,7 +102,7 @@ public final class XmlResources {
      * @see #loadCornerRadii(Resources, AttributeSet)
      */
     public static float[] loadCornerRadii(Resources res, AttributeSet attrs, float[] outRadii) {
-        DebugUtils.__checkError(outRadii == null || outRadii.length < 8, "outRadii == null || outRadii.length < 8");
+        DebugUtils.__checkError(outRadii == null || outRadii.length < 8, "Invalid parameter - outRadii == null || outRadii.length < 8");
         final TypedArray a = res.obtainAttributes(attrs, DRAWABLE_CORNERS_ATTRS);
         final float radius = a.getDimension(RADIUS_INDEX /* android.R.attr.radius */, Float.NaN);
 

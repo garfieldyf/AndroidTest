@@ -26,7 +26,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      * @param maxSize The maximum number of files to allow in this cache.
      */
     public LruFileCache(Executor executor, File cacheDir, int maxSize) {
-        DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "cacheDir == null || maxSize(" + maxSize + ") <= 0");
+        DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "Invalid parameters - cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
         mExecutor = executor;
@@ -67,14 +67,14 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
 
     @Override
     public File remove(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         final File cacheFile = new File(mCacheDir, key);
         return (cacheFile.delete() ? cacheFile : null);
     }
 
     @Override
     public File get(String key) {
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         final File cacheFile = new File(mCacheDir, key);
         cacheFile.setLastModified(System.currentTimeMillis());
         return cacheFile;
@@ -82,7 +82,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
 
     @Override
     public File put(String key, File cacheFile) {
-        DebugUtils.__checkError(key == null || cacheFile == null, "key == null || cacheFile == null");
+        DebugUtils.__checkError(key == null || cacheFile == null, "Invalid parameters - key == null || cacheFile == null");
         return null;
     }
 

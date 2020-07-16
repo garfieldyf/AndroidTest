@@ -47,7 +47,7 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
      */
     public <T extends Drawable & Animatable> AnimatedImageSpan(View view, T drawable) {
         super(drawable);
-        DebugUtils.__checkError(view == null, "view == null");
+        DebugUtils.__checkError(view == null, "Invalid parameter - view == null");
         mView = new WeakReference<View>(view);
         drawable.setCallback(this);
         drawable.start();

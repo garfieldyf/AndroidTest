@@ -1,6 +1,7 @@
 package android.ext.cache;
 
 import android.content.Context;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 
@@ -17,24 +18,11 @@ public class LruBitmapCache2<K> extends LruBitmapCache<K> {
      * @param maxSize The maximum the number of bytes to allow in this cache.
      * @param bitmapPool The {@link BitmapPool} to recycle the evicted bitmap
      * from this cache.
-     * @see #LruBitmapCache2(float, int)
      */
     public LruBitmapCache2(int maxSize, BitmapPool bitmapPool) {
         super(maxSize);
         mBitmapPool = bitmapPool;
-    }
-
-    /**
-     * Constructor
-     * @param scaleMemory The scale of memory, expressed as a percentage
-     * of this application maximum memory of the current device.
-     * @param maxPoolSize The maximum number of bitmaps to allow in the
-     * internal {@link BitmapPool}.
-     * @see #LruBitmapCache2(int, BitmapPool)
-     */
-    public LruBitmapCache2(float scaleMemory, int maxPoolSize) {
-        super(scaleMemory);
-        mBitmapPool = new LinkedBitmapPool(maxPoolSize);
+        DebugUtils.__checkError(bitmapPool == null, "Invalid parameter - bitmapPool == null");
     }
 
     @Override

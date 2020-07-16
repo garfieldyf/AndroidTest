@@ -46,7 +46,7 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
     @Override
     public synchronized V get(K key) {
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         return map.get(key);
     }
 

@@ -277,13 +277,14 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         }
 
         /* package */ void initialize(GIFImage image) {
-            DebugUtils.__checkError(image == null, "image == null");
+            DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
             mImage  = image;
             mCanvas = image.createBitmapCanvas();
         }
 
         /* package */ void setImage(GIFImage image) {
-            DebugUtils.__checkError(image == null || mCanvas == null, "image == null || mCanvas == null");
+            DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
+            DebugUtils.__checkError(mCanvas == null, "mCanvas == null");
             mImage = image;
             if (image.getBitmapCanvasBytes() > mCanvas.getAllocationByteCount()) {
                 mCanvas = image.createBitmapCanvas();

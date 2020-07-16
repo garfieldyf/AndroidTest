@@ -41,7 +41,7 @@ public final class BarcodeBuilder {
      * @param bitMatrix The <tt>BitMatrix</tt> to convert.
      */
     public BarcodeBuilder(BitMatrix bitMatrix) {
-        DebugUtils.__checkError(bitMatrix == null, "bitMatrix == null");
+        DebugUtils.__checkError(bitMatrix == null, "Invalid parameter - bitMatrix == null");
         this.bitMatrix = bitMatrix;
         this.white  = Color.WHITE;
         this.black  = Color.BLACK;

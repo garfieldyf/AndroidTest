@@ -117,7 +117,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     @Override
     public boolean addAll(Collection<? extends E> collection) {
-        DebugUtils.__checkError(collection == null, "collection == null");
+        DebugUtils.__checkError(collection == null, "Invalid parameter - collection == null");
         final int size = collection.size();
         if (size > 0) {
             updateSize(size);
@@ -129,7 +129,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
-        DebugUtils.__checkError(collection == null, "collection == null");
+        DebugUtils.__checkError(collection == null, "Invalid parameter - collection == null");
         DebugUtils.__checkError(index < 0 || index > size(), "Invalid index = " + index + ", size = " + size());
         if (index == size()) {
             return addAll(collection);
@@ -234,7 +234,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @see #getSection(int)
      */
     public boolean setSection(int sectionIndex, Collection<?> section) {
-        DebugUtils.__checkError(section == null, "section == null");
+        DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
         final int newSize = section.size();
         if (newSize == 0) {
@@ -266,7 +266,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @see #addSection(int, Collection)
      */
     public boolean addSection(Collection<?> section) {
-        DebugUtils.__checkError(section == null, "section == null");
+        DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
         final int size = section.size();
         if (size == 0) {
             return false;
@@ -293,7 +293,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
      * @see #addSection(Collection)
      */
     public boolean addSection(int sectionIndex, Collection<?> section) {
-        DebugUtils.__checkError(section == null, "section == null");
+        DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid sectionIndex = " + sectionIndex + ", sectionCount = " + mCount);
         if (sectionIndex == mCount) {
             return addSection(section);

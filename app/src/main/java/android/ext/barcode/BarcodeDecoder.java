@@ -110,7 +110,7 @@ public class BarcodeDecoder {
         /*
          * params - { BarcodeDecoder, RGBLuminanceSource, OnDecodeListener, null }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
         new DecodeTask().executeOnExecutor(executor, this, new RGBLuminanceSource(width, height, pixels), listener, null);
     }
 
@@ -130,7 +130,7 @@ public class BarcodeDecoder {
         /*
          * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
         new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener, null);
     }
 
@@ -153,7 +153,7 @@ public class BarcodeDecoder {
         /*
          * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "executor == null || listener == null");
+        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
         new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener, null);
     }
 

@@ -74,7 +74,7 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
      * @param oneShot <tt>true</tt> if the animation should only play once.
      */
     public static void setViewImage(ImageView view, GIFImage image, boolean autoStart, boolean oneShot) {
-        DebugUtils.__checkError(image == null, "image == null");
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof GIFDrawable) {
             // Sets the GIFDrawable's internal image.

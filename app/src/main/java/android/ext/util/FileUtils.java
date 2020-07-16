@@ -1068,7 +1068,7 @@ public final class FileUtils {
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          */
         public Dirent(String name, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(name) == 0, "name == null || name.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(name) == 0, "Invalid parameter - name == null || name.length() == 0");
             Dirent.__checkType(type);
             this.name = name;
             this.type = type;
@@ -1079,7 +1079,7 @@ public final class FileUtils {
          * @param source The {@link Parcel}.
          */
         public Dirent(Parcel source) {
-            DebugUtils.__checkError(source == null, "source == null");
+            DebugUtils.__checkError(source == null, "Invalid parameter - source == null");
             this.name = source.readString();
             this.type = source.readInt();
         }

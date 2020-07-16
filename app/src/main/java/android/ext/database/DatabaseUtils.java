@@ -357,7 +357,7 @@ public final class DatabaseUtils {
      * @see #parse(Cursor, Class)
      */
     public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        DebugUtils.__checkError(cursor == null || clazz == null, "cursor == null || clazz == null");
+        DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
         DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
         final T result = ClassUtils.newInstance(clazz, null, (Object[])null);
         setCursorFields(cursor, result, getCursorFields(clazz));
@@ -373,7 +373,7 @@ public final class DatabaseUtils {
      * @see #parseObject(Cursor, Class)
      */
     public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
-        DebugUtils.__checkError(cursor == null || componentType == null, "cursor == null || componentType == null");
+        DebugUtils.__checkError(cursor == null || componentType == null, "Invalid parameters - cursor == null || componentType == null");
         DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
         final int count = cursor.getCount();
         final List<T> result = new ArrayList<T>(count);
@@ -399,7 +399,7 @@ public final class DatabaseUtils {
      * @see #toJSONObject(Cursor, String[], int[])
      */
     public static JSONArray toJSONArray(Cursor cursor, String... columnNames) {
-        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
+        DebugUtils.__checkError(cursor == null || columnNames == null, "Invalid parameters - cursor == null || columnNames == null");
         final JSONArray result = new JSONArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -428,8 +428,8 @@ public final class DatabaseUtils {
      * @see #toJSONArray(Cursor, String[])
      */
     public static JSONObject toJSONObject(Cursor cursor, String[] names, int... columnIndexes) {
-        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
+        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "Invalid parameters - cursor == null || columnIndexes == null || names == null");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "Invalid parameters - columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
         final JSONObject result = new JSONObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];
@@ -466,7 +466,7 @@ public final class DatabaseUtils {
      * @see #writeCursorRow(JsonWriter, Cursor, String[], int[])
      */
     public static JsonWriter writeCursor(JsonWriter writer, Cursor cursor, String... columnNames) throws IOException {
-        DebugUtils.__checkError(cursor == null || columnNames == null, "cursor == null || columnNames == null");
+        DebugUtils.__checkError(cursor == null || columnNames == null, "Invalid parameters - cursor == null || columnNames == null");
         writer.beginArray();
         if (cursor.getCount() > 0) {
             // Gets the column indexes from column names.
@@ -498,8 +498,8 @@ public final class DatabaseUtils {
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, String[] names, int... columnIndexes) throws IOException {
-        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
+        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "Invalid parameters - cursor == null || columnIndexes == null || names == null");
+        DebugUtils.__checkError(columnIndexes.length != names.length, "Invalid parameters - columnIndexes.length(" + columnIndexes.length + ") != names.length(" + names.length + ")");
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];

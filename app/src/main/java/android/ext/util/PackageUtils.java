@@ -95,7 +95,7 @@ public final class PackageUtils {
      * @param packageFile The location of the package file to install.
      */
     public static void installPackage(Context context, String authority, File packageFile) {
-        DebugUtils.__checkError(packageFile == null, "packageFile == null");
+        DebugUtils.__checkError(packageFile == null, "Invalid parameters - packageFile == null");
         final Uri packageUri;
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         if (Build.VERSION.SDK_INT < 24) {
@@ -241,7 +241,7 @@ public final class PackageUtils {
          */
         @SuppressWarnings("deprecation")
         public PackageItemIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
-            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "The info.publicSourceDir is empty");
+            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "Invalid parameter - info.publicSourceDir == null || info.publicSourceDir.length() == 0");
             final Resources res = pm.getResourcesForApplication(info);
             try {
                 this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());

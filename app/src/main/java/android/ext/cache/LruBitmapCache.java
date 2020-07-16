@@ -17,21 +17,9 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
     /**
      * Constructor
      * @param maxSize The maximum the number of bytes to allow in this cache.
-     * @see #LruBitmapCache(float)
      */
     public LruBitmapCache(int maxSize) {
         super(maxSize);
-    }
-
-    /**
-     * Constructor
-     * @param scaleMemory The scale of memory, expressed as a percentage
-     * of this application maximum memory of the current device.
-     * @see #LruBitmapCache(int)
-     */
-    public LruBitmapCache(float scaleMemory) {
-        super((int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f));
-        DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "scaleMemory(" + scaleMemory + ") >= 1.0");
     }
 
     @Override

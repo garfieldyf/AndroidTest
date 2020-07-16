@@ -130,7 +130,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     @Override
     public void write(byte[] buffer) {
-        DebugUtils.__checkError(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "Invalid parameter - buffer == null");
         write(buffer, 0, buffer.length);
     }
 
@@ -154,7 +154,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #readFrom(InputStream, int, Cancelable)
      */
     public final void readFrom(ByteBuffer buffer) {
-        DebugUtils.__checkError(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "Invalid parameter - buffer == null");
         final int count = buffer.remaining();
         if (count > 0) {
             expandCapacity(count, false);
@@ -174,7 +174,7 @@ public final class ByteArrayBuffer extends OutputStream {
      */
     public final void readFrom(InputStream is, int contentLength, Cancelable cancelable) throws IOException {
         // Expands this buffer capacity.
-        DebugUtils.__checkError(is == null, "is == null");
+        DebugUtils.__checkError(is == null, "Invalid parameter - is == null");
         expandCapacity(contentLength, false);
         cancelable = Cancelable.ofNullable(cancelable);
 
@@ -205,7 +205,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #writeTo(OutputStream)
      */
     public final ByteBuffer writeTo(ByteBuffer buffer) {
-        DebugUtils.__checkError(buffer == null, "buffer == null");
+        DebugUtils.__checkError(buffer == null, "Invalid parameter - buffer == null");
         return buffer.put(data, 0, size);
     }
 
@@ -216,7 +216,7 @@ public final class ByteArrayBuffer extends OutputStream {
      * @see #writeTo(ByteBuffer)
      */
     public final void writeTo(OutputStream out) throws IOException {
-        DebugUtils.__checkError(out == null, "out == null");
+        DebugUtils.__checkError(out == null, "Invalid parameter - out == null");
         out.write(data, 0, size);
     }
 

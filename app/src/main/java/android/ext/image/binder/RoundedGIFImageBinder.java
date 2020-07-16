@@ -82,7 +82,7 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
      * @param oneShot <tt>true</tt> if the animation should only play once.
      */
     public static void setViewImage(ImageView view, GIFImage image, float[] radii, boolean autoStart, boolean oneShot) {
-        DebugUtils.__checkError(image == null, "image == null");
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof RoundedGIFDrawable) {
             // Sets the RoundedGIFDrawable's internal image.

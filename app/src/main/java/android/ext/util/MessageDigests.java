@@ -152,7 +152,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, int offset, int count, Algorithm algorithm) {
-        DebugUtils.__checkError(data == null || algorithm == null, "data == null || algorithm == null");
+        DebugUtils.__checkError(data == null || algorithm == null, "Invalid parameters - data == null || algorithm == null");
         ArrayUtils.checkRange(offset, count, data.length);
         final byte[] result = new byte[algorithm.digestLength];
         computeByteArray(data, offset, count, result, 0, algorithm.ordinal());
@@ -174,7 +174,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, Algorithm)
      */
     public static int computeByteArray(byte[] data, int dataOffset, int dataCount, byte[] result, int offset, Algorithm algorithm) {
-        DebugUtils.__checkError(data == null || result == null || algorithm == null, "data == null || result == null || algorithm == null");
+        DebugUtils.__checkError(data == null || result == null || algorithm == null, "Invalid parameters - data == null || result == null || algorithm == null");
         ArrayUtils.checkRange(dataOffset, dataCount, data.length);
         ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
         return computeByteArray(data, dataOffset, dataCount, result, offset, algorithm.ordinal());

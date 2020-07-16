@@ -55,19 +55,19 @@ public final class Caches {
 
         @Override
         public Object remove(Object key) {
-            DebugUtils.__checkError(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
             return null;
         }
 
         @Override
         public Object get(Object key) {
-            DebugUtils.__checkError(key == null, "key == null");
+            DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
             return null;
         }
 
         @Override
         public Object put(Object key, Object value) {
-            DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
+            DebugUtils.__checkError(key == null || value == null, "Invalid parameters - key == null || value == null");
             return null;
         }
     }
@@ -94,7 +94,7 @@ public final class Caches {
 
         @Override
         public void put(Bitmap bitmap) {
-            DebugUtils.__checkError(bitmap == null, "bitmap == null");
+            DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
             DebugUtils.__checkWarning(bitmap.isRecycled(), "EmptyBitmapPool", "The " + bitmap + " is recycled, couldn't recycle to reused.");
             DebugUtils.__checkWarning(!bitmap.isMutable(), "EmptyBitmapPool", "The " + bitmap + " is immutable, couldn't recycle to reused.");
         }

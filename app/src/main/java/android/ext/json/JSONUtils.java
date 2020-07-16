@@ -152,7 +152,7 @@ public final class JSONUtils {
      * @see #parse(byte[], int, int, Cancelable)
      */
     public static <T> T parse(String json, Cancelable cancelable) throws IOException {
-        DebugUtils.__checkError(json == null, "json == null");
+        DebugUtils.__checkError(json == null, "Invalid parameter - json == null");
         return parse(new JsonReader(new StringReader(json)), cancelable);
     }
 

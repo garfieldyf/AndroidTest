@@ -151,7 +151,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected final void onRecycle(Object[] params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + PARAMS_LENGTH);
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "Invalid parameter - params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + PARAMS_LENGTH);
         Arrays.fill(params, null);  // Prevent memory leak.
         mModule.mParamsPool.recycle(params);
     }
@@ -205,7 +205,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * match the "http", "https" and "ftp".
      */
     private static boolean matchScheme(String uri) {
-        DebugUtils.__checkError(uri == null, "uri == null");
+        DebugUtils.__checkError(uri == null, "Invalid parameter - uri == null");
         return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
     }
 
@@ -419,7 +419,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //         * preloads the image with the arguments supplied to this request.
 //         */
 //        public final void preload() {
-//            DebugUtils.__checkError(mUri == null, "uri == null");
+//            DebugUtils.__checkError(mUri == null, "Invalid parameter - uri == null");
 //            DebugUtils.__checkWarning(getCache() == Caches.emptyCache(), "ImageLoader", "The image cache is empty, Calling the preload has no effect.");
 //            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "ImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, Calling the preload has no effect.");
 //            if (getCache() != Caches.emptyCache() && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {

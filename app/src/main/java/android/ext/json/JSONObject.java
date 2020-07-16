@@ -48,7 +48,7 @@ public class JSONObject extends HashMap<String, Object> {
     @Override
     public JSONObject put(String name, Object value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         super.put(name, value);
         return this;
     }
@@ -61,7 +61,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     public JSONObject put(String name, int value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         super.put(name, value);
         return this;
     }
@@ -74,7 +74,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     public JSONObject put(String name, long value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         super.put(name, value);
         return this;
     }
@@ -87,7 +87,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     public JSONObject put(String name, boolean value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         super.put(name, value);
         return this;
     }
@@ -101,7 +101,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     public JSONObject put(String name, float value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         super.put(name, value);
         return this;
@@ -116,7 +116,7 @@ public class JSONObject extends HashMap<String, Object> {
      */
     public JSONObject put(String name, double value) {
         __checkMutable();
-        DebugUtils.__checkError(name == null, "name == null");
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         super.put(name, value);
         return this;

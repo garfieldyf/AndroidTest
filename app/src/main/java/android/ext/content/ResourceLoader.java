@@ -125,7 +125,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
      */
     public final void load(Key key, LoadParams<Key, Result> loadParams, OnLoadCompleteListener<Key, Result> listener, Object cookie) {
         DebugUtils.__checkUIThread("load");
-        DebugUtils.__checkError(key == null || loadParams == null || listener == null, "key == null || loadParams == null || listener == null");
+        DebugUtils.__checkError(key == null || loadParams == null || listener == null, "Invalid parameters - key == null || loadParams == null || listener == null");
         if (mState != SHUTDOWN) {
             final Task task = mRunningTasks.get(key);
             DebugUtils.__checkDebug(task != null && !task.isCancelled(), "ResourceLoader", "The task is already running - key = " + key);

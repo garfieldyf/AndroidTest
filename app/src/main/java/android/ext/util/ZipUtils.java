@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import android.ext.util.FileUtils.Dirent;
 import android.ext.util.Pools.ByteArrayPool;
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +10,6 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.zip.CRC32;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;

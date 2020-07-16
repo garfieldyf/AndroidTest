@@ -86,7 +86,7 @@ public final class ArrayUtils {
      * @see #indexOf(Object[], int, int, Object)
      */
     public static int indexOf(Object[] array, Object value) {
-        DebugUtils.__checkError(array == null, "array == null");
+        DebugUtils.__checkError(array == null, "Invalid parameter - array == null");
         return indexOf(array, 0, array.length, value);
     }
 
@@ -102,7 +102,7 @@ public final class ArrayUtils {
      * @see #indexOf(Object[], Object)
      */
     public static int indexOf(Object[] array, int start, int end, Object value) {
-        DebugUtils.__checkError(array == null, "array == null");
+        DebugUtils.__checkError(array == null, "Invalid parameter - array == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (; start < end; ++start) {
@@ -133,7 +133,7 @@ public final class ArrayUtils {
      * @see #indexOf(List, int, int, Filter)
      */
     public static <T> int indexOf(T[] array, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkError(array == null || filter == null, "array == null || filter == null");
+        DebugUtils.__checkError(array == null || filter == null, "Invalid parameters - array == null || filter == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         for (; start < end; ++start) {
             if (filter.accept(array[start])) {
@@ -156,7 +156,7 @@ public final class ArrayUtils {
      * @see #indexOf(T[], int, int, Filter)
      */
     public static <T> int indexOf(List<T> list, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkError(list == null || filter == null, "list == null || filter == null");
+        DebugUtils.__checkError(list == null || filter == null, "Invalid parameters - list == null || filter == null");
         DebugUtils.__checkRange(start, end - start, list.size());
         final ListIterator<T> itor = list.listIterator(start);
         for (; start < end; ++start) {
@@ -178,7 +178,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(Object[], int, int, Object)
      */
     public static int lastIndexOf(Object[] array, Object value) {
-        DebugUtils.__checkError(array == null, "array == null");
+        DebugUtils.__checkError(array == null, "Invalid parameter - array == null");
         return lastIndexOf(array, 0, array.length, value);
     }
 
@@ -194,7 +194,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(Object[], Object)
      */
     public static int lastIndexOf(Object[] array, int start, int end, Object value) {
-        DebugUtils.__checkError(array == null, "array == null");
+        DebugUtils.__checkError(array == null, "Invalid parameter - array == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         if (value != null) {
             for (--end; end >= start; --end) {
@@ -225,7 +225,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(List, int, int, Filter)
      */
     public static <T> int lastIndexOf(T[] array, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkError(array == null || filter == null, "array == null || filter == null");
+        DebugUtils.__checkError(array == null || filter == null, "Invalid parameters - array == null || filter == null");
         DebugUtils.__checkRange(start, end - start, array.length);
         for (--end; end >= start; --end) {
             if (filter.accept(array[end])) {
@@ -248,7 +248,7 @@ public final class ArrayUtils {
      * @see #lastIndexOf(T[], int, int, Filter)
      */
     public static <T> int lastIndexOf(List<T> list, int start, int end, Filter<? super T> filter) {
-        DebugUtils.__checkError(list == null || filter == null, "list == null || filter == null");
+        DebugUtils.__checkError(list == null || filter == null, "Invalid parameters - list == null || filter == null");
         DebugUtils.__checkRange(start, end - start, list.size());
         final ListIterator<T> itor = list.listIterator(end);
         for (; start < end; ++start) {
@@ -293,7 +293,7 @@ public final class ArrayUtils {
      * @see #equals(byte[], int, byte[], int, int)
      */
     public static boolean equals(int[] array1, int offset1, int[] array2, int offset2, int length) {
-        DebugUtils.__checkError(array1 == null || array2 == null, "array1 == null || array2 == null");
+        DebugUtils.__checkError(array1 == null || array2 == null, "Invalid parameters - array1 == null || array2 == null");
         DebugUtils.__checkRange(offset1, length, array1.length);
         DebugUtils.__checkRange(offset2, length, array2.length);
         for (int i = 0; i < length; ++i) {
@@ -316,7 +316,7 @@ public final class ArrayUtils {
      * @see #equals(int[], int, int[], int, int)
      */
     public static boolean equals(byte[] array1, int offset1, byte[] array2, int offset2, int length) {
-        DebugUtils.__checkError(array1 == null || array2 == null, "array1 == null || array2 == null");
+        DebugUtils.__checkError(array1 == null || array2 == null, "Invalid parameters - array1 == null || array2 == null");
         DebugUtils.__checkRange(offset1, length, array1.length);
         DebugUtils.__checkRange(offset2, length, array2.length);
         for (int i = 0; i < length; ++i) {
@@ -356,7 +356,7 @@ public final class ArrayUtils {
      * @see #insert(LinkedList, T, Comparator)
      */
     public static <T extends Comparable<? super T>> void insert(LinkedList<T> list, T value) {
-        DebugUtils.__checkError(list == null, "list == null");
+        DebugUtils.__checkError(list == null, "Invalid parameter - list == null");
         final T last = list.peekLast();
         if (last == null || value.compareTo(last) >= 0) {
             list.addLast(value);
@@ -385,7 +385,7 @@ public final class ArrayUtils {
      * @see #insert(LinkedList, T)
      */
     public static <T> void insert(LinkedList<? extends T> list, T value, Comparator<? super T> comparator) {
-        DebugUtils.__checkError(list == null || comparator == null, "list == null || comparator == null");
+        DebugUtils.__checkError(list == null || comparator == null, "Invalid parameters - list == null || comparator == null");
         final T last = list.peekLast();
         if (last == null || comparator.compare(value, last) >= 0) {
             ((LinkedList<T>)list).addLast(value);
@@ -424,8 +424,8 @@ public final class ArrayUtils {
      * @return The new array.
      */
     public static <T> T copyOf(Object srcArray, int copyLength, int newLength) {
-        DebugUtils.__checkError(srcArray == null, "srcArray == null");
-        DebugUtils.__checkError(newLength < copyLength, "newLength = " + newLength + " < copyLength = " + copyLength);
+        DebugUtils.__checkError(srcArray == null, "Invalid parameter - srcArray == null");
+        DebugUtils.__checkError(newLength < copyLength, "Invalid parameter - newLength(" + newLength + ") < copyLength(" + copyLength + ")");
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
         System.arraycopy(srcArray, 0, newArray, 0, copyLength);
         return (T)newArray;

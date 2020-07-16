@@ -25,7 +25,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
      * @param maxSize The maximum number of bitmaps to allow in this pool.
      */
     public LinkedBitmapPool(int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
+        DebugUtils.__checkError(maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") <= 0");
         mMaxSize = maxSize;
         mBitmaps = new LinkedList<Bitmap>();
     }
@@ -51,7 +51,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
 
     @Override
     public synchronized void put(Bitmap bitmap) {
-        DebugUtils.__checkError(bitmap == null, "bitmap == null");
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
         DebugUtils.__checkWarning(bitmap.isRecycled(), "LinkedBitmapPool", "The " + bitmap + " is recycled, couldn't recycle to reused.");
         DebugUtils.__checkWarning(!bitmap.isMutable(), "LinkedBitmapPool", "The " + bitmap + " is immutable, couldn't recycle to reused.");
         if (bitmap.isMutable() && !bitmap.isRecycled()) {

@@ -23,7 +23,7 @@ public class ImageSpan extends ReplacementSpan {
      * @see #ImageSpan(Resources, int)
      */
     public ImageSpan(Drawable drawable) {
-        DebugUtils.__checkError(drawable == null, "drawable == null");
+        DebugUtils.__checkError(drawable == null, "Invalid parameter - drawable == null");
         mDrawable = drawable;
     }
 

@@ -26,7 +26,7 @@ public final class Pages {
      * @see PageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPage(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition(" + combinedPosition + ") < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") < 0");
         return (int)(combinedPosition >> 32);
     }
 
@@ -38,7 +38,7 @@ public final class Pages {
      * @see PageAdapter#getPageForPosition(int)
      */
     public static int getOriginalPosition(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "combinedPosition(" + combinedPosition + ") < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") < 0");
         return (int)combinedPosition;
     }
 
@@ -78,7 +78,7 @@ public final class Pages {
          */
         @SuppressWarnings({ "unchecked", "rawtypes" })
         public ListPage(List data) {
-            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.size() == 0");
+            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "Invalid parameter - data == null || data.size() == 0");
             mData = data;
         }
 
@@ -113,7 +113,7 @@ public final class Pages {
          */
         @SuppressWarnings("unchecked")
         public ArrayPage(E... data) {
-            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "data == null || data.length == 0");
+            DebugUtils.__checkError(ArrayUtils.getSize(data) == 0, "Invalid parameter - data == null || data.length == 0");
             mData = data;
         }
 

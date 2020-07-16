@@ -29,7 +29,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * @param maxSize The maximum number of values to allow in this cache.
      */
     public SimpleLruCache(int maxSize) {
-        DebugUtils.__checkError(maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
+        DebugUtils.__checkError(maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") <= 0");
         this.maxSize = maxSize;
         this.map = new LinkedHashMap<K, V>(0, 0.75f, true);
     }
@@ -62,7 +62,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     @Override
     public V get(K key) {
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         return map.get(key);
     }
 
@@ -76,7 +76,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        DebugUtils.__checkError(key == null || value == null, "key == null || value == null");
+        DebugUtils.__checkError(key == null || value == null, "Invalid parameters - key == null || value == null");
         final V previous = putImpl(key, value);
         if (previous != null) {
             entryRemoved(false, key, previous, value);
@@ -88,7 +88,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     @Override
     public V remove(K key) {
-        DebugUtils.__checkError(key == null, "key == null");
+        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         final V previous = removeImpl(key);
         if (previous != null) {
             entryRemoved(false, key, previous, null);

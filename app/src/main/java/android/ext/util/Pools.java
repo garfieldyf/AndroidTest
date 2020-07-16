@@ -200,7 +200,7 @@ public final class Pools {
          * @see #obtain()
          */
         public final void recycle(E element) {
-            DebugUtils.__checkError(element == null, "element == null");
+            DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
             referent.set(element);
         }
 
@@ -225,7 +225,7 @@ public final class Pools {
          * @param maxSize The maximum number of elements to allow in this pool.
          */
         public ArrayPool(Factory<E> factory, int maxSize) {
-            DebugUtils.__checkError(factory == null || maxSize <= 0, "maxSize(" + maxSize + ") <= 0");
+            DebugUtils.__checkError(factory == null || maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") <= 0");
             this.factory  = factory;
             this.elements = new Object[maxSize];
         }
@@ -255,7 +255,7 @@ public final class Pools {
 
         @Override
         public void recycle(E element) {
-            DebugUtils.__checkError(element == null, "element == null");
+            DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
             __checkInPool(element);
             if (size < elements.length) {
                 elements[size++] = element;
@@ -306,7 +306,7 @@ public final class Pools {
          */
         public SynchronizedPool(Pool<E> pool) {
             this.pool = pool;
-            DebugUtils.__checkError(pool == null, "pool == null");
+            DebugUtils.__checkError(pool == null, "Invalid parameter - pool == null");
         }
 
         @Override

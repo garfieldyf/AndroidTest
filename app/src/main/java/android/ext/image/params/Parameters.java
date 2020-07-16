@@ -72,7 +72,7 @@ public class Parameters {
      * @param config The {@link Config} to decode.
      */
     protected Parameters(Object value, Config config) {
-        DebugUtils.__checkError(config == null, "config == null");
+        DebugUtils.__checkError(config == null, "Invalid parameter - config == null");
         this.value  = value;
         this.config = config;
     }

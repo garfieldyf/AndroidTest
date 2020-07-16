@@ -4,7 +4,6 @@ import static android.ext.image.ImageModule.PARAMETERS;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
-import android.ext.cache.LruCache;
 
 /**
  * Class <tt>IconLoader</tt> allows to load the icon associated with the
@@ -29,17 +28,7 @@ public final class IconLoader<URI> extends ImageLoader<URI, Object> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
-     * @see #IconLoader(ImageModule, Cache)
-     */
-    public IconLoader(ImageModule<?, ?> module) {
-        this(module, new LruCache<URI, Object>(64));
-    }
-
-    /**
-     * Constructor
-     * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
-     * @see #IconLoader(ImageModule)
      */
     public IconLoader(ImageModule<?, ?> module, Cache<URI, Object> iconCache) {
         super(module, iconCache);

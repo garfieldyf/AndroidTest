@@ -369,7 +369,16 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             return new ContactPhotoDecoder(this, bitmapPool);
 
         default:
-            return ClassUtils.newInstance(className, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
+            return createImageDecoder(className, bitmapPool);
+        }
+    }
+
+    private ImageLoader.ImageDecoder createImageDecoder(String className, BitmapPool bitmapPool) throws ReflectiveOperationException {
+        final Class<ImageLoader.ImageDecoder> clazz = (Class<ImageLoader.ImageDecoder>)Class.forName(className);
+        try {
+            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
+        } catch (NoSuchMethodException e) {
+            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class }, this);
         }
     }
 

@@ -126,6 +126,7 @@ public class ThreadPoolManager extends ThreadPool {
 
     @Override
     protected void beforeExecute(Thread thread, Runnable target) {
+        DebugUtils.__checkError(!(target instanceof Task), "Cannot execute " + target + ", The task must be " + Task.class.getName());
         synchronized (mRunningTasks) {
             mRunningTasks.add((Task)target);
         }
@@ -133,6 +134,7 @@ public class ThreadPoolManager extends ThreadPool {
 
     @Override
     protected void afterExecute(Runnable target, Throwable throwable) {
+        DebugUtils.__checkError(!(target instanceof Task), "Cannot execute " + target + ", The task must be " + Task.class.getName());
         synchronized (mRunningTasks) {
             mRunningTasks.remove(target);
         }

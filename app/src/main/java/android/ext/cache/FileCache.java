@@ -1,7 +1,6 @@
 package android.ext.cache;
 
 import java.io.File;
-import java.util.concurrent.Executor;
 
 /**
  * A <tt>FileCache</tt> is a data structure consisting of a set of
@@ -48,10 +47,9 @@ public interface FileCache {
     /**
      * Trim this cache to the appropriate level. Typically called on the
      * {@link android.content.ComponentCallbacks2#onTrimMemory(int)}.
-     * @param executor The {@link Executor}.
      * @param level The integer represents a trim level as specified in
      * {@link android.content.ComponentCallbacks2}.
      */
-    default void trimMemory(Executor executor, int level) {
+    default void trimMemory(int level) {
     }
 }

@@ -2,13 +2,14 @@ package android.ext.image.params;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.support.AppCompat;
+import android.ext.graphics.BitmapUtils;
 import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.util.Printer;
 
 /**
@@ -103,7 +104,7 @@ public class Parameters {
      */
     public int computeByteCount(Options opts) {
         DebugUtils.__checkError(opts.inSampleSize <= 0 || opts.outWidth <= 0 || opts.outHeight <= 0, "opts.inSampleSize(" + opts.inSampleSize + ") <= 0 || opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
-        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * AppCompat.getBytesPerPixel(opts);
+        return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * getBytesPerPixel(opts);
     }
 
     public void dump(Printer printer, StringBuilder result) {
@@ -119,7 +120,7 @@ public class Parameters {
      */
     /* package */ final int computeByteCountImpl(Options opts) {
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
-        final int byteCount = AppCompat.getBytesPerPixel(opts);
+        final int byteCount = getBytesPerPixel(opts);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);
         } else {
@@ -150,5 +151,18 @@ public class Parameters {
 
     private static int fixSampleSize(int sampleSize) {
         return (sampleSize <= 1 ? 1 : (sampleSize <= 8 ? Integer.highestOneBit(sampleSize) : (sampleSize / 8 * 8)));
+    }
+
+    private static int getBytesPerPixel(Options opts) {
+        Parameters.__checkOptions(opts);
+        DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
+        return BitmapUtils.getBytesPerPixel(Build.VERSION.SDK_INT >= 26 && opts.outConfig != null ? opts.outConfig : opts.inPreferredConfig);
+    }
+
+    private static void __checkOptions(Options opts) {
+        if (Build.VERSION.SDK_INT >= 26) {
+            Log.d("Parameters", "getBytesPerPixel - outConfig = " + opts.outConfig);
+            DebugUtils.__checkError(opts.outConfig == null && opts.inPreferredConfig == null, "opts.outConfig == null && opts.inPreferredConfig == null");
+        }
     }
 }

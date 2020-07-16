@@ -13,10 +13,14 @@ import android.ext.util.ArrayUtils.Filter;
 import android.ext.util.FileUtils.Dirent;
 import android.ext.util.FileUtils.ScanCallback;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
+import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Printer;
 import java.io.Closeable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -81,6 +85,30 @@ public final class PackageUtils {
      */
     public static boolean isUpdatedSystemApp(ApplicationInfo ai) {
         return ((ai.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0);
+    }
+
+    /**
+     * Install a package with the specified <em>packageFile</em>.
+     * @param context The <tt>Context</tt>.
+     * @param authority The authority of a {@link FileProvider} defined
+     * in a <tt>&lt;provider&gt;</tt> element in your app's manifest.
+     * @param packageFile The location of the package file to install.
+     */
+    public static void installPackage(Context context, String authority, File packageFile) {
+        DebugUtils.__checkError(packageFile == null, "packageFile == null");
+        final Uri packageUri;
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        if (Build.VERSION.SDK_INT < 24) {
+            packageUri = Uri.fromFile(packageFile);
+        } else {
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            packageUri = FileProvider.getUriForFile(context, authority, packageFile);
+        }
+
+        DebugUtils.__checkDebug(true, "PackageUtils", "path = " + packageFile + ", uri = " + packageUri);
+        intent.setDataAndType(packageUri, "application/vnd.android.package-archive");
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 
     /**

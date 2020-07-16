@@ -4,7 +4,6 @@ import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
-import android.ext.support.AppCompat;
 import android.ext.util.DebugUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
@@ -76,9 +75,32 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
         } finally {
-            AppCompat.clearForRecycle(opts);
-            mModule.mOptionsPool.recycle(opts);
+            recycleOptions(opts);
         }
+    }
+
+    private void recycleOptions(Options opts) {
+        opts.inBitmap  = null;
+        opts.inDensity = 0;
+        opts.outWidth  = 0;
+        opts.outHeight = 0;
+        opts.inScaled  = true;
+        opts.inMutable = false;
+        opts.inSampleSize  = 0;
+        opts.outMimeType   = null;
+        opts.inTempStorage = null;
+        opts.inTargetDensity = 0;
+        opts.inScreenDensity = 0;
+        opts.inJustDecodeBounds = false;
+        opts.inPreferredConfig  = Config.ARGB_8888;
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            opts.outConfig = null;
+            opts.outColorSpace = null;
+            opts.inPreferredColorSpace = null;
+        }
+
+        mModule.mOptionsPool.recycle(opts);
     }
 
     private static void __checkOptions(Options opts) {

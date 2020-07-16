@@ -250,7 +250,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         if (mFileCache != null) {
-            mFileCache.trimMemory(level);
+            mFileCache.trimMemory(mExecutor, level);
         }
 
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
@@ -522,18 +522,17 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          */
         public final ImageModule<URI, Image> build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, 4));
-            final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
-            return new ImageModule(mContext, executor, createImageCache(), createFileCache(executor));
+            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(), createFileCache());
         }
 
-        private FileCache createFileCache(Executor executor) {
+        private FileCache createFileCache() {
             if (mFileCache == null) {
                 return null;
             } else if (mFileCache instanceof FileCache) {
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
             }
         }
 

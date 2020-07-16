@@ -18,19 +18,16 @@ import java.util.concurrent.Executor;
 public final class LruFileCache implements FileCache, Runnable, Comparator<File> {
     private final int mMaxSize;
     private final File mCacheDir;
-    private final Executor mExecutor;
 
     /**
      * Constructor
-     * @param executor The {@link Executor}.
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
      */
-    public LruFileCache(Executor executor, File cacheDir, int maxSize) {
+    public LruFileCache(File cacheDir, int maxSize) {
         DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
-        mExecutor = executor;
     }
 
     /**
@@ -88,11 +85,11 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     }
 
     @Override
-    public void trimMemory(int level) {
+    public void trimMemory(Executor executor, int level) {
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             // The app's UI is no longer visible.
             // Remove the oldest files of this cache.
-            mExecutor.execute(this);
+            executor.execute(this);
         }
     }
 

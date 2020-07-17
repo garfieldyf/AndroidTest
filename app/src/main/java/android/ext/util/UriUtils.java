@@ -18,6 +18,22 @@ public final class UriUtils {
     public static final String SCHEME_ANDROID_ASSET = "android.asset";
 
     /**
+     * Returns the scheme with the specified <em>uri</em>. Example: "http".
+     * @param uri The uri to parse.
+     * @return The scheme or <tt>null</tt> if the <em>uri</em> has no scheme.
+     */
+    public static String parseScheme(Object uri) {
+        DebugUtils.__checkError(uri == null, "Invalid parameter - uri == null");
+        if (uri instanceof Uri) {
+            return ((Uri)uri).getScheme();
+        } else {
+            final String uriString = uri.toString();
+            final int index = uriString.indexOf("://");
+            return (index != -1 ? uriString.substring(0, index) : null);
+        }
+    }
+
+    /**
      * Opens an <tt>InputStream</tt> from the specified <em>uri</em>.
      * <h3>The default implementation accepts the following URI schemes:</h3>
      * <ul><li>path (no scheme)</li>
@@ -54,25 +70,6 @@ public final class UriUtils {
     }
 
     /**
-     * Returns the scheme with the specified <em>uri</em>. Example: "http".
-     * @param uri The uri to parse.
-     * @return The scheme or <tt>null</tt> if the <em>uri</em> has no scheme.
-     * @see #getFileUri(String)
-     * @see #getAssetUri(String)
-     * @see #getResourceUri(String, Object)
-     */
-    public static String parseScheme(Object uri) {
-        DebugUtils.__checkError(uri == null, "Invalid parameter - uri == null");
-        if (uri instanceof Uri) {
-            return ((Uri)uri).getScheme();
-        } else {
-            final String uriString = uri.toString();
-            final int index = uriString.indexOf("://");
-            return (index != -1 ? uriString.substring(0, index) : null);
-        }
-    }
-
-    /**
      * Constructs a scheme is "file" uri from a <em>path</em>.
      * @param path The file path.
      * @return A {@link Uri} for the given <em>path</em>.
@@ -99,7 +96,7 @@ public final class UriUtils {
      * Constructs a scheme is "file" uri string. The returned
      * string such as <tt>"file:///sdcard/docs/home.html"</tt>.
      * @param path The file path.
-     * @return The uri string.
+     * @return A uri {@link String} for the given <em>path</em>.
      */
     public static String getFileUri(String path) {
         DebugUtils.__checkError(path == null, "Invalid parameter - path == null");
@@ -110,7 +107,7 @@ public final class UriUtils {
      * Constructs a scheme is "android.asset" uri string. The returned string such as
      * <tt>"android.asset://docs/home.html"</tt>.
      * @param filename A relative path within the assets, such as <tt>"docs/home.html"</tt>.
-     * @return The uri string.
+     * @return A uri {@link String} for the given <em>filename</em>.
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "Invalid parameter - filename == null");
@@ -122,11 +119,12 @@ public final class UriUtils {
      * @param context The <tt>Context</tt>.
      * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return The uri string.
+     * @return A uri {@link String} for the given <em>resource</em>.
      * @see #getResourceUri(String, Object)
      */
     public static String getResourceUri(Context context, Object resource) {
-        return getResourceUri(context.getPackageName(), resource);
+        DebugUtils.__checkError(context == null || resource == null, "Invalid parameters - context == null || resource == null");
+        return (SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + resource);
     }
 
     /**
@@ -135,7 +133,7 @@ public final class UriUtils {
      * @param packageName The application's package name.
      * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return The uri string.
+     * @return A uri {@link String} for the given <em>resource</em>.
      * @see #getResourceUri(Context, Object)
      */
     public static String getResourceUri(String packageName, Object resource) {

@@ -1,9 +1,12 @@
 package android.ext.image;
 
 import static android.ext.image.ImageModule.PARAMETERS;
+import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
+import android.graphics.drawable.Drawable;
+import android.widget.ImageView;
 
 /**
  * Class <tt>IconLoader</tt> allows to load the icon associated with the
@@ -38,5 +41,15 @@ public final class IconLoader<URI> extends ImageLoader<URI, Object> {
     @Override
     protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
         return ((ResolveInfo)params[PARAMETERS]).loadIcon(mPackageManager);
+    }
+
+    @Override
+    public void bindValue(URI uri, Object[] params, Object target, Object value, int state) {
+        final ImageView view = (ImageView)target;
+        if (value != null) {
+            view.setImageDrawable((Drawable)value);
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+        }
     }
 }

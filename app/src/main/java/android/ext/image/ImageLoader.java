@@ -128,10 +128,8 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     @Override
     public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
-        if (value instanceof Bitmap) {
+        if (value != null) {
             view.setImageBitmap((Bitmap)value);
-        } else if (value instanceof Drawable) {
-            view.setImageDrawable((Drawable)value);
         } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
             view.setImageDrawable(getPlaceholder(view.getResources(), params));
         }

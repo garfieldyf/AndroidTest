@@ -30,7 +30,7 @@
         <istrue value="${compile_barcode}" />
     </condition>
 
-    <condition property="max.pool.size" value="${max_pool_size}" else="48">
+    <condition property="max.pool.size" value="${max_pool_size}" else="32">
         <isset property="max_pool_size" />
     </condition>
 
@@ -56,7 +56,7 @@
 
         <!-- replace ImageModule.MAX_POOL_SIZE -->
         <echo level="info">Replace MAX_POOL_SIZE = ${max.pool.size} in the ImageModule.java</echo>
-        <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_POOL_SIZE = 48;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" encoding="UTF-8" />
+        <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" encoding="UTF-8" />
     </target>
 
     <!-- target -remove-foucs-if -->

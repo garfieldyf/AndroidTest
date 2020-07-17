@@ -68,7 +68,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /**
      * The maximum number of tasks.
      */
-    private static final int MAX_POOL_SIZE = 48;
+    private static final int MAX_POOL_SIZE = 32;
 
     /**
      * The application <tt>Context</tt>.

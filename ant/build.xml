@@ -154,6 +154,7 @@
             <fileset dir="${basedir}">
                 <exclude name="*.xml" />
                 <exclude name="*.bat" />
+                <exclude name="*.txt" />
                 <exclude name="**/out/**" />
             </fileset>
         </delete>

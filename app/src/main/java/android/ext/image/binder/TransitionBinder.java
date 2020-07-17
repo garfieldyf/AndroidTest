@@ -4,8 +4,8 @@ import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.ReflectUtils;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -56,9 +56,9 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
      */
     public TransitionBinder(Context context, AttributeSet attrs) {
         final String packageName = context.getPackageName();
-        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "TransitionBinder"));
-        mCrossFade = a.getBoolean(ClassUtils.getFieldValue(packageName, "TransitionBinder_crossFade"), false);
-        mDuration  = a.getInt(ClassUtils.getFieldValue(packageName, "TransitionBinder_android_duration"), 300);
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(packageName, "TransitionBinder"));
+        mCrossFade = a.getBoolean(ReflectUtils.getFieldValue(packageName, "TransitionBinder_crossFade"), false);
+        mDuration  = a.getInt(ReflectUtils.getFieldValue(packageName, "TransitionBinder_android_duration"), 300);
         a.recycle();
     }
 

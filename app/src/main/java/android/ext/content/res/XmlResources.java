@@ -14,7 +14,7 @@ import android.ext.image.binder.TransitionBinder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.ScaleParameters;
 import android.ext.image.params.SizeParameters;
-import android.ext.util.ClassUtils;
+import android.ext.util.ReflectUtils;
 import android.ext.util.DebugUtils;
 import android.util.AttributeSet;
 import android.util.Xml;
@@ -178,7 +178,7 @@ public final class XmlResources {
             return new RoundedTransitionBinder(context, attrs);
 
         default:
-            return ClassUtils.newInstance(name, new Class[] { Context.class, AttributeSet.class }, context, attrs);
+            return ReflectUtils.newInstance(name, new Class[] { Context.class, AttributeSet.class }, context, attrs);
         }
     }
 

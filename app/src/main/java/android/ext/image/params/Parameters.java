@@ -3,8 +3,8 @@ package android.ext.image.params;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
-import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.ReflectUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.os.Build;
@@ -60,9 +60,9 @@ public class Parameters {
      */
     public Parameters(Context context, AttributeSet attrs) {
         final String packageName = context.getPackageName();
-        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "Parameters"));
-        this.value  = fixSampleSize(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
-        this.config = parseConfig(a.getInt(ClassUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(packageName, "Parameters"));
+        this.value  = fixSampleSize(a.getInt(ReflectUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
+        this.config = parseConfig(a.getInt(ReflectUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888));
         a.recycle();
     }
 

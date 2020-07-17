@@ -2,8 +2,8 @@ package android.ext.focus;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.util.ClassUtils;
 import android.ext.util.Pools.RectPool;
+import android.ext.util.ReflectUtils;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -34,7 +34,7 @@ public final class FocusDrawable {
      * @see #FocusDrawable(Drawable)
      */
     public FocusDrawable(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(context.getPackageName(), "FocusDrawable"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(context.getPackageName(), "FocusDrawable"));
         mDrawable = a.getDrawable(0 /* R.styleable.FocusDrawable_focus */);
         a.recycle();
     }

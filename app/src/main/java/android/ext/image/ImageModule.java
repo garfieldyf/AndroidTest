@@ -30,13 +30,13 @@ import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
 import android.ext.util.ArrayUtils;
-import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.ext.util.ReflectUtils;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.drawable.Drawable;
 import android.os.Process;
@@ -258,9 +258,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
         final String packageName = context.getPackageName();
         final AttributeSet attrs = Xml.asAttributeSet(parser);
-        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(packageName, "ImageLoader"));
-        final int flags = a.getInt(ClassUtils.getFieldValue(packageName, "ImageLoader_flags"), 0);
-        final String name = a.getString(ClassUtils.getFieldValue(packageName, "ImageLoader_decoder"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(packageName, "ImageLoader"));
+        final int flags = a.getInt(ReflectUtils.getFieldValue(packageName, "ImageLoader_flags"), 0);
+        final String name = a.getString(ReflectUtils.getFieldValue(packageName, "ImageLoader_decoder"));
         a.recycle();
 
         final Cache imageCache = ((flags & FLAG_NO_MEMORY_CACHE) == 0 ? mImageCache : null);
@@ -275,9 +275,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
         final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
         try {
-            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
         } catch (NoSuchMethodException e) {
-            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
         }
     }
 
@@ -349,9 +349,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     private ImageLoader.ImageDecoder createImageDecoder(String className, BitmapPool bitmapPool) throws ReflectiveOperationException {
         final Class<ImageLoader.ImageDecoder> clazz = (Class<ImageLoader.ImageDecoder>)Class.forName(className);
         try {
-            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
         } catch (NoSuchMethodException e) {
-            return ClassUtils.newInstance(clazz, new Class[] { ImageModule.class }, this);
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class }, this);
         }
     }
 

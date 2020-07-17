@@ -3,10 +3,10 @@ package android.ext.util;
 import java.lang.reflect.Constructor;
 
 /**
- * Class ClassUtils
+ * Class ReflectUtils
  * @author Garfield
  */
-public final class ClassUtils {
+public final class ReflectUtils {
     /**
      * Returns a {@link Constructor} object with the specified <em>clazz</em> and <em>parameterTypes</em>.
      * The returned <tt>Constructor</tt> object accessible flag is <tt>true</tt>.
@@ -67,6 +67,6 @@ public final class ClassUtils {
     /**
      * This utility class cannot be instantiated.
      */
-    private ClassUtils() {
+    private ReflectUtils() {
     }
 }

@@ -3,9 +3,9 @@ package android.ext.image.params;
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.ext.util.ClassUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.ext.util.ReflectUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
@@ -31,7 +31,7 @@ public class ScaleParameters extends Parameters {
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, ClassUtils.getFieldValue(context.getPackageName(), "ScaleParameters"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(context.getPackageName(), "ScaleParameters"));
         this.value = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
         DebugUtils.__checkError(Float.compare((float)value, +0.0f) < 0 || Float.compare((float)value, +1.0f) > 0, "The scale " + value + " out of range [0 - 1.0]");
         a.recycle();

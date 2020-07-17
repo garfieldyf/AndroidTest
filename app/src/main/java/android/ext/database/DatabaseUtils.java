@@ -12,7 +12,7 @@ import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
-import android.ext.util.ClassUtils;
+import android.ext.util.ReflectUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.net.Uri;
@@ -359,7 +359,7 @@ public final class DatabaseUtils {
     public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
         DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
-        final T result = ClassUtils.newInstance(clazz, null, (Object[])null);
+        final T result = ReflectUtils.newInstance(clazz, null, (Object[])null);
         setCursorFields(cursor, result, getCursorFields(clazz));
         return result;
     }
@@ -380,7 +380,7 @@ public final class DatabaseUtils {
         if (count > 0) {
             cursor.moveToPosition(-1);
             final List<Pair<Field, String>> cursorFields = getCursorFields(componentType);
-            final Constructor<? extends T> ctor = ClassUtils.getConstructor(componentType, (Class<?>[])null);
+            final Constructor<? extends T> ctor = ReflectUtils.getConstructor(componentType, (Class<?>[])null);
             while (cursor.moveToNext()) {
                 final T object = ctor.newInstance((Object[])null);
                 setCursorFields(cursor, object, cursorFields);

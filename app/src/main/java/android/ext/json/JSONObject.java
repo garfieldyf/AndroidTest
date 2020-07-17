@@ -1,14 +1,14 @@
 package android.ext.json;
 
 import android.ext.util.DebugUtils;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
  * Class JSONObject
  * @author Garfield
  */
-public class JSONObject extends HashMap<String, Object> {
+public class JSONObject extends LinkedHashMap<String, Object> {
     /**
      * Constructor
      * @see #JSONObject(int)

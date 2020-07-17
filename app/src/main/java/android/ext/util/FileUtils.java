@@ -1008,7 +1008,7 @@ public final class FileUtils {
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Comparable<Dirent>, Parcelable {
+    public static class Dirent implements Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */
@@ -1071,16 +1071,6 @@ public final class FileUtils {
             Dirent.__checkType(type);
             this.name = name;
             this.type = type;
-        }
-
-        /**
-         * Constructor
-         * @param source The {@link Parcel}.
-         */
-        public Dirent(Parcel source) {
-            DebugUtils.__checkError(source == null, "Invalid parameter - source == null");
-            this.name = source.readString();
-            this.type = source.readInt();
         }
 
         /**
@@ -1162,17 +1152,6 @@ public final class FileUtils {
             return false;
         }
 
-        @Override
-        public int describeContents() {
-            return 0;
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeString(name);
-            dest.writeInt(type);
-        }
-
         /**
          * @see #compareToIgnoreCase(Dirent)
          */
@@ -1212,6 +1191,16 @@ public final class FileUtils {
         }
 
         /**
+         * Returns a {@link Dirent} type from the specified <em>mode</em>.
+         * @param mode The mode of the {@link Stat}.
+         * @return One of <tt>Dirent.DT_XXX</tt> constants.
+         */
+        public static int getFileType(int mode) {
+            Dirent.__checkType((mode & Stat.S_IFMT) >> 12);
+            return ((mode & Stat.S_IFMT) >> 12);
+        }
+
+        /**
          * Returns a <tt>Comparator</tt> ignoring the {@link #name} field case differences.
          * @return The <tt>Comparator</tt>.
          * @see #compareTo(Dirent)
@@ -1232,18 +1221,6 @@ public final class FileUtils {
                    .append(", hidden = ").append(isHidden())
                    .append(" }").toString());
         }
-
-        public static final Creator<Dirent> CREATOR = new Creator<Dirent>() {
-            @Override
-            public Dirent createFromParcel(Parcel source) {
-                return new Dirent(source);
-            }
-
-            @Override
-            public Dirent[] newArray(int size) {
-                return new Dirent[size];
-            }
-        };
 
         private static String toString(int type) {
             switch (type) {

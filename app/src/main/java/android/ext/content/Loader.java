@@ -120,7 +120,9 @@ public abstract class Loader<Key> implements Factory<Task> {
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         final StringBuilder result = new StringBuilder(80);
+        Pools.dumpPool(mTaskPool, printer);
         printer.println(DebugUtils.toString(mTaskPool, result.append("  taskPool ==> ")).toString());
+
         final int size = mRunningTasks.size();
         if (size > 0) {
             result.setLength(0);

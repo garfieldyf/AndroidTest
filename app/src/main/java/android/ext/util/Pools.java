@@ -3,6 +3,7 @@ package android.ext.util;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.util.Log;
 import android.util.Printer;
 import java.lang.reflect.Array;
 import java.util.Arrays;
@@ -36,6 +37,36 @@ public final class Pools {
         return new SynchronizedPool<E>(pool);
     }
 
+    /**
+     * Retrieves a byte array from the pool. Allows us to avoid allocating new byte
+     * arrays in many cases. When the byte array can no longer be used, The caller
+     * should be call {@link #recycleByteArray(byte[])} to recycles the byte array.
+     * @return The byte array.
+     * @see #recycleByteArray(byte[])
+     */
+    public static byte[] obtainByteArray() {
+        return sInstance.obtain();
+    }
+
+    /**
+     * Recycles the specified <em>array</em> to the pool. After calling this function you must
+     * not ever touch the <em>array</em> again.
+     * @param array The byte array to recycle, returned earlier by {@link #obtainByteArray()}.
+     * @see #obtainByteArray()
+     */
+    public static void recycleByteArray(byte[] array) {
+        DebugUtils.__checkError(ArrayUtils.getSize(array) != 8192, "Invalid parameter - The byte array(" + array + ") was not returned earlier by obtainByteArray()");
+        sInstance.recycle(array);
+    }
+
+    /**
+     * Called on the <tt>ImageModule</tt> internal, do not call this method directly.
+     * @hide
+     */
+    public static void clearByteArrayPool() {
+        sInstance.clear();
+    }
+
     public static void dumpPool(Pool<?> pool, Printer printer) {
         if (pool instanceof SynchronizedPool) {
             ((SynchronizedPool<?>)pool).dump(printer);
@@ -66,7 +97,7 @@ public final class Pools {
         /**
          * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
          * calling this function you must not ever touch the <em>element</em> again.
-         * @param element The element to recycle.
+         * @param element The element to recycle, returned earlier by {@link #obtain()}.
          */
         void recycle(E element);
     }
@@ -158,13 +189,6 @@ public final class Pools {
         /* package */ Matrix newInstance() {
             return new Matrix();
         }
-    }
-
-    /**
-     * Class <tt>ByteArrayPool</tt> for managing a pool of byte arrays.
-     */
-    public static final class ByteArrayPool {
-        public static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 2));
     }
 
     /**
@@ -275,20 +299,29 @@ public final class Pools {
                 }
 
                 result.setLength(0);
-                DebugUtils.toString(element, result.append("  "));
-                if (element.getClass().isArray()) {
-                    result.append(" { length = ").append(Array.getLength(element)).append(" }");
-                }
-
-                printer.println(result.toString());
+                printer.println(toString(element, result.append("  ")).toString());
             }
         }
 
+        private StringBuilder toString(Object element, StringBuilder result) {
+            DebugUtils.toString(element, result);
+            if (element.getClass().isArray()) {
+                result.append(" { length = ").append(Array.getLength(element)).append(" }");
+            }
+
+            return result;
+        }
+
         private void __checkInPool(Object element) {
+            final StringBuilder result = new StringBuilder("The ");
             for (int i = 0; i < size; ++i) {
                 if (elements[i] == element) {
-                    throw new AssertionError("The " + element + " is already in the pool!");
+                    throw new AssertionError(toString(element, result.append("element(")).append(") is already in the pool").toString());
                 }
+            }
+
+            if (size >= elements.length) {
+                Log.w("ArrayPool", toString(element, result.append("ArrayPool is FULL, discards the element - ")).toString());
             }
         }
     }
@@ -330,6 +363,11 @@ public final class Pools {
             }
         }
     }
+
+    /**
+     * The byte array pool for managing a pool of byte arrays.
+     */
+    private static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
 
     /**
      * This class cannot be instantiated.

@@ -1,6 +1,5 @@
 package android.ext.util;
 
-import android.ext.util.Pools.ByteArrayPool;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -110,7 +109,7 @@ public final class ZipUtils {
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
         cancelable = Cancelable.ofNullable(cancelable);
 
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final byte[] buffer = Pools.obtainByteArray();
         try (final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Compresses the files.
             os.setLevel(compressionLevel);
@@ -119,7 +118,7 @@ public final class ZipUtils {
                 compress(os, f, f.getName(), cancelable, buffer);
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            Pools.recycleByteArray(buffer);
         }
     }
 
@@ -135,7 +134,7 @@ public final class ZipUtils {
      * @see #compress(String, int, Cancelable, String[])
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final byte[] buffer = Pools.obtainByteArray();
         try (final ZipFile file = new ZipFile(zipFile)) {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
@@ -156,7 +155,7 @@ public final class ZipUtils {
                 }
             }
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            Pools.recycleByteArray(buffer);
         }
     }
 

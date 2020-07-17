@@ -33,7 +33,6 @@ import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools;
-import android.ext.util.Pools.ByteArrayPool;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.util.ReflectUtils;
@@ -218,6 +217,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkStartMethodTracing();
+        Pools.clearByteArrayPool();
         if (mImageCache != null) {
             mImageCache.trimMemory(level);
         }
@@ -239,7 +239,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mParamsPool.clear();
             mBufferPool.clear();
             mOptionsPool.clear();
-            ByteArrayPool.sInstance.clear();
         }
 
         DebugUtils.__checkStopMethodTracing("ImageModule", new StringBuilder(64).append("onTrimMemory - level = ").append(toString(level)).append(',').toString());

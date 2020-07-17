@@ -6,7 +6,7 @@ import android.content.res.Resources.NotFoundException;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
-import android.ext.util.Pools.ByteArrayPool;
+import android.ext.util.Pools;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -201,11 +201,11 @@ public final class GIFImage {
     }
 
     private static long decodeStreamInternal(InputStream is) {
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final byte[] buffer = Pools.obtainByteArray();
         try {
             return nativeDecodeStream(is, buffer);
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            Pools.recycleByteArray(buffer);
         }
     }
 

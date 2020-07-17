@@ -1,7 +1,6 @@
 package android.ext.util;
 
 import android.content.Context;
-import android.ext.util.Pools.ByteArrayPool;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.Keep;
@@ -601,11 +600,11 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final byte[] buffer = ByteArrayPool.sInstance.obtain();
+        final byte[] buffer = Pools.obtainByteArray();
         try {
             copyStreamImpl(is, out, cancelable, buffer);
         } finally {
-            ByteArrayPool.sInstance.recycle(buffer);
+            Pools.recycleByteArray(buffer);
         }
     }
 

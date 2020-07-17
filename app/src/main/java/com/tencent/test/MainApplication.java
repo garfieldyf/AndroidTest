@@ -15,15 +15,15 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
+import android.os.AsyncTask;
 import android.support.annotation.Keep;
 import android.util.Log;
 import android.util.LogPrinter;
-import java.util.concurrent.Executor;
 
 public final class MainApplication extends Application {
     public static MainApplication sInstance;
+    public static final ThreadPool sThreadPool;
 
-    private ThreadPool mThreadPool;
     private PackageInfo mPackageInfo;
     private ImageModule<String, Object> mImageModule;
 
@@ -36,7 +36,6 @@ public final class MainApplication extends Application {
         ProcessUtils.installUncaughtExceptionHandler(this);
 
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
-        mThreadPool  = new ThreadPool(ThreadPool.computeMaximumThreads());
         mImageModule = new Builder<String, Object>(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
             .setImageSize(128)
@@ -79,14 +78,6 @@ public final class MainApplication extends Application {
         mImageModule.resume(id);
     }
 
-    public ThreadPool getExecutor() {
-        return mThreadPool;
-    }
-
-    public Executor getSerialExecutor() {
-        return mThreadPool.createSerialExecutor();
-    }
-
     public static String[] obtainUrls() {
         return Urls;
     }
@@ -103,6 +94,13 @@ public final class MainApplication extends Application {
             Log.i("abcd", "loadInBackground - uri = " + uri);
             return super.loadInBackground(task, uri, params, flags);
         }
+    }
+
+    static {
+        System.loadLibrary("androidext");
+        sThreadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
+        AsyncTask.setDefaultExecutor(sThreadPool);
+        ImageDrawable.initAttrs(R.attr.autoMirrored);
     }
 
     private static final String[] Urls = {
@@ -1752,9 +1750,4 @@ public final class MainApplication extends Application {
         "http://img.funtv.bestv.com.cn/sdw?oid=44af6eb00328e46e06cab2390ecd7a5b&w=838&h=474",
         "http://img.funtv.bestv.com.cn/sdw?oid=71f154faf7852be22dff061530740e41&w=838&h=474",
     };
-
-    static {
-        System.loadLibrary("androidext");
-        ImageDrawable.initAttrs(R.attr.autoMirrored);
-    }
 }

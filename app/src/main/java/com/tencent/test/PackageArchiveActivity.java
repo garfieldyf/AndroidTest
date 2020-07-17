@@ -1,7 +1,6 @@
 package com.tencent.test;
 
 import android.app.Activity;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.ext.cache.LruCache;
 import android.ext.content.AbsAsyncTask;
@@ -39,7 +38,7 @@ public class PackageArchiveActivity extends Activity {
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);
-        new LoadTask(this).executeOnExecutor(MainApplication.sInstance.getExecutor(), "/mnt/usb/sda1");
+        new LoadTask(this).executeOnExecutor(MainApplication.sThreadPool, "/mnt/usb/sda1");
         DebugUtils.stopMethodTracing("yf", "onCreate");
     }
 

@@ -178,7 +178,7 @@ public class DecodeActivity extends Activity implements OnDecodeListener, Camera
         if (!isDestroyed()) {
             mData = data;
 //            Toast.makeText(this, "data length = " + data.length, Toast.LENGTH_LONG).show();
-            mDecoder.startDecode(MainApplication.sInstance.getExecutor(), data, mCameraView.getPreviewWidth(), mCameraView.getPreviewHeight(),
+            mDecoder.startDecode(MainApplication.sThreadPool, data, mCameraView.getPreviewWidth(), mCameraView.getPreviewHeight(),
                     mCameraView.getBarcodeClipBounds(), this);
         }
     }

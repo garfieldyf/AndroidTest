@@ -20,7 +20,6 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class EncodeActivity extends Activity implements OnClickListener, OnEncodeListener {
     private CheckBox mCheckBox;
@@ -50,7 +49,7 @@ public class EncodeActivity extends Activity implements OnClickListener, OnEncod
         int size = BarcodeEncoder.computeQRCodeSize(this, 0.55f);
         // String contents = mInputText.getText().toString();
         String contents = "http://phapp.tv.funshion.com/download?action=setlock&version=3.1.0_2017-04-12_11-57&mac=28:76:CD:01:D9:EA&sid=funshion";
-        mEncoder.startEncode(MainApplication.sInstance.getExecutor(), contents, BarcodeFormat.QR_CODE, size, size, this);
+        mEncoder.startEncode(MainApplication.sThreadPool, contents, BarcodeFormat.QR_CODE, size, size, this);
 //        String contents = "33456798";
 //        mEncoder.startEncode(contents, BarcodeFormat.CODE_128, size, size / 4, MainApplication.sInstance.getExecutor(), this);
 

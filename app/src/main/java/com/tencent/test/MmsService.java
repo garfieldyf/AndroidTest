@@ -12,7 +12,7 @@ public class MmsService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSerialExecutor = MainApplication.sInstance.getSerialExecutor();
+        mSerialExecutor = MainApplication.sThreadPool.createSerialExecutor();
         Log.i("yf", "onCreate");
     }
 

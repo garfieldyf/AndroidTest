@@ -23,7 +23,7 @@ import java.util.RandomAccess;
 
 public final class JSONTest {
     public static void testDownload() {
-        new DownloadTask().executeOnExecutor(MainApplication.sInstance.getExecutor(), "http://111.170.234.234/app.znds.com/down/20190902/dptvb_1.0_dangbei.apk");
+        new DownloadTask().executeOnExecutor(MainApplication.sThreadPool, "http://111.170.234.234/app.znds.com/down/20190902/dptvb_1.0_dangbei.apk");
     }
 
     /* package */ static final class DownloadTask extends AsyncDownloadTask<String, Object, ByteArrayBuffer> {

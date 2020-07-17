@@ -33,7 +33,7 @@ public final class CrashReportService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSerialExecutor = MainApplication.sInstance.getSerialExecutor();
+        mSerialExecutor = MainApplication.sThreadPool.createSerialExecutor();
     }
 
     @Override

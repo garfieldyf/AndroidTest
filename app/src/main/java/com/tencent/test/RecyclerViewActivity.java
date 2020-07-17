@@ -130,7 +130,7 @@ public class RecyclerViewActivity extends Activity {
         @Override
         public Page<String> loadPage(int page, int startPosition, int itemCount) {
             Log.i("PageAdapter", "page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
-            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sInstance.getExecutor(), startPosition, itemCount);
+            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, itemCount);
             return null;
         }
     }

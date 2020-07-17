@@ -370,7 +370,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
                 }
             };
 
-            MainApplication.sInstance.getExecutor().execute(run);
+            MainApplication.sThreadPool.execute(run);
         }
     }
 
@@ -406,14 +406,14 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final JsonLoadParams params = new JsonLoadParams("content");
 //        final URLLoadParams params = new URLLoadParams();
 
-        final ResourceLoader<String, JSONObject> loader = new ResourceLoader<String, JSONObject>(this, MainApplication.sInstance.getExecutor());
+        final ResourceLoader<String, JSONObject> loader = new ResourceLoader<String, JSONObject>(this, MainApplication.sThreadPool);
         loader.load(url1, params, JsonLoader.sListener, null);
 
         mListView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 final AsyncViewStub view = (AsyncViewStub)findViewById(R.id.btn_cancel_stub);
-                view.inflate(MainApplication.sInstance.getExecutor(), new OnInflateListener() {
+                view.inflate(MainApplication.sThreadPool, new OnInflateListener() {
                     @Override
                     public void onFinishInflate(AsyncViewStub stub, View view, int layoutId) {
                         //Log.i("abc", view.toString());
@@ -671,13 +671,13 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     private static final class SQLiteHandler extends AsyncSQLiteHandler {
         public SQLiteHandler(SQLiteDatabase db) {
-            super(MainApplication.sInstance.getExecutor().createSerialExecutor(), db);
+            super(MainApplication.sThreadPool.createSerialExecutor(), db);
         }
     }
 
     private static final class QueryHandler extends AsyncQueryHandler {
         public QueryHandler(Context context) {
-            super(context, MainApplication.sInstance.getExecutor().createSerialExecutor());
+            super(context, MainApplication.sThreadPool.createSerialExecutor());
         }
     }
 
@@ -873,7 +873,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
                 }
 
                 try {
-                    MainApplication.sInstance.getExecutor().invokeAll(tasks);
+                    MainApplication.sThreadPool.invokeAll(tasks);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -1092,7 +1092,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private static void testScanFiles() {
-        MainApplication.sInstance.getExecutor().execute(new Runnable() {
+        MainApplication.sThreadPool.execute(new Runnable() {
             @Override
             public void run() {
                 DebugUtils.startMethodTracing();

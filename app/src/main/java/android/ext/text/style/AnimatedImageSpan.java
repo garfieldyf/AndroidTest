@@ -1,5 +1,6 @@
 package android.ext.text.style;
 
+import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.util.DebugUtils;
 import android.graphics.drawable.Animatable;
@@ -26,7 +27,9 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
      */
     @SuppressWarnings("deprecation")
     public static AnimatedImageSpan newAnimatedImageSpan(View view, int id) {
-        return new AnimatedImageSpan(view, (AnimationDrawable)view.getResources().getDrawable(id));
+        final AnimationDrawable drawable = (AnimationDrawable)view.getResources().getDrawable(id);
+        DebugUtils.__checkError(drawable == null, "Couldn't load resources - ID #0x" + Integer.toHexString(id));
+        return new AnimatedImageSpan(view, drawable);
     }
 
     /**
@@ -37,7 +40,9 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
      * @see #newAnimatedImageSpan(View, int)
      */
     public static AnimatedImageSpan newGIFImageSpan(View view, int id) {
-        return new AnimatedImageSpan(view, GIFDrawable.decode(view.getResources(), id));
+        final GIFImage image = GIFImage.decode(view.getResources(), id);
+        DebugUtils.__checkError(image == null, "Couldn't load resources - ID #0x" + Integer.toHexString(id));
+        return new AnimatedImageSpan(view, new GIFDrawable(image));
     }
 
     /**

@@ -1,83 +1,16 @@
 package android.ext.graphics.drawable;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.GIFImage;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
-import java.io.InputStream;
 
 /**
  * Class GIFDrawable
  * @author Garfield
  */
 public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
-    /**
-     * Decodes a {@link GIFDrawable} from the <tt>Resources</tt>.
-     * @param res The resource containing the GIF data.
-     * @param id The resource id to be decoded.
-     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decode(byte[], int, int)
-     * @see #decode(InputStream, byte[])
-     * @see #decode(Context, Object, byte[])
-     */
-    public static GIFDrawable decode(Resources res, int id) {
-        final GIFImage image = GIFImage.decode(res, id);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
-    /**
-     * Decodes a {@link GIFDrawable} from the <tt>InputStream</tt>.
-     * @param is The <tt>InputStream</tt> containing the GIF data.
-     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
-     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decode(Resources, int)
-     * @see #decode(byte[], int, int)
-     * @see #decode(Context, Object, byte[])
-     */
-    public static GIFDrawable decode(InputStream is, byte[] tempStorage) {
-        final GIFImage image = GIFImage.decode(is, tempStorage);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
-    /**
-     * Decodes a {@link GIFDrawable} from the byte array.
-     * @param data The byte array containing the GIF data.
-     * @param offset The starting offset of the <em>data</em>.
-     * @param length The number of bytes of the <em>data</em>, beginning at offset.
-     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decode(Resources, int)
-     * @see #decode(InputStream, byte[])
-     * @see #decode(Context, Object, byte[])
-     */
-    public static GIFDrawable decode(byte[] data, int offset, int length) {
-        final GIFImage image = GIFImage.decode(data, offset, length);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
-    /**
-     * Decodes a {@link GIFDrawable} from the specified <em>uri</em>.
-     * <h3>The default implementation accepts the following URI schemes:</h3>
-     * <ul><li>path (no scheme)</li>
-     * <li>{@link File} (no scheme)</li>
-     * <li>file ({@link #SCHEME_FILE})</li>
-     * <li>content ({@link #SCHEME_CONTENT})</li>
-     * <li>android.asset ({@link #SCHEME_ANDROID_ASSET})</li>
-     * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
-     * @param context The <tt>Context</tt>.
-     * @param uri The uri to decode.
-     * @param tempStorage May be <tt>null</tt>. The temporary storage to use for decoding. Suggest 16K.
-     * @return The <tt>GIFDrawable</tt>, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decode(Resources, int)
-     * @see #decode(byte[], int, int)
-     * @see #decode(InputStream, byte[])
-     */
-    public static GIFDrawable decode(Context context, Object uri, byte[] tempStorage) {
-        final GIFImage image = GIFImage.decode(context, uri, tempStorage);
-        return (image != null ? new GIFDrawable(image) : null);
-    }
-
     /**
      * The default constructor used by {@link Resources#getDrawable(int)},
      * do not call this method directly.

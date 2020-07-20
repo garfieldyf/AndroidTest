@@ -159,9 +159,13 @@ public final class JSONTest {
         CrashDatabase db = new CrashDatabase(MainApplication.sInstance);
         try {
             DebugUtils.startMethodTracing();
-            List<CrashInfo> infos = DatabaseUtils.query(db.getWritableDatabase(), CrashInfo.class, "SELECT * FROM crashes", (String[])null);
+            final Cursor cursor = db.getWritableDatabase().rawQuery("SELECT * FROM crashes", null);
+            List<CrashInfo> infos = DatabaseUtils.parse(cursor, CrashInfo.class);
             DebugUtils.stopMethodTracing("yf", "queryCrashInfos");
             return infos.toArray(new CrashInfo[0]);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         } finally {
             db.close();
         }

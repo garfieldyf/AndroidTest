@@ -799,9 +799,17 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         public void onReceive(Context context, Intent intent) {
             dump("yf", intent);
             Log.i("yf", "id = " + intent.getData().getLastPathSegment());
-            final List<User> users = DatabaseUtils.query(mDatabase.getWritableDatabase(), User.class, "SELECT * FROM " + UserDatabase.TABLE_NAME, (String[])null);
-            if (users != null) {
-                Log.i("yf", users.toString());
+
+            final Cursor cursor = mDatabase.getWritableDatabase().rawQuery("SELECT * FROM " + UserDatabase.TABLE_NAME, null);
+            try {
+                final List<User> users = DatabaseUtils.parse(cursor, User.class);
+                if (users != null) {
+                    Log.i("yf", users.toString());
+                }
+            } catch (ReflectiveOperationException e) {
+                e.printStackTrace();
+            } finally {
+                cursor.close();
             }
         }
     }

@@ -12,9 +12,9 @@ import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
-import android.ext.util.ReflectUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.ReflectUtils;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseInputStream;
@@ -25,7 +25,6 @@ import android.util.Pair;
 import android.util.Printer;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -130,26 +129,6 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Query the given SQL statement, returning a first row contents of the <tt>Cursor</tt> with the specified <em>clazz</em>.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
-     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values from
-     * <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass <em>(String[])null</em>
-     * instead of allocating an empty array.
-     * @return A new object, or <tt>null</tt>.
-     * @see #parseObject(Cursor, Class)
-     */
-    public static <T> T simpleQuery(SQLiteDatabase db, Class<? extends T> clazz, String sql, String... selectionArgs) {
-        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
-            return (cursor.moveToFirst() ? parseObject(cursor, clazz) : null);
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
-            return null;
-        }
-    }
-
-    /**
      * Executes a statement that returns a 1 by 1 table with a blob value.
      * @param db The <tt>SQLiteDatabase</tt>.
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
@@ -159,7 +138,7 @@ public final class DatabaseUtils {
      * @return An {@link InputStream} for a copy of the blob value, or <tt>null</tt>
      * if the value is <tt>null</tt> or could not be read for some reason.
      * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
-     * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
+     * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
     public static InputStream simpleQuery(SQLiteDatabase db, String sql, Object... bindArgs) {
         InputStream result = null;
@@ -187,37 +166,19 @@ public final class DatabaseUtils {
      * @return An {@link ByteArrayBuffer} of the blob value, or <tt>null</tt> if
      * the value is <tt>null</tt> or could not be read for some reason.
      * @see #simpleQuery(SQLiteDatabase, String, Object[])
-     * @see #simpleQueryBlob(SQLiteDatabase, OutputStream, String, Object[])
+     * @see #simpleQueryBlob(ContentResolver, Uri, String, String, String[])
      */
     public static ByteArrayBuffer simpleQueryBlob(SQLiteDatabase db, String sql, Object... bindArgs) {
-        try {
-            final ByteArrayBuffer result = new ByteArrayBuffer();
-            simpleQueryBlob(db, result, sql, bindArgs);
-            return result;
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
-            return null;
-        }
-    }
-
-    /**
-     * Executes a statement that returns a 1 by 1 table with a blob value.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param out The <tt>OutputStream</tt> to store the blob value.
-     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
-     * @param bindArgs You may include ? in where clause in the query, which will
-     * be replaced by the values from <em>bindArgs</em>. If no arguments, you can
-     * pass <em>(Object[])null</em> instead of allocating an empty array.
-     * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #simpleQuery(SQLiteDatabase, String, Object[])
-     * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
-     */
-    public static void simpleQueryBlob(SQLiteDatabase db, OutputStream out, String sql, Object... bindArgs) throws IOException {
+        ByteArrayBuffer result = null;
         try (final InputStream is = simpleQuery(db, sql, bindArgs)) {
             if (is != null) {
-                FileUtils.copyStream(is, out, null, null);
+                FileUtils.copyStream(is, result = new ByteArrayBuffer(), null, null);
             }
+        } catch (Exception e) {
+            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
         }
+
+        return result;
     }
 
     /**
@@ -231,56 +192,12 @@ public final class DatabaseUtils {
      * by the values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @return The byte array of the blob value, or <tt>null</tt> if the value is
      * <tt>null</tt> or could not be read for some reason.
+     * @see #simpleQuery(SQLiteDatabase, String, Object[])
+     * @see #simpleQueryBlob(SQLiteDatabase, String, Object[])
      */
     public static byte[] simpleQueryBlob(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {
         final Object result = simpleQuery(resolver, uri, column, selection, selectionArgs);
         return (result instanceof byte[] ? (byte[])result : null);
-    }
-
-    /**
-     * Query the given SQL statement, returning a new <tt>List</tt> with the specified <em>componentType</em>.
-     * @param db The <tt>SQLiteDatabase</tt>.
-     * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
-     * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values
-     * from <em>selectionArgs</em>. The values will be bound as Strings. If no arguments, you can pass
-     * <em>(String[])null</em> instead of allocating an empty array.
-     * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #query(ContentResolver, Class, Uri, String[], String, String[], String)
-     * @see #parse(Cursor, Class)
-     */
-    public static <T> List<T> query(SQLiteDatabase db, Class<? extends T> componentType, String sql, String... selectionArgs) {
-        try (final Cursor cursor = db.rawQuery(sql, selectionArgs)) {
-            return parse(cursor, componentType);
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + sql, e);
-            return null;
-        }
-    }
-
-    /**
-     * Query the given <em>uri</em>, returning a new <tt>List</tt> with the specified <em>componentType</em>.
-     * @param resolver The <tt>ContentResolver</tt>.
-     * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
-     * @param uri The URI, using the content:// scheme, for the content to retrieve.
-     * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
-     * @param selection A filter declaring which rows to return, formatted as an SQL WHERE clause
-     * (excluding the WHERE itself). Passing <tt>null</tt> will return all rows for the given table.
-     * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the values
-     * from <em>selectionArgs</em>. The values will be bound as Strings.
-     * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
-     * Passing <tt>null</tt> will use the default sort order, which may be unordered.
-     * @return A new <tt>List</tt>, or <tt>null</tt>.
-     * @see #query(SQLiteDatabase, Class, String, String[])
-     * @see #parse(Cursor, Class)
-     */
-    public static <T> List<T> query(ContentResolver resolver, Class<? extends T> componentType, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        try (Cursor cursor = resolver.query(uri, projection, selection, selectionArgs, sortOrder)) {
-            return (cursor != null ? parse(cursor, componentType) : null);
-        } catch (Exception e) {
-            Log.e(DatabaseUtils.class.getName(), "Couldn't query - " + uri, e);
-            return null;
-        }
     }
 
     /**
@@ -348,29 +265,11 @@ public final class DatabaseUtils {
     }
 
     /**
-     * Parses an object from the specified <em>cursor</em>.
-     * @param cursor The {@link Cursor} from which to get the data. The cursor
-     * must be move to the correct position.
-     * @param clazz A <tt>Class</tt> can be deserialized. See {@link CursorField}.
-     * @return An new object.
-     * @throws ReflectiveOperationException if the object cannot be created.
-     * @see #parse(Cursor, Class)
-     */
-    public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
-        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
-        final T result = ReflectUtils.newInstance(clazz, null, (Object[])null);
-        setCursorFields(cursor, result, getCursorFields(clazz));
-        return result;
-    }
-
-    /**
      * Parses a <tt>Cursor</tt>'s data to a <tt>List</tt> from the specified <em>cursor</em>.
      * @param cursor The {@link Cursor} from which to get the data.
      * @param componentType A <tt>Class</tt> can be deserialized of the list elements. See {@link CursorField}.
      * @return A new <tt>List</tt>.
      * @throws ReflectiveOperationException if the elements cannot be created.
-     * @see #parseObject(Cursor, Class)
      */
     public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || componentType == null, "Invalid parameters - cursor == null || componentType == null");

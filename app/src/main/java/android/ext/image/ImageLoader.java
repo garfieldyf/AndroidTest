@@ -3,7 +3,6 @@ package android.ext.image;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
-import static android.ext.image.ImageModule.getPlaceholder;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
@@ -131,7 +130,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         if (value != null) {
             view.setImageBitmap((Bitmap)value);
         } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+            ImageModule.setPlaceholder(view, params);
         }
     }
 

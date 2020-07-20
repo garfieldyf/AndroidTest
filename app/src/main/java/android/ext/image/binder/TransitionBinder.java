@@ -1,9 +1,9 @@
 package android.ext.image.binder;
 
-import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.image.ImageModule;
 import android.ext.util.DebugUtils;
 import android.ext.util.ReflectUtils;
 import android.graphics.Bitmap;
@@ -76,10 +76,10 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
             if (bitmap != null) {
                 setImageBitmap(view, bitmap);
             } else {
-                view.setImageDrawable(getPlaceholder(view.getResources(), params));
+                ImageModule.setPlaceholder(view, params);
             }
         } else if (bitmap != null) {
-            final Drawable placeholder = getPlaceholder(view.getResources(), params);
+            final Drawable placeholder = ImageModule.getPlaceholder(view.getResources(), params);
             DebugUtils.__checkError(placeholder == null, "Invalid parameter - placeholder == null");
             final TransitionDrawable drawable = new TransitionDrawable(new Drawable[] { placeholder, newDrawable(view, bitmap) });
             view.setImageDrawable(drawable);

@@ -1,11 +1,11 @@
 package android.ext.image.binder;
 
-import static android.ext.image.ImageModule.getPlaceholder;
 import android.content.Context;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
+import android.ext.image.ImageModule;
 import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
@@ -55,7 +55,7 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
         if (image != null) {
             setViewImage(view, image, mAutoStart, mOneShot);
         } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+            ImageModule.setPlaceholder(view, params);
         }
     }
 

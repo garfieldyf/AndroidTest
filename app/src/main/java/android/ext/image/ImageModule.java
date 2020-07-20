@@ -45,6 +45,7 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
+import android.widget.ImageView;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -284,7 +285,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * Returns the parameters associated with the <em>params</em>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The parameters or <tt>null</tt>.
-     * @see #getPlaceholder(Resources, Object[])
      */
     public static <T> T getParameters(Object[] params) {
         DebugUtils.__checkError(ArrayUtils.getSize(params) < (PARAMETERS + 1), "Invalid parameter - params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + (PARAMETERS + 1));
@@ -292,11 +292,27 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
+     * Sets the placeholder drawable associated with the <em>params</em> to the {@link ImageView}.
+     * @param view The <tt>ImageView</tt> to set.
+     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @see #getPlaceholder(Resources, Object[])
+     */
+    public static void setPlaceholder(ImageView view, Object[] params) {
+        DebugUtils.__checkError(ArrayUtils.getSize(params) < (PLACEHOLDER + 1), "Invalid parameter - params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + (PLACEHOLDER + 1));
+        final Object placeholder = params[PLACEHOLDER];
+        if (placeholder instanceof Integer) {
+            view.setImageResource((int)placeholder);
+        } else {
+            view.setImageDrawable((Drawable)placeholder);
+        }
+    }
+
+    /**
      * Returns the placeholder drawable associated with the <em>params</em>.
      * @param res The <tt>Resources</tt>.
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @return The placeholder <tt>Drawable</tt> or <tt>null</tt>.
-     * @see #getParameters(Object[])
+     * @see #setPlaceholder(ImageView, Object[])
      */
     @SuppressWarnings("deprecation")
     public static Drawable getPlaceholder(Resources res, Object[] params) {

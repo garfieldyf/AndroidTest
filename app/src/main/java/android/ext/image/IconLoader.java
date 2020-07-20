@@ -49,7 +49,7 @@ public final class IconLoader<URI> extends ImageLoader<URI, Object> {
         if (value != null) {
             view.setImageDrawable((Drawable)value);
         } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            view.setImageDrawable(getPlaceholder(view.getResources(), params));
+            ImageModule.setPlaceholder(view, params);
         }
     }
 }

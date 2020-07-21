@@ -26,7 +26,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      * @param maxSize The maximum number of files to allow in this cache.
      */
     public LruFileCache(Executor executor, File cacheDir, int maxSize) {
-        DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "Invalid parameters - cacheDir == null || maxSize(" + maxSize + ") <= 0");
+        DebugUtils.__checkError(executor == null || cacheDir == null || maxSize <= 0, "Invalid parameters - executor == null || cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
         mExecutor = executor;

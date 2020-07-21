@@ -33,12 +33,6 @@ public class SizeParameters extends Parameters {
     private static final int MIN_HEIGHT_INDEX = 1;
 
     /**
-     * The default {@link Parameters} (sample size = 1,
-     * config = RGB_565) used to decode the bitmap.
-     */
-    public static final Parameters defaultParameters;
-
-    /**
      * The minimum width to decode, in pixels.
      */
     private final int minWidth;
@@ -114,7 +108,8 @@ public class SizeParameters extends Parameters {
             .append(" }").toString());
     }
 
-    static {
-        defaultParameters = new SizeParameters(Config.RGB_565, 0, 0);
-    }
+    /**
+     * The default {@link Parameters} (sample size = 1, config = RGB_565) used to decode the bitmap.
+     */
+    public static final Parameters defaultParameters = new SizeParameters(Config.RGB_565, 0, 0);
 }

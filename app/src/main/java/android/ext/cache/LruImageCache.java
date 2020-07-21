@@ -1,6 +1,7 @@
 package android.ext.cache;
 
 import android.content.Context;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 
@@ -14,12 +15,13 @@ public final class LruImageCache<K> implements Cache<K, Object> {
 
     /**
      * Constructor
-     * @param bitmapCache May be <tt>null</tt>. The {@link Cache} to store the bitmaps.
-     * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the images.
+     * @param bitmapCache The {@link Cache} to store the bitmaps.
+     * @param imageCache The {@link Cache} to store the images.
      */
     public LruImageCache(Cache<K, Bitmap> bitmapCache, Cache<K, Object> imageCache) {
-        mImageCache  = (imageCache != null ? imageCache : Caches.emptyCache());
-        mBitmapCache = (bitmapCache != null ? bitmapCache : Caches.emptyCache());
+        DebugUtils.__checkError(bitmapCache == null || imageCache == null, "Invalid parameters - bitmapCache == null || imageCache == null");
+        mImageCache  = imageCache;
+        mBitmapCache = bitmapCache;
     }
 
     @Override

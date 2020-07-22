@@ -1,17 +1,18 @@
 package com.tencent.temp;
 
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.ext.cache.Cache;
-import android.ext.image.ImageLoader;
+import android.ext.image.IconLoader;
 import android.ext.image.ImageModule;
+import android.ext.util.DebugUtils;
 import android.ext.util.PackageUtils.PackageItemIcon;
+import android.support.annotation.Keep;
 
 /**
- * Class <tt>PackageIconLoader</tt> allows to load the icon and label from
- * the package archive file's application info on a background thread and
- * bind it to target on the UI thread.
+ * Class <tt>PackageIconLoader</tt> allows to load the icon and label
+ * from the package archive file on a background thread and bind it
+ * to target on the UI thread.
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;xxx.xxx.PackageIconLoader | loader ]
@@ -23,26 +24,26 @@ import android.ext.util.PackageUtils.PackageItemIcon;
  *       .placeholder(R.drawable.ic_placeholder)
  *       .parameters(applicationInfo)
  *       .binder(binder)
- *       .into(imageView);</pre>
+ *       .into(viewHolder);</pre>
  * @author Garfield
  */
-public final class PackageIconLoader<URI> extends ImageLoader<URI, PackageItemIcon> {
-    private final PackageManager mPackageManager;
-
+public final class PackageIconLoader<URI> extends IconLoader<URI> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
-    public PackageIconLoader(ImageModule<?, ?> module, Cache<URI, PackageItemIcon> iconCache) {
+    @Keep
+    public PackageIconLoader(ImageModule<?, ?> module, Cache<URI, Object> iconCache) {
         super(module, iconCache);
-        mPackageManager = module.mContext.getPackageManager();
     }
 
     @Override
-    protected PackageItemIcon loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
         try {
-            return new PackageItemIcon(mPackageManager, ImageModule.<ApplicationInfo>getParameters(params));
+            final ApplicationInfo info = ImageModule.getParameters(params);
+            DebugUtils.__checkError(info == null, "Invalid parameter - applicationInfo == null");
+            return new PackageItemIcon(mPackageManager, info);
         } catch (NameNotFoundException e) {
             return null;
         }

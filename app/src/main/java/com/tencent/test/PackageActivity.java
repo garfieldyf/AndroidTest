@@ -77,7 +77,7 @@ public class PackageActivity extends Activity {
                 holder.icon.setImageDrawable(value.icon);
             } else {
                 holder.name.setText(null);
-                holder.icon.setImageDrawable(ImageModule.getPlaceholder(holder.icon.getResources(), params));
+                ImageModule.setPlaceholder(holder.icon, params);
             }
         }
     }

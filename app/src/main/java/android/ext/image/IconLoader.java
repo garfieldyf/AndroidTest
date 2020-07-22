@@ -1,17 +1,17 @@
 package android.ext.image;
 
 import static android.ext.image.ImageModule.PARAMETERS;
-import static android.ext.image.ImageModule.getPlaceholder;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 /**
- * Class <tt>IconLoader</tt> allows to load the icon associated with the
- * {@link ResolveInfo} on a background thread and bind it to target on
- * the UI thread.
+ * Class <tt>IconLoader</tt> allows to load the icon associated with the {@link ResolveInfo}
+ * or {@link ApplicationInfo} on a background thread and bind it to target on the UI thread.
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;[ IconLoader | loader ]
@@ -19,14 +19,14 @@ import android.widget.ImageView;
  *      class="classFullName"
  *      app:flags="[ none | noMemoryCache ]" /&gt;
  *
- * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name)
+ * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name or applicationInfo.packageName)
  *       .placeholder(R.drawable.ic_placeholder)
- *       .parameters(resolveInfo)
+ *       .parameters(resolveInfo or applicationInfo)
  *       .into(imageView);</pre>
  * @author Garfield
  */
-public final class IconLoader<URI> extends ImageLoader<URI, Object> {
-    private final PackageManager mPackageManager;
+public class IconLoader<URI> extends ImageLoader<URI, Object> {
+    protected final PackageManager mPackageManager;
 
     /**
      * Constructor
@@ -40,7 +40,15 @@ public final class IconLoader<URI> extends ImageLoader<URI, Object> {
 
     @Override
     protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
-        return ((ResolveInfo)params[PARAMETERS]).loadIcon(mPackageManager);
+        final Object param = params[PARAMETERS];
+        DebugUtils.__checkError(param == null, "Invalid parameter - param == null");
+        if (param instanceof ResolveInfo) {
+            return ((ResolveInfo)param).loadIcon(mPackageManager);
+        } else if (param instanceof ApplicationInfo) {
+            return ((ApplicationInfo)param).loadIcon(mPackageManager);
+        } else {
+            return mPackageManager.getDefaultActivityIcon();
+        }
     }
 
     @Override

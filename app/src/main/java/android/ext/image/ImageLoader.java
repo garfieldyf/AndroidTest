@@ -70,20 +70,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Constructor
-     * @param module The {@link ImageModule}.
-     * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
-     */
-    protected ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache) {
-        super(module.mExecutor, imageCache, module.mTaskPool);
-
-        mModule  = module;
-        mLoader  = null;
-        mDecoder = null;
-        mRequest = new LoadRequest();
-    }
-
-    /**
      * Loads the image from the specified <em>uri</em>, bind it to the target. If the image
      * is already cached, it is bind immediately. Otherwise loads the image on a background
      * thread. <p><b>Note: This method must be invoked on the UI thread.</b></p>
@@ -188,6 +174,20 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             Log.e(getClass().getName(), "Couldn't load image data from - " + url + "\n" + e);
             return null;
         }
+    }
+
+    /**
+     * Constructor
+     * @param module The {@link ImageModule}.
+     * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
+     */
+    /* package */ ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache) {
+        super(module.mExecutor, imageCache, module.mTaskPool);
+
+        mModule  = module;
+        mLoader  = null;
+        mDecoder = null;
+        mRequest = new LoadRequest();
     }
 
     /**

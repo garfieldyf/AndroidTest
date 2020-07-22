@@ -1,7 +1,5 @@
 package android.ext.util;
 
-import java.util.Formatter;
-
 /**
  * Class StringUtils
  * @author Garfield
@@ -120,7 +118,7 @@ public final class StringUtils {
      * @param data The array to convert.
      * @return The hexadecimal string.
      * @see #toHexString(byte[], int, int)
-     * @see #toHexString(Appendable, byte[], int, int)
+     * @see #toHexString(StringBuilder, byte[], int, int)
      */
     public static String toHexString(byte[] data) {
         return toHexString(new StringBuilder(data.length << 1), data, 0, data.length).toString();
@@ -133,7 +131,7 @@ public final class StringUtils {
      * @param end The exclusive end index of the <em>data</em>.
      * @return The hexadecimal string.
      * @see #toHexString(byte[])
-     * @see #toHexString(Appendable, byte[], int, int)
+     * @see #toHexString(StringBuilder, byte[], int, int)
      */
     public static String toHexString(byte[] data, int start, int end) {
         return toHexString(new StringBuilder((end - start) << 1), data, start, end).toString();
@@ -141,7 +139,7 @@ public final class StringUtils {
 
     /**
      * Converts the specified byte array to a hexadecimal string.
-     * @param out The <tt>Appendable</tt> to append the converted hexadecimal string.
+     * @param out The <tt>StringBuilder</tt> to append the converted hexadecimal string.
      * @param data The array to convert.
      * @param start The inclusive beginning index of the <em>data</em>.
      * @param end The exclusive end index of the <em>data</em>.
@@ -149,10 +147,10 @@ public final class StringUtils {
      * @see #toHexString(byte[])
      * @see #toHexString(byte[], int, int)
      */
-    public static Appendable toHexString(Appendable out, byte[] data, int start, int end) {
-        final Formatter formatter = new Formatter(out);
-        for (; start < end; ++start) {
-            formatter.format("%02x", data[start]);
+    public static StringBuilder toHexString(StringBuilder out, byte[] data, int start, int end) {
+        for (int digit; start < end; ++start) {
+            digit = (data[start] & 0xFF);
+            out.append(HEX_DIGITS[digit >>> 4]).append(HEX_DIGITS[digit & 0x0F]);
         }
 
         return out;
@@ -172,6 +170,13 @@ public final class StringUtils {
 
         return true;
     }
+
+    /**
+     * The hexadecimal digit characters.
+     */
+    private final static char[] HEX_DIGITS = {
+        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'
+    };
 
     /**
      * This utility class cannot be instantiated.

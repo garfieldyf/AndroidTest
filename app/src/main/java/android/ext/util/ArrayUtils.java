@@ -533,16 +533,17 @@ public final class ArrayUtils {
      * @see #toByteArray(CharSequence, byte[], int)
      */
     public static int toByteArray(CharSequence hex, int start, int end, byte[] out, int offset) {
-        DebugUtils.__checkRange(start, end - start, hex.length());
-        DebugUtils.__checkRange(offset, (end - start) >> 1, out.length);
-        DebugUtils.__checkError((end - start) % 2 != 0, "The hex length (" + (end - start) + ") must be even.");
-        for (int i = start, high, low; i < end; ++offset) {
-            high = Character.digit((int)hex.charAt(i++), 16) << 4;
-            low  = Character.digit((int)hex.charAt(i++), 16);
-            out[offset] = (byte)(high + low);
+        final int length = end - start;
+        DebugUtils.__checkRange(start, length, hex.length());
+        DebugUtils.__checkRange(offset, length >> 1, out.length);
+        DebugUtils.__checkError((end - start) % 2 != 0, "The hex length (" + length + ") must be even.");
+        for (int high, low; start < end; ++offset) {
+            high = Character.digit((int)hex.charAt(start++), 16);
+            low  = Character.digit((int)hex.charAt(start++), 16);
+            out[offset] = (byte)((high << 4) | low);
         }
 
-        return (end - start) >> 1;
+        return length >> 1;
     }
 
     /**

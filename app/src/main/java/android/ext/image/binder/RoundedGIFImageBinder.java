@@ -13,8 +13,8 @@ import android.widget.ImageView;
 import java.util.Arrays;
 
 /**
- * Class <tt>RoundedGIFImageBinder</tt> used to transforms a {@link GIFImage}
- * to a {@link RoundedGIFDrawable} to bind to the {@link ImageView}.
+ * Class <tt>RoundedGIFImageBinder</tt> converts a {@link GIFImage} to
+ * a {@link RoundedGIFDrawable} and bind it to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedGIFImageBinder xmlns:android="http://schemas.android.com/apk/res/android"

@@ -13,8 +13,8 @@ import android.util.Printer;
 import android.widget.ImageView;
 
 /**
- * Class <tt>GIFImageBinder</tt> used to transforms a {@link GIFImage}
- * to a {@link GIFDrawable} to bind to the {@link ImageView}.
+ * Class <tt>GIFImageBinder</tt> converts a {@link GIFImage} to
+ * a {@link GIFDrawable} and bind it to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;GIFImageBinder xmlns:android="http://schemas.android.com/apk/res/android"

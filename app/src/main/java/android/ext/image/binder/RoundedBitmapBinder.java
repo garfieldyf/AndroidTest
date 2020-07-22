@@ -13,8 +13,8 @@ import android.widget.ImageView;
 import java.util.Arrays;
 
 /**
- * Class <tt>RoundedBitmapBinder</tt> used to transforms a {@link Bitmap}
- * to a {@link RoundedBitmapDrawable} to bind to the {@link ImageView}.
+ * Class <tt>OvalBitmapBinder</tt> converts a {@link Bitmap} to a
+ * {@link RoundedBitmapDrawable} and bind it to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedBitmapBinder xmlns:android="http://schemas.android.com/apk/res/android"

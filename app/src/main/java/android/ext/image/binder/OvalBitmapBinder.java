@@ -8,8 +8,8 @@ import android.graphics.drawable.Drawable;
 import android.widget.ImageView;
 
 /**
- * Class <tt>OvalBitmapBinder</tt> used to transforms a {@link Bitmap}
- * to a {@link OvalBitmapDrawable} to bind the {@link ImageView}.
+ * Class <tt>OvalBitmapBinder</tt> converts a {@link Bitmap} to a
+ * {@link OvalBitmapDrawable} and bind it to the {@link ImageView}.
  * @author Garfield
  */
 public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {

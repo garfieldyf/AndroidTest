@@ -11,9 +11,9 @@ import android.widget.ImageView;
 import java.util.Arrays;
 
 /**
- * Class <tt>RoundedTransitionBinder</tt> used to transforms a {@link Bitmap} to
- * a {@link RoundedBitmapDrawable} and play transition animation when the drawable
- * bind to the {@link ImageView}.
+ * Class <tt>RoundedTransitionBinder</tt> converts a {@link Bitmap} to a
+ * {@link RoundedBitmapDrawable} and play transition animation when the
+ * drawable bind to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;RoundedTransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"

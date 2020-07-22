@@ -8,9 +8,9 @@ import android.util.AttributeSet;
 import android.widget.ImageView;
 
 /**
- * Class <tt>OvalTransitionBinder</tt> used to transforms a {@link Bitmap} to
- * an {@link OvalBitmapDrawable} and play transition animation when the drawable
- * bind to the {@link ImageView}.
+ * Class <tt>OvalTransitionBinder</tt> converts a {@link Bitmap} to an
+ * {@link OvalBitmapDrawable} and play transition animation when the
+ * drawable bind to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;OvalTransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"

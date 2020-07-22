@@ -15,8 +15,9 @@ import android.util.Printer;
 import android.widget.ImageView;
 
 /**
- * Class <tt>TransitionBinder</tt> used to play transition animation when the
- * {@link Bitmap} bind to the {@link ImageView}.
+ * Class <tt>TransitionBinder</tt> converts a {@link Bitmap} to an
+ * {@link BitmapDrawable} and play transition animation when the
+ * drawable bind to the {@link ImageView}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;TransitionBinder xmlns:android="http://schemas.android.com/apk/res/android"

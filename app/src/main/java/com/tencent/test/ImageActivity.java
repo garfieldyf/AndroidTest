@@ -67,6 +67,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
@@ -760,7 +761,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         public final long insert(Context context, String name, String password) {
             final long id = DatabaseUtils.executeInsert(getWritableDatabase(), "INSERT INTO " + TABLE_NAME + "(name, password) VALUES(?,?)", name, password);
             if (id != -1) {
-                DatabaseReceiver.sendBroadcast(context, UserDatabase.TABLE_NAME, id);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(DatabaseReceiver.resolveIntent(UserDatabase.TABLE_NAME, id));
             }
 
             return id;

@@ -22,26 +22,20 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
     public static final String ACTION_TABLE_CONTENT_CHANGED = "{C620F8F3-59EB-4EA7-887E-813EFC58295A}";
 
     /**
-     * Intent extra used to define the SQL statement type.
+     * Intent extra used to define the row ID.
      */
-    public static final String EXTRA_STATEMENT = "statement";
+    public static final String EXTRA_ROW_ID = "_rowID!";
 
     /**
-     * Intent extra used to define the row ID.
-     * @see #ACTION_TABLE_CONTENT_CHANGED
+     * Intent extra used to define the SQL statement type.
+     * See <tt>STATEMENT_XXX</tt> constants.
      */
-    public static final String EXTRA_ROW_ID = "rowID";
+    public static final String EXTRA_STATEMENT = "_statement!";
 
     /**
      * Intent extra used to define the number of rows affected.
-     * @see #ACTION_TABLE_CONTENT_CHANGED
      */
-    public static final String EXTRA_ROWS_AFFECTED = "rowsAffected";
-
-    /**
-     * The scheme specific part for the local broadcasts.
-     */
-    private static final String SSP_PREFIX = "//contents";
+    public static final String EXTRA_ROWS_AFFECTED = "_rowsAffected!";
 
     /**
      * The type of the SQL statement INSERT.
@@ -62,6 +56,11 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * The type of the SQL statement REPLACE.
      */
     public static final int STATEMENT_REPLACE = 4;
+
+    /**
+     * The scheme specific part for the local broadcasts.
+     */
+    private static final String SSP_PREFIX = "//contents";
 
     /**
      * Equivalent to calling <tt>registerReceiver(context, scheme, Long.toString(id), this)</tt>.
@@ -121,7 +120,9 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
      * @see #resolveIntent(String, String)
      */
     public static Intent resolveIntent(String scheme, long id) {
-        return resolveIntent(scheme, Long.toString(id));
+        final Intent intent = resolveIntent(scheme, Long.toString(id));
+        intent.putExtra(EXTRA_ROW_ID, id);
+        return intent;
     }
 
     /**
@@ -142,34 +143,8 @@ public abstract class DatabaseReceiver extends BroadcastReceiver {
         return new Intent(ACTION_TABLE_CONTENT_CHANGED, Uri.parse(data));
     }
 
-    /**
-     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match.
-     * @param rowID The row ID of the inserted row.
-     * @see #sendBroadcast(Context, String, int)
-     */
-    public static void sendBroadcast(Context context, String scheme, long rowID) {
-        final Intent intent = resolveIntent(scheme, Long.toString(rowID));
-        intent.putExtra(EXTRA_ROW_ID, rowID);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
-    /**
-     * Broadcasts the given the <em>scheme</em> to all interested <tt>BroadcastReceivers</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param scheme The <tt>Intent</tt> data scheme to match.
-     * @param rowsAffected the number of rows affected for update/delete.
-     * @see #sendBroadcast(Context, String, long)
-     */
-    public static void sendBroadcast(Context context, String scheme, int rowsAffected) {
-        final Intent intent = resolveIntent(scheme, null);
-        intent.putExtra(EXTRA_ROWS_AFFECTED, rowsAffected);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-    }
-
     public static void dump(String tag, Intent intent) {
-        Log.d(tag, new StringBuilder()
+        Log.d(tag, new StringBuilder(96)
            .append("Intent { action = ").append(intent.getAction())
            .append(", scheme = ").append(intent.getScheme())
            .append(", data = ").append(intent.getDataString())

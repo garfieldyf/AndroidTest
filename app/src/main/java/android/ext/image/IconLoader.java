@@ -39,6 +39,16 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
     }
 
     @Override
+    public void bindValue(URI uri, Object[] params, Object target, Object value, int state) {
+        final ImageView view = (ImageView)target;
+        if (value != null) {
+            view.setImageDrawable((Drawable)value);
+        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
+            ImageModule.setPlaceholder(view, params);
+        }
+    }
+
+    @Override
     protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
         final Object param = params[PARAMETERS];
         DebugUtils.__checkError(param == null, "Invalid parameter - param == null");
@@ -48,16 +58,6 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
             return ((ApplicationInfo)param).loadIcon(mPackageManager);
         } else {
             return mPackageManager.getDefaultActivityIcon();
-        }
-    }
-
-    @Override
-    public void bindValue(URI uri, Object[] params, Object target, Object value, int state) {
-        final ImageView view = (ImageView)target;
-        if (value != null) {
-            view.setImageDrawable((Drawable)value);
-        } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
-            ImageModule.setPlaceholder(view, params);
         }
     }
 }

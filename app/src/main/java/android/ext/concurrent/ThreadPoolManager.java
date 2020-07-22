@@ -5,10 +5,9 @@ import android.ext.util.DebugUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Garfield
  */
 public class ThreadPoolManager extends ThreadPool {
-    private final List<Task> mRunningTasks;
+    private final Collection<Task> mRunningTasks;
 
     /**
      * Constructor
@@ -59,28 +58,12 @@ public class ThreadPoolManager extends ThreadPool {
      */
     public boolean cancelAll(boolean mayInterruptIfRunning) {
         // Cancel and remove from pending task queue.
-        boolean result = false;
-        final BlockingQueue<Runnable> taskQueue = getQueue();
-        if (!taskQueue.isEmpty()) {
-            for (Runnable task : taskQueue) {
-                result |= ((Task)task).cancel(false);
-            }
-
-            taskQueue.clear();
-        }
+        final boolean result = cancelAll(getQueue(), false);
 
         // Cancel and remove from running task queue.
         synchronized (mRunningTasks) {
-            if (!mRunningTasks.isEmpty()) {
-                for (Task task : mRunningTasks) {
-                    result |= task.cancel(mayInterruptIfRunning);
-                }
-
-                mRunningTasks.clear();
-            }
+            return (result | cancelAll(mRunningTasks, mayInterruptIfRunning));
         }
-
-        return result;
     }
 
     /**
@@ -119,9 +102,10 @@ public class ThreadPoolManager extends ThreadPool {
     }
 
     public final void dump(Printer printer) {
+        final String className = getClass().getSimpleName();
         final StringBuilder result = new StringBuilder(96);
-        dumpTasks(printer, result, getRunningTasks(), "Running");
-        dumpTasks(printer, result, new ArrayList<Object>(getQueue()), "Pending");
+        dumpTasks(printer, result, getRunningTasks(), className, "Running");
+        dumpTasks(printer, result, new ArrayList<Object>(getQueue()), className, "Pending");
     }
 
     @Override
@@ -140,14 +124,27 @@ public class ThreadPoolManager extends ThreadPool {
         }
     }
 
-    private List<?> getRunningTasks() {
+    private Collection<?> getRunningTasks() {
         synchronized (mRunningTasks) {
             return new ArrayList<Object>(mRunningTasks);
         }
     }
 
-    private void dumpTasks(Printer printer, StringBuilder result, List<?> tasks, String namePrefix) {
-        DebugUtils.dumpSummary(printer, result, 80, " Dumping %s %s Tasks [ size = %d ] ", getClass().getSimpleName(), namePrefix, tasks.size());
+    private static boolean cancelAll(Collection<?> tasks, boolean mayInterruptIfRunning) {
+        boolean result = false;
+        if (!tasks.isEmpty()) {
+            for (Object task : tasks) {
+                result |= ((Task)task).cancel(mayInterruptIfRunning);
+            }
+
+            tasks.clear();
+        }
+
+        return result;
+    }
+
+    private static void dumpTasks(Printer printer, StringBuilder result, Collection<?> tasks, String className, String namePrefix) {
+        DebugUtils.dumpSummary(printer, result, 80, " Dumping %s %s Tasks [ size = %d ] ", className, namePrefix, tasks.size());
         for (Object task : tasks) {
             result.setLength(0);
             printer.println(result.append("  ").append(task).toString());

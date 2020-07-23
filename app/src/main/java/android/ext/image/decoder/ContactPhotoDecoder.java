@@ -33,14 +33,15 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
     @Override
     protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         final ContentResolver resolver = mModule.mContext.getContentResolver();
+        final Uri contactUri = (Uri)uri;
         if (opts.inJustDecodeBounds) {
-            decodeContactPhoto(resolver, (Uri)uri, opts);
+            decodeContactPhoto(resolver, contactUri, opts);
             if (opts.outWidth <= 0) {
                 sPhotoLocal.set(null);  // Clear the contact photo data.
-                decodePhotoBounds(resolver, (Uri)uri, opts);
+                decodePhotoBounds(resolver, contactUri, opts);
             }
         } else {
-            final Bitmap photo = decodeContactPhoto(resolver, (Uri)uri, opts);
+            final Bitmap photo = decodeContactPhoto(resolver, contactUri, opts);
             if (photo != null) {
                 return photo;
             }

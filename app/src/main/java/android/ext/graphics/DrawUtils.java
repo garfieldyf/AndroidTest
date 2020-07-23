@@ -21,7 +21,6 @@ import android.graphics.Xfermode;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.View;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class DrawUtils
@@ -362,7 +361,7 @@ public final class DrawUtils {
         }
 
         // Computes y-coordinate.
-        final FontMetrics fm = FontMetricsPool.obtain(paint);
+        final FontMetrics fm = FontMetricsPool.sInstance.obtain(paint);
         switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
         case Gravity.BOTTOM:
             outRect.top = bottom - fm.descent;
@@ -377,24 +376,34 @@ public final class DrawUtils {
             outRect.top = top - fm.ascent;
         }
 
-        FontMetricsPool.sInstance.compareAndSet(null, fm);
+        FontMetricsPool.sInstance.recycle(fm);
         return textAlign;
     }
 
     /**
      * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
      */
-    private static final class FontMetricsPool extends AtomicReference<FontMetrics> {
+    private static final class FontMetricsPool {
         public static final FontMetricsPool sInstance = new FontMetricsPool();
+        private FontMetrics mMetrics;
 
-        public static FontMetrics obtain(Paint paint) {
-            FontMetrics result = sInstance.getAndSet(null);
-            if (result == null) {
-                result = new FontMetrics();
+        public final FontMetrics obtain(Paint paint) {
+            FontMetrics metrics;
+            synchronized (this) {
+                metrics  = mMetrics;
+                mMetrics = null;
             }
 
-            paint.getFontMetrics(result);
-            return result;
+            if (metrics == null) {
+                metrics = new FontMetrics();
+            }
+
+            paint.getFontMetrics(metrics);
+            return metrics;
+        }
+
+        public synchronized final void recycle(FontMetrics metrics) {
+            mMetrics = metrics;
         }
     }
 

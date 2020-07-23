@@ -7,7 +7,6 @@ import android.util.Log;
 import android.util.Printer;
 import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Class Pools
@@ -194,15 +193,8 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    private static abstract class SimplePool<E> {
-        private final AtomicReference<E> referent;
-
-        /**
-         * Constructor
-         */
-        public SimplePool() {
-            this.referent = new AtomicReference<E>();
-        }
+    /* package */ static abstract class SimplePool<E> {
+        private E element;
 
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
@@ -212,8 +204,9 @@ public final class Pools {
          * @return The element.
          * @see #recycle(E)
          */
-        public final E obtain() {
-            final E element = referent.getAndSet(null);
+        public synchronized final E obtain() {
+            final E element = this.element;
+            this.element = null;
             return (element != null ? element : newInstance());
         }
 
@@ -223,9 +216,9 @@ public final class Pools {
          * @param element The element to recycle.
          * @see #obtain()
          */
-        public final void recycle(E element) {
+        public synchronized final void recycle(E element) {
             DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
-            referent.set(element);
+            this.element = element;
         }
 
         /**

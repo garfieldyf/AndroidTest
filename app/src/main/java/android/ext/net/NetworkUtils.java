@@ -98,7 +98,7 @@ public final class NetworkUtils {
         final int inLength  = StringUtils.getLength(inAddress);
         final int outLength = ArrayUtils.getSize(outAddress);
         for (int i = 0, j = 0; i < outLength && j < inLength; ++i, j += 3) {
-            outAddress[i] = (byte)((Character.digit((int)inAddress.charAt(j), 16) << 4) + Character.digit((int)inAddress.charAt(j + 1), 16));
+            outAddress[i] = (byte)((Character.digit((int)inAddress.charAt(j), 16) << 4) | Character.digit((int)inAddress.charAt(j + 1), 16));
         }
 
         return outAddress;

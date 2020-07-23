@@ -29,17 +29,20 @@ import java.util.function.UnaryOperator;
  * Class JSONUtils
  * @author Garfield
  */
-@SuppressWarnings("unchecked")
 public final class JSONUtils {
     /**
-     * The <tt>0-length</tt>, immutable {@link JSONArray}.
+     * Returns an empty (<tt>0-length</tt>), immutable {@link JSONArray}.
      */
-    public static final JSONArray EMPTY_ARRAY = new EmptyJSONArray();
+    public static JSONArray emptyJSONArray() {
+        return EmptyJSONArray.sInstance;
+    }
 
     /**
-     * The <tt>0-length</tt>, immutable {@link JSONObject}.
+     * Returns an empty (<tt>0-length</tt>), immutable {@link JSONObject}.
      */
-    public static final JSONObject EMPTY_OBJECT = new EmptyJSONObject();
+    public static JSONObject emptyJSONObject() {
+        return EmptyJSONObject.sInstance;
+    }
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
@@ -167,6 +170,7 @@ public final class JSONUtils {
      * @see #parse(Context, Object, Cancelable)
      * @see #parse(byte[], int, int, Cancelable)
      */
+    @SuppressWarnings("unchecked")
     public static <T> T parse(JsonReader reader, Cancelable cancelable) throws IOException {
         switch (reader.peek()) {
         case BEGIN_ARRAY:
@@ -233,6 +237,7 @@ public final class JSONUtils {
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
      * @see #writeObject(String, Object)
      */
+    @SuppressWarnings("unchecked")
     public static JsonWriter writeObject(JsonWriter writer, Object object) throws IOException {
         if (object == null) {
             return writer.nullValue();
@@ -459,6 +464,7 @@ public final class JSONUtils {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     private static JsonWriter writeSet(JsonWriter writer, Set<?> values) throws IOException {
         if (values.isEmpty()) {
             return writer.nullValue();
@@ -511,6 +517,8 @@ public final class JSONUtils {
      * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
      */
     /* package */ static final class EmptyJSONArray extends JSONArray {
+        public static final JSONArray sInstance = new EmptyJSONArray();
+
         @Override
         public void clear() {
             throw new AssertionError("Unsupported operation - The JSONArray is immutable");
@@ -576,6 +584,8 @@ public final class JSONUtils {
      * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
      */
     /* package */ static final class EmptyJSONObject extends JSONObject {
+        public static final JSONObject sInstance = new EmptyJSONObject();
+
         @Override
         public void clear() {
             throw new AssertionError("Unsupported operation - The JSONObject is immutable");

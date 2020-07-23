@@ -94,7 +94,7 @@ public final class MessageDigests {
      */
     public static byte[] computeString(String string, Algorithm algorithm) {
         if (string == null) {
-            throw new NullPointerException("string == null");
+            throw new NullPointerException("Invalid parameter - string == null");
         }
 
         final byte[] result = new byte[algorithm.digestLength];
@@ -115,7 +115,7 @@ public final class MessageDigests {
      */
     public static int computeString(String string, byte[] result, int offset, Algorithm algorithm) {
         if (string == null) {
-            throw new NullPointerException("string == null");
+            throw new NullPointerException("Invalid parameter - string == null");
         }
 
         ArrayUtils.checkRange(offset, algorithm.digestLength, result.length);
@@ -132,7 +132,7 @@ public final class MessageDigests {
      */
     public static byte[] computeByteArray(byte[] data, Algorithm algorithm) {
         if (data == null) {
-            throw new NullPointerException("data == null");
+            throw new NullPointerException("Invalid parameter - data == null");
         }
 
         final byte[] result = new byte[algorithm.digestLength];

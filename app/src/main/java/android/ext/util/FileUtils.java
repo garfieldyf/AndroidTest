@@ -542,6 +542,7 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     /* package */ static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
+        DebugUtils.__checkError(buffer == null, "Invalid parameter - buffer == null");
         for (int readBytes, offset = 0; !cancelable.isCancelled(); ) {
             if ((readBytes = is.read(buffer, offset, buffer.length - offset)) == -1) {
                 // Writes the last remaining bytes of the buffer.
@@ -1067,7 +1068,7 @@ public final class FileUtils {
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
          */
         public Dirent(String name, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(name) == 0, "Invalid parameter - name == null || name.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(name) == 0, "Invalid parameter - The name is null or 0-length");
             Dirent.__checkType(type);
             this.name = name;
             this.type = type;

@@ -38,7 +38,9 @@
     <target name="-copy">
         <!-- copy the java files -->
         <copy todir="${src.dir}/${jni.package}" overwrite="true">
-            <fileset dir="${source.dir}/java/android/ext" />
+            <fileset dir="${source.dir}/java/android/ext">
+                <exclude name="**/renderscript/**" />
+            </fileset>
         </copy>
 
         <!-- copy the android support v7 files -->

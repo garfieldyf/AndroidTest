@@ -1,5 +1,7 @@
 package android.ext.text.style;
 
+import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
+import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import android.content.res.Resources;
 import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
@@ -55,9 +57,10 @@ public class ImageSpan extends ReplacementSpan {
 
     @Override
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        final int left = (int)x + mPaddingLeft;
+        final int left   = (int)x + mPaddingLeft;
+        final int margin = (int)((float)DEVICE_DENSITY / DENSITY_DEFAULT);
         final int dy = (bottom - top - mDrawable.getIntrinsicHeight()) / 2;
-        mDrawable.setBounds(left + 1, top + dy + 1, left + mDrawable.getIntrinsicWidth() - 1, bottom - dy - 1);
+        mDrawable.setBounds(left + margin, top + dy + margin, left + mDrawable.getIntrinsicWidth() - margin, bottom - dy - margin);
         mDrawable.draw(canvas);
     }
 }

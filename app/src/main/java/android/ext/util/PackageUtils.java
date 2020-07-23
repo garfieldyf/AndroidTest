@@ -241,7 +241,7 @@ public final class PackageUtils {
          */
         @SuppressWarnings("deprecation")
         public PackageItemIcon(PackageManager pm, ApplicationInfo info) throws NameNotFoundException {
-            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "Invalid parameter - info.publicSourceDir == null || info.publicSourceDir.length() == 0");
+            DebugUtils.__checkError(TextUtils.isEmpty(info.publicSourceDir), "Invalid parameter - The info.publicSourceDir is null or 0-length");
             final Resources res = pm.getResourcesForApplication(info);
             try {
                 this.icon  = (info.icon != 0 ? res.getDrawable(info.icon) : pm.getDefaultActivityIcon());

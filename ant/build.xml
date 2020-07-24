@@ -12,15 +12,19 @@
     <property name="class.dir" value="${basedir}/classes" />
     <property name="source.dir" value="${basedir}/../app/src/main" />
 
+    <!-- env.ANDROID_SDK_ROOT = D:\Google\android-sdk-windows -->
+    <property name="sdk.dir" value="${env.ANDROID_SDK_ROOT}" />
+
+    <!-- env.LOCAL_LIBS_ROOT = E:\Include\java -->
+    <property name="local.libs.dir" value="${env.LOCAL_LIBS_ROOT}" />
+
     <property name="api.level" value="26" />
     <property name="sdk.version" value="8.0" />
-    <property name="sdk.dir" value="${env.ANDROID_SDK_ROOT}" />
-    <property name="libs.jar.dir" value="${env.LOCAL_LIBS_ROOT}" />
-    <property name="zxing.jar.path" value="${libs.jar.dir}/zxing/zxing.jar" />
-    <property name="android.stubs.jar.path" value="${libs.jar.dir}/android/android-sdk-stubs.jar" />
-    <property name="support.v4.jar.path" value="${libs.jar.dir}/support-v7/android-support-v4.jar" />
+    <property name="zxing.jar.path" value="${local.libs.dir}/zxing/zxing.jar" />
+    <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
+    <property name="support.v4.jar.path" value="${local.libs.dir}/support-v7/android-support-v4.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
-    <property name="recyclerview.v7.jar.path" value="${libs.jar.dir}/support-v7/android-support-v7-recyclerview.jar" />
+    <property name="recyclerview.v7.jar.path" value="${local.libs.dir}/support-v7/android-support-v7-recyclerview.jar" />
 
     <condition property="compile.foucs">
         <istrue value="${compile_foucs}" />

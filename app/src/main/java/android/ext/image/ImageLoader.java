@@ -89,7 +89,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      */
     public LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
-        mRequest.mUri = resolveUri(uri);
+        mRequest.mUri = (uri instanceof String && ((String)uri).isEmpty() ? null : uri);
         mRequest.mFlags  = 0;
         mRequest.mBinder = this;
         mRequest.mParams = mModule.mParamsPool.obtain();
@@ -191,18 +191,10 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     /**
-     * Resolves an empty (0-length) string to <tt>null</tt>.
-     */
-    private static <URI> URI resolveUri(URI uri) {
-        return (uri instanceof String && ((String)uri).length() == 0 ? null : uri);
-    }
-
-    /**
-     * Matches the scheme of the specified <em>uri</em>. The default implementation
-     * match the "http", "https" and "ftp".
+     * Matches the scheme of the specified <em>uri</em>. The default
+     * implementation match the "http", "https" and "ftp".
      */
     private static boolean matchScheme(String uri) {
-        DebugUtils.__checkError(uri == null, "Invalid parameter - uri == null");
         return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
     }
 

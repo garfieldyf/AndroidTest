@@ -155,7 +155,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @return The value mapped by <em>key</em> or <tt>null</tt>
      * if there was no mapping.
      */
-    public final Value remove(Key key) {
+    public Value remove(Key key) {
         return mCache.remove(key);
     }
 

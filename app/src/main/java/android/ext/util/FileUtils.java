@@ -566,7 +566,7 @@ public final class FileUtils {
         if (StringUtils.getLength(name) > 0) {
             final File file = new File(dir, name);
             final int errno = mkdirs(file.getPath(), 0);
-            DebugUtils.__checkLogError(errno != 0, "FileUtils", "mkdirs '" + dir + "' failed: errno = " + errno);
+            DebugUtils.__checkLogError(errno != 0, "FileUtils", "mkdirs '" + file + "' failed: errno = " + errno);
             dir = (errno == 0 ? file : null);
         }
 

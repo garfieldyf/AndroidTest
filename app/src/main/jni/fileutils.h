@@ -81,6 +81,14 @@ __STATIC_INLINE__ jint createDirectory(const char* filename)
     return (dirPath.empty() ? EINVAL : __NS::createDirectory(dirPath.data, dirPath.size));
 }
 
+__STATIC_INLINE__ int deleteFilesImpl(const char* path, bool deleteSelf)
+{
+    assert(path);
+
+    const int errnum = __NS::deleteFiles(path);
+    return (errnum == 0 && deleteSelf ? __NS::deleteFile(path) : errnum);
+}
+
 __STATIC_INLINE__ int buildPath(char (&outPath)[MAX_PATH], const char* path, size_t length)
 {
     assert(path);
@@ -440,7 +448,7 @@ JNIEXPORT_METHOD(jint) deleteFiles(JNIEnv* env, jclass /*clazz*/, jstring path, 
 
     struct stat buf;
     const JNI::jstring_t jpath(env, path);
-    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? __NS::deleteFiles(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
+    return (::lstat(jpath, &buf) == 0 ? (S_ISDIR(buf.st_mode) ? deleteFilesImpl(jpath, deleteSelf) : __NS::deleteFile(jpath)) : errno);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

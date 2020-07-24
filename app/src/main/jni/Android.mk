@@ -95,6 +95,7 @@ PACKAGE_UTILITIES := android/ext/util/
 endif
 
 LOCAL_C_INCLUDES += $(LOCAL_INCLUDE_PATH)/common $(LOCAL_INCLUDE_PATH)/android
+# LOCAL_CPPFLAGS += -DASSERT_THROW_EXCEPTION
 LOCAL_CPPFLAGS   += -fvisibility=hidden -Wall -Wunused -Wcomment -Wparentheses -Wunused-label -Wchar-subscripts -Wunused-variable \
                     -Wunused-function -Wunused-parameter -Wuninitialized -Wreturn-type -Wformat -Wshadow -Wunused-value -Wpointer-arith \
                     -DPACKAGE_UTILITIES=\"$(PACKAGE_UTILITIES)\" -DPACKAGE_GRAPHICS=\"$(PACKAGE_GRAPHICS)\"

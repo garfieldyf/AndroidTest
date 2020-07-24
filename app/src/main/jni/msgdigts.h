@@ -27,11 +27,15 @@ namespace MessageDigests {
 
 enum
 {
-    MD5    = 0,     // The MD5 hashing algorithm.
-    SHA1   = 1,     // The SHA1(SHA) hashing algorithm.
-    SHA256 = 2,     // The SHA256 hashing algorithm.
-    SHA384 = 3,     // The SHA384 hashing algorithm.
-    SHA512 = 4,     // The SHA512 hashing algorithm.
+    // The message digest hash algorithm.
+    MD5    = 0,
+    SHA1   = 1,
+    SHA256 = 2,
+    SHA384 = 3,
+    SHA512 = 4,
+
+    // The buffer size for computing the hash value.
+    _BUF_SIZE = 8192,
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,8 +66,8 @@ __STATIC_INLINE__ jint computeFileImpl(const __NS::File& file, JNIEnv* env, jbyt
     assert(!file.isEmpty());
 
     ssize_t readBytes;
-    u_char buffer[8192];
     TMessageDigest digest;
+    u_char buffer[_BUF_SIZE];
 
     while ((readBytes = file.read(buffer, sizeof(buffer))) > 0)
         digest.update(buffer, readBytes);
@@ -80,7 +84,7 @@ __STATIC_INLINE__ jint computeStringImpl(JNIEnv* env, jstring str, jbyteArray re
     assert(offset >= 0);
 
     TMessageDigest digest;
-    JNI::_jstring_t<1024> jstr(env, str);
+    JNI::_jstring_t<2048> jstr(env, str);
     digest.update((const u_char*)jstr.str(), jstr.length);
 
     return digestImpl(digest, env, result, offset);
@@ -96,8 +100,8 @@ __STATIC_INLINE__ jint computeByteArrayImpl(JNIEnv* env, jbyteArray data, jint d
     assert(env->GetArrayLength(data) - dataOffset >= dataLength);
 
     int32_t readBytes;
-    u_char buffer[8192];
     TMessageDigest digest;
+    u_char buffer[_BUF_SIZE];
 
     __NS::ByteArrayInputStream is(env, data, dataLength, dataOffset);
     while ((readBytes = is.read(buffer, _countof(buffer))) > 0)

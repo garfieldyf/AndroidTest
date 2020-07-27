@@ -1,7 +1,7 @@
 package android.ext.image;
 
 import static android.ext.image.ImageModule.PARAMETERS;
-import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
@@ -11,7 +11,7 @@ import android.widget.ImageView;
 
 /**
  * Class <tt>IconLoader</tt> allows to load the icon associated with the {@link ResolveInfo}
- * or {@link ApplicationInfo} on a background thread and bind it to target on the UI thread.
+ * or {@link PackageItemInfo} on a background thread and bind it to target on the UI thread.
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;[ IconLoader | loader ]
@@ -19,9 +19,9 @@ import android.widget.ImageView;
  *      class="classFullName"
  *      app:flags="[ none | noMemoryCache ]" /&gt;
  *
- * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name or applicationInfo.packageName)
+ * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name or packageItemInfo.name)
  *       .placeholder(R.drawable.ic_placeholder)
- *       .parameters(resolveInfo or applicationInfo)
+ *       .parameters(resolveInfo or packageItemInfo)
  *       .into(imageView);</pre>
  * @author Garfield
  */
@@ -54,8 +54,8 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
         DebugUtils.__checkError(param == null, "Invalid parameter - param == null");
         if (param instanceof ResolveInfo) {
             return ((ResolveInfo)param).loadIcon(mPackageManager);
-        } else if (param instanceof ApplicationInfo) {
-            return ((ApplicationInfo)param).loadIcon(mPackageManager);
+        } else if (param instanceof PackageItemInfo) {
+            return ((PackageItemInfo)param).loadIcon(mPackageManager);
         } else {
             return mPackageManager.getDefaultActivityIcon();
         }

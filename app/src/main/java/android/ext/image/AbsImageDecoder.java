@@ -85,12 +85,14 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         opts.outWidth  = 0;
         opts.outHeight = 0;
         opts.inScaled  = true;
+        opts.inDither  = false;
         opts.inMutable = false;
         opts.inSampleSize  = 0;
         opts.outMimeType   = null;
         opts.inTempStorage = null;
         opts.inTargetDensity = 0;
         opts.inScreenDensity = 0;
+        opts.inPremultiplied = true;
         opts.inJustDecodeBounds = false;
         opts.inPreferredConfig  = Config.ARGB_8888;
 

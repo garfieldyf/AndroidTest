@@ -425,22 +425,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
-        if (mPageCache instanceof SimpleLruCache) {
-            final StringBuilder result = new StringBuilder(128);
-            final Formatter formatter  = new Formatter(result);
-            final Set<Entry<Integer, Page<E>>> entries = ((SimpleLruCache<Integer, Page<E>>)mPageCache).snapshot().entrySet();
-
-            DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
-            result.setLength(0);
-            printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
-
-            for (Entry<Integer, Page<E>> entry : entries) {
-                final Page<E> page = entry.getValue();
-                result.setLength(0);
-
-                formatter.format("    Page %-2d ==> ", entry.getKey());
-                printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
-            }
+        if (mPageCache instanceof ArrayMapCache) {
+            dump(printer, ((ArrayMapCache<Integer, Page<E>>)mPageCache).entrySet());
+        } else if (mPageCache instanceof SimpleLruCache) {
+            dump(printer, ((SimpleLruCache<Integer, Page<E>>)mPageCache).snapshot().entrySet());
         }
     }
 
@@ -478,6 +466,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The page, or <tt>null</tt>.
      */
     protected abstract Page<E> loadPage(int pageIndex, int startPosition, int itemCount);
+
+    /**
+     * Dump this page cache.
+     */
+    private void dump(Printer printer, Set<Entry<Integer, Page<E>>> entries) {
+        final StringBuilder result = new StringBuilder(128);
+        final Formatter formatter  = new Formatter(result);
+        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
+        result.setLength(0);
+        printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
+
+        for (Entry<Integer, Page<E>> entry : entries) {
+            final Page<E> page = entry.getValue();
+            result.setLength(0);
+
+            formatter.format("    Page %-2d ==> ", entry.getKey());
+            printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+        }
+    }
 
     /**
      * Class <tt>Adapter</tt>

@@ -3,6 +3,8 @@ package android.ext.cache;
 import android.ext.util.DebugUtils;
 import android.util.ArrayMap;
 import android.util.Printer;
+import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * Class <tt>ArrayMapCache</tt> is an implementation of a {@link Cache}.
@@ -26,6 +28,14 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
      */
     public ArrayMapCache(int capacity) {
         map = new ArrayMap<K, V>(capacity);
+    }
+
+    /**
+     * Returns a {@link Set} of all of the keys and values.
+     * @return A <tt>Set</tt> of all of the keys and values.
+     */
+    public final Set<Entry<K, V>> entrySet() {
+        return map.entrySet();
     }
 
     @Override
@@ -57,7 +67,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
         DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
         for (int i = 0; i < size; ++i) {
             result.setLength(0);
-            printer.println(result.append("  ").append(map.keyAt(i)).append(" ==> ").append(map.valueAt(i)).toString());
+            printer.println(DebugUtils.toString(map.valueAt(i), result.append("  ").append(map.keyAt(i)).append(" ==> ")).toString());
         }
     }
 }

@@ -1,5 +1,6 @@
 package android.ext.database;
 
+import android.app.Activity;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -55,6 +56,7 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
      * Sets the object that owns this handler.
      * @param owner The owner object.
      * @see #getOwner()
+     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
@@ -65,11 +67,26 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
      * @return The owner object or <tt>null</tt>
      * if the owner released by the GC.
      * @see #setOwner(Object)
+     * @see #getOwnerActivity()
      */
     @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
+    }
+
+    /**
+     * Alias of {@link #getOwner()}.
+     * @return The <tt>Activity</tt> that owns this handler or <tt>null</tt> if
+     * the owner activity has been finished or destroyed or release by the GC.
+     * @see #getOwner()
+     * @see #setOwner(Object)
+     */
+    @SuppressWarnings("unchecked")
+    public final <T extends Activity> T getOwnerActivity() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final T activity = (T)mOwner.get();
+        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
 
     public final void dump(Printer printer) {

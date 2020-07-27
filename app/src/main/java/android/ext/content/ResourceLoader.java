@@ -203,24 +203,25 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return result;
     }
 
-    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, String cacheFile, boolean hitCache) {
-        final String tempFile = cacheFile + ".tmp";
+    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, File cacheFile, boolean hitCache) {
+        final String cachePath = cacheFile.getPath();
+        final File tempFile = new File(cachePath + ".tmp");
         Result result = null;
         try {
             final int statusCode = loadParams.newDownloadRequest(context, key).download(tempFile, cancelable, null);
-            if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile))) {
+            if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(hitCache && FileUtils.compareFile(cachePath, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
-                result = loadParams.parseResult(context, key, new File(tempFile), null);
+                result = loadParams.parseResult(context, key, tempFile, null);
                 DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
                 if (result != null) {
                     // Save the temp file to the cache file.
-                    FileUtils.moveFile(tempFile, cacheFile);
-                    DebugUtils.__checkDebug(true, "ResourceLoader", "save the cache file = " + cacheFile + ", hitCache = " + hitCache);
+                    FileUtils.moveFile(tempFile.getPath(), cachePath);
+                    DebugUtils.__checkDebug(true, "ResourceLoader", "save the cache file = " + cachePath + ", hitCache = " + hitCache);
                 }
             }
         } catch (Exception e) {
-            FileUtils.deleteFiles(tempFile, false);
+            tempFile.delete();
             Log.e(ResourceLoader.class.getName(), "Couldn't load resource - key = " + key + "\n" + e);
         }
 
@@ -233,8 +234,8 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
          */
         if (hitCache && result == null) {
             DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
+            tempFile.delete();
             cancelable.cancel(false);
-            FileUtils.deleteFiles(tempFile, false);
         }
 
         return result;
@@ -263,7 +264,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 setProgress(result);
             }
 
-            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile.getPath(), hitCache));
+            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile, hitCache));
         }
 
         @Override

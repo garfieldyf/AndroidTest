@@ -134,6 +134,6 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
             publishProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mKey, mLoadParams, this, cacheFile.getPath(), hitCache));
+        return (isCancelled() ? null : download(mContext, mKey, mLoadParams, this, cacheFile, hitCache));
     }
 }

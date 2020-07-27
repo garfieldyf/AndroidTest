@@ -291,7 +291,6 @@ public class DownloadRequest {
      * cancelled before it completed normally the returned value is undefined, If the download failed return <tt>null</tt>.
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(File, Cancelable, byte[])
-     * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
@@ -313,7 +312,6 @@ public class DownloadRequest {
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(File, Cancelable, byte[])
-     * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      */
     public final int download(OutputStream out, Cancelable cancelable, byte[] tempBuffer) throws IOException {
@@ -339,7 +337,6 @@ public class DownloadRequest {
      * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
      * @throws IOException if an error occurs while downloading the resource.
      * @see #download(Cancelable)
-     * @see #download(String, Cancelable, byte[])
      * @see #download(DownloadCallback, Object[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
@@ -363,23 +360,6 @@ public class DownloadRequest {
     }
 
     /**
-     * Equivalent to calling <tt>download(new File(filename), cancelable, tempBuffer)</tt>.
-     * @param filename The file to write the resource, must be absolute file path.
-     * @param cancelable A {@link Cancelable} can be check the download is cancelled, or <tt>null</tt> if
-     * none. If the download was cancelled before it completed normally the file's contents is undefined.
-     * @param tempBuffer May be <tt>null</tt>. The temporary byte array to use for downloading.
-     * @return The response code returned by the remote server, <tt>-1</tt> if no valid response code.
-     * @throws IOException if an error occurs while downloading the resource.
-     * @see #download(Cancelable)
-     * @see #download(File, Cancelable, byte[])
-     * @see #download(DownloadCallback, Object[])
-     * @see #download(OutputStream, Cancelable, byte[])
-     */
-    public final int download(String filename, Cancelable cancelable, byte[] tempBuffer) throws IOException {
-        return download(new File(filename), cancelable, tempBuffer);
-    }
-
-    /**
      * Downloads the resource from the remote server with the arguments supplied to this request.
      * @param callback The {@link DownloadCallback} to used to downloads.
      * @param params The parameters passed into {@link DownloadCallback#onDownload}. If no parameters,
@@ -388,7 +368,6 @@ public class DownloadRequest {
      * @throws Exception if an error occurs while downloading the resource.
      * @see #download(Cancelable)
      * @see #download(File, Cancelable, byte[])
-     * @see #download(String, Cancelable, byte[])
      * @see #download(OutputStream, Cancelable, byte[])
      */
     @SuppressWarnings("unchecked")

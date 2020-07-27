@@ -30,7 +30,7 @@ import java.io.File;
  *     }
  * }
  *
- * new ResourceTask&lt;String, JSONObject&gt;(activity, url)
+ * new ResourceTask&lt;String, JSONObject&gt;(context, url)
  *    .setCookie(cookie)
  *    .setOnLoadCompleteListener(new LoadCompleteListener())
  *    .execute(loadParams);</pre>
@@ -66,23 +66,10 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param key The key of this task.
-     * @see #ResourceTask(Activity, Key)
      */
     public ResourceTask(Context context, Key key) {
         mKey = key;
         mContext = context.getApplicationContext();
-    }
-
-    /**
-     * Constructor
-     * @param ownerActivity The owner <tt>Activity</tt>.
-     * @param key The key of this task.
-     * @see #ResourceTask(Context, Key)
-     */
-    public ResourceTask(Activity ownerActivity, Key key) {
-        super(ownerActivity);
-        mKey = key;
-        mContext = ownerActivity.getApplicationContext();
     }
 
     /**
@@ -108,9 +95,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     @Override
     protected void onPostExecute(Result result) {
         DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setOnLoadCompleteListener()");
-        if (validateOwner(mOwner)) {
-            mListener.onLoadComplete(mKey, mLoadParams, mCookie, result);
-        }
+        mListener.onLoadComplete(mKey, mLoadParams, mCookie, result);
     }
 
     @Override

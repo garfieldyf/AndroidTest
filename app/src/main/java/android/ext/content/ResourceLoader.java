@@ -1,6 +1,5 @@
 package android.ext.content;
 
-import static android.ext.content.AbsAsyncTask.validateOwner;
 import static java.net.HttpURLConnection.HTTP_OK;
 import android.app.Activity;
 import android.content.Context;
@@ -75,13 +74,11 @@ import java.util.concurrent.Executor;
  *
  * private ResourceLoader&lt;String, JSONObject&gt; mLoader;
  *
- * mLoader = new ResourceLoader&lt;String, JSONObject&gt;(activity, executor);
+ * mLoader = new ResourceLoader&lt;String, JSONObject&gt;(context, executor);
  * mLoader.load(url, new JSONLoadParams(), new LoadCompleteListener(), cookie);</pre>
  * @author Garfield
  */
 public final class ResourceLoader<Key, Result> extends Loader<Key> {
-    private static final int MAX_POOL_SIZE = 8;
-
     /**
      * The application <tt>Context</tt>.
      */
@@ -90,29 +87,16 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
     /**
      * The owner of this loader.
      */
-    /* package */ WeakReference<Object> mOwner;
+    private WeakReference<Object> mOwner;
 
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #ResourceLoader(Activity, Executor)
      */
     public ResourceLoader(Context context, Executor executor) {
-        super(executor, MAX_POOL_SIZE);
+        super(executor, 8);
         mContext = context.getApplicationContext();
-    }
-
-    /**
-     * Constructor
-     * @param ownerActivity The owner <tt>Activity</tt>.
-     * @param executor The <tt>Executor</tt> to executing load task.
-     * @see #ResourceLoader(Context, Executor)
-     */
-    public ResourceLoader(Activity ownerActivity, Executor executor) {
-        super(executor, MAX_POOL_SIZE);
-        mOwner = new WeakReference<Object>(ownerActivity);
-        mContext = ownerActivity.getApplicationContext();
     }
 
     /**
@@ -141,6 +125,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
      * Sets the object that owns this loader.
      * @param owner The owner object.
      * @see #getOwner()
+     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
@@ -151,11 +136,26 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
      * @return The owner object or <tt>null</tt>
      * if the owner released by the GC.
      * @see #setOwner(Object)
+     * @see #getOwnerActivity()
      */
     @SuppressWarnings("unchecked")
     public final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
+    }
+
+    /**
+     * Alias of {@link #getOwner()}.
+     * @return The <tt>Activity</tt> that owns this loader or <tt>null</tt> if
+     * the owner activity has been finished or destroyed or release by the GC.
+     * @see #getOwner()
+     * @see #setOwner(Object)
+     */
+    @SuppressWarnings("unchecked")
+    public final <T extends Activity> T getOwnerActivity() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final T activity = (T)mOwner.get();
+        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
 
     @Override
@@ -269,14 +269,14 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
 
         @Override
         public void onProgress(Object value) {
-            if (mState != SHUTDOWN && validateOwner(mOwner)) {
+            if (mState != SHUTDOWN) {
                 mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
             }
         }
 
         @Override
         public void onPostExecute(Object result) {
-            if (!isTaskCancelled(mKey, this) && validateOwner(mOwner)) {
+            if (!isTaskCancelled(mKey, this)) {
                 mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
             }
 

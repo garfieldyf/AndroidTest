@@ -218,7 +218,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkStartMethodTracing();
-        Pools.clearByteArrayPool();
+        Pools.BYTE_ARRAY_POOL.clear();
         if (mImageCache != null) {
             mImageCache.trimMemory(level);
         }

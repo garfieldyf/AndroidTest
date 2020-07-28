@@ -75,10 +75,11 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Sets the <em>data</em> to post to the remote HTTP server.
-     * @param data May be a <tt>String, File, InputStream, JSONObject,
-     * JSONArray</tt> or their collections(<tt>Array, Collection, Map</tt>).
+     * @param data May be a <tt>JSONObject, JSONArray, File, InputStream</tt>
+     * or the collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
      * @see #post(byte[], int, int)
+     * @see #post(String, int, int)
      * @see #post(PostCallback, Object[])
      * @see JSONUtils#writeObject(JsonWriter, Object)
      */
@@ -89,6 +90,36 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
+     * Sets the byte array to post to the remote HTTP server.
+     * @param data The byte array to post.
+     * @param offset The start position in <em>data</em> from where to get bytes.
+     * @param count The number of bytes from <em>data</em> to write to.
+     * @return This request.
+     * @see #post(Object)
+     * @see #post(String, int, int)
+     * @see #post(PostCallback, Object[])
+     */
+    public final DownloadPostRequest post(byte[] data, int offset, int count) {
+        DebugUtils.__checkRange(offset, count, data.length);
+        return postImpl(data, offset, count);
+    }
+
+    /**
+     * Sets the <tt>String</tt> to post to the remote HTTP server.
+     * @param data The string to post.
+     * @param offset The start position in <em>data</em> from where to get characters.
+     * @param count The number of characters from <em>data</em> to write to.
+     * @return This request.
+     * @see #post(Object)
+     * @see #post(byte[], int, int)
+     * @see #post(PostCallback, Object[])
+     */
+    public final DownloadPostRequest post(String data, int offset, int count) {
+        DebugUtils.__checkRange(offset, count, data.length());
+        return postImpl(data, offset, count);
+    }
+
+    /**
      * Sets the {@link PostCallback} to post the data to the remote HTTP server.
      * @param callback The <tt>PostCallback</tt> to set.
      * @param params The parameters passed into {@link PostCallback#onPostData}.
@@ -96,28 +127,12 @@ public final class DownloadPostRequest extends DownloadRequest {
      * an empty array.
      * @see #post(Object)
      * @see #post(byte[], int, int)
+     * @see #post(String, int, int)
      */
     public final DownloadPostRequest post(PostCallback callback, Object... params) {
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
         mParams = params;
         mData = callback;
-        return this;
-    }
-
-    /**
-     * Sets the byte array to post to the remote HTTP server.
-     * @param data The byte array to post.
-     * @param offset The start position in <em>data</em> from where to get bytes.
-     * @param count The number of bytes from <em>data</em> to write to.
-     * @return This request.
-     * @see #post(Object)
-     * @see #post(PostCallback, Object[])
-     */
-    public final DownloadPostRequest post(byte[] data, int offset, int count) {
-        DebugUtils.__checkRange(offset, count, data.length);
-        DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
-        mData = data;
-        mParams = new Object[] { offset, count };
         return this;
     }
 
@@ -130,19 +145,18 @@ public final class DownloadPostRequest extends DownloadRequest {
         } else if (mData instanceof File) {
             connectImpl();
             postData((File)mData);
-        } else if (mData instanceof byte[]) {
-            connectImpl();
-            postData((byte[])mData, (int)mParams[0], (int)mParams[1]);
-        } else if (mData instanceof String) {
-            final byte[] data = ((String)mData).getBytes();
-            connectImpl();
-            postData(data, 0, data.length);
         } else if (mData instanceof InputStream) {
             connectImpl();
             postData((InputStream)mData);
         } else if (mData instanceof PostCallback) {
             connectImpl();
             ((PostCallback)mData).onPostData(mConnection, mParams);
+        } else if (mData instanceof byte[]) {
+            connectImpl();
+            postData((byte[])mData, (int)mParams[0], (int)mParams[1]);
+        } else if (mData instanceof String) {
+            connectImpl();
+            postData((String)mData, (int)mParams[0], (int)mParams[1]);
         } else {
             DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", DebugUtils.toString(mData, new StringBuilder("Unsupported POST type - ")).toString());
             mConnection.connect();
@@ -159,7 +173,18 @@ public final class DownloadPostRequest extends DownloadRequest {
      */
     private void connectImpl() throws IOException {
         ((HttpURLConnection)mConnection).setRequestMethod("POST");
+        mConnection.setDoOutput(true);
         mConnection.connect();
+    }
+
+    /**
+     * Sets the <em>data</em> to post to the remote HTTP server.
+     */
+    private DownloadPostRequest postImpl(Object data, int offset, int count) {
+        DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
+        mData = data;
+        mParams = new Object[] { offset, count };
+        return this;
     }
 
     /**
@@ -181,6 +206,15 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
+     * Posts the data to the remote HTTP server.
+     */
+    private void postData(Object data) throws IOException {
+        try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8))) {
+            JSONUtils.writeObject(writer, data);
+        }
+    }
+
+    /**
      * Posts the byte array to the remote HTTP server.
      */
     private void postData(byte[] data, int offset, int count) throws IOException {
@@ -190,11 +224,11 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the data to the remote HTTP server.
+     * Posts the <tt>String</tt> to the remote HTTP server.
      */
-    private void postData(Object data) throws IOException {
-        try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8))) {
-            JSONUtils.writeObject(writer, data);
+    private void postData(String data, int offset, int count) throws IOException {
+        try (final OutputStreamWriter writer = new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8)) {
+            writer.write(data, offset, count);
         }
     }
 

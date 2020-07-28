@@ -14,6 +14,11 @@ import java.util.Arrays;
  */
 public final class Pools {
     /**
+     * The byte array pool for managing a pool of byte arrays.
+     */
+    public static final Pool<byte[]> BYTE_ARRAY_POOL;
+
+    /**
      * Creates a new <b>fixed-size</b> {@link Pool}.
      * @param factory The {@link Factory} to create a new element
      * when the pool is empty.
@@ -34,36 +39,6 @@ public final class Pools {
      */
     public static <E> Pool<E> synchronizedPool(Pool<E> pool) {
         return new SynchronizedPool<E>(pool);
-    }
-
-    /**
-     * Retrieves a byte array from the pool. Allows us to avoid allocating new byte
-     * arrays in many cases. When the byte array can no longer be used, The caller
-     * should be call {@link #recycleByteArray(byte[])} to recycles the byte array.
-     * @return The byte array.
-     * @see #recycleByteArray(byte[])
-     */
-    public static byte[] obtainByteArray() {
-        return sInstance.obtain();
-    }
-
-    /**
-     * Recycles the specified <em>array</em> to the pool. After calling this function you must
-     * not ever touch the <em>array</em> again.
-     * @param array The byte array to recycle, returned earlier by {@link #obtainByteArray()}.
-     * @see #obtainByteArray()
-     */
-    public static void recycleByteArray(byte[] array) {
-        DebugUtils.__checkError(ArrayUtils.getSize(array) != 8192, "Invalid parameter - The byte array(" + array + ") was not returned earlier by obtainByteArray()");
-        sInstance.recycle(array);
-    }
-
-    /**
-     * Called on the <tt>ImageModule</tt> internal, do not call this method directly.
-     * @hide
-     */
-    public static void clearByteArrayPool() {
-        sInstance.clear();
     }
 
     public static void dumpPool(Pool<?> pool, Printer printer) {
@@ -357,10 +332,9 @@ public final class Pools {
         }
     }
 
-    /**
-     * The byte array pool for managing a pool of byte arrays.
-     */
-    private static final Pool<byte[]> sInstance = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
+    static {
+        BYTE_ARRAY_POOL = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
+    }
 
     /**
      * This class cannot be instantiated.

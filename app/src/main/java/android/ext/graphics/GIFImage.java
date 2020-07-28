@@ -201,11 +201,11 @@ public final class GIFImage {
     }
 
     private static long decodeStreamInternal(InputStream is) {
-        final byte[] buffer = Pools.obtainByteArray();
+        final byte[] buffer = Pools.BYTE_ARRAY_POOL.obtain();
         try {
             return nativeDecodeStream(is, buffer);
         } finally {
-            Pools.recycleByteArray(buffer);
+            Pools.BYTE_ARRAY_POOL.recycle(buffer);
         }
     }
 

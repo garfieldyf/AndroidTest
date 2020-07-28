@@ -148,7 +148,7 @@ public class BarcodeDecorView extends View {
      * @see #setTextSize(int)
      */
     public void setTextSize(float textSize) {
-        if (Float.compare(mPaint.getTextSize(), textSize) != 0) {
+        if (mPaint.getTextSize() != textSize) {
             mPaint.setTextSize(textSize);
             invalidate();
         }
@@ -181,7 +181,7 @@ public class BarcodeDecorView extends View {
      * @see #setTextOffset(int)
      */
     public void setTextOffset(float offset) {
-        if (Float.compare(mTextOffset, offset) != 0) {
+        if (mTextOffset != offset) {
             mTextOffset = offset;
             invalidate();
         }
@@ -375,6 +375,6 @@ public class BarcodeDecorView extends View {
 
     private static float getDimension(String packageName, String name, TypedArray array, float defaultValue, int unit, DisplayMetrics dm) {
         final float value = array.getDimension(ReflectUtils.getFieldValue(packageName, name), 0);
-        return (Float.compare(value, +0.0f) != 0 ? value : TypedValue.applyDimension(unit, defaultValue, dm));
+        return (value != 0f ? value : TypedValue.applyDimension(unit, defaultValue, dm));
     }
 }

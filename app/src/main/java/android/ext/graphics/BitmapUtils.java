@@ -101,7 +101,7 @@ public final class BitmapUtils {
      * if no scaling is required.
      */
     public static Bitmap createScaledBitmap(Bitmap bitmap, float sx, float sy, Config newConfig, Paint paint) {
-        if (Float.compare(sx, +1.0f) != 0 || Float.compare(sy, +1.0f) != 0) {
+        if (sx != 1.0f || sy != 1.0f) {
             final Matrix matrix = MatrixPool.sInstance.obtain();
             matrix.setScale(sx, sy);
             bitmap = createBitmap(bitmap, matrix, newConfig, paint);
@@ -138,7 +138,7 @@ public final class BitmapUtils {
      * @see #createRotateBitmap(Bitmap, float, Config, Paint)
      */
     public static Bitmap createRotateBitmap(Bitmap bitmap, float degrees, float px, float py, Config newConfig, Paint paint) {
-        if (Float.compare(degrees, +0.0f) != 0) {
+        if (degrees != 0f) {
             final Matrix matrix = MatrixPool.sInstance.obtain();
             matrix.setRotate(degrees, px, py);
             bitmap = createBitmap(bitmap, matrix, newConfig, paint);

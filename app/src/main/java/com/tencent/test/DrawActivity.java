@@ -1,16 +1,17 @@
 package com.tencent.test;
 
 import android.app.Activity;
+import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFBaseDrawable;
 import android.ext.graphics.drawable.GIFBaseDrawable.AnimationCallback;
-import android.ext.graphics.drawable.GIFDrawable;
+import android.ext.graphics.drawable.RoundedGIFDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class DrawActivity extends Activity implements AnimationCallback {
+public class DrawActivity extends Activity implements AnimationCallback, Runnable {
     private ImageView mImageView;
     private TextView mTextView;
 
@@ -19,15 +20,23 @@ public class DrawActivity extends Activity implements AnimationCallback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_test);
 
-//        final GIFDrawable drawable = GIFDrawable.decode(getResources(), R.raw.bbb);
-//        drawable.setAnimationCallback(this);
+        final GIFBaseDrawable<?> drawable = new RoundedGIFDrawable(GIFImage.decode(getResources(), R.drawable.bbb), 20);
+//        final GIFBaseDrawable<?> drawable = new GIFDrawable(GIFImage.decode(getResources(), R.drawable.bbb));
+        drawable.setAnimationCallback(this);
         mImageView = (ImageView)findViewById(R.id.image1);
-//        mImageView.setImageDrawable(drawable);
+        mImageView.setImageDrawable(drawable);
         mTextView = (TextView)findViewById(R.id.start);
+        //mImageView.postDelayed(this, 100);
+    }
+
+    @Override
+    public void run() {
+        mImageView.invalidate();
+        mImageView.postDelayed(this, 100);
     }
 
     public void onPlayClicked(View view) {
-        final GIFDrawable drawable = (GIFDrawable)mImageView.getDrawable();
+        final GIFBaseDrawable<?> drawable = (GIFBaseDrawable<?>)mImageView.getDrawable();
         if (drawable.isRunning()) {
             drawable.stop();
             ((TextView)view).setText("Play");
@@ -38,7 +47,7 @@ public class DrawActivity extends Activity implements AnimationCallback {
     }
 
     public void onOneShotClicked(View view) {
-        final GIFDrawable drawable = (GIFDrawable)mImageView.getDrawable();
+        final GIFBaseDrawable<?> drawable = (GIFBaseDrawable<?>)mImageView.getDrawable();
         if (drawable.isOneShot()) {
             drawable.setOneShot(false);
             ((TextView)view).setText("OneShot");
@@ -56,24 +65,5 @@ public class DrawActivity extends Activity implements AnimationCallback {
     @Override
     public void onAnimationEnd(GIFBaseDrawable<?> drawable) {
         mTextView.setText("Play");
-
-//        final List<FileEntry> entries = new ArrayList<FileEntry>();
-//        FileUtils.scanFiles("", new ScanCallback() {
-//            @Keep
-//            @Override
-//            @SuppressWarnings("unchecked")
-//            public int onScanFile(String path, int type, Object cookie) {
-//                ((List<FileEntry>)cookie).add(new FileEntry(path, type));
-//                return SC_CONTINUE;
-//            }
-//        }, 0, entries);
     }
-
-//    private static final class FileEntry {
-//        private final Dirent dirent;
-//
-//        public FileEntry(String path, int type) {
-//            dirent = new Dirent(path, type);
-//        }
-//    }
 }

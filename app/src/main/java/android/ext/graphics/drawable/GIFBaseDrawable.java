@@ -25,7 +25,7 @@ import org.xmlpull.v1.XmlPullParserException;
 public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> extends ImageDrawable<T> implements Runnable, Animatable {
     /* ------------- mFlags 0x00FF0000 ------------- */
     private static final int FLAG_RUNNING = 0x00400000;
-    private static final int FLAG_SCHED   = 0x00800000;
+    private static final int FLAG_DRAWN   = 0x00800000;
 
     /* ---------- mState.mFlags 0x00FF0000 ---------- */
     private static final int FLAG_ONESHOT    = 0x00400000;
@@ -122,7 +122,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     @Override
     public void start() {
         if (!isRunning() && mState.mImage.getFrameCount() > 1) {
-            mFlags = (mFlags | FLAG_RUNNING) & ~FLAG_SCHED;
+            mFlags = (mFlags | FLAG_RUNNING) & ~FLAG_DRAWN;
             mFrameIndex = 0;
             invalidateSelf();
 
@@ -147,7 +147,7 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
     @Override
     public void run() {
-        mFlags &= ~FLAG_SCHED;
+        mFlags &= ~FLAG_DRAWN;
         mFrameIndex = (mFrameIndex + 1) % mState.mImage.getFrameCount();
         invalidateSelf();
     }
@@ -191,19 +191,22 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
     @Override
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
-        if (mState.mImage.draw(mState.mCanvas, mFrameIndex)) {
-            // Draws the GIF image current frame.
-            drawFrame(canvas, mFrameIndex, mState.mCanvas, bounds, paint);
+        if ((mFlags & FLAG_DRAWN) == 0) {
+            // Draws the GIF image current frame to bitmap canvas.
+            mState.mImage.draw(mState.mCanvas, mFrameIndex);
+        }
 
-            // Schedules the GIF image next frame.
-            if (isRunning()) {
-                if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
-                    unscheduleSelf();
-                } else if ((mFlags & FLAG_SCHED) == 0) {
-                    mFlags |= FLAG_SCHED;
-                    scheduleSelf(this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
-                    DebugUtils.__checkDebug(true, getClass().getName(), "scheduleSelf - frame = " + mFrameIndex);
-                }
+        // Draws the bitmap canvas to canvas.
+        DebugUtils.__checkDebug((mFlags & FLAG_DRAWN) != 0, getClass().getName(), "No schedule the GIF image frame " + mFrameIndex + " - do not call nativeDraw");
+        drawFrame(canvas, mState.mCanvas, bounds, paint);
+
+        // Schedules the GIF image next frame.
+        if (isRunning()) {
+            if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
+                unscheduleSelf();
+            } else if ((mFlags & FLAG_DRAWN) == 0) {
+                mFlags |= FLAG_DRAWN;
+                scheduleSelf(this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
             }
         }
     }
@@ -223,12 +226,11 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     /**
      * Draws the current frame of this GIF drawable in the <em>bounds</em>.
      * @param canvas The canvas to draw into.
-     * @param frameIndex The current frame index.
      * @param frame The current frame to be drawn.
-     * @param bounds The frame bounds of this drawable.
+     * @param bounds The frame of the contents of this drawable.
      * @param paint The paint used to draw the frame of this drawable.
      */
-    protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
+    protected void drawFrame(Canvas canvas, Bitmap frame, RectF bounds, Paint paint) {
         canvas.drawBitmap(frame, null, bounds, paint);
     }
 

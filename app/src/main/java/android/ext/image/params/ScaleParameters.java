@@ -33,7 +33,7 @@ public class ScaleParameters extends Parameters {
 
         final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(context.getPackageName(), "ScaleParameters"));
         this.value = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
-        DebugUtils.__checkError(Float.compare((float)value, +0.0f) < 0 || Float.compare((float)value, +1.0f) > 0, "The scale " + value + " out of range [0 - 1.0]");
+        DebugUtils.__checkError((float)value < 0f || (float)value > 1.0f, "The scale " + value + " out of range [0 - 1.0]");
         a.recycle();
     }
 
@@ -46,7 +46,7 @@ public class ScaleParameters extends Parameters {
      */
     public ScaleParameters(Config config, float scale) {
         super(scale, config);
-        DebugUtils.__checkError(Float.compare(scale, +0.0f) < 0 || Float.compare(scale, +1.0f) > 0, "The scale " + scale + " out of range [0 - 1.0]");
+        DebugUtils.__checkError(scale < 0f || scale > 1.0f, "The scale " + scale + " out of range [0 - 1.0]");
     }
 
     @Override
@@ -62,7 +62,7 @@ public class ScaleParameters extends Parameters {
          */
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
         final float scale = (float)value;
-        if (Float.compare(scale, +0.0f) > 0 && Float.compare(scale, +1.0f) < 0) {
+        if (scale > 0f && scale < 1.0f) {
             opts.inTargetDensity = DEVICE_DENSITY;
             opts.inDensity = (int)(DEVICE_DENSITY * (opts.outWidth / (opts.outWidth * scale)));
         } else {

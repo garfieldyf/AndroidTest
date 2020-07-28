@@ -567,7 +567,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 maxSize = (int)mImageCache;
             } else {
                 final float scaleMemory = (float)mImageCache;
-                DebugUtils.__checkError(Float.compare(scaleMemory, 1.0f) >= 0, "Invalid parameter - scaleMemory(" + scaleMemory + ") >= 1.0");
+                DebugUtils.__checkError(scaleMemory >= 1.0f, "Invalid parameter - The scaleMemory(" + scaleMemory + ") out of range [0 - 1.0)");
                 maxSize = (int)(Runtime.getRuntime().maxMemory() * scaleMemory + 0.5f);
             }
 

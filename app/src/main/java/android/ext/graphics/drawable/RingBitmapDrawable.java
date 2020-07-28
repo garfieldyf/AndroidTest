@@ -59,7 +59,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
      * @see #getInnerRadius()
      */
     public void setInnerRadius(float innerRadius) {
-        if (Float.compare(mState.mInnerRadius, innerRadius) != 0) {
+        if (mState.mInnerRadius != innerRadius) {
             mState.mInnerRadius = innerRadius;
             invalidateSelf(mState.mShader, true);
         }
@@ -75,7 +75,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
         outPath.setFillType(FillType.EVEN_ODD);
         outPath.addOval(bounds, Direction.CW);
         final float outerRadius = Math.min(bounds.width(), bounds.height()) * 0.5f;
-        if (Float.compare(mState.mInnerRadius, +0.0f) > 0 && Float.compare(mState.mInnerRadius, outerRadius) < 0) {
+        if (mState.mInnerRadius > 0f && mState.mInnerRadius < outerRadius) {
             outPath.addCircle(bounds.centerX(), bounds.centerY(), mState.mInnerRadius, Direction.CW);
         }
     }

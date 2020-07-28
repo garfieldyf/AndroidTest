@@ -428,7 +428,7 @@ public abstract class ImageDrawable<T extends ImageDrawable.ImageState> extends 
     /* package */ static boolean radiusEquals(float[] radii, int start, float radius) {
         if (radii != null && radii.length >= 8) {
             for (; start < 8; ++start) {
-                if (Float.compare(radii[start], radius) != 0) {
+                if (radii[start] != radius) {
                     return false;
                 }
             }

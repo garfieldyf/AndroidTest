@@ -25,7 +25,7 @@ public abstract class ShapeGIFDrawable<T extends ShapeGIFDrawable.ShapeGIFState>
     }
 
     @Override
-    protected void drawFrame(Canvas canvas, int frameIndex, Bitmap frame, RectF bounds, Paint paint) {
+    protected void drawFrame(Canvas canvas, Bitmap frame, RectF bounds, Paint paint) {
         if (paint.getShader() != null) {
             canvas.drawPath(mState.mPath, paint);
         } else {

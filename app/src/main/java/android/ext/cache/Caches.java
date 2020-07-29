@@ -95,8 +95,8 @@ public final class Caches {
         @Override
         public void put(Bitmap bitmap) {
             DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
-            DebugUtils.__checkWarning(bitmap.isRecycled(), "EmptyBitmapPool", "The " + bitmap + " is recycled, couldn't recycle to reused.");
-            DebugUtils.__checkWarning(!bitmap.isMutable(), "EmptyBitmapPool", "The " + bitmap + " is immutable, couldn't recycle to reused.");
+            DebugUtils.__checkError(bitmap.isRecycled(), "Invalid parameter - The " + bitmap + " is recycled, couldn't recycle to reused.");
+            DebugUtils.__checkError(!bitmap.isMutable(), "Invalid parameter - The " + bitmap + " is immutable, couldn't recycle to reused.");
         }
     }
 

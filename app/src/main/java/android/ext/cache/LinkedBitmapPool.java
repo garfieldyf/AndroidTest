@@ -52,16 +52,14 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
     @Override
     public synchronized void put(Bitmap bitmap) {
         DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
-        DebugUtils.__checkWarning(bitmap.isRecycled(), "LinkedBitmapPool", "The " + bitmap + " is recycled, couldn't recycle to reused.");
-        DebugUtils.__checkWarning(!bitmap.isMutable(), "LinkedBitmapPool", "The " + bitmap + " is immutable, couldn't recycle to reused.");
-        if (bitmap.isMutable() && !bitmap.isRecycled()) {
-            // Inserts the bitmap into the mBitmaps at the appropriate position.
-            ArrayUtils.insert(mBitmaps, bitmap, this);
+        DebugUtils.__checkError(bitmap.isRecycled(), "Invalid parameter - The " + bitmap + " is recycled, couldn't recycle to reused.");
+        DebugUtils.__checkError(!bitmap.isMutable(), "Invalid parameter - The " + bitmap + " is immutable, couldn't recycle to reused.");
+        // Inserts the bitmap into the mBitmaps at the appropriate position.
+        ArrayUtils.insert(mBitmaps, bitmap, this);
 
-            // Removes the smallest bitmaps until the mBitmaps.size() is less the mMaxSize.
-            while (mBitmaps.size() > mMaxSize) {
-                mBitmaps.removeFirst();
-            }
+        // Removes the smallest bitmaps until the mBitmaps.size() is less the mMaxSize.
+        while (mBitmaps.size() > mMaxSize) {
+            mBitmaps.removeFirst();
         }
     }
 

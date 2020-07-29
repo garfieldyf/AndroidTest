@@ -437,7 +437,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          */
         public Builder(Context context) {
             mContext  = context;
-            mPriority = Process.THREAD_PRIORITY_BACKGROUND;
+            mPriority = Process.THREAD_PRIORITY_BACKGROUND - 5;
         }
 
         /**

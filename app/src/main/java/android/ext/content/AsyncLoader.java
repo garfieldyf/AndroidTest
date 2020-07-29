@@ -181,7 +181,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @param task The {@link Task}.
      * @return The target <tt>Object</tt> or <tt>null</tt> if
      * loads synchronously.
-     * @hide
      */
     protected final Object getTarget(Task task) {
         return (task != null ? ((LoadTask)task).mTarget : null);
@@ -190,7 +189,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * Called on the UI thread to recycle the <em>params</em>.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
-     * @hide
      */
     protected void onRecycle(Params[] params) {
     }

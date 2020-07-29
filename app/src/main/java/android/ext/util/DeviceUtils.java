@@ -119,11 +119,11 @@ public final class DeviceUtils {
 
         infos.setLength(0);
         infos.append("  model = ").append(Build.MODEL)
-             .append(", brand = ").append(Build.BRAND)
-             .append(", manufacturer = ").append(Build.MANUFACTURER)
+             .append("\n  brand = ").append(Build.BRAND)
+             .append("\n  manufacturer = ").append(Build.MANUFACTURER)
              .append("\n  cpu info [ ").append("model = ").append(Build.HARDWARE)
+             .append(", platform = ").append(getCpuModel())
              .append(", core = ").append(cpuCore)
-             .append(", abis = ").append(Arrays.toString(SUPPORTED_ABIS))
              .append(" ]");
         printer.println(infos.toString());
 
@@ -140,8 +140,10 @@ public final class DeviceUtils {
 
         // Dumps sdk, version, abis, and mac infos.
         infos.setLength(0);
-        infos.append("  sdk = ").append(Build.VERSION.SDK_INT)
-             .append("\n  version = ").append(Build.VERSION.RELEASE);
+        infos.append("  display = ").append(Build.DISPLAY)
+             .append("\n  sdk = ").append(Build.VERSION.SDK_INT)
+             .append("\n  version = ").append(Build.VERSION.RELEASE)
+             .append("\n  abis = ").append(Arrays.toString(SUPPORTED_ABIS));
 
         if (Build.VERSION.SDK_INT > 20) {
             infos.append("\n  abis32 = ").append(Arrays.toString(Build.SUPPORTED_32_BIT_ABIS))
@@ -180,7 +182,7 @@ public final class DeviceUtils {
              .append("\n  width   = ").append(dm.widthPixels)
              .append("\n  height  = ").append(dm.heightPixels)
              .append("\n  density = ").append(dm.density)
-             .append("\n  densityDpi = [ ").append(toDensity(dm.densityDpi)).append(", ").append(dm.densityDpi).append(" ]")
+             .append("\n  densityDpi = ").append(toDensity(dm.densityDpi))
              .append("\n  scaledDensity = ").append(dm.scaledDensity)
              .append("\n  xdpi = ").append(dm.xdpi)
              .append("\n  ydpi = ").append(dm.ydpi);
@@ -383,6 +385,10 @@ public final class DeviceUtils {
         default:
             return Integer.toString(layoutSize);
         }
+    }
+
+    private static String getCpuModel() {
+        return SystemProperties.get("ro.board.platform", "N/A");
     }
 
     private static String getAppHeapSize(String key) {

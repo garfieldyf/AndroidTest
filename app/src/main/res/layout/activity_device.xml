@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <android.ext.temp.PrinterView
+    <com.tencent.temp.PrinterView
         android:id="@+id/device_info"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

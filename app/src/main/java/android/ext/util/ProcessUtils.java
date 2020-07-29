@@ -239,7 +239,7 @@ public final class ProcessUtils {
          * "brand": "BRAND",
          * "sdk": 19,
          * "version": "4.4.4",
-         * "abis": "armeabi-v7a, armeabi",
+         * "abis": "arm64-v8a|armeabi-v7a|armeabi",
          * "package": "com.xxxx"</pre>
          * @param writer The {@link JsonWriter} to write to.
          * @param packageName The application's package name.
@@ -260,7 +260,7 @@ public final class ProcessUtils {
             final String[] abis = DeviceUtils.SUPPORTED_ABIS;
             final StringBuilder result = new StringBuilder(48).append(abis[0]);
             for (int i = 1; i < abis.length; ++i) {
-                result.append(", ").append(abis[i]);
+                result.append('|').append(abis[i]);
             }
 
             return result.toString();

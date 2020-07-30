@@ -159,7 +159,7 @@ public class BarcodeEncoder {
      * @param listener The {@link OnEncodeListener} used for being notified when the contents was encoded a barcode image.
      */
     public void startEncode(Executor executor, String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
-        DebugUtils.__checkError(executor == null, "executor == null");
+        DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
         /*
          * params - { BarcodeEncoder, contents, format, width, height }
          */

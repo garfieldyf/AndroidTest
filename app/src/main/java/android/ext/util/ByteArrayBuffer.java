@@ -175,6 +175,7 @@ public final class ByteArrayBuffer extends OutputStream {
     public final void readFrom(InputStream is, int contentLength, Cancelable cancelable) throws IOException {
         // Expands this buffer capacity.
         DebugUtils.__checkError(is == null, "Invalid parameter - is == null");
+        DebugUtils.__checkDebug(true, "ByteArrayBuffer", "contentLength = " + contentLength);
         expandCapacity(contentLength, false);
         cancelable = Cancelable.ofNullable(cancelable);
 

@@ -52,6 +52,7 @@ import android.ext.util.ZipUtils;
 import android.ext.widget.AsyncViewStub;
 import android.ext.widget.AsyncViewStub.OnInflateListener;
 import android.ext.widget.CountDownTimer;
+import android.ext.widget.ViewVisibility;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -124,7 +125,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 public class ImageActivity extends Activity implements OnScrollListener, OnItemClickListener {
     private ListView mListView;
-    private ImageView mImageView;
+    private ViewVisibility mVisibility;
     private ImageAdapter mAdapter;
     private UserDatabase mDatabase;
     private UserBroadcastReceiver mReceiver;
@@ -141,7 +142,8 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         // startService(new Intent(this, TestService.class));
 
         mAdapter = new ImageAdapter();
-        mImageView = (ImageView)findViewById(R.id.blur);
+        mVisibility = new ViewVisibility(findViewById(R.id.loading_stub));
+//        mVisibility.hide(false);
         mListView = (ListView)findViewById(R.id.images);
         mListView.setAdapter(mAdapter);
         mListView.setOnScrollListener(this);
@@ -410,6 +412,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final ResourceLoader<String, JSONObject> loader = new ResourceLoader<String, JSONObject>(this, MainApplication.sThreadPool);
         loader.load(url1, params, JsonLoader.sListener, null);
 
+//        mVisibility.show(1100);
         mListView.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -418,6 +421,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
                     @Override
                     public void onFinishInflate(AsyncViewStub stub, View view, int layoutId) {
                         //Log.i("abc", view.toString());
+//                        mVisibility.hide(false);
                     }
                 });
             }
@@ -1167,11 +1171,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     @Override
     public void onBackPressed() {
-        if (mImageView.getVisibility() == View.GONE) {
-            super.onBackPressed();
-        } else {
-            mImageView.setVisibility(View.GONE);
-        }
+        super.onBackPressed();
     }
 
     @Override

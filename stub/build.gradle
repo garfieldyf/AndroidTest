@@ -31,4 +31,6 @@ android {
 }
 
 dependencies {
+    //noinspection GradlePath
+    //implementation files('E:/workspace/AndroidTest/ant/out/debug/funshion.jar')
 }

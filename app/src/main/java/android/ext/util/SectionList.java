@@ -366,7 +366,7 @@ public class SectionList<E> extends ArrayList<E> implements Cloneable {
 
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(128);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ size = %d, sectionCount = %d ] ", getClass().getSimpleName(), size(), mCount);
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s [ size = %d, sectionCount = %d ] ", getClass().getSimpleName(), size(), mCount);
         for (int i = 0; i < mCount; ++i) {
             result.setLength(0);
             final int size  = mSizes[i];

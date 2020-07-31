@@ -115,7 +115,7 @@ public final class DeviceUtils {
         context = context.getApplicationContext();
         final int cpuCore = Runtime.getRuntime().availableProcessors();
         final StringBuilder infos = new StringBuilder(256);
-        DebugUtils.dumpSummary(printer, infos, 110, " System Informations ", (Object[])null);
+        dumpSummary(printer, infos, 110, " System Informations ", (Object[])null);
 
         infos.setLength(0);
         infos.append("  model = ").append(Build.MODEL)
@@ -385,6 +385,31 @@ public final class DeviceUtils {
         default:
             return Integer.toString(layoutSize);
         }
+    }
+
+    public static StringBuilder toString(Object object, StringBuilder result) {
+        if (object == null) {
+            return result.append("null");
+        } else {
+            return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
+        }
+    }
+
+    public static void dumpSummary(Printer printer, StringBuilder result, int maxLength, String format, Object... args) {
+        final String summary = String.format(format, args);
+        final int length = (maxLength - summary.length()) / 2;
+
+        result.setLength(0);
+        for (int i = 0; i < length; ++i) {
+            result.append('=');
+        }
+
+        result.append(summary);
+        for (int i = 0; i < length; ++i) {
+            result.append('=');
+        }
+
+        printer.println(result.toString());
     }
 
     private static String getCpuModel() {

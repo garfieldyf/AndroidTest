@@ -5,6 +5,7 @@ import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import android.content.Context;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.util.Printer;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -168,7 +169,7 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
         final StringBuilder result = new StringBuilder(256);
         final Set<Entry<K, V>> entries = snapshot().entrySet();
 
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), entries.size(), size(), maxSize());
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %d, maxSize = %d ] ", getClass().getSimpleName(), entries.size(), size(), maxSize());
         for (Entry<?, ?> entry : entries) {
             result.setLength(0);
             printer.println(result.append("  ").append(entry.getKey()).append(" ==> ").append(entry.getValue()).toString());

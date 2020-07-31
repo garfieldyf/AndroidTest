@@ -3,6 +3,7 @@ package android.ext.net;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.StringUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -241,7 +242,7 @@ public final class NetworkUtils {
      */
     private static void dumpHeaders(Printer printer, URL url, String format, Map<String, ?> headers, Map<String, ?> extraHeaders) {
         final StringBuilder result = new StringBuilder(80);
-        DebugUtils.dumpSummary(printer, result, 80, format, url.getProtocol().toUpperCase(Locale.getDefault()));
+        DeviceUtils.dumpSummary(printer, result, 80, format, url.getProtocol().toUpperCase(Locale.getDefault()));
         printer.println("  URL = " + url.toString());
 
         dumpHeaders(printer, result, headers);

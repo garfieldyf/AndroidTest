@@ -263,7 +263,7 @@ public final class Pools {
                         className = element.getClass().getSimpleName() + "Pool";
                     }
 
-                    DebugUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
+                    DeviceUtils.dumpSummary(printer, result, 80, " Dumping %s [ size = %d, maxSize = %d ] ", className, size, elements.length);
                 }
 
                 result.setLength(0);
@@ -272,7 +272,7 @@ public final class Pools {
         }
 
         private StringBuilder toString(Object element, StringBuilder result) {
-            DebugUtils.toString(element, result);
+            DeviceUtils.toString(element, result);
             if (element.getClass().isArray()) {
                 result.append(" { length = ").append(Array.getLength(element)).append(" }");
             }

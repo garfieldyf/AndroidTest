@@ -1,6 +1,7 @@
 package android.ext.cache;
 
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.util.ArrayMap;
 import android.util.Printer;
 import java.util.Map.Entry;
@@ -64,10 +65,10 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(196);
         final int size = map.size();
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d ] ", getClass().getSimpleName(), size);
         for (int i = 0; i < size; ++i) {
             result.setLength(0);
-            printer.println(DebugUtils.toString(map.valueAt(i), result.append("  ").append(map.keyAt(i)).append(" ==> ")).toString());
+            printer.println(DeviceUtils.toString(map.valueAt(i), result.append("  ").append(map.keyAt(i)).append(" ==> ")).toString());
         }
     }
 }

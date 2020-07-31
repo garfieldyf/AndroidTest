@@ -4,6 +4,7 @@ import android.content.Context;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
 
         final int size = bitmaps.size();
         final StringBuilder result = new StringBuilder(288);
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), size, mMaxSize);
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping %s [ size = %d, maxSize = %d ] ", getClass().getSimpleName(), size, mMaxSize);
         for (int i = 0; i < size; ++i) {
             result.setLength(0);
             final Bitmap bitmap = bitmaps.get(i);

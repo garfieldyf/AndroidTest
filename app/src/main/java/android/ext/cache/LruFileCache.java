@@ -3,6 +3,7 @@ package android.ext.cache;
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Printer;
@@ -132,7 +133,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
         }
 
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
         result.setLength(0);
         printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).toString());
     }

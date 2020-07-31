@@ -4,6 +4,7 @@ import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.util.JsonWriter;
 import java.io.File;
@@ -158,7 +159,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             connectImpl();
             postData((String)mData, (int)mParams[0], (int)mParams[1]);
         } else {
-            DebugUtils.__checkError(mData != null, DebugUtils.toString(mData, new StringBuilder("Unsupported POST type - ")).toString());
+            DebugUtils.__checkError(mData != null, DeviceUtils.toString(mData, new StringBuilder("Unsupported POST type - ")).toString());
             mConnection.connect();
         }
 

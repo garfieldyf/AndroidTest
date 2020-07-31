@@ -3,6 +3,7 @@ package android.ext.content;
 import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
@@ -121,15 +122,15 @@ public abstract class Loader<Key> implements Factory<Task> {
         DebugUtils.__checkUIThread("dump");
         final StringBuilder result = new StringBuilder(80);
         Pools.dumpPool(mTaskPool, printer);
-        printer.println(DebugUtils.toString(mTaskPool, result.append("taskPool = ")).toString());
+        printer.println(DeviceUtils.toString(mTaskPool, result.append("taskPool = ")).toString());
 
         final int size = mRunningTasks.size();
         if (size > 0) {
             result.setLength(0);
-            DebugUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
+            DeviceUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
             for (Entry<Key, Task> entry : mRunningTasks.entrySet()) {
                 result.setLength(0);
-                printer.println(DebugUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
+                printer.println(DeviceUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
             }
         }
     }

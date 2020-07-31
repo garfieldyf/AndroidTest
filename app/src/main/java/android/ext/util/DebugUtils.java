@@ -3,7 +3,6 @@ package android.ext.util;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.util.Log;
-import android.util.Printer;
 import java.lang.reflect.Modifier;
 
 /**
@@ -63,34 +62,8 @@ public final class DebugUtils {
         Log.d(tag, String.format("%s running time = %d%cs", prefix, runningTime, timeUnit));
     }
 
-    public static void dumpSummary(Printer printer, StringBuilder result, int maxLength, String format, Object... args) {
-        final String summary = String.format(format, args);
-        final int length = (maxLength - summary.length()) / 2;
-
-        result.setLength(0);
-        for (int i = 0; i < length; ++i) {
-            result.append('=');
-        }
-
-        result.append(summary);
-        for (int i = 0; i < length; ++i) {
-            result.append('=');
-        }
-
-        printer.println(result.toString());
-    }
-
-    public static StringBuilder toString(Object object, StringBuilder result) {
-        if (object == null) {
-            return result.append("null");
-        } else {
-            return result.append(object.getClass().getName()).append('@').append(Integer.toHexString(System.identityHashCode(object)));
-        }
-    }
-
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkStartMethodTracing() {
         startMethodTracing();
@@ -98,7 +71,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkStopMethodTracing(String tag, String prefix) {
         stopMethodTracing(tag, prefix, 'm');
@@ -106,7 +78,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkUIThread(String method) {
         if (Looper.getMainLooper() != Looper.myLooper()) {
@@ -116,7 +87,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkError(boolean reportError, String message) {
         if (reportError) {
@@ -126,7 +96,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkRange(int offset, int length, int arrayLength) {
         if ((offset | length) < 0 || arrayLength - offset < length) {
@@ -136,7 +105,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkDebug(boolean report, String tag, String message) {
         if (report) {
@@ -146,7 +114,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkWarning(boolean report, String tag, String message) {
         if (report) {
@@ -156,7 +123,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkLogError(boolean report, String tag, String message) {
         if (report) {
@@ -166,7 +132,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkLogError(boolean report, String tag, String message, Throwable e) {
         if (report) {
@@ -176,7 +141,6 @@ public final class DebugUtils {
 
     /**
      * Called on the DEBUG mode, do not call this method directly.
-     * @hide
      */
     public static void __checkMemoryLeaks(Class<?> clazz) {
         if ((clazz.isAnonymousClass() || clazz.isMemberClass()) && (clazz.getModifiers() & Modifier.STATIC) == 0) {

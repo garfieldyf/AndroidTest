@@ -6,6 +6,7 @@ import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Log;
@@ -213,7 +214,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(context, key, tempFile, null);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", DebugUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", DeviceUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
                 if (result != null) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile.getPath(), cachePath);

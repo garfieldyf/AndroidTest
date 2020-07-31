@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.util.Log;
 
 public class NoteDatabase extends SQLiteOpenHelper {
@@ -14,7 +14,7 @@ public class NoteDatabase extends SQLiteOpenHelper {
 
     public long insert(long offset) {
         final SQLiteDatabase db = getWritableDatabase();
-        Log.i("yf", DebugUtils.toString(db, new StringBuilder("db = ")).toString());
+        Log.i("yf", DeviceUtils.toString(db, new StringBuilder("db = ")).toString());
         final ContentValues values = new ContentValues();
         values.put("_date", System.currentTimeMillis() + offset);
         values.put("service", "service_" + offset);

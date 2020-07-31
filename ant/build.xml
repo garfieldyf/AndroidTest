@@ -104,6 +104,11 @@
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>
 
+        <!-- delete import xxx.util.DebugUtils -->
+        <replaceregexp match="import (.*).util.DebugUtils;" replace="" flags="g" byline="true" >
+            <fileset dir="${src.dir}" includes="**/*.java" />
+        </replaceregexp>
+
         <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
         <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
         <replace file="${src.dir}/${jni.package}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />

@@ -2,6 +2,7 @@ package android.ext.concurrent;
 
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.os.Process;
 import android.util.Printer;
 import java.util.ArrayList;
@@ -144,7 +145,7 @@ public class ThreadPoolManager extends ThreadPool {
     }
 
     private static void dumpTasks(Printer printer, StringBuilder result, Collection<?> tasks, String className, String namePrefix) {
-        DebugUtils.dumpSummary(printer, result, 80, " Dumping %s %s Tasks [ size = %d ] ", className, namePrefix, tasks.size());
+        DeviceUtils.dumpSummary(printer, result, 80, " Dumping %s %s Tasks [ size = %d ] ", className, namePrefix, tasks.size());
         for (Object task : tasks) {
             result.setLength(0);
             printer.println(result.append("  ").append(task).toString());

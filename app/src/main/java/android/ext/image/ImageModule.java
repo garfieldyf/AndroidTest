@@ -31,6 +31,7 @@ import android.ext.image.params.Parameters;
 import android.ext.image.params.SizeParameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
@@ -365,7 +366,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         final StringBuilder result = new StringBuilder(130);
         final Resources res = mContext.getResources();
         final int size = mResources.size();
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
 
         final TypedValue value = new TypedValue();
         for (int i = 0; i < size; ++i) {
@@ -383,7 +384,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             } else if (object instanceof RoundedBitmapBinder) {
                 ((RoundedBitmapBinder)object).dump(printer, result);
             } else {
-                printer.println(DebugUtils.toString(object, result).toString());
+                printer.println(DeviceUtils.toString(object, result).toString());
             }
         }
 

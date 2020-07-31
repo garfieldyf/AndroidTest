@@ -5,6 +5,7 @@ import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.widget.BaseAdapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
@@ -473,16 +474,16 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private void dump(Printer printer, Set<Entry<Integer, Page<E>>> entries) {
         final StringBuilder result = new StringBuilder(128);
         final Formatter formatter  = new Formatter(result);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mInitialSize, mPageSize, mItemCount);
         result.setLength(0);
-        printer.println(DebugUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
+        printer.println(DeviceUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
 
         for (Entry<Integer, Page<E>> entry : entries) {
             final Page<E> page = entry.getValue();
             result.setLength(0);
 
             formatter.format("    Page %-2d ==> ", entry.getKey());
-            printer.println(DebugUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
+            printer.println(DeviceUtils.toString(page, result).append(" { count = ").append(page.getCount()).append(" }").toString());
         }
     }
 

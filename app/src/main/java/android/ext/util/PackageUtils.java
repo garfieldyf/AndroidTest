@@ -183,7 +183,7 @@ public final class PackageUtils {
     public static void dumpPackageInfos(Printer printer, Collection<PackageInfo> infos) {
         final StringBuilder result = new StringBuilder(384);
         final int size = ArrayUtils.getSize(infos);
-        DebugUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
+        DeviceUtils.dumpSummary(printer, result, 140, " Dumping PackageInfos [ size = %d ] ", size);
         if (size > 0) {
             for (PackageInfo info : infos) {
                 result.setLength(0);

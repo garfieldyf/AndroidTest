@@ -2,7 +2,7 @@ package android.ext.cache;
 
 import android.content.Context;
 import android.ext.graphics.BitmapUtils;
-import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.graphics.Bitmap;
 import android.util.Printer;
@@ -32,7 +32,7 @@ public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
         final Set<Entry<K, Bitmap>> entries = snapshot().entrySet();
         final StringBuilder result = new StringBuilder(384);
 
-        DebugUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %s, maxSize = %s, appMaxSize = %s ] ", getClass().getSimpleName(), entries.size(), FileUtils.formatFileSize(size()), FileUtils.formatFileSize(maxSize()), FileUtils.formatFileSize(Runtime.getRuntime().maxMemory()));
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping %s [ count = %d, size = %s, maxSize = %s, appMaxSize = %s ] ", getClass().getSimpleName(), entries.size(), FileUtils.formatFileSize(size()), FileUtils.formatFileSize(maxSize()), FileUtils.formatFileSize(Runtime.getRuntime().maxMemory()));
         for (Entry<K, Bitmap> entry : entries) {
             result.setLength(0);
             final Bitmap value = entry.getValue();

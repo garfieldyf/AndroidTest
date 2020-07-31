@@ -13,6 +13,7 @@ import android.ext.json.JSONObject;
 import android.ext.util.ArrayUtils;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.ReflectUtils;
 import android.net.Uri;
@@ -508,7 +509,7 @@ public final class DatabaseUtils {
     private static void __checkDumpCursorFields(Class<?> clazz, List<Pair<Field, String>> cursorFields) {
         final Printer printer = new LogPrinter(Log.DEBUG, "DatabaseUtils");
         final StringBuilder result = new StringBuilder(100);
-        DebugUtils.dumpSummary(printer, result, 100, " Dumping %s cursor fields [ size = %d ] ", clazz.getName(), cursorFields.size());
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s cursor fields [ size = %d ] ", clazz.getName(), cursorFields.size());
         for (Pair<Field, String> cursorField : cursorFields) {
             final String modifier = Modifier.toString(cursorField.first.getModifiers());
             result.setLength(0);

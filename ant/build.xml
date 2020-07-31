@@ -97,6 +97,7 @@
         <property name="ndk.target" value="release" />
         <property name="out.file.dir" value="${out.dir}/release" />
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
+        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.file.dir}/${module.name}-proguard.txt" />
 
         <!-- delete call the __checkXXX methods -->
         <echo level="info">Delete __checkXXX() methods.</echo>
@@ -149,7 +150,7 @@
         </ant>
 
         <!-- copy so file -->
-        <copy todir="${out.file.dir}" overwrite="true">
+        <copy todir="${out.file.dir}/jniLibs" overwrite="true">
             <fileset dir="${source.dir}/jniLibs" includes="**/*.so" />
         </copy>
     </target>
@@ -159,7 +160,6 @@
         <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${module.name}_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_focus_widget.xml" tofile="${out.dir}/attrs_focus_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
-        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.dir}/${module.name}-proguard.txt" />
         <echo level="info">Deletes temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
@@ -172,7 +172,6 @@
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
         <echo level="info">Install: ${out.dir}/attrs_${module.name}_widget.xml</echo>
-        <echo level="info">Install: ${out.dir}/${module.name}-proguard.txt</echo>
     </target>
 
     <!-- target -clean -->

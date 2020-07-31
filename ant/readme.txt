@@ -1,33 +1,41 @@
 集成说明
-1、将 debug 目录下面的 so 文件拷贝到工程目录 app/src/debug/jniLibs
-2、将 release 目录下面的 so 文件拷贝到工程目录 app/src/release/jniLibs
-   在 build.gradle 文件中加入：
-    defaultConfig {
-        ndk {
-            abiFilters "arm64-v8a", "armeabi-v7a"
+1、将 out/debug   目录下面的所有文件拷贝到工程目录 app/src/debug
+   将 out/release 目录下面的所有文件拷贝到工程目录 app/src/release
+   将 android-sdk-stubs.jar 文件拷贝到工程目录 app/src/release
+   将 out 目录下面的 xml 资源文件拷贝到工程的 res/values 目录
+
+2、在 build.gradle 文件中加入：
+    allprojects {
+        gradle.projectsEvaluated {
+            tasks.withType(JavaCompile) {
+                options.compilerArgs.add('-Xbootclasspath/p:app/src/release/android-sdk-stubs.jar')
+            }
         }
     }
 
-3、将 debug 目录下面的 jar 文件拷贝到工程目录 app/libs/debug
-   如: app/libs/debug/xxx.jar
-   在 build.gradle 中加入：debugImplementation files('libs/debug/xxx.jar')
-
-4、将 release 目录下面的 jar 文件拷贝到工程目录 app/libs/release
-   如: app/libs/release/xxx.jar
-   在 build.gradle 中加入：releaseImplementation files('libs/release/xxx.jar')
-
-5、将 xml 资源文件拷贝到工程的 res/values 目录, proguard 文件拷贝到工程目录
-   在 build.gradle 文件加入：proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'xxx-proguard.txt'
-
-6、将 android-sdk-stubs.jar 文件拷贝到工程目录 app/libs/compile
-   在 build.gradle 文件中加入：
-        allprojects {
-            gradle.projectsEvaluated {
-                tasks.withType(JavaCompile) {
-                    options.compilerArgs.add('-Xbootclasspath/p:libs/compile/android-sdk-stubs.jar')
-                }
+    android {
+        defaultConfig {
+            ndk {
+                abiFilters "arm64-v8a", "armeabi-v7a"
             }
         }
+
+        buildTypes {
+            release {
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/release/xxx-proguard.txt'
+            }
+        }
+
+        compileOptions {
+            sourceCompatibility = '1.8'
+            targetCompatibility = '1.8'
+        }
+    }
+
+    dependencies {
+        debugImplementation files('src/debug/xxx.jar')
+        releaseImplementation files('src/release/xxx.jar')
+    }
 
 使用说明
 1、DebugUtils 中的所有方法只能在开发过程中使用，不能集成到发布版本中。

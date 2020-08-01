@@ -56,7 +56,7 @@ public final class ReflectUtils {
      * @hide
      */
     @SuppressWarnings("unchecked")
-    public static <T> T getFieldValue(String packageName, String name) {
+    public static <T> T getResourceStyleable(String packageName, String name) {
         try {
             return (T)Class.forName(packageName + ".R$styleable").getField(name).get(null);
         } catch (Throwable e) {

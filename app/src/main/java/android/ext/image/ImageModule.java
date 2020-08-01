@@ -259,9 +259,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
         final String packageName = context.getPackageName();
         final AttributeSet attrs = Xml.asAttributeSet(parser);
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(packageName, "ImageLoader"));
-        final int flags = a.getInt(ReflectUtils.getFieldValue(packageName, "ImageLoader_flags"), 0);
-        final String name = a.getString(ReflectUtils.getFieldValue(packageName, "ImageLoader_decoder"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "ImageLoader"));
+        final int flags = a.getInt(ReflectUtils.getResourceStyleable(packageName, "ImageLoader_flags"), 0);
+        final String name = a.getString(ReflectUtils.getResourceStyleable(packageName, "ImageLoader_decoder"));
         a.recycle();
 
         final Cache imageCache = ((flags & FLAG_NO_MEMORY_CACHE) == 0 ? mImageCache : null);

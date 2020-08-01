@@ -60,9 +60,9 @@ public class Parameters {
      */
     public Parameters(Context context, AttributeSet attrs) {
         final String packageName = context.getPackageName();
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getFieldValue(packageName, "Parameters"));
-        this.value  = fixSampleSize(a.getInt(ReflectUtils.getFieldValue(packageName, "Parameters_sampleSize"), 1));
-        this.config = parseConfig(a.getInt(ReflectUtils.getFieldValue(packageName, "Parameters_config"), ARGB_8888));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "Parameters"));
+        this.value  = fixSampleSize(a.getInt(ReflectUtils.getResourceStyleable(packageName, "Parameters_sampleSize"), 1));
+        this.config = parseConfig(a.getInt(ReflectUtils.getResourceStyleable(packageName, "Parameters_config"), ARGB_8888));
         a.recycle();
     }
 

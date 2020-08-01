@@ -137,7 +137,7 @@ public abstract class Loader<Key> implements Factory<Task> {
 
     @Override
     public Task newInstance() {
-        throw new RuntimeException("Must be implementation!");
+        throw new AssertionError("Must be implementation!");
     }
 
     /**

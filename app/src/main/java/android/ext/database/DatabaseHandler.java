@@ -95,7 +95,7 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
 
     @Override
     public final void run() {
-        throw new RuntimeException("No Implementation, This method is a stub!");
+        throw new AssertionError("No Implementation, This method is a stub!");
     }
 
     /**

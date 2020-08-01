@@ -56,6 +56,7 @@ public final class MessageDigests {
      * @see #computeFile(String, byte[], int, Algorithm)
      */
     public static byte[] computeFile(String filename, Algorithm algorithm) {
+        DebugUtils.__checkError(algorithm == null, "Invalid parameters - algorithm == null");
         if (StringUtils.getLength(filename) == 0) {
             throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
         }
@@ -76,6 +77,7 @@ public final class MessageDigests {
      * @see #computeFile(String, Algorithm)
      */
     public static int computeFile(String filename, byte[] result, int offset, Algorithm algorithm) {
+        DebugUtils.__checkError(algorithm == null, "Invalid parameters - algorithm == null");
         if (StringUtils.getLength(filename) == 0) {
             throw new IllegalArgumentException("Invalid parameter - The filename is null or 0-length");
         }
@@ -93,6 +95,7 @@ public final class MessageDigests {
      * @see #computeString(String, byte[], int, Algorithm)
      */
     public static byte[] computeString(String string, Algorithm algorithm) {
+        DebugUtils.__checkError(algorithm == null, "Invalid parameters - algorithm == null");
         if (string == null) {
             throw new NullPointerException("Invalid parameter - string == null");
         }
@@ -114,6 +117,7 @@ public final class MessageDigests {
      * @see #computeString(String, Algorithm)
      */
     public static int computeString(String string, byte[] result, int offset, Algorithm algorithm) {
+        DebugUtils.__checkError(algorithm == null, "Invalid parameters - algorithm == null");
         if (string == null) {
             throw new NullPointerException("Invalid parameter - string == null");
         }
@@ -131,6 +135,7 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, Algorithm algorithm) {
+        DebugUtils.__checkError(algorithm == null, "Invalid parameters - algorithm == null");
         if (data == null) {
             throw new NullPointerException("Invalid parameter - data == null");
         }

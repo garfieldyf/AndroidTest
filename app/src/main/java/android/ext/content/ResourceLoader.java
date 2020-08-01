@@ -32,6 +32,7 @@ import java.util.concurrent.Executor;
  *         final File cacheFile = new File(context.getFilesDir(), "xxx/cacheFile.json");
  *         if (!cacheFile.exists()) {
  *             // Copy assets file to cacheFile.
+ *             FileUtils.copyFile(context, UriUtils.getAssetUri("xxx/cacheFile.json"), cacheFile, null);
  *         }
  *
  *         return cacheFile.

@@ -30,7 +30,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private final int mInitialSize;
 
     private int mItemCount;
-    private final Adapter mAdapter;
+    private final Loader mLoader;
     private final BitSet mLoadStates;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -85,7 +85,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
-        mAdapter = (prefetchDistance > 0 ? new PrefetchAdapter(prefetchDistance) : new Adapter());
+        mLoader = (prefetchDistance > 0 ? new PrefetchLoader(prefetchDistance) : new Loader());
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public E getItem(int position, E fallback) {
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
-        return mAdapter.getItem(position, fallback);
+        return mLoader.get(position, fallback);
     }
 
     /**
@@ -488,10 +488,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>Adapter</tt>
+     * Class <tt>Loader</tt>
      */
-    /* package */ class Adapter {
-        public E getItem(int position, E fallback) {
+    /* package */ class Loader {
+        public E get(int position, E fallback) {
             final long combinedPosition = getPageForPosition(position);
             final Page<E> page = getPage(Pages.getOriginalPage(combinedPosition));
             return (page != null ? page.getItem((int)combinedPosition) : fallback);
@@ -499,9 +499,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>PrefetchAdapter</tt> is an implementation of a {@link Adapter}.
+     * Class <tt>PrefetchLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class PrefetchAdapter extends Adapter {
+    private final class PrefetchLoader extends Loader {
         private final int mPrefetchDistance;
 
         /**
@@ -509,12 +509,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          * @param prefetchDistance Defines how far to the first or last
          * item in the page to this adapter should prefetch the data.
          */
-        public PrefetchAdapter(int prefetchDistance) {
+        public PrefetchLoader(int prefetchDistance) {
             mPrefetchDistance = prefetchDistance;
         }
 
         @Override
-        public E getItem(int position, E fallback) {
+        public E get(int position, E fallback) {
             final long combinedPosition = getPageForPosition(position);
             final int pageIndex = Pages.getOriginalPage(combinedPosition);
             final Page<E> page  = getPage(pageIndex);

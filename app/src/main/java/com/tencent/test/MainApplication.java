@@ -30,11 +30,10 @@ public final class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        sInstance = this;
 
         DebugUtils.startMethodTracing();
-        sInstance = this;
         ProcessUtils.installUncaughtExceptionHandler(this);
-
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         mImageModule = new Builder<String, Object>(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
@@ -43,8 +42,6 @@ public final class MainApplication extends Application {
             .setFileSize(1000)
 //            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
             .build();
-
-        //AsyncTask.setDefaultExecutor(mThreadPool);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
     }
 
@@ -58,24 +55,20 @@ public final class MainApplication extends Application {
         return mImageModule;
     }
 
-    public final PackageInfo myPackageInfo() {
-        return mPackageInfo;
-    }
-
-    public ImageLoader<String, Object> with(int id) {
-        return mImageModule.get(id);
-    }
-
     public final LoadRequest load(int id, String uri) {
         return mImageModule.load(id, uri);
     }
-    
+
     public final void pause(int id) {
         mImageModule.pause(id);
     }
 
     public final void resume(int id) {
         mImageModule.resume(id);
+    }
+
+    public final PackageInfo myPackageInfo() {
+        return mPackageInfo;
     }
 
     public static String[] obtainUrls() {

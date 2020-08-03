@@ -22,7 +22,7 @@
 
         buildTypes {
             release {
-                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/release/xxx-proguard.txt'
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/release/xxx-proguard.pro'
             }
         }
 

@@ -15,14 +15,14 @@ import android.widget.ImageView;
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;[ IconLoader | loader ]
- *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      class="classFullName"
- *      app:flags="[ none | noMemoryCache ]" /&gt;
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     class="classFullName"
+ *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
  * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name or packageItemInfo.packageName)
- *       .placeholder(R.drawable.ic_placeholder)
- *       .parameters(resolveInfo or packageItemInfo)
- *       .into(imageView);</pre>
+ *     .placeholder(R.drawable.ic_placeholder)
+ *     .parameters(resolveInfo or packageItemInfo)
+ *     .into(imageView);</pre>
  * @author Garfield
  */
 public class IconLoader<URI> extends ImageLoader<URI, Object> {

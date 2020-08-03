@@ -97,7 +97,7 @@
         <property name="ndk.target" value="release" />
         <property name="out.file.dir" value="${out.dir}/release" />
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
-        <copy file="${source.dir}/jni/proguard.txt" tofile="${out.file.dir}/${module.name}-proguard.txt" />
+        <copy file="${source.dir}/jni/proguard.pro" tofile="${out.file.dir}/${module.name}-proguard.pro" />
 
         <!-- delete call the __checkXXX methods -->
         <echo level="info">Delete __checkXXX() methods.</echo>
@@ -224,7 +224,7 @@
         <taskdef name="proguard" classname="proguard.ant.ProGuardTask" classpath="${proguard.dir}/lib/proguard.jar" />
 
         <proguard>
-            -include        "${basedir}/../app/proguard.txt"
+            -include        "${basedir}/../app/proguard.pro"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
             -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}

@@ -54,7 +54,7 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * Class ImageModule
+ * Class <tt>ImageModule</tt> for managing the loader, cache, pool and parameters etc.
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -113,8 +113,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * module.load(R.xml.image_loader, uri)
-     *       .placeholder(R.drawable.ic_placeholder)
-     *       .into(imageView);</pre>
+     *     .parameters(R.xml.decode_params)
+     *     .placeholder(R.drawable.ic_placeholder)
+     *     .into(imageView);</pre>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
      * @see #get(int)

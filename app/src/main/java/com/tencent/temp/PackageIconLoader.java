@@ -16,15 +16,15 @@ import android.support.annotation.Keep;
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * &lt;xxx.xxx.PackageIconLoader | loader ]
- *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      class="classFullName"
- *      app:flags="[ none | noMemoryCache ]" /&gt;
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     class="classFullName"
+ *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
  * module.load(R.xml.package_icon_loader, applicationInfo.packageName)
- *       .placeholder(R.drawable.ic_placeholder)
- *       .parameters(applicationInfo)
- *       .binder(binder)
- *       .into(viewHolder);</pre>
+ *     .placeholder(R.drawable.ic_placeholder)
+ *     .parameters(applicationInfo)
+ *     .binder(binder)
+ *     .into(viewHolder);</pre>
  * @author Garfield
  */
 public final class PackageIconLoader<URI> extends IconLoader<URI> {

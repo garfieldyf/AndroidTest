@@ -135,7 +135,7 @@ public final class BarcodeBuilder {
      * Sets the logo will be draw into the barcode image.
      * @param res The <tt>Resources</tt>.
      * @param logoResId The resource id of the logo.
-     * @param sizeResId The resource id of the size dimension.
+     * @param sizeResId The resource id of the logo size.
      * @return This builder.
      * @see #logo(Drawable)
      * @see #logo(Resources, int)

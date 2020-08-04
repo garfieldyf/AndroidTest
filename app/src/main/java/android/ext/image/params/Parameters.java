@@ -20,10 +20,7 @@ import android.util.Printer;
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
  *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]"
- *      app:sampleSize="2"
- *      app:attribute1="value1"
- *      app:attribute2="value2"
- *      ... ... /&gt;</pre>
+ *      app:sampleSize="2" /&gt;</pre>
  * @author Garfield
  */
 public class Parameters {

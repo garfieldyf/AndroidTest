@@ -10,6 +10,7 @@ import android.widget.ImageView;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;xxx.focus.FocusImageView
+ *     xmlns:android="http://schemas.android.com/apk/res/android"
  *     xmlns:app="http://schemas.android.com/apk/res-auto"
  *     app:focus="@drawable/focused_image"
  *     ... ... /&gt;</pre>

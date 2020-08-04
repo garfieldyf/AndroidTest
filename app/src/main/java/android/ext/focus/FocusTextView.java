@@ -10,8 +10,9 @@ import android.widget.TextView;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;xxx.focus.FocusTextView
+ *     xmlns:android="http://schemas.android.com/apk/res/android"
  *     xmlns:app="http://schemas.android.com/apk/res-auto"
- *     android:singleLine="false" &lt;!-- must be false --&gt;
+ *     &lt;!-- android:singleLine="false" must be false --&gt;
  *     app:focus="@drawable/focused_image"
  *     ... ... /&gt;</pre>
  * @author Garfield

@@ -193,7 +193,9 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
         if ((mFlags & FLAG_SCHED) == 0) {
             // Draws the GIF image current frame to bitmap canvas.
+            DebugUtils.__checkStartMethodTracing();
             mState.mImage.draw(mState.mCanvas, mFrameIndex);
+            DebugUtils.__checkStopMethodTracing(getClass().getName(), "nativeDraw frame = " + mFrameIndex);
         }
 
         // Draws the bitmap canvas to canvas.

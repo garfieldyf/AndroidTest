@@ -154,7 +154,7 @@ public final class CryptoUtils {
         final Cipher cipher = Cipher.getInstance(transformation);
         cipher.init(opmode, key);
 
-        final byte[] buffer = Pools.BYTE_ARRAY_POOL.obtain();
+        final byte[] buffer = Pools.sByteArrayPool.obtain();
         try {
             int readBytes;
             while ((readBytes = source.read(buffer, 0, buffer.length)) != -1) {
@@ -163,7 +163,7 @@ public final class CryptoUtils {
 
             return cipher.doFinal();
         } finally {
-            Pools.BYTE_ARRAY_POOL.recycle(buffer);
+            Pools.sByteArrayPool.recycle(buffer);
         }
     }
 

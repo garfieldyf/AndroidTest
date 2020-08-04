@@ -16,7 +16,7 @@ public final class Pools {
     /**
      * The byte array pool for managing a pool of byte arrays.
      */
-    public static final Pool<byte[]> BYTE_ARRAY_POOL;
+    public static final Pool<byte[]> sByteArrayPool;
 
     /**
      * Creates a new <b>fixed-size</b> {@link Pool}.
@@ -26,8 +26,8 @@ public final class Pools {
      * @return An newly created <tt>Pool</tt>.
      * @see #synchronizedPool(Pool)
      */
-    public static <E> Pool<E> newPool(Factory<E> factory, int maxSize) {
-        return new ArrayPool<E>(factory, maxSize);
+    public static <T> Pool<T> newPool(Factory<T> factory, int maxSize) {
+        return new ArrayPool<T>(factory, maxSize);
     }
 
     /**
@@ -37,8 +37,8 @@ public final class Pools {
      * @return A synchronized <tt>Pool</tt>.
      * @see #newPool(Factory, int)
      */
-    public static <E> Pool<E> synchronizedPool(Pool<E> pool) {
-        return new SynchronizedPool<E>(pool);
+    public static <T> Pool<T> synchronizedPool(Pool<T> pool) {
+        return new SynchronizedPool<T>(pool);
     }
 
     public static void dumpPool(Pool<?> pool, Printer printer) {
@@ -52,7 +52,7 @@ public final class Pools {
     /**
      * The <tt>Pool</tt> interface for managing a pool of objects.
      */
-    public static interface Pool<E> {
+    public static interface Pool<T> {
         /**
          * Removes all elements from this <tt>Pool</tt>, leaving it empty.
          */
@@ -61,30 +61,30 @@ public final class Pools {
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
-         * longer be used, The caller should be call {@link #recycle(E)} to
+         * longer be used, The caller should be call {@link #recycle(T)} to
          * recycles the element. When this <tt>Pool</tt> is empty, should be
          * call {@link Factory#newInstance()} to create a new element.
          * @return The element.
          */
-        E obtain();
+        T obtain();
 
         /**
          * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
          * calling this function you must not ever touch the <em>element</em> again.
          * @param element The element to recycle, returned earlier by {@link #obtain()}.
          */
-        void recycle(E element);
+        void recycle(T element);
     }
 
     /**
      * The <tt>Factory</tt> interface used to create a new object.
      */
-    public static interface Factory<E> {
+    public static interface Factory<T> {
         /**
          * Creates a new instance.
          * @return A new instance.
          */
-        E newInstance();
+        T newInstance();
     }
 
     /**
@@ -168,19 +168,19 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    /* package */ static abstract class SimplePool<E> {
-        private E element;
+    /* package */ static abstract class SimplePool<T> {
+        private T element;
 
         /**
          * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
          * allocating new elements in many cases. When the element can no
-         * longer be used, The caller should be call {@link #recycle(E)} to
+         * longer be used, The caller should be call {@link #recycle(T)} to
          * recycles the element.
          * @return The element.
-         * @see #recycle(E)
+         * @see #recycle(T)
          */
-        public synchronized final E obtain() {
-            final E element = this.element;
+        public synchronized final T obtain() {
+            final T element = this.element;
             this.element = null;
             return (element != null ? element : newInstance());
         }
@@ -191,7 +191,7 @@ public final class Pools {
          * @param element The element to recycle.
          * @see #obtain()
          */
-        public synchronized final void recycle(E element) {
+        public synchronized final void recycle(T element) {
             DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
             this.element = element;
         }
@@ -200,23 +200,23 @@ public final class Pools {
          * Creates a new instance.
          * @return A new instance.
          */
-        /* package */ abstract E newInstance();
+        /* package */ abstract T newInstance();
     }
 
     /**
      * Class <tt>ArrayPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class ArrayPool<E> implements Pool<E> {
+    private static final class ArrayPool<T> implements Pool<T> {
         private int size;
         private final Object[] elements;
-        private final Factory<E> factory;
+        private final Factory<T> factory;
 
         /**
          * Constructor
          * @param factory The {@link Factory} to create a new element when this pool is empty.
          * @param maxSize The maximum number of elements to allow in this pool.
          */
-        public ArrayPool(Factory<E> factory, int maxSize) {
+        public ArrayPool(Factory<T> factory, int maxSize) {
             DebugUtils.__checkError(factory == null || maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") <= 0");
             this.factory  = factory;
             this.elements = new Object[maxSize];
@@ -233,10 +233,10 @@ public final class Pools {
 
         @Override
         @SuppressWarnings("unchecked")
-        public E obtain() {
-            final E element;
+        public T obtain() {
+            final T element;
             if (size > 0) {
-                element = (E)elements[--size];
+                element = (T)elements[--size];
                 elements[size] = null;
             } else {
                 element = factory.newInstance();
@@ -246,7 +246,7 @@ public final class Pools {
         }
 
         @Override
-        public void recycle(E element) {
+        public void recycle(T element) {
             DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
             __checkInPool(element);
             if (size < elements.length) {
@@ -297,15 +297,15 @@ public final class Pools {
     /**
      * Class <tt>SynchronizedPool</tt> is an implementation of a {@link Pool}.
      */
-    private static final class SynchronizedPool<E> implements Pool<E> {
-        private final Pool<E> pool;
+    private static final class SynchronizedPool<T> implements Pool<T> {
+        private final Pool<T> pool;
 
         /**
          * Constructor
          * <p>Creates a new synchronized pool.</p>
          * @param pool The {@link Pool}.
          */
-        public SynchronizedPool(Pool<E> pool) {
+        public SynchronizedPool(Pool<T> pool) {
             this.pool = pool;
             DebugUtils.__checkError(pool == null, "Invalid parameter - pool == null");
         }
@@ -316,12 +316,12 @@ public final class Pools {
         }
 
         @Override
-        public synchronized E obtain() {
+        public synchronized T obtain() {
             return pool.obtain();
         }
 
         @Override
-        public synchronized void recycle(E element) {
+        public synchronized void recycle(T element) {
             pool.recycle(element);
         }
 
@@ -333,7 +333,7 @@ public final class Pools {
     }
 
     static {
-        BYTE_ARRAY_POOL = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
+        sByteArrayPool = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
     }
 
     /**

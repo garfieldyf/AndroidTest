@@ -601,11 +601,11 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(InputStream is, OutputStream out, Cancelable cancelable) throws IOException {
-        final byte[] buffer = Pools.BYTE_ARRAY_POOL.obtain();
+        final byte[] buffer = Pools.sByteArrayPool.obtain();
         try {
             copyStreamImpl(is, out, cancelable, buffer);
         } finally {
-            Pools.BYTE_ARRAY_POOL.recycle(buffer);
+            Pools.sByteArrayPool.recycle(buffer);
         }
     }
 

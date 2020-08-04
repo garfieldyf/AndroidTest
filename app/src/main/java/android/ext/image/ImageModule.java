@@ -220,7 +220,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkStartMethodTracing();
-        Pools.BYTE_ARRAY_POOL.clear();
+        Pools.sByteArrayPool.clear();
         if (mImageCache != null) {
             mImageCache.trimMemory(level);
         }
@@ -423,6 +423,12 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     /**
      * Class <tt>Builder</tt> to creates an {@link ImageModule}.
+     * <h3>Usage</h3>
+     * <p>Here is an example:</p><pre>
+     * final ImageModule&lt;String, Bitmap&gt; module = new Builder&lt;String, Bitmap&gt;(context)
+     *     .setScaleMemory(0.4f)   // The memory cache size.
+     *     .setFileSize(1000)      // The file cache size.
+     *     .build();</pre>
      */
     public static final class Builder<URI, Image> {
         private int mPriority;

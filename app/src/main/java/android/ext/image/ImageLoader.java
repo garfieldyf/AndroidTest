@@ -283,6 +283,12 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     /**
      * The <tt>LoadRequest</tt> class used to {@link ImageLoader} to load the image.
+     * <h3>Usage</h3>
+     * <p>Here is an example:</p><pre>
+     * loader.load(uri)
+     *     .parameters(R.xml.decode_params)
+     *     .placeholder(R.drawable.ic_placeholder)
+     *     .into(imageView);</pre>
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public final class LoadRequest {

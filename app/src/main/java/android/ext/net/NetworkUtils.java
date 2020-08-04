@@ -117,22 +117,22 @@ public final class NetworkUtils {
     }
 
     /**
-     * Returns the {@link InetAddress} from the network interface.
+     * Returns the {@link Inet4Address} from the network interface.
      * @param ifname The network interface name. May be {@link #WLAN},
      * {@link #ETHERNET} or other interface name.
-     * @return The <tt>InetAddress</tt> or <tt>null</tt> if it has no address.
+     * @return The <tt>Inet4Address</tt> or <tt>null</tt> if it has no address.
      */
-    public static InetAddress getInetAddress(String ifname) {
+    public static Inet4Address getInetAddress(String ifname) {
         try {
             final Enumeration<InetAddress> addresses = NetworkInterface.getByName(ifname).getInetAddresses();
             while (addresses.hasMoreElements()) {
                 final InetAddress address = addresses.nextElement();
                 if (!address.isLoopbackAddress() && address instanceof Inet4Address) {
-                    return address;
+                    return (Inet4Address)address;
                 }
             }
         } catch (Exception e) {
-            DebugUtils.__checkLogError(true, NetworkUtils.class.getName(), "Couldn't get InetAddress from network interface - " + ifname);
+            DebugUtils.__checkLogError(true, NetworkUtils.class.getName(), "Couldn't get Inet4Address from network interface - " + ifname);
         }
 
         return null;

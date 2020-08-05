@@ -1,9 +1,11 @@
 package android.ext.image.params;
 
+import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.ReflectUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
@@ -11,6 +13,7 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;
+import android.view.View;
 
 /**
  * Class <tt>Parameters</tt> can be used to decode bitmap.
@@ -112,10 +115,18 @@ public class Parameters {
     }
 
     /**
+     * Returns the default {@link Parameters} used to decode the bitmap.
+     * The default <tt>Parameters</tt> sample size = 1, config = RGB_565.
+     */
+    public static Parameters defaultParameters() {
+        return DefaultParameters.sInstance;
+    }
+
+    /**
      * Computes the number of bytes that can be used to
      * store the image's pixels when decoding the image.
      */
-    /* package */ final int computeByteCountImpl(Options opts) {
+    /* package */ static int computeByteCountImpl(Options opts) {
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
         final int byteCount = getBytesPerPixel(opts);
         if (opts.inTargetDensity == 0) {
@@ -123,6 +134,19 @@ public class Parameters {
         } else {
             final float scale = (float)opts.inTargetDensity / opts.inDensity;
             return (int)(opts.outWidth * scale + 0.5f) * (int)(opts.outHeight * scale + 0.5f) * byteCount;
+        }
+    }
+
+    /**
+     * Computes the {@link Options#inDensity} to decode image.
+     */
+    /* package */ static void computeOptionsDensity(int width, int height, Options opts) {
+        if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
+            final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
+            opts.inTargetDensity = DEVICE_DENSITY;
+            opts.inDensity = (int)(DEVICE_DENSITY * scale + 0.5f);
+        } else {
+            opts.inDensity = opts.inTargetDensity = 0;
         }
     }
 
@@ -160,6 +184,53 @@ public class Parameters {
         if (Build.VERSION.SDK_INT >= 26) {
             Log.d("Parameters", "getBytesPerPixel - outConfig = " + opts.outConfig);
             DebugUtils.__checkError(opts.outConfig == null && opts.inPreferredConfig == null, "opts.outConfig == null && opts.inPreferredConfig == null");
+        }
+    }
+
+    /**
+     * Class <tt>DefaultParameters</tt> is an implementation of a {@link Parameters}.
+     */
+    private static final class DefaultParameters extends Parameters {
+        public static final Parameters sInstance = new DefaultParameters();
+
+        /**
+         * This class cannot be instantiated.
+         */
+        private DefaultParameters() {
+            super(null, Config.RGB_565);
+        }
+
+        @Override
+        public boolean isMutable() {
+            return true;
+        }
+
+        @Override
+        public int computeByteCount(Options opts) {
+            return computeByteCountImpl(opts);
+        }
+
+        @Override
+        public void computeSampleSize(Object target, Options opts) {
+            final int width, height;
+            if (target instanceof View) {
+                final View view = (View)target;
+                width  = view.getWidth();
+                height = view.getHeight();
+            } else {
+                height = width = 0;
+            }
+
+            computeOptionsDensity(width, height, opts);
+        }
+
+        @Override
+        public void dump(Printer printer, StringBuilder result) {
+            printer.println(result.append(getClass().getSimpleName())
+                .append(" { config = ").append(config.name())
+                .append(", sampleSize = 1")
+                .append(", deviceDensity = ").append(DeviceUtils.toDensity(DEVICE_DENSITY))
+                .append(" }").toString());
         }
     }
 }

@@ -3,7 +3,6 @@ package android.ext.image;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.image.params.Parameters;
-import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
@@ -56,7 +55,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         try {
             Parameters parameters = ImageModule.getParameters(params);
             if (parameters == null) {
-                parameters = SizeParameters.defaultParameters;
+                parameters = Parameters.defaultParameters();
             }
 
             // Decodes the image bounds.

@@ -89,13 +89,7 @@ public class SizeParameters extends Parameters {
         }
 
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");
-        if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
-            final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
-            opts.inTargetDensity = DEVICE_DENSITY;
-            opts.inDensity = (int)(DEVICE_DENSITY * scale + 0.5f);
-        } else {
-            opts.inDensity = opts.inTargetDensity = 0;
-        }
+        computeOptionsDensity(width, height, opts);
     }
 
     @Override
@@ -107,9 +101,4 @@ public class SizeParameters extends Parameters {
             .append(", deviceDensity = ").append(DeviceUtils.toDensity(DEVICE_DENSITY))
             .append(" }").toString());
     }
-
-    /**
-     * The default {@link Parameters} (sample size = 1, config = RGB_565) used to decode the bitmap.
-     */
-    public static final Parameters defaultParameters = new SizeParameters(Config.RGB_565, 0, 0);
 }

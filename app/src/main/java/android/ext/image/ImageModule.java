@@ -28,7 +28,6 @@ import android.ext.image.decoder.BitmapDecoder;
 import android.ext.image.decoder.ContactPhotoDecoder;
 import android.ext.image.decoder.ImageDecoder;
 import android.ext.image.params.Parameters;
-import android.ext.image.params.SizeParameters;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -390,7 +389,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         }
 
         result.setLength(0);
-        SizeParameters.defaultParameters.dump(printer, result.append("  default ==> "));
+        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
     }
 
     private static String toString(int level) {

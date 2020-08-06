@@ -32,11 +32,11 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Returns a {@link Set} of all of the keys and values.
-     * @return A <tt>Set</tt> of all of the keys and values.
+     * Returns the number of key-value in this cache.
+     * @return The number of key-value in this cache.
      */
-    public final Set<Entry<K, V>> entrySet() {
-        return map.entrySet();
+    public final int size() {
+        return map.size();
     }
 
     @Override
@@ -60,6 +60,34 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     public V put(K key, V value) {
         DebugUtils.__checkError(key == null || value == null, "Invalid parameters - key == null || value == null");
         return map.put(key, value);
+    }
+
+    /**
+     * Return the key at the given <em>index</em> in this cache.
+     * @param index The index, must be between 0 and {@link #size()} - 1.
+     * @return The key that was stored at the <em>index</em>.
+     */
+    public final K keyAt(int index) {
+        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameters - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
+        return map.keyAt(index);
+    }
+
+    /**
+     * Return the value at the given <em>index</em> in this cache.
+     * @param index The index, must be between 0 and {@link #size()} - 1.
+     * @return The value that was stored at the <em>index</em>.
+     */
+    public final V valueAt(int index) {
+        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameters - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
+        return map.valueAt(index);
+    }
+
+    /**
+     * Returns a {@link Set} of all of the keys and values.
+     * @return A <tt>Set</tt> of all of the keys and values.
+     */
+    public final Set<Entry<K, V>> entrySet() {
+        return map.entrySet();
     }
 
     public final void dump(Printer printer) {

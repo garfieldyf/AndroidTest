@@ -75,9 +75,8 @@ public final class ViewVisibility implements Runnable {
 
     private void show() {
         if (mView instanceof ViewStub) {
-            final ViewStub stub = (ViewStub)mView;
-            DebugUtils.__checkDebug(true, "ViewVisibility", "Inflates the layout resource - ID #0x" + Integer.toHexString(stub.getLayoutResource()));
-            mView = stub.inflate();
+            DebugUtils.__checkDebug(true, "ViewVisibility", "Inflates the layout resource - ID #0x" + Integer.toHexString(((ViewStub)mView).getLayoutResource()));
+            mView = ((ViewStub)mView).inflate();
         }
 
         mView.setVisibility(View.VISIBLE);

@@ -78,14 +78,14 @@ public class SizeParameters extends Parameters {
          *      scale  = max(scaleX, scaleY);
          */
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
-        final int width, height;
+        final int width, height, minHeight = (int)value;
         if (target instanceof View) {
             final View view = (View)target;
-            width  = Math.max(view.getWidth(), minWidth);
-            height = Math.max(view.getHeight(), (int)value);
+            width  = Math.max(view.getWidth(),  minWidth);
+            height = Math.max(view.getHeight(), minHeight);
         } else {
             width  = minWidth;
-            height = (int)value;
+            height = minHeight;
         }
 
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");

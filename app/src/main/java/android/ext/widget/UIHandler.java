@@ -28,6 +28,37 @@ public final class UIHandler extends Handler implements Executor {
         sInstance.execute(action);
     }
 
+    @Override
+    public void execute(Runnable command) {
+        if (getLooper() == Looper.myLooper()) {
+            command.run();
+        } else {
+            post(command);
+        }
+    }
+
+    @Override
+    public void dispatchMessage(Message msg) {
+        switch (msg.what) {
+        // Dispatch the Task messages.
+        case MESSAGE_PROGRESS:
+            ((Task)msg.getCallback()).onProgress(msg.obj);
+            break;
+
+        case MESSAGE_FINISHED:
+            ((Task)msg.getCallback()).onPostExecute(msg.obj);
+            break;
+
+        // Dispatch the DatabaseHandler messages.
+        case MESSAGE_DATABASE_MESSAGE:
+            ((DatabaseHandler)msg.getCallback()).dispatchMessage(msg.arg1, msg.arg2, msg.obj);
+            break;
+
+        default:
+            super.dispatchMessage(msg);
+        }
+    }
+
     /**
      * Called on the {@link Task} internal, do not call this method directly.
      * @hide
@@ -61,37 +92,6 @@ public final class UIHandler extends Handler implements Executor {
         msg.arg2 = token;
         msg.obj  = result;
         sendMessage(msg);
-    }
-
-    @Override
-    public void execute(Runnable command) {
-        if (getLooper() == Looper.myLooper()) {
-            command.run();
-        } else {
-            post(command);
-        }
-    }
-
-    @Override
-    public void dispatchMessage(Message msg) {
-        switch (msg.what) {
-        // Dispatch the Task messages.
-        case MESSAGE_PROGRESS:
-            ((Task)msg.getCallback()).onProgress(msg.obj);
-            break;
-
-        case MESSAGE_FINISHED:
-            ((Task)msg.getCallback()).onPostExecute(msg.obj);
-            break;
-
-        // Dispatch the DatabaseHandler messages.
-        case MESSAGE_DATABASE_MESSAGE:
-            ((DatabaseHandler)msg.getCallback()).dispatchMessage(msg.arg1, msg.arg2, msg.obj);
-            break;
-
-        default:
-            super.dispatchMessage(msg);
-        }
     }
 
     // The Task messages.

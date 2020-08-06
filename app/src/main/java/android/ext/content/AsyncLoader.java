@@ -278,12 +278,14 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
             }
 
             // Recycles this task to avoid potential memory leaks.
+            final Pool<Task> taskPool = mLoader.mTaskPool;
             mLoader.onRecycle(params);
             clearForRecycle();
             mKey = null;
             mTarget = null;
             mBinder = null;
-            mLoader.mTaskPool.recycle(this);
+            mLoader = null;
+            taskPool.recycle(this);
         }
     }
 

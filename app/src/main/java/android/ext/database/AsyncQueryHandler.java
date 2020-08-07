@@ -171,7 +171,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     @Override
-    public final void dispatchMessage(int message, int token, Object result) {
+    public final void handleMessage(int message, int token, Object result) {
         switch (message) {
         case MESSAGE_CALL:
             onCallComplete(token, (Bundle)result);
@@ -190,7 +190,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             break;
 
         default:
-            super.dispatchMessage(message, token, result);
+            super.handleMessage(message, token, result);
         }
     }
 
@@ -266,7 +266,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ final class AsyncQueryTask implements Runnable {
+    /* package */ final class AsyncQueryTask extends AbstractTask {
         /* package */ Uri uri;
         /* package */ int token;
         /* package */ int message;
@@ -317,6 +317,32 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             }
 
             UIHandler.sInstance.sendMessage(AsyncQueryHandler.this, message, token, result);
+            recycleTask(this);
+        }
+
+        @Override
+        public final void handleMessage(int message, int token, Object result) {
+            switch (message) {
+            case MESSAGE_CALL:
+                onCallComplete(token, (Bundle)result);
+                break;
+
+            case MESSAGE_INSERT:
+                onInsertComplete(token, (Uri)result);
+                break;
+
+            case MESSAGE_INSERTS:
+                onBulkInsertComplete(token, (int)result);
+                break;
+
+            case MESSAGE_BATCH:
+                onApplyBatchComplete(token, (ContentProviderResult[])result);
+                break;
+
+            default:
+                super.handleMessage(message, token, result);
+            }
+
             recycleTask(this);
         }
 

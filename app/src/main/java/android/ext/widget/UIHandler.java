@@ -1,7 +1,8 @@
 package android.ext.widget;
 
 import android.ext.content.Loader.Task;
-import android.ext.database.DatabaseHandler;
+import android.ext.database.DatabaseHandler.AbstractSQLiteTask;
+import android.ext.widget.BaseAdapter.NotificationRunnable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -49,9 +50,14 @@ public final class UIHandler extends Handler implements Executor {
             ((Task)msg.getCallback()).onPostExecute(msg.obj);
             break;
 
+        // Dispatch the BaseAdapter messages.
+        case MESSAGE_ADAPTER:
+            ((NotificationRunnable)msg.getCallback()).handleMessage(msg);
+            break;
+
         // Dispatch the DatabaseHandler messages.
-        case MESSAGE_DATABASE_MESSAGE:
-            ((DatabaseHandler)msg.getCallback()).dispatchMessage(msg.arg1, msg.arg2, msg.obj);
+        case MESSAGE_DATABASE_HANDLER:
+            ((AbstractSQLiteTask)msg.getCallback()).handleMessage(msg.arg1, msg.arg2, msg.obj);
             break;
 
         default:
@@ -82,12 +88,23 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
+     * Called on the {@link BaseAdapter} internal, do not call this method directly.
+     * @hide
+     */
+    public final void sendMessage(Message msg, int message, int positionStart) {
+        msg.what = MESSAGE_ADAPTER;
+        msg.arg1 = message;
+        msg.arg2 = positionStart;
+        sendMessage(msg);
+    }
+
+    /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      * @hide
      */
-    public final void sendMessage(DatabaseHandler handler, int message, int token, Object result) {
-        final Message msg = Message.obtain(this, handler);
-        msg.what = MESSAGE_DATABASE_MESSAGE;
+    public final void sendMessage(Runnable callback, int message, int token, Object result) {
+        final Message msg = Message.obtain(this, callback);
+        msg.what = MESSAGE_DATABASE_HANDLER;
         msg.arg1 = message;
         msg.arg2 = token;
         msg.obj  = result;
@@ -95,11 +112,14 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     // The Task messages.
-    private static final int MESSAGE_PROGRESS = 0xEEEEEEEE;
-    private static final int MESSAGE_FINISHED = 0xEFEFEFEF;
+    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
+    private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
+
+    // The BaseAdapter messages.
+    private static final int MESSAGE_ADAPTER = 0xEFEFEFEF;
 
     // The DatabaseHandler messages.
-    private static final int MESSAGE_DATABASE_MESSAGE = 0xFEFEFEFE;
+    private static final int MESSAGE_DATABASE_HANDLER = 0xFEFEFEFE;
 
     /**
      * This class cannot be instantiated.

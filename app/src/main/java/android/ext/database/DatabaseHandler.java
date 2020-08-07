@@ -103,7 +103,7 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
      * messages, do not call this method directly.
      * @hide
      */
-    public void dispatchMessage(int message, int token, Object result) {
+    public void handleMessage(int message, int token, Object result) {
         switch (message) {
         case MESSAGE_EXECUTE:
             onExecuteComplete(token, result);
@@ -157,5 +157,36 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
      * @param rowsAffected The number of rows affected.
      */
     protected void onDeleteComplete(int token, int rowsAffected) {
+    }
+
+    public abstract class AbstractTask implements Runnable {
+        /**
+         * Called on the UI thread when this task handle
+         * messages, do not call this method directly.
+         * @hide
+         */
+        public void handleMessage(int message, int token, Object result) {
+            switch (message) {
+            case MESSAGE_EXECUTE:
+                onExecuteComplete(token, result);
+                break;
+
+            case MESSAGE_UPDATE:
+                onUpdateComplete(token, (int)result);
+                break;
+
+            case MESSAGE_DELETE:
+                onDeleteComplete(token, (int)result);
+                break;
+
+            case MESSAGE_QUERY:
+            case MESSAGE_RAWQUERY:
+                onQueryComplete(token, (Cursor)result);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown message: " + message);
+            }
+        }
     }
 }

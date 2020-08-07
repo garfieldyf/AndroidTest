@@ -156,7 +156,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     @Override
-    public final void dispatchMessage(int message, int token, Object result) {
+    public final void handleMessage(int message, int token, Object result) {
         switch (message) {
         case MESSAGE_INSERT:
             onInsertComplete(token, (long)result);
@@ -167,7 +167,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             break;
 
         default:
-            super.dispatchMessage(message, token, result);
+            super.handleMessage(message, token, result);
         }
     }
 
@@ -227,7 +227,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Class <tt>SQLiteTask</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ final class SQLiteTask implements Runnable {
+    /* package */ final class SQLiteTask extends AbstractTask {
         /* package */ int token;
         /* package */ int message;
         /* package */ String table;
@@ -237,7 +237,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         /* package */ String[] selectionArgs;
 
         @Override
-        public void run() {
+        public final void run() {
             if (!mDatabase.isOpen()) {
                 DebugUtils.__checkWarning(true, AsyncSQLiteHandler.class.getName(), "The SQLiteDatabase was closed.");
                 return;
@@ -275,6 +275,24 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             }
 
             UIHandler.sInstance.sendMessage(AsyncSQLiteHandler.this, message, token, result);
+            recycleTask(this);
+        }
+
+        @Override
+        public final void handleMessage(int message, int token, Object result) {
+            switch (message) {
+            case MESSAGE_INSERT:
+                onInsertComplete(token, (long)result);
+                break;
+
+            case MESSAGE_REPLACE:
+                onReplaceComplete(token, (long)result);
+                break;
+
+            default:
+                super.handleMessage(message, token, result);
+            }
+
             recycleTask(this);
         }
 

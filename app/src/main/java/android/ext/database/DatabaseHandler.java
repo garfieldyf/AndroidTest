@@ -14,7 +14,7 @@ import java.util.concurrent.Executor;
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
-public abstract class DatabaseHandler implements Runnable, Factory<Object> {
+public abstract class DatabaseHandler implements Factory<Object> {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -38,7 +38,7 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     /* package */ DatabaseHandler(Executor executor) {
         DebugUtils.__checkMemoryLeaks(getClass());
         mExecutor = executor;
-        mTaskPool = Pools.synchronizedPool(Pools.newPool(this, 8));
+        mTaskPool = Pools.newPool(this, 8);
     }
 
     /**
@@ -93,40 +93,6 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
         Pools.dumpPool(mTaskPool, printer);
     }
 
-    @Override
-    public final void run() {
-        throw new AssertionError("No Implementation, This method is a stub!");
-    }
-
-    /**
-     * Called on the UI thread when this handler handle
-     * messages, do not call this method directly.
-     * @hide
-     */
-    public void handleMessage(int message, int token, Object result) {
-        switch (message) {
-        case MESSAGE_EXECUTE:
-            onExecuteComplete(token, result);
-            break;
-
-        case MESSAGE_UPDATE:
-            onUpdateComplete(token, (int)result);
-            break;
-
-        case MESSAGE_DELETE:
-            onDeleteComplete(token, (int)result);
-            break;
-
-        case MESSAGE_QUERY:
-        case MESSAGE_RAWQUERY:
-            onQueryComplete(token, (Cursor)result);
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown message: " + message);
-        }
-    }
-
     /**
      * Called when an asynchronous execute is completed on the UI thread.
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
@@ -159,7 +125,18 @@ public abstract class DatabaseHandler implements Runnable, Factory<Object> {
     protected void onDeleteComplete(int token, int rowsAffected) {
     }
 
-    public abstract class AbstractTask implements Runnable {
+    /**
+     * Class <tt>AbstractSQLiteTask</tt> is an implementation of a {@link Runnable}.
+     * @hide
+     */
+    public abstract class AbstractSQLiteTask implements Runnable {
+        /* package */ int token;
+        /* package */ int message;
+        /* package */ Object values;
+        /* package */ String sortOrder;
+        /* package */ String selection;
+        /* package */ String[] selectionArgs;
+
         /**
          * Called on the UI thread when this task handle
          * messages, do not call this method directly.

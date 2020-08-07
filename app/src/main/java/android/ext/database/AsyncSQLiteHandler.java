@@ -44,17 +44,20 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * This method begins an asynchronous execute custom query. When the query is executing
      * {@link #onExecute} is called on a background thread. After the query is done
      * {@link #onExecuteComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
      * to identify execute.
      * @param params The parameters passed into <tt>onExecute</tt>. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
     public final void startExecute(int token, Object... params) {
+        DebugUtils.__checkUIThread("startExecute");
         mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, null, null, null, params));
     }
 
     /**
      * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onQueryComplete} to identify the query.
      * @param sql The SQL query. The SQL string must not be <tt>;</tt> terminated.
      * @param selectionArgs You may include ? in where clause in the query, which will be replaced by the
@@ -62,11 +65,13 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[], String, String[], String)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
+        DebugUtils.__checkUIThread("startQuery");
         mExecutor.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
     }
 
     /**
      * This method begins an asynchronous query. When the query is done {@link #onQueryComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onQueryComplete} to identify the query.
      * @param table The table to query.
      * @param projection A list of which columns to return. Passing <tt>null</tt> will return all columns.
@@ -79,6 +84,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[])
      */
     public final void startQuery(int token, String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        DebugUtils.__checkUIThread("startQuery");
         final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
         mExecutor.execute(task);
@@ -86,6 +92,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
 
     /**
      * This method begins an asynchronous insert. When the insert is done {@link #onInsertComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onInsertComplete} to identify the insert.
      * @param table The table to insert the row into.
      * @param nullColumnHack Optional, may be <tt>null</tt>. SQL doesn't allow inserting a completely
@@ -97,11 +104,13 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * names and the values the column values.
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
+        DebugUtils.__checkUIThread("startInsert");
         mExecutor.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
     }
 
     /**
      * This method begins an asynchronous replace. When the replace is done {@link #onReplaceComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onReplaceComplete} to identify the replace.
      * @param table The table in which to replace the row.
      * @param nullColumnHack Optional, may be <tt>null</tt>. SQL doesn't allow inserting a completely empty row
@@ -112,11 +121,13 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * translated to NULL.
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
+        DebugUtils.__checkUIThread("startReplace");
         mExecutor.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
     }
 
     /**
      * This method begins an asynchronous update. When the update is done {@link #onUpdateComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onUpdateComplete} to identify the update.
      * @param table The table to update in.
      * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
@@ -126,11 +137,13 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
+        DebugUtils.__checkUIThread("startUpdate");
         mExecutor.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
     }
 
     /**
      * This method begins an asynchronous delete. When the delete is done {@link #onDeleteComplete} is called.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onDeleteComplete} to identify the delete.
      * @param table The table of the row to delete.
      * @param whereClause The WHERE clause to apply when deleting. Passing <tt>null</tt> or <tt>"1"</tt> will
@@ -139,6 +152,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
+        DebugUtils.__checkUIThread("startDelete");
         mExecutor.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
     }
 
@@ -153,22 +167,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     @Override
     public final Object newInstance() {
         return new SQLiteTask();
-    }
-
-    @Override
-    public final void handleMessage(int message, int token, Object result) {
-        switch (message) {
-        case MESSAGE_INSERT:
-            onInsertComplete(token, (long)result);
-            break;
-
-        case MESSAGE_REPLACE:
-            onReplaceComplete(token, (long)result);
-            break;
-
-        default:
-            super.handleMessage(message, token, result);
-        }
     }
 
     /**
@@ -199,18 +197,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     /**
-     * Recycles the specified {@link SQLiteTask} to the task pool.
-     */
-    /* package */ final void recycleTask(SQLiteTask task) {
-        task.table  = null;
-        task.values = null;
-        task.sortOrder = null;
-        task.selection = null;
-        task.selectionArgs = null;
-        mTaskPool.recycle(task);
-    }
-
-    /**
      * Retrieves a new {@link SQLiteTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
     private SQLiteTask obtainTask(int token, int message, String table, String selection, String[] selectionArgs, Object values) {
@@ -227,14 +213,8 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Class <tt>SQLiteTask</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ final class SQLiteTask extends AbstractTask {
-        /* package */ int token;
-        /* package */ int message;
+    /* package */ final class SQLiteTask extends AbstractSQLiteTask {
         /* package */ String table;
-        /* package */ Object values;
-        /* package */ String sortOrder;
-        /* package */ String selection;
-        /* package */ String[] selectionArgs;
 
         @Override
         public final void run() {
@@ -274,8 +254,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 throw new IllegalStateException("Unknown message: " + message);
             }
 
-            UIHandler.sInstance.sendMessage(AsyncSQLiteHandler.this, message, token, result);
-            recycleTask(this);
+            UIHandler.sInstance.sendMessage(this, message, token, result);
         }
 
         @Override
@@ -293,7 +272,12 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 super.handleMessage(message, token, result);
             }
 
-            recycleTask(this);
+            this.table  = null;
+            this.values = null;
+            this.sortOrder = null;
+            this.selection = null;
+            this.selectionArgs = null;
+            mTaskPool.recycle(this);
         }
 
         private Cursor execQuery() {

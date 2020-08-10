@@ -92,9 +92,9 @@ public class PackageArchiveActivity extends Activity {
         @Override
         protected List<PackageInfo> doInBackground(String... params) {
             DebugUtils.startMethodTracing();
-            List<PackageInfo> result = new PackageParser(MainApplication.sInstance)
-                .addScanFlags(FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
-                .setCancelable(this)
+            List<PackageInfo> result = new PackageParser(MainApplication.sInstance.getPackageManager())
+                .scanFlags(FileUtils.FLAG_IGNORE_HIDDEN_FILE | FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
+                .cancelable(this)
                 .parse(params);
             DebugUtils.stopMethodTracing("yf", "parsePackages");
 

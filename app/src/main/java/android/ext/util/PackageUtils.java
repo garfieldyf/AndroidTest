@@ -301,10 +301,10 @@ public final class PackageUtils {
      * Class <tt>PackageParser</tt> used to parse the package archive files.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
-     * final List&lt;PackageInfo&gt; result = new PackageParser(context)
-     *     .addParseFlags(PackageManager.GET_ACTIVITIES)
-     *     .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
-     *     .setCancelable(cancelable)
+     * final List&lt;PackageInfo&gt; result = new PackageParser(packageManager)
+     *     .parseFlags(PackageManager.GET_ACTIVITIES)
+     *     .scanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
+     *     .cancelable(cancelable)
      *     .parse(dirPath1, dirPath2, ...);</pre>
      */
     public static class PackageParser implements ScanCallback {
@@ -316,33 +316,33 @@ public final class PackageUtils {
 
         /**
          * Constructor
-         * @param context The <tt>Context</tt>.
+         * @param packageManager The <tt>PackageManager</tt>.
          */
-        public PackageParser(Context context) {
-            mPackageManager = context.getPackageManager();
+        public PackageParser(PackageManager packageManager) {
+            mPackageManager = packageManager;
         }
 
         /**
-         * Adds the scan flags to scan the package archive files.
+         * Sets the scan flags to scan the package archive files.
          * @param flags The scan flags. May be <tt>0</tt> or any combination of
          * {@link #FLAG_IGNORE_HIDDEN_FILE}, {@link #FLAG_SCAN_FOR_DESCENDENTS}.
          * @return This parser.
          * @see FileUtils#scanFiles(String, ScanCallback, int, Object)
          */
-        public final PackageParser addScanFlags(int flags) {
-            mScanFlags |= flags;
+        public final PackageParser scanFlags(int flags) {
+            mScanFlags = flags;
             return this;
         }
 
         /**
-         * Adds the parse flags to parse the package info.
+         * Sets the parse flags to parse the package info.
          * @param flags The parse flags. May be <tt>0</tt> or any
          * combination of <tt>PackageManager.GET_XXX</tt> constants.
          * @return This parser.
          * @see PackageManager#getPackageArchiveInfo(String, int)
          */
-        public final PackageParser addParseFlags(int flags) {
-            mParseFlags |= flags;
+        public final PackageParser parseFlags(int flags) {
+            mParseFlags = flags;
             return this;
         }
 
@@ -352,7 +352,7 @@ public final class PackageUtils {
          * before it completed normally the parsed result is undefined.
          * @return This parser.
          */
-        public final PackageParser setCancelable(Cancelable cancelable) {
+        public final PackageParser cancelable(Cancelable cancelable) {
             mCancelable = cancelable;
             return this;
         }

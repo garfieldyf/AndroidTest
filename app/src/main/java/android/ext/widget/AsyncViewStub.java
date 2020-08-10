@@ -16,10 +16,10 @@ import java.util.concurrent.Executor;
 
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.
- * <p>Note:</p><ol><li>For a layout to be inflated asynchronously it needs to have a parent whose
+ * <p>Note:</p><ul><li>For a layout to be inflated asynchronously it needs to have a parent whose
  * {@link ViewGroup#generateLayoutParams(AttributeSet)} is thread-safely and all the <tt>Views</tt>
  * being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</li>
- * <li>This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</li></ol>
+ * <li>This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</li></ul>
  * @author Garfield
  */
 public final class AsyncViewStub extends View {
@@ -59,9 +59,9 @@ public final class AsyncViewStub extends View {
 
     /**
      * Returns the id taken by the inflated view. If the inflated id
-     * is {@link View#NO_ID}, the inflated view keeps its original id.
+     * is {@link #NO_ID}, the inflated view keeps its original id.
      * @return A positive integer used to identify the inflated view
-     * or {@link View#NO_ID} if the inflated view should keep its id.
+     * or {@link #NO_ID} if the inflated view should keep its id.
      * @see #setInflatedId(int)
      */
     public final int getInflatedId() {
@@ -70,9 +70,9 @@ public final class AsyncViewStub extends View {
 
     /**
      * Defines the id taken by the inflated view. If the inflated id is
-     * {@link View#NO_ID}, the inflated view keeps its original id.
+     * {@link #NO_ID}, the inflated view keeps its original id.
      * @param inflatedId A positive integer used to identify the inflated
-     * view or {@link View#NO_ID} if the inflated view should keep its id.
+     * view or {@link #NO_ID} if the inflated view should keep its id.
      * @see #getInflatedId()
      */
     public final void setInflatedId(int inflatedId) {

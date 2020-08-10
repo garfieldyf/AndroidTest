@@ -458,9 +458,10 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private void testPackageParser() {
-        final List<PackageInfo> result = new PackageParser(this)
-            //.addParseFlags(PackageManager.GET_ACTIVITIES)
-            .addScanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
+        final List<PackageInfo> result = new PackageParser(getPackageManager())
+            .scanFlags(FileUtils.FLAG_SCAN_FOR_DESCENDENTS)
+//            .parseFlags(PackageManager.GET_ACTIVITIES)
+//            .cancelable(null)
             .parse("/mnt/usb/sda1");
         PackageUtils.dumpPackageInfos(new LogPrinter(Log.INFO, "yf"), result);
         for (PackageInfo pi : result) {
@@ -471,7 +472,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         //////////////////////////////////
 
-        List<PackageInfo> infos = new PackageParser(this).parse("/sdcard/apks");
+        List<PackageInfo> infos = new PackageParser(getPackageManager()).parse("/sdcard/apks");
         PackageUtils.dumpPackageInfos(new LogPrinter(Log.INFO, "yf"), infos);
     }
     

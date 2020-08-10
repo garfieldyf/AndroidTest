@@ -15,8 +15,8 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 /**
- * Class <tt>ResourceLoader</tt> allows to load the resource on a background thread
- * and publish results on the UI thread. This class can be support the cache file.
+ * Class <tt>ResourceLoader</tt> allows to load the resource from the web on a background
+ * thread and publish results on the UI thread. This class can be support the cache file.
  * <h3>ResourceLoader's generic types</h3>
  * <p>The two types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>

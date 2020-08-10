@@ -37,7 +37,10 @@ public final class AsyncViewStub extends View {
     /* package */ int mInflatedId;
 
     public AsyncViewStub(Context context) {
-        this(context, null, 0);
+        super(context);
+
+        setVisibility(GONE);
+        setWillNotDraw(true);
     }
 
     public AsyncViewStub(Context context, AttributeSet attrs) {
@@ -45,16 +48,13 @@ public final class AsyncViewStub extends View {
     }
 
     public AsyncViewStub(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context);
+        this(context);
 
         final TypedArray a = context.obtainStyledAttributes(attrs, VIEW_STUB_ATTRS, defStyleAttr, 0);
         setId(a.getResourceId(ID_INDEX /* android.R.attr.id */, NO_ID));
         mLayoutId   = a.getResourceId(LAYOUT_INDEX /* android.R.attr.layout */, 0);
         mInflatedId = a.getResourceId(INFLATED_ID_INDEX /* android.R.attr.inflatedId */, NO_ID);
         a.recycle();
-
-        setVisibility(GONE);
-        setWillNotDraw(true);
     }
 
     /**

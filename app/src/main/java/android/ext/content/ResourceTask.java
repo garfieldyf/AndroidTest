@@ -3,7 +3,6 @@ package android.ext.content;
 import static android.ext.content.ResourceLoader.download;
 import static android.ext.content.ResourceLoader.loadFromCache;
 import static android.ext.content.ResourceLoader.parseResult;
-import android.app.Activity;
 import android.content.Context;
 import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
@@ -11,8 +10,8 @@ import android.ext.util.DebugUtils;
 import java.io.File;
 
 /**
- * Class <tt>ResourceTask</tt> allows to load the resource on a background thread
- * and publish results on the UI thread. This class can be support the cache file.
+ * Class <tt>ResourceTask</tt> allows to load the resource from the web on a background
+ * thread and publish results on the UI thread. This class can be support the cache file.
  * <h3>ResourceTask's generic types</h3>
  * <p>The two types used by a task are the following:</p>
  * <ol><li><tt>Key</tt>, The type of the key sent to the task.</li>

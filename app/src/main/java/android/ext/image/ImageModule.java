@@ -424,7 +424,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * Class <tt>Builder</tt> to creates an {@link ImageModule}.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
-     * final ImageModule&lt;String, Bitmap&gt; module = new Builder&lt;String, Bitmap&gt;(context)
+     * private ImageModule&lt;String, Bitmap&gt; mImageModule;
+     *
+     * mImageModule = new Builder&lt;String, Bitmap&gt;(context)
      *     .setScaleMemory(0.4f)   // The memory cache size.
      *     .setFileSize(1000)      // The file cache size.
      *     .build();</pre>

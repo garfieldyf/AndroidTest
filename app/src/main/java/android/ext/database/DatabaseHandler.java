@@ -126,10 +126,10 @@ public abstract class DatabaseHandler implements Factory<Object> {
     }
 
     /**
-     * Class <tt>AbstractSQLiteTask</tt> is an implementation of a {@link Runnable}.
+     * Class <tt>SQLiteCallback</tt> is an implementation of a {@link Runnable}.
      * @hide
      */
-    public abstract class AbstractSQLiteTask implements Runnable {
+    public abstract class SQLiteCallback implements Runnable {
         /* package */ int token;
         /* package */ int message;
         /* package */ Object values;

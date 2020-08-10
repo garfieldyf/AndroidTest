@@ -29,8 +29,8 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#createSerialExecutor()}.
+     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
+     * or {@link ThreadPool#createSerialExecutor()}.
      * @see #AsyncQueryHandler(Activity, Executor)
      */
     public AsyncQueryHandler(Context context, Executor executor) {
@@ -41,8 +41,8 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param activity The owner <tt>Activity</tt>.
-     * @param executor The serial <tt>Executor</tt>.
-     * See {@link ThreadPool#createSerialExecutor()}.
+     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
+     * or {@link ThreadPool#createSerialExecutor()}.
      * @see #AsyncQueryHandler(Context, Executor)
      */
     public AsyncQueryHandler(Activity ownerActivity, Executor executor) {
@@ -246,7 +246,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ final class AsyncQueryTask extends AbstractSQLiteTask {
+    /* package */ final class AsyncQueryTask extends SQLiteCallback {
         /* package */ Uri uri;
 
         @Override

@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import static android.ext.widget.UIHandler.MESSAGE_NOTIFICATION;
 import android.ext.util.DebugUtils;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
@@ -203,20 +204,23 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
         mRecyclerView = recyclerView;
     }
 
-    private void sendMessage(int message, int positionStart, Object obj) {
+    private void sendMessage(int message, int arg2, Object obj) {
         if (mCallback == null) {
-            mCallback = new NotificationRunnable();
+            mCallback = new NotificationCallback();
         }
 
         final Message msg = Message.obtain(UIHandler.sInstance, mCallback);
-        msg.obj = obj;
-        UIHandler.sInstance.sendMessage(msg, message, positionStart);
+        msg.what = MESSAGE_NOTIFICATION;
+        msg.arg1 = message;
+        msg.arg2 = arg2;
+        msg.obj  = obj;
+        UIHandler.sInstance.sendMessage(msg);
     }
 
     /**
-     * Class <tt>NotificationRunnable</tt> is an implementation of a {@link Runnable}.
+     * Class <tt>NotificationCallback</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ final class NotificationRunnable implements Runnable {
+    /* package */ final class NotificationCallback implements Runnable {
         @SuppressWarnings("unchecked")
         public final void handleMessage(Message msg) {
             switch (msg.arg1) {

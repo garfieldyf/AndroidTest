@@ -1,8 +1,8 @@
 package android.ext.widget;
 
 import android.ext.content.Loader.Task;
-import android.ext.database.DatabaseHandler.AbstractSQLiteTask;
-import android.ext.widget.BaseAdapter.NotificationRunnable;
+import android.ext.database.DatabaseHandler.SQLiteCallback;
+import android.ext.widget.BaseAdapter.NotificationCallback;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -51,13 +51,13 @@ public final class UIHandler extends Handler implements Executor {
             break;
 
         // Dispatch the BaseAdapter messages.
-        case MESSAGE_ADAPTER:
-            ((NotificationRunnable)msg.getCallback()).handleMessage(msg);
+        case MESSAGE_NOTIFICATION:
+            ((NotificationCallback)msg.getCallback()).handleMessage(msg);
             break;
 
         // Dispatch the DatabaseHandler messages.
         case MESSAGE_DATABASE_HANDLER:
-            ((AbstractSQLiteTask)msg.getCallback()).handleMessage(msg.arg1, msg.arg2, msg.obj);
+            ((SQLiteCallback)msg.getCallback()).handleMessage(msg.arg1, msg.arg2, msg.obj);
             break;
 
         default:
@@ -88,17 +88,6 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * Called on the {@link BaseAdapter} internal, do not call this method directly.
-     * @hide
-     */
-    public final void sendMessage(Message msg, int message, int positionStart) {
-        msg.what = MESSAGE_ADAPTER;
-        msg.arg1 = message;
-        msg.arg2 = positionStart;
-        sendMessage(msg);
-    }
-
-    /**
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      * @hide
      */
@@ -115,11 +104,11 @@ public final class UIHandler extends Handler implements Executor {
     private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
     private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
-    // The BaseAdapter messages.
-    private static final int MESSAGE_ADAPTER = 0xEFEFEFEF;
-
     // The DatabaseHandler messages.
-    private static final int MESSAGE_DATABASE_HANDLER = 0xFEFEFEFE;
+    private static final int MESSAGE_DATABASE_HANDLER = 0xEFEFEFEF;
+
+    // The BaseAdapter messages.
+    /* package */ static final int MESSAGE_NOTIFICATION = 0xFEFEFEFE;
 
     /**
      * This class cannot be instantiated.

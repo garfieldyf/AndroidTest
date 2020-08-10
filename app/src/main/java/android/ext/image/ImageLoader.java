@@ -66,7 +66,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mRequest = new LoadRequest();
         mDecoder = decoder;
         mModule  = module;
-        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new Loader());
+        mLoader  = (fileCache != null ? new FileCacheLoader(fileCache) : new Loader("._temp_cache!"));
     }
 
     /**
@@ -108,6 +108,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      */
     public final Image loadSync(URI uri, int resId, int flags) {
         return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, resId));
+    }
+
+    @Override
+    public Image remove(URI uri) {
+        if (mLoader != null) {
+            mLoader.remove(uri);
+        }
+
+        return super.remove(uri);
     }
 
     @Override
@@ -194,7 +203,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * Matches the scheme of the specified <em>uri</em>. The default
      * implementation match the "http", "https" and "ftp".
      */
-    private static boolean matchScheme(String uri) {
+    /* package */ static boolean matchScheme(String uri) {
         return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
     }
 
@@ -207,11 +216,20 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         /**
          * Constructor
          */
-        public Loader() {
+        public Loader(String name) {
             DebugUtils.__checkStartMethodTracing();
-            mCacheDir = FileUtils.getCacheDir(mModule.mContext, "._temp_cache!").getPath();
+            mCacheDir = FileUtils.getCacheDir(mModule.mContext, name).getPath();
             FileUtils.deleteFiles(mCacheDir, false);
-            DebugUtils.__checkStopMethodTracing("ImageLoader", "ImageLoader.Loader <init>");
+            DebugUtils.__checkStopMethodTracing("ImageLoader", "Loader <init>");
+        }
+
+        /**
+         * Removes the cache file for the specified
+         * <em>uri</em> from the cache of this loader.
+         * @param uri The uri to remove.
+         */
+        public void remove(Object uri) {
+            // No file cache, do nothing.
         }
 
         /**
@@ -245,7 +263,18 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @param cache The {@link FileCache} to store the loaded image files.
          */
         public FileCacheLoader(FileCache cache) {
+            super("._temp_image_cache!");
             mCache = cache;
+        }
+
+        @Override
+        public void remove(Object uri) {
+            final String uriString = uri.toString();
+            if (matchScheme(uriString)) {
+                DebugUtils.__checkStartMethodTracing();
+                mCache.remove(StringUtils.toHexString(MessageDigests.computeString(uriString, Algorithm.SHA1)));
+                DebugUtils.__checkStopMethodTracing("ImageLoader", "FileCacheLoader.remove");
+            }
         }
 
         @Override

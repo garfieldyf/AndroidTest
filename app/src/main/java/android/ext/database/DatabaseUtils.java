@@ -348,7 +348,7 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                result.put(name, toBigInteger(cursor.getBlob(columnIndex)));
+                result.put(name, toString(cursor.getBlob(columnIndex)));
                 break;
             }
         }
@@ -418,7 +418,7 @@ public final class DatabaseUtils {
                 break;
 
             case Cursor.FIELD_TYPE_BLOB:
-                writer.name(name).value(toBigInteger(cursor.getBlob(columnIndex)));
+                writer.name(name).value(toString(cursor.getBlob(columnIndex)));
                 break;
             }
         }
@@ -426,8 +426,8 @@ public final class DatabaseUtils {
         return writer.endObject();
     }
 
-    private static BigInteger toBigInteger(byte[] blob) {
-        return (ArrayUtils.getSize(blob) > 0 ? new BigInteger(blob) : null);
+    private static String toString(byte[] blob) {
+        return (ArrayUtils.getSize(blob) > 0 ? new BigInteger(blob).toString() : null);
     }
 
     private static List<Pair<Field, String>> getCursorFields(Class<?> clazz) {

@@ -236,44 +236,6 @@ public class JSONObject extends LinkedHashMap<String, Object> {
         return JSONUtils.toBoolean(get(name), fallback);
     }
 
-//    /**
-//     * Equivalent to calling <tt>optBigInteger(name, null)</tt>.
-//     * @see #optBigInteger(String, BigInteger)
-//     */
-//    public BigInteger optBigInteger(String name) {
-//        return JSONUtils.toBigInteger(get(name), null);
-//    }
-//
-//    /**
-//     * Returns the value mapped by <em>name</em> if it exists and is a {@link BigInteger}
-//     * or can be coerced to a <tt>BigInteger</tt>. Returns <em>fallback</em> otherwise.
-//     * @param name The JSON property name.
-//     * @return The <tt>BigInteger</tt> value or <em>fallback</em>.
-//     * @see #optBigInteger(String)
-//     */
-//    public BigInteger optBigInteger(String name, BigInteger fallback) {
-//        return JSONUtils.toBigInteger(get(name), fallback);
-//    }
-//
-//    /**
-//     * Equivalent to calling <tt>optBigDecimal(name, null)</tt>.
-//     * @see #optBigDecimal(String, BigDecimal)
-//     */
-//    public BigDecimal optBigDecimal(String name) {
-//        return JSONUtils.toBigDecimal(get(name), null);
-//    }
-//
-//    /**
-//     * Returns the value mapped by <em>name</em> if it exists and is a {@link BigDecimal}
-//     * or can be coerced to a <tt>BigDecimal</tt>. Returns <em>fallback</em> otherwise.
-//     * @param name The JSON property name.
-//     * @return The <tt>BigDecimal</tt> value or <em>fallback</em>.
-//     * @see #optBigDecimal(String)
-//     */
-//    public BigDecimal optBigDecimal(String name, BigDecimal fallback) {
-//        return JSONUtils.toBigDecimal(get(name), fallback);
-//    }
-
     /**
      * Returns the value mapped by <em>name</em> if it exists and
      * is a {@link JSONArray}. Returns <tt>null</tt> otherwise.

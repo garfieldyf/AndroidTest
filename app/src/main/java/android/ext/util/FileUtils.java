@@ -840,6 +840,7 @@ public final class FileUtils {
          * @see #Stat()
          */
         public Stat(Stat from) {
+            DebugUtils.__checkError(from == null, "Invalid parameter - from == null");
             this.mode    = from.mode;
             this.uid     = from.uid;
             this.gid     = from.gid;
@@ -1009,7 +1010,7 @@ public final class FileUtils {
     /**
      * Class <tt>Dirent</tt> is wrapper for linux structure <tt>dirent</tt>.
      */
-    public static class Dirent implements Comparable<Dirent> {
+    public static final class Dirent implements Comparable<Dirent> {
         /**
          * The <tt>Dirent</tt> unknown.
          */

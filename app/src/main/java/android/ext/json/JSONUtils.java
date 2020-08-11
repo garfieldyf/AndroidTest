@@ -347,44 +347,6 @@ public final class JSONUtils {
         return fallback;
     }
 
-//    /* package */ static BigInteger toBigInteger(Object value, BigInteger fallback) {
-//        if (value instanceof BigInteger) {
-//            return (BigInteger)value;
-//        } else if (value instanceof Number) {
-//            return BigInteger.valueOf(((Number)value).longValue());
-//        } else if (value instanceof String) {
-//            try {
-//                return new BigInteger((String)value);
-//            } catch (NumberFormatException e) {
-//                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
-//            }
-//        }
-//
-//        return fallback;
-//    }
-//
-//    /* package */ static BigDecimal toBigDecimal(Object value, BigDecimal fallback) {
-//        if (value instanceof BigDecimal) {
-//            return (BigDecimal)value;
-//        } else if (value instanceof BigInteger) {
-//            return new BigDecimal((BigInteger)value);
-//        } else if (value instanceof Number) {
-//            try {
-//                return BigDecimal.valueOf(((Number)value).doubleValue());
-//            } catch (NumberFormatException e) {
-//                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
-//            }
-//        } else if (value instanceof String) {
-//            try {
-//                return new BigDecimal((String)value);
-//            } catch (NumberFormatException e) {
-//                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
-//            }
-//        }
-//
-//        return fallback;
-//    }
-
     /* package */ static String toJSONString(Object value) {
         try {
             final StringWriter out = new StringWriter(128);

@@ -283,44 +283,6 @@ public class JSONArray extends ArrayList<Object> {
         return JSONUtils.toString(opt(index), fallback);
     }
 
-//    /**
-//     * Equivalent to calling <tt>optBigInteger(index, null)</tt>.
-//     * @see #optBigInteger(int, BigInteger)
-//     */
-//    public BigInteger optBigInteger(int index) {
-//        return JSONUtils.toBigInteger(opt(index), null);
-//    }
-//
-//    /**
-//     * Returns the value at <em>index</em> if it exists and is a {@link BigInteger}
-//     * or can be coerced to a <tt>BigInteger</tt>. Returns <em>fallback</em> otherwise.
-//     * @param index The index of the value.
-//     * @return The value at <em>index</em> or <em>fallback</em>.
-//     * @see #optBigInteger(int)
-//     */
-//    public BigInteger optBigInteger(int index, BigInteger fallback) {
-//        return JSONUtils.toBigInteger(opt(index), fallback);
-//    }
-//
-//    /**
-//     * Equivalent to calling <tt>optBigDecimal(index, null)</tt>.
-//     * @see #optBigDecimal(int, BigDecimal)
-//     */
-//    public BigDecimal optBigDecimal(int index) {
-//        return JSONUtils.toBigDecimal(opt(index), null);
-//    }
-//
-//    /**
-//     * Returns the value at <em>index</em> if it exists and is a {@link BigDecimal}
-//     * or can be coerced to a <tt>BigDecimal</tt>. Returns <em>fallback</em> otherwise.
-//     * @param index The index of the value.
-//     * @return The value at <em>index</em> or <em>fallback</em>.
-//     * @see #optBigDecimal(int)
-//     */
-//    public BigDecimal optBigDecimal(int index, BigDecimal fallback) {
-//        return JSONUtils.toBigDecimal(opt(index), fallback);
-//    }
-
     /**
      * Returns the value at <em>index</em> if it exists and
      * is a {@link JSONArray}. Returns <tt>null</tt> otherwise.

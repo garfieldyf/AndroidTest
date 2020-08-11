@@ -75,6 +75,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      */
     public final Context mContext;
 
+    /* package */ final String mCacheDir;
     /* package */ final Executor mExecutor;
     /* package */ final Pool<Task> mTaskPool;
     /* package */ final Pool<byte[]> mBufferPool;
@@ -95,6 +96,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
         final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
+        mCacheDir = getCacheDir(context);
         mExecutor = executor;
         mFileCache   = fileCache;
         mImageCache  = imageCache;
@@ -390,6 +392,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
         result.setLength(0);
         Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
+    }
+
+    private static String getCacheDir(Context context) {
+        DebugUtils.__checkStartMethodTracing();
+        final String cacheDir = FileUtils.getCacheDir(context, "._temp_cache!").getPath();
+        FileUtils.deleteFiles(cacheDir, false);
+        DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir");
+        return cacheDir;
     }
 
     private static String toString(int level) {

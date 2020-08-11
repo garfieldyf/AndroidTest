@@ -132,7 +132,7 @@ public final class NetworkUtils {
                 }
             }
         } catch (Exception e) {
-            DebugUtils.__checkLogError(true, NetworkUtils.class.getName(), "Couldn't get Inet4Address from network interface - " + ifname);
+            DebugUtils.__checkLogError(true, NetworkUtils.class.getName(), "Couldn't get Inet4Address from network interface - " + ifname, e);
         }
 
         return null;

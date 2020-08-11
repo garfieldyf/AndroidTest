@@ -404,11 +404,15 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     assert(env);
     AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || callback == NULL, "dirPath == null || dirPath.length() == 0 || callback == null", EINVAL);
 
-    jint result;
+    jint result, errnum;
     const JNI::jstring_t jdirPath(env, dirPath);
-    return ((flags & FLAG_SCAN_FOR_DESCENDENTS)
-            ? ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie, result))
-            : ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie)));
+
+    if (flags & FLAG_SCAN_FOR_DESCENDENTS)
+        errnum = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie, result));
+    else
+        errnum = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie));
+
+    return errnum;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

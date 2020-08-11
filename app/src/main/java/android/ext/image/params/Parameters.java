@@ -140,7 +140,7 @@ public class Parameters {
     /**
      * Computes the {@link Options#inDensity} to decode image.
      */
-    /* package */ static void computeOptionsDensity(int width, int height, Options opts) {
+    /* package */ static void computeDecodeDensity(int width, int height, Options opts) {
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             opts.inTargetDensity = DEVICE_DENSITY;
@@ -221,7 +221,7 @@ public class Parameters {
                 height = width = 0;
             }
 
-            computeOptionsDensity(width, height, opts);
+            computeDecodeDensity(width, height, opts);
         }
 
         @Override

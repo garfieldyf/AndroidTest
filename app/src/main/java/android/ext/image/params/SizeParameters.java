@@ -89,7 +89,7 @@ public class SizeParameters extends Parameters {
         }
 
         DebugUtils.__checkWarning(width <= 0 || height <= 0, "SizeParameters", "The image will be decode original size (width = " + width + ", height = " + height + ").");
-        computeOptionsDensity(width, height, opts);
+        computeDecodeDensity(width, height, opts);
     }
 
     @Override

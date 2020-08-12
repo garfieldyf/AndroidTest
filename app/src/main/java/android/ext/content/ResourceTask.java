@@ -6,8 +6,10 @@ import static android.ext.content.ResourceLoader.parseResult;
 import android.content.Context;
 import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
+import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.DebugUtils;
 import java.io.File;
+import java.net.URLConnection;
 
 /**
  * Class <tt>ResourceTask</tt> allows to load the resource from the web on a background
@@ -35,7 +37,7 @@ import java.io.File;
  *    .execute(loadParams);</pre>
  * @author Garfield
  */
-public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Result>, Object, Result> {
+public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Result>, Object, Result> implements DownloadCallback<Object, Integer> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -92,6 +94,11 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     }
 
     @Override
+    public Integer onDownload(URLConnection conn, int statusCode, Object[] params) throws Exception {
+        return download(conn, statusCode, params);
+    }
+
+    @Override
     protected void onPostExecute(Result result) {
         DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setOnLoadCompleteListener()");
         mListener.onLoadComplete(mKey, mLoadParams, mCookie, result);
@@ -118,6 +125,6 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
             publishProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mKey, mLoadParams, this, cacheFile, hitCache));
+        return (isCancelled() ? null : download(mContext, mKey, mLoadParams, this, cacheFile, this, hitCache));
     }
 }

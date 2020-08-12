@@ -4,6 +4,7 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
+import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -11,7 +12,9 @@ import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Log;
 import java.io.File;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.URLConnection;
 import java.util.concurrent.Executor;
 
 /**
@@ -80,7 +83,7 @@ import java.util.concurrent.Executor;
  * mLoader.load(url, new JSONLoadParams(), new LoadCompleteListener(), cookie);</pre>
  * @author Garfield
  */
-public final class ResourceLoader<Key, Result> extends Loader<Key> {
+public class ResourceLoader<Key, Result> extends Loader<Key> implements DownloadCallback<Object, Integer> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -165,6 +168,11 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return new LoadTask();
     }
 
+    @Override
+    public Integer onDownload(URLConnection conn, int statusCode, Object[] params) throws Exception {
+        return download(conn, statusCode, params);
+    }
+
     @SuppressWarnings({ "unchecked", "rawtypes" })
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
@@ -173,6 +181,16 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         task.mListener = listener;
         task.mLoadParams = loadParams;
         return task;
+    }
+
+    /* package */ static int download(URLConnection conn, int statusCode, Object[] params) throws Exception {
+        if (statusCode == HTTP_OK) {
+            try (final InputStream is = conn.getInputStream()) {
+                FileUtils.copyStream(is, (File)params[0], (Cancelable)params[1]);
+            }
+        }
+
+        return statusCode;
     }
 
     /* package */ static <Key, Result> Result loadFromCache(Context context, Key key, LoadParams<Key, Result> loadParams, File cacheFile) {
@@ -205,12 +223,12 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
         return result;
     }
 
-    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, File cacheFile, boolean hitCache) {
+    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, File cacheFile, DownloadCallback<Object, Integer> callback, boolean hitCache) {
         final String cachePath = cacheFile.getPath();
         final File tempFile = new File(cachePath + ".tmp");
         Result result = null;
         try {
-            final int statusCode = loadParams.newDownloadRequest(context, key).download(tempFile, cancelable, null);
+            final int statusCode = loadParams.newDownloadRequest(context, key).download(callback, tempFile, cancelable);
             if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(hitCache && FileUtils.compareFile(cachePath, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
@@ -266,7 +284,7 @@ public final class ResourceLoader<Key, Result> extends Loader<Key> {
                 setProgress(result);
             }
 
-            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile, hitCache));
+            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile, ResourceLoader.this, hitCache));
         }
 
         @Override

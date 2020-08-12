@@ -26,11 +26,11 @@ import java.util.Set;
  * @author Garfield
  */
 public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> {
+    private int mItemCount;
     private final int mPageSize;
     private final int mInitialSize;
 
-    private int mItemCount;
-    private final Loader mLoader;
+    private final Fetcher mFetcher;
     private final BitSet mLoadStates;
     private final Cache<Integer, Page<E>> mPageCache;
 
@@ -85,7 +85,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
-        mLoader = (prefetchDistance > 0 ? new PrefetchLoader(prefetchDistance) : new Loader());
+        mFetcher = (prefetchDistance > 0 ? new Prefetcher(prefetchDistance) : new Fetcher());
     }
 
     /**
@@ -135,7 +135,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public E getItem(int position, E fallback) {
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
-        return mLoader.get(position, fallback);
+        return mFetcher.get(position, fallback);
     }
 
     /**
@@ -434,15 +434,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Prefetch the page with the given <em>pageIndex</em> and <em>position</em>. The
+     * Prefetch the page with the given <em>pageIndex</em> and <em>pagePosition</em>. The
      * default implementation load the previous and next page near by the current page.
      * @param pageIndex The index of the current page.
-     * @param position The index of the item in the page.
+     * @param pagePosition The index of the item in the current page.
      * @param prefetchDistance Defines how far to the first or last item in the page.
      */
-    protected void prefetchPage(int pageIndex, int position, int prefetchDistance) {
+    protected void prefetchPage(int pageIndex, int pagePosition, int prefetchDistance) {
         // Prefetch the previous page data.
-        if (pageIndex > 0 && position == prefetchDistance - 1) {
+        if (pageIndex > 0 && pagePosition == prefetchDistance - 1) {
             getPage(pageIndex - 1);
         }
 
@@ -450,7 +450,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         if (pageIndex < lastPage) {
             // Prefetch the next page data.
             final int pageSize = (pageIndex > 0 ? mPageSize : mInitialSize);
-            if (position == pageSize - prefetchDistance) {
+            if (pagePosition == pageSize - prefetchDistance) {
                 getPage(pageIndex + 1);
             }
         }
@@ -488,9 +488,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>Loader</tt>
+     * Class <tt>Fetcher</tt>
      */
-    /* package */ class Loader {
+    /* package */ class Fetcher {
         public E get(int position, E fallback) {
             final long combinedPosition = getPageForPosition(position);
             final Page<E> page = getPage(Pages.getOriginalPage(combinedPosition));
@@ -499,9 +499,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>PrefetchLoader</tt> is an implementation of a {@link Loader}.
+     * Class <tt>Prefetcher</tt> is an implementation of a {@link Fetcher}.
      */
-    private final class PrefetchLoader extends Loader {
+    private final class Prefetcher extends Fetcher {
         private final int mPrefetchDistance;
 
         /**
@@ -509,7 +509,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          * @param prefetchDistance Defines how far to the first or last
          * item in the page to this adapter should prefetch the data.
          */
-        public PrefetchLoader(int prefetchDistance) {
+        public Prefetcher(int prefetchDistance) {
             mPrefetchDistance = prefetchDistance;
         }
 

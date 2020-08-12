@@ -244,9 +244,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link Runnable}.
+     * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link AbsSQLiteTask}.
      */
-    /* package */ final class AsyncQueryTask extends SQLiteCallback {
+    /* package */ final class AsyncQueryTask extends AbsSQLiteTask {
         /* package */ Uri uri;
 
         @Override
@@ -254,16 +254,12 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             final ContentResolver resolver = mContext.getContentResolver();
             final Object result;
             switch (message) {
-            case MESSAGE_CALL:
-                result = resolver.call(uri, selection, sortOrder, (Bundle)values);
+            case MESSAGE_QUERY:
+                result = execQuery(resolver);
                 break;
 
             case MESSAGE_BATCH:
                 result = applyBatch(resolver);
-                break;
-
-            case MESSAGE_QUERY:
-                result = execQuery(resolver);
                 break;
 
             case MESSAGE_INSERT:
@@ -282,6 +278,10 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 result = resolver.bulkInsert(uri, (ContentValues[])values);
                 break;
 
+            case MESSAGE_CALL:
+                result = resolver.call(uri, selection, sortOrder, (Bundle)values);
+                break;
+
             case MESSAGE_UPDATE:
                 result = resolver.update(uri, (ContentValues)values, selection, selectionArgs);
                 break;
@@ -290,18 +290,34 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 throw new IllegalStateException("Unknown message: " + message);
             }
 
-            UIHandler.sInstance.sendMessage(this, message, token, result);
+            UIHandler.sInstance.sendMessage(this, result);
         }
 
         @Override
-        public final void handleMessage(int message, int token, Object result) {
+        public final void onPostExecute(Object result) {
             switch (message) {
-            case MESSAGE_CALL:
-                onCallComplete(token, (Bundle)result);
+            case MESSAGE_EXECUTE:
+                onExecuteComplete(token, result);
+                break;
+
+            case MESSAGE_UPDATE:
+                onUpdateComplete(token, (int)result);
+                break;
+
+            case MESSAGE_DELETE:
+                onDeleteComplete(token, (int)result);
                 break;
 
             case MESSAGE_INSERT:
                 onInsertComplete(token, (Uri)result);
+                break;
+
+            case MESSAGE_CALL:
+                onCallComplete(token, (Bundle)result);
+                break;
+
+            case MESSAGE_QUERY:
+                onQueryComplete(token, (Cursor)result);
                 break;
 
             case MESSAGE_INSERTS:
@@ -313,14 +329,11 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 break;
 
             default:
-                super.handleMessage(message, token, result);
+                throw new IllegalStateException("Unknown message: " + message);
             }
 
+            clearForRecycle();
             this.uri = null;
-            this.values = null;
-            this.sortOrder = null;
-            this.selection = null;
-            this.selectionArgs = null;
             mTaskPool.recycle(this);
         }
 

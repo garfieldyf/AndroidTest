@@ -1,7 +1,7 @@
 package android.ext.widget;
 
 import android.ext.content.Loader.Task;
-import android.ext.database.DatabaseHandler.SQLiteCallback;
+import android.ext.database.DatabaseHandler.AbsSQLiteTask;
 import android.ext.widget.BaseAdapter.NotificationCallback;
 import android.os.Handler;
 import android.os.Looper;
@@ -50,14 +50,14 @@ public final class UIHandler extends Handler implements Executor {
             ((Task)msg.getCallback()).onPostExecute(msg.obj);
             break;
 
+        // Dispatch the DatabaseHandler messages.
+        case MESSAGE_DATABASE:
+            ((AbsSQLiteTask)msg.getCallback()).onPostExecute(msg.obj);
+            break;
+
         // Dispatch the BaseAdapter messages.
         case MESSAGE_NOTIFICATION:
             ((NotificationCallback)msg.getCallback()).handleMessage(msg);
-            break;
-
-        // Dispatch the DatabaseHandler messages.
-        case MESSAGE_DATABASE_HANDLER:
-            ((SQLiteCallback)msg.getCallback()).handleMessage(msg.arg1, msg.arg2, msg.obj);
             break;
 
         default:
@@ -91,11 +91,9 @@ public final class UIHandler extends Handler implements Executor {
      * Called on the {@link DatabaseHandler} internal, do not call this method directly.
      * @hide
      */
-    public final void sendMessage(Runnable callback, int message, int token, Object result) {
-        final Message msg = Message.obtain(this, callback);
-        msg.what = MESSAGE_DATABASE_HANDLER;
-        msg.arg1 = message;
-        msg.arg2 = token;
+    public final void sendMessage(AbsSQLiteTask task, Object result) {
+        final Message msg = Message.obtain(this, task);
+        msg.what = MESSAGE_DATABASE;
         msg.obj  = result;
         sendMessage(msg);
     }
@@ -105,7 +103,7 @@ public final class UIHandler extends Handler implements Executor {
     private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
 
     // The DatabaseHandler messages.
-    private static final int MESSAGE_DATABASE_HANDLER = 0xEFEFEFEF;
+    private static final int MESSAGE_DATABASE = 0xEFEFEFEF;
 
     // The BaseAdapter messages.
     /* package */ static final int MESSAGE_NOTIFICATION = 0xFEFEFEFE;

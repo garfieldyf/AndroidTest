@@ -223,7 +223,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return result;
     }
 
-    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable, File cacheFile, DownloadCallback<Object, Integer> callback, boolean hitCache) {
+    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, DownloadCallback<Object, Integer> callback, Cancelable cancelable, File cacheFile, boolean hitCache) {
         final String cachePath = cacheFile.getPath();
         final File tempFile = new File(cachePath + ".tmp");
         Result result = null;
@@ -284,7 +284,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
                 setProgress(result);
             }
 
-            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, this, cacheFile, ResourceLoader.this, hitCache));
+            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, ResourceLoader.this, this, cacheFile, hitCache));
         }
 
         @Override

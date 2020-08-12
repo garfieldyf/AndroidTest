@@ -167,7 +167,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         // testColor();
         // testUncompress();
         // testLogo();
-        // testDBHandler();
+//         testDBHandler();
 //         testDate();
         // testGray();
         // testForkJoin();
@@ -679,6 +679,17 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         public SQLiteHandler(SQLiteDatabase db) {
             super(MainApplication.sThreadPool.createSerialExecutor(), db);
         }
+
+        @Override
+        protected Object onExecute(SQLiteDatabase db, int token, Object[] params) {
+            Log.d("abcd", "token = " + token + ", params = " + Arrays.toString(params));
+            return params[0];
+        }
+
+        @Override
+        protected void onExecuteComplete(int token, Object result) {
+            Log.d("abcd", "token = " + token + ", result = " + result);
+        }
     }
 
     private static final class QueryHandler extends AsyncQueryHandler {
@@ -688,11 +699,12 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private void testDBHandler() {
-        SQLiteHandler handler = new SQLiteHandler(null);
-        Log.i("yf", "SQLiteHandler = " + handler.toString());
+        SQLiteHandler handler = new SQLiteHandler(mDatabase2.getWritableDatabase());
+        Log.i("abcd", "SQLiteHandler = " + handler.toString());
+        handler.startExecute(1, "a", 1, "2");
 
         QueryHandler h = new QueryHandler(this);
-        Log.i("yf", "QueryHandler = " + h.toString());
+        Log.i("abcd", "QueryHandler = " + h.toString());
     }
 
     private void testRegex() {

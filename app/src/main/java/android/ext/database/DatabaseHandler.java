@@ -126,10 +126,10 @@ public abstract class DatabaseHandler implements Factory<Object> {
     }
 
     /**
-     * Class <tt>SQLiteCallback</tt> is an implementation of a {@link Runnable}.
+     * Class <tt>AbsSQLiteTask</tt> is an implementation of a {@link Runnable}.
      * @hide
      */
-    public abstract class SQLiteCallback implements Runnable {
+    public static abstract class AbsSQLiteTask implements Runnable {
         /* package */ int token;
         /* package */ int message;
         /* package */ Object values;
@@ -138,32 +138,20 @@ public abstract class DatabaseHandler implements Factory<Object> {
         /* package */ String[] selectionArgs;
 
         /**
+         * Clears all fields for recycle.
+         */
+        /* package */ final void clearForRecycle() {
+            this.values = null;
+            this.sortOrder = null;
+            this.selection = null;
+            this.selectionArgs = null;
+        }
+
+        /**
          * Called on the UI thread when this task handle
          * messages, do not call this method directly.
          * @hide
          */
-        public void handleMessage(int message, int token, Object result) {
-            switch (message) {
-            case MESSAGE_EXECUTE:
-                onExecuteComplete(token, result);
-                break;
-
-            case MESSAGE_UPDATE:
-                onUpdateComplete(token, (int)result);
-                break;
-
-            case MESSAGE_DELETE:
-                onDeleteComplete(token, (int)result);
-                break;
-
-            case MESSAGE_QUERY:
-            case MESSAGE_RAWQUERY:
-                onQueryComplete(token, (Cursor)result);
-                break;
-
-            default:
-                throw new IllegalStateException("Unknown message: " + message);
-            }
-        }
+        public abstract void onPostExecute(Object result);
     }
 }

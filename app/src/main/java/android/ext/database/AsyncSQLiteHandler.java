@@ -211,9 +211,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     /**
-     * Class <tt>SQLiteTask</tt> is an implementation of a {@link Runnable}.
+     * Class <tt>SQLiteTask</tt> is an implementation of a {@link AbsSQLiteTask}.
      */
-    /* package */ final class SQLiteTask extends SQLiteCallback {
+    /* package */ final class SQLiteTask extends AbsSQLiteTask {
         /* package */ String table;
 
         @Override
@@ -254,14 +254,31 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 throw new IllegalStateException("Unknown message: " + message);
             }
 
-            UIHandler.sInstance.sendMessage(this, message, token, result);
+            UIHandler.sInstance.sendMessage(this, result);
         }
 
         @Override
-        public final void handleMessage(int message, int token, Object result) {
+        public final void onPostExecute(Object result) {
             switch (message) {
+            case MESSAGE_QUERY:
+            case MESSAGE_RAWQUERY:
+                onQueryComplete(token, (Cursor)result);
+                break;
+
+            case MESSAGE_EXECUTE:
+                onExecuteComplete(token, result);
+                break;
+
+            case MESSAGE_DELETE:
+                onDeleteComplete(token, (int)result);
+                break;
+
             case MESSAGE_INSERT:
                 onInsertComplete(token, (long)result);
+                break;
+
+            case MESSAGE_UPDATE:
+                onUpdateComplete(token, (int)result);
                 break;
 
             case MESSAGE_REPLACE:
@@ -269,14 +286,11 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 break;
 
             default:
-                super.handleMessage(message, token, result);
+                throw new IllegalStateException("Unknown message: " + message);
             }
 
-            this.table  = null;
-            this.values = null;
-            this.sortOrder = null;
-            this.selection = null;
-            this.selectionArgs = null;
+            clearForRecycle();
+            this.table = null;
             mTaskPool.recycle(this);
         }
 

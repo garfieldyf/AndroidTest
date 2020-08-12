@@ -77,7 +77,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray add(float value) {
         __checkMutable();
-        JSONUtils.__checkDouble(value);
+        JSONUtils.__checkFloat(value);
         super.add(value);
         return this;
     }
@@ -140,7 +140,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray add(int index, float value) {
         __checkMutable();
-        JSONUtils.__checkDouble(value);
+        JSONUtils.__checkFloat(value);
         super.add(index, value);
         return this;
     }

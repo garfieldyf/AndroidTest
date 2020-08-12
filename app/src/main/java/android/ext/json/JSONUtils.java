@@ -357,9 +357,15 @@ public final class JSONUtils {
         }
     }
 
-    /* package */ static void __checkDouble(double d) {
-        if (Double.isInfinite(d) || Double.isNaN(d)) {
-            throw new AssertionError("Forbidden numeric value: " + d);
+    /* package */ static void __checkFloat(float value) {
+        if (Float.isInfinite(value) || Float.isNaN(value)) {
+            throw new AssertionError("Forbidden numeric value: " + value);
+        }
+    }
+
+    /* package */ static void __checkDouble(double value) {
+        if (Double.isInfinite(value) || Double.isNaN(value)) {
+            throw new AssertionError("Forbidden numeric value: " + value);
         }
     }
 

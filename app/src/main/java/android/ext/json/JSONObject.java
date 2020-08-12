@@ -102,7 +102,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public JSONObject put(String name, float value) {
         __checkMutable();
         DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        JSONUtils.__checkDouble(value);
+        JSONUtils.__checkFloat(value);
         super.put(name, value);
         return this;
     }

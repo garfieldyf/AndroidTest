@@ -53,7 +53,7 @@ public final class JsonLoader {
         public File getCacheFile(Context context, String url) {
             if (!mCacheFile.exists()) {
                 try {
-                    FileUtils.copyFile(context, UriUtils.getAssetUri("json_cache/content"), mCacheFile.getPath(), null);
+                    FileUtils.copyFile(context, UriUtils.getAssetUri("json_cache/content"), mCacheFile, null);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

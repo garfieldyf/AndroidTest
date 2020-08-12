@@ -252,7 +252,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         Log.i("yf", "srcSHA = " + StringUtils.toHexString(digest));
 
         try {
-            FileUtils.copyFile(this, UriUtils.getFileUri(srcPath), dstPath, null);
+            FileUtils.copyFile(this, UriUtils.getFileUri(srcPath), new File(dstPath), null);
             digest = MessageDigests.computeFile(dstPath, Algorithm.SHA1);
             Log.i("yf", "dstSHA = " + StringUtils.toHexString(digest));
         } catch (IOException e) {

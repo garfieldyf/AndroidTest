@@ -448,8 +448,8 @@ public final class FileUtils {
      * @throws IOException if an error occurs while writing to <em>outFile</em>.
      * @see UriUtils#openInputStream(Context, Object)
      */
-    public static void copyFile(Context context, Object uri, String outFile, Cancelable cancelable) throws IOException {
-        FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
+    public static void copyFile(Context context, Object uri, File outFile, Cancelable cancelable) throws IOException {
+        FileUtils.mkdirs(outFile.getPath(), FLAG_IGNORE_FILENAME);
         try (final OutputStream os = new FileOutputStream(outFile)) {
             readFile(context, uri, os, cancelable);
         }
@@ -466,8 +466,8 @@ public final class FileUtils {
      * @throws IOException if an error occurs while writing to <em>outFile</em>.
      * @see #copyStream(InputStream, OutputStream, Cancelable, byte[])
      */
-    public static void copyStream(InputStream is, String outFile, Cancelable cancelable) throws IOException {
-        FileUtils.mkdirs(outFile, FLAG_IGNORE_FILENAME);
+    public static void copyStream(InputStream is, File outFile, Cancelable cancelable) throws IOException {
+        FileUtils.mkdirs(outFile.getPath(), FLAG_IGNORE_FILENAME);
         try (final OutputStream os = new FileOutputStream(outFile)) {
             copyStream(is, os, cancelable, null);
         }
@@ -482,7 +482,7 @@ public final class FileUtils {
      * the <em>out's</em> contents is undefined.
      * @param buffer May be <tt>null</tt>. The temporary byte array to store the read bytes.
      * @throws IOException if an error occurs while writing to <em>out</em>.
-     * @see #copyStream(InputStream, String, Cancelable)
+     * @see #copyStream(InputStream, File, Cancelable)
      */
     public static void copyStream(InputStream is, OutputStream out, Cancelable cancelable, byte[] buffer) throws IOException {
         if (out instanceof ByteArrayBuffer) {

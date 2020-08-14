@@ -282,13 +282,24 @@ public final class DatabaseUtils {
             final List<Pair<Field, String>> cursorFields = getCursorFields(componentType);
             final Constructor<? extends T> ctor = ReflectUtils.getConstructor(componentType, (Class<?>[])null);
             while (cursor.moveToNext()) {
-                final T object = ctor.newInstance((Object[])null);
-                setCursorFields(cursor, object, cursorFields);
-                result.add(object);
+                result.add(newInstance(cursor, ctor, cursorFields));
             }
         }
 
         return result;
+    }
+
+    /**
+     * Parses the specified <em>cursor</em> current row to an object.
+     * @param cursor The {@link Cursor} from which to get the data. The cursor must be move to the correct position.
+     * @param clazz A <tt>Class</tt> can be deserialized of the object. See {@link CursorField}.
+     * @return A new object.
+     * @throws ReflectiveOperationException if the object cannot be created.
+     */
+    public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
+        DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
+        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
+        return newInstance(cursor, ReflectUtils.getConstructor(clazz, (Class<?>[])null), getCursorFields(clazz));
     }
 
     /**
@@ -449,7 +460,8 @@ public final class DatabaseUtils {
         return cursorFields;
     }
 
-    private static void setCursorFields(Cursor cursor, Object object, List<Pair<Field, String>> cursorFields) throws ReflectiveOperationException {
+    private static <T> T newInstance(Cursor cursor, Constructor<? extends T> ctor, List<Pair<Field, String>> cursorFields) throws ReflectiveOperationException {
+        final T object = ctor.newInstance((Object[])null);
         for (int i = 0, size = cursorFields.size(); i < size; ++i) {
             final Pair<Field, String> cursorField = cursorFields.get(i);
             final Field field = cursorField.first;
@@ -475,6 +487,8 @@ public final class DatabaseUtils {
                 throw new AssertionError("Unsupported field type - " + type.getName());
             }
         }
+
+        return object;
     }
 
     private static Object simpleQuery(ContentResolver resolver, Uri uri, String column, String selection, String[] selectionArgs) {

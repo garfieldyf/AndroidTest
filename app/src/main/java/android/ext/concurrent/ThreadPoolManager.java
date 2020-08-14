@@ -54,7 +54,7 @@ public class ThreadPoolManager extends ThreadPool {
      * Attempts to stop all pending and running {@link Task}s from the internal queue.
      * @param mayInterruptIfRunning <tt>true</tt> if all the running {@link Task}s should
      * be interrupted, <tt>false</tt> otherwise.
-     * @return <tt>true</tt> if at least one task was cancelled, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if any tasks were cancelled, <tt>false</tt> otherwise.
      * @see #cancel(long, boolean)
      */
     public boolean cancelAll(boolean mayInterruptIfRunning) {

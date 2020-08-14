@@ -17,7 +17,7 @@ import java.io.IOException;
 public final class JsonLoader {
     public static final OnLoadCompleteListener<String, JSONObject> sListener = new OnLoadCompleteListener<String, JSONObject>() {
         @Override
-        public void onLoadComplete(String key, LoadParams<String, JSONObject> loadParams, Object cookie, JSONObject result) {
+        public void onLoadComplete(String key, Object cookie, JSONObject result) {
             if (result != null) {
                 Log.i("ResourceLoader", "JsonLoader - Load Succeeded, Update UI.");
             } else {

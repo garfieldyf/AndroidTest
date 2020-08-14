@@ -54,11 +54,6 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     protected Object mCookie;
 
     /**
-     * The parameters of this task.
-     */
-    protected LoadParams<Key, Result> mLoadParams;
-
-    /**
      * The {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      */
     protected OnLoadCompleteListener<Key, Result> mListener;
@@ -101,7 +96,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     @Override
     protected void onPostExecute(Result result) {
         DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setOnLoadCompleteListener()");
-        mListener.onLoadComplete(mKey, mLoadParams, mCookie, result);
+        mListener.onLoadComplete(mKey, mCookie, result);
     }
 
     @Override
@@ -111,20 +106,20 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     }
 
     @Override
-    protected final Result doInBackground(LoadParams<Key, Result>[] loadParams) {
-        mLoadParams = loadParams[0];
-        final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
+    protected final Result doInBackground(LoadParams<Key, Result>[] params) {
+        final LoadParams<Key, Result> loadParams = params[0];
+        final File cacheFile = loadParams.getCacheFile(mContext, mKey);
         if (cacheFile == null) {
-            return parseResult(mContext, mKey, mLoadParams, this);
+            return parseResult(mContext, mKey, loadParams, this);
         }
 
-        final Result result = loadFromCache(mContext, mKey, mLoadParams, cacheFile);
+        final Result result = loadFromCache(mContext, mKey, loadParams, cacheFile);
         final boolean hitCache = (result != null);
         if (hitCache) {
             // Loads from the cache file succeeded, update UI.
             publishProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mKey, mLoadParams, this, this, cacheFile, hitCache));
+        return (isCancelled() ? null : download(mContext, mKey, loadParams, this, this, cacheFile, hitCache));
     }
 }

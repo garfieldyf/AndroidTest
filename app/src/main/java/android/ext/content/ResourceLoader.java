@@ -68,7 +68,7 @@ import java.util.concurrent.Executor;
  *
  * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;String, JSONObject&gt; {
  *    {@code @Override}
- *     public void onLoadComplete(String key, LoadParams&lt;String, JSONObject&gt; loadParams, Object cookie, JSONObject result) {
+ *     public void onLoadComplete(String key, Object cookie, JSONObject result) {
  *         if (result != null) {
  *             // Loading succeeded, update UI.
  *         } else {
@@ -290,14 +290,14 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         @Override
         public void onProgress(Object value) {
             if (mState != SHUTDOWN) {
-                mListener.onLoadComplete(mKey, mLoadParams, mParams, value);
+                mListener.onLoadComplete(mKey, mParams, value);
             }
         }
 
         @Override
         public void onPostExecute(Object result) {
             if (!isTaskCancelled(mKey, this)) {
-                mListener.onLoadComplete(mKey, mLoadParams, mParams, result);
+                mListener.onLoadComplete(mKey, mParams, result);
             }
 
             // Recycles this task to avoid potential memory leaks.
@@ -353,10 +353,9 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         /**
          * Called on the UI thread when the load is complete.
          * @param key The key, passed earlier by {@link ResourceLoader#load}.
-         * @param loadParams The parameters, passed earlier by {@link ResourceLoader#load}.
          * @param cookie An object, passed earlier by {@link ResourceLoader#load}.
          * @param result A result or <tt>null</tt> of the load.
          */
-        void onLoadComplete(Key key, LoadParams<Key, Result> loadParams, Object cookie, Result result);
+        void onLoadComplete(Key key, Object cookie, Result result);
     }
 }

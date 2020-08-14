@@ -1,10 +1,7 @@
 package android.ext.json;
 
-import android.ext.util.ArrayUtils.Filter;
-import android.ext.util.DebugUtils;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * Class JSONArray
@@ -318,25 +315,6 @@ public class JSONArray extends ArrayList<Object> {
     public Object remove(int index) {
         __checkMutable();
         return (index >= 0 && index < size() ? super.remove(index) : null);
-    }
-
-    /**
-     * Removes all of the values of this array that satisfy the given <em>filter</em>.
-     * @param filter A {@link Filter} which returns <tt>true</tt> for values to be removed.
-     * @return <tt>true</tt> if any valeus were removed, <tt>false</tt> otherwise.
-     */
-    public boolean remove(Filter<? super Object> filter) {
-        DebugUtils.__checkError(filter == null, "Invalid parameter - filter == null");
-        boolean result = false;
-        final Iterator<Object> itor = iterator();
-        while (itor.hasNext()) {
-            if (filter.accept(itor.next())) {
-                itor.remove();
-                result = true;
-            }
-        }
-
-        return result;
     }
 
     /**

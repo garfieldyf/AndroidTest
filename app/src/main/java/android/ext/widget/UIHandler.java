@@ -70,10 +70,7 @@ public final class UIHandler extends Handler implements Executor {
      * @hide
      */
     public final void finish(Task task, Object result) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_FINISHED;
-        msg.obj  = result;
-        sendMessage(msg);
+        sendMessage(task, MESSAGE_FINISHED, result);
     }
 
     /**
@@ -81,10 +78,7 @@ public final class UIHandler extends Handler implements Executor {
      * @hide
      */
     public final void setProgress(Task task, Object value) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_PROGRESS;
-        msg.obj  = value;
-        sendMessage(msg);
+        sendMessage(task, MESSAGE_PROGRESS, value);
     }
 
     /**
@@ -92,9 +86,13 @@ public final class UIHandler extends Handler implements Executor {
      * @hide
      */
     public final void sendMessage(AbsSQLiteTask task, Object result) {
-        final Message msg = Message.obtain(this, task);
-        msg.what = MESSAGE_DATABASE;
-        msg.obj  = result;
+        sendMessage(task, MESSAGE_DATABASE, result);
+    }
+
+    private void sendMessage(Runnable callback, int what, Object obj) {
+        final Message msg = Message.obtain(this, callback);
+        msg.what = what;
+        msg.obj  = obj;
         sendMessage(msg);
     }
 

@@ -47,12 +47,14 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
      * to identify execute.
-     * @param params The parameters passed into <tt>onExecute</tt>. If no parameters, you
+     * @param arg1 The <em>arg1</em> passed into {@link #onExecute}.
+     * @param arg2 The <em>arg2</em> passed into {@link #onExecute}.
+     * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
-    public final void startExecute(int token, Object... params) {
+    public final void startExecute(int token, String arg1, String arg2, Object... params) {
         DebugUtils.__checkUIThread("startExecute");
-        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, null, null, null, params));
+        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, arg1, arg2, null, params));
     }
 
     /**
@@ -170,17 +172,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     /**
-     * Executes SQL statements on a background thread.
-     * @param db The {@link SQLiteDatabase}.
-     * @param token The token to identify the execute, passed in from {@link #startExecute}.
-     * @param params The parameters passed in from {@link #startExecute}.
-     * @return The execution result.
-     */
-    protected Object onExecute(SQLiteDatabase db, int token, Object[] params) {
-        return null;
-    }
-
-    /**
      * Called when an asynchronous insert is completed on the UI thread.
      * @param token The token to identify the insert, passed in from {@link #startInsert}.
      * @param id The row ID of the newly inserted row, or -1 if an error occurred.
@@ -194,6 +185,19 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param id The row ID of the newly inserted row, or -1 if an error occurred.
      */
     protected void onReplaceComplete(int token, long id) {
+    }
+
+    /**
+     * Executes SQL statements on a background thread.
+     * @param db The {@link SQLiteDatabase}.
+     * @param token The token to identify the execute, passed in from {@link #startExecute}.
+     * @param arg1 The <em>arg1</em>, passed in from {@link #startExecute}.
+     * @param arg2 The <em>arg2</em>, passed in from {@link #startExecute}.
+     * @param params The parameters passed in from {@link #startExecute}.
+     * @return The execution result.
+     */
+    protected Object onExecute(SQLiteDatabase db, int token, String arg1, String arg2, Object[] params) {
+        return null;
     }
 
     /**
@@ -230,10 +234,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 result = execQuery();
                 break;
 
-            case MESSAGE_EXECUTE:
-                result = onExecute(mDatabase, token, (Object[])values);
-                break;
-
             case MESSAGE_DELETE:
                 result = mDatabase.delete(table, selection, selectionArgs);
                 break;
@@ -244,6 +244,10 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
 
             case MESSAGE_REPLACE:
                 result = mDatabase.replace(table, selection, (ContentValues)values);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = onExecute(mDatabase, token, table, selection, (Object[])values);
                 break;
 
             case MESSAGE_UPDATE:

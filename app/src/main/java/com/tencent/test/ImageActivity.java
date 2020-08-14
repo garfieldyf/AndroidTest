@@ -681,8 +681,8 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         }
 
         @Override
-        protected Object onExecute(SQLiteDatabase db, int token, Object[] params) {
-            Log.d("abcd", "token = " + token + ", params = " + Arrays.toString(params));
+        protected Object onExecute(SQLiteDatabase db, int token, String arg1, String arg2, Object[] params) {
+            Log.d("abcd", "token = " + token + ", arg1 = " + arg1 + ", arg2 = " + arg2 + ", params = " + Arrays.toString(params));
             return params[0];
         }
 
@@ -701,7 +701,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     private void testDBHandler() {
         SQLiteHandler handler = new SQLiteHandler(mDatabase2.getWritableDatabase());
         Log.i("abcd", "SQLiteHandler = " + handler.toString());
-        handler.startExecute(1, "a", 1, "2");
+        handler.startExecute(1, "a", "2", (Object[])null);
 
         QueryHandler h = new QueryHandler(this);
         Log.i("abcd", "QueryHandler = " + h.toString());

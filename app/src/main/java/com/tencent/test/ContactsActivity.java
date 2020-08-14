@@ -52,14 +52,14 @@ public class ContactsActivity extends Activity {
         getContentResolver().insert(Data.CONTENT_URI, values);
     }
 
-    private final class ContactsLoader extends AsyncQueryHandler {
+    private static final class ContactsLoader extends AsyncQueryHandler {
         public ContactsLoader(Context context) {
             super(context, MainApplication.sThreadPool.createSerialExecutor());
         }
 
         @Override
-        protected Object onExecute(ContentResolver resolver, int token, Object[] params) {
-            return super.onExecute(resolver, token, params);
+        protected Object onExecute(ContentResolver resolver, int token, String arg1, String arg2, Object[] params) {
+            return super.onExecute(resolver, token, arg1, arg2, params);
         }
 
         @Override

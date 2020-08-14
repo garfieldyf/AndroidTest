@@ -57,12 +57,16 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
      * to identify execute.
-     * @param params The parameters passed into <tt>onExecute</tt>. If no parameters, you
+     * @param arg1 The <em>arg1</em> passed into {@link #onExecute}.
+     * @param arg2 The <em>arg2</em> passed into {@link #onExecute}.
+     * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
-    public final void startExecute(int token, Object... params) {
+    public final void startExecute(int token, String arg1, String arg2, Object... params) {
         DebugUtils.__checkUIThread("startExecute");
-        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, null, null, null, params));
+        final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, null, arg1, null, params);
+        task.sortOrder = arg2;
+        mExecutor.execute(task);
     }
 
     /**
@@ -187,17 +191,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * Executes custom query on a background thread.
-     * @param resolver The {@link ContentResolver}.
-     * @param token The token to identify the execute, passed in from {@link #startExecute}.
-     * @param params The parameters passed in from {@link #startExecute}.
-     * @return The execution result.
-     */
-    protected Object onExecute(ContentResolver resolver, int token, Object[] params) {
-        return null;
-    }
-
-    /**
      * Called when an asynchronous call is completed on the UI thread.
      * @param token The token to identify the call, passed in from {@link #startCall}.
      * @param result A result <tt>Bundle</tt> holding the results from the call.
@@ -227,6 +220,19 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param results The results of the applications.
      */
     protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
+    }
+
+    /**
+     * Executes custom query on a background thread.
+     * @param resolver The {@link ContentResolver}.
+     * @param token The token to identify the execute, passed in from {@link #startExecute}.
+     * @param arg1 The <em>arg1</em>, passed in from {@link #startExecute}.
+     * @param arg2 The <em>arg2</em>, passed in from {@link #startExecute}.
+     * @param params The parameters passed in from {@link #startExecute}.
+     * @return The execution result.
+     */
+    protected Object onExecute(ContentResolver resolver, int token, String arg1, String arg2, Object[] params) {
+        return null;
     }
 
     /**
@@ -266,10 +272,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 result = resolver.insert(uri, (ContentValues)values);
                 break;
 
-            case MESSAGE_EXECUTE:
-                result = onExecute(resolver, token, (Object[])values);
-                break;
-
             case MESSAGE_DELETE:
                 result = resolver.delete(uri, selection, selectionArgs);
                 break;
@@ -280,6 +282,10 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
 
             case MESSAGE_CALL:
                 result = resolver.call(uri, selection, sortOrder, (Bundle)values);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = onExecute(resolver, token, selection, sortOrder, (Object[])values);
                 break;
 
             case MESSAGE_UPDATE:

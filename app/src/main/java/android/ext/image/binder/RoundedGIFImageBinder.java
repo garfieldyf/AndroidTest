@@ -91,7 +91,7 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
             drawable.setImage(image);
             drawable.setCornerRadii(radii);
 
-            // Clear the ImageView's content to force update the ImageView's mDrawable.
+            // Update the ImageView's mDrawable is null.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
 

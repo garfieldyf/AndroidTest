@@ -82,7 +82,7 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
             final boolean isRunning = drawable.isRunning();
             drawable.setImage(image);
 
-            // Clear the ImageView's content to force update the ImageView's mDrawable.
+            // Update the ImageView's mDrawable is null.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
 

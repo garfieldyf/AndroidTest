@@ -51,7 +51,7 @@ public final class RingBitmapBinder implements Binder<String, Object, Bitmap> {
             drawable.setBitmap(bitmap);
             drawable.setInnerRadius(mInnerRadius);
 
-            // Clear the ImageView's content to force update the ImageView's mDrawable.
+            // Update the ImageView's mDrawable is null.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
         } else {

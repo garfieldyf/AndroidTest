@@ -9,11 +9,11 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
- * Class <tt>DexLoader</tt> used to loads the DEX files that containing classes and
+ * Class <tt>DexFileLoader</tt> used to loads the DEX files that containing classes and
  * resources. This can be used to execute code not installed as part of an application.
  * @author Garfield
  */
-public class DexLoader {
+public class DexFileLoader {
     private final ClassLoader mClassLoader;
 
     /**
@@ -24,10 +24,10 @@ public class DexLoader {
      * @param dexOutputDir The directory where optimized DEX files should be written.
      * This should be a writable directory.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #DexLoader(Context, String, String, String[])
-     * @see #DexLoader(Context, String, String, String, String[])
+     * @see #DexFileLoader(Context, String, String, String[])
+     * @see #DexFileLoader(Context, String, String, String, String[])
      */
-    public DexLoader(Context context, String dexPath) {
+    public DexFileLoader(Context context, String dexPath) {
         this(context, dexPath, getCodeCacheDir(context, dexPath), null, (String[])null);
     }
 
@@ -41,10 +41,10 @@ public class DexLoader {
      * @param libraryNames The list of names containing the native libraries to load;
      * may be <tt>null</tt>.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #DexLoader(Context, String)
-     * @see #DexLoader(Context, String, String, String, String[])
+     * @see #DexFileLoader(Context, String)
+     * @see #DexFileLoader(Context, String, String, String, String[])
      */
-    public DexLoader(Context context, String dexPath, String librarySearchPath, String[] libraryNames) {
+    public DexFileLoader(Context context, String dexPath, String librarySearchPath, String[] libraryNames) {
         this(context, dexPath, getCodeCacheDir(context, dexPath), librarySearchPath, libraryNames);
     }
 
@@ -61,10 +61,10 @@ public class DexLoader {
      * If no native libraries to load, you can pass <em>(String[])null</em> instead of
      * allocating an empty array.
      * @throws RuntimeException if an error occurs while loading libraries.
-     * @see #DexLoader(Context, String)
-     * @see #DexLoader(Context, String, String, String[])
+     * @see #DexFileLoader(Context, String)
+     * @see #DexFileLoader(Context, String, String, String[])
      */
-    public DexLoader(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
+    public DexFileLoader(Context context, String dexPath, String dexOutputDir, String librarySearchPath, String... libraryNames) {
         mClassLoader = new DexClassLoader(dexPath, dexOutputDir, librarySearchPath, context.getClassLoader());
         try {
             loadLibraries(libraryNames);

@@ -21,10 +21,11 @@
     <property name="api.level" value="26" />
     <property name="sdk.version" value="8.0" />
     <property name="zxing.jar.path" value="${local.libs.dir}/zxing/zxing.jar" />
+    <property name="androidx.core.jar.path" value="${local.libs.dir}/support/androidx-core.jar" />
+    <property name="support.v4.jar.path" value="${local.libs.dir}/support/android-support-v4.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
-    <property name="support.v4.jar.path" value="${local.libs.dir}/support-v7/android-support-v4.jar" />
-    <property name="recyclerview.v7.jar.path" value="${local.libs.dir}/support-v7/android-support-v7-recyclerview.jar" />
+    <property name="androidx.annotation.jar.path" value="${local.libs.dir}/support/androidx-annotation.jar" />
 
     <condition property="compile.foucs">
         <istrue value="${compile_foucs}" />
@@ -36,6 +37,10 @@
 
     <condition property="max.pool.size" value="${max_pool_size}" else="32">
         <isset property="max_pool_size" />
+    </condition>
+
+    <condition property="recyclerview.jar.path" value="${local.libs.dir}/support/androidx-recyclerview.jar" else="${local.libs.dir}/support/android-support-v7-recyclerview.jar">
+        <istrue value="${androidx_support}" />
     </condition>
 
     <!-- target -copy -->
@@ -65,6 +70,15 @@
         <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" encoding="UTF-8" />
     </target>
 
+    <!-- target -replace-if -->
+    <target name="-replace-if" if="${androidx_support}">
+        <echo level="info">Replace the package android.support to androidx</echo>
+        <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
+            <replacefilter token="android.support.v7" value="androidx.recyclerview" />
+            <replacefilter token="android.support.annotation" value="androidx.annotation" />
+        </replace>
+    </target>
+
     <!-- target -remove-foucs-if -->
     <target name="-remove-foucs-if" unless="compile.foucs">
         <echo level="info">Remove foucs source files...</echo>
@@ -82,8 +96,8 @@
         <delete file="${src.dir}/${jni.package}/widget/BarcodeCameraView.java" />
     </target>
 
-    <!-- target -remove -->
-    <target name="-remove" depends="-remove-foucs-if, -remove-barcode-if" />
+    <!-- target -post-copy -->
+    <target name="-post-copy" depends="-remove-foucs-if, -remove-barcode-if, -replace-if" />
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">
@@ -120,7 +134,7 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}" />
+            classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${androidx.annotation.jar.path};${androidx.core.jar.path};${recyclerview.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
@@ -192,16 +206,16 @@
     </target>
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -post-compile" />
+    <target name="debug" depends="-clean, -copy, -post-copy, -set-debug-mode, -compile-jar, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -post-compile" />
+    <target name="release" depends="-clean, -copy, -post-copy, -set-release-mode, -compile-jar, -post-compile" />
 
     <!-- target all-debug -->
-    <target name="all-debug" depends="-clean, -copy, -remove, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="all-debug" depends="-clean, -copy, -post-copy, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all-release -->
-    <target name="all-release" depends="-clean, -copy, -remove, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="all-release" depends="-clean, -copy, -post-copy, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target compile-java -->
     <target name="compile-java">
@@ -227,7 +241,7 @@
             -include        "${basedir}/../app/proguard.pro"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${recyclerview.v7.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${androidx.annotation.jar.path};${androidx.core.jar.path};${recyclerview.jar.path};${zxing.jar.path}
             -dump           "${out.file.dir}/dump.txt"
             -printseeds     "${out.file.dir}/seeds.txt"
             -printusage     "${out.file.dir}/usage.txt"

@@ -39,8 +39,12 @@
         <isset property="max_pool_size" />
     </condition>
 
+    <condition property="max.thread.count" value="${max_thread_count}" else="4">
+        <isset property="max_thread_count" />
+    </condition>
+
     <condition property="recyclerview.jar.path" value="${local.libs.dir}/support/androidx-recyclerview.jar" else="${local.libs.dir}/support/android-support-v7-recyclerview.jar">
-        <istrue value="${androidx_support}" />
+        <istrue value="${useAndroidX}" />
     </condition>
 
     <!-- target -copy -->
@@ -65,13 +69,14 @@
             <replacefilter token="android.ext" value="${java.package}" />
         </replace>
 
-        <!-- replace ImageModule.MAX_POOL_SIZE -->
-        <echo level="info">Replace MAX_POOL_SIZE = ${max.pool.size} in the ImageModule.java</echo>
+        <!-- replace ImageModule.MAX_POOL_SIZE and ImageModule.MAX_THREAD_COUNT -->
+        <echo level="info">Replace MAX_POOL_SIZE = ${max.pool.size}, MAX_THREAD_COUNT = ${max.thread.count} in the ImageModule.java</echo>
         <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" encoding="UTF-8" />
+        <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_THREAD_COUNT = 4;" value="static final int MAX_THREAD_COUNT = ${max.thread.count};" encoding="UTF-8" />
     </target>
 
     <!-- target -replace-if -->
-    <target name="-replace-if" if="${androidx_support}">
+    <target name="-replace-if" if="${useAndroidX}">
         <echo level="info">Replace the package android.support to androidx</echo>
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
             <replacefilter token="android.support.v7" value="androidx.recyclerview" />

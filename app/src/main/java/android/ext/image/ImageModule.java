@@ -65,10 +65,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ static final int PLACEHOLDER = 1;
     /* package */ static final int PARAMS_LENGTH = 2;
 
-    /**
-     * The maximum number of tasks.
-     */
     private static final int MAX_POOL_SIZE = 32;
+    private static final int MAX_THREAD_COUNT = 4;
 
     /**
      * The application <tt>Context</tt>.
@@ -585,7 +583,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @return The <tt>ImageModule</tt>.
          */
         public final ImageModule<URI, Image> build() {
-            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, 4));
+            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, MAX_THREAD_COUNT));
             final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
             return new ImageModule(mContext, executor, createImageCache(), createFileCache(executor));
         }

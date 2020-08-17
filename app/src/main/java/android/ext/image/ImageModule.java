@@ -109,7 +109,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Equivalent to calling <tt>module.get(id).load(uri)</tt>.
+     * Equivalent to calling <tt>get(id).load(uri)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
@@ -148,7 +148,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Temporarily stops all actively running tasks with the specified image loader.
+     * Equivalent to calling <tt>get(id).pause()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #resume(int)
@@ -162,7 +162,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
-     * Resumes all actively running tasks associated with the specified image loader.
+     * Equivalent to calling <tt>get(id).resume()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #pause(int)
@@ -173,6 +173,33 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         if (loader != null) {
             loader.resume();
         }
+    }
+
+    /**
+     * Equivalent to calling <tt>get(id).remove(uri)</tt>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param uri The uri to remove.
+     */
+    public final void remove(int id, URI uri) {
+        DebugUtils.__checkUIThread("remove");
+        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        if (loader != null) {
+            loader.remove(uri);
+        }
+    }
+
+    /**
+     * Equivalent to calling <tt>get(id).cancelTask(target, false)</tt>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param target The target to find the task.
+     * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
+     */
+    public final boolean cancel(int id, Object target) {
+        DebugUtils.__checkUIThread("cancel");
+        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        return (loader != null && loader.cancelTask(target, false));
     }
 
     /**

@@ -45,7 +45,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @param params The parameters, passed earlier by {@link ImageLoader#load}.
      * @param flags The flags, passed earlier by {@link ImageLoader#load}.
      * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
-     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
+     * @return The image, or <tt>null</tt> if the image data cannot be decode.
      * @see #decodeImage(Object, Object, Parameters, int, Options)
      * @see UriUtils#openInputStream(Context, Object)
      */
@@ -132,7 +132,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
-     * @return The image object, or <tt>null</tt> if the image data cannot be decode.
+     * @return The image, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      * @see #decodeImage(Object, Object, Object[], int, byte[])
      */

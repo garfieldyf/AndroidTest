@@ -138,6 +138,13 @@ public abstract class DatabaseHandler implements Factory<Object> {
         /* package */ String[] selectionArgs;
 
         /**
+         * Runs on the UI thread after {@link #run()},
+         * do not call this method directly.
+         * @hide
+         */
+        public abstract void onPostExecute(Object result);
+
+        /**
          * Clears all fields for recycle.
          */
         /* package */ final void clearForRecycle() {
@@ -148,10 +155,30 @@ public abstract class DatabaseHandler implements Factory<Object> {
         }
 
         /**
-         * Called on the UI thread when this task handle
-         * messages, do not call this method directly.
-         * @hide
+         * Runs on the UI thread after {@link #run()}.
          */
-        public abstract void onPostExecute(Object result);
+        /* package */ final void onPostExecute(DatabaseHandler handler, Object result) {
+            switch (message) {
+            case MESSAGE_QUERY:
+            case MESSAGE_RAWQUERY:
+                handler.onQueryComplete(token, (Cursor)result);
+                break;
+
+            case MESSAGE_EXECUTE:
+                handler.onExecuteComplete(token, result);
+                break;
+
+            case MESSAGE_UPDATE:
+                handler.onUpdateComplete(token, (int)result);
+                break;
+
+            case MESSAGE_DELETE:
+                handler.onDeleteComplete(token, (int)result);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown message: " + message);
+            }
+        }
     }
 }

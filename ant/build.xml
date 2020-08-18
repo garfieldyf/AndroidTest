@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="${module.name}" basedir="." default="compile-all">
+<project name="${MODULE_NAME}" basedir="." default="compile-all">
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
-    <property name="version" value="5.0.3" />
-    <property name="out.file.name" value="${module.name}.jar" />
-    <property name="source.file.name" value="${module.name}-sources.jar" />
+    <property name="version" value="5.1.0" />
+    <property name="out.file.name" value="${MODULE_NAME}.jar" />
+    <property name="source.file.name" value="${MODULE_NAME}-sources.jar" />
 
     <property name="src.dir" value="${basedir}/src" />
     <property name="out.dir" value="${basedir}/out" />
@@ -21,36 +21,29 @@
     <property name="api.level" value="26" />
     <property name="sdk.version" value="8.0" />
     <property name="zxing.jar.path" value="${local.libs.dir}/zxing/zxing.jar" />
-    <property name="androidx.core.jar.path" value="${local.libs.dir}/support/androidx-core.jar" />
-    <property name="support.v4.jar.path" value="${local.libs.dir}/support/android-support-v4.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
-    <property name="androidx.annotation.jar.path" value="${local.libs.dir}/support/androidx-annotation.jar" />
 
-    <condition property="compile.foucs">
-        <istrue value="${compile_foucs}" />
+    <condition property="max.pool.size" value="${MAX_POOL_SIZE}" else="32">
+        <isset property="MAX_POOL_SIZE" />
     </condition>
 
-    <condition property="compile.barcode">
-        <istrue value="${compile_barcode}" />
+    <condition property="max.thread.count" value="${MAX_THREAD_COUNT}" else="4">
+        <isset property="MAX_THREAD_COUNT" />
     </condition>
 
-    <condition property="max.pool.size" value="${max_pool_size}" else="32">
-        <isset property="max_pool_size" />
-    </condition>
-
-    <condition property="max.thread.count" value="${max_thread_count}" else="4">
-        <isset property="max_thread_count" />
+    <condition property="support.jar.path" value="${local.libs.dir}/support/androidx-core.jar" else="${local.libs.dir}/support/android-support-v4.jar">
+        <istrue value="${USE_ANDROIDX}" />
     </condition>
 
     <condition property="recyclerview.jar.path" value="${local.libs.dir}/support/androidx-recyclerview.jar" else="${local.libs.dir}/support/android-support-v7-recyclerview.jar">
-        <istrue value="${useAndroidX}" />
+        <istrue value="${USE_ANDROIDX}" />
     </condition>
 
     <!-- target -copy -->
     <target name="-copy">
         <!-- copy the java files -->
-        <copy todir="${src.dir}/${jni.package}" overwrite="true">
+        <copy todir="${src.dir}/${JNI_PACKAGE}" overwrite="true">
             <fileset dir="${source.dir}/java/android/ext">
                 <exclude name="**/renderscript/**" />
             </fileset>
@@ -66,43 +59,53 @@
         <!-- replace the package name -->
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
             <replacefilter token="@author Garfield" value="@author ${author}" />
-            <replacefilter token="android.ext" value="${java.package}" />
+            <replacefilter token="android.ext" value="${JAVA_PACKAGE}" />
         </replace>
 
         <!-- replace ImageModule.MAX_POOL_SIZE and ImageModule.MAX_THREAD_COUNT -->
-        <echo level="info">Replace MAX_POOL_SIZE = ${max.pool.size}, MAX_THREAD_COUNT = ${max.thread.count} in the ImageModule.java</echo>
-        <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" encoding="UTF-8" />
-        <replace file="${src.dir}/${jni.package}/image/ImageModule.java" token="static final int MAX_THREAD_COUNT = 4;" value="static final int MAX_THREAD_COUNT = ${max.thread.count};" encoding="UTF-8" />
-    </target>
-
-    <!-- target -replace-if -->
-    <target name="-replace-if" if="${useAndroidX}">
-        <echo level="info">Replace the package android.support to androidx</echo>
-        <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
-            <replacefilter token="android.support.v7" value="androidx.recyclerview" />
-            <replacefilter token="android.support.annotation" value="androidx.annotation" />
+        <echo level="info">Replacing MAX_POOL_SIZE = ${max.pool.size}, MAX_THREAD_COUNT = ${max.thread.count} in the ImageModule.java</echo>
+        <replace dir="${src.dir}/${JNI_PACKAGE}/image" includes="ImageModule.java" encoding="UTF-8">
+            <replacefilter token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" />
+            <replacefilter token="static final int MAX_THREAD_COUNT = 4;" value="static final int MAX_THREAD_COUNT = ${max.thread.count};" />
         </replace>
     </target>
 
-    <!-- target -remove-foucs-if -->
-    <target name="-remove-foucs-if" unless="compile.foucs">
-        <echo level="info">Remove foucs source files...</echo>
-        <delete dir="${src.dir}/${jni.package}/focus" />
-        <delete file="${src.dir}/${jni.package}/widget/FocusManager.java" />
-        <delete file="${src.dir}/${jni.package}/widget/LayoutFocusManager.java" />
-        <delete file="${src.dir}/${jni.package}/widget/LayoutManagerHelper.java" />
+    <!-- target -replace-if -->
+    <target name="-replace-if" if="${USE_ANDROIDX}">
+        <echo level="info">Replacing the package android.support to androidx</echo>
+        <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
+            <replacefilter token="android.support.annotation.Keep" value="androidx.annotation.Keep" />
+            <replacefilter token="android.support.v4.content.FileProvider" value="androidx.core.content.FileProvider" />
+            <replacefilter token="android.support.v7.widget.RecyclerView" value="androidx.recyclerview.widget.RecyclerView" />
+            <replacefilter token="android.support.v4.content.LocalBroadcastManager" value="androidx.localbroadcastmanager.content.LocalBroadcastManager" />
+        </replace>
     </target>
 
-    <!-- target -remove-barcode-if -->
-    <target name="-remove-barcode-if" unless="compile.barcode">
-        <echo level="info">Remove barcode source files...</echo>
-        <delete dir="${src.dir}/${jni.package}/barcode" />
-        <delete file="${src.dir}/${jni.package}/widget/BarcodeDecorView.java" />
-        <delete file="${src.dir}/${jni.package}/widget/BarcodeCameraView.java" />
+    <!-- target -delete-page-if -->
+    <target name="-delete-page-if" unless="${INCLUDE_PAGE}">
+        <echo level="info">Deleting page source files...</echo>
+        <delete dir="${src.dir}/${JNI_PACKAGE}/page" />
+    </target>
+
+    <!-- target -delete-focus-if -->
+    <target name="-delete-focus-if" unless="${INCLUDE_FOCUS}">
+        <echo level="info">Deleting focus source files...</echo>
+        <delete dir="${src.dir}/${JNI_PACKAGE}/focus" />
+        <delete file="${src.dir}/${JNI_PACKAGE}/widget/FocusManager.java" />
+        <delete file="${src.dir}/${JNI_PACKAGE}/widget/LayoutFocusManager.java" />
+        <delete file="${src.dir}/${JNI_PACKAGE}/widget/LayoutManagerHelper.java" />
+    </target>
+
+    <!-- target -delete-barcode-if -->
+    <target name="-delete-barcode-if" unless="${INCLUDE_BARCODE}">
+        <echo level="info">Deleting barcode source files...</echo>
+        <delete dir="${src.dir}/${JNI_PACKAGE}/barcode" />
+        <delete file="${src.dir}/${JNI_PACKAGE}/widget/BarcodeDecorView.java" />
+        <delete file="${src.dir}/${JNI_PACKAGE}/widget/BarcodeCameraView.java" />
     </target>
 
     <!-- target -post-copy -->
-    <target name="-post-copy" depends="-remove-foucs-if, -remove-barcode-if, -replace-if" />
+    <target name="-post-copy" depends="-delete-page-if, -delete-focus-if, -delete-barcode-if, -replace-if" />
 
     <!-- target -set-debug-mode -->
     <target name="-set-debug-mode">
@@ -116,22 +119,23 @@
         <property name="ndk.target" value="release" />
         <property name="out.file.dir" value="${out.dir}/release" />
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
-        <copy file="${source.dir}/jni/proguard.pro" tofile="${out.file.dir}/${module.name}-proguard.pro" />
+        <copy file="${source.dir}/jni/proguard.pro" tofile="${out.file.dir}/${MODULE_NAME}-proguard.pro" />
 
-        <!-- delete call the __checkXXX methods -->
-        <echo level="info">Delete __checkXXX() methods.</echo>
+        <!-- remove call the __checkXXX methods -->
+        <echo level="info">Removing __checkXXX() method invocation.</echo>
         <replaceregexp match="(.*)__check(.*);" replace="" flags="g" byline="true" >
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>
 
-        <!-- delete import xxx.util.DebugUtils -->
+        <!-- delete DebugUtils.java -->
         <replaceregexp match="import (.*).util.DebugUtils;" replace="" flags="g" byline="true" >
             <fileset dir="${src.dir}" includes="**/*.java" />
         </replaceregexp>
+        <delete file="${src.dir}/${JNI_PACKAGE}/util/DebugUtils.java" />
 
         <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
-        <echo level="info">Replace writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
-        <replace file="${src.dir}/${jni.package}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
+        <echo level="info">Replacing writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
+        <replace file="${src.dir}/${JNI_PACKAGE}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
     </target>
 
     <!-- target -compile-jar -->
@@ -139,7 +143,7 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${androidx.annotation.jar.path};${androidx.core.jar.path};${recyclerview.jar.path};${zxing.jar.path}" />
+            classpath="${android.stubs.jar.path};${android.jar.path};${support.jar.path};${recyclerview.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
@@ -165,7 +169,7 @@
         <!-- compile c++ files -->
         <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
             <!-- optional ndk_args NDK_STL=1 -->
-            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${module.name} PACKAGE_GRAPHICS=${jni.package}/graphics/ PACKAGE_UTILITIES=${jni.package}/util/" />
+            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${MODULE_NAME} PACKAGE_GRAPHICS=${JNI_PACKAGE}/graphics/ PACKAGE_UTILITIES=${JNI_PACKAGE}/util/" />
         </ant>
 
         <!-- copy so file -->
@@ -176,10 +180,10 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${module.name}_widget.xml" />
+        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${MODULE_NAME}_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_focus_widget.xml" tofile="${out.dir}/attrs_focus_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
-        <echo level="info">Deletes temp files...</echo>
+        <echo level="info">Deleting temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">
                 <exclude name="*.xml" />
@@ -190,18 +194,18 @@
         </delete>
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
-        <echo level="info">Install: ${out.dir}/attrs_${module.name}_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/attrs_${MODULE_NAME}_widget.xml</echo>
     </target>
 
     <!-- target -clean -->
     <target name="-clean">
-        <echo level="info">Deletes output files...</echo>
+        <echo level="info">Deleting output files...</echo>
         <delete dir="${out.file.dir}"/>
     </target>
 
     <!-- target clean -->
     <target name="clean">
-        <echo level="info">Deletes output files...</echo>
+        <echo level="info">Deleting output files...</echo>
         <delete dir="${out.dir}"/>
     </target>
 
@@ -246,7 +250,7 @@
             -include        "${basedir}/../app/proguard.pro"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.v4.jar.path};${androidx.annotation.jar.path};${androidx.core.jar.path};${recyclerview.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.jar.path};${recyclerview.jar.path};${zxing.jar.path}
             -dump           "${out.file.dir}/dump.txt"
             -printseeds     "${out.file.dir}/seeds.txt"
             -printusage     "${out.file.dir}/usage.txt"
@@ -257,10 +261,10 @@
     <!-- target -compile-dex -->
     <target name="-compile-dex">
         <property name="dx.dir" value="${sdk.dir}/build-tools/29.0.0" />
-        <property name="dex.file.name" value="${module.name}-dex.jar" />
+        <property name="dex.file.name" value="${MODULE_NAME}-dex.jar" />
 
         <!-- compile dex file -->
-        <echo level="info">dx --dex --min-sdk-version=24 --output=${module.name}-dex.jar ${out.file.name}</echo>
+        <echo level="info">dx --dex --min-sdk-version=24 --output=${MODULE_NAME}-dex.jar ${out.file.name}</echo>
         <exec executable="cmd.exe">
             <arg line="/C ${dx.dir}/dx.bat --dex --min-sdk-version=24 --output=${out.file.dir}/${dex.file.name} ${out.file.dir}/${out.file.name}" />
         </exec>

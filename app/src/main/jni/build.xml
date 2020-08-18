@@ -38,14 +38,14 @@
             <fileset dir="${lib.dir}" includes="**/*.so" />
         </copy>
 
-        <echo level="info">Deletes temp files...</echo>
+        <echo level="info">Deleting temp files...</echo>
         <delete dir="${obj.dir}"/>
         <delete dir="${lib.dir}" />
     </target>
 
     <!-- target clean -->
     <target name="clean">
-        <echo level="info">Deletes output files...</echo>
+        <echo level="info">Deleting output files...</echo>
         <delete dir="${obj.dir}" />
         <delete dir="${lib.dir}" />
         <delete dir="${out.dir}" />

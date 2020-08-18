@@ -302,28 +302,12 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         @Override
         public final void onPostExecute(Object result) {
             switch (message) {
-            case MESSAGE_EXECUTE:
-                onExecuteComplete(token, result);
-                break;
-
-            case MESSAGE_UPDATE:
-                onUpdateComplete(token, (int)result);
-                break;
-
-            case MESSAGE_DELETE:
-                onDeleteComplete(token, (int)result);
-                break;
-
-            case MESSAGE_INSERT:
-                onInsertComplete(token, (Uri)result);
-                break;
-
             case MESSAGE_CALL:
                 onCallComplete(token, (Bundle)result);
                 break;
 
-            case MESSAGE_QUERY:
-                onQueryComplete(token, (Cursor)result);
+            case MESSAGE_INSERT:
+                onInsertComplete(token, (Uri)result);
                 break;
 
             case MESSAGE_INSERTS:
@@ -335,7 +319,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 break;
 
             default:
-                throw new IllegalStateException("Unknown message: " + message);
+                onPostExecute(AsyncQueryHandler.this, result);
             }
 
             clearForRecycle();

@@ -264,25 +264,8 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         @Override
         public final void onPostExecute(Object result) {
             switch (message) {
-            case MESSAGE_QUERY:
-            case MESSAGE_RAWQUERY:
-                onQueryComplete(token, (Cursor)result);
-                break;
-
-            case MESSAGE_EXECUTE:
-                onExecuteComplete(token, result);
-                break;
-
-            case MESSAGE_DELETE:
-                onDeleteComplete(token, (int)result);
-                break;
-
             case MESSAGE_INSERT:
                 onInsertComplete(token, (long)result);
-                break;
-
-            case MESSAGE_UPDATE:
-                onUpdateComplete(token, (int)result);
                 break;
 
             case MESSAGE_REPLACE:
@@ -290,7 +273,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
                 break;
 
             default:
-                throw new IllegalStateException("Unknown message: " + message);
+                onPostExecute(AsyncSQLiteHandler.this, result);
             }
 
             clearForRecycle();

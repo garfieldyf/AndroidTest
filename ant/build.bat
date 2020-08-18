@@ -1,3 +1,3 @@
 echo off
-rem ant compile-all -Dmodule.name=androidext -Djni.package=com/android/ext -Djava.package=com.android.ext -Dmax_pool_size=48 -Dmax_thread_count=5 -Dcompile_barcode=true -Dcompile_foucs=true -DuseAndroidX=true
-ant compile-java -Dmodule.name=androidext -Djni.package=com/android/ext -Djava.package=com.android.ext -Dmax_pool_size=48 -Dmax_thread_count=5 -Dcompile_barcode=false -Dcompile_foucs=false -DuseAndroidX=true
+rem ant compile-all -DMODULE_NAME=androidext -DJNI_PACKAGE=com/android/ext -DJAVA_PACKAGE=com.android.ext -DMAX_POOL_SIZE=48 -DMAX_THREAD_COUNT=5 -DINCLUDE_PAGE=true -DINCLUDE_FOCUS=true -DINCLUDE_BARCODE=true -DUSE_ANDROIDX=true
+ant compile-java -DMODULE_NAME=androidext -DJNI_PACKAGE=com/android/ext -DJAVA_PACKAGE=com.android.ext -DMAX_POOL_SIZE=48 -DMAX_THREAD_COUNT=5 -DINCLUDE_PAGE=false -DINCLUDE_FOCUS=false -DINCLUDE_BARCODE=false -DUSE_ANDROIDX=true

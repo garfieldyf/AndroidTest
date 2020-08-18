@@ -197,12 +197,6 @@
         <echo level="info">Install: ${out.dir}/attrs_${MODULE_NAME}_widget.xml</echo>
     </target>
 
-    <!-- target -clean -->
-    <target name="-clean">
-        <echo level="info">Deleting output files...</echo>
-        <delete dir="${out.file.dir}"/>
-    </target>
-
     <!-- target clean -->
     <target name="clean">
         <echo level="info">Deleting output files...</echo>
@@ -215,16 +209,16 @@
     </target>
 
     <!-- target debug -->
-    <target name="debug" depends="-clean, -copy, -post-copy, -set-debug-mode, -compile-jar, -post-compile" />
+    <target name="debug" depends="-copy, -post-copy, -set-debug-mode, -compile-jar, -post-compile" />
 
     <!-- target release -->
-    <target name="release" depends="-clean, -copy, -post-copy, -set-release-mode, -compile-jar, -post-compile" />
+    <target name="release" depends="-copy, -post-copy, -set-release-mode, -compile-jar, -post-compile" />
 
     <!-- target all-debug -->
-    <target name="all-debug" depends="-clean, -copy, -post-copy, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="all-debug" depends="-copy, -post-copy, -set-debug-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target all-release -->
-    <target name="all-release" depends="-clean, -copy, -post-copy, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
+    <target name="all-release" depends="-copy, -post-copy, -set-release-mode, -compile-jar, -compile-so, -post-compile" />
 
     <!-- target compile-java -->
     <target name="compile-java">

@@ -30,7 +30,7 @@ import java.net.URLConnection;
  *     protected void onPostExecute(JSONObject result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
- *              // The owner activity has been destroyed or release by the GC.
+ *              // The owner activity has been destroyed or released by the GC.
  *              return;
  *         }
  *

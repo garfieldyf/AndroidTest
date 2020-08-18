@@ -31,14 +31,6 @@ import java.util.concurrent.Executor;
  *     public File getCacheFile(Context context, String url) {
  *         // Builds the cache file, For example:
  *         return new File(context.getFilesDir(), "xxx/cacheFile.json");
- *         // or
- *         final File cacheFile = new File(context.getFilesDir(), "xxx/cacheFile.json");
- *         if (!cacheFile.exists()) {
- *             // Copy assets file to cacheFile.
- *             FileUtils.copyFile(context, UriUtils.getAssetUri("xxx/cacheFile.json"), cacheFile, null);
- *         }
- *
- *         return cacheFile.
  *     }
  *
  *    {@code @Override}
@@ -52,9 +44,14 @@ import java.util.concurrent.Executor;
  *         if (cacheFile == null) {
  *             // If no cache file, parse the JSON data from the network.
  *             result = newDownloadRequest(context, url).download(cancelable);
- *         } else {
+ *         } else if (cacheFile.exists()) {
  *             // Parse the JSON data from the cache file.
  *             result = JSONUtils.parse(context, cacheFile, cancelable);
+ *         } else {
+ *             // Parse the JSON data from the assets.
+ *             result = JSONUtils.parse(context, UriUtils.getAssetUri("xxx/cacheFile.json"), cancelable);
+ *             // or
+ *             return null;
  *         }
  *
  *         // Check the result is valid.
@@ -152,7 +149,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
     /**
      * Alias of {@link #getOwner()}.
      * @return The <tt>Activity</tt> that owns this loader or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
+     * the owner activity has been finished or destroyed or released by the GC.
      * @see #getOwner()
      * @see #setOwner(Object)
      */

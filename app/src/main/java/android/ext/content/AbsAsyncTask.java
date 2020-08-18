@@ -25,7 +25,7 @@ import java.lang.ref.WeakReference;
  *     protected void onPostExecute(Long result) {
  *         final Activity activity = getOwnerActivity();
  *         if (activity == null) {
- *              // The owner activity has been destroyed or release by the GC.
+ *              // The owner activity has been destroyed or released by the GC.
  *              return;
  *         }
  *
@@ -85,7 +85,7 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
     /**
      * Alias of {@link #getOwner()}.
      * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
+     * the owner activity has been finished or destroyed or released by the GC.
      * @see #getOwner()
      * @see #setOwner(Object)
      */

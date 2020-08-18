@@ -78,7 +78,7 @@ public abstract class DatabaseHandler implements Factory<Object> {
     /**
      * Alias of {@link #getOwner()}.
      * @return The <tt>Activity</tt> that owns this handler or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or release by the GC.
+     * the owner activity has been finished or destroyed or released by the GC.
      * @see #getOwner()
      * @see #setOwner(Object)
      */

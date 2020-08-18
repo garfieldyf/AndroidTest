@@ -7,7 +7,6 @@ import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.util.Printer;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -127,12 +126,11 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      * space, <tt>false</tt> otherwise.
      */
     protected void trimToSize(int maxSize, boolean evicted) {
-        final Iterator<Entry<K, V>> itor = map.entrySet().iterator();
-        while (itor.hasNext() && map.size() > maxSize) {
-            final Entry<K, V> toEvict = itor.next();
+        while (map.size() > maxSize && !map.isEmpty()) {
+            final Entry<K, V> toEvict = map.entrySet().iterator().next();
             final K key = toEvict.getKey();
             final V value = toEvict.getValue();
-            itor.remove();
+            map.remove(key);
             entryRemoved(evicted, key, value, null);
         }
     }

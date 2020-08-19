@@ -573,13 +573,12 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         Log.i("yf", "UTC time = " + calendar.getTimeInMillis());
         Log.i("yf", "UTC time = " + DateFormat.format("yyyy-MM-dd kk:mm:ss", calendar).toString());
 
-        calendar.setTimeZone(TimeZone.getTimeZone("GMT"));
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        Log.i("yf", "GMT hour = " + calendar.get(Calendar.HOUR_OF_DAY));
-        Log.i("yf", "GMT minute = " + calendar.get(Calendar.MINUTE));
-        Log.i("yf", "GMT second = " + calendar.get(Calendar.SECOND));
-        Log.i("yf", "GMT time = " + calendar.getTimeInMillis());
-        Log.i("yf", "GMT time = " + DateFormat.format("yyyy-MM-dd kk:mm:ss", calendar).toString());
+        final Calendar calendar1 = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
+        Log.i("yf", "GMT hour = " + calendar1.get(Calendar.HOUR_OF_DAY));
+        Log.i("yf", "GMT minute = " + calendar1.get(Calendar.MINUTE));
+        Log.i("yf", "GMT second = " + calendar1.get(Calendar.SECOND));
+        Log.i("yf", "GMT time = " + calendar1.getTimeInMillis());
+        Log.i("yf", "GMT time = " + DateFormat.format("yyyy-MM-dd kk:mm:ss", calendar1).toString());
     }
 
     private void testUri(Object uri) {

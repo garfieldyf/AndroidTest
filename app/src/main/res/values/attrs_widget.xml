@@ -40,4 +40,14 @@
             <flag name="noMemoryCache" value="0x02" />
         </attr>
     </declare-styleable>
+
+    <!-- NumericView styleable -->
+    <declare-styleable name="NumericView">
+        <attr name="value" format="string" />
+        <attr name="drawables" format="reference" />
+        <attr name="dotWidth" format="dimension" />
+        <attr name="numberWidth" format="dimension" />
+        <attr name="numberHeight" format="dimension" />
+        <attr name="horizontalMargin" format="dimension" />
+    </declare-styleable>
 </resources>

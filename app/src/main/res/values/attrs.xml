@@ -48,10 +48,9 @@
 
     <!-- GridImageView styleable -->
     <declare-styleable name="GridImageView">
+        <attr name="drawables" />
+        <attr name="horizontalMargin" />
         <attr name="android:columnCount" />
-        <attr name="drawables" format="reference" />
-        <attr name="horizontalMargin" format="dimension" />
         <attr name="verticalMargin" format="dimension" />
     </declare-styleable>
-
 </resources>

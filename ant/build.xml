@@ -24,6 +24,7 @@
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
 
+    <!--
     <condition property="max.pool.size" value="${MAX_POOL_SIZE}" else="32">
         <isset property="MAX_POOL_SIZE" />
     </condition>
@@ -31,6 +32,7 @@
     <condition property="max.thread.count" value="${MAX_THREAD_COUNT}" else="4">
         <isset property="MAX_THREAD_COUNT" />
     </condition>
+    -->
 
     <condition property="support.jar.path" value="${local.libs.dir}/support/androidx-core.jar" else="${local.libs.dir}/support/android-support-v4.jar">
         <istrue value="${USE_ANDROIDX}" />
@@ -62,12 +64,13 @@
             <replacefilter token="android.ext" value="${JAVA_PACKAGE}" />
         </replace>
 
-        <!-- replace ImageModule.MAX_POOL_SIZE and ImageModule.MAX_THREAD_COUNT -->
+        <!-- replace ImageModule.MAX_POOL_SIZE and ImageModule.MAX_THREAD_COUNT
         <echo level="info">Replacing MAX_POOL_SIZE = ${max.pool.size}, MAX_THREAD_COUNT = ${max.thread.count} in the ImageModule.java</echo>
         <replace dir="${src.dir}/${JNI_PACKAGE}/image" includes="ImageModule.java" encoding="UTF-8">
             <replacefilter token="static final int MAX_POOL_SIZE = 32;" value="static final int MAX_POOL_SIZE = ${max.pool.size};" />
             <replacefilter token="static final int MAX_THREAD_COUNT = 4;" value="static final int MAX_THREAD_COUNT = ${max.thread.count};" />
         </replace>
+        -->
     </target>
 
     <!-- target -replace-if -->

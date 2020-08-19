@@ -23,6 +23,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
 
     /**
      * Constructor
+     * @param executor The {@link Executor}.
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
      */

@@ -63,7 +63,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Return the key at the given <em>index</em> in this cache.
+     * Returns the key at the given <em>index</em> in this cache.
      * @param index The index, must be between 0 and {@link #size()} - 1.
      * @return The key that was stored at the <em>index</em>.
      */
@@ -73,7 +73,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
     }
 
     /**
-     * Return the value at the given <em>index</em> in this cache.
+     * Returns the value at the given <em>index</em> in this cache.
      * @param index The index, must be between 0 and {@link #size()} - 1.
      * @return The value that was stored at the <em>index</em>.
      */

@@ -27,6 +27,7 @@ public final class ViewVisibility implements Runnable {
      * @param delayMillis The delay in milliseconds until the view will be show.
      */
     public final void show(long delayMillis) {
+        DebugUtils.__checkUIThread("show");
         final ViewGroup parent = (ViewGroup)mView.getParent();
         if (parent == null) {
             DebugUtils.__checkDebug(true, "ViewVisibility", DeviceUtils.toString(mView, new StringBuilder("SHOW - The ")).append(" was removed from the parent").toString());
@@ -42,32 +43,25 @@ public final class ViewVisibility implements Runnable {
     }
 
     /**
-     * Hide the view.
-     * @param remove Whether to remove the view from it's parent.
-     * If <tt>true</tt> the view can no longer visible.
+     * Hide the view, but do not dismiss it.
+     * @see #dismiss()
      */
-    public final void hide(boolean remove) {
-        final ViewGroup parent = (ViewGroup)mView.getParent();
-        if (parent == null) {
-            DebugUtils.__checkDebug(parent == null, "ViewVisibility", DeviceUtils.toString(mView, new StringBuilder("HIDE - The ")).append(" was removed from the parent").toString());
-            return;
-        }
+    public final void hide() {
+        DebugUtils.__checkUIThread("hide");
+        hide(false);
+    }
 
-        DebugUtils.__checkDebug(true, "ViewVisibility", DeviceUtils.toString(mView, new StringBuilder("HIDE - view = ")).toString());
-        if (mVisible) {
-            mVisible = false;
-            mView.removeCallbacks(this);
-        }
-
-        if (remove) {
-            parent.removeView(mView);
-        } else {
-            mView.setVisibility(View.GONE);
-        }
+    /**
+     * Dismiss the view, removing it from the parent.
+     * @see #hide()
+     */
+    public final void dismiss() {
+        DebugUtils.__checkUIThread("dismiss");
+        hide(true);
     }
 
     @Override
-    public void run() {
+    public final void run() {
         if (mVisible) {
             show();
         }
@@ -80,5 +74,24 @@ public final class ViewVisibility implements Runnable {
         }
 
         mView.setVisibility(View.VISIBLE);
+    }
+
+    private void hide(boolean remove) {
+        final ViewGroup parent = (ViewGroup)mView.getParent();
+        if (parent == null) {
+            DebugUtils.__checkDebug(parent == null, "ViewVisibility", DeviceUtils.toString(mView, new StringBuilder("HIDE - The ")).append(" was removed from the parent").toString());
+            return;
+        }
+
+        if (mVisible) {
+            mVisible = false;
+            mView.removeCallbacks(this);
+        }
+
+        if (remove) {
+            parent.removeView(mView);
+        } else {
+            mView.setVisibility(View.GONE);
+        }
     }
 }

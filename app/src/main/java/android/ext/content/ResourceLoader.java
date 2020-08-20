@@ -245,7 +245,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         /*
          * If the cache file is hit and result is null:
          *   1. If download failed or cancelled.
-         *   2. The cache file's contents and the temp file' contents are equal.
+         *   2. The cache file and the temp file contents are equal.
          *   3. Parse the temp file failed.
          * Cancel the task and delete the temp file, do not update UI.
          */

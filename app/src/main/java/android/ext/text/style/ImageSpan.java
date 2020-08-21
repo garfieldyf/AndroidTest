@@ -1,7 +1,5 @@
 package android.ext.text.style;
 
-import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
-import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import android.content.res.Resources;
 import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
@@ -16,7 +14,9 @@ import android.text.style.ReplacementSpan;
  */
 public class ImageSpan extends ReplacementSpan {
     private int mPaddingLeft;
+    private int mPaddingTop;
     private int mPaddingRight;
+    private int mPaddingBottom;
     private final Drawable mDrawable;
 
     /**
@@ -38,29 +38,29 @@ public class ImageSpan extends ReplacementSpan {
     @SuppressWarnings("deprecation")
     public ImageSpan(Resources res, int id) {
         mDrawable = res.getDrawable(id);
-        DebugUtils.__checkError(mDrawable == null, "mDrawable == null");
+        DebugUtils.__checkError(mDrawable == null, "Couldn't load resource - ID #0x" + Integer.toHexString(id));
     }
 
     public final void setPadding(Resources res, int id) {
-        mPaddingLeft = mPaddingRight = res.getDimensionPixelOffset(id);
+        mPaddingLeft = mPaddingTop = mPaddingRight = mPaddingBottom = res.getDimensionPixelOffset(id);
     }
 
-    public final void setPadding(int left, int right) {
-        mPaddingLeft  = left;
-        mPaddingRight = right;
+    public final void setPadding(int left, int top, int right, int bottom) {
+        mPaddingLeft   = left;
+        mPaddingTop    = top;
+        mPaddingRight  = right;
+        mPaddingBottom = bottom;
     }
 
     @Override
     public int getSize(Paint paint, CharSequence text, int start, int end, FontMetricsInt fm) {
-        return mDrawable.getIntrinsicWidth() + mPaddingLeft + mPaddingRight;
+        return mDrawable.getIntrinsicWidth();
     }
 
     @Override
     public void draw(Canvas canvas, CharSequence text, int start, int end, float x, int top, int y, int bottom, Paint paint) {
-        final int left   = (int)x + mPaddingLeft;
-        final int margin = (int)((float)DEVICE_DENSITY / DENSITY_DEFAULT);
-        final int dy = (bottom - top - mDrawable.getIntrinsicHeight()) / 2;
-        mDrawable.setBounds(left + margin, top + dy + margin, left + mDrawable.getIntrinsicWidth() - margin, bottom - dy - margin);
+        final int left = (int)x + mPaddingLeft;
+        mDrawable.setBounds(left, top + mPaddingTop, left + mDrawable.getIntrinsicWidth() - mPaddingRight, bottom - mPaddingBottom);
         mDrawable.draw(canvas);
     }
 }

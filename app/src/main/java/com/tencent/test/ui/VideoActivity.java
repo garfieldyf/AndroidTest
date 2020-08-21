@@ -2,8 +2,6 @@ package com.tencent.test.ui;
 
 import android.app.Activity;
 import android.ext.graphics.BitmapUtils;
-import android.ext.graphics.GIFImage;
-import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
 import android.ext.text.style.AnimatedImageSpan;
 import android.ext.text.style.ImageSpan;
@@ -11,7 +9,6 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
-import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.text.Spannable;
@@ -30,8 +27,8 @@ public class VideoActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setSurfaceContent();
-//        setSpanTextContent();
-        setVideoContent();
+        setSpanTextContent();
+//        setVideoContent();
     }
 
     private void setVideoContent() {
@@ -109,7 +106,7 @@ public class VideoActivity extends Activity {
         SpannableStringBuilder builder = new SpannableStringBuilder("@").append(text);
 
         AnimatedImageSpan span = AnimatedImageSpan.newGIFImageSpan(view, R.drawable.mood);
-        span.setPadding(10, 10);
+        span.setPadding(0, 8, 0, 8);
         builder.setSpan(span, 0, 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
         view.setText(builder);
     }

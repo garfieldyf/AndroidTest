@@ -28,20 +28,20 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
     @SuppressWarnings("deprecation")
     public static AnimatedImageSpan newAnimatedImageSpan(View view, int id) {
         final AnimationDrawable drawable = (AnimationDrawable)view.getResources().getDrawable(id);
-        DebugUtils.__checkError(drawable == null, "Couldn't load resources - ID #0x" + Integer.toHexString(id));
+        DebugUtils.__checkError(drawable == null, "Couldn't load resource - ID #0x" + Integer.toHexString(id));
         return new AnimatedImageSpan(view, drawable);
     }
 
     /**
      * Rerturns an {@link AnimatedImageSpan} with given the resource <em>id</em>.
      * @param view The {@link View}.
-     * @param id The resource id of the GIF image.
+     * @param id The resource id of the {@link GIFImage}.
      * @return The <tt>AnimatedImageSpan</tt>.
      * @see #newAnimatedImageSpan(View, int)
      */
     public static AnimatedImageSpan newGIFImageSpan(View view, int id) {
         final GIFImage image = GIFImage.decode(view.getResources(), id);
-        DebugUtils.__checkError(image == null, "Couldn't load resources - ID #0x" + Integer.toHexString(id));
+        DebugUtils.__checkError(image == null, "Couldn't load resource - ID #0x" + Integer.toHexString(id));
         return new AnimatedImageSpan(view, new GIFDrawable(image));
     }
 

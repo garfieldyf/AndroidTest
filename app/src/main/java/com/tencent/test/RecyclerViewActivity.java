@@ -3,10 +3,9 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AbsAsyncTask;
-import android.ext.page.Page;
-import android.ext.page.PageAdapter;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
+import android.ext.widget.PageAdapter;
 import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -26,6 +25,8 @@ import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import java.util.Arrays;
+import java.util.List;
 
 public class RecyclerViewActivity extends Activity {
     private static final int ITEM_TYPE_TITLE = 0;
@@ -35,9 +36,8 @@ public class RecyclerViewActivity extends Activity {
     private static final int PAGE_SIZE = 96;
     private static final int INITIAL_SIZE = 28;
     private static final int PREFETCH_DISTANCE = 6;
-    private static final int MAX_SIZE = PAGE_SIZE * 2 + INITIAL_SIZE;
 
-    /* package */ String[] mData;
+    /* package */ List<String> mData;
     /* package */ RecyclerAdapter mAdapter;
     /* package */ RecyclerView mRecyclerView;
 
@@ -46,7 +46,7 @@ public class RecyclerViewActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.acitivity_recycler_view);
 
-        mData = MainApplication.obtainUrls();
+        mData = Arrays.asList(MainApplication.obtainUrls());
         mRecyclerView = (RecyclerView)findViewById(R.id.content);
         final GridLayoutManager layoutManager = new ItemGridLayoutManager(this, 6, GridLayoutManager.VERTICAL);
         layoutManager.setSpanSizeLookup(new ItemSpanSizeLookup());
@@ -59,7 +59,8 @@ public class RecyclerViewActivity extends Activity {
         mRecyclerView.addItemDecoration(new MarginItemDecoration(20, 20, 20, 20));
         mRecyclerView.addOnScrollListener(mListener);
         LayoutManagerHelper.setChildDrawingOrderCallback(mRecyclerView);
-        mAdapter.setItemCount(mData.length);
+        mAdapter.setItemCount(mData.size());
+//        mAdapter.setItemCount(28);
         //LayoutManagerHelper.requestChildFocus(layoutManager, 3);
     }
 
@@ -128,14 +129,14 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public Page<String> loadPage(int page, int startPosition, int itemCount) {
+        public List<String> loadPage(int page, int startPosition, int itemCount) {
             Log.i("PageAdapter", "page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
             new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, itemCount);
             return null;
         }
     }
 
-    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, Page<String>> {
+    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, List<String>> {
         private int page;
 
         public LoadTask(RecyclerViewActivity activity, int page) {
@@ -144,18 +145,18 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        protected Page<String> doInBackground(Integer... params) {
+        protected List<String> doInBackground(Integer... params) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
 
             final RecyclerViewActivity activity = getOwnerActivity();
-            return (activity != null ? new DataPage(activity.mData, params[0], params[1]) : null);
+            return (activity != null ? activity.mData.subList(params[0], params[0] + params[1]) : null);
         }
 
         @Override
-        protected void onPostExecute(Page<String> result) {
+        protected void onPostExecute(List<String> result) {
             final RecyclerViewActivity activity = getOwnerActivity();
             if (activity != null) {
                 activity.mAdapter.setPage(page, result);
@@ -164,32 +165,32 @@ public class RecyclerViewActivity extends Activity {
         }
     }
 
-    private static final class DataPage implements Page<String> {
-        private final String[] mData;
-        private final int mOffset;
-        private final int mCount;
-
-        public DataPage(String[] data, int offset, int count) {
-            mData = data;
-            mOffset = offset;
-            mCount = count;
-        }
-
-        @Override
-        public int getCount() {
-            return mCount;
-        }
-
-        @Override
-        public String getItem(int position) {
-            return mData[position + mOffset];
-        }
-
-        @Override
-        public String setItem(int position, String value) {
-            return null;
-        }
-    }
+//    private static final class DataPage implements Page<String> {
+//        private final String[] mData;
+//        private final int mOffset;
+//        private final int mCount;
+//
+//        public DataPage(String[] data, int offset, int count) {
+//            mData = data;
+//            mOffset = offset;
+//            mCount = count;
+//        }
+//
+//        @Override
+//        public int getCount() {
+//            return mCount;
+//        }
+//
+//        @Override
+//        public String getItem(int position) {
+//            return mData[position + mOffset];
+//        }
+//
+//        @Override
+//        public String setItem(int position, String value) {
+//            return null;
+//        }
+//    }
 
     private static class BaseHolder extends ViewHolder implements OnFocusChangeListener {
         public BaseHolder(View itemView) {

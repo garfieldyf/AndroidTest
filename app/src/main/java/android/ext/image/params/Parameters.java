@@ -141,12 +141,11 @@ public class Parameters {
      * Computes the {@link Options#inDensity} to decode image.
      */
     /* package */ static void computeDecodeDensity(int width, int height, Options opts) {
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") != 0 || opts.inTargetDensity(" + opts.inTargetDensity + ") != 0");
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             opts.inTargetDensity = DEVICE_DENSITY;
             opts.inDensity = (int)(DEVICE_DENSITY * scale + 0.5f);
-        } else {
-            opts.inDensity = opts.inTargetDensity = 0;
         }
     }
 
@@ -212,13 +211,11 @@ public class Parameters {
 
         @Override
         public void computeSampleSize(Object target, Options opts) {
-            final int width, height;
+            int width = 0, height = 0;
             if (target instanceof View) {
                 final View view = (View)target;
                 width  = view.getWidth();
                 height = view.getHeight();
-            } else {
-                height = width = 0;
             }
 
             computeDecodeDensity(width, height, opts);

@@ -61,12 +61,11 @@ public class ScaleParameters extends Parameters {
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") != 0 || opts.inTargetDensity(" + opts.inTargetDensity + ") != 0");
         final float scale = (float)value;
         if (scale > 0f && scale < 1.0f) {
             opts.inTargetDensity = DEVICE_DENSITY;
             opts.inDensity = (int)(DEVICE_DENSITY * (opts.outWidth / (opts.outWidth * scale)));
-        } else {
-            opts.inDensity = opts.inTargetDensity = 0;
         }
     }
 

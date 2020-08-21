@@ -226,29 +226,31 @@ public class NumericView extends View {
         super.drawableStateChanged();
 
         final int length = mValue.length();
-        if (length > 0) {
-            final Resources res  = getResources();
-            final int[] stateSet = getDrawableState();
-            for (int i = 0; i < length; ++i) {
-                final char c = mValue.charAt(i);
-                final Drawable drawable = mValues[c == '.' ? mValues.length - 1 : c - '0'].getDrawable(res);
-                if (drawable.isStateful()) {
-                    drawable.setState(stateSet);
-                }
-            }
+        if (length == 0) {
+            return;
+        }
 
+        boolean changed = false;
+        final Resources res  = getResources();
+        final int[] stateSet = getDrawableState();
+        for (int i = 0; i < length; ++i) {
+            final char c = mValue.charAt(i);
+            final Drawable drawable = mValues[c == '.' ? mValues.length - 1 : c - '0'].getDrawable(res);
+            if (drawable.isStateful()) {
+                changed |= drawable.setState(stateSet);
+            }
+        }
+
+        if (changed) {
             invalidate();
         }
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        final int measuredWidth, measuredHeight;
+        int measuredWidth = 0, measuredHeight = 0;
         final int length = mValue.length();
-        if (length == 0) {
-            measuredWidth  = 0;
-            measuredHeight = 0;
-        } else {
+        if (length > 0) {
             measuredWidth  = getPaddingLeft() + getPaddingRight() + (mNumberWidth + mHorizontalMargin) * (length - 1) + (mValue.indexOf('.') == -1 ? mNumberWidth : mDotWidth);
             measuredHeight = getPaddingTop() + getPaddingBottom() + mNumberHeight;
         }

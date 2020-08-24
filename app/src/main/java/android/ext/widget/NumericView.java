@@ -8,6 +8,7 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.ReflectUtils;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Printer;
 import android.view.View;
@@ -74,7 +75,7 @@ public class NumericView extends View {
      * @see #setValue(float)
      */
     public void setValue(String value) {
-        if (value == null) {
+        if (TextUtils.isEmpty(value)) {
             value = "";
         } else {
             // Check the value is a number.

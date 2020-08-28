@@ -33,8 +33,9 @@ public class RecyclerViewActivity extends Activity {
     private static final int ITEM_TYPE_IMAGE = 1;
     private static final int ITEM_TYPE_ITEM  = 2;
 
-    private static final int PAGE_SIZE = 96;
-    private static final int INITIAL_SIZE = 28;
+    private static final int MAX_PAGE_SIZE = 4;
+    private static final int PAGE_SIZE = 64;
+    private static final int INITIAL_SIZE = 32;
     private static final int PREFETCH_DISTANCE = 6;
 
     /* package */ List<String> mData;
@@ -89,7 +90,7 @@ public class RecyclerViewActivity extends Activity {
 
     private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
         public RecyclerAdapter() {
-            super(INITIAL_SIZE, PAGE_SIZE, PREFETCH_DISTANCE);
+            super(MAX_PAGE_SIZE, INITIAL_SIZE, PAGE_SIZE, PREFETCH_DISTANCE);
         }
 
         @Override
@@ -130,7 +131,7 @@ public class RecyclerViewActivity extends Activity {
 
         @Override
         public List<String> loadPage(int page, int startPosition, int itemCount) {
-            Log.i("PageAdapter", "page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
+            Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
             new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, itemCount);
             return null;
         }
@@ -160,7 +161,6 @@ public class RecyclerViewActivity extends Activity {
             final RecyclerViewActivity activity = getOwnerActivity();
             if (activity != null) {
                 activity.mAdapter.setPage(page, result);
-                Log.i("PageAdapter", "setPage = " + page);
             }
         }
     }

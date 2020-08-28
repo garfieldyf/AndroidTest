@@ -28,6 +28,7 @@ import java.util.Set;
 public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> {
     private int mItemCount;
     private int mMaxPageIndex;
+    private int mLastPosition;
     private List<E> mInitialPage;
 
     private final int mPageSize;
@@ -103,11 +104,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") < 0");
+        final int count = itemCount - mInitialSize;
+        mItemCount = itemCount;
         mPageCache.clear();
         mLoadStates.clear();
-        mInitialPage = null;
-        mItemCount = itemCount;
-        computeMaxPageIndex();
+        mLastPosition = 0;
+        mInitialPage  = null;
+        mMaxPageIndex = (count > 0 ? (int)Math.ceil((double)count / mPageSize) : 0);
         postNotifyDataSetChanged();
     }
 
@@ -141,19 +144,22 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         final int itemIndex = (int)combinedPosition;
         final List<E> page  = getPage(pageIndex);
 
-        // Prefetch the pageIndex previous page data.
-        if (pageIndex > 0 && itemIndex == mPrefetchDistance) {
-            getPage(pageIndex - 1);
-        }
-
-        if (pageIndex < mMaxPageIndex) {
+        if (mLastPosition > position) {
+            // Prefetch the pageIndex previous page data.
+            if (pageIndex > 0 && itemIndex == mPrefetchDistance) {
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + " previous page data");
+                getPage(pageIndex - 1);
+            }
+        } else if (pageIndex < mMaxPageIndex) {
             // Prefetch the pageIndex next page data.
             final int lastIndex = (pageIndex > 0 ? mPageSize : mInitialSize) - 1;
             if (itemIndex == lastIndex - mPrefetchDistance) {
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + " next page data");
                 getPage(pageIndex + 1);
             }
         }
 
+        mLastPosition = position;   // Saves the last position.
         return (page != null ? page.get(itemIndex) : fallback);
     }
 
@@ -389,18 +395,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The page, or <tt>null</tt>.
      */
     protected abstract List<E> loadPage(int pageIndex, int startPosition, int itemCount);
-
-    /**
-     * Computes the maximum page index.
-     */
-    private void computeMaxPageIndex() {
-        final int count = mItemCount - mInitialSize;
-        if (count <= 0) {
-            mMaxPageIndex = 0;
-        } else {
-            mMaxPageIndex = (int)Math.ceil((double)count / mPageSize);
-        }
-    }
 
     /**
      * Returns the page associated with the specified <em>pageIndex</em>.

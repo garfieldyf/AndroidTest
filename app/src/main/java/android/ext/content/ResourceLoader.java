@@ -180,7 +180,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return task;
     }
 
-    /* package */ static int download(URLConnection conn, int statusCode, Object[] params) throws Exception {
+    /* package */ static Integer download(URLConnection conn, int statusCode, Object[] params) throws Exception {
         if (statusCode == HTTP_OK) {
             try (final InputStream is = conn.getInputStream()) {
                 FileUtils.copyStream(is, (File)params[0], (Cancelable)params[1]);

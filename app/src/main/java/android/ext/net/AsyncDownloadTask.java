@@ -22,8 +22,8 @@ import java.net.URLConnection;
  *     }
  *
  *    {@code @Override}
- *     protected DownloadRequest newDownloadRequest(String[] params) throws Exception {
- *         return new DownloadRequest(params[0]).readTimeout(30000).connectTimeout(30000);
+ *     protected DownloadRequest newDownloadRequest(String[] urls) throws Exception {
+ *         return new DownloadRequest(urls[0]).readTimeout(30000).connectTimeout(30000);
  *     }
  *
  *    {@code @Override}

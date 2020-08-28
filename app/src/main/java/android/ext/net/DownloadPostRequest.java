@@ -23,8 +23,8 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Class <tt>DownloadPostRequest</tt> used to downloads the resource from the
- * remote HTTP server. This class both support HTTP "GET" and "POST" methods.
+ * Class <tt>DownloadPostRequest</tt> used to downloads the resource from
+ * the remote server. This class both support HTTP "GET" and "POST" methods.
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
  * final JSONObject result = new DownloadPostRequest(url)
@@ -41,7 +41,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Constructor
-     * @param url The url to connect the remote HTTP server.
+     * @param url The url to connect the remote server.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(String)
      * @see #DownloadPostRequest(URL, Proxy)
@@ -52,7 +52,7 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     /**
      * Constructor
-     * @param url The url to connect the remote HTTP server.
+     * @param url The url to connect the remote server.
      * @throws MalformedURLException if <em>url</em> could not be parsed as a {@link URL}.
      * @throws IOException if an error occurs while opening the connection.
      * @see #DownloadPostRequest(URL)
@@ -75,7 +75,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Sets the <em>data</em> to post to the remote HTTP server.
+     * Sets the <em>data</em> to post to the remote server.
      * @param data May be a <tt>JSONObject, JSONArray, File, InputStream</tt>
      * or the collections(<tt>Array, Collection, Map</tt>).
      * @return This request.
@@ -91,7 +91,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Sets the byte array to post to the remote HTTP server.
+     * Sets the byte array to post to the remote server.
      * @param data The byte array to post.
      * @param offset The start position in <em>data</em> from where to get bytes.
      * @param count The number of bytes from <em>data</em> to write to.
@@ -106,7 +106,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Sets the <tt>String</tt> to post to the remote HTTP server.
+     * Sets the <tt>String</tt> to post to the remote server.
      * @param data The string to post.
      * @param offset The start position in <em>data</em> from where to get characters.
      * @param count The number of characters from <em>data</em> to write to.
@@ -121,7 +121,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Sets the {@link PostCallback} to post the data to the remote HTTP server.
+     * Sets the {@link PostCallback} to post the data to the remote server.
      * @param callback The <tt>PostCallback</tt> to set.
      * @param params The parameters passed into {@link PostCallback#onPostData}.
      * If no parameters, you can pass <em>(Object[])null</em> instead of allocating
@@ -170,7 +170,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Connects to the remote HTTP server with the specified method.
+     * Connects to the remote server with the specified method.
      */
     private void connectImpl() throws IOException {
         ((HttpURLConnection)mConnection).setRequestMethod("POST");
@@ -179,7 +179,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Sets the <em>data</em> to post to the remote HTTP server.
+     * Sets the <em>data</em> to post to the remote server.
      */
     private DownloadPostRequest postImpl(Object data, int offset, int count) {
         DebugUtils.__checkWarning(mData != null, "DownloadPostRequest", "The POST data is already exists. Do you want overrides it.");
@@ -189,7 +189,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the <tt>File</tt> contents to the remote HTTP server.
+     * Posts the <tt>File</tt> contents to the remote server.
      */
     private void postData(File file) throws IOException {
         try (final InputStream is = new FileInputStream(file)) {
@@ -198,7 +198,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the <tt>InputStream</tt> contents to the remote HTTP server.
+     * Posts the <tt>InputStream</tt> contents to the remote server.
      */
     private void postData(InputStream is) throws IOException {
         try (final OutputStream os = mConnection.getOutputStream()) {
@@ -207,7 +207,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the data to the remote HTTP server.
+     * Posts the data to the remote server.
      */
     private void postData(Object data) throws IOException {
         try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8))) {
@@ -216,7 +216,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the byte array to the remote HTTP server.
+     * Posts the byte array to the remote server.
      */
     private void postData(byte[] data, int offset, int count) throws IOException {
         try (final OutputStream os = mConnection.getOutputStream()) {
@@ -225,7 +225,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     }
 
     /**
-     * Posts the <tt>String</tt> to the remote HTTP server.
+     * Posts the <tt>String</tt> to the remote server.
      */
     private void postData(String data, int offset, int count) throws IOException {
         try (final OutputStreamWriter writer = new OutputStreamWriter(mConnection.getOutputStream(), StandardCharsets.UTF_8)) {

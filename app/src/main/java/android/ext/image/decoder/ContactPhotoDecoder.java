@@ -1,7 +1,6 @@
 package android.ext.image.decoder;
 
 import android.content.ContentResolver;
-import android.ext.cache.BitmapPool;
 import android.ext.database.DatabaseUtils;
 import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
@@ -23,11 +22,9 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
      */
-    public ContactPhotoDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
-        super(module, bitmapPool);
+    public ContactPhotoDecoder(ImageModule<?, ?> module) {
+        super(module);
     }
 
     @Override

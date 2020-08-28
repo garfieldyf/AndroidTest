@@ -1,6 +1,5 @@
 package android.ext.image.decoder;
 
-import android.ext.cache.BitmapPool;
 import android.ext.graphics.GIFImage;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
@@ -19,11 +18,9 @@ public final class ImageDecoder extends BitmapDecoder<Object> {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
      */
-    public ImageDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
-        super(module, bitmapPool);
+    public ImageDecoder(ImageModule<?, ?> module) {
+        super(module);
     }
 
     @Override

@@ -43,12 +43,4 @@ public interface Cache<K, V> {
      */
     default void trimMemory(int level) {
     }
-
-    /**
-     * Returns the {@link BitmapPool} associated with this cache.
-     * @return The <tt>BitmapPool</tt> or <tt>null</tt> if no bitmap pool.
-     */
-    default BitmapPool getBitmapPool() {
-        return null;
-    }
 }

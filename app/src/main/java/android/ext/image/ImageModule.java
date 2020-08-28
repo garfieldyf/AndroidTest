@@ -81,6 +81,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ final Pool<Object[]> mParamsPool;
 
     private final FileCache mFileCache;
+    private final BitmapPool mBitmapPool;
     private final Cache<URI, Image> mImageCache;
     private final SparseArray<Object> mResources;
 
@@ -90,8 +91,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
-    /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache) {
+    /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, BitmapPool bitmapPool) {
         final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
         mCacheDir = getCacheDir(context);
@@ -101,6 +103,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mResources   = new SparseArray<Object>(8);
         mTaskPool    = ImageLoader.newTaskPool(MAX_POOL_SIZE);
         mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
+        mBitmapPool  = (bitmapPool != null ? bitmapPool : Caches.emptyBitmapPool());
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
@@ -209,6 +212,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     /**
+     * Returns the {@link BitmapPool} associated with this object.
+     * @return The <tt>BitmapPool</tt>.
+     */
+    public final BitmapPool getBitmapPool() {
+        return mBitmapPool;
+    }
+
+    /**
      * Returns the image cache associated with this object.
      * @return The {@link Cache} or <tt>null</tt>.
      */
@@ -222,8 +233,11 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         Pools.dumpPool(mBufferPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
-        dumpResources(printer);
+        if (mBitmapPool instanceof LinkedBitmapPool) {
+            ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
+        }
 
+        dumpResources(printer);
         for (int i = 0, size = mResources.size(); i < size; ++i) {
             final Object object = mResources.valueAt(i);
             if (object instanceof ImageLoader) {
@@ -267,6 +281,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mResources.clear();
             mParamsPool.clear();
             mBufferPool.clear();
+            mBitmapPool.clear();
             mOptionsPool.clear();
         }
 
@@ -298,14 +313,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         if (className.equals("IconLoader")) {
             return new IconLoader(this, imageCache);
         } else if (className.equals("ImageLoader")) {
-            return new ImageLoader(this, imageCache, fileCache, createImageDecoder(name, imageCache));
+            return new ImageLoader(this, imageCache, fileCache, createImageDecoder(name));
         }
 
         final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
         if (IconLoader.class.isAssignableFrom(clazz)) {
             return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
         } else {
-            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name, imageCache));
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name));
         }
     }
 
@@ -368,24 +383,23 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         return result;
     }
 
-    private ImageLoader.ImageDecoder createImageDecoder(String className, Cache imageCache) throws ReflectiveOperationException {
-        final BitmapPool bitmapPool = (imageCache != null ? imageCache.getBitmapPool() : null);
+    private ImageLoader.ImageDecoder createImageDecoder(String className) throws ReflectiveOperationException {
         if (TextUtils.isEmpty(className)) {
-            return new BitmapDecoder(this, bitmapPool);
+            return new BitmapDecoder(this);
         }
 
         switch (className) {
         case "BitmapDecoder":
-            return new BitmapDecoder(this, bitmapPool);
+            return new BitmapDecoder(this);
 
         case "ImageDecoder":
-            return new ImageDecoder(this, bitmapPool);
+            return new ImageDecoder(this);
 
         case "ContactPhotoDecoder":
-            return new ContactPhotoDecoder(this, bitmapPool);
+            return new ContactPhotoDecoder(this);
 
         default:
-            return ReflectUtils.newInstance(className, new Class[] { ImageModule.class, BitmapPool.class }, this, bitmapPool);
+            return ReflectUtils.newInstance(className, new Class[] { ImageModule.class }, this);
         }
     }
 
@@ -585,7 +599,8 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         public final ImageModule<URI, Image> build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, MAX_THREAD_COUNT));
             final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
-            return new ImageModule(mContext, executor, createImageCache(), createFileCache(executor));
+            final BitmapPool bitmapPool = (mPoolSize > 0 ? new LinkedBitmapPool(mPoolSize) : null);
+            return new ImageModule(mContext, executor, createImageCache(bitmapPool), createFileCache(executor), bitmapPool);
         }
 
         private FileCache createFileCache(Executor executor) {
@@ -599,7 +614,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             }
         }
 
-        private Cache createImageCache() {
+        private Cache createImageCache(BitmapPool bitmapPool) {
             if (mImageCache == null) {
                 return null;
             } else if (mImageCache instanceof Cache) {
@@ -618,14 +633,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             if (maxSize <= 0) {
                 return null;
             } else if (mImageSize <= 0) {
-                return createBitmapCache(maxSize);
+                return createBitmapCache(maxSize, bitmapPool);
             } else {
-                return new LruImageCache(createBitmapCache(maxSize), new LruCache(mImageSize));
+                return new LruImageCache(createBitmapCache(maxSize, bitmapPool), new LruCache(mImageSize));
             }
         }
 
-        private Cache createBitmapCache(int maxSize) {
-            return (mPoolSize > 0 ? new LruBitmapCache2(maxSize, new LinkedBitmapPool(mPoolSize)) : new LruBitmapCache(maxSize));
+        private static Cache createBitmapCache(int maxSize, BitmapPool bitmapPool) {
+            return (bitmapPool != null ? new LruBitmapCache2(maxSize, bitmapPool) : new LruBitmapCache(maxSize));
         }
     }
 }

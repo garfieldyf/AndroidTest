@@ -1,8 +1,6 @@
 package android.ext.image.decoder;
 
 import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
-import android.ext.cache.BitmapPool;
-import android.ext.cache.Caches;
 import android.ext.image.AbsImageDecoder;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
@@ -21,19 +19,11 @@ import android.util.Log;
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     /**
-     * The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
-     */
-    protected final BitmapPool mBitmapPool;
-
-    /**
      * Constructor
      * @param module The {@link ImageModule}.
-     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool}
-     * to reuse the bitmap when decoding bitmap.
      */
-    public BitmapDecoder(ImageModule<?, ?> module, BitmapPool bitmapPool) {
+    public BitmapDecoder(ImageModule<?, ?> module) {
         super(module);
-        mBitmapPool = (bitmapPool != null ? bitmapPool : Caches.emptyBitmapPool());
     }
 
     @Override
@@ -43,7 +33,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         parameters.computeSampleSize(target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
-        opts.inBitmap = mBitmapPool.get(parameters, opts);
+        opts.inBitmap = mModule.getBitmapPool().get(parameters, opts);
         DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
 
         // Decodes the image pixels.

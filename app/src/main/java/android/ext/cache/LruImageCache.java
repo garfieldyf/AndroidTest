@@ -53,11 +53,6 @@ public final class LruImageCache<K> implements Cache<K, Object> {
         mBitmapCache.trimMemory(level);
     }
 
-    @Override
-    public BitmapPool getBitmapPool() {
-        return mBitmapCache.getBitmapPool();
-    }
-
     public final void dump(Context context, Printer printer) {
         Caches.dumpCache(mBitmapCache, context, printer);
         Caches.dumpCache(mImageCache, context, printer);

@@ -268,16 +268,16 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             mFileCache.trimMemory(level);
         }
 
+        if (mBitmapPool != null) {
+            mBitmapPool.trimMemory(level);
+        }
+
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             for (int i = mResources.size() - 1; i >= 0; --i) {
                 final Object value = mResources.valueAt(i);
                 if (value instanceof ImageLoader) {
                     ((ImageLoader<?, ?>)value).shutdown();
                 }
-            }
-
-            if (mBitmapPool != null) {
-                mBitmapPool.clear();
             }
 
             mTaskPool.clear();

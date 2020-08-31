@@ -227,22 +227,43 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     public final void dump(Printer printer) {
+        Pools.dumpPool(mTaskPool, printer);
         Pools.dumpPool(mParamsPool, printer);
-        Pools.dumpPool(mOptionsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
+        Pools.dumpPool(mOptionsPool, printer);
         Caches.dumpCache(mImageCache, mContext, printer);
         Caches.dumpCache(mFileCache, mContext, printer);
         if (mBitmapPool instanceof LinkedBitmapPool) {
             ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
         }
 
-        dumpResources(printer);
-        for (int i = 0, size = mResources.size(); i < size; ++i) {
+        final StringBuilder result = new StringBuilder(130);
+        final Resources res = mContext.getResources();
+        final int size = mResources.size();
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
+
+        final TypedValue value = new TypedValue();
+        for (int i = 0; i < size; ++i) {
+            res.getValue(mResources.keyAt(i), value, true);
             final Object object = mResources.valueAt(i);
-            if (object instanceof ImageLoader) {
-                ((ImageLoader<?, ?>)object).dump(printer);
+
+            result.setLength(0);
+            result.append("  ").append(value.string).append(" ==> ");
+            if (object instanceof Parameters) {
+                ((Parameters)object).dump(printer, result);
+            } else if (object instanceof GIFImageBinder) {
+                ((GIFImageBinder)object).dump(printer, result);
+            } else if (object instanceof TransitionBinder) {
+                ((TransitionBinder)object).dump(printer, result);
+            } else if (object instanceof RoundedBitmapBinder) {
+                ((RoundedBitmapBinder)object).dump(printer, result);
+            } else {
+                printer.println(DeviceUtils.toString(object, result).toString());
             }
         }
+
+        result.setLength(0);
+        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
     }
 
     @Override
@@ -403,36 +424,6 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         default:
             return ReflectUtils.newInstance(className, new Class[] { ImageModule.class }, this);
         }
-    }
-
-    private void dumpResources(Printer printer) {
-        final StringBuilder result = new StringBuilder(130);
-        final Resources res = mContext.getResources();
-        final int size = mResources.size();
-        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
-
-        final TypedValue value = new TypedValue();
-        for (int i = 0; i < size; ++i) {
-            res.getValue(mResources.keyAt(i), value, true);
-            final Object object = mResources.valueAt(i);
-
-            result.setLength(0);
-            result.append("  ").append(value.string).append(" ==> ");
-            if (object instanceof Parameters) {
-                ((Parameters)object).dump(printer, result);
-            } else if (object instanceof GIFImageBinder) {
-                ((GIFImageBinder)object).dump(printer, result);
-            } else if (object instanceof TransitionBinder) {
-                ((TransitionBinder)object).dump(printer, result);
-            } else if (object instanceof RoundedBitmapBinder) {
-                ((RoundedBitmapBinder)object).dump(printer, result);
-            } else {
-                printer.println(DeviceUtils.toString(object, result).toString());
-            }
-        }
-
-        result.setLength(0);
-        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
     }
 
     private static String getCacheDir(Context context) {

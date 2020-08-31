@@ -148,20 +148,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mModule.mParamsPool.recycle(params);
     }
 
-//    /**
-//     * Called on a background thread to load an image from the specified <em>uri</em>.
-//     * @param task The current {@link Task} whose executing this method.
-//     * @param uri The uri to load, passed earlier by {@link #load}.
-//     * @param target The <tt>Object</tt> to bind, passed earlier by {@link #load}.
-//     * @param params The parameters, passed earlier by {@link #load}.
-//     * @param flags Loading flags, passed earlier by {@link #load}.
-//     * @param buffer The temporary byte array to used for loading image data.
-//     * @return The image, or <tt>null</tt> if the load failed or cancelled.
-//     */
-//    protected Image loadImage(Task task, URI uri, Object target, Object[] params, int flags, byte[] buffer) {
-//        final String uriString = uri.toString();
-//        return (matchScheme(uriString) ? mLoader.load(task, uriString, target, params, flags, buffer) : mDecoder.decodeImage(uri, target, params, flags, buffer));
-//    }
+    /**
+     * Matches the scheme of the specified <em>uri</em>. The default
+     * implementation match the scheme "http", "https" and "ftp".
+     */
+    protected boolean matchScheme(String uri) {
+        return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
+    }
 
     /**
      * Called on a background thread to load an image from the specified <em>url</em>.
@@ -197,14 +190,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         mLoader  = null;
         mDecoder = null;
         mRequest = new LoadRequest();
-    }
-
-    /**
-     * Matches the scheme of the specified <em>uri</em>. The default
-     * implementation match the "http", "https" and "ftp".
-     */
-    /* package */ static boolean matchScheme(String uri) {
-        return ("http://".regionMatches(true, 0, uri, 0, 7) || "https://".regionMatches(true, 0, uri, 0, 8) || "ftp://".regionMatches(true, 0, uri, 0, 6));
     }
 
     /**
@@ -287,17 +272,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
                 mCache.remove(hashKey);
             }
 
-            if (!isTaskCancelled(task)) {
-                // Loads the image from url, If the image file is not exists or decode failed.
-                final File tempFile = new File(mModule.mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
-                if ((result = loadImage(task, url, tempFile, target, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
-                    // Saves the image file to file cache, If load succeeded.
-                    mCache.put(hashKey, imageFile);
-                } else {
-                    // Deletes the temp file, If load failed.
-                    tempFile.delete();
-                    DebugUtils.__checkWarning(true, "ImageLoader", "loadImage failed - delete tempFile = " + tempFile + ", url = " + url);
-                }
+            // Loads the image from url, If the image file is not exists or decode failed.
+            final File tempFile = new File(mModule.mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
+            if ((result = loadImage(task, url, tempFile, target, params, flags, buffer)) != null && FileUtils.moveFile(tempFile.getPath(), imageFile.getPath()) == 0) {
+                // Saves the image file to file cache, If load succeeded.
+                mCache.put(hashKey, imageFile);
+            } else {
+                // Deletes the temp file, If load failed.
+                tempFile.delete();
+                DebugUtils.__checkWarning(true, "ImageLoader", "loadImage failed - delete tempFile = " + tempFile + ", url = " + url);
             }
 
             return result;

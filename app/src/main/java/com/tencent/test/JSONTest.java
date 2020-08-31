@@ -9,6 +9,7 @@ import android.ext.net.AsyncDownloadTask;
 import android.ext.net.DownloadRequest;
 import android.ext.util.ByteArrayBuffer;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.ProcessUtils.CrashDatabase;
 import android.net.Uri;
@@ -33,6 +34,16 @@ public final class JSONTest {
         }
 
         @Override
+        protected void onPostExecute(ByteArrayBuffer result) {
+            Log.i("abcd", "onPostExecute = " + DeviceUtils.toString(result, new StringBuilder()));
+        }
+
+        @Override
+        protected void onCancelled(ByteArrayBuffer result) {
+            Log.i("abcd", "onCancelled = " + DeviceUtils.toString(result, new StringBuilder()));
+        }
+
+        @Override
         public ByteArrayBuffer onDownload(URLConnection conn, int statusCode, String[] urls) throws Exception {
             ByteArrayBuffer result = null;
             Log.i("abcd", "begin download");
@@ -46,6 +57,8 @@ public final class JSONTest {
                 Log.i("abcd", "download failed!");
             }
 
+            //Cancelable cancelable = this;
+            //cancelable.cancel(false);
             return result;
         }
     }

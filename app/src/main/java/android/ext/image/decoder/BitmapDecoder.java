@@ -1,6 +1,7 @@
 package android.ext.image.decoder;
 
 import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
+import android.ext.cache.BitmapPool;
 import android.ext.image.AbsImageDecoder;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
@@ -33,8 +34,13 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         parameters.computeSampleSize(target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
-        opts.inBitmap = mModule.getBitmapPool().get(parameters, opts);
-        DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
+        if (Build.VERSION.SDK_INT < 26 || opts.inPreferredConfig != Config.HARDWARE) {
+            final BitmapPool bitmapPool = mModule.getBitmapPool();
+            if (bitmapPool != null) {
+                opts.inBitmap = bitmapPool.get(parameters.computeByteCount(opts));
+                DebugUtils.__checkDebug(opts.inBitmap != null, "BitmapDecoder", "decodeBitmap will attempt to reuse the " + opts.inBitmap);
+            }
+        }
 
         // Decodes the image pixels.
         Bitmap result = null;

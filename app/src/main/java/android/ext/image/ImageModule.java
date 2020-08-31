@@ -12,7 +12,6 @@ import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.cache.LinkedBitmapPool;
 import android.ext.cache.LruBitmapCache;
-import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
@@ -99,11 +98,11 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
         mCacheDir = getCacheDir(context);
         mExecutor = executor;
         mFileCache   = fileCache;
+        mBitmapPool  = bitmapPool;
         mImageCache  = imageCache;
         mResources   = new SparseArray<Object>(8);
         mTaskPool    = ImageLoader.newTaskPool(MAX_POOL_SIZE);
         mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
-        mBitmapPool  = (bitmapPool != null ? bitmapPool : Caches.emptyBitmapPool());
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
         mBufferPool  = Pools.synchronizedPool(Pools.newPool(() -> new byte[16384], maxPoolSize));
         mContext.registerComponentCallbacks(this);
@@ -213,7 +212,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
 
     /**
      * Returns the {@link BitmapPool} associated with this object.
-     * @return The <tt>BitmapPool</tt>.
+     * @return The <tt>BitmapPool</tt> or <tt>null</tt>.
      */
     public final BitmapPool getBitmapPool() {
         return mBitmapPool;
@@ -277,11 +276,14 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
                 }
             }
 
+            if (mBitmapPool != null) {
+                mBitmapPool.clear();
+            }
+
             mTaskPool.clear();
             mResources.clear();
             mParamsPool.clear();
             mBufferPool.clear();
-            mBitmapPool.clear();
             mOptionsPool.clear();
         }
 
@@ -633,14 +635,10 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
             if (maxSize <= 0) {
                 return null;
             } else if (mImageSize <= 0) {
-                return createBitmapCache(maxSize, bitmapPool);
+                return new LruBitmapCache(maxSize, bitmapPool);
             } else {
-                return new LruImageCache(createBitmapCache(maxSize, bitmapPool), new LruCache(mImageSize));
+                return new LruImageCache(new LruBitmapCache(maxSize, bitmapPool), new LruCache(mImageSize));
             }
-        }
-
-        private static Cache createBitmapCache(int maxSize, BitmapPool bitmapPool) {
-            return (bitmapPool != null ? new LruBitmapCache2(maxSize, bitmapPool) : new LruBitmapCache(maxSize));
         }
     }
 }

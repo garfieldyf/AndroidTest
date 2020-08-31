@@ -14,17 +14,37 @@ import java.util.Set;
  * @author Garfield
  */
 public class LruBitmapCache<K> extends LruCache<K, Bitmap> {
+    private final BitmapPool mBitmapPool;
+
     /**
      * Constructor
      * @param maxSize The maximum the number of bytes to allow in this cache.
+     * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to recycle
+     * the evicted bitmap from this cache.
      */
-    public LruBitmapCache(int maxSize) {
+    public LruBitmapCache(int maxSize, BitmapPool bitmapPool) {
         super(maxSize);
+        mBitmapPool = bitmapPool;
+    }
+
+    /**
+     * Returns the {@link BitmapPool} associated with this cache.
+     * @return The <tt>BitmapPool</tt> or <tt>null</tt>.
+     */
+    public final BitmapPool getBitmapPool() {
+        return mBitmapPool;
     }
 
     @Override
     protected int sizeOf(K key, Bitmap value) {
         return value.getAllocationByteCount();
+    }
+
+    @Override
+    protected void entryRemoved(boolean evicted, K key, Bitmap oldValue, Bitmap newValue) {
+        if (mBitmapPool != null && !evicted && oldValue != newValue) {
+            mBitmapPool.put(oldValue);
+        }
     }
 
     @Override

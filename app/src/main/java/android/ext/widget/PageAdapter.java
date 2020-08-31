@@ -104,13 +104,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") < 0");
-        final int count = itemCount - mInitialSize;
         mItemCount = itemCount;
         mPageCache.clear();
         mLoadStates.clear();
         mLastPosition = 0;
         mInitialPage  = null;
-        mMaxPageIndex = (count > 0 ? (int)Math.ceil((double)count / mPageSize) : 0);
+        mMaxPageIndex = (itemCount > mInitialSize ? (int)Math.ceil((double)(itemCount - mInitialSize) / mPageSize) : 0);
         postNotifyDataSetChanged();
     }
 
@@ -147,14 +146,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         if (mLastPosition > position) {
             // Prefetch the pageIndex previous page data.
             if (pageIndex > 0 && itemIndex == mPrefetchDistance) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + " previous page data");
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + ", itemIndex = " + itemIndex + " previous page data");
                 getPage(pageIndex - 1);
             }
         } else if (pageIndex < mMaxPageIndex) {
             // Prefetch the pageIndex next page data.
-            final int lastIndex = (pageIndex > 0 ? mPageSize : mInitialSize) - 1;
-            if (itemIndex == lastIndex - mPrefetchDistance) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + " next page data");
+            final int prefetchIndex = (pageIndex > 0 ? mPageSize : mInitialSize) - mPrefetchDistance - 1;
+            if (itemIndex == prefetchIndex) {
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch the pageIndex = " + pageIndex + ", itemIndex = " + itemIndex + " next page data");
                 getPage(pageIndex + 1);
             }
         }

@@ -280,7 +280,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkStartMethodTracing();
-        Pools.sByteArrayPool.clear();
+        Pools.BYTE_ARRAY_POOL.clear();
         if (mImageCache != null) {
             mImageCache.trimMemory(level);
         }

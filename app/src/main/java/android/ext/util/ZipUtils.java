@@ -109,7 +109,7 @@ public final class ZipUtils {
         FileUtils.mkdirs(zipFile, FileUtils.FLAG_IGNORE_FILENAME);
         cancelable = Cancelable.ofNullable(cancelable);
 
-        final byte[] buffer = Pools.sByteArrayPool.obtain();
+        final byte[] buffer = Pools.BYTE_ARRAY_POOL.obtain();
         try (final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Compresses the files.
             os.setLevel(compressionLevel);
@@ -118,7 +118,7 @@ public final class ZipUtils {
                 compress(os, f, f.getName(), cancelable, buffer);
             }
         } finally {
-            Pools.sByteArrayPool.recycle(buffer);
+            Pools.BYTE_ARRAY_POOL.recycle(buffer);
         }
     }
 
@@ -134,7 +134,7 @@ public final class ZipUtils {
      * @see #compress(String, int, Cancelable, String[])
      */
     public static void uncompress(String zipFile, String outPath, Cancelable cancelable) throws IOException {
-        final byte[] buffer = Pools.sByteArrayPool.obtain();
+        final byte[] buffer = Pools.BYTE_ARRAY_POOL.obtain();
         try (final ZipFile file = new ZipFile(zipFile)) {
             // Creates the necessary directories.
             FileUtils.mkdirs(outPath, 0);
@@ -155,7 +155,7 @@ public final class ZipUtils {
                 }
             }
         } finally {
-            Pools.sByteArrayPool.recycle(buffer);
+            Pools.BYTE_ARRAY_POOL.recycle(buffer);
         }
     }
 

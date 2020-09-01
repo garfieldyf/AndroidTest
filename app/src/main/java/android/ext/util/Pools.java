@@ -16,7 +16,7 @@ public final class Pools {
     /**
      * The byte array pool for managing a pool of byte arrays.
      */
-    public static final Pool<byte[]> sByteArrayPool;
+    public static final Pool<byte[]> BYTE_ARRAY_POOL;
 
     /**
      * Creates a new <b>fixed-size</b> {@link Pool}.
@@ -333,7 +333,7 @@ public final class Pools {
     }
 
     static {
-        sByteArrayPool = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
+        BYTE_ARRAY_POOL = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
     }
 
     /**

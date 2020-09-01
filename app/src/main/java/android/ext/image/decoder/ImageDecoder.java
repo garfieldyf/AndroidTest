@@ -19,7 +19,7 @@ public final class ImageDecoder extends BitmapDecoder<Object> {
      * Constructor
      * @param module The {@link ImageModule}.
      */
-    public ImageDecoder(ImageModule<?, ?> module) {
+    public ImageDecoder(ImageModule module) {
         super(module);
     }
 

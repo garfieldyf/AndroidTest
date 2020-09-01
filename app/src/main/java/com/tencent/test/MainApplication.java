@@ -25,7 +25,7 @@ public final class MainApplication extends Application {
     public static final ThreadPool sThreadPool;
 
     private PackageInfo mPackageInfo;
-    private ImageModule<String, Object> mImageModule;
+    private ImageModule mImageModule;
 
     @Override
     public void onCreate() {
@@ -35,7 +35,7 @@ public final class MainApplication extends Application {
         DebugUtils.startMethodTracing();
         ProcessUtils.installUncaughtExceptionHandler(this);
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
-        mImageModule = new Builder<String, Object>(this)
+        mImageModule = new Builder(this)
             .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
             .setImageSize(128)
 //            .setBitmapPoolSize(20)
@@ -51,7 +51,7 @@ public final class MainApplication extends Application {
         super.onTrimMemory(level);
     }
 
-    public final ImageModule<String, Object> getImageModule() {
+    public final ImageModule getImageModule() {
         return mImageModule;
     }
 
@@ -78,7 +78,7 @@ public final class MainApplication extends Application {
     @SuppressWarnings("unused")
     private static final class MainImageLoader extends ImageLoader<String, Object> {
         @Keep
-        public MainImageLoader(ImageModule<?, ?> module, Cache<String, Object> cache, FileCache fileCache, ImageDecoder<Object> decoder) {
+        public MainImageLoader(ImageModule module, Cache<String, Object> cache, FileCache fileCache, ImageDecoder<Object> decoder) {
             super(module, cache, fileCache, decoder);
         }
 

@@ -34,7 +34,7 @@ public final class PackageIconLoader<URI> extends IconLoader<URI> {
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
     @Keep
-    public PackageIconLoader(ImageModule<?, ?> module, Cache<URI, Object> iconCache) {
+    public PackageIconLoader(ImageModule module, Cache<URI, Object> iconCache) {
         super(module, iconCache);
     }
 

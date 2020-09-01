@@ -50,7 +50,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     private final LoadRequest mRequest;
     private final Loader<URI, Image> mLoader;
 
-    protected final ImageModule<?, ?> mModule;
+    protected final ImageModule mModule;
     protected final ImageDecoder<Image> mDecoder;
 
     /**
@@ -60,7 +60,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
-    protected ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
+    protected ImageLoader(ImageModule module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
         mRequest = new LoadRequest();
@@ -183,7 +183,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param module The {@link ImageModule}.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      */
-    /* package */ ImageLoader(ImageModule<?, ?> module, Cache<URI, Image> imageCache) {
+    /* package */ ImageLoader(ImageModule module, Cache<URI, Image> imageCache) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
         mModule  = module;

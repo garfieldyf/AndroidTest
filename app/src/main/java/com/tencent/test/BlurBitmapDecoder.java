@@ -11,7 +11,7 @@ import java.io.Closeable;
 public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeable {
     private RenderScriptBlur mRenderScript;
 
-    public BlurBitmapDecoder(ImageModule<?, ?> module) {
+    public BlurBitmapDecoder(ImageModule module) {
         super(module);
         mRenderScript = new RenderScriptBlur(module.mContext);
     }

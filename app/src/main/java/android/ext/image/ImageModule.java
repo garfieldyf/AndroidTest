@@ -56,7 +56,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public final class ImageModule<URI, Image> implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<ImageLoader> {
+public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>, XmlResourceInflater<Object> {
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
@@ -79,9 +79,9 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     /* package */ final Pool<Options> mOptionsPool;
     /* package */ final Pool<Object[]> mParamsPool;
 
+    private final Cache mImageCache;
     private final FileCache mFileCache;
     private final BitmapPool mBitmapPool;
-    private final Cache<URI, Image> mImageCache;
     private final SparseArray<Object> mResources;
 
     /**
@@ -92,7 +92,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
-    /* package */ ImageModule(Context context, Executor executor, Cache<URI, Image> imageCache, FileCache fileCache, BitmapPool bitmapPool) {
+    /* package */ ImageModule(Context context, Executor executor, Cache imageCache, FileCache fileCache, BitmapPool bitmapPool) {
         final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
         mCacheDir = getCacheDir(context);
@@ -122,7 +122,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @see #get(int)
      * @see ImageLoader#load(URI)
      */
-    public final LoadRequest load(int id, URI uri) {
+    public final <URI> LoadRequest load(int id, URI uri) {
         return get(id).load(uri);
     }
 
@@ -135,16 +135,16 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @see #load(int, URI)
      * @see ImageLoader#load(URI)
      */
-    public final ImageLoader<URI, Image> get(int id) {
+    public final <URI, Image> ImageLoader<URI, Image> get(int id) {
         DebugUtils.__checkUIThread("get");
-        ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        Object loader = mResources.get(id, null);
         if (loader == null) {
             DebugUtils.__checkStartMethodTracing();
             mResources.append(id, loader = XmlResources.load(mContext, id, this));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + loader + " - ID #0x" + Integer.toHexString(id));
         }
 
-        return loader;
+        return (ImageLoader)loader;
     }
 
     /**
@@ -181,7 +181,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to remove.
      */
-    public final void remove(int id, URI uri) {
+    public final <URI> void remove(int id, URI uri) {
         DebugUtils.__checkUIThread("remove");
         final ImageLoader loader = (ImageLoader)mResources.get(id, null);
         if (loader != null) {
@@ -222,7 +222,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      * Returns the image cache associated with this object.
      * @return The {@link Cache} or <tt>null</tt>.
      */
-    public final Cache<URI, Image> getImageCache() {
+    public final <URI, Image> Cache<URI, Image> getImageCache() {
         return mImageCache;
     }
 
@@ -316,7 +316,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
     }
 
     @Override
-    public final ImageLoader inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+    public final Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         String className = parser.getName();
         if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
             throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
@@ -473,7 +473,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
      *     .setFileSize(1000)      // The file cache size.
      *     .build();</pre>
      */
-    public static final class Builder<URI, Image> {
+    public static final class Builder {
         private int mPriority;
         private int mPoolSize;
         private int mImageSize;
@@ -496,7 +496,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param size The maximum number of images.
          * @return This builder.
          */
-        public final Builder<URI, Image> setImageSize(int size) {
+        public final Builder setImageSize(int size) {
             mImageSize = size;
             return this;
         }
@@ -507,7 +507,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @return This builder.
          * @see #setMemorySize(int)
          */
-        public final Builder<URI, Image> setMemorySize(int size) {
+        public final Builder setMemorySize(int size) {
             mImageCache = size;
             return this;
         }
@@ -519,7 +519,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @return This builder.
          * @see #setScaleMemory(float)
          */
-        public final Builder<URI, Image> setScaleMemory(float scaleMemory) {
+        public final Builder setScaleMemory(float scaleMemory) {
             mImageCache = scaleMemory;
             return this;
         }
@@ -529,7 +529,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param cache The image <tt>Cache</tt>.
          * @return This builder.
          */
-        public final Builder<URI, Image> setImageCache(Cache<URI, Image> cache) {
+        public final <URI, Image> Builder setImageCache(Cache<URI, Image> cache) {
             mImageCache = cache;
             return this;
         }
@@ -539,7 +539,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param size The maximum number of files.
          * @return This builder.
          */
-        public final Builder<URI, Image> setFileSize(int size) {
+        public final Builder setFileSize(int size) {
             mFileCache = size;
             return this;
         }
@@ -549,7 +549,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param cache The <tt>FileCache</tt>.
          * @return This builder.
          */
-        public final Builder<URI, Image> setFileCache(FileCache cache) {
+        public final Builder setFileCache(FileCache cache) {
             mFileCache = cache;
             return this;
         }
@@ -559,7 +559,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param size The maximum number of bitmaps.
          * @return This builder.
          */
-        public final Builder<URI, Image> setBitmapPoolSize(int size) {
+        public final Builder setBitmapPoolSize(int size) {
             mPoolSize = size;
             return this;
         }
@@ -570,7 +570,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param priority The priority.
          * @return This builder.
          */
-        public final Builder<URI, Image> setThreadPriority(int priority) {
+        public final Builder setThreadPriority(int priority) {
             mPriority = priority;
             return this;
         }
@@ -580,7 +580,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * @param maxThreads The maximum number of threads.
          * @return This builder.
          */
-        public final Builder<URI, Image> setMaximumThreads(int maxThreads) {
+        public final Builder setMaximumThreads(int maxThreads) {
             mMaxThreads = maxThreads;
             return this;
         }
@@ -589,7 +589,7 @@ public final class ImageModule<URI, Image> implements ComponentCallbacks2, Facto
          * Creates an {@link ImageModule} with the arguments supplied to this builder.
          * @return The <tt>ImageModule</tt>.
          */
-        public final ImageModule<URI, Image> build() {
+        public final ImageModule build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, MAX_THREAD_COUNT));
             final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
             final BitmapPool bitmapPool = (mPoolSize > 0 ? new LinkedBitmapPool(mPoolSize) : null);

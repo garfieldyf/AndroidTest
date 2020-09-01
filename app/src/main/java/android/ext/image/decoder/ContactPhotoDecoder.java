@@ -23,7 +23,7 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
      * Constructor
      * @param module The {@link ImageModule}.
      */
-    public ContactPhotoDecoder(ImageModule<?, ?> module) {
+    public ContactPhotoDecoder(ImageModule module) {
         super(module);
     }
 

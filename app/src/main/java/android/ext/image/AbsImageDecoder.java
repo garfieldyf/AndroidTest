@@ -21,13 +21,13 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
     /**
      * The {@link ImageModule}.
      */
-    protected final ImageModule<?, ?> mModule;
+    protected final ImageModule mModule;
 
     /**
      * Constructor
      * @param module The {@link ImageModule}.
      */
-    public AbsImageDecoder(ImageModule<?, ?> module) {
+    public AbsImageDecoder(ImageModule module) {
         mModule = module;
     }
 

@@ -23,7 +23,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
      * Constructor
      * @param module The {@link ImageModule}.
      */
-    public BitmapDecoder(ImageModule<?, ?> module) {
+    public BitmapDecoder(ImageModule module) {
         super(module);
     }
 

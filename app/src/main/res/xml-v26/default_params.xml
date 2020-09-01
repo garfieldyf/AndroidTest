@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Parameters xmlns:app="http://schemas.android.com/apk/res-auto"
-    app:config="rgb_565"
+    app:config="hardware"
     app:sampleSize="1" />

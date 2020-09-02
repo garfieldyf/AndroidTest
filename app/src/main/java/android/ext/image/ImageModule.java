@@ -8,7 +8,6 @@ import android.content.res.Resources.NotFoundException;
 import android.content.res.TypedArray;
 import android.ext.cache.BitmapPool;
 import android.ext.cache.Cache;
-import android.ext.cache.Caches;
 import android.ext.cache.FileCache;
 import android.ext.cache.LinkedBitmapPool;
 import android.ext.cache.LruBitmapCache;
@@ -231,8 +230,8 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         Pools.dumpPool(mParamsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
-        Caches.dumpCache(mImageCache, mContext, printer);
-        Caches.dumpCache(mFileCache, mContext, printer);
+        Cache.dumpCache(mImageCache, mContext, printer);
+        Cache.dumpCache(mFileCache, mContext, printer);
         if (mBitmapPool instanceof LinkedBitmapPool) {
             ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
         }

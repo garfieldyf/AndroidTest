@@ -1,5 +1,8 @@
 package android.ext.cache;
 
+import android.content.Context;
+import android.util.Printer;
+
 /**
  * A <tt>Cache</tt> is a data structure consisting of a set
  * of keys and values in which each key is mapped to a value.
@@ -42,5 +45,17 @@ public interface Cache<K, V> {
      * {@link android.content.ComponentCallbacks2}.
      */
     default void trimMemory(int level) {
+    }
+
+    public static void dumpCache(Object cache, Context context, Printer printer) {
+        if (cache instanceof ArrayMapCache) {
+            ((ArrayMapCache<?, ?>)cache).dump(printer);
+        } else if (cache instanceof LruFileCache) {
+            ((LruFileCache)cache).dump(printer);
+        } else if (cache instanceof SimpleLruCache) {
+            ((SimpleLruCache<?, ?>)cache).dump(context, printer);
+        } else if (cache instanceof LruImageCache) {
+            ((LruImageCache<?>)cache).dump(context, printer);
+        }
     }
 }

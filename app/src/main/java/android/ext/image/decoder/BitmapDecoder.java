@@ -43,22 +43,22 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         }
 
         // Decodes the image pixels.
-        Bitmap result = null;
+        Bitmap bitmap = null;
         try {
             DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
             BitmapDecoder.__checkDumpOptions(opts, flags);
-            result = decodeBitmap(uri, opts);
+            bitmap = decodeBitmap(uri, opts);
         } catch (IllegalArgumentException e) {
             // Decodes the bitmap again, If decode the bitmap into inBitmap failed.
             if (opts.inBitmap != null) {
                 DebugUtils.__checkLogError(true, "BitmapDecoder", "decodeBitmap failed - " + e.getMessage());
                 opts.inBitmap = null;
-                result = decodeBitmap(uri, opts);
+                bitmap = decodeBitmap(uri, opts);
             }
         }
 
-        BitmapDecoder.__checkBitmap(result, opts);
-        return (Image)result;
+        BitmapDecoder.__checkBitmap(bitmap, opts);
+        return (Image)bitmap;
     }
 
     private static void __checkBitmap(Bitmap bitmap, Options opts) {

@@ -41,6 +41,11 @@
         </attr>
     </declare-styleable>
 
+    <!-- FocusDrawable styleable -->
+    <declare-styleable name="FocusDrawable">
+        <attr name="focus" format="reference|color" />
+    </declare-styleable>
+
     <!-- NumericView styleable -->
     <declare-styleable name="NumericView">
         <attr name="value" format="string" />

@@ -91,7 +91,7 @@
         <property name="ndk.target" value="release" />
         <property name="out.file.dir" value="${out.dir}/release" />
         <echo level="info">Build the ${out.file.name} in RELEASE mode.</echo>
-        <copy file="${source.dir}/jni/proguard.pro" tofile="${out.file.dir}/${MODULE_NAME}-proguard.pro" />
+        <copy file="${source.dir}/jni/proguard.pro" tofile="${out.file.dir}/proguard.pro" />
 
         <!-- remove call the __checkXXX methods -->
         <echo level="info">Removing __checkXXX() method invocation.</echo>
@@ -141,7 +141,7 @@
         <!-- compile c++ files -->
         <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
             <!-- optional ndk_args NDK_STL=1 -->
-            <property name="ndk_args" value="-B all=1 LOCAL_MODULE_NAME=${MODULE_NAME} PACKAGE_GRAPHICS=${JNI_PACKAGE}/graphics/ PACKAGE_UTILITIES=${JNI_PACKAGE}/util/" />
+            <property name="ndk_args" value="NDK_ABI=&quot;${ABI}&quot; -B all=1 LOCAL_MODULE_NAME=${MODULE_NAME} PACKAGE_GRAPHICS=${JNI_PACKAGE}/graphics/ PACKAGE_UTILITIES=${JNI_PACKAGE}/util/" />
         </ant>
 
         <!-- copy so file -->
@@ -152,8 +152,7 @@
 
     <!-- target -post-compile -->
     <target name="-post-compile">
-        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_${MODULE_NAME}_widget.xml" />
-        <copy file="${source.dir}/res/values/attrs_focus_widget.xml" tofile="${out.dir}/attrs_focus_widget.xml" />
+        <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_widget.xml" />
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
         <echo level="info">Deleting temp files...</echo>
         <delete includeemptydirs="true">
@@ -166,7 +165,7 @@
         </delete>
 
         <echo level="info">Install: ${out.file.dir}/${out.file.name}</echo>
-        <echo level="info">Install: ${out.dir}/attrs_${MODULE_NAME}_widget.xml</echo>
+        <echo level="info">Install: ${out.dir}/attrs_widget.xml</echo>
     </target>
 
     <!-- target clean -->

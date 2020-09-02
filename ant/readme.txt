@@ -1,4 +1,4 @@
-集成说明
+﻿集成说明
 1、将 out/debug   目录下面的所有文件拷贝到工程目录 app/src/debug
    将 out/release 目录下面的所有文件拷贝到工程目录 app/src/release
    将 android-sdk-stubs.jar 文件拷贝到工程目录 app/src/release
@@ -16,13 +16,13 @@
     android {
         defaultConfig {
             ndk {
-                abiFilters "arm64-v8a", "armeabi-v7a"
+                abiFilters 'arm64-v8a', 'armeabi-v7a'
             }
         }
 
         buildTypes {
             release {
-                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/release/xxx-proguard.pro'
+                proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'src/release/proguard.pro'
             }
         }
 

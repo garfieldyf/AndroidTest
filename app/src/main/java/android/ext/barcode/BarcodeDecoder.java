@@ -375,7 +375,7 @@ public class BarcodeDecoder {
             /*
              * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
              */
-            DebugUtils.__checkError(params.length != 4, "params.length != 4");
+            DebugUtils.__checkError(params.length != 4, "params.length must be == 4");
             params[3] = ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
             return params;
         }

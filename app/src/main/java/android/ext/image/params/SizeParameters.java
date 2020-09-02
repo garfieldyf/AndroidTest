@@ -77,7 +77,7 @@ public class SizeParameters extends Parameters {
          *      scaleY = opts.outHeight / height;
          *      scale  = max(scaleX, scaleY);
          */
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
         final int width, height, minHeight = (int)value;
         if (target instanceof View) {
             final View view = (View)target;

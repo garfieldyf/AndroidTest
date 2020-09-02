@@ -34,7 +34,7 @@ public abstract class CountDownTimer implements Runnable {
      * @see #CountDownTimer(int, long)
      */
     public CountDownTimer(int countDownTime, long intervalMillis, Handler handler) {
-        DebugUtils.__checkError(countDownTime < 0 || intervalMillis < 0, "countDownTime(" + countDownTime + ") < 0 || intervalMillis(" + intervalMillis + ") < 0");
+        DebugUtils.__checkError(countDownTime < 0 || intervalMillis < 0, "countDownTime(" + countDownTime + ") and intervalMillis(" + intervalMillis + ") must be >= 0");
         mCountDownTime  = countDownTime;
         mIntervalMillis = intervalMillis;
         mHandler = (handler != null ? handler : UIHandler.sInstance);

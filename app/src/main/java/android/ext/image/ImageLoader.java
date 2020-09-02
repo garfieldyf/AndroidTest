@@ -421,9 +421,9 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 //         */
 //        public final void preload() {
 //            DebugUtils.__checkError(mUri == null, "Invalid parameter - uri == null");
-//            DebugUtils.__checkWarning(getCache() == Caches.emptyCache(), "ImageLoader", "The image cache is empty, Calling the preload has no effect.");
-//            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "ImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, Calling the preload has no effect.");
-//            if (getCache() != Caches.emptyCache() && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
+//            DebugUtils.__checkWarning(getCache() == null, "ImageLoader", "No image cache, invoking this method has no effect.");
+//            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "ImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, invoking this method has no effect.");
+//            if (getCache() != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
 //                load(mUri, mUri, mFlags, Binder.emptyBinder(), mParams);
 //            }
 //        }

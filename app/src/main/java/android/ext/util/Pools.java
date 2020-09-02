@@ -217,7 +217,8 @@ public final class Pools {
          * @param maxSize The maximum number of elements to allow in this pool.
          */
         public ArrayPool(Factory<T> factory, int maxSize) {
-            DebugUtils.__checkError(factory == null || maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") <= 0");
+            DebugUtils.__checkError(factory == null, "Invalid parameter - factory == null");
+            DebugUtils.__checkError(maxSize <= 0, "Invalid parameter - maxSize(" + maxSize + ") must be > 0");
             this.factory  = factory;
             this.elements = new Object[maxSize];
         }

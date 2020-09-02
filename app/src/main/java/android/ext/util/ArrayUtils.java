@@ -425,7 +425,7 @@ public final class ArrayUtils {
      */
     public static <T> T copyOf(Object srcArray, int copyLength, int newLength) {
         DebugUtils.__checkError(srcArray == null, "Invalid parameter - srcArray == null");
-        DebugUtils.__checkError(newLength < copyLength, "Invalid parameter - newLength(" + newLength + ") < copyLength(" + copyLength + ")");
+        DebugUtils.__checkError(newLength < copyLength, "Invalid parameter - newLength(" + newLength + ") must be >= copyLength(" + copyLength + ")");
         final Object newArray = Array.newInstance(srcArray.getClass().getComponentType(), newLength);
         System.arraycopy(srcArray, 0, newArray, 0, copyLength);
         return (T)newArray;

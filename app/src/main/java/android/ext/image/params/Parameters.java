@@ -104,7 +104,7 @@ public class Parameters {
      * @return The number of bytes.
      */
     public int computeByteCount(Options opts) {
-        DebugUtils.__checkError(opts.inSampleSize <= 0 || opts.outWidth <= 0 || opts.outHeight <= 0, "opts.inSampleSize(" + opts.inSampleSize + ") <= 0 || opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
+        DebugUtils.__checkError(opts.inSampleSize <= 0 || opts.outWidth <= 0 || opts.outHeight <= 0, "opts.inSampleSize(" + opts.inSampleSize + ") and opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
         return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * getBytesPerPixel(opts);
     }
 
@@ -128,7 +128,7 @@ public class Parameters {
      * store the image's pixels when decoding the image.
      */
     /* package */ static int computeByteCountImpl(Options opts) {
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
         final int byteCount = getBytesPerPixel(opts);
         if (opts.inTargetDensity == 0) {
             return (opts.outWidth * opts.outHeight * byteCount);
@@ -142,7 +142,7 @@ public class Parameters {
      * Computes the {@link Options#inDensity} to decode image.
      */
     /* package */ static void computeDecodeDensity(int width, int height, Options opts) {
-        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") != 0 || opts.inTargetDensity(" + opts.inTargetDensity + ") != 0");
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") and opts.inTargetDensity(" + opts.inTargetDensity + ") must be == 0");
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);
             opts.inTargetDensity = DEVICE_DENSITY;

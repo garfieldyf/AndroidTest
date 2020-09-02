@@ -153,6 +153,7 @@ public final class GIFImage {
      * @see #createBitmapCanvas()
      */
     public final boolean draw(Bitmap bitmapCanvas, int frameIndex) {
+        DebugUtils.__checkError(bitmapCanvas == null, "Invalid parameters - bitmapCanvas == null");
         DebugUtils.__checkError(!bitmapCanvas.isMutable(), "The bitmap canvas must be a mutable bitmap.");
         DebugUtils.__checkError(bitmapCanvas.getConfig() != Config.ARGB_8888, "The bitmap canvas pixel format must be ARGB_8888");
         DebugUtils.__checkError(bitmapCanvas.getWidth() < width, "The bitmap canvas width (" + bitmapCanvas.getWidth() + ") must be >= GIF image width (" + width + ")");

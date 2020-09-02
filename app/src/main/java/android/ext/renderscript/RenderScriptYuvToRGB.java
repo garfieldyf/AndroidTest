@@ -55,7 +55,8 @@ public final class RenderScriptYuvToRGB extends AbsRenderScript<ScriptIntrinsicY
      * @see #convert(byte[], Bitmap, boolean)
      */
     public synchronized Bitmap convert(byte[] yuvData, int width, int height, boolean grayscale) {
-        DebugUtils.__checkError(yuvData == null || width <= 0 || height <= 0, "yuvData == null || width(" + width + ") <= 0 || height(" + height + ") <= 0");
+        DebugUtils.__checkError(yuvData == null, "Invalid parameter - yuvData == null");
+        DebugUtils.__checkError(width <= 0 || height <= 0, "Invalid parameter - width(" + width + ") and height(" + height + ") must be > 0");
         if (mScript != null) {
             final Bitmap result = Bitmap.createBitmap(width, height, Config.ARGB_8888);
             convertImpl(yuvData, result, grayscale);

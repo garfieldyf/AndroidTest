@@ -60,8 +60,8 @@ public class ScaleParameters extends Parameters {
          * Scale width, expressed as a percentage of the image's width.
          *      scale = opts.outWidth / (opts.outWidth * 0.7f); // scale 70%
          */
-        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") <= 0 || opts.outHeight(" + opts.outHeight + ") <= 0");
-        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") != 0 || opts.inTargetDensity(" + opts.inTargetDensity + ") != 0");
+        DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
+        DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") and opts.inTargetDensity(" + opts.inTargetDensity + ") must be == 0");
         final float scale = (float)value;
         if (scale > 0f && scale < 1.0f) {
             opts.inTargetDensity = DEVICE_DENSITY;

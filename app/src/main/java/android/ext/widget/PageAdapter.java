@@ -46,10 +46,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param prefetchDistance Defines how far to the first or last item in the page
      * should prefetch the data.
      * @see #PageAdapter(int, int, int, int)
-     * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int initialSize, int pageSize, int prefetchDistance) {
-        this(new ArrayMapCache<Integer, List<E>>(8), initialSize, pageSize, prefetchDistance);
+        this(0, initialSize, pageSize, prefetchDistance);
     }
 
     /**
@@ -60,28 +59,12 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param pageSize The item count of each page (pageIndex > 0).
      * @param prefetchDistance Defines how far to the first or last item in the page should prefetch the data.
      * @see #PageAdapter(int, int, int)
-     * @see #PageAdapter(Cache, int, int, int)
      */
     public PageAdapter(int maxPageCount, int initialSize, int pageSize, int prefetchDistance) {
-        this(new SimpleLruCache<Integer, List<E>>(maxPageCount - 1), initialSize, pageSize, prefetchDistance);
-    }
-
-    /**
-     * Constructor
-     * <p>Creates a <tt>PageAdapter</tt> with a <em>pageCache</em></p>
-     * @param pageCache The page {@link Cache}.
-     * @param initialSize The item count of the first page (pageIndex = 0).
-     * @param pageSize The item count of each page (pageIndex > 0).
-     * @param prefetchDistance Defines how far to the first or last item
-     * in the page should prefetch the data.
-     * @see #PageAdapter(int, int, int)
-     * @see #PageAdapter(int, int, int, int)
-     */
-    @SuppressWarnings("unchecked")
-    public PageAdapter(Cache<Integer, ? extends List<? extends E>> pageCache, int initialSize, int pageSize, int prefetchDistance) {
-        DebugUtils.__checkError(pageCache == null || pageSize <= 0 || initialSize <= 0, "Invalid parameters - pageCache == null || pageSize(" + pageSize + ") <= 0 || initialSize(" + initialSize + ") <= 0");
-        DebugUtils.__checkError(prefetchDistance > Math.min(pageSize, initialSize), "Invalid parameter - prefetchDistance(" + prefetchDistance + ") > pageSize(" + Math.min(pageSize, initialSize) + ")");
-        mPageCache   = (Cache<Integer, List<E>>)pageCache;
+        DebugUtils.__checkError(maxPageCount != 0 && maxPageCount <= 1, "Invalid parameters - maxPageCount(" + maxPageCount + ") must be > 1");
+        DebugUtils.__checkError(pageSize <= 0 || initialSize <= 0, "Invalid parameters - pageSize(" + pageSize + ") and initialSize(" + initialSize + ") must be > 0");
+        DebugUtils.__checkError(prefetchDistance >= Math.min(pageSize, initialSize), "Invalid parameter - prefetchDistance(" + prefetchDistance + ") must be < " + Math.min(pageSize, initialSize));
+        mPageCache   = (maxPageCount != 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount - 1) : new ArrayMapCache<Integer, List<E>>(8));
         mPageSize    = pageSize;
         mLoadStates  = new BitSet();
         mInitialSize = initialSize;
@@ -103,7 +86,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
-        DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") < 0");
+        DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") must be >= 0");
         mItemCount = itemCount;
         mPageCache.clear();
         mLoadStates.clear();
@@ -294,7 +277,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     @SuppressWarnings("unchecked")
     public void setPage(int pageIndex, List<?> page, Object payload) {
         DebugUtils.__checkUIThread("setPage");
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") < 0");
+        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
 
         // Clears the page loading state when the page is load complete.
         mLoadStates.clear(pageIndex);
@@ -311,7 +294,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The item count.
      */
     public final int getPageSize(int pageIndex) {
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") < 0");
+        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
         return (pageIndex > 0 ? mPageSize : mInitialSize);
     }
 
@@ -348,7 +331,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getPageForPosition(int)
      */
     public final int getPositionForPage(int pageIndex) {
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") < 0");
+        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
         return (pageIndex > 0 ? (pageIndex - 1) * mPageSize + mInitialSize : 0);
     }
 
@@ -368,7 +351,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getOriginalPosition(long)
      */
     public static int getOriginalPage(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") must be >= 0");
         return (int)(combinedPosition >> 32);
     }
 
@@ -379,7 +362,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getOriginalPage(long)
      */
     public static int getOriginalPosition(long combinedPosition) {
-        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") < 0");
+        DebugUtils.__checkError(combinedPosition < 0, "Invalid parameter - combinedPosition(" + combinedPosition + ") must be >= 0");
         return (int)combinedPosition;
     }
 
@@ -422,7 +405,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The page at the specified index, or <tt>null</tt> if there was not present.
      */
     private List<E> getPage(int pageIndex) {
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") < 0");
+        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
         List<E> page = getPageImpl(pageIndex);
         if (page == null && !mLoadStates.get(pageIndex)) {
             // Computes the startPosition and itemCount to load.

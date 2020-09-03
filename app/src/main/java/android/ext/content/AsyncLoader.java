@@ -21,12 +21,12 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     /**
      * If set the loader will be ignored the memory cache when it will be load value.
      */
-    public static final int FLAG_IGNORE_MEMORY_CACHE = 0x00800000;    /* flags 0x00FF0000 */
+    public static final int FLAG_IGNORE_MEMORY_CACHE = 0x08000000;    /* flags 0x0F000000 */
 
     /**
      * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_DUMP_OPTIONS);
      */
-    private static final int FLAG_MASK = 0xFF3FFFFF;
+    private static final int FLAG_MASK = 0xF3FFFFFF;
 
     /**
      * The {@link Cache} to store the loaded values.
@@ -302,7 +302,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         /**
          * Indicates the value load from a background thread.
          */
-        int STATE_LOAD_FROM_BACKGROUND = 0x80000000;    /* state 0xFF000000 */
+        int STATE_LOAD_FROM_BACKGROUND = 0x80000000;    /* state 0xF0000000 */
 
         /**
          * Binds the specified <em>value</em> to the specified <em>target</em> on the

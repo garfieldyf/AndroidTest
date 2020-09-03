@@ -45,7 +45,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * If set the image loader will be dump the {@link Options} when
      * it will be load image.<p>This flag can be used DEBUG mode.</p>
      */
-    public static final int FLAG_DUMP_OPTIONS = 0x00400000;    /* flags 0x00FF0000 */
+    public static final int FLAG_DUMP_OPTIONS = 0x04000000;    /* flags 0x0F000000 */
 
     private final LoadRequest mRequest;
     private final Loader<URI, Image> mLoader;

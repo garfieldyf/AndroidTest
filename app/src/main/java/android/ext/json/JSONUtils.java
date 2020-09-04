@@ -31,18 +31,14 @@ import java.util.function.UnaryOperator;
  */
 public final class JSONUtils {
     /**
-     * Returns an empty (<tt>0-length</tt>), immutable {@link JSONArray}.
+     * The empty, immutable {@link JSONArray}.
      */
-    public static JSONArray emptyJSONArray() {
-        return EmptyJSONArray.sInstance;
-    }
+    public static final JSONArray EMPTY_ARRAY = new EmptyJSONArray();
 
     /**
-     * Returns an empty (<tt>0-length</tt>), immutable {@link JSONObject}.
+     * The empty, immutable {@link JSONObject}.
      */
-    public static JSONObject emptyJSONObject() {
-        return EmptyJSONObject.sInstance;
-    }
+    public static final JSONObject EMPTY_OBJECT = new EmptyJSONObject();
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
@@ -526,8 +522,6 @@ public final class JSONUtils {
      * Class <tt>EmptyJSONArray</tt> is an implementation of a {@link JSONArray}.
      */
     /* package */ static final class EmptyJSONArray extends JSONArray {
-        public static final JSONArray sInstance = new EmptyJSONArray();
-
         @Override
         public void clear() {
             throw new AssertionError("Unsupported operation - The JSONArray is immutable");
@@ -593,8 +587,6 @@ public final class JSONUtils {
      * Class <tt>EmptyJSONObject</tt> is an implementation of a {@link JSONObject}.
      */
     /* package */ static final class EmptyJSONObject extends JSONObject {
-        public static final JSONObject sInstance = new EmptyJSONObject();
-
         @Override
         public void clear() {
             throw new AssertionError("Unsupported operation - The JSONObject is immutable");

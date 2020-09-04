@@ -1,5 +1,6 @@
 package android.ext.json;
 
+import android.ext.util.DebugUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -42,7 +43,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(value);
         return this;
     }
@@ -53,7 +54,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(long value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(value);
         return this;
     }
@@ -64,7 +65,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(boolean value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(value);
         return this;
     }
@@ -76,7 +77,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(float value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkFloat(value);
         super.add(value);
         return this;
@@ -89,7 +90,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(double value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
         super.add(value);
         return this;
@@ -102,7 +103,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, int value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(index, value);
         return this;
     }
@@ -114,7 +115,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, long value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(index, value);
         return this;
     }
@@ -126,7 +127,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, boolean value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.add(index, value);
         return this;
     }
@@ -139,7 +140,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, float value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkFloat(value);
         super.add(index, value);
         return this;
@@ -153,7 +154,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, double value) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
         super.add(index, value);
         return this;
@@ -313,7 +314,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     @Override
     public Object remove(int index) {
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         return (index >= 0 && index < size() ? super.remove(index) : null);
     }
 
@@ -325,7 +326,7 @@ public class JSONArray extends ArrayList<Object> {
     @Override
     public void removeRange(int fromIndex, int toIndex) {
         // The removeRange is protected in the super class.
-        __checkMutable();
+        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         super.removeRange(fromIndex, toIndex);
     }
 
@@ -337,11 +338,5 @@ public class JSONArray extends ArrayList<Object> {
     @Override
     public boolean equals(Object object) {
         return (object instanceof JSONArray && super.equals(object));
-    }
-
-    private void __checkMutable() {
-        if (this instanceof JSONUtils.EmptyJSONArray) {
-            throw new AssertionError("Unsupported operation - The JSONArray is immutable");
-        }
     }
 }

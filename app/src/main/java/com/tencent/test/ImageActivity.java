@@ -239,9 +239,9 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         Log.d("abcd", "equals = " + array.equals(a));
         Log.d("abcd", clone.getClass().getName());
         Log.d("abcd", a.getClass().getName());
-        Log.d("abcd", JSONUtils.emptyJSONObject().clone().getClass().getName());
-//        JSONUtils.emptyJSONArray().add(1);
-        //JSONUtils.emptyJSONObject().put("aaa", 2);
+        Log.d("abcd", JSONUtils.EMPTY_OBJECT.clone().getClass().getName());
+//        JSONUtils.EMPTY_ARRAY.add(1);
+//        JSONUtils.EMPTY_OBJECT.put("aaa", 2);
     }
 
     private void testFileCopy() {

@@ -94,7 +94,7 @@ public final class Pools {
         public static final RectPool sInstance = new RectPool();
 
         /**
-         * Constructor
+         * This class cannot be instantiated.
          */
         private RectPool() {
         }
@@ -124,7 +124,7 @@ public final class Pools {
         public static final RectFPool sInstance = new RectFPool();
 
         /**
-         * Constructor
+         * This class cannot be instantiated.
          */
         private RectFPool() {
         }
@@ -154,7 +154,7 @@ public final class Pools {
         public static final MatrixPool sInstance = new MatrixPool();
 
         /**
-         * Constructor
+         * This class cannot be instantiated.
          */
         private MatrixPool() {
         }

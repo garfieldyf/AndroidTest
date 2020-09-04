@@ -290,9 +290,9 @@ public final class ArrayUtils {
      * @param offset2 The starting index of the content in <em>array2</em>.
      * @param length The number of elements to be compared.
      * @return <tt>true</tt> if both arrays are equal, <tt>false</tt> otherwise.
-     * @see #equals(byte[], int, byte[], int, int)
+     * @see #regionEquals(byte[], int, byte[], int, int)
      */
-    public static boolean equals(int[] array1, int offset1, int[] array2, int offset2, int length) {
+    public static boolean regionEquals(int[] array1, int offset1, int[] array2, int offset2, int length) {
         DebugUtils.__checkError(array1 == null || array2 == null, "Invalid parameters - array1 == null || array2 == null");
         DebugUtils.__checkRange(offset1, length, array1.length);
         DebugUtils.__checkRange(offset2, length, array2.length);
@@ -313,9 +313,9 @@ public final class ArrayUtils {
      * @param offset2 The starting index of the content in <em>array2</em>.
      * @param length The number of bytes to be compared.
      * @return <tt>true</tt> if both arrays are equal, <tt>false</tt> otherwise.
-     * @see #equals(int[], int, int[], int, int)
+     * @see #regionEquals(int[], int, int[], int, int)
      */
-    public static boolean equals(byte[] array1, int offset1, byte[] array2, int offset2, int length) {
+    public static boolean regionEquals(byte[] array1, int offset1, byte[] array2, int offset2, int length) {
         DebugUtils.__checkError(array1 == null || array2 == null, "Invalid parameters - array1 == null || array2 == null");
         DebugUtils.__checkRange(offset1, length, array1.length);
         DebugUtils.__checkRange(offset2, length, array2.length);

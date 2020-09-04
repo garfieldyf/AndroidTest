@@ -88,20 +88,6 @@ public final class ByteArrayBuffer extends OutputStream {
         return new String(data, 0, size);
     }
 
-    @Override
-    public boolean equals(Object object) {
-        if (this == object) {
-            return true;
-        }
-
-        if (object instanceof ByteArrayBuffer) {
-            final ByteArrayBuffer buffer = (ByteArrayBuffer)object;
-            return (size == buffer.size && ArrayUtils.equals(data, 0, buffer.data, 0, size));
-        }
-
-        return false;
-    }
-
     /**
      * Returns the contents of this buffer as a string converted to
      * the given the <em>charset</em>.

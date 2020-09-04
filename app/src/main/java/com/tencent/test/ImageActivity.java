@@ -307,7 +307,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         for (int i = 0; i < size; ++i) {
             DebugUtils.startMethodTracing();
-            long l = FileUtils.computeFileSizes(dir.getPath());
+            long l = FileUtils.computeFiles(dir.getPath());
             DebugUtils.stopMethodTracing("abcd", "native computeFileBytes = " + l);
         }
     }

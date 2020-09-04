@@ -307,6 +307,14 @@ public final class FileUtils {
     public static native int mkdirs(String path, int flags);
 
     /**
+     * Returns the <em>file's</em> last modified time in milliseconds.
+     * @param file The file, must be absolute file path.
+     * @return The last modified time in milliseconds or <tt>0</tt>
+     * if the file does not exist.
+     */
+    public static native long getLastModified(String file);
+
+    /**
      * Returns the file status (include mode, uid, gid, size, etc.) with the specified
      * <em>path</em>. This operation is supported for both file and directory.
      * @param path The file or directory path, must be absolute file path.
@@ -346,7 +354,7 @@ public final class FileUtils {
      * @param file The file or directory to compute, must be absolute file path.
      * @return The total number of bytes or <tt>0</tt> if the file does not exist.
      */
-    public static native long computeFileSizes(String file);
+    public static native long computeFiles(String file);
 
     /**
      * Compares the two specified file's contents are equal.
@@ -396,13 +404,14 @@ public final class FileUtils {
      * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as
      * part of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be {@link #FLAG_IGNORE_HIDDEN_FILE} or <tt>0</tt>.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @return A <tt>List</tt> of {@link Dirent} objects if the operation succeeded, <tt>null</tt> otherwise.
      * @see #listFiles(String, int, Collection)
      */
     public static List<Dirent> listFiles(String dirPath, int flags) {
         final List<Dirent> result = new ArrayList<Dirent>();
-        return (listFiles(dirPath, flags, result) == 0 ? result : null);
+        return (scanFiles(dirPath, FileUtils::onScanFile, flags, result) == 0 ? result : null);
     }
 
     /**
@@ -410,12 +419,15 @@ public final class FileUtils {
      * <p>The entries <tt>.</tt> and <tt>..</tt> representing the current and parent directory are not returned as part
      * of the list.</p>
      * @param dirPath The directory path, must be absolute file path.
-     * @param flags The flags. May be {@link #FLAG_IGNORE_HIDDEN_FILE} or <tt>0</tt>.
+     * @param flags The flags. May be <tt>0</tt> or any combination of {@link #FLAG_IGNORE_HIDDEN_FILE} and
+     * {@link #FLAG_SCAN_FOR_DESCENDENTS}.
      * @param outDirents A <tt>Collection</tt> to store the {@link Dirent} objects.
      * @return Returns <tt>0</tt> if the operation succeeded, Otherwise returns an error code. See {@link ErrnoException}.
      * @see #listFiles(String, int)
      */
-    public static native int listFiles(String dirPath, int flags, Collection<Dirent> outDirents);
+    public static int listFiles(String dirPath, int flags, Collection<Dirent> outDirents) {
+        return scanFiles(dirPath, FileUtils::onScanFile, flags, outDirents);
+    }
 
     /**
      * Scans all subfiles and directories in the specified <em>dirPath</em>. <p>The entries <tt>.</tt>
@@ -573,13 +585,10 @@ public final class FileUtils {
         return dir;
     }
 
-    /**
-     * Called by native code.
-     */
-    @Keep
-    @SuppressWarnings("unused")
-    private static void addDirent(Collection<Object> collection, String name, int type) {
-        collection.add(new Dirent(name, type));
+    @SuppressWarnings("unchecked")
+    private static int onScanFile(String path, int type, Object cookie) {
+        ((Collection<Object>)cookie).add(new Dirent(path, type));
+        return ScanCallback.SC_CONTINUE;
     }
 
     /**
@@ -1052,10 +1061,9 @@ public final class FileUtils {
         public static final int DT_SOCK = 12;
 
         /**
-         * The file name. This corresponds to
-         * the linux <tt>dirent.d_name</tt> field.
+         * The absolute file path.
          */
-        public final String name;
+        public final String path;
 
         /**
          * The file type. This corresponds to
@@ -1065,13 +1073,28 @@ public final class FileUtils {
 
         /**
          * Constructor
-         * @param name The file name.
+         * @param path The absolute file path.
          * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         * @see #Dirent(String, String, int)
          */
-        public Dirent(String name, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(name) == 0, "Invalid parameter - The name is null or 0-length");
+        public Dirent(String path, int type) {
+            DebugUtils.__checkError(StringUtils.getLength(path) == 0, "path == null || path.length() == 0");
             Dirent.__checkType(type);
-            this.name = name;
+            this.path = path;
+            this.type = type;
+        }
+
+        /**
+         * Constructor
+         * @param dir The absolute path of the directory.
+         * @param name The name of the file.
+         * @param type The file type. May be one of <tt>DT_XXX</tt> constants.
+         * @see #Dirent(String, int)
+         */
+        public Dirent(String dir, String name, int type) {
+            DebugUtils.__checkError(StringUtils.getLength(dir) == 0, "dir == null || dir.length() == 0");
+            Dirent.__checkType(type);
+            this.path = new File(dir, name).getPath();
             this.type = type;
         }
 
@@ -1101,7 +1124,27 @@ public final class FileUtils {
          * is a hidden file, <tt>false</tt> otherwise.
          */
         public final boolean isHidden() {
-            return FileUtils.isHidden(name);
+            return FileUtils.isHidden(path);
+        }
+
+        /**
+         * Returns the file's name of this <tt>Dirent</tt>.
+         * @return The file's name of this <tt>Dirent</tt>.
+         * @see #getParent()
+         * @see #getExtension()
+         */
+        public final String getName() {
+            return getFileName(path);
+        }
+
+        /**
+         * Returns the parent of this <tt>Dirent</tt>.
+         * @return The parent pathname or <tt>null</tt>.
+         * @see #getName()
+         * @see #getExtension()
+         */
+        public final String getParent() {
+            return getFileParent(path);
         }
 
         /**
@@ -1109,12 +1152,14 @@ public final class FileUtils {
          * excluding dot (<tt>.</tt>)
          * @return The extension, or <tt>null</tt> if this <tt>Dirent</tt>
          * is a directory or the extension was not found.
+         * @see #getName()
+         * @see #getParent()
          */
         public final String getExtension() {
             if (type != DT_DIR) {
-                final int index = findFileExtension(name);
+                final int index = findFileExtension(path);
                 if (index != -1) {
-                    return name.substring(index);
+                    return path.substring(index);
                 }
             }
 
@@ -1127,17 +1172,42 @@ public final class FileUtils {
          * this <tt>Dirent</tt> is a directory or the MIME type was not found.
          */
         public final String getMimeType() {
-            return (type != DT_DIR ? URLConnection.getFileNameMap().getContentTypeFor(name) : null);
+            return (type != DT_DIR ? URLConnection.getFileNameMap().getContentTypeFor(path) : null);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.mkdirs(path, flags)</tt>.
+         * @see FileUtils#mkdirs(String, int)
+         */
+        public final int mkdirs(int flags) {
+            return FileUtils.mkdirs(path, flags);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.stat(path)</tt>.
+         * @see FileUtils#stat(String)
+         */
+        public final Stat stat() {
+            final Stat stat = new Stat();
+            return (FileUtils.stat(path, stat) == 0 ? stat : null);
+        }
+
+        /**
+         * Equivalent to calling <tt>FileUtils.listFiles(path, flags)</tt>.
+         * @see FileUtils#listFiles(String, int)
+         */
+        public final List<Dirent> listFiles(int flags) {
+            return FileUtils.listFiles(path, flags);
         }
 
         @Override
         public String toString() {
-            return name;
+            return path;
         }
 
         @Override
         public int hashCode() {
-            return 31 * type + name.hashCode();
+            return 31 * type + path.hashCode();
         }
 
         @Override
@@ -1148,7 +1218,7 @@ public final class FileUtils {
 
             if (object instanceof Dirent) {
                 final Dirent dirent = (Dirent)object;
-                return (type == dirent.type && name.equals(dirent.name));
+                return (type == dirent.type && path.equals(dirent.path));
             }
 
             return false;
@@ -1167,12 +1237,12 @@ public final class FileUtils {
                 }
             }
 
-            return name.compareTo(another.name);
+            return path.compareTo(another.path);
         }
 
         /**
          * Compares the specified <tt>Dirent</tt> to this <tt>Dirent</tt>, ignoring
-         * the {@link #name} field case differences.
+         * the {@link #path} field case differences.
          * @param another The <tt>Dirent</tt> to compare.
          * @return <tt>0</tt> if the <tt>Dirent</tt>s are equal; a negative integer
          * if this <tt>Dirent</tt> is less than <em>another</em>; a positive integer
@@ -1189,7 +1259,7 @@ public final class FileUtils {
                 }
             }
 
-            return name.compareToIgnoreCase(another.name);
+            return path.compareToIgnoreCase(another.path);
         }
 
         /**
@@ -1203,7 +1273,7 @@ public final class FileUtils {
         }
 
         /**
-         * Returns a <tt>Comparator</tt> ignoring the {@link #name} field case differences.
+         * Returns a <tt>Comparator</tt> ignoring the {@link #path} field case differences.
          * @return The <tt>Comparator</tt>.
          * @see #compareTo(Dirent)
          * @see #compareToIgnoreCase(Dirent)
@@ -1213,15 +1283,18 @@ public final class FileUtils {
         }
 
         public final void dump(Printer printer) {
+            final String parent = getParent();
             final String mimeType  = getMimeType();
             final String extension = getExtension();
-            printer.println(new StringBuilder(128).append(getClass().getSimpleName())
-                   .append(" { name = ").append(name)
-                   .append(", type = ").append(type).append('(').append(toString(type)).append(')')
-                   .append(", extension = ").append(extension != null ? extension : "")
-                   .append(", mimeType = ").append(mimeType != null ? mimeType : "")
-                   .append(", hidden = ").append(isHidden())
-                   .append(" }").toString());
+            printer.println(new StringBuilder(256).append(getClass().getSimpleName())
+                .append(" { path = ").append(path)
+                .append(", type = ").append(type).append('(').append(toString(type)).append(')')
+                .append(", parent = ").append(parent != null ? parent : "")
+                .append(", name = ").append(getName())
+                .append(", extension = ").append(extension != null ? extension : "")
+                .append(", mimeType = ").append(mimeType != null ? mimeType : "")
+                .append(", hidden = ").append(isHidden())
+                .append(" }").toString());
         }
 
         private static String toString(int type) {

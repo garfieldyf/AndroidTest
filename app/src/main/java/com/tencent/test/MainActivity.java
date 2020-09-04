@@ -88,7 +88,7 @@ public class MainActivity extends Activity {
 
         public Stat stat(String parent) {
             if (mStat == null) {
-                mStat = FileUtils.stat(parent + "/" + mDirent.name);
+                mStat = FileUtils.stat(mDirent.path);
             }
 
             return mStat;
@@ -111,7 +111,7 @@ public class MainActivity extends Activity {
         }
 
         public String getPath() {
-            return mDirent.name;
+            return mDirent.path;
         }
     }
 

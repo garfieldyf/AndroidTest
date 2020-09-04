@@ -113,9 +113,9 @@ public final class ZipUtils {
         try (final ZipOutputStream os = new ZipOutputStream(new FileOutputStream(zipFile))) {
             // Compresses the files.
             os.setLevel(compressionLevel);
-            for (String file : files) {
-                final File f = new File(file);
-                compress(os, f, f.getName(), cancelable, buffer);
+            for (String f : files) {
+                final File file = new File(f);
+                compress(os, file, file.getName(), cancelable, buffer);
             }
         } finally {
             Pools.BYTE_ARRAY_POOL.recycle(buffer);

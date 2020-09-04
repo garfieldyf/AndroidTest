@@ -20,13 +20,13 @@
 //
 // mkdirs()
 // moveFile()
-// listFiles()
 // scanFiles()
 // createFile()
 // deleteFiles()
 // compareFile()
+// computeFiles()
 // getFileStatus()
-// computeFileSizes()
+// getLastModified()
 // createUniqueFile()
 
 namespace FileUtils {
@@ -62,7 +62,6 @@ enum
 
 // Class FileUtils method IDs.
 static jmethodID _setStatID;
-static jmethodID _addDirentID;
 
 // Class ScanCallback method IDs.
 static jmethodID _onScanFileID;
@@ -130,24 +129,6 @@ __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_S
     }
 
     return count;
-}
-
-template <typename _Filter>
-__STATIC_INLINE__ jint listFilesImpl(JNIEnv* env, jclass clazz, const char* path, jobject outDirents)
-{
-    assert(env);
-    assert(path);
-    assert(outDirents);
-
-    __NS::Directory<_Filter> dir;
-    jint errnum = dir.open(path);
-    if (errnum == 0)
-    {
-        for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
-            env->CallStaticVoidMethod(clazz, _addDirentID, outDirents, JNI::jstringRef_t(env, entry->d_name).get(), (jint)entry->d_type);
-    }
-
-    return errnum;
 }
 
 template <typename _Filter>
@@ -382,20 +363,6 @@ JNIEXPORT_METHOD(jint) moveFile(JNIEnv* env, jclass /*clazz*/, jstring src, jstr
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    listFiles
-// Signature: (Ljava/lang/String;ILjava/util/Collection;)I
-
-JNIEXPORT_METHOD(jint) listFiles(JNIEnv* env, jclass clazz, jstring dirPath, jint flags, jobject outDirents)
-{
-    assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, dirPath) == 0 || outDirents == NULL, "dirPath == null || dirPath.length() == 0 || outDirents == null", EINVAL);
-
-    const JNI::jstring_t jdirPath(env, dirPath);
-    return ((flags & FLAG_IGNORE_HIDDEN_FILE) ? listFilesImpl<__NS::IgnoreHiddenFilter>(env, clazz, jdirPath, outDirents) : listFilesImpl<__NS::DefaultFilter>(env, clazz, jdirPath, outDirents));
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// Class:     FileUtils
 // Method:    scanFiles
 // Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$ScanCallback;ILjava/lang/Object;)I
 
@@ -495,6 +462,21 @@ JNIEXPORT_METHOD(jboolean) compareFile(JNIEnv* env, jclass /*clazz*/, jstring fi
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
+// Method:    computeFiles
+// Signature: (Ljava/lang/String;)J
+
+JNIEXPORT_METHOD(jlong) computeFiles(JNIEnv* env, jclass /*clazz*/, jstring file)
+{
+    assert(env);
+    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
+
+    struct stat buf;
+    const JNI::jstring_t jfile(env, file);
+    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile, jfile.length) : (jlong)buf.st_size)) : 0);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Class:     FileUtils
 // Method:    stat
 // Signature: (Ljava/lang/String;L PACKAGE_UTILITIES FileUtils$Stat;)I
 
@@ -515,17 +497,16 @@ JNIEXPORT_METHOD(jint) getFileStatus(JNIEnv* env, jclass clazz, jstring path, jo
 
 ///////////////////////////////////////////////////////////////////////////////
 // Class:     FileUtils
-// Method:    computeFileSizes
+// Method:    getLastModified
 // Signature: (Ljava/lang/String;)J
 
-JNIEXPORT_METHOD(jlong) computeFileSizes(JNIEnv* env, jclass /*clazz*/, jstring file)
+JNIEXPORT_METHOD(jlong) getLastModified(JNIEnv* env, jclass /*clazz*/, jstring file)
 {
     assert(env);
-    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", 0);
+    AssertThrowErrnoException(env, JNI::getLength(env, file) == 0, "file == null || file.length() == 0", EINVAL);
 
     struct stat buf;
-    const JNI::jstring_t jfile(env, file);
-    return (::stat(jfile, &buf) == 0 ? ((S_ISDIR(buf.st_mode) ? computeFileBytes(jfile, jfile.length) : (jlong)buf.st_size)) : 0);
+    return (::stat(JNI::jstring_t(env, file), &buf) == 0 ? (jlong)buf.st_mtime * MILLISECONDS : 0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -579,9 +560,8 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
 
     // Initializes class FileUtils method IDs.
     const JNI::jclass_t clazz(env, PACKAGE_UTILITIES "FileUtils");
-    _setStatID   = clazz.getStaticMethodID("setStat", "(L" PACKAGE_UTILITIES "FileUtils$Stat;IIIJJJJ)V");
-    _addDirentID = clazz.getStaticMethodID("addDirent", "(Ljava/util/Collection;Ljava/lang/String;I)V");
-    assert(_setStatID != NULL && _addDirentID != NULL);
+    _setStatID = clazz.getStaticMethodID("setStat", "(L" PACKAGE_UTILITIES "FileUtils$Stat;IIIJJJJ)V");
+    assert(_setStatID != NULL);
 
     // Registers class FileUtils native methods.
     const JNINativeMethod methods[] =
@@ -589,10 +569,10 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
         { "mkdirs", "(Ljava/lang/String;I)I", (void*)mkdirs },
         { "createFile", "(Ljava/lang/String;J)I", (void*)createFile },
         { "deleteFiles", "(Ljava/lang/String;Z)I", (void*)deleteFiles },
-        { "computeFileSizes", "(Ljava/lang/String;)J", (void*)computeFileSizes },
+        { "computeFiles", "(Ljava/lang/String;)J", (void*)computeFiles },
+        { "getLastModified", "(Ljava/lang/String;)J", (void*)getLastModified },
         { "moveFile", "(Ljava/lang/String;Ljava/lang/String;)I", (void*)moveFile },
         { "compareFile", "(Ljava/lang/String;Ljava/lang/String;)Z", (void*)compareFile },
-        { "listFiles", "(Ljava/lang/String;ILjava/util/Collection;)I", (void*)listFiles },
         { "createUniqueFile", "(Ljava/lang/String;J)Ljava/lang/String;", (void*)createUniqueFile },
         { "stat", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$Stat;)I", (void*)getFileStatus },
         { "scanFiles", "(Ljava/lang/String;L" PACKAGE_UTILITIES "FileUtils$ScanCallback;ILjava/lang/Object;)I", (void*)scanFiles },

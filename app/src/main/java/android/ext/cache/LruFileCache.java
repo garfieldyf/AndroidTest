@@ -1,24 +1,26 @@
 package android.ext.cache;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.FileUtils.ScanCallback;
 import android.os.Process;
 import android.util.Printer;
 import java.io.File;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
  * @author Garfield
  */
-public final class LruFileCache implements FileCache, Runnable, Comparator<File> {
+public final class LruFileCache implements FileCache, ScanCallback, Runnable, Comparator<String> {
     private final int mMaxSize;
-    private final File mCacheDir;
+    private final String mCacheDir;
     private final Executor mExecutor;
 
     /**
@@ -27,7 +29,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
      */
-    public LruFileCache(Executor executor, File cacheDir, int maxSize) {
+    public LruFileCache(Executor executor, String cacheDir, int maxSize) {
         DebugUtils.__checkError(executor == null || cacheDir == null || maxSize <= 0, "Invalid parameters - executor == null || cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
@@ -47,7 +49,7 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      */
     public final void clear() {
         DebugUtils.__checkStartMethodTracing();
-        FileUtils.deleteFiles(mCacheDir.getPath(), false);
+        FileUtils.deleteFiles(mCacheDir, false);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
@@ -57,13 +59,13 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
      */
     public final long getCacheSize() {
         DebugUtils.__checkStartMethodTracing();
-        final long result = FileUtils.computeFileSizes(mCacheDir.getPath());
+        final long result = FileUtils.computeFiles(mCacheDir);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
     }
 
     @Override
-    public File getCacheDir() {
+    public String getCacheDir() {
         return mCacheDir;
     }
 
@@ -103,13 +105,12 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
         try {
             DebugUtils.__checkStartMethodTracing();
             Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
-            final File[] files = mCacheDir.listFiles();
-            final int size = ArrayUtils.getSize(files);
+            final List<String> files = listFiles();
+            final int size = files.size();
             if (size > mMaxSize) {
-                Arrays.sort(files, this);
+                Collections.sort(files, this);
                 for (int i = mMaxSize; i < size; ++i) {
-                    files[i].delete();
-                    DebugUtils.__checkDebug(true, "LruFileCache", "deleteFile = " + files[i].getName());
+                    FileUtils.deleteFiles(files.get(i), false);
                 }
             }
             DebugUtils.__checkStopMethodTracing("LruFileCache", "trimToSize size = " + size + ", maxSize = " + mMaxSize + (size > mMaxSize ? ", deleteSize = " + (size - mMaxSize) : ""));
@@ -119,23 +120,28 @@ public final class LruFileCache implements FileCache, Runnable, Comparator<File>
     }
 
     @Override
-    public final int compare(File one, File another) {
+    @SuppressWarnings("unchecked")
+    public final int onScanFile(String path, int type, Object cookie) {
+        ((List<Object>)cookie).add(path);
+        return SC_CONTINUE;
+    }
+
+    @Override
+    public final int compare(String one, String another) {
         // Sort by descending order.
-        return Long.compare(another.lastModified(), one.lastModified());
+        return Long.compare(FileUtils.getLastModified(another), FileUtils.getLastModified(one));
+    }
+
+    private List<String> listFiles() {
+        final List<String> files = new ArrayList<String>(mMaxSize >> 2);
+        FileUtils.scanFiles(mCacheDir, this, 0, files);
+        return files;
     }
 
     public final void dump(Printer printer) {
-        final File[] files = mCacheDir.listFiles();
-        final int size = ArrayUtils.getSize(files);
-
-        long length = 0;
-        for (int i = 0; i < size; ++i) {
-            length += files[i].length();
-        }
-
         final StringBuilder result = new StringBuilder(100);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", size, FileUtils.formatFileSize(length));
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", listFiles().size(), FileUtils.formatFileSize(FileUtils.computeFiles(mCacheDir)));
         result.setLength(0);
-        printer.println(result.append("  cacheDir = ").append(mCacheDir.getPath()).toString());
+        printer.println(result.append("  cacheDir = ").append(mCacheDir).toString());
     }
 }

@@ -490,7 +490,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          */
         public Builder(Context context) {
             mContext  = context;
-            mPriority = Process.THREAD_PRIORITY_BACKGROUND - 5;
+            mPriority = Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
         }
 
         /**
@@ -605,7 +605,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!").getPath(), maxSize) : null);
             }
         }
 

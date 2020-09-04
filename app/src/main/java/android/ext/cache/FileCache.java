@@ -12,7 +12,7 @@ public interface FileCache {
      * Returns the absolute path of the cache directory.
      * @return The absolute path of the cache directory.
      */
-    File getCacheDir();
+    String getCacheDir();
 
     /**
      * Removes the cache file for the specified <em>key</em> in this cache.

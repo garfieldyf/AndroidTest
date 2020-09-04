@@ -1289,10 +1289,10 @@ public final class FileUtils {
             printer.println(new StringBuilder(256).append(getClass().getSimpleName())
                 .append(" { path = ").append(path)
                 .append(", type = ").append(type).append('(').append(toString(type)).append(')')
-                .append(", parent = ").append(parent != null ? parent : "")
+                .append(", parent = ").append(parent != null ? parent : "N/A")
                 .append(", name = ").append(getName())
-                .append(", extension = ").append(extension != null ? extension : "")
-                .append(", mimeType = ").append(mimeType != null ? mimeType : "")
+                .append(", extension = ").append(extension != null ? extension : "N/A")
+                .append(", mimeType = ").append(mimeType != null ? mimeType : "N/A")
                 .append(", hidden = ").append(isHidden())
                 .append(" }").toString());
         }

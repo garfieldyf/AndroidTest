@@ -70,14 +70,14 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public E get(int index) {
-        final long combinedIndex = getSectionForIndex(index);
-        return (E)mSections[getOriginalSection(combinedIndex)].get((int)combinedIndex);
+        final int sectionIndex = getSectionForPosition(index);
+        return (E)mSections[sectionIndex].get(index - mIndexes[sectionIndex]);
     }
 
     @Override
     public E set(int index, E value) {
-        final long combinedIndex = getSectionForIndex(index);
-        return (E)mSections[getOriginalSection(combinedIndex)].set((int)combinedIndex, value);
+        final int sectionIndex = getSectionForPosition(index);
+        return (E)mSections[sectionIndex].set(index - mIndexes[sectionIndex], value);
     }
 
     /**
@@ -132,7 +132,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      */
     public void addSection(List<?> section) {
         DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
-        DebugUtils.__checkError(mIndexes == EMPTY_IMMUTABLE_ARRAY, "Unsupported operation - The SectionList is immutable");
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         if (mCount == mSections.length) {
             final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
             mIndexes  = ArrayUtils.copyOf(mIndexes, mCount, newLength);
@@ -154,7 +154,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      */
     public void addSection(int sectionIndex, List<?> section) {
         DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
-        DebugUtils.__checkError(mIndexes == EMPTY_IMMUTABLE_ARRAY, "Unsupported operation - The SectionList is immutable");
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         if (sectionIndex == mCount) {
             addSection(section);
@@ -180,7 +180,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @return The start index of the removed section in this <tt>SectionList</tt>.
      */
     public int removeSection(int sectionIndex) {
-        DebugUtils.__checkError(mIndexes == EMPTY_IMMUTABLE_ARRAY, "Unsupported operation - The SectionList is immutable");
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         mSize -= mSections[sectionIndex].size();
         System.arraycopy(mSections, sectionIndex + 1, mSections, sectionIndex, --mCount - sectionIndex);
@@ -193,25 +193,16 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     }
 
     /**
-     * Given a index within this <tt>SectionList</tt>, returns the combined index of the
-     * corresponding section within the array of sections.<p>The returned combined index:
-     * <li>bit &nbsp;&nbsp;0-31 : Lower 32 bits of the index of the item in the section.
-     * <li>bit 32-63 : Higher 32 bits of the index of the section.</p>
-     * @param index The index of the item within this <tt>SectionList</tt>.
-     * @return The combined index of the section.
-     * @see #getIndexForSection(int)
-     * @see #getOriginalSection(long)
-     * @see #getOriginalIndex(long)
+     * Given a position within this <tt>SectionList</tt>, returns the index of the
+     * section within the array of sections.
+     * @param index The position of the item within this <tt>SectionList</tt>.
+     * @return The index of the section within the array of sections.
+     * @see #getPositionForSection(int)
      */
-    public long getSectionForIndex(int index) {
+    public int getSectionForPosition(int index) {
         DebugUtils.__checkError(index < 0 || index >= mSize, "Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
-        int sectionIndex = Arrays.binarySearch(mIndexes, 0, mCount, index);
-        if (sectionIndex < 0) {
-            sectionIndex = -sectionIndex - 2;
-        }
-
-        DebugUtils.__checkError(sectionIndex < 0, "Invalid sectionIndex = " + sectionIndex);
-        return (((long)sectionIndex << 32) | ((index - mIndexes[sectionIndex]) & 0xFFFFFFFFL));
+        final int sectionIndex = Arrays.binarySearch(mIndexes, 0, mCount, index);
+        return (sectionIndex >= 0 ? sectionIndex : -sectionIndex - 2);
     }
 
     /**
@@ -219,9 +210,9 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * index of that section within this <tt>SectionList</tt>.
      * @param sectionIndex The index of the section.
      * @return The starting index of that section within this <tt>SectionList</tt>.
-     * @see #getSectionForIndex(int)
+     * @see #getSectionForPosition(int)
      */
-    public int getIndexForSection(int sectionIndex) {
+    public int getPositionForSection(int sectionIndex) {
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         return mIndexes[sectionIndex];
     }
@@ -230,30 +221,8 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * Returns a type-safe empty, immutable {@link SectionList}.
      * @return An empty {@link SectionList}.
      */
-    public static <E> SectionList<E> emptySectionList() {
-        return EMPTY_SECTION_LIST;
-    }
-
-    /**
-     * Returns the index of the section with the given the <em>combinedIndex</em>.
-     * @param combinedIndex The combined index, returned earlier by {@link #getSectionForIndex}.
-     * @return The index of the section.
-     * @see #getOriginalIndex(long)
-     */
-    public static int getOriginalSection(long combinedIndex) {
-        DebugUtils.__checkError(combinedIndex < 0, "combinedIndex < 0");
-        return (int)(combinedIndex >> 32);
-    }
-
-    /**
-     * Returns the index of the item in the section with the given the <em>combinedIndex</em>.
-     * @param combinedIndex The combined index, returned earlier by {@link #getSectionForIndex}.
-     * @return The index of the item in the section.
-     * @see #getOriginalSection(long)
-     */
-    public static int getOriginalIndex(long combinedIndex) {
-        DebugUtils.__checkError(combinedIndex < 0, "combinedIndex < 0");
-        return (int)combinedIndex;
+    public static <E> SectionList<E> emptyList() {
+        return EMPTY_IMMUTABLE_LIST;
     }
 
     public final void dump(Printer printer) {
@@ -406,11 +375,9 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         }
     }
 
-    private static final int[] EMPTY_IMMUTABLE_ARRAY;
-    private static final SectionList EMPTY_SECTION_LIST;
+    private static final SectionList EMPTY_IMMUTABLE_LIST;
 
     static {
-        EMPTY_IMMUTABLE_ARRAY = new int[0];
-        EMPTY_SECTION_LIST = new SectionList(EMPTY_IMMUTABLE_ARRAY);
+        EMPTY_IMMUTABLE_LIST = new SectionList(new int[0]);
     }
 }

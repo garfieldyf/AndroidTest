@@ -28,7 +28,7 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
     }
 
     @Override
-    protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
+    protected Bitmap decodeBitmap(Object uri, Options opts) {
         final ContentResolver resolver = mModule.mContext.getContentResolver();
         final Uri contactUri = (Uri)uri;
         if (opts.inJustDecodeBounds) {
@@ -57,7 +57,8 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
      * Decode the contact's thumbnail photo bounds (including width, height, mimeType etc).
      */
     private static void decodePhotoBounds(ContentResolver resolver, Uri contactUri, Options opts) {
-        final byte[] data = DatabaseUtils.simpleQueryBlob(resolver, Uri.withAppendedPath(contactUri, Photo.CONTENT_DIRECTORY), Photo.PHOTO, null, null);
+        final Uri photoUri = Uri.withAppendedPath(contactUri, Photo.CONTENT_DIRECTORY);
+        final byte[] data = DatabaseUtils.simpleQueryBlob(resolver, photoUri, Photo.PHOTO, null, null);
         if (data != null) {
             BitmapFactory.decodeByteArray(data, 0, data.length, opts);
             if (opts.outWidth > 0) {
@@ -70,9 +71,12 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
     /**
      * Decode the contact's display photo.
      */
-    private static Bitmap decodeContactPhoto(ContentResolver resolver, Uri contactUri, Options opts) throws Exception {
-        try (final InputStream is = resolver.openInputStream(Uri.withAppendedPath(contactUri, Photo.DISPLAY_PHOTO))) {
-            return (is != null ? BitmapFactory.decodeStream(is, null, opts) : null);
+    private static Bitmap decodeContactPhoto(ContentResolver resolver, Uri contactUri, Options opts) {
+        final Uri photoUri = Uri.withAppendedPath(contactUri, Photo.DISPLAY_PHOTO);
+        try (final InputStream is = resolver.openInputStream(photoUri)) {
+            return BitmapFactory.decodeStream(is, null, opts);
+        } catch (Exception e) {
+            return null;
         }
     }
 }

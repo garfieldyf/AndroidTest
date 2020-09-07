@@ -200,8 +200,23 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         //XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG, "yf"), "");
         //testFileCopy();
 //        TestSectionList.testList();
+//        testContactPhoto();
 
         testJsonLoader();
+    }
+
+    private void testContactPhoto() {
+//        final ContentResolver resolver = getContentResolver();
+//        Cursor cursor = resolver.query(Contacts.CONTENT_URI, null, null, null, null);
+//        if (cursor != null) {
+//            final StringBuilder sb = new StringBuilder();
+//            android.database.DatabaseUtils.dumpCursor(cursor, sb);
+//            Log.e("abcd", sb.toString());
+//            cursor.close();
+//        }
+
+//        final ContactPhotoDecoder<Bitmap> decoder = new ContactPhotoDecoder<>(MainApplication.sInstance.getImageModule());
+//        decoder.decodeImage(ContentUris.withAppendedId(Contacts.CONTENT_URI, 4), this, new Object[] { null }, 0, null);
     }
 
     @TargetApi(26)

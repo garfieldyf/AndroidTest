@@ -114,12 +114,11 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
         }
 
         final Result result = loadFromCache(mContext, mKey, loadParams, cacheFile);
-        final boolean hitCache = (result != null);
-        if (hitCache) {
+        if (result != null) {
             // Loads from the cache file succeeded, update UI.
             publishProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mKey, loadParams, this, this, cacheFile, hitCache));
+        return (isCancelled() ? null : download(mContext, mKey, loadParams, result, cacheFile.getPath(), this, this));
     }
 }

@@ -7,7 +7,6 @@ import android.ext.net.DownloadRequest;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
-import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Log;
@@ -220,21 +219,20 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return result;
     }
 
-    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, DownloadCallback<Object, Integer> callback, Cancelable cancelable, File cacheFile, boolean hitCache) {
-        final String cachePath = cacheFile.getPath();
-        final File tempFile = new File(cachePath + ".tmp");
+    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Object cachedResult, String cacheFile, Cancelable cancelable, DownloadCallback<Object, Integer> callback) {
+        final File tempFile = new File(cacheFile + ".tmp");
         Result result = null;
         try {
             final int statusCode = loadParams.newDownloadRequest(context, key).download(callback, tempFile, cancelable);
-            if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(hitCache && FileUtils.compareFile(cachePath, tempFile.getPath()))) {
+            if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(cachedResult != null && FileUtils.compareFile(cacheFile, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(context, key, tempFile, null);
-                DebugUtils.__checkStopMethodTracing("ResourceLoader", DeviceUtils.toString(result, new StringBuilder("downloads - result = ")).append(", key = ").append(key).toString());
+                DebugUtils.__checkStopMethodTracing("ResourceLoader", "downloads - key = " + key + ", tempFile = " + tempFile);
                 if (result != null) {
                     // Save the temp file to the cache file.
-                    FileUtils.moveFile(tempFile.getPath(), cachePath);
-                    DebugUtils.__checkDebug(true, "ResourceLoader", "save the cache file = " + cachePath + ", hitCache = " + hitCache);
+                    FileUtils.moveFile(tempFile.getPath(), cacheFile);
+                    DebugUtils.__checkDebug(true, "ResourceLoader", "save - key = " + key + ", tempFile = " + tempFile + ", cacheFile = " + cacheFile + ", hitCache = " + (cachedResult != null));
                 }
             }
         } catch (Exception e) {
@@ -243,14 +241,14 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         }
 
         /*
-         * If the cache file is hit and result is null:
+         * If the cache file was loaded and result is null:
          *   1. If download failed or cancelled.
          *   2. The cache file and the temp file contents are equal.
          *   3. Parse the temp file failed.
          * Cancel the task and delete the temp file, do not update UI.
          */
-        if (hitCache && result == null) {
-            DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key);
+        if (cachedResult != null && result == null) {
+            DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key + ", tempFile = " + tempFile);
             tempFile.delete();
             cancelable.cancel(false);
         }
@@ -275,13 +273,12 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
             }
 
             final Object result = loadFromCache(mContext, mKey, mLoadParams, cacheFile);
-            final boolean hitCache = (result != null);
-            if (hitCache) {
+            if (result != null) {
                 // Loads from the cache file succeeded, update UI.
                 setProgress(result);
             }
 
-            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, ResourceLoader.this, this, cacheFile, hitCache));
+            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, result, cacheFile.getPath(), this, ResourceLoader.this));
         }
 
         @Override

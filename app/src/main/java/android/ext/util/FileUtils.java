@@ -76,10 +76,13 @@ public final class FileUtils {
     public static File getFilesDir(Context context, String name) {
         File filesDir = context.getExternalFilesDir(name);
         if (filesDir == null) {
-            filesDir = mkdirs(context.getFilesDir(), name);
+            filesDir = context.getFilesDir();
+            if (StringUtils.getLength(name) > 0) {
+                filesDir = new File(filesDir, name);
+                mkdirs(filesDir.getPath(), 0);
+            }
         }
 
-        DebugUtils.__checkDebug(true, "FileUtils", "filesDir = " + filesDir);
         return filesDir;
     }
 
@@ -99,15 +102,18 @@ public final class FileUtils {
      */
     public static File getCacheDir(Context context, String name) {
         File cacheDir = context.getExternalCacheDir();
-        if (cacheDir != null) {
-            cacheDir = mkdirs(cacheDir, name);
-        }
-
         if (cacheDir == null) {
-            cacheDir = mkdirs(context.getCacheDir(), name);
+            cacheDir = context.getCacheDir();
         }
 
-        DebugUtils.__checkDebug(true, "FileUtils", "cacheDir = " + cacheDir);
+        if (StringUtils.getLength(name) > 0) {
+            cacheDir = new File(cacheDir, name);
+            final int errno = mkdirs(cacheDir.getPath(), 0);
+            if (errno != 0) {
+                Log.e(FileUtils.class.getName(), "mkdirs '" + cacheDir + "' failed: errno = " + errno);
+            }
+        }
+
         return cacheDir;
     }
 
@@ -571,20 +577,6 @@ public final class FileUtils {
         }
     }
 
-    /**
-     * Creates the directory with the specified <em>dir</em> and <em>name</em>.
-     */
-    private static File mkdirs(File dir, String name) {
-        if (StringUtils.getLength(name) > 0) {
-            final File file = new File(dir, name);
-            final int errno = mkdirs(file.getPath(), 0);
-            DebugUtils.__checkLogError(errno != 0, "FileUtils", "mkdirs '" + file + "' failed: errno = " + errno);
-            dir = (errno == 0 ? file : null);
-        }
-
-        return dir;
-    }
-
     @SuppressWarnings("unchecked")
     private static int onScanFile(String path, int type, Object cookie) {
         ((Collection<Object>)cookie).add(new Dirent(path, type));
@@ -622,11 +614,11 @@ public final class FileUtils {
      * Copies the specified <tt>InputStream's</tt> contents into the <tt>OutputStream</tt>.
      */
     private static void copyStreamImpl(FileInputStream is, FileOutputStream out, Cancelable cancelable) throws IOException {
-        try (final FileChannel source = is.getChannel(); final FileChannel target = out.getChannel()) {
+        try (final FileChannel src = is.getChannel(); final FileChannel dst = out.getChannel()) {
             DebugUtils.__checkStartMethodTracing();
-            long writtenBytes, position = 0, size = source.size();
+            long writtenBytes, position = 0, size = src.size();
             while (size > 0 && !cancelable.isCancelled()) {
-                writtenBytes = source.transferTo(position, size, target);
+                writtenBytes = src.transferTo(position, size, dst);
                 size -= writtenBytes;
                 position += writtenBytes;
             }
@@ -1288,7 +1280,7 @@ public final class FileUtils {
             final String extension = getExtension();
             printer.println(new StringBuilder(256).append(getClass().getSimpleName())
                 .append(" { path = ").append(path)
-                .append(", type = ").append(type).append('(').append(toString(type)).append(')')
+                .append(", type = ").append(toString(type))
                 .append(", parent = ").append(parent != null ? parent : "N/A")
                 .append(", name = ").append(getName())
                 .append(", extension = ").append(extension != null ? extension : "N/A")
@@ -1300,28 +1292,28 @@ public final class FileUtils {
         private static String toString(int type) {
             switch (type) {
             case DT_FIFO:
-                return "DT_FIFO";
+                return type + "(DT_FIFO)";
 
             case DT_CHR:
-                return "DT_CHR";
+                return type + "(DT_CHR)";
 
             case DT_DIR:
-                return "DT_DIR";
+                return type + "(DT_DIR)";
 
             case DT_BLK:
-                return "DT_BLK";
+                return type + "(DT_BLK)";
 
             case DT_REG:
-                return "DT_REG";
+                return type + "(DT_REG)";
 
             case DT_LNK:
-                return "DT_LNK";
+                return type + "(DT_LNK)";
 
             case DT_SOCK:
-                return "DT_SOCK";
+                return type + "(DT_SOCK)";
 
             default:
-                return "DT_UNKNOWN";
+                return type + "(DT_UNKNOWN)";
             }
         }
 

@@ -3,7 +3,7 @@
     <!-- properties -->
     <property environment="env" />
     <property name="author" value="Garfield" />
-    <property name="version" value="3.3.0" />
+    <property name="version" value="3.4.0" />
     <property name="out.file.name" value="${MODULE_NAME}.jar" />
     <property name="source.file.name" value="${MODULE_NAME}-sources.jar" />
 

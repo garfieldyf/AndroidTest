@@ -9,12 +9,6 @@ import java.io.File;
  */
 public interface FileCache {
     /**
-     * Returns the absolute path of the cache directory.
-     * @return The absolute path of the cache directory.
-     */
-    String getCacheDir();
-
-    /**
      * Removes the cache file for the specified <em>key</em> in this cache.
      * The cache file will be delete from filesystem.
      * @param key The key to remove.

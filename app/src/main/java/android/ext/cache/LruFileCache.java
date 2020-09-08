@@ -54,6 +54,14 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
     }
 
     /**
+     * Returns the absolute path of the cache directory.
+     * @return The absolute path of the cache directory.
+     */
+    public final String getCacheDir() {
+        return mCacheDir;
+    }
+
+    /**
      * Returns the total number of bytes of all cache files.
      * @return The total number of bytes.
      */
@@ -62,11 +70,6 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
         final long result = FileUtils.computeFiles(mCacheDir);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
-    }
-
-    @Override
-    public String getCacheDir() {
-        return mCacheDir;
     }
 
     @Override

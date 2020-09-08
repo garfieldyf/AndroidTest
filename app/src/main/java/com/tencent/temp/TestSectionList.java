@@ -1,7 +1,5 @@
 package com.tencent.temp;
 
-import android.ext.json.JSONArray;
-import android.ext.json.JSONObject;
 import android.ext.util.SectionList;
 import android.util.Log;
 import android.util.LogPrinter;
@@ -12,61 +10,19 @@ import java.util.List;
 
 public final class TestSectionList {
     public static void testList() {
-//        JSONArray a = new JSONArray();
-//        a.add(new JSONObject()
-//            .put("key1", "value1")
-//            .put("key2", "value2")
-//            .put("key3", "value3"));
-//
-//        SectionList<JSONObject> l = new SectionList<JSONObject>(a);
-//        l.addSection(a);
-//        l.addSection(1, a);
-//        Log.d("cccc", l.get(0).toString());
-//        l.dump(new LogPrinter(Log.DEBUG, "cccc"));
-
         final LogPrinter printer = new LogPrinter(Log.INFO, "abcd");
         SectionList<String> list = new SectionList<String>();
-//        list.add("section_0_0");
-//        list.add("section_0_1");
-//        list.add("section_0_2");
-//        list.add(0, "section_0");
-//        list.add(list.size(), "section_2");
-//        list.add(1, "section_1");
-
         list.addSection(buildSection(0, 3));
         list.addSection(buildSection(1, 4));
         list.addSection(0, buildSection(3, 5));
         list.addSection(1, buildSection(2, 6));
-        list.addAll(buildSection(5, 3));
         list.clear();
-        list.add("section_0_0");
         list.addSection(0, buildSection(2, 6));
-        list.getSection(1).add("section_add");
         list.addSection(0, buildSection(1, 4));
         list.addSection(1, buildSection(3, 3));
         list.addSection(2, buildSection(4, 2));
-//        list.setSection(3, buildSection(9, 6));
-//        list.setSection(3, buildSection(10, 7));
-
-//        for (int i = 0; i < 3; ++i) {
-//            list.remove(4);
-//        }
-
-//        printer.println("remove section index = " + list.removeSection(2));
-
-//        SectionList<String> clone = list.clone();
-//        clone.dump(printer);
-//        printer.println("equals = " + clone.equals(list));
-
-//        list.add(5, "section_0");
-//        removeSection(printer, list, 3);
-//        list.remove("section_5_2");
-//        list.remove("section");
-//        list.removeSection(2);
         forEach(printer, list);
-//        printer.println(list.toString());
-//        removeAll(printer, list, 2, 4);
-//        removeAll(printer, list);
+        //printer.println("section = " + list.getSectionForPosition(17));
     }
 
     private static void removeAll(Printer printer, SectionList<String> list) {

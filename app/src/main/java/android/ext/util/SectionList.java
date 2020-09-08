@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Class <tt>SectionList</tt> allows to adding data by section. This
  * class does not support adding or removing the item, but the items
- * can be set. Setting an item modifies the underlying array.
+ * can be set. Setting an item modifies the underlying list.
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -51,6 +51,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public void clear() {
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         if (mSize > 0) {
             Arrays.fill(mSections, 0, mCount, null);
             mSize  = 0;
@@ -76,6 +77,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public E set(int index, E value) {
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         final int sectionIndex = getSectionForPosition(index);
         return (E)mSections[sectionIndex].set(index - mIndexes[sectionIndex], value);
     }
@@ -102,14 +104,15 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     }
 
     /**
-     * Replaces the section at the specified <em>sectionIndex</em> in this
-     * <tt>SectionList</tt> with the specified <em>section</em>.
-     * @param sectionIndex The index at which to put the <em>section</em>.
+     * Replaces the section at the specified <em>sectionIndex</em>
+     * in this <tt>SectionList</tt>.
+     * @param sectionIndex The index at which to set the section.
      * @param section The {@link List} to set.
      * @return The previous section at the <em>sectionIndex</em>.
      * @see #getSection(int)
      */
     public List<E> setSection(int sectionIndex, List<?> section) {
+        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         final List<E> oldSection = mSections[sectionIndex];
@@ -131,8 +134,8 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @see #addSection(int, List)
      */
     public void addSection(List<?> section) {
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
         DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
+        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
         if (mCount == mSections.length) {
             final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
             mIndexes  = ArrayUtils.copyOf(mIndexes, mCount, newLength);
@@ -153,8 +156,8 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @see #addSection(List)
      */
     public void addSection(int sectionIndex, List<?> section) {
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
         DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
+        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         if (sectionIndex == mCount) {
             addSection(section);

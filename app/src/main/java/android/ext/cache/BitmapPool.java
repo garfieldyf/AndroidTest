@@ -8,6 +8,11 @@ import android.graphics.Bitmap;
  */
 public interface BitmapPool {
     /**
+     * Removes all bitmaps from this pool, leaving it empty.
+     */
+    void clear();
+
+    /**
      * Retrieves the <tt>Bitmap</tt> in this pool that it's allocation
      * bytes greater than or equal to the given the <em>size</em>.
      * @param size The bytes to match.
@@ -21,13 +26,4 @@ public interface BitmapPool {
      * @param bitmap The <tt>Bitmap</tt>.
      */
     void put(Bitmap bitmap);
-
-    /**
-     * Trim this pool to the appropriate level. Typically called on the
-     * {@link android.content.ComponentCallbacks2#onTrimMemory(int)}.
-     * @param level The integer represents a trim level as specified in
-     * {@link android.content.ComponentCallbacks2}.
-     */
-    default void trimMemory(int level) {
-    }
 }

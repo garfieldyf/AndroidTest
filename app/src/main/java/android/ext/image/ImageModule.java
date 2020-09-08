@@ -280,16 +280,16 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         DebugUtils.__checkUIThread("onTrimMemory");
         DebugUtils.__checkStartMethodTracing();
         Pools.BYTE_ARRAY_POOL.clear();
+        if (mBitmapPool != null) {
+            mBitmapPool.clear();
+        }
+
         if (mImageCache != null) {
             mImageCache.trimMemory(level);
         }
 
         if (mFileCache != null) {
             mFileCache.trimMemory(level);
-        }
-
-        if (mBitmapPool != null) {
-            mBitmapPool.trimMemory(level);
         }
 
         if (level >= TRIM_MEMORY_UI_HIDDEN) {

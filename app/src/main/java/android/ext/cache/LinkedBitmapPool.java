@@ -31,9 +31,7 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
         mBitmaps = new LinkedList<Bitmap>();
     }
 
-    /**
-     * Removes all bitmaps from this pool, leaving it empty.
-     */
+    @Override
     public synchronized void clear() {
         mBitmaps.clear();
     }
@@ -66,11 +64,6 @@ public class LinkedBitmapPool implements BitmapPool, Comparator<Bitmap> {
                 mBitmaps.removeFirst();
             }
         }
-    }
-
-    @Override
-    public synchronized void trimMemory(int level) {
-        mBitmaps.clear();
     }
 
     @Override

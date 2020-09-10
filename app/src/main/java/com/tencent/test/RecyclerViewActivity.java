@@ -2,7 +2,6 @@ package com.tencent.test;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AbsAsyncTask;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
 import android.ext.widget.PageAdapter;
@@ -90,7 +89,12 @@ public class RecyclerViewActivity extends Activity {
 
     private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
         public RecyclerAdapter() {
-            super(MAX_PAGE_SIZE, INITIAL_SIZE, PAGE_SIZE, PREFETCH_DISTANCE);
+            super(new Config.Builder(MainApplication.sThreadPool)
+                .setPageSize(PAGE_SIZE)
+                .setInitialSize(INITIAL_SIZE)
+                .setMaximumPageCount(MAX_PAGE_SIZE)
+                .setPrefetchDistance(PREFETCH_DISTANCE)
+                .build());
         }
 
         @Override
@@ -132,36 +136,12 @@ public class RecyclerViewActivity extends Activity {
         @Override
         public List<String> loadPage(int page, int startPosition, int itemCount) {
             Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", itemCount = " + itemCount);
-            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, itemCount);
-            return null;
-        }
-    }
-
-    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, List<String>> {
-        private int page;
-
-        public LoadTask(RecyclerViewActivity activity, int page) {
-            super(activity);
-            this.page = page;
-        }
-
-        @Override
-        protected List<String> doInBackground(Integer... params) {
             try {
                 Thread.sleep(200);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
 
-            final RecyclerViewActivity activity = getOwnerActivity();
-            return (activity != null ? activity.mData.subList(params[0], params[0] + params[1]) : null);
-        }
-
-        @Override
-        protected void onPostExecute(List<String> result) {
-            final RecyclerViewActivity activity = getOwnerActivity();
-            if (activity != null) {
-                activity.mAdapter.setPage(page, result);
-            }
+            return mData.subList(startPosition, startPosition + itemCount);
         }
     }
 

@@ -81,7 +81,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     private final Cache mImageCache;
     private final FileCache mFileCache;
     private final BitmapPool mBitmapPool;
-    private final SparseArray<Object> mResources;
+    private final SparseArray mResources;
 
     /**
      * Constructor
@@ -99,7 +99,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         mFileCache   = fileCache;
         mBitmapPool  = bitmapPool;
         mImageCache  = imageCache;
-        mResources   = new SparseArray<Object>(8);
+        mResources   = new SparseArray(8);
         mTaskPool    = ImageLoader.newTaskPool(MAX_POOL_SIZE);
         mParamsPool  = Pools.newPool(this, MAX_POOL_SIZE);
         mOptionsPool = Pools.synchronizedPool(Pools.newPool(Options::new, maxPoolSize));
@@ -122,7 +122,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see ImageLoader#load(URI)
      */
     public final <URI> LoadRequest load(int id, URI uri) {
-        return get(id).load(uri);
+        return ((ImageLoader)getResource(id, this)).load(uri);
     }
 
     /**
@@ -135,15 +135,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see ImageLoader#load(URI)
      */
     public final <URI, Image> ImageLoader<URI, Image> get(int id) {
-        DebugUtils.__checkUIThread("get");
-        Object loader = mResources.get(id, null);
-        if (loader == null) {
-            DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, loader = XmlResources.load(mContext, id, this));
-            DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + loader + " - ID #0x" + Integer.toHexString(id));
-        }
-
-        return (ImageLoader)loader;
+        return (ImageLoader)getResource(id, this);
     }
 
     /**
@@ -296,7 +288,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
             for (int i = mResources.size() - 1; i >= 0; --i) {
                 final Object value = mResources.valueAt(i);
                 if (value instanceof ImageLoader) {
-                    ((ImageLoader<?, ?>)value).shutdown();
+                    ((ImageLoader)value).shutdown();
                 }
             }
 
@@ -390,18 +382,19 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Return an object associated with a xml resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * Return an object associated with a xml resource id. <p><b>Note: This method must be invoked
+     * on the UI thread.</b></p>
      * @param id The xml resource id.
+     * @param inflater May be <tt>null</tt>. The {@link XmlResourceInflater} to inflating XML data.
      * @return The object.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
-    /* package */ final Object getResource(int id) {
+    /* package */ final Object getResource(int id, XmlResourceInflater inflater) {
         DebugUtils.__checkUIThread("getResource");
         Object result = mResources.get(id, null);
         if (result == null) {
             DebugUtils.__checkStartMethodTracing();
-            mResources.append(id, result = XmlResources.load(mContext, id));
+            mResources.append(id, result = (inflater != null ? XmlResources.load(mContext, id, inflater) : XmlResources.load(mContext, id)));
             DebugUtils.__checkStopMethodTracing("ImageModule", "Loads " + result + " - ID #0x" + Integer.toHexString(id));
         }
 

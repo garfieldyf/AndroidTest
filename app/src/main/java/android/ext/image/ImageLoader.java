@@ -349,7 +349,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #parameters(Object)
          */
         public final LoadRequest parameters(int id) {
-            mParams[PARAMETERS] = mModule.getResource(id);
+            mParams[PARAMETERS] = mModule.getResource(id, null);
             return this;
         }
 
@@ -393,7 +393,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
          * @see #binder(Binder)
          */
         public final LoadRequest binder(int id) {
-            mBinder = (Binder)mModule.getResource(id);
+            mBinder = (Binder)mModule.getResource(id, null);
             return this;
         }
 

@@ -47,7 +47,7 @@ public interface Cache<K, V> {
     default void trimMemory(int level) {
     }
 
-    public static void dumpCache(Object cache, Context context, Printer printer) {
+    public static void dumpCache(Context context, Printer printer, Cache<?, ?> cache) {
         if (cache instanceof ArrayMapCache) {
             ((ArrayMapCache<?, ?>)cache).dump(printer);
         } else if (cache instanceof LruFileCache) {

@@ -7,7 +7,12 @@ import java.io.File;
  * keys and files in which each key is mapped to a single {@link File}.
  * @author Garfield
  */
-public interface FileCache {
+public interface FileCache extends Cache<String, File> {
+    /**
+     * Clears this cache and deletes all cache files from the filesystem.
+     */
+    void clear();
+
     /**
      * Removes the cache file for the specified <em>key</em> in this cache.
      * The cache file will be delete from filesystem.
@@ -37,13 +42,4 @@ public interface FileCache {
      * @see #get(String)
      */
     File put(String key, File cacheFile);
-
-    /**
-     * Trim this cache to the appropriate level. Typically called on the
-     * {@link android.content.ComponentCallbacks2#onTrimMemory(int)}.
-     * @param level The integer represents a trim level as specified in
-     * {@link android.content.ComponentCallbacks2}.
-     */
-    default void trimMemory(int level) {
-    }
 }

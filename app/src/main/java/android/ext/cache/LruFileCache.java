@@ -45,15 +45,6 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
     }
 
     /**
-     * Clears this cache and deletes all cache files from the filesystem.
-     */
-    public final void clear() {
-        DebugUtils.__checkStartMethodTracing();
-        FileUtils.deleteFiles(mCacheDir, false);
-        DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
-    }
-
-    /**
      * Returns the absolute path of the cache directory.
      * @return The absolute path of the cache directory.
      */
@@ -70,6 +61,13 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
         final long result = FileUtils.computeFiles(mCacheDir);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
+    }
+
+    @Override
+    public void clear() {
+        DebugUtils.__checkStartMethodTracing();
+        FileUtils.deleteFiles(mCacheDir, false);
+        DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
     @Override

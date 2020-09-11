@@ -54,7 +54,7 @@ public final class LruImageCache<K> implements Cache<K, Object> {
     }
 
     public final void dump(Context context, Printer printer) {
-        Cache.dumpCache(mBitmapCache, context, printer);
-        Cache.dumpCache(mImageCache, context, printer);
+        Cache.dumpCache(context, printer, mBitmapCache);
+        Cache.dumpCache(context, printer, mImageCache);
     }
 }

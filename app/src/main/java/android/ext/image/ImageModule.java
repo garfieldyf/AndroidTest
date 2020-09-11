@@ -230,8 +230,8 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         Pools.dumpPool(mParamsPool, printer);
         Pools.dumpPool(mBufferPool, printer);
         Pools.dumpPool(mOptionsPool, printer);
-        Cache.dumpCache(mImageCache, mContext, printer);
-        Cache.dumpCache(mFileCache, mContext, printer);
+        Cache.dumpCache(mContext, printer, mImageCache);
+        Cache.dumpCache(mContext, printer, mFileCache);
         if (mBitmapPool instanceof LinkedBitmapPool) {
             ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
         }

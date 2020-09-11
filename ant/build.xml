@@ -55,6 +55,7 @@
             <replacefilter token="android.support.annotation.Keep" value="androidx.annotation.Keep" />
             <replacefilter token="android.support.v4.content.FileProvider" value="androidx.core.content.FileProvider" />
             <replacefilter token="android.support.v7.widget.RecyclerView" value="androidx.recyclerview.widget.RecyclerView" />
+            <replacefilter token="android.support.v7.widget.LinearLayoutManager" value="androidx.recyclerview.widget.LinearLayoutManager" />
             <replacefilter token="android.support.v4.content.LocalBroadcastManager" value="androidx.localbroadcastmanager.content.LocalBroadcastManager" />
         </replace>
     </target>

@@ -13,11 +13,11 @@ public interface BitmapPool {
     void clear();
 
     /**
-     * Retrieves the <tt>Bitmap</tt> in this pool that it's allocation
-     * bytes greater than or equal to the given the <em>size</em>.
+     * Retrieves and removes the <tt>Bitmap</tt> from this pool whose
+     * allocation bytes greater than or equal to the given the size.
      * @param size The bytes to match.
-     * @return The <tt>Bitmap</tt> or <tt>null</tt> if there is no match
-     * the bitmap.
+     * @return The <tt>Bitmap</tt> or <tt>null</tt> if there is no
+     * match the bitmap.
      */
     Bitmap get(int size);
 

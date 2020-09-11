@@ -78,7 +78,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray add(float value) {
         DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        JSONUtils.__checkFloat(value);
+        JSONUtils.__checkDouble(value);
         super.add(value);
         return this;
     }
@@ -141,7 +141,7 @@ public class JSONArray extends ArrayList<Object> {
      */
     public JSONArray add(int index, float value) {
         DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        JSONUtils.__checkFloat(value);
+        JSONUtils.__checkDouble(value);
         super.add(index, value);
         return this;
     }

@@ -102,7 +102,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     public JSONObject put(String name, float value) {
         DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
         DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        JSONUtils.__checkFloat(value);
+        JSONUtils.__checkDouble(value);
         super.put(name, value);
         return this;
     }

@@ -173,14 +173,17 @@ public class Parameters {
 
     private static int getBytesPerPixel(Options opts) {
         Parameters.__checkOptions(opts);
-        DebugUtils.__checkError(opts.inPreferredConfig == null, "opts.inPreferredConfig == null");
         return BitmapUtils.getBytesPerPixel(Build.VERSION.SDK_INT >= 26 && opts.outConfig != null ? opts.outConfig : opts.inPreferredConfig);
     }
 
     private static void __checkOptions(Options opts) {
         if (Build.VERSION.SDK_INT >= 26) {
             Log.d("Parameters", "getBytesPerPixel - outConfig = " + opts.outConfig);
-            DebugUtils.__checkError(opts.outConfig == null && opts.inPreferredConfig == null, "opts.outConfig == null && opts.inPreferredConfig == null");
+            if (opts.outConfig == null && opts.inPreferredConfig == null) {
+                throw new AssertionError("opts.outConfig == null && opts.inPreferredConfig == null");
+            }
+        } else if (opts.inPreferredConfig == null) {
+            throw new AssertionError("opts.inPreferredConfig == null");
         }
     }
 

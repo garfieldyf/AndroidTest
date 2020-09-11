@@ -344,8 +344,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @return The parameters or <tt>null</tt>.
      */
     public static <T> T getParameters(Object[] params) {
-        DebugUtils.__checkError(params == null, "Invalid parameter - params == null");
-        DebugUtils.__checkError(params.length < (PARAMETERS + 1), "Invalid parameter - params.length(" + params.length + ") must be >= " + (PARAMETERS + 1));
+        ImageModule.__checkParameters(params, PARAMETERS);
         return (T)params[PARAMETERS];
     }
 
@@ -356,8 +355,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see #getPlaceholder(Resources, Object[])
      */
     public static void setPlaceholder(ImageView view, Object[] params) {
-        DebugUtils.__checkError(params == null, "Invalid parameter - params == null");
-        DebugUtils.__checkError(params.length < (PLACEHOLDER + 1), "Invalid parameter - params.length(" + params.length + ") must be >= " + (PLACEHOLDER + 1));
+        ImageModule.__checkParameters(params, PLACEHOLDER);
         final Object placeholder = params[PLACEHOLDER];
         if (placeholder instanceof Integer) {
             view.setImageResource((int)placeholder);
@@ -375,8 +373,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      */
     @SuppressWarnings("deprecation")
     public static Drawable getPlaceholder(Resources res, Object[] params) {
-        DebugUtils.__checkError(params == null, "Invalid parameter - params == null");
-        DebugUtils.__checkError(params.length < (PLACEHOLDER + 1), "Invalid parameter - params.length(" + params.length + ") must be >= " + (PLACEHOLDER + 1));
+        ImageModule.__checkParameters(params, PLACEHOLDER);
         final Object placeholder = params[PLACEHOLDER];
         return (placeholder instanceof Integer ? res.getDrawable((int)placeholder) : (Drawable)placeholder);
     }
@@ -399,6 +396,17 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         }
 
         return result;
+    }
+
+    /* package */ static void __checkParameters(Object[] params, int index) {
+        if (params == null) {
+            throw new AssertionError("Invalid parameter - params == null");
+        }
+
+        final int minLength = index + 1;
+        if (params.length < minLength) {
+            throw new AssertionError("Invalid parameter - params.length(" + params.length + ") must be >= " + minLength);
+        }
     }
 
     private ImageLoader.ImageDecoder createImageDecoder(String className) throws ReflectiveOperationException {

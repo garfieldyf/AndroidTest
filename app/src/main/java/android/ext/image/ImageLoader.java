@@ -11,7 +11,6 @@ import android.ext.content.AsyncLoader.Binder;
 import android.ext.content.res.XmlResources;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
-import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
 import android.ext.util.MessageDigests;
@@ -143,7 +142,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
 
     @Override
     protected final void onRecycle(Object[] params) {
-        DebugUtils.__checkError(ArrayUtils.getSize(params) < PARAMS_LENGTH, "Invalid parameter - params == null || params.length(" + ArrayUtils.getSize(params) + ") < " + PARAMS_LENGTH);
+        ImageModule.__checkParameters(params, PARAMS_LENGTH - 1);
         Arrays.fill(params, null);  // Prevent memory leak.
         mModule.mParamsPool.recycle(params);
     }

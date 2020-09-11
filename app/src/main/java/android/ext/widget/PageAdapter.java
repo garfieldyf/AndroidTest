@@ -533,18 +533,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
              * @return The <tt>Config</tt>.
              */
             public final Config build() {
-                Builder.__checkPageCache(mPageCache);
-                DebugUtils.__checkError(mPageSize <= 0 || mInitialSize <= 0, "Invalid parameters - pageSize(" + mPageSize + ") and initialSize(" + mInitialSize + ") must be > 0");
-                DebugUtils.__checkError(mPrefetchDistance >= Math.min(mPageSize, mInitialSize), "Invalid parameter - prefetchDistance(" + mPrefetchDistance + ") must be < " + Math.min(mPageSize, mInitialSize));
-                return new Config(mExecutor, mPageCache, mInitialSize, mPageSize, mPrefetchDistance);
+                this.__checkParameters();
+                return new Config(mExecutor, mPageCache, mInitialSize > 0 ? mInitialSize : mPageSize, mPageSize, mPrefetchDistance);
             }
 
-            private static void __checkPageCache(Object pageCache) {
-                if (pageCache instanceof Integer) {
-                    final int maxPageCount = (int)pageCache;
+            private void __checkParameters() {
+                if (mPageSize <= 0) {
+                    throw new AssertionError("Invalid parameter - pageSize(" + mPageSize + ") must be > 0");
+                }
+
+                if (mPageCache instanceof Integer) {
+                    final int maxPageCount = (int)mPageCache;
                     if (maxPageCount < 0) {
-                        throw new AssertionError("Invalid parameters - maxPageCount(" + maxPageCount + ") must be >= 0");
+                        throw new AssertionError("Invalid parameter - maxPageCount(" + maxPageCount + ") must be >= 0");
                     }
+                }
+
+                final int pageSize = (mInitialSize > 0 ? Math.min(mPageSize, mInitialSize) : mPageSize);
+                if (mPrefetchDistance >= pageSize) {
+                    throw new AssertionError("Invalid parameter - prefetchDistance(" + mPrefetchDistance + ") must be < " + pageSize);
                 }
             }
         }

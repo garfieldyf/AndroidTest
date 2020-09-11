@@ -45,7 +45,6 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
         // Decodes the image pixels.
         Bitmap bitmap = null;
         try {
-            DebugUtils.__checkError(opts.inBitmap != null && !opts.inBitmap.isMutable(), "Only mutable bitmap can be reused - " + opts.inBitmap);
             BitmapDecoder.__checkDumpOptions(opts, flags);
             bitmap = decodeBitmap(uri, opts);
         } catch (IllegalArgumentException e) {
@@ -71,6 +70,10 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
     }
 
     private static void __checkDumpOptions(Options opts, int flags) {
+        if (opts.inBitmap != null && !opts.inBitmap.isMutable()) {
+            throw new AssertionError("Only mutable bitmap can be reused - " + opts.inBitmap);
+        }
+
         if ((flags & FLAG_DUMP_OPTIONS) != 0) {
             final StringBuilder builder = new StringBuilder(opts.toString()).append("\n{")
                 .append("\n  inSampleSize = ").append(opts.inSampleSize)

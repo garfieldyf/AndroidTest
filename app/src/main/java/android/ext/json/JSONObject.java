@@ -1,6 +1,5 @@
 package android.ext.json;
 
-import android.ext.util.DebugUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,8 +46,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      */
     @Override
     public JSONObject put(String name, Object value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -60,8 +58,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, int value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -73,8 +70,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, long value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -86,8 +82,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, boolean value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -100,9 +95,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, float value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -115,9 +109,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, double value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_OBJECT, "Unsupported operation - The JSONObject is immutable");
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
+        this.__checkName(name);
         super.put(name, value);
         return this;
     }
@@ -266,5 +259,15 @@ public class JSONObject extends LinkedHashMap<String, Object> {
     @Override
     public boolean equals(Object object) {
         return (object instanceof JSONObject && super.equals(object));
+    }
+
+    private void __checkName(String name) {
+        if (name == null) {
+            throw new AssertionError("Invalid parameter - name == null");
+        }
+
+        if (this == JSONUtils.EMPTY_OBJECT) {
+            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
+        }
     }
 }

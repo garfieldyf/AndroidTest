@@ -248,8 +248,7 @@ public final class Pools {
 
         @Override
         public void recycle(T element) {
-            DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
-            __checkInPool(element);
+            this.__checkInPool(element);
             if (size < elements.length) {
                 elements[size++] = element;
             }
@@ -282,6 +281,10 @@ public final class Pools {
         }
 
         private void __checkInPool(Object element) {
+            if (element == null) {
+                throw new AssertionError("Invalid parameter - element == null");
+            }
+
             final StringBuilder result = new StringBuilder("The ");
             for (int i = 0; i < size; ++i) {
                 if (elements[i] == element) {

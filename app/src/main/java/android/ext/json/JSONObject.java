@@ -1,5 +1,6 @@
 package android.ext.json;
 
+import android.ext.util.DebugUtils;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -120,6 +121,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optInt(String, int)
      */
     public int optInt(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toInt(get(name), 0);
     }
 
@@ -131,6 +133,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optInt(String)
      */
     public int optInt(String name, int fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toInt(get(name), fallback);
     }
 
@@ -139,6 +142,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optLong(String, int)
      */
     public long optLong(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toLong(get(name), 0);
     }
 
@@ -150,6 +154,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optLong(String)
      */
     public long optLong(String name, long fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toLong(get(name), fallback);
     }
 
@@ -158,6 +163,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optString(String, String)
      */
     public String optString(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toString(get(name), "");
     }
 
@@ -169,6 +175,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optString(String)
      */
     public String optString(String name, String fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toString(get(name), fallback);
     }
 
@@ -177,6 +184,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optFloat(String, float)
      */
     public float optFloat(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return (float)JSONUtils.toDouble(get(name), 0);
     }
 
@@ -188,6 +196,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optFloat(String)
      */
     public float optFloat(String name, float fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return (float)JSONUtils.toDouble(get(name), fallback);
     }
 
@@ -196,6 +205,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optDouble(String, double)
      */
     public double optDouble(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toDouble(get(name), 0);
     }
 
@@ -207,6 +217,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optDouble(String)
      */
     public double optDouble(String name, double fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toDouble(get(name), fallback);
     }
 
@@ -215,6 +226,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optBoolean(String, boolean)
      */
     public boolean optBoolean(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toBoolean(get(name), false);
     }
 
@@ -226,6 +238,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optBoolean(String)
      */
     public boolean optBoolean(String name, boolean fallback) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         return JSONUtils.toBoolean(get(name), fallback);
     }
 
@@ -236,6 +249,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return The <tt>JSONArray</tt> or <tt>null</tt>.
      */
     public JSONArray optJSONArray(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         final Object value = get(name);
         return (value instanceof JSONArray ? (JSONArray)value : null);
     }
@@ -247,6 +261,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return The <tt>JSONObject</tt> or <tt>null</tt>.
      */
     public JSONObject optJSONObject(String name) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         final Object value = get(name);
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }

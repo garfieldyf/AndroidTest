@@ -874,7 +874,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         if (permissions != null) {
             Log.i("yf", "length = " + permissions.length + ", type = " + permissions.toString());
             try {
-                JSONUtils.writeObject("/sdcard/permissions.json", permissions);
+                JSONUtils.writeObject(new File("/sdcard/permissions.json"), permissions);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -8,6 +8,7 @@ import android.ext.util.UriUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -228,7 +229,7 @@ public final class JSONUtils {
      * JSONArray</tt> or the collections(<tt>Array, Collection, Map</tt>).
      * @return The <em>writer</em>.
      * @throws IOException if an error occurs while writing to the <em>writer</em>.
-     * @see #writeObject(String, Object)
+     * @see #writeObject(File, Object)
      */
     @SuppressWarnings("unchecked")
     public static JsonWriter writeObject(JsonWriter writer, Object object) throws IOException {
@@ -260,14 +261,14 @@ public final class JSONUtils {
     /**
      * Writes the specified <em>object</em> into a <em>jsonFile</em>.
      * <p>Note: This method will be create the necessary directories.</p>
-     * @param jsonFile The json file to write.
+     * @param jsonFile The json file to write, must be absolute file path.
      * @param object May be a <tt>String, Boolean, Number, JSONObject,
      * JSONArray</tt> or the collections(<tt>Array, Collection, Map</tt>).
      * @throws IOException if an error occurs while writing to the file.
      * @see #writeObject(JsonWriter, Object)
      */
-    public static void writeObject(String jsonFile, Object object) throws IOException {
-        FileUtils.mkdirs(jsonFile, FileUtils.FLAG_IGNORE_FILENAME);
+    public static void writeObject(File jsonFile, Object object) throws IOException {
+        FileUtils.mkdirs(jsonFile.getPath(), FileUtils.FLAG_IGNORE_FILENAME);
         try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(new FileOutputStream(jsonFile), StandardCharsets.UTF_8))) {
             writeObject(writer, object);
         }
@@ -357,19 +358,19 @@ public final class JSONUtils {
     }
 
     private static Number parseNumber(JsonReader reader) throws IOException {
-        final String string = reader.nextString();
-        if (string.indexOf('.') == -1) {
+        final String value = reader.nextString();
+        if (value.indexOf('.') == -1) {
             try {
-                return Integer.valueOf(string, 10);
+                return Integer.valueOf(value, 10);
             } catch (NumberFormatException e) {
                 try {
-                    return Long.valueOf(string, 10);
+                    return Long.valueOf(value, 10);
                 } catch (NumberFormatException ignored) {
                 }
             }
         }
 
-        return Double.valueOf(string);
+        return Double.valueOf(value);
     }
 
     private static JSONArray parseArray(JsonReader reader, Cancelable cancelable) throws IOException {

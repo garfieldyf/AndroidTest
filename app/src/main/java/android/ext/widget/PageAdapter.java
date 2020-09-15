@@ -4,7 +4,6 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
-import android.ext.content.AbsAsyncTask;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -16,7 +15,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.Executor;
 
 /**
  * Class <tt>PageAdapter</tt> allows to loading data by page.
@@ -31,7 +29,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     private int mItemCount;
     private int mMaxPageIndex;
     private int mLastPosition;
-    private List<E> mInitialPage;
 
     private final Config mConfig;
     private final BitSet mLoadStates;
@@ -45,7 +42,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkError(config == null, "Invalid parameters - config == null");
         mConfig = config;
         mLoadStates = new BitSet();
-        mPageCache  = config.createPageCache();
+        mPageCache  = new PageCache<E>(config.createPageCache());
     }
 
     /**
@@ -68,7 +65,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mPageCache.clear();
         mLoadStates.clear();
         mLastPosition = 0;
-        mInitialPage  = null;
         mMaxPageIndex = (itemCount > mConfig.initialSize ? (int)Math.ceil((double)(itemCount - mConfig.initialSize) / mConfig.pageSize) : 0);
         postNotifyDataSetChanged();
     }
@@ -150,24 +146,38 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Sets the item at the specified <em>position</em> in this adapter with the specified <em>value</em>.
-     * This method will be call {@link #notifyItemChanged(int)} when the <em>value</em> has set. <p>Unlike
-     * {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when the item was
-     * not present.</p>
+     * Equivalent to calling <tt>setItem(position, value, null)</tt>.
      * @param position The adapter position of the item in this adapter.
      * @param value The value to set.
-     * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
+     * @return The previous item at the specified <em>position</em>
+     * or <tt>null</tt> if the item not found.
+     * @see #setItem(int, E, Object)
      */
-    public E setItem(int position, E value) {
+    public final E setItem(int position, E value) {
+        return setItem(position, value, null);
+    }
+
+    /**
+     * Sets the item at the specified <em>position</em> in this adapter with the specified <em>value</em>.
+     * This method will be call {@link #notifyItemChanged(int, Object)} when the <em>value</em> has set.
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when
+     * the item was not present.</p>
+     * @param position The adapter position of the item in this adapter.
+     * @param value The value to set.
+     * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
+     * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
+     * @see #setItem(int, E)
+     */
+    public E setItem(int position, E value, Object payload) {
         DebugUtils.__checkUIThread("setItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
 
         E previous = null;
         final long combinedPosition = getPageForPosition(position);
-        final List<E> page = getPageImpl(getOriginalPage(combinedPosition));
+        final List<E> page = mPageCache.get(getOriginalPage(combinedPosition));
         if (page != null) {
             previous = page.set((int)combinedPosition, value);
-            postNotifyItemRangeChanged(position, 1, null);
+            postNotifyItemRangeChanged(position, 1, payload);
         }
 
         return previous;
@@ -186,7 +196,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("peekItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
         final long combinedPosition = getPageForPosition(position);
-        final List<E> page = getPageImpl(getOriginalPage(combinedPosition));
+        final List<E> page = mPageCache.get(getOriginalPage(combinedPosition));
         return (page != null ? page.get((int)combinedPosition) : null);
     }
 
@@ -214,6 +224,40 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     public final E peekItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
         return (position != NO_POSITION ? peekItem(position) : null);
+    }
+
+    /**
+     * Equivalent to calling <tt>setPage(pageIndex, page, null)</tt>.
+     * @param pageIndex The index of the page.
+     * @param page May be <tt>null</tt>. The page to add.
+     * @see #setPage(int, List, Object)
+     */
+    public final void setPage(int pageIndex, List<?> page) {
+        setPage(pageIndex, page, null);
+    }
+
+    /**
+     * Sets the page at the specified <em>pageIndex</em> in this adapter. This
+     * method will be call {@link #notifyItemRangeChanged(int, int, Object)}
+     * when the <em>page</em> has added. <p>This is useful when asynchronously
+     * loading to prevent blocking the UI.</p>
+     * @param pageIndex The index of the page.
+     * @param page May be <tt>null</tt>. The page to add.
+     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
+     * @see #setPage(int, List)
+     */
+    @SuppressWarnings("unchecked")
+    public void setPage(int pageIndex, List<?> page, Object payload) {
+        DebugUtils.__checkUIThread("setPage");
+        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
+
+        // Clears the page loading state when the page is load complete.
+        mLoadStates.clear(pageIndex);
+        final int size = ArrayUtils.getSize(page);
+        if (size > 0) {
+            mPageCache.put(pageIndex, (List<E>)page);
+            postNotifyItemRangeChanged(getPositionForPage(pageIndex), size, payload);
+        }
     }
 
     /**
@@ -263,11 +307,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
-        if (mPageCache instanceof ArrayMapCache) {
-            dump(printer, ((ArrayMapCache<Integer, List<E>>)mPageCache).entrySet());
-        } else if (mPageCache instanceof SimpleLruCache) {
-            dump(printer, ((SimpleLruCache<Integer, List<E>>)mPageCache).snapshot().entrySet());
-        }
+        final StringBuilder result = new StringBuilder(128);
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mConfig.initialSize, mConfig.pageSize, mItemCount);
+        ((PageCache<E>)mPageCache).dump(printer, result);
     }
 
     /**
@@ -293,45 +335,16 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Called on a background thread to load a page with given the <em>pageIndex</em>.
+     * Returns a page at the given the <em>pageIndex</em>. Subclasses must implement
+     * this method to return <tt>List</tt> for a particular page. <p>If you want to
+     * asynchronously load the page data to prevent blocking the UI, it is possible
+     * to return <tt>null</tt> and at a later time call {@link #setPage}.<p>
      * @param pageIndex The index of the page whose data should be returned.
      * @param startPosition The start position of data to load.
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
     protected abstract List<E> loadPage(int pageIndex, int startPosition, int loadSize);
-
-    /**
-     * Called on the UI thread when the page load complete. This
-     * method will be call {@link #notifyItemRangeChanged(int, int)}
-     * when the <em>page</em> was added.
-     * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The page to add.
-     */
-    protected void onLoadComplete(int pageIndex, List<E> page) {
-        DebugUtils.__checkUIThread("onLoadComplete");
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
-
-        // Clears the page loading state.
-        mLoadStates.clear(pageIndex);
-        final int size = ArrayUtils.getSize(page);
-        if (size > 0) {
-            if (pageIndex == 0) {
-                mInitialPage = page;
-            } else {
-                mPageCache.put(pageIndex, page);
-            }
-
-            postNotifyItemRangeChanged(getPositionForPage(pageIndex), size, null);
-        }
-    }
-
-    /**
-     * Returns the page associated with the specified <em>pageIndex</em>.
-     */
-    private List<E> getPageImpl(int pageIndex) {
-        return (pageIndex == 0 ? mInitialPage : mPageCache.get(pageIndex));
-    }
 
     /**
      * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
@@ -342,7 +355,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     private List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
-        List<E> page = getPageImpl(pageIndex);
+        List<E> page = mPageCache.get(pageIndex);
         if (page == null && !mLoadStates.get(pageIndex)) {
             // Computes the startPosition and loadSize to load.
             final int startPosition, loadSize;
@@ -356,34 +369,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
             // Loads the page data and sets the page loading state.
             mLoadStates.set(pageIndex);
-            new LoadTask(this, pageIndex).executeOnExecutor(mConfig.mExecutor, startPosition, loadSize);
+            page = loadPage(pageIndex, startPosition, loadSize);
+            if (ArrayUtils.getSize(page) > 0) {
+                // Clears the page loading state.
+                mLoadStates.clear(pageIndex);
+                mPageCache.put(pageIndex, page);
+            }
         }
 
         return page;
-    }
-
-    /**
-     * Dump this page cache.
-     */
-    private void dump(Printer printer, Set<Entry<Integer, List<E>>> entries) {
-        final StringBuilder result = new StringBuilder(128);
-        final Formatter formatter  = new Formatter(result);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mConfig.initialSize, mConfig.pageSize, mItemCount);
-        result.setLength(0);
-        printer.println(DeviceUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size() + (mInitialPage != null ? 1 : 0)).append(" ]").toString());
-
-        if (mInitialPage != null) {
-            result.setLength(0);
-            printer.println(DeviceUtils.toString(mInitialPage, result.append("    Page 0  ==> ")).append(" { count = ").append(mInitialPage.size()).append(" }").toString());
-        }
-
-        for (Entry<Integer, List<E>> entry : entries) {
-            final List<E> page = entry.getValue();
-            result.setLength(0);
-
-            formatter.format("    Page %-2d ==> ", entry.getKey());
-            printer.println(DeviceUtils.toString(page, result).append(" { count = ").append(page.size()).append(" }").toString());
-        }
     }
 
     /**
@@ -397,7 +391,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         public final int pageSize;
 
         /**
-         * The number of items for initial page (pageIndex = 0)
+         * The number of items for initial page (pageIndex == 0)
          * loaded by the <tt>PageAdapter</tt>.
          */
         public final int initialSize;
@@ -408,8 +402,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          */
         public final int prefetchDistance;
 
+        /**
+         * The page {@link Cache} or maximum number of pages.
+         */
         /* package */ final Object mPageCache;
-        /* package */ final Executor mExecutor;
 
         /**
          * Returns the maximum number of pages in the page cache.
@@ -423,9 +419,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         /**
          * Constructor
          */
-        /* package */ Config(Executor executor, Object pageCache, int initialSize, int pageSize, int prefetchDistance) {
+        /* package */ Config(Object pageCache, int initialSize, int pageSize, int prefetchDistance) {
             this.pageSize    = pageSize;
-            this.mExecutor   = executor;
             this.mPageCache  = pageCache;
             this.initialSize = initialSize;
             this.prefetchDistance = prefetchDistance;
@@ -448,14 +443,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             }
 
             final int maxPageCount = (mPageCache instanceof Integer ? (int)mPageCache : 0);
-            return (maxPageCount != 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount) : new ArrayMapCache<Integer, List<E>>(8));
+            return (maxPageCount != 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount - 1) : new ArrayMapCache<Integer, List<E>>(8));
         }
 
         /**
          * Class <tt>Builder</tt> used to create a {@link Config}.
          * <h3>Usage</h3>
          * <p>Here is an example:</p><pre>
-         * final Config config = new Builder(executor)
+         * final Config config = new Builder()
          *     .setInitialSize(16)
          *     .setPageSize(64)
          *     .setPrefetchDistance(5)
@@ -467,15 +462,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             private int mPageSize;
             private int mInitialSize;
             private int mPrefetchDistance;
-            private final Executor mExecutor;
-
-            /**
-             * Constructor
-             * @param executor The <tt>Executor</tt> to executing load task.
-             */
-            public Builder(Executor executor) {
-                mExecutor = executor;
-            }
 
             /**
              * Sets the number of items for each page (pageIndex > 0) to load.
@@ -488,7 +474,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             }
 
             /**
-             * Sets the number of items for initial page (pageIndex = 0) to load.
+             * Sets the number of items for initial page (pageIndex == 0) to load.
+             * If not set, defaults to the page size.
              * @param initialSize The number of items.
              * @return This builder.
              */
@@ -534,7 +521,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
              */
             public final Config build() {
                 this.__checkParameters();
-                return new Config(mExecutor, mPageCache, mInitialSize > 0 ? mInitialSize : mPageSize, mPageSize, mPrefetchDistance);
+                return new Config(mPageCache, mInitialSize > 0 ? mInitialSize : mPageSize, mPageSize, mPrefetchDistance);
             }
 
             private void __checkParameters() {
@@ -544,8 +531,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
                 if (mPageCache instanceof Integer) {
                     final int maxPageCount = (int)mPageCache;
-                    if (maxPageCount < 0) {
-                        throw new AssertionError("Invalid parameter - maxPageCount(" + maxPageCount + ") must be >= 0");
+                    if (maxPageCount != 0 && maxPageCount <= 1) {
+                        throw new AssertionError("Invalid parameter - maxPageCount(" + maxPageCount + ") must be > 1");
                     }
                 }
 
@@ -558,28 +545,66 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>LoadTask</tt> is an implementation of a {@link AbsAsyncTask}.
+     * Class <tt>PageCache</tt> is an implementation of a {@link Cache}.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static final class LoadTask extends AbsAsyncTask<Integer, Object, List> {
-        private final int mPageIndex;
+    private static final class PageCache<E> implements Cache<Integer, List<E>> {
+        private List<E> mInitialPage;
+        private final Cache<Integer, List<E>> mPages;
 
-        public LoadTask(Object owner, int pageIndex) {
-            super(owner);
-            mPageIndex = pageIndex;
+        public PageCache(Cache<Integer, List<E>> pages) {
+            mPages = pages;
         }
 
         @Override
-        protected List doInBackground(Integer... params) {
-            final PageAdapter adapter = getOwner();
-            return (adapter != null ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
+        public void clear() {
+            mPages.clear();
+            mInitialPage = null;
         }
 
         @Override
-        protected void onPostExecute(List result) {
-            final PageAdapter adapter = getOwner();
-            if (adapter != null) {
-                adapter.onLoadComplete(mPageIndex, result);
+        public List<E> remove(Integer pageIndex) {
+            return mPages.remove(pageIndex);
+        }
+
+        @Override
+        public List<E> get(Integer pageIndex) {
+            return (pageIndex == 0 ? mInitialPage : mPages.get(pageIndex));
+        }
+
+        @Override
+        public List<E> put(Integer pageIndex, List<E> page) {
+            if (pageIndex == 0) {
+                mInitialPage = page;
+                return null;
+            } else {
+                return mPages.put(pageIndex, page);
+            }
+        }
+
+        /* package */ final void dump(Printer printer, StringBuilder result) {
+            if (mPages instanceof ArrayMapCache) {
+                dump(printer, ((ArrayMapCache<Integer, List<E>>)mPages).entrySet(), result);
+            } else if (mPages instanceof SimpleLruCache) {
+                dump(printer, ((SimpleLruCache<Integer, List<E>>)mPages).snapshot().entrySet(), result);
+            }
+        }
+
+        private void dump(Printer printer, Set<Entry<Integer, List<E>>> entries, StringBuilder result) {
+            result.setLength(0);
+            printer.println(DeviceUtils.toString(mPages, result.append("  PageCache [ ")).append(", size = ").append(entries.size() + (mInitialPage != null ? 1 : 0)).append(" ]").toString());
+
+            if (mInitialPage != null) {
+                result.setLength(0);
+                printer.println(DeviceUtils.toString(mInitialPage, result.append("    Page 0  ==> ")).append(" { count = ").append(mInitialPage.size()).append(" }").toString());
+            }
+
+            final Formatter formatter = new Formatter(result);
+            for (Entry<Integer, List<E>> entry : entries) {
+                final List<E> page = entry.getValue();
+                result.setLength(0);
+
+                formatter.format("    Page %-2d ==> ", entry.getKey());
+                printer.println(DeviceUtils.toString(page, result).append(" { count = ").append(page.size()).append(" }").toString());
             }
         }
     }

@@ -469,9 +469,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * Class <tt>Builder</tt> to creates an {@link ImageModule}.
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
-     * private ImageModule&lt;String, Bitmap&gt; mImageModule;
+     * private ImageModule mImageModule;
      *
-     * mImageModule = new Builder&lt;String, Bitmap&gt;(context)
+     * mImageModule = new Builder(context)
      *     .setScaleMemory(0.4f)   // The memory cache size.
      *     .setFileSize(1000)      // The file cache size.
      *     .build();</pre>

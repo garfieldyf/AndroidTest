@@ -5,7 +5,7 @@ import android.content.Context;
 import android.ext.content.AbsAsyncTask;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.ext.widget.PageAdapter;
+import android.ext.widget.PageAdapter2;
 import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -88,9 +88,9 @@ public class RecyclerViewActivity extends Activity {
         }
     };
 
-    private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
+    private final class RecyclerAdapter extends PageAdapter2<String, BaseHolder> {
         public RecyclerAdapter() {
-            super(new Config.Builder()
+            super(MainApplication.sThreadPool, new Config.Builder()
                 .setPageSize(PAGE_SIZE)
                 .setInitialSize(INITIAL_SIZE)
                 .setMaximumPageCount(MAX_PAGE_SIZE)
@@ -136,9 +136,15 @@ public class RecyclerViewActivity extends Activity {
 
         @Override
         public List<String> loadPage(int page, int startPosition, int loadSize) {
-            Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
-            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, loadSize);
-            return null;
+            //Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
+//            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, loadSize);
+//            return null;
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+            }
+
+            return mData.subList(startPosition, startPosition + loadSize);
         }
     }
 

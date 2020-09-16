@@ -337,7 +337,7 @@ public final class Pools {
     }
 
     static {
-        BYTE_ARRAY_POOL = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 3));
+        BYTE_ARRAY_POOL = new SynchronizedPool<byte[]>(new ArrayPool<byte[]>(() -> new byte[8192], 2));
     }
 
     /**

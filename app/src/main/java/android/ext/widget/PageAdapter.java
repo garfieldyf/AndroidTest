@@ -65,7 +65,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mPageCache.clear();
         mLoadStates.clear();
         mLastPosition = 0;
-        mMaxPageIndex = (itemCount > mConfig.initialSize ? (int)Math.ceil((double)(itemCount - mConfig.initialSize) / mConfig.pageSize) : 0);
+        mMaxPageIndex = (int)Math.ceil((double)(itemCount - mConfig.initialSize) / mConfig.pageSize);
         postNotifyDataSetChanged();
     }
 
@@ -255,6 +255,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         mLoadStates.clear(pageIndex);
         final int size = ArrayUtils.getSize(page);
         if (size > 0) {
+            DebugUtils.__checkDebug(true, "PageAdapter", "setPage - pageIndex = " + pageIndex + ", startPosition = " + getPositionForPage(pageIndex) + ", size = " + size);
             mPageCache.put(pageIndex, (List<E>)page);
             postNotifyItemRangeChanged(getPositionForPage(pageIndex), size, payload);
         }
@@ -339,12 +340,26 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * this method to return <tt>List</tt> for a particular page. <p>If you want to
      * asynchronously load the page data to prevent blocking the UI, it is possible
      * to return <tt>null</tt> and at a later time call {@link #setPage}.<p>
-     * @param pageIndex The index of the page whose data should be returned.
+     * @param pageIndex The index of the page whose data should be load.
      * @param startPosition The start position of data to load.
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
     protected abstract List<E> loadPage(int pageIndex, int startPosition, int loadSize);
+
+    /**
+     * Returns a page at the given the <em>pageIndex</em>.
+     */
+    /* package */ List<E> loadPageImpl(int pageIndex, int startPosition, int loadSize) {
+        final List<E> page = loadPage(pageIndex, startPosition, loadSize);
+        if (ArrayUtils.getSize(page) > 0) {
+            // Clears the page loading state.
+            mLoadStates.clear(pageIndex);
+            mPageCache.put(pageIndex, page);
+        }
+
+        return page;
+    }
 
     /**
      * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
@@ -355,29 +370,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     private List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
-        List<E> page = mPageCache.get(pageIndex);
-        if (page == null && !mLoadStates.get(pageIndex)) {
-            // Computes the startPosition and loadSize to load.
-            final int startPosition, loadSize;
-            if (pageIndex == 0) {
-                loadSize = mConfig.initialSize;
-                startPosition = 0;
-            } else {
-                loadSize = mConfig.pageSize;
-                startPosition = (pageIndex - 1) * mConfig.pageSize + mConfig.initialSize;
-            }
-
-            // Loads the page data and sets the page loading state.
-            mLoadStates.set(pageIndex);
-            page = loadPage(pageIndex, startPosition, loadSize);
-            if (ArrayUtils.getSize(page) > 0) {
-                // Clears the page loading state.
-                mLoadStates.clear(pageIndex);
-                mPageCache.put(pageIndex, page);
-            }
+        final List<E> page = mPageCache.get(pageIndex);
+        if (page != null || mLoadStates.get(pageIndex)) {
+            return page;
         }
 
-        return page;
+        // Computes the startPosition and loadSize to load.
+        final int startPosition, loadSize;
+        if (pageIndex == 0) {
+            loadSize = mConfig.initialSize;
+            startPosition = 0;
+        } else {
+            loadSize = mConfig.pageSize;
+            startPosition = (pageIndex - 1) * mConfig.pageSize + mConfig.initialSize;
+        }
+
+        // Loads the page data and sets the page loading state.
+        DebugUtils.__checkDebug(true, "PageAdapter", "loadPage - pageIndex = " + pageIndex + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
+        mLoadStates.set(pageIndex);
+        return loadPageImpl(pageIndex, startPosition, loadSize);
     }
 
     /**

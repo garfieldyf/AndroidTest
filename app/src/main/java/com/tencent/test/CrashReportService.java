@@ -97,14 +97,8 @@ public final class CrashReportService extends Service {
                 os = new GZIPOutputStream(os);
             }
 
-            final JsonWriter writer = new JsonWriter(new OutputStreamWriter(os));
-            try {
-                writer.beginObject();
-                CrashDatabase.writeDeviceInfo(writer, getPackageName());
-                CrashDatabase.writeTo(writer.name("crashes"), (Cursor)params[0]);
-                writer.endObject();
-            } finally {
-                writer.close();
+            try (final JsonWriter writer = new JsonWriter(new OutputStreamWriter(os))) {
+                CrashDatabase.write(writer, (Cursor)params[0], getPackageName());
             }
         }
     }

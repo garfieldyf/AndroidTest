@@ -210,31 +210,39 @@ public final class ProcessUtils {
 
         /**
          * Writes the specified crash infos to the <em>writer</em>.
-         * <p>The crash infos such as the following:</p><pre>
-         * [{
-         *     "_date": 1537852558991,
-         *     "vcode": 1,
-         *     "vname": "1.0",
-         *     "process": "com.xxxx",
-         *     "thread": "main",
-         *     "class": "java.lang.NullPointerException",
-         *     "stack": "java.lang.NullPointerException: This is test! ... ..."
-         *   }, ... ]</pre>
+         * <p>The result json such as the following:</p><pre>
+         * {
+         *     "model": "MODEL",
+         *     "brand": "BRAND",
+         *     "sdk": 19,
+         *     "version": "4.4.4",
+         *     "abis": "arm64-v8a|armeabi-v7a|armeabi",
+         *     "package": "com.xxxx",
+         *     "crashes": [{
+         *         "_date": 1537852558991,
+         *         "vcode": 1,
+         *         "vname": "1.0",
+         *         "process": "com.xxxx",
+         *         "thread": "main",
+         *         "class": "java.lang.NullPointerException",
+         *         "stack": "java.lang.NullPointerException: This is test! ... ..."
+         *     }, ... ]
+         * }</pre>
          * @param writer The {@link JsonWriter} to write to.
          * @param cursor The {@link Cursor} from which to get the crash data.
          * May be returned earlier by {@link CrashDatabase#query(long)}.
-         * @return The <em>writer</em>.
+         * @param packageName The application's package name.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
          * @see #writeDeviceInfo(JsonWriter, String)
          * @see DatabaseUtils#writeCursor(JsonWriter, Cursor, String[])
          */
-        public static JsonWriter writeTo(JsonWriter writer, Cursor cursor) throws IOException {
-            return DatabaseUtils.writeCursor(writer, cursor, cursor.getColumnNames());
+        public static void write(JsonWriter writer, Cursor cursor, String packageName) throws IOException {
+            DatabaseUtils.writeCursor(writeDeviceInfo(writer.beginObject(), packageName).name("crashes"), cursor, cursor.getColumnNames()).endObject();
         }
 
         /**
          * Writes the device info (e.g. mode, brand, version, abis and package name)
-         * to the <em>writer</em>.<p>The device info such as the following:</p><pre>
+         * to the <em>writer</em>.<p>The result json such as the following:</p><pre>
          * "model": "MODEL",
          * "brand": "BRAND",
          * "sdk": 19,
@@ -245,7 +253,7 @@ public final class ProcessUtils {
          * @param packageName The application's package name.
          * @return The <em>writer</em>.
          * @throws IOException if an error occurs while writing to the <em>writer</em>.
-         * @see #writeTo(JsonWriter, Cursor)
+         * @see #write(JsonWriter, Cursor, String)
          */
         public static JsonWriter writeDeviceInfo(JsonWriter writer, String packageName) throws IOException {
             return writer.name("model").value(Build.MODEL)

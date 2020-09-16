@@ -152,7 +152,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final Printer printer = new LogPrinter(Log.DEBUG, "aaaa");
         DeviceUtils.dumpSystemInfo(this, printer);
         mDatabase2 = new NoteDatabase(getApplicationContext());
-        // testReport();
+//         testReport();
         // Log.i("yf", NetworkUtils.getActiveNetworkInfo(this).toString());
 //         testScanFiles();
         // JSONTest.download(this);
@@ -959,7 +959,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     public static void report(Context context) {
         final ByteArrayBuffer crashInfos = new ByteArrayBuffer();
         final JsonWriter writer = new JsonWriter(new OutputStreamWriter(crashInfos));
-        writer.setIndent("    ");
+//        writer.setIndent("    ");
 
         final long now = System.currentTimeMillis();
         final CrashDatabase db = new CrashDatabase(context);
@@ -967,7 +967,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         try {
             DebugUtils.startMethodTracing();
-            CrashDatabase.writeTo(writer, cursor);
+            CrashDatabase.write(writer, cursor, BuildConfig.APPLICATION_ID);
             FileUtils.close(writer);
             DebugUtils.stopMethodTracing("yf", "queryCrashInfos count = " + cursor.getCount());
 

@@ -115,26 +115,12 @@ public final class UriUtils {
     }
 
     /**
-     * Equivalent to calling <tt>getResourceUri(context.getPackageName(), resource)</tt>.
-     * @param context The <tt>Context</tt>.
-     * @param resource Type {@link Integer} or {@link String} representation of the
-     * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
-     * @return A uri {@link String} for the given <em>resource</em>.
-     * @see #getResourceUri(String, Object)
-     */
-    public static String getResourceUri(Context context, Object resource) {
-        DebugUtils.__checkError(context == null || resource == null, "Invalid parameters - context == null || resource == null");
-        return (SCHEME_ANDROID_RESOURCE + "://" + context.getPackageName() + "/" + resource);
-    }
-
-    /**
      * Constructs a scheme is "android.resource" uri string. The returned string such as
      * <tt>"android.resource://<em>packageName</em>/drawable/ic_launcher"</tt>.
      * @param packageName The application's package name.
      * @param resource Type {@link Integer} or {@link String} representation of the
      * resource, such as <tt>R.drawable.ic_launcher</tt> or <tt>"drawable/ic_launcher"</tt>.
      * @return A uri {@link String} for the given <em>resource</em>.
-     * @see #getResourceUri(Context, Object)
      */
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null || resource == null, "Invalid parameters - packageName == null || resource == null");

@@ -164,16 +164,16 @@ public class NumericView extends View {
     }
 
     /**
-     * Returns the horizontal margin used between each drawable in this view.
-     * @return The horizontal margin between each drawable, in pixels.
+     * Returns the horizontal margin between each number drawable in this view.
+     * @return The horizontal margin, in pixels.
      */
     public int getHorizontalMargin() {
         return mHorizontalMargin;
     }
 
     /**
-     * Sets the horizontal margin used between each drawable in this view.
-     * @param horizontalMargin The horizontal margin between each drawable, in pixels.
+     * Sets the horizontal margin between each number drawable in this view.
+     * @param horizontalMargin The horizontal margin, in pixels.
      */
     public void setHorizontalMargin(int horizontalMargin) {
         if (mHorizontalMargin != horizontalMargin) {

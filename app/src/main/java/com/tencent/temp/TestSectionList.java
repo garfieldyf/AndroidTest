@@ -12,15 +12,19 @@ public final class TestSectionList {
     public static void testList() {
         final LogPrinter printer = new LogPrinter(Log.INFO, "abcd");
         SectionList<String> list = new SectionList<String>();
+//        list.add("section_add");
         list.addSection(buildSection(0, 3));
         list.addSection(buildSection(1, 4));
         list.addSection(0, buildSection(3, 5));
         list.addSection(1, buildSection(2, 6));
-        list.clear();
-        list.addSection(0, buildSection(2, 6));
-        list.addSection(0, buildSection(1, 4));
-        list.addSection(1, buildSection(3, 3));
-        list.addSection(2, buildSection(4, 2));
+//        list.add(5, "section_add_5");
+//        list.add("section_add_2");
+//        list.add(9, "section_add_9");
+//        list.clear();
+//        list.addSection(0, buildSection(2, 6));
+//        list.addSection(0, buildSection(1, 4));
+//        list.addSection(1, buildSection(3, 3));
+//        list.addSection(2, buildSection(4, 2));
         forEach(printer, list);
         //printer.println("section = " + list.getSectionForPosition(17));
     }
@@ -58,6 +62,13 @@ public final class TestSectionList {
 
     private static void forEach(Printer printer, SectionList<String> list) {
         list.dump(printer);
+        final int sectionCount = list.getSectionCount();
+        for (int i = 0, index = 0; i < sectionCount; ++i) {
+            final List<String> section = list.getSection(i);
+            for (int j = 0, size = section.size(); j < size; ++j, ++index) {
+                printer.println("index = " + index + ", section = " + i + ", sectionIndex = " + j + ", value = " + section.get(j));
+            }
+        }
     }
 
     private static List<String> buildSection(int sectionIndex, int count) {

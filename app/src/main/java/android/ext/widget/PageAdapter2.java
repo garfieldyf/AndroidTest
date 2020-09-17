@@ -57,7 +57,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         @Override
         protected List doInBackground(Integer[] params) {
             final PageAdapter adapter = getOwner();
-            return (adapter != null ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
+            return (adapter != null && !isDestroyed(adapter) ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
         }
 
         @Override

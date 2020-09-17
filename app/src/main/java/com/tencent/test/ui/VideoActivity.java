@@ -10,6 +10,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -105,7 +106,13 @@ public class VideoActivity extends Activity {
         final TextView view = (TextView)findViewById(id);
         SpannableStringBuilder builder = new SpannableStringBuilder("@").append(text);
 
-        AnimatedImageSpan span = AnimatedImageSpan.newGIFImageSpan(view, R.drawable.mood);
+        AnimatedImageSpan span;
+        if (Build.VERSION.SDK_INT >= 24) {
+            span = AnimatedImageSpan.newAnimatedImageSpan(view, R.drawable.gif_drawable);
+        } else {
+            span = AnimatedImageSpan.newGIFImageSpan(view, R.drawable.mood);
+        }
+
         span.setPadding(0, 8, 0, 8);
         builder.setSpan(span, 0, 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
         view.setText(builder);

@@ -4,7 +4,6 @@ import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFDrawable;
 import android.ext.util.DebugUtils;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Drawable.Callback;
 import android.os.SystemClock;
@@ -21,15 +20,15 @@ public class AnimatedImageSpan extends ImageSpan implements Callback {
     /**
      * Rerturns an {@link AnimatedImageSpan} with given the resource <em>id</em>.
      * @param view The {@link View}.
-     * @param id The resource id of the {@link AnimationDrawable}.
+     * @param id The resource id of the {@link Animatable} drawable.
      * @return The <tt>AnimatedImageSpan</tt>.
      * @see #newGIFImageSpan(View, int)
      */
     @SuppressWarnings("deprecation")
     public static AnimatedImageSpan newAnimatedImageSpan(View view, int id) {
-        final AnimationDrawable drawable = (AnimationDrawable)view.getResources().getDrawable(id);
+        final Drawable drawable = view.getResources().getDrawable(id);
         DebugUtils.__checkError(drawable == null, "Couldn't load resource - ID #0x" + Integer.toHexString(id));
-        return new AnimatedImageSpan(view, drawable);
+        return new AnimatedImageSpan(view, (Drawable & Animatable)drawable);
     }
 
     /**

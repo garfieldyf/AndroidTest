@@ -139,7 +139,7 @@ public final class GIFImage {
      * @see #getFrameCount()
      */
     public final int getFrameDelay(int frameIndex) {
-        DebugUtils.__checkError(frameIndex < 0 || frameIndex >= getFrameCount(), "Index out of bounds - [ frameIndex = " + frameIndex + ", frameCount = " + getFrameCount() + " ]");
+        DebugUtils.__checkError(frameIndex < 0 || frameIndex >= getFrameCount(), "Invalid parameters - frameIndex out of bounds [ frameIndex = " + frameIndex + ", frameCount = " + getFrameCount() + " ]");
         return nativeGetFrameDelay(mNativeImage, frameIndex);
     }
 
@@ -154,10 +154,12 @@ public final class GIFImage {
      */
     public final boolean draw(Bitmap bitmapCanvas, int frameIndex) {
         DebugUtils.__checkError(bitmapCanvas == null, "Invalid parameters - bitmapCanvas == null");
+        DebugUtils.__checkError(bitmapCanvas.isRecycled(), "The bitmap canvas was recycled.");
         DebugUtils.__checkError(!bitmapCanvas.isMutable(), "The bitmap canvas must be a mutable bitmap.");
         DebugUtils.__checkError(bitmapCanvas.getConfig() != Config.ARGB_8888, "The bitmap canvas pixel format must be ARGB_8888");
         DebugUtils.__checkError(bitmapCanvas.getWidth() < width, "The bitmap canvas width (" + bitmapCanvas.getWidth() + ") must be >= GIF image width (" + width + ")");
         DebugUtils.__checkError(bitmapCanvas.getHeight() < height, "The bitmap canvas height (" + bitmapCanvas.getHeight() + ") must be >= GIF image height (" + height + ")");
+        DebugUtils.__checkError(frameIndex < 0 || frameIndex >= getFrameCount(), "Invalid parameters - frameIndex out of bounds [ frameIndex = " + frameIndex + ", frameCount = " + getFrameCount() + " ]");
         return nativeDraw(bitmapCanvas, mNativeImage, frameIndex);
     }
 
@@ -182,7 +184,7 @@ public final class GIFImage {
         printer.println(new StringBuilder(96)
             .append("GIFImage { nativePtr = 0x").append(Long.toHexString(mNativeImage))
             .append(", width = ").append(width).append(", height = ").append(height)
-            .append(", frameCount = ").append(nativeGetFrameCount(mNativeImage))
+            .append(", frameCount = ").append(getFrameCount())
             .append(" }").toString());
     }
 

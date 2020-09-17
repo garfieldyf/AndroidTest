@@ -405,10 +405,10 @@ public final class JSONUtils {
                 break;
 
             case NULL:
-                // Don't skip null, because the result's size will be incorrect.
+                // Don't skip NULL, because the result's size will be incorrect.
                 result.add(null);
                 reader.nextNull();
-                DebugUtils.__checkWarning(true, "JSONUtils", "The type is JsonToken.NULL, add null to JSONArray.");
+                DebugUtils.__checkWarning(true, "JSONUtils", "The type is NULL, add null to JSONArray.");
                 break;
 
             default:

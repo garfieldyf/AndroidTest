@@ -13,6 +13,7 @@ import android.view.View;
 import java.util.BitSet;
 import java.util.Formatter;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -42,7 +43,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkError(config == null, "Invalid parameter - config == null");
         mConfig = config;
         mLoadStates = new BitSet();
-        mPageCache  = new PageCache<E>(config.createPageCache());
+        mPageCache  = config.createPageCache();
     }
 
     /**
@@ -102,13 +103,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         if (mLastPosition > position) {
             // Prefetch the pageIndex previous page data.
             if (pageIndex > 0 && itemIndex == mConfig.prefetchDistance) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex - 1) + ", itemIndex = " + itemIndex);
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex - 1) + ", itemIndex = " + itemIndex + ", position = " + position);
                 getPage(pageIndex - 1);
             }
         } else if (pageIndex < mMaxPageIndex) {
             // Prefetch the pageIndex next page data.
             if (itemIndex == mConfig.getPrefetchIndex(pageIndex)) {
-                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex + 1) + ", itemIndex = " + itemIndex);
+                DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex + 1) + ", itemIndex = " + itemIndex + ", position = " + position);
                 getPage(pageIndex + 1);
             }
         }
@@ -308,9 +309,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
-        final StringBuilder result = new StringBuilder(128);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d ] ", getClass().getSimpleName(), mConfig.initialSize, mConfig.pageSize, mItemCount);
-        ((PageCache<E>)mPageCache).dump(printer, result);
+        if (mPageCache instanceof LruPageCache) {
+            dump(printer, ((LruPageCache<E>)mPageCache).snapshot().entrySet());
+        } else if (mPageCache instanceof ArrayMapCache) {
+            dump(printer, ((ArrayMapCache<Integer, List<E>>)mPageCache).entrySet());
+        } else if (mPageCache instanceof SimpleLruCache) {
+            dump(printer, ((SimpleLruCache<Integer, List<E>>)mPageCache).snapshot().entrySet());
+        }
     }
 
     /**
@@ -392,6 +397,25 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
+     * Dump this page cache.
+     */
+    private void dump(Printer printer, Set<Entry<Integer, List<E>>> entries) {
+        final StringBuilder result = new StringBuilder(128);
+        final Formatter formatter  = new Formatter(result);
+        DeviceUtils.dumpSummary(printer, result, 128, " Dumping %s [ initialSize = %d, pageSize = %d, itemCount = %d, maxPageCount = %d ] ", getClass().getSimpleName(), mConfig.initialSize, mConfig.pageSize, mItemCount, mConfig.getMaximumPageCount());
+        result.setLength(0);
+        printer.println(DeviceUtils.toString(mPageCache, result.append("  PageCache [ ")).append(", size = ").append(entries.size()).append(" ]").toString());
+
+        for (Entry<Integer, List<E>> entry : entries) {
+            final List<E> page = entry.getValue();
+            result.setLength(0);
+
+            formatter.format("    Page %-2d ==> ", entry.getKey());
+            printer.println(DeviceUtils.toString(page, result).append(" { count = ").append(page.size()).append(" }").toString());
+        }
+    }
+
+    /**
      * Class <tt>Config</tt> used to {@link PageAdapter} to loads data.
      */
     public static final class Config {
@@ -424,7 +448,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          * cache is <b>unlimitted-size</b> or <tt>-1</tt> if unknown.
          */
         public final int getMaximumPageCount() {
-            return (mPageCache instanceof Integer ? (int)mPageCache : -1);
+            return (mPageCache == null ? 0 : (mPageCache instanceof Integer ? (int)mPageCache : -1));
         }
 
         /**
@@ -454,7 +478,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             }
 
             final int maxPageCount = (mPageCache instanceof Integer ? (int)mPageCache : 0);
-            return (maxPageCount != 0 ? new SimpleLruCache<Integer, List<E>>(maxPageCount - 1) : new ArrayMapCache<Integer, List<E>>(8));
+            return (maxPageCount != 0 ? new LruPageCache<E>(maxPageCount - 1) : new ArrayMapCache<Integer, List<E>>(8));
         }
 
         /**
@@ -556,30 +580,28 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Class <tt>PageCache</tt> is an implementation of a {@link Cache}.
+     * Class <tt>LruPageCache</tt> is an implementation of a {@link SimpleLruCache}.
      */
-    private static final class PageCache<E> implements Cache<Integer, List<E>> {
+    private static final class LruPageCache<E> extends SimpleLruCache<Integer, List<E>> {
         private List<E> mInitialPage;
-        private final Cache<Integer, List<E>> mPages;
 
-        public PageCache(Cache<Integer, List<E>> pages) {
-            mPages = pages;
+        /**
+         * Constructor
+         * @param maxPageCount The maximum number of pages to allow in this cache.
+         */
+        public LruPageCache(int maxPageCount) {
+            super(maxPageCount);
         }
 
         @Override
         public void clear() {
-            mPages.clear();
+            super.clear();
             mInitialPage = null;
         }
 
         @Override
-        public List<E> remove(Integer pageIndex) {
-            return mPages.remove(pageIndex);
-        }
-
-        @Override
         public List<E> get(Integer pageIndex) {
-            return (pageIndex == 0 ? mInitialPage : mPages.get(pageIndex));
+            return (pageIndex == 0 ? mInitialPage : super.get(pageIndex));
         }
 
         @Override
@@ -588,35 +610,15 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
                 mInitialPage = page;
                 return null;
             } else {
-                return mPages.put(pageIndex, page);
+                return super.put(pageIndex, page);
             }
         }
 
-        /* package */ final void dump(Printer printer, StringBuilder result) {
-            if (mPages instanceof ArrayMapCache) {
-                dump(printer, ((ArrayMapCache<Integer, List<E>>)mPages).entrySet(), result);
-            } else if (mPages instanceof SimpleLruCache) {
-                dump(printer, ((SimpleLruCache<Integer, List<E>>)mPages).snapshot().entrySet(), result);
-            }
-        }
-
-        private void dump(Printer printer, Set<Entry<Integer, List<E>>> entries, StringBuilder result) {
-            result.setLength(0);
-            printer.println(DeviceUtils.toString(mPages, result.append("  PageCache [ ")).append(", size = ").append(entries.size() + (mInitialPage != null ? 1 : 0)).append(" ]").toString());
-
-            if (mInitialPage != null) {
-                result.setLength(0);
-                printer.println(DeviceUtils.toString(mInitialPage, result.append("    Page 0  ==> ")).append(" { count = ").append(mInitialPage.size()).append(" }").toString());
-            }
-
-            final Formatter formatter = new Formatter(result);
-            for (Entry<Integer, List<E>> entry : entries) {
-                final List<E> page = entry.getValue();
-                result.setLength(0);
-
-                formatter.format("    Page %-2d ==> ", entry.getKey());
-                printer.println(DeviceUtils.toString(page, result).append(" { count = ").append(page.size()).append(" }").toString());
-            }
+        @Override
+        public Map<Integer, List<E>> snapshot() {
+            final Map<Integer, List<E>> result = super.snapshot();
+            result.put(0, mInitialPage);
+            return result;
         }
     }
 }

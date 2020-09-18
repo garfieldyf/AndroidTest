@@ -35,8 +35,7 @@ public class NumericView extends View {
 
         final String packageName = context.getPackageName();
         final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "NumericView"));
-        final String value = a.getString(ReflectUtils.getResourceStyleable(packageName, "NumericView_value"));
-        mValue  = (value != null ? value : "");
+        mValue  = checkValue(a.getString(ReflectUtils.getResourceStyleable(packageName, "NumericView_value")));
         mValues = initValues(a.getResourceId(ReflectUtils.getResourceStyleable(packageName, "NumericView_drawables"), 0));
         mDotWidth = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_dotWidth"), 0);
         mNumberWidth  = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_numberWidth"), 0);
@@ -75,14 +74,7 @@ public class NumericView extends View {
      * @see #setValue(float)
      */
     public void setValue(String value) {
-        if (TextUtils.isEmpty(value)) {
-            value = "";
-        } else {
-            // Check the value is a number.
-            Float.parseFloat(value);
-        }
-
-        setValueInternal(value);
+        setValueInternal(checkValue(value));
     }
 
     /**
@@ -187,9 +179,7 @@ public class NumericView extends View {
         final StringBuilder result = new StringBuilder(128);
         DeviceUtils.dumpSummary(printer, result, 100, " Dumping NumericView [ value = %s, size = %d ] ", mValue, mValues.length);
         for (int i = 0; i < mValues.length; ++i) {
-            result.setLength(0);
-            final Value value = mValues[i];
-            printer.println(result.append("  [ index = ").append(i).append(", id = 0x").append(Integer.toHexString(value.id)).append(", drawable = ").append(value.drawable).append(" ]").toString());
+            mValues[i].dump(printer, i, result);
         }
     }
 
@@ -274,6 +264,17 @@ public class NumericView extends View {
         return values;
     }
 
+    private String checkValue(String value) {
+        if (TextUtils.isEmpty(value)) {
+            value = "";
+        } else {
+            // Check the value is a number.
+            Float.parseFloat(value);
+        }
+
+        return value;
+    }
+
     private void setValueInternal(String value) {
         if (!mValue.equals(value)) {
             mValue = value;
@@ -286,8 +287,8 @@ public class NumericView extends View {
      * Class <tt>Value</tt> wrapped a drawable and a resource id.
      */
     private static final class Value {
-        /* package */ final int id;
-        /* package */ Drawable drawable;
+        private final int id;
+        private Drawable drawable;
 
         public Value(int id) {
             DebugUtils.__checkError(id == 0, "Invalid drawable id");
@@ -301,6 +302,11 @@ public class NumericView extends View {
             }
 
             return drawable;
+        }
+
+        public final void dump(Printer printer, int index, StringBuilder result) {
+            result.setLength(0);
+            printer.println(result.append("  [ index = ").append(index).append(", id = 0x").append(Integer.toHexString(id)).append(", drawable = ").append(drawable).append(" ]").toString());
         }
     }
 }

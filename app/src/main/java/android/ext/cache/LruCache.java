@@ -46,7 +46,10 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
 
     @Override
     public synchronized V get(K key) {
-        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
+        if (key == null) {
+            throw new NullPointerException("Invalid parameter - key == null");
+        }
+
         return map.get(key);
     }
 
@@ -103,7 +106,10 @@ public class LruCache<K, V> extends SimpleLruCache<K, V> {
     @Override
     /* package */ synchronized V putImpl(K key, V value) {
         final int result = sizeOf(key, value);
-        DebugUtils.__checkError(result < 0, "Negative size: " + key + " = " + value);
+        if (result < 0) {
+            throw new IllegalStateException("Negative size: " + key + " = " + value);
+        }
+
         size += result;
         final V previous = map.put(key, value);
         if (previous != null) {

@@ -88,12 +88,11 @@ public final class RoundedBitmapBinder implements Binder<Object, Object, Bitmap>
      */
     public static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap, float[] radii) {
         if (drawable instanceof RoundedBitmapDrawable) {
-            // Sets the RoundedBitmapDrawable's internal bitmap.
             final RoundedBitmapDrawable d = (RoundedBitmapDrawable)drawable;
             d.setBitmap(bitmap);
             d.setCornerRadii(radii);
 
-            // Update the ImageView's mDrawable is null.
+            // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
         } else {

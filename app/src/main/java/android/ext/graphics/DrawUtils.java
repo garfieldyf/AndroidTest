@@ -207,7 +207,7 @@ public final class DrawUtils {
      * @param paint The paint used to draw, This parameter can <b>not</b> be <tt>null</tt>.
      */
     public static void drawInvertedBitmap(Canvas canvas, Object source, float width, float height, int alpha, float percent, int direction, Paint paint) {
-        DebugUtils.__checkError(source == null, "Invalid parameters - source == null");
+        DebugUtils.__checkError(source == null, "Invalid parameter - source == null");
         DebugUtils.__checkError(width <= 0 || height <= 0, "Invalid parameters - width(" + width + ") and height(" + height + ") must be > 0");
         DebugUtils.__checkError(!(source instanceof Bitmap || source instanceof View), "Invalid source - " + source.getClass().getName());
         float scale, dx = 0, dy = 0, startX = 0, stopX = 0, startY = 0, stopY = 0;

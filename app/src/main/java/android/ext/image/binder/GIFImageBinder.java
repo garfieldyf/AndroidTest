@@ -77,12 +77,11 @@ public class GIFImageBinder implements Binder<Object, Object, GIFImage> {
         DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof GIFDrawable) {
-            // Sets the GIFDrawable's internal image.
             final GIFDrawable drawable = (GIFDrawable)oldDrawable;
             final boolean isRunning = drawable.isRunning();
             drawable.setImage(image);
 
-            // Update the ImageView's mDrawable is null.
+            // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
 

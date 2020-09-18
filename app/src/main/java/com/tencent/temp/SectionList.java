@@ -102,7 +102,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
     @Override
     public void add(int index, E value) {
-        DebugUtils.__checkError(index < 0 || index > mSize, "Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+        checkIndex(index);
         if (index == mSize) {
             add(value);
         } else {
@@ -134,7 +134,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     @Override
     public boolean addAll(int index, Collection<? extends E> collection) {
         DebugUtils.__checkError(collection == null, "Invalid parameter - collection == null");
-        DebugUtils.__checkError(index < 0 || index > mSize, "Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+        checkIndex(index);
         final int size = collection.size();
         if (size <= 0) {
             return false;
@@ -169,7 +169,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @see #setSection(int, List)
      */
     public List<E> getSection(int sectionIndex) {
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        checkSectionIndex(sectionIndex);
         return mSections[sectionIndex];
     }
 
@@ -184,7 +184,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     public List<E> setSection(int sectionIndex, List<?> section) {
         DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
         DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        checkSectionIndex(sectionIndex);
         final List<E> oldSection = mSections[sectionIndex];
         mSections[sectionIndex] = section;
 
@@ -273,7 +273,10 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @see #getPositionForSection(int)
      */
     public int getSectionForPosition(int index) {
-        DebugUtils.__checkError(index < 0 || index >= mSize, "Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+        if (index < 0 || index >= mSize) {
+            throw new IndexOutOfBoundsException("Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+        }
+
         final int sectionIndex = Arrays.binarySearch(mIndexes, 0, mCount, index);
         return (sectionIndex >= 0 ? sectionIndex : -sectionIndex - 2);
     }
@@ -286,7 +289,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * @see #getSectionForPosition(int)
      */
     public int getPositionForSection(int sectionIndex) {
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        checkSectionIndex(sectionIndex);
         return mIndexes[sectionIndex];
     }
 
@@ -414,6 +417,18 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         System.arraycopy(mSections, 0, newSections, 0, sectionIndex);
         System.arraycopy(mSections, sectionIndex, newSections, sectionIndex + 1, mCount - sectionIndex);
         return newSections;
+    }
+
+    private void checkIndex(int index) {
+        if (index < 0 || index > mSize) {
+            throw new IndexOutOfBoundsException("Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+        }
+    }
+
+    private void checkSectionIndex(int sectionIndex) {
+        if (sectionIndex < 0 || sectionIndex >= mCount) {
+            throw new IndexOutOfBoundsException("Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        }
     }
 
     /**

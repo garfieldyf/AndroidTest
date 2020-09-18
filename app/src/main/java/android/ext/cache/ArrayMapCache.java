@@ -46,19 +46,16 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
 
     @Override
     public V remove(K key) {
-        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         return map.remove(key);
     }
 
     @Override
     public V get(K key) {
-        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
         return map.get(key);
     }
 
     @Override
     public V put(K key, V value) {
-        DebugUtils.__checkError(key == null || value == null, "Invalid parameters - key == null || value == null");
         return map.put(key, value);
     }
 
@@ -68,7 +65,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
      * @return The key that was stored at the <em>index</em>.
      */
     public final K keyAt(int index) {
-        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameters - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
+        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameter - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
         return map.keyAt(index);
     }
 
@@ -78,7 +75,7 @@ public final class ArrayMapCache<K, V> implements Cache<K, V> {
      * @return The value that was stored at the <em>index</em>.
      */
     public final V valueAt(int index) {
-        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameters - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
+        DebugUtils.__checkError(index < 0 || index >= map.size(), "Invalid parameter - index out of bounds [ index = " + index + ", size = " + map.size() + " ]");
         return map.valueAt(index);
     }
 

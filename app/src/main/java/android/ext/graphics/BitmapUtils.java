@@ -161,7 +161,7 @@ public final class BitmapUtils {
      * @return An inverted bitmap.
      */
     public static Bitmap createInvertedBitmap(Object source, int width, int height, int alpha, float percent, int direction, Paint paint) {
-        DebugUtils.__checkError(source == null, "Invalid parameters - source == null");
+        DebugUtils.__checkError(source == null, "Invalid parameter - source == null");
         DebugUtils.__checkError(width <= 0 || height <= 0, "Invalid parameters - width(" + width + ") and height(" + height + ") must be > 0");
         DebugUtils.__checkError(!(source instanceof Bitmap || source instanceof View), "Invalid source - " + source.getClass().getName());
         final float origWidth = width, origHeight = height;

@@ -39,17 +39,6 @@ public final class NetworkUtils {
     public static final String ETHERNET = "eth0";
 
     /**
-     * Closes the {@link HttpURLConnection} and releases resources associated
-     * with the <em>conn</em>, handling <tt>null</tt> <em>conn</em>.
-     * @param conn The <tt>HttpURLConnection</tt> to close.
-     */
-    public static void close(HttpURLConnection conn) {
-        if (conn != null) {
-            conn.disconnect();
-        }
-    }
-
-    /**
      * Returns the MAC address from the network interface.
      * @param ifname The network interface name. May be {@link #WLAN},
      * {@link #ETHERNET} or other interface name.

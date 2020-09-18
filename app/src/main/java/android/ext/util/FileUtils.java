@@ -1070,7 +1070,7 @@ public final class FileUtils {
          * @see #Dirent(String, String, int)
          */
         public Dirent(String path, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(path) == 0, "path == null || path.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(path) == 0, "Invalid parameter - path == null || path.length() == 0");
             Dirent.__checkType(type);
             this.path = path;
             this.type = type;
@@ -1084,7 +1084,7 @@ public final class FileUtils {
          * @see #Dirent(String, int)
          */
         public Dirent(String dir, String name, int type) {
-            DebugUtils.__checkError(StringUtils.getLength(dir) == 0, "dir == null || dir.length() == 0");
+            DebugUtils.__checkError(StringUtils.getLength(dir) == 0, "Invalid parameter - dir == null || dir.length() == 0");
             Dirent.__checkType(type);
             this.path = new File(dir, name).getPath();
             this.type = type;

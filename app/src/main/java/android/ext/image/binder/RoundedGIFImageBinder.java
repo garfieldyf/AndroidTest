@@ -85,13 +85,12 @@ public class RoundedGIFImageBinder extends GIFImageBinder {
         DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof RoundedGIFDrawable) {
-            // Sets the RoundedGIFDrawable's internal image.
             final RoundedGIFDrawable drawable = (RoundedGIFDrawable)oldDrawable;
             final boolean isRunning = drawable.isRunning();
             drawable.setImage(image);
             drawable.setCornerRadii(radii);
 
-            // Update the ImageView's mDrawable is null.
+            // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
 

@@ -46,12 +46,11 @@ public final class RingBitmapBinder implements Binder<String, Object, Bitmap> {
     private void setImageBitmap(ImageView view, Bitmap bitmap) {
         final Drawable oldDrawable = view.getDrawable();
         if (oldDrawable instanceof RingBitmapDrawable) {
-            // Sets the RingBitmapDrawable's internal bitmap.
             final RingBitmapDrawable drawable = (RingBitmapDrawable)oldDrawable;
             drawable.setBitmap(bitmap);
             drawable.setInnerRadius(mInnerRadius);
 
-            // Update the ImageView's mDrawable is null.
+            // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
         } else {

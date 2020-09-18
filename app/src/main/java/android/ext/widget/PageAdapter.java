@@ -39,7 +39,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param config The {@link Config}, which defines how the adapter will load data.
      */
     public PageAdapter(Config config) {
-        DebugUtils.__checkError(config == null, "Invalid parameters - config == null");
+        DebugUtils.__checkError(config == null, "Invalid parameter - config == null");
         mConfig = config;
         mLoadStates = new BitSet();
         mPageCache  = new PageCache<E>(config.createPageCache());
@@ -170,7 +170,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public E setItem(int position, E value, Object payload) {
         DebugUtils.__checkUIThread("setItem");
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid parameter - position out of bounds [ position = " + position + ", itemCount = " + mItemCount + " ]");
 
         E previous = null;
         final long combinedPosition = getPageForPosition(position);
@@ -194,7 +194,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     public E peekItem(int position) {
         DebugUtils.__checkUIThread("peekItem");
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid parameter - position out of bounds [ position = " + position + ", itemCount = " + mItemCount + " ]");
         final long combinedPosition = getPageForPosition(position);
         final List<E> page = mPageCache.get(getOriginalPage(combinedPosition));
         return (page != null ? page.get((int)combinedPosition) : null);
@@ -281,7 +281,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getOriginalPosition(long)
      */
     public final long getPageForPosition(int position) {
-        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
+        DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid parameter - position out of bounds [ position = " + position + ", itemCount = " + mItemCount + " ]");
         final int pageIndex, itemIndex, offset = position - mConfig.initialSize;
         if (offset < 0) {
             pageIndex = 0;

@@ -95,7 +95,7 @@ public final class PackageUtils {
      * @param packageFile The location of the package file to install.
      */
     public static void installPackage(Context context, String authority, File packageFile) {
-        DebugUtils.__checkError(packageFile == null, "Invalid parameters - packageFile == null");
+        DebugUtils.__checkError(packageFile == null, "Invalid parameter - packageFile == null");
         final Uri packageUri;
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         if (Build.VERSION.SDK_INT < 24) {

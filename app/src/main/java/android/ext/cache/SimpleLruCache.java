@@ -62,7 +62,10 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     @Override
     public V get(K key) {
-        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
+        if (key == null) {
+            throw new NullPointerException("Invalid parameter - key == null");
+        }
+
         return map.get(key);
     }
 
@@ -76,7 +79,10 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
      */
     @Override
     public V put(K key, V value) {
-        DebugUtils.__checkError(key == null || value == null, "Invalid parameters - key == null || value == null");
+        if (key == null || value == null) {
+            throw new NullPointerException("Invalid parameters - key == null || value == null");
+        }
+
         final V previous = putImpl(key, value);
         if (previous != null) {
             entryRemoved(false, key, previous, value);
@@ -88,7 +94,10 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
 
     @Override
     public V remove(K key) {
-        DebugUtils.__checkError(key == null, "Invalid parameter - key == null");
+        if (key == null) {
+            throw new NullPointerException("Invalid parameter - key == null");
+        }
+
         final V previous = removeImpl(key);
         if (previous != null) {
             entryRemoved(false, key, previous, null);

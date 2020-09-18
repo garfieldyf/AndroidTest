@@ -39,10 +39,9 @@ public final class OvalBitmapBinder implements Binder<Object, Object, Bitmap> {
      */
     public static void setImageBitmap(ImageView view, Drawable drawable, Bitmap bitmap) {
         if (drawable instanceof OvalBitmapDrawable) {
-            // Sets the OvalBitmapDrawable's internal bitmap.
             ((OvalBitmapDrawable)drawable).setBitmap(bitmap);
 
-            // Update the ImageView's mDrawable is null.
+            // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
             view.setImageDrawable(drawable);
         } else {

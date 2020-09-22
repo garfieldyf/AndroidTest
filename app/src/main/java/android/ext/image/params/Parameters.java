@@ -1,7 +1,6 @@
 package android.ext.image.params;
 
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
@@ -150,21 +149,24 @@ public class Parameters {
         }
     }
 
-    @TargetApi(26)
     private static Config parseConfig(int config) {
-        switch (config) {
-        case RGB_565:
-            return Config.RGB_565;
+        if (Build.VERSION.SDK_INT >= 26) {
+            switch (config) {
+            case RGB_565:
+                return Config.RGB_565;
 
-        case HARDWARE:
-            return Config.HARDWARE;
+            case HARDWARE:
+                return Config.HARDWARE;
 
-        case RGBA_F16:
-            return Config.RGBA_F16;
+            case RGBA_F16:
+                return Config.RGBA_F16;
 
-        default:
-            return Config.ARGB_8888;
+            default:
+                return Config.ARGB_8888;
+            }
         }
+
+        return (config == RGB_565 ? Config.RGB_565 : Config.ARGB_8888);
     }
 
     private static int fixSampleSize(int sampleSize) {

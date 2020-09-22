@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Formatter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Class <tt>SectionList</tt> allows to adding data by section.
@@ -183,7 +184,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      */
     public List<E> setSection(int sectionIndex, List<?> section) {
         DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
+        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameter - The section is null or 0-size");
         checkSectionIndex(sectionIndex);
         final List<E> oldSection = mSections[sectionIndex];
         mSections[sectionIndex] = section;
@@ -201,11 +202,21 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     /**
      * Adds the specified <em>section</em> at the end of this <tt>SectionList</tt>.
      * @param section The {@link List} to add.
+     * @return <tt>true</tt> if this <tt>SectionList</tt> has been modified,
+     * <tt>false</tt> otherwise.
      * @see #addSection(int, List)
      */
-    public void addSection(List<?> section) {
-        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
+    public boolean addSection(List<?> section) {
+        DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
+        if (this == EMPTY_IMMUTABLE_LIST) {
+            throw new UnsupportedOperationException("Unsupported operation - The SectionList is immutable");
+        }
+
+        final int size = section.size();
+        if (size <= 0) {
+            return false;
+        }
+
         if (mCount == mSections.length) {
             final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
             mIndexes  = ArrayUtils.copyOf(mIndexes, mCount, newLength);
@@ -214,7 +225,8 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
         mSections[mCount] = section;
         mIndexes[mCount++] = mSize;
-        mSize += section.size();
+        mSize += size;
+        return true;
     }
 
     /**
@@ -223,28 +235,38 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      * count of this <tt>SectionList</tt>, the <em>section</em> is added at the end.
      * @param sectionIndex The index at which to insert.
      * @param section The {@link List} to add.
+     * @return <tt>true</tt> if this <tt>SectionList</tt> has been modified, <tt>false</tt> otherwise.
      * @see #addSection(List)
      */
-    public void addSection(int sectionIndex, List<?> section) {
-        DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
-        DebugUtils.__checkError(ArrayUtils.getSize(section) == 0, "Invalid parameters - The section is null or 0-size");
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
-        if (sectionIndex == mCount) {
-            addSection(section);
-        } else {
-            if (mCount < mSections.length) {
-                System.arraycopy(mSections, sectionIndex, mSections, sectionIndex + 1, mCount - sectionIndex);
-            } else {
-                final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
-                mSections = newSectionArray(sectionIndex, newLength);
-                mIndexes  = ArrayUtils.copyOf(mIndexes, mCount, newLength);
-            }
-
-            ++mCount;
-            mSections[sectionIndex] = section;
-            mSize += section.size();
-            updateIndexes(sectionIndex);
+    public boolean addSection(int sectionIndex, List<?> section) {
+        DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
+        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid parameter - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        if (this == EMPTY_IMMUTABLE_LIST) {
+            throw new UnsupportedOperationException("Unsupported operation - The SectionList is immutable");
         }
+
+        if (sectionIndex == mCount) {
+            return addSection(section);
+        }
+
+        final int size = section.size();
+        if (size <= 0) {
+            return false;
+        }
+
+        if (mCount < mSections.length) {
+            System.arraycopy(mSections, sectionIndex, mSections, sectionIndex + 1, mCount - sectionIndex);
+        } else {
+            final int newLength = mCount + ARRAY_CAPACITY_INCREMENT;
+            mSections = newSectionArray(sectionIndex, newLength);
+            mIndexes  = ArrayUtils.copyOf(mIndexes, mCount, newLength);
+        }
+
+        ++mCount;
+        mSize += size;
+        mSections[sectionIndex] = section;
+        updateIndexes(sectionIndex);
+        return true;
     }
 
     /**
@@ -254,7 +276,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      */
     public int removeSection(int sectionIndex) {
         DebugUtils.__checkError(this == EMPTY_IMMUTABLE_LIST, "Unsupported operation - The SectionList is immutable");
-        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+        DebugUtils.__checkError(sectionIndex < 0 || sectionIndex >= mCount, "Invalid parameter - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         mSize -= mSections[sectionIndex].size();
         System.arraycopy(mSections, sectionIndex + 1, mSections, sectionIndex, --mCount - sectionIndex);
         mSections[mCount] = null;  // Prevent memory leak.
@@ -274,7 +296,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
      */
     public int getSectionForPosition(int index) {
         if (index < 0 || index >= mSize) {
-            throw new IndexOutOfBoundsException("Invalid parameters - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
+            throw new IndexOutOfBoundsException("Invalid parameter - index out of bounds [ index = " + index + ", size = " + mSize + " ]");
         }
 
         final int sectionIndex = Arrays.binarySearch(mIndexes, 0, mCount, index);
@@ -427,7 +449,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
     private void checkSectionIndex(int sectionIndex) {
         if (sectionIndex < 0 || sectionIndex >= mCount) {
-            throw new IndexOutOfBoundsException("Invalid parameters - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
+            throw new IndexOutOfBoundsException("Invalid parameter - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         }
     }
 
@@ -445,7 +467,10 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
 
         @Override
         public E next() {
-            DebugUtils.__checkError(mIndex >= mSize, "NoSuchElementException");
+            if (mIndex >= mSize) {
+                throw new NoSuchElementException();
+            }
+
             final int startIndex  = mIndexes[mSectionIndex];
             final List<E> section = mSections[mSectionIndex];
             final E value = section.get(mIndex - startIndex);

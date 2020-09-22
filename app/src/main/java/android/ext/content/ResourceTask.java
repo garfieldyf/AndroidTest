@@ -9,6 +9,7 @@ import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.DebugUtils;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.net.URLConnection;
 
 /**
@@ -20,20 +21,9 @@ import java.net.URLConnection;
  * <li><tt>Result</tt>, The type of the result of the task.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is an example:</p><pre>
- * private static class LoadCompleteListener implements OnLoadCompleteListener&lt;String, JSONObject&gt; {
- *    {@code @Override}
- *     public void onLoadComplete(String key, LoadParams&lt;String, JSONObject&gt; loadParams, Object cookie, JSONObject result) {
- *         if (result != null) {
- *             // Loading succeeded, update UI.
- *         } else {
- *             // Loading failed, show error or empty UI.
- *         }
- *     }
- * }
- *
  * new ResourceTask&lt;String, JSONObject&gt;(context, url)
  *    .setCookie(cookie)
- *    .setOnLoadCompleteListener(new LoadCompleteListener())
+ *    .setWeakOnLoadCompleteListener(listener)
  *    .execute(loadParams);</pre>
  * @author Garfield
  */
@@ -56,7 +46,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     /**
      * The {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      */
-    protected OnLoadCompleteListener<Key, Result> mListener;
+    private WeakReference<OnLoadCompleteListener<Key, Result>> mListener;
 
     /**
      * Constructor
@@ -80,11 +70,12 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
 
     /**
      * Sets An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
-     * @param listener The <tt>OnLoadCompleteListener</tt>.
+     * The listener is internally held as {@link WeakReference weak reference}.
+     * @param listener The <tt>OnLoadCompleteListener</tt> to set.
      * @return This <em>task</em>.
      */
-    public final ResourceTask<Key, Result> setOnLoadCompleteListener(OnLoadCompleteListener<Key, Result> listener) {
-        mListener = listener;
+    public final ResourceTask<Key, Result> setWeakOnLoadCompleteListener(OnLoadCompleteListener<Key, Result> listener) {
+        mListener = new WeakReference<OnLoadCompleteListener<Key, Result>>(listener);
         return this;
     }
 
@@ -95,8 +86,11 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
 
     @Override
     protected void onPostExecute(Result result) {
-        DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setOnLoadCompleteListener()");
-        mListener.onLoadComplete(mKey, mCookie, result);
+        DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setWeakOnLoadCompleteListener()");
+        final OnLoadCompleteListener<Key, Result> listener = mListener.get();
+        if (listener != null) {
+            listener.onLoadComplete(mKey, mCookie, result);
+        }
     }
 
     @Override

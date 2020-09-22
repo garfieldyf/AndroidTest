@@ -348,7 +348,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
          * Called on the UI thread when the load is complete.
          * @param key The key, passed earlier by {@link ResourceLoader#load}.
          * @param cookie An object, passed earlier by {@link ResourceLoader#load}.
-         * @param result A result or <tt>null</tt> of the load.
+         * @param result A result of the load or <tt>null</tt>.
          */
         void onLoadComplete(Key key, Object cookie, Result result);
     }

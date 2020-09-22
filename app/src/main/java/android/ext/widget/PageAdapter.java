@@ -309,9 +309,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
-        if (mPageCache instanceof LruPageCache) {
-            dump(printer, ((LruPageCache<E>)mPageCache).snapshot().entrySet());
-        } else if (mPageCache instanceof ArrayMapCache) {
+        if (mPageCache instanceof ArrayMapCache) {
             dump(printer, ((ArrayMapCache<Integer, List<E>>)mPageCache).entrySet());
         } else if (mPageCache instanceof SimpleLruCache) {
             dump(printer, ((SimpleLruCache<Integer, List<E>>)mPageCache).snapshot().entrySet());

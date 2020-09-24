@@ -9,6 +9,12 @@ import java.io.File;
  */
 public interface FileCache extends Cache<String, File> {
     /**
+     * Returns the absolute path of the cache directory.
+     * @return The absolute path of the cache directory.
+     */
+    File getCacheDir();
+
+    /**
      * Clears this cache and deletes all cache files from the filesystem.
      */
     void clear();

@@ -99,6 +99,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.ref.WeakReference;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -231,6 +234,43 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         opts.inPreferredConfig = Config.HARDWARE;
         final Bitmap bitmap2 = BitmapFactory.decodeResource(getResources(), R.drawable.ic_image, opts);
         BitmapUtils.dumpBitmap(this, "ImageModule", bitmap2);
+    }
+
+    private void testMessageDigests(String string) {
+//        testMessageDigests("XmlResources.loadParameters(this, R.xml.size_params).dump(new LogPrinter(Log.DEBUG");
+//        testMessageDigests("DEBUG");
+//        testMessageDigests("final ContentResolver resolver = getContentResolver();\r\nCursor cursor = resolver.query(Contacts.CONTENT_URI, null, null, null, null);");
+//        testMessageDigests("if (cursor != null) {\r\n\tfinal StringBuilder sb = new StringBuilder();\r\n\tandroid.database.DatabaseUtils.dumpCursor(cursor, sb);\r\n\tcursor.close();");
+//        testMessageDigests("");
+
+        final Algorithm[] algorithms = new Algorithm[] {
+            Algorithm.MD5,
+            Algorithm.SHA1,
+            Algorithm.SHA256,
+            Algorithm.SHA384,
+            Algorithm.SHA512,
+        };
+
+        Log.d("abcd", "string = " + string);
+        for (Algorithm algorithm : algorithms) {
+            final byte[] digest1 = computeMessageDigest(string, algorithm.name());
+            final byte[] digest2 = MessageDigests.computeString(string, algorithm);
+            if (!Arrays.equals(digest1, digest2)) {
+                throw new IllegalStateException("testMessageDigests");
+            }
+
+            Log.d("abcd", "\n  algorithm = " + algorithm.toString() +
+                "\n  native = " + StringUtils.toHexString(digest1) +
+                "\n  java   = " + StringUtils.toHexString(digest2));
+        }
+    }
+
+    private static byte[] computeMessageDigest(String string, String algorithm) {
+        try {
+            return MessageDigest.getInstance(algorithm).digest(string.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
     }
 
     private void testJSONArray() {

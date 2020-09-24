@@ -282,7 +282,7 @@ public final class JSONUtils {
             try {
                 return (int)Double.parseDouble((String)value);
             } catch (NumberFormatException e) {
-                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
+                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse to int : " + value, e);
             }
         }
 
@@ -296,7 +296,7 @@ public final class JSONUtils {
             try {
                 return (long)Double.parseDouble((String)value);
             } catch (NumberFormatException e) {
-                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
+                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse to long : " + value, e);
             }
         }
 
@@ -320,7 +320,7 @@ public final class JSONUtils {
             try {
                 return Double.parseDouble((String)value);
             } catch (NumberFormatException e) {
-                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse : " + value, e);
+                DebugUtils.__checkLogError(true, "JSONUtils", "Couldn't parse to double : " + value, e);
             }
         }
 

@@ -25,7 +25,6 @@ public class JSONArray implements List<Object>, RandomAccess {
     /**
      * Constructor
      * @see #JSONArray(int)
-     * @see #JSONArray(List)
      * @see #JSONArray(JSONArray)
      */
     public JSONArray() {
@@ -36,7 +35,6 @@ public class JSONArray implements List<Object>, RandomAccess {
      * Constructor
      * @param capacity The initial capacity of this array.
      * @see #JSONArray()
-     * @see #JSONArray(List)
      * @see #JSONArray(JSONArray)
      */
     public JSONArray(int capacity) {
@@ -44,26 +42,20 @@ public class JSONArray implements List<Object>, RandomAccess {
     }
 
     /**
-     * Constructor
-     * @param values The <tt>List</tt> to set.
-     * @see #JSONArray()
-     * @see #JSONArray(int)
-     * @see #JSONArray(JSONArray)
-     */
-    @SuppressWarnings("unchecked")
-    public JSONArray(List<?> values) {
-        this.values = (List<Object>)values;
-    }
-
-    /**
      * Copy constructor
      * @param array The <tt>JSONArray</tt> to copy.
      * @see #JSONArray()
-     * @see #JSONArray(int)
      * @see #JSONArray(List)
      */
     public JSONArray(JSONArray array) {
         this.values = new ArrayList<Object>(array.values);
+    }
+
+    /**
+     * Constructor
+     */
+    /* package */ JSONArray(List<Object> values) {
+        this.values = values;
     }
 
     @Override

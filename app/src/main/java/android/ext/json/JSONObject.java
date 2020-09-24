@@ -21,7 +21,6 @@ public class JSONObject implements Map<String, Object> {
     /**
      * Constructor
      * @see #JSONObject(int)
-     * @see #JSONObject(Map)
      * @see #JSONObject(JSONObject)
      */
     public JSONObject() {
@@ -32,7 +31,6 @@ public class JSONObject implements Map<String, Object> {
      * Constructor
      * @param capacity The initial capacity of this object.
      * @see #JSONObject()
-     * @see #JSONObject(Map)
      * @see #JSONObject(JSONObject)
      */
     public JSONObject(int capacity) {
@@ -40,26 +38,20 @@ public class JSONObject implements Map<String, Object> {
     }
 
     /**
-     * Constructor
-     * @param values The <tt>Map</tt> to set.
-     * @see #JSONObject()
-     * @see #JSONObject(int)
-     * @see #JSONObject(JSONObject)
-     */
-    @SuppressWarnings("unchecked")
-    public JSONObject(Map<String, ?> values) {
-        this.values = (Map<String, Object>)values;
-    }
-
-    /**
      * Copy constructor
      * @param object The <tt>JSONObject</tt> to copy.
      * @see #JSONObject()
      * @see #JSONObject(int)
-     * @see #JSONObject(Map)
      */
     public JSONObject(JSONObject object) {
         this.values = new LinkedHashMap<String, Object>(object.values);
+    }
+
+    /**
+     * Constructor
+     */
+    /* package */ JSONObject(Map<String, Object> values) {
+        this.values = values;
     }
 
     @Override

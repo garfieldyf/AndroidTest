@@ -43,19 +43,6 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
     }
 
     /**
-     * Called on the <tt>Binder</tt> internal, do not call this method directly.
-     * @hide
-     */
-    public final void setBitmap(Bitmap bitmap) {
-        if (mState.mBitmap != bitmap) {
-            mFlags |= FLAG_BOUNDS;
-            mState.setBitmap(bitmap);
-            invalidateSelf(mState.mShader, true);
-            DebugUtils.__checkDebug(true, getClass().getName(), "setBitmap() - " + bitmap);
-        }
-    }
-
-    /**
      * Returns the mipmap hint is enabled on this drawable's bitmap.
      * @return <tt>true</tt> if the mipmap hint is enabled,
      * <tt>false</tt> otherwise.
@@ -142,6 +129,18 @@ public abstract class ShapeBitmapDrawable<T extends ShapeBitmapDrawable.BitmapSt
      * @param outPath The path to be build.
      */
     protected abstract void getConvexPath(RectF bounds, Path outPath);
+
+    /**
+     * Sets the specified {@link Bitmap} to this drawable.
+     */
+    /* package */ final void setBitmap(Bitmap bitmap) {
+        if (mState.mBitmap != bitmap) {
+            mFlags |= FLAG_BOUNDS;
+            mState.setBitmap(bitmap);
+            invalidateSelf(mState.mShader, true);
+            DebugUtils.__checkDebug(true, getClass().getName(), "setBitmap() - " + bitmap);
+        }
+    }
 
     /**
      * Class <tt>BitmapState</tt> is an implementation of a {@link ConstantState}.

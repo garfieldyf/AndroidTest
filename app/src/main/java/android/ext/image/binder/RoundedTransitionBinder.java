@@ -27,8 +27,8 @@ import java.util.Arrays;
  *     app:crossFade="true" /&gt;</pre>
  * @author Garfield
  */
-public final class RoundedTransitionBinder extends TransitionBinder {
-    private final float[] mRadii;
+public class RoundedTransitionBinder extends TransitionBinder {
+    protected final float[] mRadii;
 
     /**
      * Constructor
@@ -90,6 +90,6 @@ public final class RoundedTransitionBinder extends TransitionBinder {
 
     @Override
     protected void setImageBitmap(ImageView view, Bitmap bitmap) {
-        RoundedBitmapBinder.setImageBitmap(view, getDrawable(view), bitmap, mRadii);
+        RoundedBitmapDrawable.setBitmap(view, getDrawable(view), bitmap, mRadii);
     }
 }

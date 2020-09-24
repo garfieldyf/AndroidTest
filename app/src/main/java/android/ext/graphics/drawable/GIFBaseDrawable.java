@@ -58,20 +58,6 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
     }
 
     /**
-     * Called on the <tt>Binder</tt> internal, do not call this method directly.
-     * @hide
-     */
-    public final void setImage(GIFImage image) {
-        if (mState.mImage != image) {
-            mFlags = (mFlags | FLAG_BOUNDS) & ~FLAG_RUNNING;
-            mState.setImage(image);
-            mFrameIndex = 0;
-            unscheduleSelf(this);
-            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
-        }
-    }
-
-    /**
      * Returns the number of frames of this drawable.
      * @return The frame count, must be >= 1.
      */
@@ -234,6 +220,19 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
      */
     protected void drawFrame(Canvas canvas, Bitmap frame, RectF bounds, Paint paint) {
         canvas.drawBitmap(frame, null, bounds, paint);
+    }
+
+    /**
+     * Sets the specified {@link GIFImage} to this drawable.
+     */
+    /* package */ final void setImage(GIFImage image) {
+        if (mState.mImage != image) {
+            mFlags = (mFlags | FLAG_BOUNDS) & ~FLAG_RUNNING;
+            mState.setImage(image);
+            mFrameIndex = 0;
+            unscheduleSelf(this);
+            DebugUtils.__checkDebug(true, getClass().getName(), "setImage() - " + image);
+        }
     }
 
     private void unscheduleSelf() {

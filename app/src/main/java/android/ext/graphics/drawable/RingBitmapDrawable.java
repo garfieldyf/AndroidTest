@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -15,6 +16,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -104,6 +106,43 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
      */
     /* package */ RingBitmapDrawable(RingBitmapState state) {
         super(state);
+    }
+
+    /**
+     * Equivalent to calling <tt>setBitmap(view, view.getDrawable(), bitmap, innerRadius)</tt>.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @param innerRadius The inner radius of the ring.
+     * @see #setBitmap(ImageView, Drawable, Bitmap, float)
+     */
+    public static void setBitmap(ImageView view, Bitmap bitmap, float innerRadius) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        setBitmap(view, view.getDrawable(), bitmap, innerRadius);
+    }
+
+    /**
+     * Sets a {@link Bitmap} as the content of the {@link ImageView}. This method
+     * will be reuse the <em>view's</em> original <tt>RingBitmapDrawable</tt>.
+     * Allows us to avoid allocating new <tt>RingBitmapDrawable</tt> in many cases.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param origDrawable The <em>view's</em> original drawable or <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @param innerRadius The inner radius of the ring.
+     * @see #setBitmap(ImageView, Bitmap, float)
+     */
+    public static void setBitmap(ImageView view, Drawable origDrawable, Bitmap bitmap, float innerRadius) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        if (origDrawable instanceof RingBitmapDrawable) {
+            final RingBitmapDrawable drawable = (RingBitmapDrawable)origDrawable;
+            drawable.setBitmap(bitmap);
+            drawable.setInnerRadius(innerRadius);
+
+            // Force update the ImageView's mDrawable.
+            view.setImageDrawable(null);
+            view.setImageDrawable(drawable);
+        } else {
+            view.setImageDrawable(new RingBitmapDrawable(bitmap, innerRadius));
+        }
     }
 
     /**

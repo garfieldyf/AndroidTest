@@ -3,8 +3,10 @@ package android.ext.graphics.drawable;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.graphics.GIFImage;
+import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
+import android.widget.ImageView;
 
 /**
  * Class GIFDrawable
@@ -40,6 +42,50 @@ public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
      */
     /* package */ GIFDrawable(GIFImageState state) {
         super(state);
+    }
+
+    /**
+     * Equivalent to calling <tt>setImage(view, image, true, false)</tt>.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @see #setImage(ImageView, GIFImage, boolean, boolean)
+     */
+    public static void setImage(ImageView view, GIFImage image) {
+        DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
+        setImage(view, image, true, false);
+    }
+
+    /**
+     * Sets a {@link GIFImage} as the content of the {@link ImageView}. This
+     * method will be reuse the <em>view's</em> original <tt>GIFDrawable</tt>.
+     * Allows us to avoid allocating new <tt>GIFDrawable</tt> in many cases.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @param autoStart <tt>true</tt> if the animation should auto play.
+     * @param oneShot <tt>true</tt> if the animation should only play once.
+     * @see #setImage(ImageView, GIFImage)
+     */
+    public static void setImage(ImageView view, GIFImage image, boolean autoStart, boolean oneShot) {
+        DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
+        final Drawable origDrawable = view.getDrawable();
+        if (origDrawable instanceof GIFDrawable) {
+            final GIFDrawable drawable = (GIFDrawable)origDrawable;
+            final boolean isRunning = drawable.isRunning();
+            drawable.setImage(image);
+
+            // Force update the ImageView's mDrawable.
+            view.setImageDrawable(null);
+            view.setImageDrawable(drawable);
+
+            if (isRunning) {
+                drawable.start();
+            }
+        } else {
+            final GIFDrawable drawable = new GIFDrawable(image);
+            drawable.setOneShot(oneShot);
+            drawable.setAutoStart(autoStart);
+            view.setImageDrawable(drawable);
+        }
     }
 
     /**

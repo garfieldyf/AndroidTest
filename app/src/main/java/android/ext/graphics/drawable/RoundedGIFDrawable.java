@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.GIFImage;
+import android.ext.util.DebugUtils;
 import android.graphics.Outline;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
@@ -11,6 +12,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -166,6 +168,53 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     }
 
     /**
+     * Equivalent to calling <tt>setImage(view, image, radii, true, false)</tt>.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @param radii An array of 8 values, 4 pairs of [X,Y] radii.
+     * @see #setImage(ImageView, GIFImage, float[], boolean, boolean)
+     */
+    public static void setImage(ImageView view, GIFImage image, float[] radii) {
+        DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
+        setImage(view, image, radii, true, false);
+    }
+
+    /**
+     * Sets a {@link GIFImage} as the content of the {@link ImageView}. This
+     * method will be reuse the <em>view's</em> original <tt>GIFDrawable</tt>.
+     * Allows us to avoid allocating new <tt>GIFDrawable</tt> in many cases.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param image The <tt>GIFImage</tt> to set. Never <tt>null</tt>.
+     * @param radii An array of 8 values, 4 pairs of [X,Y] radii.
+     * @param autoStart <tt>true</tt> if the animation should auto play.
+     * @param oneShot <tt>true</tt> if the animation should only play once.
+     * @see #setImage(ImageView, GIFImage, float[])
+     */
+    public static void setImage(ImageView view, GIFImage image, float[] radii, boolean autoStart, boolean oneShot) {
+        DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
+        final Drawable origDrawable = view.getDrawable();
+        if (origDrawable instanceof RoundedGIFDrawable) {
+            final RoundedGIFDrawable drawable = (RoundedGIFDrawable)origDrawable;
+            final boolean isRunning = drawable.isRunning();
+            drawable.setImage(image);
+            drawable.setCornerRadii(radii);
+
+            // Force update the ImageView's mDrawable.
+            view.setImageDrawable(null);
+            view.setImageDrawable(drawable);
+
+            if (isRunning) {
+                drawable.start();
+            }
+        } else {
+            final RoundedGIFDrawable drawable = new RoundedGIFDrawable(image, radii);
+            drawable.setOneShot(oneShot);
+            drawable.setAutoStart(autoStart);
+            view.setImageDrawable(drawable);
+        }
+    }
+
+    /**
      * Class <tt>RoundedGIFState</tt> is an implementation of a {@link ConstantState}.
      */
     /* package */ static final class RoundedGIFState extends ShapeGIFDrawable.ShapeGIFState {
@@ -187,9 +236,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
          */
         public RoundedGIFState(RoundedGIFState state) {
             super(state);
-            if (state.mRadii != null) {
-                mRadii = state.mRadii.clone();
-            }
+            mRadii = state.mRadii;
         }
 
         @Override

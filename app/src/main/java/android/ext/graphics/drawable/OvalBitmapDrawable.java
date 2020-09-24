@@ -3,6 +3,7 @@ package android.ext.graphics.drawable;
 import android.annotation.TargetApi;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Outline;
@@ -13,6 +14,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -74,6 +76,39 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
      */
     /* package */ OvalBitmapDrawable(OvalBitmapState state) {
         super(state);
+    }
+
+    /**
+     * Equivalent to calling <tt>setBitmap(view, view.getDrawable(), bitmap)</tt>.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @see #setBitmap(ImageView, Drawable, Bitmap)
+     */
+    public static void setBitmap(ImageView view, Bitmap bitmap) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        setBitmap(view, view.getDrawable(), bitmap);
+    }
+
+    /**
+     * Sets a {@link Bitmap} as the content of the {@link ImageView}. This method
+     * will be reuse the <em>view's</em> original <tt>OvalBitmapDrawable</tt>.
+     * Allows us to avoid allocating new <tt>OvalBitmapDrawable</tt> in many cases.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param origDrawable The <em>view's</em> original drawable or <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @see #setBitmap(ImageView, Bitmap)
+     */
+    public static void setBitmap(ImageView view, Drawable origDrawable, Bitmap bitmap) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        if (origDrawable instanceof OvalBitmapDrawable) {
+            ((OvalBitmapDrawable)origDrawable).setBitmap(bitmap);
+
+            // Force update the ImageView's mDrawable.
+            view.setImageDrawable(null);
+            view.setImageDrawable(origDrawable);
+        } else {
+            view.setImageDrawable(new OvalBitmapDrawable(bitmap));
+        }
     }
 
     /**

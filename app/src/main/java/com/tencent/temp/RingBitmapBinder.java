@@ -6,7 +6,6 @@ import android.ext.content.res.XmlResources;
 import android.ext.graphics.drawable.RingBitmapDrawable;
 import android.ext.image.ImageModule;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -37,24 +36,9 @@ public final class RingBitmapBinder implements Binder<String, Object, Bitmap> {
     public void bindValue(String uri, Object[] params, Object target, Bitmap bitmap, int state) {
         final ImageView view = (ImageView)target;
         if (bitmap != null) {
-            setImageBitmap(view, bitmap);
+            RingBitmapDrawable.setBitmap(view, bitmap, mInnerRadius);
         } else if ((state & STATE_LOAD_FROM_BACKGROUND) == 0) {
             ImageModule.setPlaceholder(view, params);
-        }
-    }
-
-    private void setImageBitmap(ImageView view, Bitmap bitmap) {
-        final Drawable oldDrawable = view.getDrawable();
-        if (oldDrawable instanceof RingBitmapDrawable) {
-            final RingBitmapDrawable drawable = (RingBitmapDrawable)oldDrawable;
-            drawable.setBitmap(bitmap);
-            drawable.setInnerRadius(mInnerRadius);
-
-            // Force update the ImageView's mDrawable.
-            view.setImageDrawable(null);
-            view.setImageDrawable(drawable);
-        } else {
-            view.setImageDrawable(new RingBitmapDrawable(bitmap, mInnerRadius));
         }
     }
 }

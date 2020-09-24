@@ -48,6 +48,6 @@ public final class OvalTransitionBinder extends TransitionBinder {
 
     @Override
     protected void setImageBitmap(ImageView view, Bitmap bitmap) {
-        OvalBitmapBinder.setImageBitmap(view, getDrawable(view), bitmap);
+        OvalBitmapDrawable.setBitmap(view, getDrawable(view), bitmap);
     }
 }

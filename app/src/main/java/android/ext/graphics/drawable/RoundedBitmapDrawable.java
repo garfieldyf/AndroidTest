@@ -3,6 +3,7 @@ package android.ext.graphics.drawable;
 import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.ext.content.res.XmlResources;
+import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Outline;
 import android.graphics.Path;
@@ -11,6 +12,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 import android.util.AttributeSet;
+import android.widget.ImageView;
 import java.io.IOException;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -166,6 +168,43 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     }
 
     /**
+     * Equivalent to calling <tt>setBitmap(view, view.getDrawable(), bitmap, radii)</tt>.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @param radii An array of 8 values, 4 pairs of [X,Y] radii.
+     * @see #setBitmap(ImageView, Drawable, Bitmap, float[])
+     */
+    public static void setBitmap(ImageView view, Bitmap bitmap, float[] radii) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        setBitmap(view, view.getDrawable(), bitmap, radii);
+    }
+
+    /**
+     * Sets a {@link Bitmap} as the content of the {@link ImageView}. This method
+     * will be reuse the <em>view's</em> original <tt>RoundedBitmapDrawable</tt>.
+     * Allows us to avoid allocating new <tt>RoundedBitmapDrawable</tt> in many cases.
+     * @param view The <tt>ImageView</tt>. Never <tt>null</tt>.
+     * @param origDrawable The <em>view's</em> original drawable or <tt>null</tt>.
+     * @param bitmap The <tt>Bitmap</tt> to set. Never <tt>null</tt>.
+     * @param radii An array of 8 values, 4 pairs of [X,Y] radii.
+     * @see #setBitmap(ImageView, Bitmap, float[])
+     */
+    public static void setBitmap(ImageView view, Drawable origDrawable, Bitmap bitmap, float[] radii) {
+        DebugUtils.__checkError(view == null || bitmap == null, "Invalid parameters - view == null || bitmap == null");
+        if (origDrawable instanceof RoundedBitmapDrawable) {
+            final RoundedBitmapDrawable drawable = (RoundedBitmapDrawable)origDrawable;
+            drawable.setBitmap(bitmap);
+            drawable.setCornerRadii(radii);
+
+            // Force update the ImageView's mDrawable.
+            view.setImageDrawable(null);
+            view.setImageDrawable(drawable);
+        } else {
+            view.setImageDrawable(new RoundedBitmapDrawable(bitmap, radii));
+        }
+    }
+
+    /**
      * Class <tt>RoundedBitmapState</tt> is an implementation of a {@link ConstantState}.
      */
     /* package */ static final class RoundedBitmapState extends ShapeBitmapDrawable.BitmapState {
@@ -187,9 +226,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
          */
         public RoundedBitmapState(RoundedBitmapState state) {
             super(state);
-            if (state.mRadii != null) {
-                mRadii = state.mRadii.clone();
-            }
+            mRadii = state.mRadii;
         }
 
         @Override

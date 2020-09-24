@@ -110,7 +110,8 @@ public class TransitionBinder implements Binder<Object, Object, Bitmap> {
     /**
      * Return the view's drawable, or <tt>null</tt> if no drawable has been assigned.
      */
-    /* package */ static Drawable getDrawable(ImageView view) {
+    protected static Drawable getDrawable(ImageView view) {
+        DebugUtils.__checkError(view == null, "Invalid parameter - view == null");
         Drawable drawable = view.getDrawable();
         if (drawable instanceof TransitionDrawable) {
             drawable = ((TransitionDrawable)drawable).getDrawable(1);

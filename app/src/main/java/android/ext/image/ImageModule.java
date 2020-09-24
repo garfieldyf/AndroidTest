@@ -44,6 +44,7 @@ import android.util.SparseArray;
 import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.ImageView;
+import java.io.File;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -94,7 +95,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /* package */ ImageModule(Context context, Executor executor, Cache imageCache, FileCache fileCache, BitmapPool bitmapPool) {
         final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
-        mCacheDir = getCacheDir(context);
+        mCacheDir = getCacheDir(context, fileCache);
         mExecutor = executor;
         mFileCache   = fileCache;
         mBitmapPool  = bitmapPool;
@@ -429,9 +430,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         }
     }
 
-    private static String getCacheDir(Context context) {
+    private static String getCacheDir(Context context, FileCache fileCache) {
         DebugUtils.__checkStartMethodTracing();
-        final String cacheDir = FileUtils.getCacheDir(context, "._temp_cache!").getPath();
+        final String cacheDir = (fileCache != null ? new File(fileCache.getCacheDir().getParent(), "._temp_cache!").getPath() : FileUtils.getCacheDir(context, "._temp_cache!").getPath());
         FileUtils.deleteFiles(cacheDir, false);
         DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir");
         return cacheDir;

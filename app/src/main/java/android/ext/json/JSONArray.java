@@ -1,40 +1,97 @@
 package android.ext.json;
 
-import android.ext.util.DebugUtils;
+import android.annotation.TargetApi;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.RandomAccess;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
 
 /**
  * Class JSONArray
  * @author Garfield
  */
-public class JSONArray extends ArrayList<Object> {
+@TargetApi(24)
+public class JSONArray implements List<Object>, RandomAccess {
+    private final List<Object> values;
+
     /**
      * Constructor
      * @see #JSONArray(int)
-     * @see #JSONArray(Collection)
+     * @see #JSONArray(List)
+     * @see #JSONArray(JSONArray)
      */
     public JSONArray() {
+        this.values = new ArrayList<Object>();
     }
 
     /**
      * Constructor
      * @param capacity The initial capacity of this array.
      * @see #JSONArray()
-     * @see #JSONArray(Collection)
+     * @see #JSONArray(List)
+     * @see #JSONArray(JSONArray)
      */
     public JSONArray(int capacity) {
-        super(capacity);
+        this.values = new ArrayList<Object>(capacity);
     }
 
     /**
      * Constructor
-     * @param values The values to add.
+     * @param values The <tt>List</tt> to set.
      * @see #JSONArray()
      * @see #JSONArray(int)
+     * @see #JSONArray(JSONArray)
      */
-    public JSONArray(Collection<?> values) {
-        super(values);
+    @SuppressWarnings("unchecked")
+    public JSONArray(List<?> values) {
+        this.values = (List<Object>)values;
+    }
+
+    /**
+     * Copy constructor
+     * @param array The <tt>JSONArray</tt> to copy.
+     * @see #JSONArray()
+     * @see #JSONArray(int)
+     * @see #JSONArray(List)
+     */
+    public JSONArray(JSONArray array) {
+        this.values = new ArrayList<Object>(array.values);
+    }
+
+    @Override
+    public void clear() {
+        values.clear();
+    }
+
+    @Override
+    public int size() {
+        return values.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
+    }
+
+    /**
+     * Adds <em>value</em> to the end of this array.
+     * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
+     * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
+     * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
+     * @return Always return <tt>true</tt>.
+     */
+    @Override
+    public boolean add(Object value) {
+        JSONUtils.__checkDouble(value);
+        return values.add(value);
     }
 
     /**
@@ -43,8 +100,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(value);
+        values.add(value);
         return this;
     }
 
@@ -54,8 +110,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(long value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(value);
+        values.add(value);
         return this;
     }
 
@@ -65,8 +120,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(boolean value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(value);
+        values.add(value);
         return this;
     }
 
@@ -77,9 +131,8 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(float value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
-        super.add(value);
+        values.add(value);
         return this;
     }
 
@@ -90,10 +143,22 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(double value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
-        super.add(value);
+        values.add(value);
         return this;
+    }
+
+    /**
+     * Inserts <em>value</em> into this array at the specified <em>index</em>.
+     * @param index The index at which to insert.
+     * @param value A {@link JSONObject}, {@link JSONArray}, <tt>String,
+     * Boolean, Integer, Long, Double</tt>, or <tt>null</tt>. May not be
+     * {@link Double#isNaN() NaN} or {@link Double#isInfinite() infinite}.
+     */
+    @Override
+    public void add(int index, Object value) {
+        JSONUtils.__checkDouble(value);
+        values.add(index, value);
     }
 
     /**
@@ -103,8 +168,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, int value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(index, value);
+        values.add(index, value);
         return this;
     }
 
@@ -115,8 +179,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, long value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(index, value);
+        values.add(index, value);
         return this;
     }
 
@@ -127,8 +190,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, boolean value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.add(index, value);
+        values.add(index, value);
         return this;
     }
 
@@ -140,9 +202,8 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, float value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
-        super.add(index, value);
+        values.add(index, value);
         return this;
     }
 
@@ -154,9 +215,8 @@ public class JSONArray extends ArrayList<Object> {
      * @return This array.
      */
     public JSONArray add(int index, double value) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
         JSONUtils.__checkDouble(value);
-        super.add(index, value);
+        values.add(index, value);
         return this;
     }
 
@@ -167,7 +227,7 @@ public class JSONArray extends ArrayList<Object> {
      * @return The value at <em>index</em> or <tt>null</tt>.
      */
     public Object opt(int index) {
-        return (index >= 0 && index < size() ? get(index) : null);
+        return (index >= 0 && index < values.size() ? values.get(index) : null);
     }
 
     /**
@@ -306,6 +366,23 @@ public class JSONArray extends ArrayList<Object> {
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
+    @Override
+    public Object get(int index) {
+        return values.get(index);
+    }
+
+    @Override
+    public Object set(int index, Object value) {
+        JSONUtils.__checkDouble(value);
+        return values.set(index, value);
+    }
+
+    @Override
+    public boolean remove(Object value) {
+        JSONUtils.__checkDouble(value);
+        return values.remove(value);
+    }
+
     /**
      * Removes and returns the value at <em>index</em>, or <tt>null</tt>
      * if this array has no value at <em>index</em>.
@@ -314,29 +391,126 @@ public class JSONArray extends ArrayList<Object> {
      */
     @Override
     public Object remove(int index) {
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        return (index >= 0 && index < size() ? super.remove(index) : null);
+        return (index >= 0 && index < values.size() ? values.remove(index) : null);
     }
 
-    /**
-     * Removes from this array all of the values whose index is between
-     * <em>fromIndex</em>, inclusive, and <em>toIndex</em>, exclusive.
-     * If <em>fromIndex==toIndex</em>, this operation has no effect.
-     */
     @Override
-    public void removeRange(int fromIndex, int toIndex) {
-        // The removeRange is protected in the super class.
-        DebugUtils.__checkError(this == JSONUtils.EMPTY_ARRAY, "Unsupported operation - The JSONArray is immutable");
-        super.removeRange(fromIndex, toIndex);
+    public boolean removeIf(Predicate<? super Object> filter) {
+        return values.removeIf(filter);
+    }
+
+    @Override
+    public boolean addAll(Collection<?> collection) {
+        return values.addAll(collection);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<?> collection) {
+        return values.addAll(index, collection);
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> collection) {
+        return values.removeAll(collection);
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> collection) {
+        return values.retainAll(collection);
+    }
+
+    @Override
+    public void replaceAll(UnaryOperator<Object> operator) {
+        values.replaceAll(operator);
+    }
+
+    @Override
+    public int indexOf(Object value) {
+        return values.indexOf(value);
+    }
+
+    @Override
+    public int lastIndexOf(Object value) {
+        return values.lastIndexOf(value);
+    }
+
+    @Override
+    public boolean contains(Object value) {
+        return values.contains(value);
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> collection) {
+        return values.containsAll(collection);
+    }
+
+    @Override
+    public Iterator<Object> iterator() {
+        return values.iterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator() {
+        return values.listIterator();
+    }
+
+    @Override
+    public ListIterator<Object> listIterator(int index) {
+        return values.listIterator(index);
+    }
+
+    @Override
+    public Object[] toArray() {
+        return values.toArray();
+    }
+
+    @Override
+    public <T> T[] toArray(T[] array) {
+        return values.toArray(array);
+    }
+
+    @Override
+    public List<Object> subList(int start, int end) {
+        return values.subList(start, end);
+    }
+
+    @Override
+    public Stream<Object> stream() {
+        return values.stream();
+    }
+
+    @Override
+    public Stream<Object> parallelStream() {
+        return values.parallelStream();
+    }
+
+    @Override
+    public Spliterator<Object> spliterator() {
+        return values.spliterator();
+    }
+
+    @Override
+    public void forEach(Consumer<? super Object> action) {
+        values.forEach(action);
+    }
+
+    @Override
+    public void sort(Comparator<? super Object> comparator) {
+        values.sort(comparator);
+    }
+
+    @Override
+    public int hashCode() {
+        return values.hashCode();
     }
 
     @Override
     public String toString() {
-        return JSONUtils.toJSONString(this);
+        return JSONUtils.toJSONString(values);
     }
 
     @Override
     public boolean equals(Object object) {
-        return (object instanceof JSONArray && super.equals(object));
+        return (object instanceof JSONArray && values.equals(((JSONArray)object).values));
     }
 }

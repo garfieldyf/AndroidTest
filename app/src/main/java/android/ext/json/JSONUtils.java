@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,12 +32,12 @@ public final class JSONUtils {
     /**
      * The empty, immutable {@link JSONArray}.
      */
-    public static final JSONArray EMPTY_ARRAY = new JSONArray();
+    public static final JSONArray EMPTY_ARRAY = new JSONArray(Collections.emptyList());
 
     /**
      * The empty, immutable {@link JSONObject}.
      */
-    public static final JSONObject EMPTY_OBJECT = new JSONObject();
+    public static final JSONObject EMPTY_OBJECT = new JSONObject(Collections.emptyMap());
 
     /**
      * Equivalent to calling {@link JSONArray#optJSONObject(int)},
@@ -354,6 +355,15 @@ public final class JSONUtils {
     /* package */ static void __checkDouble(double value) {
         if (Double.isInfinite(value) || Double.isNaN(value)) {
             throw new AssertionError("Forbidden numeric value: " + value);
+        }
+    }
+
+    /* package */ static void __checkDouble(Object value) {
+        if (value instanceof Number) {
+            final double d = ((Number)value).doubleValue();
+            if (Double.isInfinite(d) || Double.isNaN(d)) {
+                throw new AssertionError("Forbidden numeric value: " + value);
+            }
         }
     }
 

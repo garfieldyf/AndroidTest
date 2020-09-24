@@ -238,7 +238,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        JsonUtils.addAll(array, makeArray(3, "add"));
 //        JsonUtils.addAll(array, 3, makeArray(3, "insert"));
         Log.i("abcd", array.toString());
-        Object a = array.clone();
+        //Object a = array.clone();
 
         JSONObject object = new JSONObject()
             .put("name", "tom")
@@ -249,12 +249,12 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         JSONObject o = new JSONObject(object);
         JSONArray array1 = new JSONArray(array);
 
-        final Object clone = object.clone();
-        Log.d("abcd", "equals = " + clone.equals(object));
-        Log.d("abcd", "equals = " + array.equals(a));
-        Log.d("abcd", clone.getClass().getName());
-        Log.d("abcd", a.getClass().getName());
-        Log.d("abcd", JSONUtils.EMPTY_OBJECT.clone().getClass().getName());
+        //final Object clone = object.clone();
+//        Log.d("abcd", "equals = " + clone.equals(object));
+//        Log.d("abcd", "equals = " + array.equals(a));
+//        Log.d("abcd", clone.getClass().getName());
+//        Log.d("abcd", a.getClass().getName());
+//        Log.d("abcd", JSONUtils.EMPTY_OBJECT.clone().getClass().getName());
 //        JSONUtils.EMPTY_ARRAY.add(1);
 //        JSONUtils.EMPTY_OBJECT.put("aaa", 2);
     }

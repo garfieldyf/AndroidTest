@@ -1,20 +1,31 @@
 package android.ext.json;
 
+import android.annotation.TargetApi;
 import android.ext.util.DebugUtils;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Class JSONObject
  * @author Garfield
  */
-public class JSONObject extends LinkedHashMap<String, Object> {
+@TargetApi(24)
+public class JSONObject implements Map<String, Object> {
+    private final Map<String, Object> values;
+
     /**
      * Constructor
      * @see #JSONObject(int)
      * @see #JSONObject(Map)
+     * @see #JSONObject(JSONObject)
      */
     public JSONObject() {
+        this.values = new LinkedHashMap<String, Object>();
     }
 
     /**
@@ -22,19 +33,48 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @param capacity The initial capacity of this object.
      * @see #JSONObject()
      * @see #JSONObject(Map)
+     * @see #JSONObject(JSONObject)
      */
     public JSONObject(int capacity) {
-        super(capacity);
+        this.values = new LinkedHashMap<String, Object>(capacity);
     }
 
     /**
      * Constructor
-     * @param values The values to add.
+     * @param values The <tt>Map</tt> to set.
      * @see #JSONObject()
      * @see #JSONObject(int)
+     * @see #JSONObject(JSONObject)
      */
-    public JSONObject(Map<? extends String, ?> values) {
-        super(values);
+    @SuppressWarnings("unchecked")
+    public JSONObject(Map<String, ?> values) {
+        this.values = (Map<String, Object>)values;
+    }
+
+    /**
+     * Copy constructor
+     * @param object The <tt>JSONObject</tt> to copy.
+     * @see #JSONObject()
+     * @see #JSONObject(int)
+     * @see #JSONObject(Map)
+     */
+    public JSONObject(JSONObject object) {
+        this.values = new LinkedHashMap<String, Object>(object.values);
+    }
+
+    @Override
+    public void clear() {
+        values.clear();
+    }
+
+    @Override
+    public int size() {
+        return values.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return values.isEmpty();
     }
 
     /**
@@ -47,8 +87,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      */
     @Override
     public JSONObject put(String name, Object value) {
-        this.__checkName(name);
-        super.put(name, value);
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        JSONUtils.__checkDouble(value);
+        values.put(name, value);
         return this;
     }
 
@@ -59,8 +100,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, int value) {
-        this.__checkName(name);
-        super.put(name, value);
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        values.put(name, value);
         return this;
     }
 
@@ -71,8 +112,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, long value) {
-        this.__checkName(name);
-        super.put(name, value);
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        values.put(name, value);
         return this;
     }
 
@@ -83,8 +124,8 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, boolean value) {
-        this.__checkName(name);
-        super.put(name, value);
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        values.put(name, value);
         return this;
     }
 
@@ -96,9 +137,9 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, float value) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
-        this.__checkName(name);
-        super.put(name, value);
+        values.put(name, value);
         return this;
     }
 
@@ -110,10 +151,27 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, double value) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
-        this.__checkName(name);
-        super.put(name, value);
+        values.put(name, value);
         return this;
+    }
+
+    @Override
+    public Object putIfAbsent(String name, Object value) {
+        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
+        JSONUtils.__checkDouble(value);
+        return values.putIfAbsent(name, value);
+    }
+
+    @Override
+    public Object get(Object name) {
+        return values.get(name);
+    }
+
+    @Override
+    public Object getOrDefault(Object name, Object defaultValue) {
+        return values.getOrDefault(name, defaultValue);
     }
 
     /**
@@ -121,8 +179,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optInt(String, int)
      */
     public int optInt(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toInt(get(name), 0);
+        return JSONUtils.toInt(values.get(name), 0);
     }
 
     /**
@@ -133,8 +190,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optInt(String)
      */
     public int optInt(String name, int fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toInt(get(name), fallback);
+        return JSONUtils.toInt(values.get(name), fallback);
     }
 
     /**
@@ -142,8 +198,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optLong(String, int)
      */
     public long optLong(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toLong(get(name), 0);
+        return JSONUtils.toLong(values.get(name), 0);
     }
 
     /**
@@ -154,8 +209,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optLong(String)
      */
     public long optLong(String name, long fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toLong(get(name), fallback);
+        return JSONUtils.toLong(values.get(name), fallback);
     }
 
     /**
@@ -163,8 +217,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optString(String, String)
      */
     public String optString(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toString(get(name), "");
+        return JSONUtils.toString(values.get(name), "");
     }
 
     /**
@@ -175,8 +228,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optString(String)
      */
     public String optString(String name, String fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toString(get(name), fallback);
+        return JSONUtils.toString(values.get(name), fallback);
     }
 
     /**
@@ -184,8 +236,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optFloat(String, float)
      */
     public float optFloat(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return (float)JSONUtils.toDouble(get(name), 0);
+        return (float)JSONUtils.toDouble(values.get(name), 0);
     }
 
     /**
@@ -196,8 +247,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optFloat(String)
      */
     public float optFloat(String name, float fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return (float)JSONUtils.toDouble(get(name), fallback);
+        return (float)JSONUtils.toDouble(values.get(name), fallback);
     }
 
     /**
@@ -205,8 +255,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optDouble(String, double)
      */
     public double optDouble(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toDouble(get(name), 0);
+        return JSONUtils.toDouble(values.get(name), 0);
     }
 
     /**
@@ -217,8 +266,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optDouble(String)
      */
     public double optDouble(String name, double fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toDouble(get(name), fallback);
+        return JSONUtils.toDouble(values.get(name), fallback);
     }
 
     /**
@@ -226,8 +274,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optBoolean(String, boolean)
      */
     public boolean optBoolean(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toBoolean(get(name), false);
+        return JSONUtils.toBoolean(values.get(name), false);
     }
 
     /**
@@ -238,8 +285,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @see #optBoolean(String)
      */
     public boolean optBoolean(String name, boolean fallback) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        return JSONUtils.toBoolean(get(name), fallback);
+        return JSONUtils.toBoolean(values.get(name), fallback);
     }
 
     /**
@@ -249,8 +295,7 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return The <tt>JSONArray</tt> or <tt>null</tt>.
      */
     public JSONArray optJSONArray(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        final Object value = get(name);
+        final Object value = values.get(name);
         return (value instanceof JSONArray ? (JSONArray)value : null);
     }
 
@@ -261,28 +306,102 @@ public class JSONObject extends LinkedHashMap<String, Object> {
      * @return The <tt>JSONObject</tt> or <tt>null</tt>.
      */
     public JSONObject optJSONObject(String name) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
-        final Object value = get(name);
+        final Object value = values.get(name);
         return (value instanceof JSONObject ? (JSONObject)value : null);
     }
 
     @Override
+    public Object remove(Object name) {
+        return values.remove(name);
+    }
+
+    @Override
+    public boolean remove(Object name, Object value) {
+        return values.remove(name, value);
+    }
+
+    @Override
+    public boolean containsKey(Object name) {
+        return values.containsKey(name);
+    }
+
+    @Override
+    public boolean containsValue(Object value) {
+        return values.containsValue(value);
+    }
+
+    @Override
+    public Set<String> keySet() {
+        return values.keySet();
+    }
+
+    @Override
+    public Collection<Object> values() {
+        return values.values();
+    }
+
+    @Override
+    public Set<Entry<String, Object>> entrySet() {
+        return values.entrySet();
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ?> map) {
+        values.putAll(map);
+    }
+
+    @Override
+    public Object replace(String name, Object value) {
+        return values.replace(name, value);
+    }
+
+    @Override
+    public boolean replace(String name, Object oldValue, Object newValue) {
+        return values.replace(name, oldValue, newValue);
+    }
+
+    @Override
+    public void replaceAll(BiFunction<? super String, ? super Object, ?> function) {
+        values.replaceAll(function);
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super String, ? super Object> action) {
+        values.forEach(action);
+    }
+
+    @Override
+    public Object compute(String name, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+        return values.compute(name, remappingFunction);
+    }
+
+    @Override
+    public Object computeIfAbsent(String name, Function<? super String, ?> mappingFunction) {
+        return values.computeIfAbsent(name, mappingFunction);
+    }
+
+    @Override
+    public Object computeIfPresent(String name, BiFunction<? super String, ? super Object, ?> remappingFunction) {
+        return values.computeIfPresent(name, remappingFunction);
+    }
+
+    @Override
+    public Object merge(String name, Object value, BiFunction<? super Object, ? super Object, ?> remappingFunction) {
+        return values.merge(name, value, remappingFunction);
+    }
+
+    @Override
+    public int hashCode() {
+        return values.hashCode();
+    }
+
+    @Override
     public String toString() {
-        return JSONUtils.toJSONString(this);
+        return JSONUtils.toJSONString(values);
     }
 
     @Override
     public boolean equals(Object object) {
-        return (object instanceof JSONObject && super.equals(object));
-    }
-
-    private void __checkName(String name) {
-        if (name == null) {
-            throw new AssertionError("Invalid parameter - name == null");
-        }
-
-        if (this == JSONUtils.EMPTY_OBJECT) {
-            throw new AssertionError("Unsupported operation - The JSONObject is immutable");
-        }
+        return (object instanceof JSONObject && values.equals(((JSONObject)object).values));
     }
 }

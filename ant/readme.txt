@@ -1,8 +1,8 @@
 ﻿集成说明
-1、将 out/debug   目录下面的所有文件拷贝到工程目录 app/src/debug
-   将 out/release 目录下面的所有文件拷贝到工程目录 app/src/release
-   将 android-sdk-stubs.jar 文件拷贝到工程目录 app/src/release
-   将 out 目录下面的 xml 资源文件拷贝到工程的 res/values 目录
+1、将 out/debug   目录下面的所有文件拷贝到工程的 app/src/debug 目录
+   将 out/release 目录下面的所有文件拷贝到工程的 app/src/release 目录
+   将 android-sdk-stubs.jar 文件拷贝到工程的 app/src/release 目录
+   将 out 目录下面的 xml 资源文件拷贝到工程的 app/src/main/res/values 目录
 
 2、在 build.gradle 文件中加入：
     allprojects {

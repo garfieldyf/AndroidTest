@@ -24,11 +24,7 @@
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
 
-    <condition property="support.jar.path" value="${local.libs.dir}/support/androidx-core.jar" else="${local.libs.dir}/support/android-support-v4.jar">
-        <istrue value="${USE_ANDROIDX}" />
-    </condition>
-
-    <condition property="recyclerview.jar.path" value="${local.libs.dir}/support/androidx-recyclerview.jar" else="${local.libs.dir}/support/android-support-v7-recyclerview.jar">
+    <condition property="support.jar.path" value="${local.libs.dir}/support/androidx-core.jar" else="${local.libs.dir}/support/android-support-v7.jar">
         <istrue value="${USE_ANDROIDX}" />
     </condition>
 
@@ -116,7 +112,7 @@
         <!-- compile java files -->
         <mkdir dir="${class.dir}" />
         <javac srcdir="${src.dir}" destdir="${class.dir}" debug="true" source="1.8" target="1.8" includeAntRuntime="false" includeJavaRuntime="false"
-            classpath="${android.stubs.jar.path};${android.jar.path};${support.jar.path};${recyclerview.jar.path};${zxing.jar.path}" />
+            classpath="${android.stubs.jar.path};${android.jar.path};${support.jar.path};${zxing.jar.path}" />
 
         <!-- build jar file -->
         <jar destfile="${out.file.dir}/${out.file.name}" basedir="${class.dir}">
@@ -216,7 +212,7 @@
             -include        "${basedir}/../app/proguard.pro"
             -injars         ${out.file.dir}/${out.file.name}
             -outjars        "${out.file.dir}/${out.file.name}"
-            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.jar.path};${recyclerview.jar.path};${zxing.jar.path}
+            -libraryjars    ${android.stubs.jar.path};${android.jar.path};${support.jar.path};${zxing.jar.path}
             -dump           "${out.file.dir}/dump.txt"
             -printseeds     "${out.file.dir}/seeds.txt"
             -printusage     "${out.file.dir}/usage.txt"

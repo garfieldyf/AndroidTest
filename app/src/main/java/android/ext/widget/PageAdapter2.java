@@ -57,25 +57,25 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         @Override
         protected List doInBackground(Integer[] params) {
             final PageAdapter adapter = getOwner();
-            return (adapter != null && !isDestroyed(adapter) ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
+            return (adapter != null && validateAdapter(adapter) ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
         }
 
         @Override
         protected void onPostExecute(List result) {
             final PageAdapter adapter = getOwner();
-            if (adapter != null && !isDestroyed(adapter)) {
+            if (adapter != null && validateAdapter(adapter)) {
                 adapter.setPage(mPageIndex, result, null);
             }
         }
 
-        private static boolean isDestroyed(PageAdapter adapter) {
+        private static boolean validateAdapter(PageAdapter adapter) {
             final Context context = adapter.mRecyclerView.getContext();
             if (context instanceof Activity) {
                 final Activity activity = (Activity)context;
-                return (activity.isFinishing() || activity.isDestroyed());
+                return (!activity.isFinishing() && !activity.isDestroyed());
             }
 
-            return false;
+            return true;
         }
     }
 }

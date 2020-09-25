@@ -1,7 +1,6 @@
 package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import android.app.Activity;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.net.DownloadRequest.DownloadCallback;
@@ -12,7 +11,6 @@ import android.os.Process;
 import android.util.Log;
 import java.io.File;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.net.URLConnection;
 import java.util.concurrent.Executor;
 
@@ -86,11 +84,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
     public final Context mContext;
 
     /**
-     * The owner of this loader.
-     */
-    private WeakReference<Object> mOwner;
-
-    /**
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param executor The <tt>Executor</tt> to executing load task.
@@ -120,43 +113,6 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
                 mExecutor.execute(newTask);
             }
         }
-    }
-
-    /**
-     * Sets the object that owns this loader.
-     * @param owner The owner object.
-     * @see #getOwner()
-     * @see #getOwnerActivity()
-     */
-    public final void setOwner(Object owner) {
-        mOwner = new WeakReference<Object>(owner);
-    }
-
-    /**
-     * Returns the object that owns this loader.
-     * @return The owner object or <tt>null</tt>
-     * if the owner released by the GC.
-     * @see #setOwner(Object)
-     * @see #getOwnerActivity()
-     */
-    @SuppressWarnings("unchecked")
-    public final <T> T getOwner() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        return (T)mOwner.get();
-    }
-
-    /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this loader or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or released by the GC.
-     * @see #getOwner()
-     * @see #setOwner(Object)
-     */
-    @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
     }
 
     @Override

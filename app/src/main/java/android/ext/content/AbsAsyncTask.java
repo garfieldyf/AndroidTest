@@ -34,9 +34,6 @@ import java.lang.ref.WeakReference;
  * }
  *
  * new DownloadTask(activity).execute(url);</pre>
- * @see AbsAsyncTask#setOwner(Object)
- * @see AbsAsyncTask#getOwner()
- * @see AbsAsyncTask#getOwnerActivity()
  * @author Garfield
  */
 public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements Cancelable {
@@ -63,11 +60,12 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
     /**
      * Sets the object that owns this task.
      * @param owner The owner object.
+     * @return This <em>task</em>.
      * @see #getOwner()
-     * @see #getOwnerActivity()
      */
-    public final void setOwner(Object owner) {
+    public final AbsAsyncTask<Params, Progress, Result> setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
+        return this;
     }
 
     /**
@@ -86,13 +84,22 @@ public abstract class AbsAsyncTask<Params, Progress, Result> extends AsyncTask<P
      * Alias of {@link #getOwner()}.
      * @return The <tt>Activity</tt> that owns this task or <tt>null</tt> if
      * the owner activity has been finished or destroyed or released by the GC.
-     * @see #getOwner()
-     * @see #setOwner(Object)
      */
     @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+    protected final <T extends Activity> T getOwnerActivity() {
+        this.__checkOwnerActivity();
         final T activity = (T)mOwner.get();
         return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    }
+
+    private void __checkOwnerActivity() {
+        if (mOwner == null) {
+            throw new AssertionError("The " + getClass().getName() + " did not call setOwner()");
+        }
+
+        final Object owner = mOwner.get();
+        if (owner != null && !(owner instanceof Activity)) {
+            throw new AssertionError("The " + owner + " is NOT an Activity");
+        }
     }
 }

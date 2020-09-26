@@ -1,11 +1,11 @@
 package android.ext.barcode;
 
+import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
@@ -108,10 +108,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(Executor executor, int[] pixels, int width, int height, OnDecodeListener listener) {
         /*
-         * params - { BarcodeDecoder, RGBLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
         DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().executeOnExecutor(executor, this, new RGBLuminanceSource(width, height, pixels), listener, null);
+        new DecodeTask().execute(executor, this, new RGBLuminanceSource(width, height, pixels), listener);
     }
 
     /**
@@ -128,10 +128,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(Executor executor, byte[] data, int width, int height, Rect clipBounds, OnDecodeListener listener) {
         /*
-         * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
         DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener, null);
+        new DecodeTask().execute(executor, this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener);
     }
 
     /**
@@ -151,10 +151,10 @@ public class BarcodeDecoder {
      */
     public final void startDecode(Executor executor, byte[] data, int width, int height, int left, int top, int right, int bottom, OnDecodeListener listener) {
         /*
-         * params - { BarcodeDecoder, PlanarYUVLuminanceSource, OnDecodeListener, null }
+         * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
         DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().executeOnExecutor(executor, this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener, null);
+        new DecodeTask().execute(executor, this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener);
     }
 
     /**
@@ -369,24 +369,23 @@ public class BarcodeDecoder {
     /**
      * Class <tt>DecodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Object[]> {
+    /* package */ static final class DecodeTask extends AsyncTask<Object, Object, Result> {
         @Override
-        protected Object[] doInBackground(Object[] params) {
+        protected Result doInBackground(Object[] params) {
             /*
-             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener, null }
+             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
              */
-            DebugUtils.__checkError(params.length != 4, "params.length must be == 4");
-            params[3] = ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
-            return params;
+            DebugUtils.__checkError(params.length != 3, "params.length must be == 3");
+            return ((BarcodeDecoder)params[0]).decode((LuminanceSource)params[1]);
         }
 
         @Override
-        protected void onPostExecute(Object[] result) {
+        protected void onPostExecute(Object[] params, Result result) {
             /*
-             * result - { BarcodeDecoder, LuminanceSource, OnDecodeListener, Result }
+             * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
              */
-            ((OnDecodeListener)result[2]).onDecodeComplete((LuminanceSource)result[1], (Result)result[3]);
-            result[2] = null;   // Prevent memory leak.
+            ((OnDecodeListener)params[2]).onDecodeComplete((LuminanceSource)params[1], result);
+            Arrays.fill(params, null);  // Prevent memory leak.
         }
     }
 }

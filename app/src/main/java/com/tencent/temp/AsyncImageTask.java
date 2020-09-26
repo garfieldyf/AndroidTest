@@ -2,7 +2,7 @@ package com.tencent.temp;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.ext.content.res.XmlResources;
 import android.ext.graphics.BitmapUtils;
 import android.ext.image.params.Parameters;
@@ -59,7 +59,7 @@ import java.net.HttpURLConnection;
  *    .execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncImageTask<URI> extends AbsAsyncTask<URI, Object, Object[]> {
+public abstract class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[]> {
     /**
      * The application <tt>Context</tt>.
      */

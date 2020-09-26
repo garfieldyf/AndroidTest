@@ -3,7 +3,7 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.pm.PackageItemInfo;
 import android.content.pm.ResolveInfo;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.image.ImageModule;
@@ -35,7 +35,7 @@ public class PackageActivity extends Activity {
         mAppList = (ListView)findViewById(R.id.packages);
         mAdapter = new AppAdapter();
         mAppList.setAdapter(mAdapter);
-        new LoadTask(this).executeOnExecutor(MainApplication.sThreadPool, (Object[])null);
+        new LoadTask(this).execute(MainApplication.sThreadPool, (Object[])null);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class PackageActivity extends Activity {
         }
     }
 
-    private static final class LoadTask extends AbsAsyncTask<Object, Object, List<ResolveInfo>> implements Filter<ResolveInfo> {
+    private static final class LoadTask extends AsyncTask<Object, Object, List<ResolveInfo>> implements Filter<ResolveInfo> {
         public LoadTask(PackageActivity activity) {
             super(activity);
         }
@@ -114,8 +114,8 @@ public class PackageActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(List<ResolveInfo> result) {
-            final PackageActivity activity = getOwnerActivity();
+        protected void onPostExecute(Object[] params, List<ResolveInfo> result) {
+            final PackageActivity activity = getOwner();
             if (activity != null) {
                 ((TextView)activity.findViewById(R.id.title)).setText("已安装的应用: " + result.size());
                 activity.mAdapter.changeData(result);

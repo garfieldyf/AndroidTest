@@ -266,6 +266,13 @@ public abstract class Loader<Key> implements Factory<Task> {
         }
 
         /**
+         * Sets the current state is cancelled.
+         */
+        /* package */ final void setCancelled() {
+            mState.set(CANCELLED);
+        }
+
+        /**
          * This method can be invoked to publish progress value to update UI.
          * @param value The progress value to update.
          */

@@ -48,12 +48,16 @@
     <target name="-replace-if" if="${USE_ANDROIDX}">
         <echo level="info">Replacing the package android.support to androidx</echo>
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
+            <replacefilter token="android.arch.lifecycle" value="androidx.lifecycle" />
             <replacefilter token="android.support.annotation.Keep" value="androidx.annotation.Keep" />
             <replacefilter token="android.support.v4.content.FileProvider" value="androidx.core.content.FileProvider" />
             <replacefilter token="android.support.v7.widget.RecyclerView" value="androidx.recyclerview.widget.RecyclerView" />
             <replacefilter token="android.support.v7.widget.LinearLayoutManager" value="androidx.recyclerview.widget.LinearLayoutManager" />
             <replacefilter token="android.support.v4.content.LocalBroadcastManager" value="androidx.localbroadcastmanager.content.LocalBroadcastManager" />
         </replace>
+
+        <!-- replace the GenericLifecycleObserver to LifecycleEventObserver -->
+        <replace file="${src.dir}/${JNI_PACKAGE}/content/AsyncTask.java" token="GenericLifecycleObserver" value="LifecycleEventObserver" encoding="UTF-8" />
     </target>
 
     <!-- target -delete-focus-if -->

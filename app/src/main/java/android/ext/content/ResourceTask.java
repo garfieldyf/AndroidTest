@@ -24,10 +24,11 @@ import java.net.URLConnection;
  * new ResourceTask&lt;String, JSONObject&gt;(context, url)
  *    .setCookie(cookie)
  *    .setWeakOnLoadCompleteListener(listener)
- *    .execute(loadParams);</pre>
+ *    .setOwner(activity)   // May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+ *    .execute(executor, loadParams);</pre>
  * @author Garfield
  */
-public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Result>, Object, Result> implements DownloadCallback<Object, Integer> {
+public class ResourceTask<Key, Result> extends AsyncTask<LoadParams<Key, Result>, Object, Result> implements DownloadCallback<Object, Integer> {
     /**
      * The application <tt>Context</tt>.
      */
@@ -85,7 +86,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     }
 
     @Override
-    protected void onPostExecute(Result result) {
+    protected void onPostExecute(LoadParams<Key, Result>[] params, Result result) {
         DebugUtils.__checkError(mListener == null, "The " + getClass().getName() + " did not call setWeakOnLoadCompleteListener()");
         final OnLoadCompleteListener<Key, Result> listener = mListener.get();
         if (listener != null) {
@@ -96,7 +97,7 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
     @Override
     @SuppressWarnings("unchecked")
     protected final void onProgressUpdate(Object[] values) {
-        onPostExecute((Result)values[0]);
+        onPostExecute((LoadParams<Key, Result>[])mWorker.mParams, (Result)values[0]);
     }
 
     @Override
@@ -104,15 +105,15 @@ public class ResourceTask<Key, Result> extends AbsAsyncTask<LoadParams<Key, Resu
         final LoadParams<Key, Result> loadParams = params[0];
         final File cacheFile = loadParams.getCacheFile(mContext, mKey);
         if (cacheFile == null) {
-            return parseResult(mContext, mKey, loadParams, this);
+            return parseResult(mContext, mWorker, mKey, loadParams);
         }
 
         final Result result = loadFromCache(mContext, mKey, loadParams, cacheFile);
         if (result != null) {
             // Loads from the cache file succeeded, update UI.
-            publishProgress(result);
+            setProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mKey, loadParams, result, cacheFile.getPath(), this, this));
+        return (isCancelled() ? null : download(mContext, mWorker, mKey, loadParams, cacheFile.getPath(), (result != null), this));
     }
 }

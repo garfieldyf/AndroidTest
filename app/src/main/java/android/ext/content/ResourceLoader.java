@@ -125,7 +125,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return download(conn, statusCode, params);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     private LoadTask obtain(Key key, LoadParams loadParams, Object cookie, OnLoadCompleteListener listener) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -145,6 +145,19 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return statusCode;
     }
 
+    /* package */ static <Key, Result> Result parseResult(Context context, Task task, Key key, LoadParams<Key, Result> loadParams) {
+        Result result = null;
+        try {
+            DebugUtils.__checkStartMethodTracing();
+            result = loadParams.parseResult(context, key, null, task);
+            DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + key);
+        } catch (Exception e) {
+            Log.e(ResourceLoader.class.getName(), "Couldn't parse result - key = " + key + "\n" + e);
+        }
+
+        return result;
+    }
+
     /* package */ static <Key, Result> Result loadFromCache(Context context, Key key, LoadParams<Key, Result> loadParams, File cacheFile) {
         final int priority = Process.getThreadPriority(Process.myTid());
         Result result = null;
@@ -162,25 +175,12 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         return result;
     }
 
-    /* package */ static <Key, Result> Result parseResult(Context context, Key key, LoadParams<Key, Result> loadParams, Cancelable cancelable) {
-        Result result = null;
-        try {
-            DebugUtils.__checkStartMethodTracing();
-            result = loadParams.parseResult(context, key, null, cancelable);
-            DebugUtils.__checkStopMethodTracing("ResourceLoader", "parse result - key = " + key);
-        } catch (Exception e) {
-            Log.e(ResourceLoader.class.getName(), "Couldn't parse result - key = " + key + "\n" + e);
-        }
-
-        return result;
-    }
-
-    /* package */ static <Key, Result> Result download(Context context, Key key, LoadParams<Key, Result> loadParams, Object cachedResult, String cacheFile, Cancelable cancelable, DownloadCallback<Object, Integer> callback) {
+    /* package */ static <Key, Result> Result download(Context context, Task task, Key key, LoadParams<Key, Result> loadParams, String cacheFile, boolean hitCache, DownloadCallback<Object, Integer> callback) {
         final File tempFile = new File(cacheFile + ".tmp");
         Result result = null;
         try {
-            final int statusCode = loadParams.newDownloadRequest(context, key).download(callback, tempFile, cancelable);
-            if (statusCode == HTTP_OK && !cancelable.isCancelled() && !(cachedResult != null && FileUtils.compareFile(cacheFile, tempFile.getPath()))) {
+            final int statusCode = loadParams.newDownloadRequest(context, key).download(callback, tempFile, task);
+            if (statusCode == HTTP_OK && !task.isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
                 result = loadParams.parseResult(context, key, tempFile, null);
@@ -188,7 +188,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
                 if (result != null) {
                     // Save the temp file to the cache file.
                     FileUtils.moveFile(tempFile.getPath(), cacheFile);
-                    DebugUtils.__checkDebug(true, "ResourceLoader", "save - key = " + key + ", tempFile = " + tempFile + ", cacheFile = " + cacheFile + ", hitCache = " + (cachedResult != null));
+                    DebugUtils.__checkDebug(true, "ResourceLoader", "save - key = " + key + ", tempFile = " + tempFile + ", cacheFile = " + cacheFile + ", hitCache = " + hitCache);
                 }
             }
         } catch (Exception e) {
@@ -203,10 +203,10 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
          *   3. Parse the temp file failed.
          * Cancel the task and delete the temp file, do not update UI.
          */
-        if (cachedResult != null && result == null) {
+        if (hitCache && result == null) {
             DebugUtils.__checkDebug(true, "ResourceLoader", "cancel task - key = " + key + ", tempFile = " + tempFile);
             tempFile.delete();
-            cancelable.cancel(false);
+            task.cancel(false);
         }
 
         return result;
@@ -215,7 +215,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     /* package */ final class LoadTask extends Task {
         /* package */ Key mKey;
         /* package */ LoadParams mLoadParams;
@@ -225,7 +225,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
         public Object doInBackground(Object params) {
             final File cacheFile = mLoadParams.getCacheFile(mContext, mKey);
             if (cacheFile == null) {
-                return parseResult(mContext, mKey, mLoadParams, this);
+                return parseResult(mContext, this, mKey, mLoadParams);
             }
 
             final Object result = loadFromCache(mContext, mKey, mLoadParams, cacheFile);
@@ -234,7 +234,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
                 setProgress(result);
             }
 
-            return (isTaskCancelled(this) ? null : download(mContext, mKey, mLoadParams, result, cacheFile.getPath(), this, ResourceLoader.this));
+            return (isTaskCancelled(this) ? null : download(mContext, this, mKey, mLoadParams, cacheFile.getPath(), (result != null), ResourceLoader.this));
         }
 
         @Override

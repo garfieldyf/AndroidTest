@@ -1,6 +1,7 @@
 package com.tencent.temp;
 
 import android.app.Activity;
+import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.ResourceTask;
 import android.ext.json.JSONObject;
 import android.util.Log;
@@ -11,8 +12,8 @@ public class JsonTask extends ResourceTask<String, JSONObject> {
     }
 
     @Override
-    protected void onPostExecute(JSONObject result) {
-        final Activity activity = getOwnerActivity();
+    protected void onPostExecute(LoadParams<String, JSONObject>[] params, JSONObject result) {
+        final Activity activity = getOwner();
         if (activity == null) {
             // The owner activity has been destroyed or release by the GC.
             return;

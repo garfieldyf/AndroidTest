@@ -3,7 +3,7 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.ext.cache.LruCache;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -38,7 +38,7 @@ public class PackageArchiveActivity extends Activity {
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);
-        new LoadTask(this).executeOnExecutor(MainApplication.sThreadPool, "/mnt/usb/sda1");
+        new LoadTask(this).execute(MainApplication.sThreadPool, "/mnt/usb/sda1");
         DebugUtils.stopMethodTracing("yf", "onCreate");
     }
 
@@ -84,7 +84,7 @@ public class PackageArchiveActivity extends Activity {
         }
     }
 
-    private static final class LoadTask extends AbsAsyncTask<String, Object, List<PackageInfo>> {
+    private static final class LoadTask extends AsyncTask<String, Object, List<PackageInfo>> {
         public LoadTask(PackageArchiveActivity activity) {
             super(activity);
         }
@@ -102,8 +102,8 @@ public class PackageArchiveActivity extends Activity {
         }
 
         @Override
-        protected void onPostExecute(List<PackageInfo> result) {
-            final PackageArchiveActivity activity = getOwnerActivity();
+        protected void onPostExecute(String[] params, List<PackageInfo> result) {
+            final PackageArchiveActivity activity = getOwner();
             if (activity != null) {
                 ((TextView)activity.findViewById(R.id.title)).setText("可安装的应用: " + ArrayUtils.getSize(result));
                 activity.mAdapter.changeData(result);

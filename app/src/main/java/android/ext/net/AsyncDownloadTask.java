@@ -2,7 +2,7 @@ package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.ByteArrayBuffer;
 import android.util.Log;
@@ -43,7 +43,7 @@ import java.net.URLConnection;
  * new JSONDownloadTask(activity).execute(url);</pre>
  * @author Garfield
  */
-public abstract class AsyncDownloadTask<Params, Progress, Result> extends AbsAsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {
+public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {
     private DownloadRequest mRequest;
 
     /**

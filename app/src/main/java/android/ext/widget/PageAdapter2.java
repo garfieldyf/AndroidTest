@@ -2,7 +2,7 @@ package android.ext.widget;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -38,7 +38,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      */
     @Override
     /* package */ List<E> loadPageImpl(int pageIndex, int startPosition, int loadSize) {
-        new LoadTask(this, pageIndex).executeOnExecutor(mExecutor, startPosition, loadSize);
+        new LoadTask(this, pageIndex).execute(mExecutor, startPosition, loadSize);
         return null;
     }
 
@@ -46,7 +46,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      * Class <tt>LoadTask</tt> is an implementation of a {@link AbsAsyncTask}.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private static final class LoadTask extends AbsAsyncTask<Integer, Object, List> {
+    private static final class LoadTask extends AsyncTask<Integer, Object, List> {
         private final int mPageIndex;
 
         public LoadTask(Object owner, int pageIndex) {
@@ -61,7 +61,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         }
 
         @Override
-        protected void onPostExecute(List result) {
+        protected void onPostExecute(Integer[] params, List result) {
             final PageAdapter adapter = getOwner();
             if (adapter != null && validateAdapter(adapter)) {
                 adapter.setPage(mPageIndex, result, null);

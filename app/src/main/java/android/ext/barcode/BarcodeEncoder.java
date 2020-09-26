@@ -3,18 +3,18 @@ package android.ext.barcode;
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import android.content.Context;
+import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.os.AsyncTask;
 import android.util.DisplayMetrics;
-import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.datamatrix.encoder.SymbolShapeHint;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -161,9 +161,9 @@ public class BarcodeEncoder {
     public void startEncode(Executor executor, String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
         DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
         /*
-         * params - { BarcodeEncoder, contents, format, width, height }
+         * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener, null }
          */
-        new EncodeTask(listener).executeOnExecutor(executor, this, contents, format, width, height);
+        new EncodeTask().execute(executor, this, contents, format, width, height, listener, null);
     }
 
     /**
@@ -181,32 +181,23 @@ public class BarcodeEncoder {
     /**
      * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    private static final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
-        private OnEncodeListener mListener;
-
-        /**
-         * Constructor
-         * @param listener The {@link OnEncodeListener} used for being
-         * notified when the contents was encoded a barcode image.
-         */
-        public EncodeTask(OnEncodeListener listener) {
-            mListener = listener;
-        }
-
+    /* package */ static final class EncodeTask extends AsyncTask<Object, Object, Bitmap> {
         @Override
-        protected Pair<BitMatrix, Bitmap> doInBackground(Object[] params) {
+        protected Bitmap doInBackground(Object[] params) {
             /*
-             * params - { BarcodeEncoder, contents, format, width, height }
+             * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener, BitMatrix }
              */
+            DebugUtils.__checkError(params.length != 7, "params.length must be == 7");
             final BarcodeEncoder encoder = (BarcodeEncoder)params[0];
             final BitMatrix bitMatrix = encoder.encode((String)params[1], (BarcodeFormat)params[2], (int)params[3], (int)params[4]);
-            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? mListener.convertToBitmap(bitMatrix, encoder.mHints) : null));
+            params[6] = bitMatrix;
+            return (bitMatrix != null ? ((OnEncodeListener)params[5]).convertToBitmap(bitMatrix, encoder.mHints) : null);
         }
 
         @Override
-        protected void onPostExecute(Pair<BitMatrix, Bitmap> result) {
-            mListener.onEncodeComplete(result.first, result.second);
-            mListener = null;    // Prevent memory leak.
+        protected void onPostExecute(Object[] params, Bitmap result) {
+            ((OnEncodeListener)params[5]).onEncodeComplete((BitMatrix)params[6], result);
+            Arrays.fill(params, null);  // Prevent memory leak.
         }
     }
 

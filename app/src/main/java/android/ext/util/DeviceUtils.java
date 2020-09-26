@@ -387,6 +387,14 @@ public final class DeviceUtils {
         }
     }
 
+    public static String toString(Object object) {
+        if (object == null) {
+            return "null";
+        } else {
+            return object.getClass().getName() + "@" + Integer.toHexString(System.identityHashCode(object));
+        }
+    }
+
     public static StringBuilder toString(Object object, StringBuilder result) {
         if (object == null) {
             return result.append("null");

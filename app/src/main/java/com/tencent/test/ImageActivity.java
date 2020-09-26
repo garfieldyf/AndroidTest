@@ -63,7 +63,6 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -98,7 +97,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.lang.ref.WeakReference;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -466,6 +464,17 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         final ResourceLoader<String, JSONObject> loader = new ResourceLoader<String, JSONObject>(this, MainApplication.sThreadPool);
         loader.load(url1, params, JsonLoader.sListener, null);
+
+//        new ResourceTask<String, JSONObject>(this, url1)
+//            .setWeakOnLoadCompleteListener((s, cookie, result) -> {
+//                if (result != null) {
+//                    Log.i("ResourceLoader", "JsonLoader - Load Succeeded, Update UI.");
+//                } else {
+//                    Log.i("ResourceLoader", "JsonLoader - Load Failed, Show error UI.");
+//                }
+//            })
+//            .setOwner(this)
+//            .execute(MainApplication.sThreadPool, params);
 
 //        mVisibility.show(1100);
         mListView.postDelayed(new Runnable() {
@@ -1372,38 +1381,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         @Override
         public void onCancel(DialogInterface dialog) {
             getOwnerActivity().finish();
-        }
-    }
-
-    private static final class LoadingTask extends AsyncTask<Object, Object, Object> {
-        private final WeakReference<ImageActivity> mActivity;
-
-        public LoadingTask(ImageActivity activity) {
-            mActivity = new WeakReference<ImageActivity>(activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected void onPostExecute(Object result) {
-            final ImageActivity activity = mActivity.get();
-            if (activity != null && !activity.isDestroyed()) {
-            }
-        }
-
-        @Override
-        protected Object doInBackground(Object... params) {
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                final Thread thread = Thread.currentThread();
-                final String name = thread.getName();
-                Log.e("yf", name + " - interrupted = " + Thread.interrupted() + ", isInterrupted = " + thread.isInterrupted(), e);
-            }
-
-            return null;
         }
     }
 

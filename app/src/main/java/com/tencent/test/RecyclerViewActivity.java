@@ -2,7 +2,7 @@ package com.tencent.test;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AbsAsyncTask;
+import android.ext.content.AsyncTask;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
 import android.ext.widget.PageAdapter2;
@@ -148,7 +148,7 @@ public class RecyclerViewActivity extends Activity {
         }
     }
 
-    private static final class LoadTask extends AbsAsyncTask<Integer, Integer, List<String>> {
+    private static final class LoadTask extends AsyncTask<Integer, Integer, List<String>> {
         private int page;
 
         public LoadTask(RecyclerViewActivity activity, int page) {
@@ -157,19 +157,19 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        protected List<String> doInBackground(Integer... params) {
+        protected List<String> doInBackground(Integer[] params) {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
             }
 
-            final RecyclerViewActivity activity = getOwnerActivity();
+            final RecyclerViewActivity activity = getOwner();
             return (activity != null ? activity.mData.subList(params[0], params[0] + params[1]) : null);
         }
 
         @Override
-        protected void onPostExecute(List<String> result) {
-            final RecyclerViewActivity activity = getOwnerActivity();
+        protected void onPostExecute(Integer[] params, List<String> result) {
+            final RecyclerViewActivity activity = getOwner();
             if (activity != null) {
                 activity.mAdapter.setPage(page, result);
             }

@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.tencent.test">
 
@@ -18,18 +19,18 @@
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
 
     <application
-        android:name="MainApplication"
+        android:name=".MainApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen" >
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar.Fullscreen">
         <activity
-            android:name="ImageActivity"
+            android:name=".ImageActivity"
             android:configChanges="keyboard|orientation"
             android:icon="@drawable/icon"
             android:label="@string/app_name"
             android:launchMode="singleTask"
-            android:theme="@style/TransitionsTheme" >
+            android:theme="@style/TransitionsTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,40 +38,42 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="ThemeActivity"
+            android:name=".TestFragmentActivity" />
+        <activity
+            android:name=".ThemeActivity"
             android:screenOrientation="landscape"
             android:theme="@style/AppLightTheme" />
         <activity
-            android:name="RecyclerActivity"
+            android:name=".RecyclerActivity"
             android:configChanges="keyboard|orientation"
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/TransitionsTheme" />
         <activity
-            android:name="AndroidTestActivity"
+            android:name=".AndroidTestActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
-            android:name="DrawActivity"
+            android:name=".DrawActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="BarcodeActivity"
+            android:name=".BarcodeActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="TestActivity"
+            android:name=".TestActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name="WaveActivity"
+            android:name=".WaveActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name="MainActivity"
+            android:name=".MainActivity"
             android:screenOrientation="landscape" />
-        <activity android:name="RoundedRectActivity" />
+        <activity android:name=".RoundedRectActivity" />
         <activity
-            android:name="GIFImageActivity"
+            android:name=".GIFImageActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name="DecodeActivity"
+            android:name=".DecodeActivity"
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
@@ -78,44 +81,43 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
-            android:name="EncodeActivity"
+            android:name=".EncodeActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="ContactsActivity"
+            android:name=".ContactsActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="BlurActivity"
+            android:name=".BlurActivity"
             android:screenOrientation="landscape" />
         <activity
-            android:name="com.tencent.test.ui.WebViewActivity"
+            android:name=".ui.WebViewActivity"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.DeviceDefault" >
-        </activity>
-        <activity android:name="PrinterActivity" />
-        <activity android:name="ViewPagerActivity" />
+            android:theme="@android:style/Theme.DeviceDefault"></activity>
+        <activity android:name=".PrinterActivity" />
+        <activity android:name=".ViewPagerActivity" />
         <activity
-            android:name="SensorActivity"
+            android:name=".SensorActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name="PercentActivity"
+            android:name=".PercentActivity"
             android:screenOrientation="landscape"
             android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />
-        <activity android:name="PackageActivity" />
-        <activity android:name="RecyclerViewActivity" />
-        <activity android:name="PackageArchiveActivity" />
-        <activity android:name="com.tencent.test.ui.VideoActivity" />
+        <activity android:name=".PackageActivity" />
+        <activity android:name=".RecyclerViewActivity" />
+        <activity android:name=".PackageArchiveActivity" />
+        <activity android:name=".ui.VideoActivity" />
 
         <service
-            android:name="CrashService"
+            android:name=".CrashService"
             android:process=":crash" />
-        <service android:name="MmsService" />
-        <service android:name="TestService" />
+        <service android:name=".MmsService" />
+        <service android:name=".TestService" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.tencent.test.fileprovider"
             android:exported="false"
-            android:grantUriPermissions="true" >
+            android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />

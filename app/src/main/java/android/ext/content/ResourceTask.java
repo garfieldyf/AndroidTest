@@ -114,6 +114,6 @@ public class ResourceTask<Key, Result> extends AsyncTask<LoadParams<Key, Result>
             setProgress(result);
         }
 
-        return (isCancelled() ? null : download(mContext, mWorker, mKey, loadParams, cacheFile.getPath(), (result != null), this));
+        return (mWorker.isCancelled() ? null : download(mContext, mWorker, mKey, loadParams, cacheFile.getPath(), (result != null), this));
     }
 }

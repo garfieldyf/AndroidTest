@@ -289,7 +289,7 @@ public class ResourceLoader<Key, Result> extends Loader<Key> implements Download
          * @param context The <tt>Context</tt>.
          * @param key The key, passed earlier by {@link #load}.
          * @param cacheFile The cache file's content to parse, or <tt>null</tt> if no cache file.
-         * @param cancelable A {@link Cancelable} can be check the parse is cancelled.
+         * @param cancelable May be <tt>null</tt>. A {@link Cancelable} can be check the parse is cancelled.
          * @return A result or <tt>null</tt>, defined by the subclass.
          * @throws Exception if the data can not be parse.
          */

@@ -13,9 +13,9 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 /**
- * Like as {@link android.os.AsyncTask}, but this class has an owner <tt>Object</tt> to avoid
- * potential memory leaks and listen the owner's lifecycle when the owner destroy. The owner
- * object may be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+ * Like as {@link android.os.AsyncTask}, but this class has an owner <tt>Object</tt> (the owner may be
+ * an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.) to avoid potential memory
+ * leaks and listen the owner's lifecycle when the owner destroy this task will be cancelled.
  * @author Garfield
  */
 public abstract class AsyncTask<Params, Progress, Result> implements Cancelable {
@@ -223,7 +223,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
         if (!mWorker.isCancelled() && owner instanceof Activity) {
             final Activity activity = (Activity)owner;
-            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getSimpleName(), "The activity - " + DeviceUtils.toString(owner) + " has been destroyed: the task will be call onCancelled()");
+            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getSimpleName(), "The Activity - " + DeviceUtils.toString(owner) + " has been destroyed: the task will be call onCancelled()");
             return (activity.isFinishing() || activity.isDestroyed());
         }
 
@@ -274,7 +274,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         public void onStateChanged(LifecycleOwner source, Event event) {
             if (event == Event.ON_DESTROY) {
                 cancel(false);
-                DebugUtils.__checkDebug(true, AsyncTask.this.getClass().getSimpleName(), "The lifecycle - " + DeviceUtils.toString(source) + " has been destroyed: the task will be call onCancelled()");
+                DebugUtils.__checkDebug(true, AsyncTask.this.getClass().getSimpleName(), "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed: the task will be call onCancelled()");
             }
         }
     }

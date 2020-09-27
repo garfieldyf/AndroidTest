@@ -135,7 +135,7 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public List<String> loadPage(int page, int startPosition, int loadSize) {
+        public List<String> loadPage(AsyncTask<?, ?, ?> task, int page, int startPosition, int loadSize) {
             //Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
 //            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, loadSize);
 //            return null;

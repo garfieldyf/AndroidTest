@@ -24,51 +24,46 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         mExecutor = executor;
     }
 
+    @Override
+    protected List<E> loadPage(int pageIndex, int startPosition, int loadSize) {
+        new LoadTask(this).execute(mExecutor, pageIndex, startPosition, loadSize);
+        return null;
+    }
+
     /**
      * Called on a background thread to load a page with given the <em>pageIndex</em>.
+     * @param task The current {@link AsyncTask} whose executing this method.
      * @param pageIndex The index of the page whose data should be load.
      * @param startPosition The start position of data to load.
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
-    protected abstract List<E> loadPage(int pageIndex, int startPosition, int loadSize);
-
-    /**
-     * Returns a page at the given the <em>pageIndex</em>.
-     */
-    @Override
-    /* package */ List<E> loadPageImpl(int pageIndex, int startPosition, int loadSize) {
-        new LoadTask(this, pageIndex).execute(mExecutor, startPosition, loadSize);
-        return null;
-    }
+    protected abstract List<E> loadPage(AsyncTask<?, ?, ?> task, int pageIndex, int startPosition, int loadSize);
 
     /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link AbsAsyncTask}.
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final class LoadTask extends AsyncTask<Integer, Object, List> {
-        private final int mPageIndex;
-
-        public LoadTask(Object owner, int pageIndex) {
+        public LoadTask(Object owner) {
             super(owner);
-            mPageIndex = pageIndex;
         }
 
         @Override
         protected List doInBackground(Integer[] params) {
-            final PageAdapter adapter = getOwner();
-            return (adapter != null && validateAdapter(adapter) ? adapter.loadPage(mPageIndex, params[0], params[1]) : null);
+            final PageAdapter2 adapter = getOwner();
+            return (adapter != null && validateOwner(adapter) ? adapter.loadPage(this, params[0], params[1], params[2]) : null);
         }
 
         @Override
         protected void onPostExecute(Integer[] params, List result) {
             final PageAdapter adapter = getOwner();
-            if (adapter != null && validateAdapter(adapter)) {
-                adapter.setPage(mPageIndex, result, null);
+            if (adapter != null && validateOwner(adapter)) {
+                adapter.setPage(params[0], result, null);
             }
         }
 
-        private static boolean validateAdapter(PageAdapter adapter) {
+        private static boolean validateOwner(PageAdapter adapter) {
             final Context context = adapter.mRecyclerView.getContext();
             if (context instanceof Activity) {
                 final Activity activity = (Activity)context;

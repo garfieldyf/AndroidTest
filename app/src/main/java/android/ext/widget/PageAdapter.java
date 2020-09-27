@@ -351,20 +351,6 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     protected abstract List<E> loadPage(int pageIndex, int startPosition, int loadSize);
 
     /**
-     * Returns a page at the given the <em>pageIndex</em>.
-     */
-    /* package */ List<E> loadPageImpl(int pageIndex, int startPosition, int loadSize) {
-        final List<E> page = loadPage(pageIndex, startPosition, loadSize);
-        if (ArrayUtils.getSize(page) > 0) {
-            // Clears the page loading state.
-            mLoadStates.clear(pageIndex);
-            mPageCache.put(pageIndex, page);
-        }
-
-        return page;
-    }
-
-    /**
      * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
      * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the page
      * when the page was not present.</p>
@@ -373,7 +359,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      */
     private List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
-        final List<E> page = mPageCache.get(pageIndex);
+        List<E> page = mPageCache.get(pageIndex);
         if (page != null || mLoadStates.get(pageIndex)) {
             return page;
         }
@@ -391,7 +377,14 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         // Loads the page data and sets the page loading state.
         DebugUtils.__checkDebug(true, "PageAdapter", "loadPage - pageIndex = " + pageIndex + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
         mLoadStates.set(pageIndex);
-        return loadPageImpl(pageIndex, startPosition, loadSize);
+        page = loadPage(pageIndex, startPosition, loadSize);
+        if (ArrayUtils.getSize(page) > 0) {
+            // Clears the page loading state.
+            mLoadStates.clear(pageIndex);
+            mPageCache.put(pageIndex, page);
+        }
+
+        return page;
     }
 
     /**

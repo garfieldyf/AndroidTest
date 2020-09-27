@@ -1,9 +1,8 @@
 package android.ext.widget;
 
-import android.app.Activity;
-import android.content.Context;
 import android.ext.content.AsyncTask;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -12,6 +11,7 @@ import java.util.concurrent.Executor;
  * @author Garfield
  */
 public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter<E, VH> {
+    private Object mOwner;
     private final Executor mExecutor;
 
     /**
@@ -24,9 +24,17 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         mExecutor = executor;
     }
 
+    /**
+     * Sets the object that owns the internal task.
+     * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+     */
+    public final void setOwner(Object owner) {
+        mOwner = owner;
+    }
+
     @Override
     protected List<E> loadPage(int pageIndex, int startPosition, int loadSize) {
-        new LoadTask(this).execute(mExecutor, pageIndex, startPosition, loadSize);
+        new LoadTask(this, mOwner).execute(mExecutor, pageIndex, startPosition, loadSize);
         return null;
     }
 
@@ -45,32 +53,30 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private static final class LoadTask extends AsyncTask<Integer, Object, List> {
-        public LoadTask(Object owner) {
-            super(owner);
+        private final WeakReference<PageAdapter2> mAdapter;
+
+        /**
+         * Constructor
+         * @param adapter The {@link PageAdapter2}.
+         * @param owner The owner object.
+         */
+        public LoadTask(PageAdapter2 adapter, Object owner) {
+            super(owner != null ? owner : adapter.mRecyclerView.getContext());
+            mAdapter = new WeakReference<PageAdapter2>(adapter);
         }
 
         @Override
         protected List doInBackground(Integer[] params) {
-            final PageAdapter2 adapter = getOwner();
-            return (adapter != null && validateOwner(adapter) ? adapter.loadPage(this, params[0], params[1], params[2]) : null);
+            final PageAdapter2 adapter = mAdapter.get();
+            return (adapter != null ? adapter.loadPage(this, params[0], params[1], params[2]) : null);
         }
 
         @Override
         protected void onPostExecute(Integer[] params, List result) {
-            final PageAdapter adapter = getOwner();
-            if (adapter != null && validateOwner(adapter)) {
+            final PageAdapter2 adapter = mAdapter.get();
+            if (adapter != null) {
                 adapter.setPage(params[0], result, null);
             }
-        }
-
-        private static boolean validateOwner(PageAdapter adapter) {
-            final Context context = adapter.mRecyclerView.getContext();
-            if (context instanceof Activity) {
-                final Activity activity = (Activity)context;
-                return (!activity.isFinishing() && !activity.isDestroyed());
-            }
-
-            return true;
         }
     }
 }

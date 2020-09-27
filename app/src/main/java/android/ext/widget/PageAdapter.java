@@ -608,7 +608,10 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         @Override
         public Map<Integer, List<E>> snapshot() {
             final Map<Integer, List<E>> result = super.snapshot();
-            result.put(0, mInitialPage);
+            if (mInitialPage != null) {
+                result.put(0, mInitialPage);
+            }
+
             return result;
         }
     }

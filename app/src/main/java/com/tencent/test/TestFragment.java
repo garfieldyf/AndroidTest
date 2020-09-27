@@ -16,7 +16,7 @@ public class TestFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = new View(getActivity());
         view.setBackgroundColor(Color.RED);
-        new LifecycleTask(this).execute(MainApplication.sThreadPool );
+        new LifecycleTask(this).execute(MainApplication.sThreadPool);
         return view;
     }
 

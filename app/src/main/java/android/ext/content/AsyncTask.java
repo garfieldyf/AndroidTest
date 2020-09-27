@@ -126,12 +126,14 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     }
 
     /**
-     * Runs on the UI thread after {@link #setProgress} is invoked.
-     * @param values The progress values to update, passed earlier
-     * by {@link #setProgress}.
-     * @see #setProgress(Progress[])
+     * Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * {@link #doInBackground(Params[])} has finished.
+     * @param result The result, returned earlier by {@link #doInBackground}.
+     * @see #cancel(boolean)
+     * @see #doInBackground(Params[])
+     * @see #onPostExecute(Params[], Result)
      */
-    protected void onProgressUpdate(Progress[] values) {
+    protected void onCancelled(Result result) {
     }
 
     /**
@@ -144,25 +146,12 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     }
 
     /**
-     * Runs on the UI thread after {@link #cancel(boolean)} is invoked and
-     * {@link #doInBackground(Params[])} has finished.
-     * @param result The result, returned earlier by {@link #doInBackground}.
-     * @see #cancel(boolean)
-     * @see #doInBackground(Params[])
-     * @see #onPostExecute(Params[], Result)
+     * Runs on the UI thread after {@link #setProgress} is invoked.
+     * @param values The progress values to update, passed earlier
+     * by {@link #setProgress}.
+     * @see #setProgress(Progress[])
      */
-    protected void onCancelled(Result result) {
-    }
-
-    /**
-     * Runs on the UI thread after {@link #doInBackground}.
-     * @param params The parameters, passed earlier by {@link #execute}.
-     * @param result The result, returned earlier by {@link #doInBackground}.
-     * @see #onPreExecute(Params[])
-     * @see #onCancelled(Result)
-     * @see #doInBackground(Params[])
-     */
-    protected void onPostExecute(Params[] params, Result result) {
+    protected void onProgressUpdate(Progress[] values) {
     }
 
     /**
@@ -174,6 +163,16 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #onPostExecute(Params[], Result)
      */
     protected abstract Result doInBackground(Params[] params);
+
+    /**
+     * Runs on the UI thread after {@link #doInBackground}.
+     * @param params The parameters, passed earlier by {@link #execute}.
+     * @param result The result, returned earlier by {@link #doInBackground}.
+     * @see #onPreExecute(Params[])
+     * @see #onCancelled(Result)
+     * @see #doInBackground(Params[])
+     */
+    protected abstract void onPostExecute(Params[] params, Result result);
 
     /**
      * Runs on the UI thread after {@link #doInBackground}.

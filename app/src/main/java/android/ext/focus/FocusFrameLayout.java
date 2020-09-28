@@ -31,6 +31,12 @@ public class FocusFrameLayout extends FrameLayout {
     }
 
     @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        mDrawable.drawableStateChanged(this);
+    }
+
+    @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
         mDrawable.draw(canvas, this, ENABLED_FOCUSED_STATE_SET);

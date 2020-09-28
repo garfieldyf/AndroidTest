@@ -30,6 +30,12 @@ public class FocusTextView extends TextView {
     }
 
     @Override
+    protected void drawableStateChanged() {
+        super.drawableStateChanged();
+        mDrawable.drawableStateChanged(this);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         mDrawable.draw(canvas, this, ENABLED_FOCUSED_STATE_SET);

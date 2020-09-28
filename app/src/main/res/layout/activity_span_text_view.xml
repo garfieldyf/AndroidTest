@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
+    android:background="@android:color/white"
     android:gravity="center"
     android:orientation="vertical">
 
@@ -22,12 +23,28 @@
         android:contentDescription="@null"
         android:focusable="true"
         android:scaleType="fitXY"
-        app:focus="@drawable/tv_fun_card_selector" />
+        app:focus="@drawable/tv_fun_card_focused" />
 
-    <TextView android:id="@+id/face"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:background="@android:color/holo_blue_dark"
-        android:textSize="32sp" />
+    <LinearLayout android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipChildren="false"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <android.ext.focus.FocusImageView android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:contentDescription="@null"
+            android:duplicateParentState="true"
+            android:scaleType="fitXY"
+            app:focus="@drawable/tv_fun_card_selector" />
+
+        <TextView android:id="@+id/face"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/holo_blue_dark"
+            android:textSize="32sp" />
+    </LinearLayout>
+
 </LinearLayout>

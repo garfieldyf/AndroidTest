@@ -42,6 +42,15 @@ public final class FocusDrawable {
     }
 
     /**
+     * Callback method to be invoked when the view's state has been changed.
+     */
+    public void drawableStateChanged(View view) {
+        if (mDrawable.isStateful() && mDrawable.setState(view.getDrawableState())) {
+            view.invalidate();
+        }
+    }
+
+    /**
      * Draw this focus drawable with the specified the {@link View} states.
      * @param canvas The canvas to draw into.
      * @param view The <tt>View</tt> obtains the current states.
@@ -49,14 +58,12 @@ public final class FocusDrawable {
      * focus drawable is state full, This parameter will be ignored.
      */
     public void draw(Canvas canvas, View view, int[] stateSpec) {
-        final int[] stateSet = view.getDrawableState();
         if (mDrawable.isStateful()) {
-            mDrawable.setState(stateSet);
             final Drawable drawable = mDrawable.getCurrent();
             if (drawable != null) {
                 draw(canvas, view, drawable);
             }
-        } else if (StateSet.stateSetMatches(stateSpec, stateSet)) {
+        } else if (StateSet.stateSetMatches(stateSpec, view.getDrawableState())) {
             draw(canvas, view, mDrawable);
         }
     }

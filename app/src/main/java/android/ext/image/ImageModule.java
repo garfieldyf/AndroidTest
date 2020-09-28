@@ -607,7 +607,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!").getPath(), maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
             }
         }
 

@@ -20,7 +20,7 @@ import java.util.concurrent.Executor;
  */
 public final class LruFileCache implements FileCache, ScanCallback, Runnable, Comparator<String> {
     private final int mMaxSize;
-    private final String mCacheDir;
+    private final File mCacheDir;
     private final Executor mExecutor;
 
     /**
@@ -29,7 +29,7 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
      */
-    public LruFileCache(Executor executor, String cacheDir, int maxSize) {
+    public LruFileCache(Executor executor, File cacheDir, int maxSize) {
         DebugUtils.__checkError(executor == null || cacheDir == null || maxSize <= 0, "Invalid parameters - executor == null || cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
@@ -50,20 +50,20 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
      */
     public final long getCacheSize() {
         DebugUtils.__checkStartMethodTracing();
-        final long result = FileUtils.computeFiles(mCacheDir);
+        final long result = FileUtils.computeFiles(mCacheDir.getPath());
         DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
     }
 
     @Override
     public File getCacheDir() {
-        return new File(mCacheDir);
+        return mCacheDir;
     }
 
     @Override
     public void clear() {
         DebugUtils.__checkStartMethodTracing();
-        FileUtils.deleteFiles(mCacheDir, false);
+        FileUtils.deleteFiles(mCacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("LruFileCache", "clear");
     }
 
@@ -132,13 +132,13 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
 
     private List<String> listFiles() {
         final List<String> files = new ArrayList<String>(mMaxSize >> 2);
-        FileUtils.scanFiles(mCacheDir, this, 0, files);
+        FileUtils.scanFiles(mCacheDir.getPath(), this, 0, files);
         return files;
     }
 
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(100);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", listFiles().size(), FileUtils.formatFileSize(FileUtils.computeFiles(mCacheDir)));
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", listFiles().size(), FileUtils.formatFileSize(FileUtils.computeFiles(mCacheDir.getPath())));
         result.setLength(0);
         printer.println(result.append("  cacheDir = ").append(mCacheDir).toString());
     }

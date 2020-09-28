@@ -72,7 +72,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * you can pass <em>(Params[])null</em> instead of allocating an empty array.
      * @return This <em>task</em>.
      */
-    @SafeVarargs
+    @SuppressWarnings("unchecked")
     public final AsyncTask<Params, Progress, Result> execute(Executor executor, Params... params) {
         DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
         DebugUtils.__checkUIThread("execute");
@@ -120,7 +120,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @param values The progress values to update.
      * @see #onProgressUpdate(Progress[])
      */
-    @SafeVarargs
+    @SuppressWarnings("unchecked")
     protected final void setProgress(Progress... values) {
         mWorker.setProgress(values);
     }

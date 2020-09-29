@@ -2,6 +2,7 @@ package android.ext.json;
 
 import android.annotation.TargetApi;
 import android.ext.util.DebugUtils;
+import android.util.Printer;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -395,5 +396,9 @@ public class JSONObject implements Map<String, Object> {
     @Override
     public boolean equals(Object object) {
         return (object instanceof JSONObject && values.equals(((JSONObject)object).values));
+    }
+
+    public final void dump(Printer printer) {
+        JSONUtils.dump(printer, values);
     }
 }

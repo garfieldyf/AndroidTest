@@ -17,10 +17,6 @@ import java.net.URLConnection;
  * <h3>Usage</h3>
  * <p>Here is an example of subclassing:</p><pre>
  * private static class JSONDownloadTask extends AsyncDownloadTask&lt;String, Object, JSONObject&gt; {
- *     public JSONDownloadTask(Activity ownerActivity) {
- *         super(ownerActivity);
- *     }
- *
  *    {@code @Override}
  *     protected DownloadRequest newDownloadRequest(String[] urls) throws Exception {
  *         return new DownloadRequest(urls[0]).readTimeout(30000).connectTimeout(30000);
@@ -28,19 +24,15 @@ import java.net.URLConnection;
  *
  *    {@code @Override}
  *     protected void onPostExecute(JSONObject result) {
- *         final Activity activity = getOwnerActivity();
- *         if (activity == null) {
- *              // The owner activity has been destroyed or released by the GC.
- *              return;
- *         }
- *
  *         if (result != null) {
  *             Log.i(TAG, result.toString());
  *         }
  *     }
  * }
  *
- * new JSONDownloadTask(activity).execute(url);</pre>
+ * new JSONDownloadTask()
+ *    .setOwner(activity)   // May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+ *    .execute(executor, url);</pre>
  * @author Garfield
  */
 public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {

@@ -7,6 +7,7 @@ import android.ext.util.FileUtils;
 import android.ext.util.UriUtils;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.util.Printer;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -347,6 +348,18 @@ public final class JSONUtils {
             final StringWriter out = new StringWriter(128);
             writeObject(new JsonWriter(out), value);
             return out.toString();
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /* package */ static void dump(Printer printer, Object value) {
+        try {
+            final StringWriter out  = new StringWriter(128);
+            final JsonWriter writer = new JsonWriter(out);
+            writer.setIndent("    ");
+            writeObject(writer, value);
+            printer.println(out.toString());
         } catch (IOException e) {
             throw new AssertionError(e);
         }

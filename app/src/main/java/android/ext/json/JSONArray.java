@@ -1,6 +1,7 @@
 package android.ext.json;
 
 import android.annotation.TargetApi;
+import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -504,5 +505,9 @@ public class JSONArray implements List<Object>, RandomAccess {
     @Override
     public boolean equals(Object object) {
         return (object instanceof JSONArray && values.equals(((JSONArray)object).values));
+    }
+
+    public final void dump(Printer printer) {
+        JSONUtils.dump(printer, values);
     }
 }

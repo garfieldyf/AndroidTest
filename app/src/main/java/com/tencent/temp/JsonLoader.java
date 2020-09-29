@@ -20,6 +20,7 @@ public final class JsonLoader {
         public void onLoadComplete(String key, Object cookie, JSONObject result) {
             if (result != null) {
                 Log.i("ResourceLoader", "JsonLoader - Load Succeeded, Update UI.");
+                //result.dump(new LogPrinter(Log.DEBUG, "ResourceLoader"));
             } else {
                 Log.i("ResourceLoader", "JsonLoader - Load Failed, Show error UI.");
             }

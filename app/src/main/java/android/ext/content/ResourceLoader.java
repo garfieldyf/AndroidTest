@@ -172,7 +172,9 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         final File tempFile = new File(cacheFile + ".tmp");
         Result result = null;
         try {
-            final int statusCode = mLoadParams.newDownloadRequest(mContext, params).download(tempFile, mWorker, null);
+            final DownloadRequest request = mLoadParams.newDownloadRequest(mContext, params);
+            DebugUtils.__checkError(request == null, "The LoadParams newDownloadRequest must be implementation!");
+            final int statusCode = request.download(tempFile, mWorker, null);
             if (statusCode == HTTP_OK && !mWorker.isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
                 DebugUtils.__checkStartMethodTracing();
@@ -206,6 +208,18 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
     }
 
     /**
+     * Callback interface when a {@link ResourceLoader} has finished loading its data.
+     */
+    public static interface OnLoadCompleteListener<Params, Result> {
+        /**
+         * Called on the UI thread when the load is complete.
+         * @param params The parameters, passed earlier by {@link #execute}.
+         * @param result A result of the load or <tt>null</tt>.
+         */
+        void onLoadComplete(Params[] params, Result result);
+    }
+
+    /**
      * Class <tt>LoadParams</tt> used to {@link ResourceLoader} to load resource.
      */
     public static interface LoadParams<Params, Result> {
@@ -228,7 +242,9 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @return The {@link DownloadRequest}.
          * @throws Exception if an error occurs while opening the connection.
          */
-        DownloadRequest newDownloadRequest(Context context, Params[] params) throws Exception;
+        default DownloadRequest newDownloadRequest(Context context, Params[] params) throws Exception {
+            return null;
+        }
 
         /**
          * Called on a background thread to parse the data from the cache file.
@@ -240,17 +256,5 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @throws Exception if the data can not be parse.
          */
         Result parseResult(Context context, Params[] params, File cacheFile, Cancelable cancelable) throws Exception;
-    }
-
-    /**
-     * Callback interface when a {@link ResourceLoader} has finished loading its data.
-     */
-    public static interface OnLoadCompleteListener<Params, Result> {
-        /**
-         * Called on the UI thread when the load is complete.
-         * @param params The parameters, passed earlier by {@link #execute}.
-         * @param result A result of the load or <tt>null</tt>.
-         */
-        void onLoadComplete(Params[] params, Result result);
     }
 }

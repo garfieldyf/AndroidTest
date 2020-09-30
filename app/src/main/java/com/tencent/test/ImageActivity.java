@@ -18,6 +18,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.annotation.CursorField;
 import android.ext.content.ResourceLoader;
+import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.database.AsyncQueryHandler;
 import android.ext.database.AsyncSQLiteHandler;
@@ -459,7 +460,9 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final String url1 = "http://jo.funtv.bestv.com.cn/config/channel/index/v3?block_id=620&ispreview=1&version=3.3.4.1&sid=FD4351A-LU&mac=28%3A76%3ACD%3A01%3AD9%3AEA&chiptype=638";
 //        final String url2 = "http://jo.funtv.bestv.com.cn/config/mretrievetabs/v2?block_id=288&ispreview=1&version=3.3.4.1&sid=FD4351A-LU&mac=28%3A76%3ACD%3A01%3AD9%3AEA&chiptype=638";
 //        final String url3 = "http://appv2.funtv.bestv.com.cn/frontpage/all/tomato/v3";
-        final JSONLoadParams params = new JSONLoadParams("content");
+
+        final LoadParams<String, JSONObject> params = new JSONLoadParams("content");
+        //final LoadParams<String, JSONObject> params = new URLLoadParams();
 
         new ResourceLoader<String, JSONObject>(this, params)
             .setWeakOnLoadCompleteListener(JsonLoader.sListener)

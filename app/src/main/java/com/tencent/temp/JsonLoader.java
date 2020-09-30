@@ -25,6 +25,19 @@ public final class JsonLoader {
         }
     };
 
+    public static final class URLLoadParams implements LoadParams<String, JSONObject> {
+        @Override
+        public JSONObject parseResult(Context context, String[] urls, File cacheFile, Cancelable cancelable) throws Exception {
+            final JSONObject result = new DownloadRequest(urls[0])
+                .connectTimeout(30000)
+                .readTimeout(30000)
+                .accept("*/*")
+                .download(cancelable);
+
+            return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);
+        }
+    }
+
     public static final class JSONLoadParams implements LoadParams<String, JSONObject> {
         private final File mCacheFile;
 

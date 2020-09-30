@@ -210,7 +210,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     private boolean removeLifecycleObserver() {
         final Object owner = mOwner.get();
         if (owner == null) {
-            DebugUtils.__checkDebug(true, getClass().getSimpleName(), "The owner released by the GC: the task will be call onCancelled()");
+            DebugUtils.__checkDebug(true, getClass().getName(), "The owner released by the GC: the task will be call onCancelled()");
             return true;
         }
 
@@ -222,7 +222,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
         if (!mWorker.isCancelled() && owner instanceof Activity) {
             final Activity activity = (Activity)owner;
-            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getSimpleName(), "The Activity - " + DeviceUtils.toString(owner) + " has been destroyed: the task will be call onCancelled()");
+            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getName(), "The Activity - " + DeviceUtils.toString(owner) + " has been destroyed: the task will be call onCancelled()");
             return (activity.isFinishing() || activity.isDestroyed());
         }
 
@@ -273,7 +273,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         public void onStateChanged(LifecycleOwner source, Event event) {
             if (event == Event.ON_DESTROY) {
                 cancel(false);
-                DebugUtils.__checkDebug(true, AsyncTask.this.getClass().getSimpleName(), "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed: the task will be call onCancelled()");
+                DebugUtils.__checkDebug(true, AsyncTask.this.getClass().getName(), "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed: the task will be call onCancelled()");
             }
         }
     }

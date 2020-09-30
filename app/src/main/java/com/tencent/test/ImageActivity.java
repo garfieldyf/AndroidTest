@@ -89,7 +89,7 @@ import android.widget.TextView;
 import com.tencent.temp.BaseListAdapter;
 import com.tencent.temp.DexFileLoader;
 import com.tencent.temp.JsonLoader;
-import com.tencent.temp.JsonLoader.JsonLoadParams;
+import com.tencent.temp.JsonLoader.JSONLoadParams;
 import com.tencent.test.JSONTest.Permission;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -459,22 +459,12 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         final String url1 = "http://jo.funtv.bestv.com.cn/config/channel/index/v3?block_id=620&ispreview=1&version=3.3.4.1&sid=FD4351A-LU&mac=28%3A76%3ACD%3A01%3AD9%3AEA&chiptype=638";
 //        final String url2 = "http://jo.funtv.bestv.com.cn/config/mretrievetabs/v2?block_id=288&ispreview=1&version=3.3.4.1&sid=FD4351A-LU&mac=28%3A76%3ACD%3A01%3AD9%3AEA&chiptype=638";
 //        final String url3 = "http://appv2.funtv.bestv.com.cn/frontpage/all/tomato/v3";
-        final JsonLoadParams params = new JsonLoadParams("content");
-//        final URLLoadParams params = new URLLoadParams();
+        final JSONLoadParams params = new JSONLoadParams("content");
 
-        final ResourceLoader<String, JSONObject> loader = new ResourceLoader<String, JSONObject>(this, MainApplication.sThreadPool);
-        loader.load(url1, params, JsonLoader.sListener, null);
-
-//        new ResourceTask<String, JSONObject>(this, url1)
-//            .setWeakOnLoadCompleteListener((s, cookie, result) -> {
-//                if (result != null) {
-//                    Log.i("ResourceLoader", "JsonLoader - Load Succeeded, Update UI.");
-//                } else {
-//                    Log.i("ResourceLoader", "JsonLoader - Load Failed, Show error UI.");
-//                }
-//            })
-//            .setOwner(this)
-//            .execute(MainApplication.sThreadPool, params);
+        new ResourceLoader<String, JSONObject>(this, params)
+            .setWeakOnLoadCompleteListener(JsonLoader.sListener)
+            .setOwner(this)
+            .execute(MainApplication.sThreadPool, url1);
 
 //        mVisibility.show(1100);
         mListView.postDelayed(new Runnable() {

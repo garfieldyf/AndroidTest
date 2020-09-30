@@ -8,16 +8,14 @@ import android.ext.json.JSONUtils;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.FileUtils;
-import android.ext.util.UriUtils;
 import android.util.Log;
 import com.tencent.test.MainApplication;
 import java.io.File;
-import java.io.IOException;
 
 public final class JsonLoader {
     public static final OnLoadCompleteListener<String, JSONObject> sListener = new OnLoadCompleteListener<String, JSONObject>() {
         @Override
-        public void onLoadComplete(String key, Object cookie, JSONObject result) {
+        public void onLoadComplete(String[] urls, JSONObject result) {
             if (result != null) {
                 Log.i("ResourceLoader", "JsonLoader - Load Succeeded, Update UI.");
                 //result.dump(new LogPrinter(Log.DEBUG, "ResourceLoader"));
@@ -27,44 +25,29 @@ public final class JsonLoader {
         }
     };
 
-    public static class URLLoadParams implements LoadParams<String, JSONObject> {
-        @Override
-        public DownloadRequest newDownloadRequest(Context context, String url) throws Exception {
-            return new DownloadRequest(url).connectTimeout(30000).readTimeout(30000).accept("*/*");
-        }
-
-        @Override
-        public JSONObject parseResult(Context context, String url, File cacheFile, Cancelable cancelable) throws Exception {
-            final JSONObject result = newDownloadRequest(context, url).download(cancelable);
-            return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);
-        }
-    }
-
-    public static class JsonLoadParams extends URLLoadParams {
+    public static final class JSONLoadParams implements LoadParams<String, JSONObject> {
         private final File mCacheFile;
 
-        /**
-         * Constructor
-         */
-        public JsonLoadParams(String cacheFileName) {
+        public JSONLoadParams(String cacheFileName) {
             mCacheFile = new File(FileUtils.getCacheDir(MainApplication.sInstance, ".json_cache"), cacheFileName);
         }
 
         @Override
-        public File getCacheFile(Context context, String url) {
-            if (!mCacheFile.exists()) {
-                try {
-                    FileUtils.copyFile(context, UriUtils.getAssetUri("json_cache/content"), mCacheFile, null);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
+        public File getCacheFile(Context context, String[] urls) {
+//            try {
+//                Thread.sleep(2000);
+//            } catch (InterruptedException ignored) {
+//            }
             return mCacheFile;
         }
 
         @Override
-        public JSONObject parseResult(Context context, String key, File cacheFile, Cancelable cancelable) throws Exception {
+        public DownloadRequest newDownloadRequest(Context context, String[] urls) throws Exception {
+            return new DownloadRequest(urls[0]).connectTimeout(30000).readTimeout(30000).accept("*/*");
+        }
+
+        @Override
+        public JSONObject parseResult(Context context, String[] urls, File cacheFile, Cancelable cancelable) throws Exception {
             final JSONObject result = JSONUtils.parse(context, cacheFile, cancelable);
 //            result.put("retCode", "401");
             return (JSONUtils.optInt(result, "retCode", 0) == 200 ? result : null);

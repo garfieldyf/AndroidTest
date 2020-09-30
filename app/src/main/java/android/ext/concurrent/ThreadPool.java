@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Garfield
  */
 public class ThreadPool extends ThreadPoolExecutor {
+    private static final int MIN_THREAD_COUNT = 4;
+    private static final int MAX_THREAD_COUNT = 8;
+
     /**
      * Constructor
      * <p>Creates a new <tt>ThreadPool</tt> to execute the given task. At any point, at most
@@ -61,7 +64,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @return The maximum number of threads.
      */
     public static int computeMaximumThreads() {
-        return ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 4, 8);
+        return ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), MIN_THREAD_COUNT, MAX_THREAD_COUNT);
     }
 
     /**

@@ -65,6 +65,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /* package */ static final int PARAMS_LENGTH = 2;
 
     private static final int MAX_POOL_SIZE = 32;
+    private static final int MIN_THREAD_COUNT = 2;
     private static final int MAX_THREAD_COUNT = 4;
 
     /**
@@ -594,7 +595,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * @return The <tt>ImageModule</tt>.
          */
         public final ImageModule build() {
-            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), 2, MAX_THREAD_COUNT));
+            final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), MIN_THREAD_COUNT, MAX_THREAD_COUNT));
             final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
             final BitmapPool bitmapPool = (mPoolSize > 0 ? new LinkedBitmapPool(mPoolSize) : null);
             return new ImageModule(mContext, executor, createImageCache(bitmapPool), createFileCache(executor), bitmapPool);

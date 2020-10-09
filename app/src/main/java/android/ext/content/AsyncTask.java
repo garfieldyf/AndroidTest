@@ -9,6 +9,7 @@ import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.os.Process;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
@@ -61,6 +62,17 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
         mOwner = new WeakReference<Object>(owner);
         addLifecycleObserver(owner);
+        return this;
+    }
+
+    /**
+     * Sets the priority to run this task at. The value supplied
+     * must be from {@link Process} and not from {@link Thread}.
+     * @param priority The priority.
+     * @return This <em>task</em>.
+     */
+    public final AsyncTask<Params, Progress, Result> setPriority(int priority) {
+        mWorker.mPriority = priority;
         return this;
     }
 
@@ -254,6 +266,8 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     @SuppressWarnings("unchecked")
     /* package */ final class Worker extends Task implements GenericLifecycleObserver {
+        /* package */ int mPriority = Process.THREAD_PRIORITY_BACKGROUND;
+
         @Override
         public void onProgress(Object value) {
             onProgressUpdate((Progress[])value);
@@ -266,7 +280,13 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
         @Override
         public Object doInBackground(Object params) {
-            return AsyncTask.this.doInBackground((Params[])params);
+            final int priority = Process.getThreadPriority(Process.myTid());
+            try {
+                Process.setThreadPriority(mPriority);
+                return AsyncTask.this.doInBackground((Params[])params);
+            } finally {
+                Process.setThreadPriority(priority);
+            }
         }
 
         @Override

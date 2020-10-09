@@ -32,7 +32,7 @@ import java.lang.ref.WeakReference;
  *     public JSONObject parseResult(Context context, String[] urls, File cacheFile, Cancelable cancelable) throws Exception {
  *         final JSONObject result;
  *         if (cacheFile == null) {
- *             // If no cache file, parse the JSON data from the network.
+ *             // If no cache file, parse the JSON data from the web.
  *             result = newDownloadRequest(context, urls).download(cancelable);
  *         } else if (cacheFile.exists()) {
  *             // Parse the JSON data from the cache file.

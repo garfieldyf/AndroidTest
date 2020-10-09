@@ -8,7 +8,7 @@ import android.widget.RelativeLayout;
 /**
  * Class <tt>FocusRelativeLayout</tt>
  * <h3>Usage</h3>
- * <p>Here is a xml resource example:</p><pre>
+ * <p>Here is a resource example:</p><pre>
  * &lt;xxx.focus.FocusRelativeLayout
  *     xmlns:android="http://schemas.android.com/apk/res/android"
  *     xmlns:app="http://schemas.android.com/apk/res-auto"

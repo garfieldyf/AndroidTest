@@ -15,6 +15,19 @@ import android.view.View;
 
 /**
  * Class NumericView
+ * <h3>Usage</h3>
+ * <p>Here is a resource example:</p><pre>
+ * &lt;xxx.widget.NumericView
+ *     xmlns:android="http://schemas.android.com/apk/res/android"
+ *     xmlns:app="http://schemas.android.com/apk/res-auto"
+ *     android:layout_width="wrap_content"
+ *     android:layout_height="wrap_content"
+ *     app:numberWidth="40dp"
+ *     app:numberHeight="60dp"
+ *     app:dotWidth="20dp"
+ *     app:value="51.1"
+ *     app:horizontalMargin="5dp"
+ *     app:drawables="@array/number_drawables" /&gt;</pre>
  * @author Garfield
  */
 public class NumericView extends View {
@@ -195,13 +208,13 @@ public class NumericView extends View {
         final int bottom = top + mNumberHeight;
 
         for (int i = 0, left = getPaddingLeft(); i < length; ++i) {
-            final char c = mValue.charAt(i);
+            final char digit = mValue.charAt(i);
             final int width, index;
-            if (c == '.') {
+            if (digit == '.') {
                 width = mDotWidth;
                 index = mValues.length - 1;
             } else {
-                index = c - '0';
+                index = digit - '0';
                 width = mNumberWidth;
             }
 
@@ -225,8 +238,8 @@ public class NumericView extends View {
         final Resources res  = getResources();
         final int[] stateSet = getDrawableState();
         for (int i = 0; i < length; ++i) {
-            final char c = mValue.charAt(i);
-            final Drawable drawable = mValues[c == '.' ? mValues.length - 1 : c - '0'].getDrawable(res);
+            final char digit = mValue.charAt(i);
+            final Drawable drawable = mValues[digit == '.' ? mValues.length - 1 : digit - '0'].getDrawable(res);
             if (drawable.isStateful()) {
                 changed |= drawable.setState(stateSet);
             }

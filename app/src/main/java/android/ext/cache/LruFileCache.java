@@ -128,7 +128,8 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
     }
 
     private List<String> listFiles() {
-        final List<String> files = new ArrayList<String>(mMaxSize >> 2);
+        DebugUtils.__checkDebug(true, "LruFileCache", "listFiles initialCapacity = " + (mMaxSize / 10));
+        final List<String> files = new ArrayList<String>(mMaxSize / 10);
         FileUtils.scanFiles(mCacheDir.getPath(), this, 0, files);
         return files;
     }

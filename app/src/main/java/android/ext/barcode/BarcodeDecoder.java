@@ -381,7 +381,6 @@ public class BarcodeDecoder {
              * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
              */
             ((OnDecodeListener)params[2]).onDecodeComplete((LuminanceSource)params[1], result);
-            Arrays.fill(params, null);  // Prevent memory leak.
         }
     }
 }

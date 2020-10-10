@@ -150,14 +150,12 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     }
 
     /**
-     * Runs on the UI thread after {@link #cancel(boolean)} is invoked and
-     * {@link #doInBackground(Params[])} has finished.
-     * @param result The result, returned earlier by {@link #doInBackground}.
-     * @see #cancel(boolean)
-     * @see #doInBackground(Params[])
-     * @see #onPostExecute(Params[], Result)
+     * Runs on the UI thread after {@link #setProgress} is invoked.
+     * @param values The progress values to update, passed earlier
+     * by {@link #setProgress}.
+     * @see #setProgress(Progress[])
      */
-    protected void onCancelled(Result result) {
+    protected void onProgressUpdate(Progress[] values) {
     }
 
     /**
@@ -170,12 +168,14 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     }
 
     /**
-     * Runs on the UI thread after {@link #setProgress} is invoked.
-     * @param values The progress values to update, passed earlier
-     * by {@link #setProgress}.
-     * @see #setProgress(Progress[])
+     * Runs on the UI thread after {@link #cancel(boolean)} is invoked and
+     * {@link #doInBackground(Params[])} has finished.
+     * @param result The result, returned earlier by {@link #doInBackground}.
+     * @see #cancel(boolean)
+     * @see #doInBackground(Params[])
+     * @see #onPostExecute(Params[], Result)
      */
-    protected void onProgressUpdate(Progress[] values) {
+    protected void onCancelled(Result result) {
     }
 
     /**
@@ -199,24 +199,6 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     protected abstract void onPostExecute(Params[] params, Result result);
 
     /**
-     * Runs on the UI thread after {@link #doInBackground}.
-     */
-    /* package */ final void finish(Params[] params, Result result) {
-        if (mOwner != null && removeLifecycleObserver()) {
-            // Force update the worker state is cancelled.
-            mWorker.setCancelled();
-        }
-
-        if (mWorker.isCancelled()) {
-            onCancelled(result);
-        } else {
-            onPostExecute(params, result);
-        }
-
-        mStatus = Status.FINISHED;
-    }
-
-    /**
      * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
      */
     private void addLifecycleObserver(Object owner) {
@@ -231,7 +213,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
      * @return <tt>true</tt> if the owner has been destroyed, <tt>false</tt> otherwise.
      */
-    private boolean removeLifecycleObserver() {
+    /* package */ final boolean removeLifecycleObserver() {
         final Object owner = mOwner.get();
         if (owner == null) {
             DebugUtils.__checkDebug(true, getClass().getName(), "The owner released by the GC: the task will be call onCancelled()");
@@ -290,13 +272,26 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         }
 
         @Override
-        public void onPostExecute(Object result) {
-            finish((Params[])mParams, (Result)result);
+        public Object doInBackground(Object params) {
+            return AsyncTask.this.doInBackground((Params[])params);
         }
 
         @Override
-        public Object doInBackground(Object params) {
-            return AsyncTask.this.doInBackground((Params[])params);
+        public void onPostExecute(Object result) {
+            if (mOwner != null && removeLifecycleObserver()) {
+                // Force update the state is cancelled.
+                setCancelled();
+            }
+
+            if (isCancelled()) {
+                AsyncTask.this.onCancelled((Result)result);
+            } else {
+                AsyncTask.this.onPostExecute((Params[])mParams, (Result)result);
+            }
+
+            // Prevent memory leak.
+            mParams = null;
+            mStatus = Status.FINISHED;
         }
 
         @Override

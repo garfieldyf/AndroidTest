@@ -201,7 +201,6 @@ public final class AsyncViewStub extends View {
             }
 
             viewStub.onFinishInflate(parent, view, (OnInflateListener)params[1]);
-            Arrays.fill(params, null);  // Prevent memory leak.
         }
     }
 

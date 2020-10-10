@@ -35,12 +35,12 @@ public final class JSONTest {
 
         @Override
         protected void onPostExecute(String[] s, ByteArrayBuffer result) {
-            Log.i("abcd", "onPostExecute = " + DeviceUtils.toString(result, new StringBuilder()));
+            Log.i("abcd", "onPostExecute = " + DeviceUtils.toString(result));
         }
 
         @Override
         protected void onCancelled(ByteArrayBuffer result) {
-            Log.i("abcd", "onCancelled = " + DeviceUtils.toString(result, new StringBuilder()));
+            Log.i("abcd", "onCancelled = " + DeviceUtils.toString(result));
         }
 
         @Override

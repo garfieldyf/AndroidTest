@@ -14,7 +14,6 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.datamatrix.encoder.SymbolShapeHint;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -195,7 +194,6 @@ public class BarcodeEncoder {
         @Override
         protected void onPostExecute(Object[] params, Bitmap result) {
             ((OnEncodeListener)params[5]).onEncodeComplete((BitMatrix)params[6], result);
-            Arrays.fill(params, null);  // Prevent memory leak.
         }
     }
 

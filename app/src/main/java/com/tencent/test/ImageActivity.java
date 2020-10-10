@@ -241,15 +241,8 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //        testMessageDigests("if (cursor != null) {\r\n\tfinal StringBuilder sb = new StringBuilder();\r\n\tandroid.database.DatabaseUtils.dumpCursor(cursor, sb);\r\n\tcursor.close();");
 //        testMessageDigests("");
 
-        final Algorithm[] algorithms = new Algorithm[] {
-            Algorithm.MD5,
-            Algorithm.SHA1,
-            Algorithm.SHA256,
-            Algorithm.SHA384,
-            Algorithm.SHA512,
-        };
-
-        Log.d("abcd", "string = " + string);
+        final Algorithm[] algorithms = Algorithm.values();
+        Log.d("abcd", "values = " + DeviceUtils.toString(algorithms) + ", string = " + string);
         for (Algorithm algorithm : algorithms) {
             final byte[] digest1 = computeMessageDigest(string, algorithm.name());
             final byte[] digest2 = MessageDigests.computeString(string, algorithm);

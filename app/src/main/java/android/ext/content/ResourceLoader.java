@@ -5,6 +5,7 @@ import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
 import android.util.Log;
@@ -173,7 +174,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         Result result = null;
         try {
             final DownloadRequest request = mLoadParams.newDownloadRequest(mContext, params);
-            DebugUtils.__checkError(request == null, "The LoadParams newDownloadRequest must be implementation!");
+            DebugUtils.__checkError(request == null, "The " + DeviceUtils.toString(mLoadParams) + " newDownloadRequest must be implementation!");
             final int statusCode = request.download(tempFile, mWorker, null);
             if (statusCode == HTTP_OK && !mWorker.isCancelled() && !(hitCache && FileUtils.compareFile(cacheFile, tempFile.getPath()))) {
                 // If the cache file is not equals the temp file, parse the temp file.
@@ -192,7 +193,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         }
 
         /*
-         * If the cache file was loaded and result is null:
+         * If the cache file was hit and result is null:
          *   1. If download failed or cancelled.
          *   2. The cache file and the temp file contents are equal.
          *   3. Parse the temp file failed.

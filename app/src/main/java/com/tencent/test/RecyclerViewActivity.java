@@ -90,7 +90,7 @@ public class RecyclerViewActivity extends Activity {
 
     private final class RecyclerAdapter extends PageAdapter2<String, BaseHolder> {
         public RecyclerAdapter() {
-            super(MainApplication.sThreadPool, new Config.Builder()
+            super(new Config.Builder()
                 .setPageSize(PAGE_SIZE)
                 .setInitialSize(INITIAL_SIZE)
                 .setMaximumPageCount(MAX_PAGE_SIZE)

@@ -54,7 +54,7 @@ public class ContactsActivity extends Activity {
 
     private static final class ContactsLoader extends AsyncQueryHandler {
         public ContactsLoader(Context context) {
-            super(context, MainApplication.sThreadPool.createSerialExecutor());
+            super(context);
         }
 
         @Override

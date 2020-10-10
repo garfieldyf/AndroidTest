@@ -5,11 +5,11 @@ import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.Lifecycle.Event;
 import android.arch.lifecycle.LifecycleOwner;
+import android.ext.concurrent.ThreadPool;
 import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
-import android.os.Process;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
@@ -20,6 +20,16 @@ import java.util.concurrent.Executor;
  * @author Garfield
  */
 public abstract class AsyncTask<Params, Progress, Result> implements Cancelable {
+    /**
+     * An {@link Executor} that can be used to execute tasks.
+     */
+    public static final Executor THREAD_POOL_EXECUTOR;
+
+    /**
+     * An {@link Executor} that execute tasks one at a time in serial order.
+     */
+    public static final Executor SERIAL_EXECUTOR;
+
     /* package */ Status mStatus;
     /* package */ final Worker mWorker;
     /* package */ WeakReference<Object> mOwner;
@@ -66,14 +76,15 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     }
 
     /**
-     * Sets the priority to run this task at. The value supplied
-     * must be from {@link Process} and not from {@link Thread}.
-     * @param priority The priority.
+     * Equivalent to calling <tt>executeOnExecutor(THREAD_POOL_EXECUTOR, params)</tt>.
+     * @param params The parameters of this task. If this task no parameters, you can
+     * pass <em>(Params[])null</em> instead of allocating an empty array.
      * @return This <em>task</em>.
+     * @see #executeOnExecutor(Executor, Params[])
      */
-    public final AsyncTask<Params, Progress, Result> setPriority(int priority) {
-        mWorker.mPriority = priority;
-        return this;
+    @SuppressWarnings("unchecked")
+    public final AsyncTask<Params, Progress, Result> execute(Params... params) {
+        return executeOnExecutor(THREAD_POOL_EXECUTOR, params);
     }
 
     /**
@@ -83,9 +94,10 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @param params The parameters of this task. If this task no parameters,
      * you can pass <em>(Params[])null</em> instead of allocating an empty array.
      * @return This <em>task</em>.
+     * @see #execute(Params[])
      */
     @SuppressWarnings("unchecked")
-    public final AsyncTask<Params, Progress, Result> execute(Executor executor, Params... params) {
+    public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor executor, Params... params) {
         DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
         DebugUtils.__checkUIThread("execute");
         switch (mStatus) {
@@ -241,6 +253,12 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         return false;
     }
 
+    static {
+        final ThreadPool threadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
+        THREAD_POOL_EXECUTOR = threadPool;
+        SERIAL_EXECUTOR = threadPool.createSerialExecutor();
+    }
+
     /**
      * Indicates the current status of the task.
      */
@@ -266,8 +284,6 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     @SuppressWarnings("unchecked")
     /* package */ final class Worker extends Task implements GenericLifecycleObserver {
-        /* package */ int mPriority = Process.THREAD_PRIORITY_BACKGROUND;
-
         @Override
         public void onProgress(Object value) {
             onProgressUpdate((Progress[])value);
@@ -280,13 +296,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
         @Override
         public Object doInBackground(Object params) {
-            final int priority = Process.getThreadPriority(Process.myTid());
-            try {
-                Process.setThreadPriority(mPriority);
-                return AsyncTask.this.doInBackground((Params[])params);
-            } finally {
-                Process.setThreadPriority(priority);
-            }
+            return AsyncTask.this.doInBackground((Params[])params);
         }
 
         @Override

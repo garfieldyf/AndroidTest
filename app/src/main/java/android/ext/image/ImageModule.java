@@ -596,19 +596,18 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          */
         public final ImageModule build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), MIN_THREAD_COUNT, MAX_THREAD_COUNT));
-            final Executor executor = ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority);
             final BitmapPool bitmapPool = (mPoolSize > 0 ? new LinkedBitmapPool(mPoolSize) : null);
-            return new ImageModule(mContext, executor, createImageCache(bitmapPool), createFileCache(executor), bitmapPool);
+            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(bitmapPool), createFileCache(), bitmapPool);
         }
 
-        private FileCache createFileCache(Executor executor) {
+        private FileCache createFileCache() {
             if (mFileCache == null) {
                 return null;
             } else if (mFileCache instanceof FileCache) {
                 return (FileCache)mFileCache;
             } else {
                 final int maxSize = (int)mFileCache;
-                return (maxSize > 0 ? new LruFileCache(executor, FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
+                return (maxSize > 0 ? new LruFileCache(FileUtils.getCacheDir(mContext, "._image_cache!"), maxSize) : null);
             }
         }
 

@@ -1,6 +1,7 @@
 package com.tencent.test;
 
 import android.content.Intent;
+import android.ext.content.AsyncTask;
 import android.ext.service.IntentService;
 import android.util.Log;
 
@@ -12,7 +13,7 @@ public class MmsService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSerialExecutor = MainApplication.sThreadPool.createSerialExecutor();
+        mSerialExecutor = AsyncTask.SERIAL_EXECUTOR;
         Log.i("yf", "onCreate");
     }
 

@@ -38,7 +38,7 @@ public class PackageArchiveActivity extends Activity {
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);
-        new LoadTask(this).execute(MainApplication.sThreadPool, "/mnt/usb/sda1");
+        new LoadTask(this).execute("/mnt/usb/sda1");
         DebugUtils.stopMethodTracing("yf", "onCreate");
     }
 

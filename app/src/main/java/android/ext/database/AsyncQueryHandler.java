@@ -1,6 +1,6 @@
 package android.ext.database;
 
-import android.app.Activity;
+import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 
 /**
  * Class <tt>AsyncQueryHandler</tt> is a helper class to help make
@@ -29,25 +28,9 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
-     * or {@link ThreadPool#createSerialExecutor()}.
-     * @see #AsyncQueryHandler(Activity, Executor)
      */
-    public AsyncQueryHandler(Context context, Executor executor) {
-        super(executor);
+    public AsyncQueryHandler(Context context) {
         mContext = context.getApplicationContext();
-    }
-
-    /**
-     * Constructor
-     * @param activity The owner <tt>Activity</tt>.
-     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
-     * or {@link ThreadPool#createSerialExecutor()}.
-     * @see #AsyncQueryHandler(Context, Executor)
-     */
-    public AsyncQueryHandler(Activity ownerActivity, Executor executor) {
-        super(executor, ownerActivity);
-        mContext = ownerActivity.getApplicationContext();
     }
 
     /**
@@ -66,7 +49,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         DebugUtils.__checkUIThread("startExecute");
         final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, null, arg1, null, params);
         task.sortOrder = arg2;
-        mExecutor.execute(task);
+        SERIAL_EXECUTOR.execute(task);
     }
 
     /**
@@ -86,7 +69,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         DebugUtils.__checkUIThread("startQuery");
         final AsyncQueryTask task = obtainTask(token, MESSAGE_QUERY, uri, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
-        mExecutor.execute(task);
+        SERIAL_EXECUTOR.execute(task);
     }
 
     /**
@@ -103,7 +86,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         DebugUtils.__checkUIThread("startCall");
         final AsyncQueryTask task = obtainTask(token, MESSAGE_CALL, uri, method, null, extras);
         task.sortOrder = arg;
-        mExecutor.execute(task);
+        SERIAL_EXECUTOR.execute(task);
     }
 
     /**
@@ -116,7 +99,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startInsert(int token, Uri uri, ContentValues values) {
         DebugUtils.__checkUIThread("startInsert");
-        mExecutor.execute(obtainTask(token, MESSAGE_INSERT, uri, null, null, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERT, uri, null, null, values));
     }
 
     /**
@@ -132,7 +115,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         DebugUtils.__checkUIThread("startUpdate");
-        mExecutor.execute(obtainTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs, values));
     }
 
     /**
@@ -147,7 +130,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
         DebugUtils.__checkUIThread("startDelete");
-        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs, null));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs, null));
     }
 
     /**
@@ -161,7 +144,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
         DebugUtils.__checkUIThread("startBulkInsert");
-        mExecutor.execute(obtainTask(token, MESSAGE_INSERTS, uri, null, null, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERTS, uri, null, null, values));
     }
 
     /**
@@ -174,7 +157,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      */
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
         DebugUtils.__checkUIThread("startApplyBatch");
-        mExecutor.execute(obtainTask(token, MESSAGE_BATCH, null, authority, null, operations));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_BATCH, null, authority, null, operations));
     }
 
     /**

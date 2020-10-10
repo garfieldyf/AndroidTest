@@ -1,5 +1,6 @@
 package com.tencent.test;
 
+import android.ext.content.AsyncTask;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -33,7 +34,7 @@ public final class CrashReportService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSerialExecutor = MainApplication.sThreadPool.createSerialExecutor();
+        mSerialExecutor = AsyncTask.SERIAL_EXECUTOR;
     }
 
     @Override

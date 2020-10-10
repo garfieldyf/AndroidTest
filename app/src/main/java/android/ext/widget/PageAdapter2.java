@@ -4,7 +4,6 @@ import android.ext.content.AsyncTask;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Class PageAdapter2
@@ -12,16 +11,13 @@ import java.util.concurrent.Executor;
  */
 public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter<E, VH> {
     private Object mOwner;
-    private final Executor mExecutor;
 
     /**
      * Constructor
-     * @param executor The <tt>Executor</tt> to executing load task.
      * @param config The {@link Config}, which defines how the adapter will load data.
      */
-    public PageAdapter2(Executor executor, Config config) {
+    public PageAdapter2(Config config) {
         super(config);
-        mExecutor = executor;
     }
 
     /**
@@ -34,7 +30,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
 
     @Override
     protected List<E> loadPage(int pageIndex, int startPosition, int loadSize) {
-        new LoadTask(this, mOwner).execute(mExecutor, pageIndex, startPosition, loadSize);
+        new LoadTask(this, mOwner).execute(pageIndex, startPosition, loadSize);
         return null;
     }
 

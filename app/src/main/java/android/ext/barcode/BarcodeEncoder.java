@@ -17,7 +17,6 @@ import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 /**
  * Class <tt>BarcodeEncoder</tt> used to encodes the contents to a barcode image.
@@ -151,19 +150,18 @@ public class BarcodeEncoder {
 
     /**
      * This method begins an asynchronous encode a barcode image with the specified <em>contents</em>.
-     * @param executor The <tt>Executor</tt> to executing encode.
      * @param contents The contents to encode.
      * @param format The {@link BarcodeFormat} to encode.
      * @param width The preferred width in pixels.
      * @param height The preferred height in pixels.
      * @param listener The {@link OnEncodeListener} used for being notified when the contents was encoded a barcode image.
      */
-    public void startEncode(Executor executor, String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
-        DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
+    public void startEncode(String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
+        DebugUtils.__checkError(listener == null, "Invalid parameter - listener == null");
         /*
          * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener, null }
          */
-        new EncodeTask().execute(executor, this, contents, format, width, height, listener, null);
+        new EncodeTask().execute(this, contents, format, width, height, listener, null);
     }
 
     /**

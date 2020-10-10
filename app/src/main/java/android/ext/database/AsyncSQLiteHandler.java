@@ -1,11 +1,11 @@
 package android.ext.database;
 
+import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler;
-import java.util.concurrent.Executor;
 
 /**
  * Class <tt>AsyncSQLiteHandler</tt> is a helper class to help make
@@ -17,26 +17,9 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
 
     /**
      * Constructor
-     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
-     * or {@link ThreadPool#createSerialExecutor()}.
      * @param db The {@link SQLiteDatabase}.
-     * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase, Object)
      */
-    public AsyncSQLiteHandler(Executor executor, SQLiteDatabase db) {
-        super(executor);
-        mDatabase = db;
-    }
-
-    /**
-     * Constructor
-     * @param executor The serial <tt>Executor</tt>. See {@link AsyncTask#SERIAL_EXECUTOR}
-     * or {@link ThreadPool#createSerialExecutor()}.
-     * @param db The {@link SQLiteDatabase}.
-     * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #AsyncSQLiteHandler(Executor, SQLiteDatabase)
-     */
-    public AsyncSQLiteHandler(Executor executor, SQLiteDatabase db, Object owner) {
-        super(executor, owner);
+    public AsyncSQLiteHandler(SQLiteDatabase db) {
         mDatabase = db;
     }
 
@@ -54,7 +37,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startExecute(int token, String arg1, String arg2, Object... params) {
         DebugUtils.__checkUIThread("startExecute");
-        mExecutor.execute(obtainTask(token, MESSAGE_EXECUTE, arg1, arg2, null, params));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_EXECUTE, arg1, arg2, null, params));
     }
 
     /**
@@ -68,7 +51,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
         DebugUtils.__checkUIThread("startQuery");
-        mExecutor.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
     }
 
     /**
@@ -89,7 +72,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         DebugUtils.__checkUIThread("startQuery");
         final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
-        mExecutor.execute(task);
+        SERIAL_EXECUTOR.execute(task);
     }
 
     /**
@@ -107,7 +90,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
         DebugUtils.__checkUIThread("startInsert");
-        mExecutor.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
     }
 
     /**
@@ -124,7 +107,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
         DebugUtils.__checkUIThread("startReplace");
-        mExecutor.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
     }
 
     /**
@@ -140,7 +123,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
         DebugUtils.__checkUIThread("startUpdate");
-        mExecutor.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
     }
 
     /**
@@ -155,7 +138,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
         DebugUtils.__checkUIThread("startDelete");
-        mExecutor.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
+        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
     }
 
     /**

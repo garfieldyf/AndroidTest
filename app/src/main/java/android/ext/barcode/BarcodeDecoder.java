@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 /**
  * Class BarcodeDecoder
@@ -97,46 +96,43 @@ public class BarcodeDecoder {
 
     /**
      * This method begins an asynchronous decode the barcode image from the bitmap pixels.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param pixels The array of colors representing the pixels of the bitmap.
      * @param width The width of the bitmap in pixels.
      * @param height The height of the bitmap in pixels.
      * @param listener The {@link OnDecodeListener} used for being notified
      * when the barcode image was decoded.
-     * @see #startDecode(Executor, byte[], int, int, Rect, OnDecodeListener)
-     * @see #startDecode(Executor, byte[], int, int, int, int, int, int, OnDecodeListener)
+     * @see #startDecode(byte[], int, int, Rect, OnDecodeListener)
+     * @see #startDecode(byte[], int, int, int, int, int, int, OnDecodeListener)
      */
-    public final void startDecode(Executor executor, int[] pixels, int width, int height, OnDecodeListener listener) {
+    public final void startDecode(int[] pixels, int width, int height, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().execute(executor, this, new RGBLuminanceSource(width, height, pixels), listener);
+        DebugUtils.__checkError(listener == null, "Invalid parameter - listener == null");
+        new DecodeTask().execute(this, new RGBLuminanceSource(width, height, pixels), listener);
     }
 
     /**
      * This method begins an asynchronous decode the barcode image from the camera device.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param data The array of YUV data returned from the camera device.
      * @param width The <em>data</em> width in pixels.
      * @param height The <em>data</em> height in pixels.
      * @param clipBounds The <tt>Rect</tt> expressing the barcode clip area.
      * @param listener The {@link OnDecodeListener} used for being notified when
      * the barcode image was decoded.
-     * @see #startDecode(Executor, int[], int, int, OnDecodeListener)
-     * @see #startDecode(Executor, byte[], int, int, int, int, int, int, OnDecodeListener)
+     * @see #startDecode(int[], int, int, OnDecodeListener)
+     * @see #startDecode(byte[], int, int, int, int, int, int, OnDecodeListener)
      */
-    public final void startDecode(Executor executor, byte[] data, int width, int height, Rect clipBounds, OnDecodeListener listener) {
+    public final void startDecode(byte[] data, int width, int height, Rect clipBounds, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().execute(executor, this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener);
+        DebugUtils.__checkError(listener == null, "Invalid parameter - listener == null");
+        new DecodeTask().execute(this, new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false), listener);
     }
 
     /**
      * This method begins an asynchronous decode the barcode image from the camera device.
-     * @param executor The <tt>Executor</tt> to executing decode.
      * @param data The array of YUV data returned from the camera device.
      * @param width The <em>data</em> width in pixels.
      * @param height The <em>data</em> height in pixels.
@@ -146,15 +142,15 @@ public class BarcodeDecoder {
      * @param bottom The bottom side of the rectangle expressing the barcode clip area.
      * @param listener The {@link OnDecodeListener} used for being notified when the
      * barcode image was decoded.
-     * @see #startDecode(Executor, int[], int, int, OnDecodeListener)
-     * @see #startDecode(Executor, byte[], int, int, Rect, OnDecodeListener)
+     * @see #startDecode(int[], int, int, OnDecodeListener)
+     * @see #startDecode(byte[], int, int, Rect, OnDecodeListener)
      */
-    public final void startDecode(Executor executor, byte[] data, int width, int height, int left, int top, int right, int bottom, OnDecodeListener listener) {
+    public final void startDecode(byte[] data, int width, int height, int left, int top, int right, int bottom, OnDecodeListener listener) {
         /*
          * params - { BarcodeDecoder, LuminanceSource, OnDecodeListener }
          */
-        DebugUtils.__checkError(executor == null || listener == null, "Invalid parameters - executor == null || listener == null");
-        new DecodeTask().execute(executor, this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener);
+        DebugUtils.__checkError(listener == null, "Invalid parameter - listener == null");
+        new DecodeTask().execute(this, new PlanarYUVLuminanceSource(data, width, height, left, top, right - left, bottom - top, false), listener);
     }
 
     /**

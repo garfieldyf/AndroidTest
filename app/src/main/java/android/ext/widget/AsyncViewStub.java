@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
 
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.
@@ -85,7 +84,6 @@ public final class AsyncViewStub extends View {
      * replace this <tt>AsyncViewStub</tt> in its parent.
      * @return The layout resource id used to inflate the new <tt>View</tt>.
      * @see #setLayoutResource(int)
-     * @see #inflate(Executor, OnInflateListener)
      */
     public final int getLayoutResource() {
         return mLayoutId;
@@ -97,7 +95,6 @@ public final class AsyncViewStub extends View {
      * <tt>AsyncViewStub</tt> in its parent.
      * @param layoutId A valid layout resource id.
      * @see #getLayoutResource()
-     * @see #inflate(Executor, OnInflateListener)
      */
     public final void setLayoutResource(int layoutId) {
         mLayoutId = layoutId;
@@ -106,11 +103,10 @@ public final class AsyncViewStub extends View {
     /**
      * Inflates the layout resource on a background thread and replaces this <tt>AsyncViewStub</tt> in its
      * parent by the inflated <tt>View</tt> on the UI thread.
-     * @param executor The <tt>Executor</tt> to executing inflation.
      * @param listener May be <tt>null</tt>. The {@link OnInflateListener} to notify of successful inflation.
      */
-    public final void inflate(Executor executor, OnInflateListener listener) {
-        new AsyncInflateTask(getContext()).execute(executor, this, listener);
+    public final void inflate(OnInflateListener listener) {
+        new AsyncInflateTask(getContext()).execute(this, listener);
     }
 
     @Override

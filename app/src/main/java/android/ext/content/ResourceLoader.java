@@ -67,7 +67,7 @@ import java.lang.ref.WeakReference;
  * new ResourceLoader&lt;String, JSONObject&gt;(context, new JSONLoadParams())
  *    .setWeakOnLoadCompleteListener(new LoadCompleteListener())
  *    .setOwner(activity)   // May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
- *    .execute(executor, url);</pre>
+ *    .execute(url);</pre>
  * @author Garfield
  */
 public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Result> {

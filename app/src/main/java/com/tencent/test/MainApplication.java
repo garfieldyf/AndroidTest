@@ -4,7 +4,6 @@ import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
-import android.ext.concurrent.ThreadPool;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageLoader.LoadRequest;
@@ -15,14 +14,13 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
-import android.os.AsyncTask;
 import android.support.annotation.Keep;
 import android.util.Log;
 import android.util.LogPrinter;
 
 public final class MainApplication extends Application {
     public static MainApplication sInstance;
-    public static final ThreadPool sThreadPool;
+//    public static final ThreadPool sThreadPool;
 
     private PackageInfo mPackageInfo;
     private ImageModule mImageModule;
@@ -91,8 +89,8 @@ public final class MainApplication extends Application {
 
     static {
         System.loadLibrary("androidext");
-        sThreadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
-        AsyncTask.setDefaultExecutor(sThreadPool);
+//        sThreadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
+//        AsyncTask.setDefaultExecutor(sThreadPool);
         ImageDrawable.initAttrs(R.attr.autoMirrored);
     }
 

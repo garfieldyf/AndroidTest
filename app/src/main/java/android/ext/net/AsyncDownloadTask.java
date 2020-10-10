@@ -32,7 +32,7 @@ import java.net.URLConnection;
  *
  * new JSONDownloadTask()
  *    .setOwner(activity)   // May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
- *    .execute(executor, url);</pre>
+ *    .execute(url);</pre>
  * @author Garfield
  */
 public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncTask<Params, Progress, Result> implements DownloadCallback<Params, Result> {

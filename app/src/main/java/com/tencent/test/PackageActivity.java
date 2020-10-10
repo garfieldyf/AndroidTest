@@ -35,7 +35,7 @@ public class PackageActivity extends Activity {
         mAppList = (ListView)findViewById(R.id.packages);
         mAdapter = new AppAdapter();
         mAppList.setAdapter(mAdapter);
-        new LoadTask(this).execute(MainApplication.sThreadPool, (Object[])null);
+        new LoadTask(this).execute((Object[])null);
     }
 
     @Override

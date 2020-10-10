@@ -17,6 +17,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.ext.annotation.CursorField;
+import android.ext.content.AsyncTask;
 import android.ext.content.ResourceLoader;
 import android.ext.content.ResourceLoader.LoadParams;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
@@ -110,9 +111,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.Future;
 import java.util.concurrent.RecursiveTask;
@@ -427,7 +426,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
                 }
             };
 
-            MainApplication.sThreadPool.execute(run);
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(run);
         }
     }
 
@@ -467,14 +466,14 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         new ResourceLoader<String, JSONObject>(this, params)
             .setWeakOnLoadCompleteListener(JsonLoader.sListener)
             .setOwner(this)
-            .execute(MainApplication.sThreadPool, url1);
+            .execute(url1);
 
 //        mVisibility.show(1100);
         mListView.postDelayed(new Runnable() {
             @Override
             public void run() {
                 final AsyncViewStub view = (AsyncViewStub)findViewById(R.id.btn_cancel_stub);
-                view.inflate(MainApplication.sThreadPool, new OnInflateListener() {
+                view.inflate(new OnInflateListener() {
                     @Override
                     public void onFinishInflate(AsyncViewStub stub, View view, int layoutId) {
                         //Log.i("abc", view.toString());
@@ -733,7 +732,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     private static final class SQLiteHandler extends AsyncSQLiteHandler {
         public SQLiteHandler(SQLiteDatabase db) {
-            super(MainApplication.sThreadPool.createSerialExecutor(), db);
+            super(db);
         }
 
         @Override
@@ -750,7 +749,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
     private static final class QueryHandler extends AsyncQueryHandler {
         public QueryHandler(Context context) {
-            super(context, MainApplication.sThreadPool.createSerialExecutor());
+            super(context);
         }
     }
 
@@ -943,24 +942,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         } catch (Throwable e) {
             e.printStackTrace();
         }
-    }
-
-    private void testInvokeAll() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                List<Callable<Object>> tasks = new ArrayList<Callable<Object>>();
-                for (int i = 0; i < 20; ++i) {
-                    tasks.add(Executors.callable(new TaskRunnable()));
-                }
-
-                try {
-                    MainApplication.sThreadPool.invokeAll(tasks);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     private static final class MyCountDownTimer extends CountDownTimer {
@@ -1174,7 +1155,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     }
 
     private static void testScanFiles() {
-        MainApplication.sThreadPool.execute(new Runnable() {
+        AsyncTask.THREAD_POOL_EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
                 DebugUtils.startMethodTracing();

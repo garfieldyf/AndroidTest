@@ -1,6 +1,7 @@
 package android.ext.cache;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN;
+import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Class <tt>LruFileCache</tt> is an implementation of a {@link FileCache}.
@@ -21,19 +21,16 @@ import java.util.concurrent.Executor;
 public final class LruFileCache implements FileCache, ScanCallback, Runnable, Comparator<String> {
     private final int mMaxSize;
     private final File mCacheDir;
-    private final Executor mExecutor;
 
     /**
      * Constructor
-     * @param executor The {@link Executor}.
      * @param cacheDir The absolute path of the cache directory.
      * @param maxSize The maximum number of files to allow in this cache.
      */
-    public LruFileCache(Executor executor, File cacheDir, int maxSize) {
-        DebugUtils.__checkError(executor == null || cacheDir == null || maxSize <= 0, "Invalid parameters - executor == null || cacheDir == null || maxSize(" + maxSize + ") <= 0");
+    public LruFileCache(File cacheDir, int maxSize) {
+        DebugUtils.__checkError(cacheDir == null || maxSize <= 0, "Invalid parameters - cacheDir == null || maxSize(" + maxSize + ") <= 0");
         mMaxSize  = maxSize;
         mCacheDir = cacheDir;
-        mExecutor = executor;
     }
 
     /**
@@ -93,7 +90,7 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             // The app's UI is no longer visible.
             // Remove the oldest files of this cache.
-            mExecutor.execute(this);
+            AsyncTask.THREAD_POOL_EXECUTOR.execute(this);
         }
     }
 

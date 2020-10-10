@@ -8,7 +8,6 @@ import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
-import java.util.concurrent.Executor;
 
 /**
  * Abstract class <tt>DatabaseHandler</tt>.
@@ -26,30 +25,15 @@ public abstract class DatabaseHandler implements Factory<Object> {
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
-    /* package */ final Executor mExecutor;
     /* package */ final Pool<Object> mTaskPool;
     /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
-     * @param executor The serial <tt>Executor</tt>.
-     * @see #DatabaseHandler(Executor, Object)
      */
-    /* package */ DatabaseHandler(Executor executor) {
+    /* package */ DatabaseHandler() {
         DebugUtils.__checkMemoryLeaks(getClass());
-        mExecutor = executor;
         mTaskPool = Pools.newPool(this, 8);
-    }
-
-    /**
-     * Constructor
-     * @param executor The serial <tt>Executor</tt>.
-     * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #DatabaseHandler(Executor)
-     */
-    /* package */ DatabaseHandler(Executor executor, Object owner) {
-        this(executor);
-        mOwner = new WeakReference<Object>(owner);
     }
 
     /**

@@ -10,7 +10,7 @@ public class TestFragmentActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test_fragment);
-        new LifecycleTask(this).execute(MainApplication.sThreadPool);
+        new LifecycleTask(this).execute((Object[])null);
     }
 
     public void onButtonClick(View view) {

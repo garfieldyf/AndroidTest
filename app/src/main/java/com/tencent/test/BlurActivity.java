@@ -72,7 +72,7 @@ public class BlurActivity extends Activity implements OnClickListener {
         final String url1 = "http://img.funshion.com/sdw?oid=9922513929ba871e30a05d18f9a97c80&w=360&h=504";
         new ImageTask(this)
             .setParameters(R.xml.scaled_params)
-            .execute(MainApplication.sThreadPool, url1);
+            .execute(url1);
     }
 
     @Override

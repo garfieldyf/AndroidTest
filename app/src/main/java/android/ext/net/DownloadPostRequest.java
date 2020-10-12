@@ -1,7 +1,5 @@
 package android.ext.net;
 
-import android.ext.json.JSONArray;
-import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -21,6 +19,8 @@ import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 /**
  * Class <tt>DownloadPostRequest</tt> used to downloads the resource from
@@ -140,7 +140,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     @Override
     /* package */ int connect() throws IOException {
         __checkDumpHeaders(true);
-        if (mData instanceof JSONObject || mData instanceof JSONArray || mData instanceof org.json.JSONObject || mData instanceof org.json.JSONArray || mData instanceof Collection || mData instanceof Map || mData instanceof Object[]) {
+        if (mData instanceof Collection || mData instanceof Map || mData instanceof Object[] || mData instanceof JSONObject || mData instanceof JSONArray) {
             connectImpl();
             postData(mData);
         } else if (mData instanceof File) {

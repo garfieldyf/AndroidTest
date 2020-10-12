@@ -71,12 +71,6 @@ public class SizeParameters extends Parameters {
 
     @Override
     public void computeSampleSize(Object target, Options opts) {
-        /*
-         * Scale width and height.
-         *      scaleX = opts.outWidth  / width;
-         *      scaleY = opts.outHeight / height;
-         *      scale  = max(scaleX, scaleY);
-         */
         DebugUtils.__checkError(opts.outWidth <= 0 || opts.outHeight <= 0, "opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
         final int width, height, minHeight = (int)value;
         if (target instanceof View) {

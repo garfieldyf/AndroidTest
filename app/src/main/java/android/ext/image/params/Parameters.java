@@ -141,6 +141,12 @@ public class Parameters {
      * Computes the {@link Options#inDensity} to decode image.
      */
     /* package */ static void computeDecodeDensity(int width, int height, Options opts) {
+        /*
+         * Scale width and height.
+         *      scaleX = opts.outWidth  / width;
+         *      scaleY = opts.outHeight / height;
+         *      scale  = max(scaleX, scaleY);
+         */
         DebugUtils.__checkError(opts.inDensity != 0 || opts.inTargetDensity != 0, "opts.inDensity(" + opts.inDensity + ") and opts.inTargetDensity(" + opts.inTargetDensity + ") must be == 0");
         if (width > 0 && height > 0 && opts.outWidth > width && opts.outHeight > height) {
             final float scale = Math.max((float)opts.outWidth / width, (float)opts.outHeight / height);

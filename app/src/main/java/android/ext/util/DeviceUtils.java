@@ -122,7 +122,7 @@ public final class DeviceUtils {
              .append("\n  brand = ").append(Build.BRAND)
              .append("\n  manufacturer = ").append(Build.MANUFACTURER)
              .append("\n  cpu info [ ").append("model = ").append(Build.HARDWARE)
-             .append(", platform = ").append(getCpuModel())
+             .append(", platform = ").append(SystemProperties.get("ro.board.platform", "N/A"))
              .append(", core = ").append(cpuCore)
              .append(" ]");
         printer.println(infos.toString());
@@ -418,10 +418,6 @@ public final class DeviceUtils {
         }
 
         printer.println(result.toString());
-    }
-
-    private static String getCpuModel() {
-        return SystemProperties.get("ro.board.platform", "N/A");
     }
 
     private static String getAppHeapSize(String key) {

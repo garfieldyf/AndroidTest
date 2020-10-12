@@ -28,8 +28,20 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @see #AsyncQueryHandler(Context, Object)
      */
     public AsyncQueryHandler(Context context) {
+        mContext = context.getApplicationContext();
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
+     * @param owner The owner object. See {@link #setOwner(Object)}.
+     * @see #AsyncQueryHandler(Context)
+     */
+    public AsyncQueryHandler(Context context, Object owner) {
+        super(owner);
         mContext = context.getApplicationContext();
     }
 
@@ -40,14 +52,15 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
      * to identify execute.
+     * @param uri The URI, using the content:// scheme, for the content to retrieve.
      * @param arg1 The <em>arg1</em> passed into {@link #onExecute}.
      * @param arg2 The <em>arg2</em> passed into {@link #onExecute}.
      * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
-    public final void startExecute(int token, String arg1, String arg2, Object... params) {
+    public final void startExecute(int token, Uri uri, String arg1, String arg2, Object... params) {
         DebugUtils.__checkUIThread("startExecute");
-        final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, null, arg1, null, params);
+        final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, uri, arg1, null, params);
         task.sortOrder = arg2;
         SERIAL_EXECUTOR.execute(task);
     }
@@ -174,14 +187,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * Called when an asynchronous call is completed on the UI thread.
-     * @param token The token to identify the call, passed in from {@link #startCall}.
-     * @param result A result <tt>Bundle</tt> holding the results from the call.
-     */
-    protected void onCallComplete(int token, Bundle result) {
-    }
-
-    /**
      * Called when an asynchronous insert is completed on the UI thread.
      * @param token The token to identify the insert, passed in from {@link #startInsert}.
      * @param newUri The URL of the newly created row.
@@ -190,31 +195,16 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * Called when an asynchronous multiple inserts is completed on the UI thread.
-     * @param token The token to identify the insert, passed in from {@link #startBulkInsert}.
-     * @param newRows The number of newly created rows.
-     */
-    protected void onBulkInsertComplete(int token, int newRows) {
-    }
-
-    /**
-     * Called when an asynchronous apply is completed on the UI thread.
-     * @param token The token to identify the apply, passed in from {@link #startApplyBatch}.
-     * @param results The results of the applications.
-     */
-    protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
-    }
-
-    /**
      * Executes custom query on a background thread.
      * @param resolver The {@link ContentResolver}.
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
+     * @param uri The <em>uri</em>, passed in from {@link #startExecute}.
      * @param arg1 The <em>arg1</em>, passed in from {@link #startExecute}.
      * @param arg2 The <em>arg2</em>, passed in from {@link #startExecute}.
      * @param params The parameters passed in from {@link #startExecute}.
      * @return The execution result.
      */
-    protected Object onExecute(ContentResolver resolver, int token, String arg1, String arg2, Object[] params) {
+    protected Object onExecute(ContentResolver resolver, int token, Uri uri, String arg1, String arg2, Object[] params) {
         return null;
     }
 
@@ -225,6 +215,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         final AsyncQueryTask task = (AsyncQueryTask)mTaskPool.obtain();
         task.uri = uri;
         task.token = token;
+        task.handler = this;
         task.values  = values;
         task.message = message;
         task.selection = selection;
@@ -235,12 +226,12 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Class <tt>AsyncQueryTask</tt> is an implementation of a {@link AbsSQLiteTask}.
      */
-    /* package */ final class AsyncQueryTask extends AbsSQLiteTask {
+    /* package */ static final class AsyncQueryTask extends AbsSQLiteTask {
         /* package */ Uri uri;
 
         @Override
         public final void run() {
-            final ContentResolver resolver = mContext.getContentResolver();
+            final ContentResolver resolver = ((AsyncQueryHandler)handler).mContext.getContentResolver();
             final Object result;
             switch (message) {
             case MESSAGE_QUERY:
@@ -267,12 +258,12 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 result = resolver.call(uri, selection, sortOrder, (Bundle)values);
                 break;
 
-            case MESSAGE_EXECUTE:
-                result = onExecute(resolver, token, selection, sortOrder, (Object[])values);
-                break;
-
             case MESSAGE_UPDATE:
                 result = resolver.update(uri, (ContentValues)values, selection, selectionArgs);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = ((AsyncQueryHandler)handler).onExecute(resolver, token, uri, selection, sortOrder, (Object[])values);
                 break;
 
             default:
@@ -283,31 +274,12 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
         }
 
         @Override
-        public final void onPostExecute(Object result) {
-            switch (message) {
-            case MESSAGE_CALL:
-                onCallComplete(token, (Bundle)result);
-                break;
-
-            case MESSAGE_INSERT:
-                onInsertComplete(token, (Uri)result);
-                break;
-
-            case MESSAGE_INSERTS:
-                onBulkInsertComplete(token, (int)result);
-                break;
-
-            case MESSAGE_BATCH:
-                onApplyBatchComplete(token, (ContentProviderResult[])result);
-                break;
-
-            default:
-                onPostExecute(AsyncQueryHandler.this, result);
+        /* package */ final void handleMessage(Object result) {
+            if (message == MESSAGE_INSERT) {
+                ((AsyncQueryHandler)handler).onInsertComplete(token, (Uri)result);
+            } else {
+                super.handleMessage(result);
             }
-
-            clearForRecycle();
-            this.uri = null;
-            mTaskPool.recycle(this);
         }
 
         private Cursor execQuery(ContentResolver resolver) {
@@ -321,7 +293,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                     cursor.getCount();
                 }
             } catch (Exception e) {
-                Log.e(AsyncQueryHandler.class.getName(), "Couldn't query from - " + uri, e);
+                Log.e(handler.getClass().getName(), "Couldn't query from - " + uri, e);
             }
 
             DebugUtils.__checkStopMethodTracing("AsyncQueryHandler", "execQuery");

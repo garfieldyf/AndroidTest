@@ -58,8 +58,8 @@ public class ContactsActivity extends Activity {
         }
 
         @Override
-        protected Object onExecute(ContentResolver resolver, int token, String arg1, String arg2, Object[] params) {
-            return super.onExecute(resolver, token, arg1, arg2, params);
+        protected Object onExecute(ContentResolver resolver, int token, Uri uri, String arg1, String arg2, Object[] params) {
+            return super.onExecute(resolver, token, uri, arg1, arg2, params);
         }
 
         @Override

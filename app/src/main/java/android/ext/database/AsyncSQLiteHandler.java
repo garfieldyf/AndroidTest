@@ -18,8 +18,20 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Constructor
      * @param db The {@link SQLiteDatabase}.
+     * @see #AsyncSQLiteHandler(SQLiteDatabase, Object)
      */
     public AsyncSQLiteHandler(SQLiteDatabase db) {
+        mDatabase = db;
+    }
+
+    /**
+     * Constructor
+     * @param db The {@link SQLiteDatabase}.
+     * @param owner The owner object. See {@link #setOwner(Object)}.
+     * @see #AsyncSQLiteHandler(SQLiteDatabase)
+     */
+    public AsyncSQLiteHandler(SQLiteDatabase db, Object owner) {
+        super(owner);
         mDatabase = db;
     }
 
@@ -30,14 +42,17 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param token A token passed into {@link #onExecute} and {@link #onExecuteComplete}
      * to identify execute.
+     * @param table The <em>table</em> passed into {@link #onExecute}.
      * @param arg1 The <em>arg1</em> passed into {@link #onExecute}.
      * @param arg2 The <em>arg2</em> passed into {@link #onExecute}.
      * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
-    public final void startExecute(int token, String arg1, String arg2, Object... params) {
+    public final void startExecute(int token, String table, String arg1, String arg2, Object... params) {
         DebugUtils.__checkUIThread("startExecute");
-        SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_EXECUTE, arg1, arg2, null, params));
+        final SQLiteTask task = obtainTask(token, MESSAGE_EXECUTE, table, arg1, null, params);
+        task.sortOrder = arg2;
+        SERIAL_EXECUTOR.execute(task);
     }
 
     /**
@@ -163,23 +178,16 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     /**
-     * Called when an asynchronous replace is completed on the UI thread.
-     * @param token The token to identify the replace, passed in from {@link #startReplace}.
-     * @param id The row ID of the newly inserted row, or -1 if an error occurred.
-     */
-    protected void onReplaceComplete(int token, long id) {
-    }
-
-    /**
      * Executes SQL statements on a background thread.
      * @param db The {@link SQLiteDatabase}.
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
+     * @param table The <em>table</em>, passed in from {@link #startExecute}.
      * @param arg1 The <em>arg1</em>, passed in from {@link #startExecute}.
      * @param arg2 The <em>arg2</em>, passed in from {@link #startExecute}.
      * @param params The parameters passed in from {@link #startExecute}.
      * @return The execution result.
      */
-    protected Object onExecute(SQLiteDatabase db, int token, String arg1, String arg2, Object[] params) {
+    protected Object onExecute(SQLiteDatabase db, int token, String table, String arg1, String arg2, Object[] params) {
         return null;
     }
 
@@ -190,6 +198,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         final SQLiteTask task = (SQLiteTask)mTaskPool.obtain();
         task.token = token;
         task.table = table;
+        task.handler = this;
         task.values  = values;
         task.message = message;
         task.selection = selection;
@@ -200,13 +209,14 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Class <tt>SQLiteTask</tt> is an implementation of a {@link AbsSQLiteTask}.
      */
-    /* package */ final class SQLiteTask extends AbsSQLiteTask {
+    /* package */ static final class SQLiteTask extends AbsSQLiteTask {
         /* package */ String table;
 
         @Override
         public final void run() {
-            if (!mDatabase.isOpen()) {
-                DebugUtils.__checkWarning(true, AsyncSQLiteHandler.class.getName(), "The SQLiteDatabase was closed.");
+            final SQLiteDatabase db = ((AsyncSQLiteHandler)handler).mDatabase;
+            if (!db.isOpen()) {
+                DebugUtils.__checkWarning(true, handler.getClass().getName(), "The SQLiteDatabase was closed.");
                 return;
             }
 
@@ -214,27 +224,27 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             switch (message) {
             case MESSAGE_QUERY:
             case MESSAGE_RAWQUERY:
-                result = execQuery();
+                result = execQuery(db);
                 break;
 
             case MESSAGE_DELETE:
-                result = mDatabase.delete(table, selection, selectionArgs);
+                result = db.delete(table, selection, selectionArgs);
                 break;
 
             case MESSAGE_INSERT:
-                result = mDatabase.insert(table, selection, (ContentValues)values);
+                result = db.insert(table, selection, (ContentValues)values);
                 break;
 
             case MESSAGE_REPLACE:
-                result = mDatabase.replace(table, selection, (ContentValues)values);
-                break;
-
-            case MESSAGE_EXECUTE:
-                result = onExecute(mDatabase, token, table, selection, (Object[])values);
+                result = db.replace(table, selection, (ContentValues)values);
                 break;
 
             case MESSAGE_UPDATE:
-                result = mDatabase.update(table, (ContentValues)values, selection, selectionArgs);
+                result = db.update(table, (ContentValues)values, selection, selectionArgs);
+                break;
+
+            case MESSAGE_EXECUTE:
+                result = ((AsyncSQLiteHandler)handler).onExecute(db, token, table, selection, sortOrder, (Object[])values);
                 break;
 
             default:
@@ -245,32 +255,21 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
         }
 
         @Override
-        public final void onPostExecute(Object result) {
-            switch (message) {
-            case MESSAGE_INSERT:
-                onInsertComplete(token, (long)result);
-                break;
-
-            case MESSAGE_REPLACE:
-                onReplaceComplete(token, (long)result);
-                break;
-
-            default:
-                onPostExecute(AsyncSQLiteHandler.this, result);
+        /* package */ final void handleMessage(Object result) {
+            if (message == MESSAGE_INSERT) {
+                ((AsyncSQLiteHandler)handler).onInsertComplete(token, (long)result);
+            } else {
+                super.handleMessage(result);
             }
-
-            clearForRecycle();
-            this.table = null;
-            mTaskPool.recycle(this);
         }
 
-        private Cursor execQuery() {
+        private Cursor execQuery(SQLiteDatabase db) {
             DebugUtils.__checkStartMethodTracing();
             final Cursor cursor;
             if (message == MESSAGE_RAWQUERY) {
-                cursor = mDatabase.rawQuery(selection, selectionArgs);
+                cursor = db.rawQuery(selection, selectionArgs);
             } else {
-                cursor = mDatabase.query(table, (String[])values, selection, selectionArgs, null, null, sortOrder);
+                cursor = db.query(table, (String[])values, selection, selectionArgs, null, null, sortOrder);
             }
 
             if (cursor != null) {

@@ -1,11 +1,17 @@
 package android.ext.database;
 
-import android.app.Activity;
+import android.arch.lifecycle.GenericLifecycleObserver;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.LifecycleOwner;
+import android.content.ContentProviderResult;
 import android.database.Cursor;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.os.Bundle;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
 
@@ -13,7 +19,7 @@ import java.lang.ref.WeakReference;
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
-public abstract class DatabaseHandler implements Factory<Object> {
+public abstract class DatabaseHandler implements Factory<Object>, GenericLifecycleObserver {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -25,11 +31,13 @@ public abstract class DatabaseHandler implements Factory<Object> {
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
+    /* package */ boolean mDestroyed;
     /* package */ final Pool<Object> mTaskPool;
     /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
+     * @see #DatabaseHandler(Object)
      */
     /* package */ DatabaseHandler() {
         DebugUtils.__checkMemoryLeaks(getClass());
@@ -37,44 +45,67 @@ public abstract class DatabaseHandler implements Factory<Object> {
     }
 
     /**
+     * Constructor
+     * @param owner The owner object. See {@link #setOwner(Object)}.
+     * @see #DatabaseHandler()
+     */
+    /* package */ DatabaseHandler(Object owner) {
+        this();
+        setOwner(owner);
+    }
+
+    /**
      * Sets the object that owns this handler.
-     * @param owner The owner object.
+     * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
      * @see #getOwner()
-     * @see #getOwnerActivity()
      */
     public final void setOwner(Object owner) {
         mOwner = new WeakReference<Object>(owner);
+        addLifecycleObserver(owner);
+    }
+
+    public final void dump(Printer printer) {
+        Pools.dumpPool(mTaskPool, printer);
+    }
+
+    @Override
+    public void onStateChanged(LifecycleOwner source, Event event) {
+        if (event == Event.ON_DESTROY) {
+            mDestroyed = true;
+            removeLifecycleObserver();
+            DebugUtils.__checkDebug(true, getClass().getName(), "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed.");
+        }
     }
 
     /**
      * Returns the object that owns this handler.
-     * @return The owner object or <tt>null</tt>
-     * if the owner released by the GC.
+     * @return The owner object or <tt>null</tt> if the owner released by the GC.
      * @see #setOwner(Object)
-     * @see #getOwnerActivity()
      */
     @SuppressWarnings("unchecked")
-    public final <T> T getOwner() {
+    protected final <T> T getOwner() {
         DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
         return (T)mOwner.get();
     }
 
     /**
-     * Alias of {@link #getOwner()}.
-     * @return The <tt>Activity</tt> that owns this handler or <tt>null</tt> if
-     * the owner activity has been finished or destroyed or released by the GC.
-     * @see #getOwner()
-     * @see #setOwner(Object)
+     * Called when the owner has been destroyed on the UI thread.
+     * @param token The token.
+     * @param result The result.
      */
-    @SuppressWarnings("unchecked")
-    public final <T extends Activity> T getOwnerActivity() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        final T activity = (T)mOwner.get();
-        return (activity != null && !activity.isFinishing() && !activity.isDestroyed() ? activity : null);
+    protected void onDestroy(int token, Object result) {
+        // Closes the Cursor to avoid memory leak.
+        if (result instanceof Cursor) {
+            ((Cursor)result).close();
+        }
     }
 
-    public final void dump(Printer printer) {
-        Pools.dumpPool(mTaskPool, printer);
+    /**
+     * Called when an asynchronous call is completed on the UI thread.
+     * @param token The token to identify the call, passed in from {@link #startCall}.
+     * @param result A result <tt>Bundle</tt> holding the results from the call.
+     */
+    protected void onCallComplete(int token, Bundle result) {
     }
 
     /**
@@ -94,6 +125,14 @@ public abstract class DatabaseHandler implements Factory<Object> {
     }
 
     /**
+     * Called when an asynchronous replace is completed on the UI thread.
+     * @param token The token to identify the replace, passed in from {@link #startReplace}.
+     * @param id The row ID of the newly inserted row, or -1 if an error occurred.
+     */
+    protected void onReplaceComplete(int token, long id) {
+    }
+
+    /**
      * Called when an asynchronous update is completed on the UI thread.
      * @param token The token to identify the update, passed in from {@link #startUpdate}.
      * @param rowsAffected The number of rows affected.
@@ -110,6 +149,46 @@ public abstract class DatabaseHandler implements Factory<Object> {
     }
 
     /**
+     * Called when an asynchronous multiple inserts is completed on the UI thread.
+     * @param token The token to identify the insert, passed in from {@link #startBulkInsert}.
+     * @param newRows The number of newly created rows.
+     */
+    protected void onBulkInsertComplete(int token, int newRows) {
+    }
+
+    /**
+     * Called when an asynchronous apply is completed on the UI thread.
+     * @param token The token to identify the apply, passed in from {@link #startApplyBatch}.
+     * @param results The results of the applications.
+     */
+    protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
+    }
+
+    /**
+     * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
+     */
+    private void addLifecycleObserver(Object owner) {
+        if (owner instanceof Lifecycle) {
+            ((Lifecycle)owner).addObserver(this);
+        } else if (owner instanceof LifecycleOwner) {
+            ((LifecycleOwner)owner).getLifecycle().addObserver(this);
+        }
+    }
+
+    /**
+     * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
+     */
+    private void removeLifecycleObserver() {
+        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        final Object owner = mOwner.get();
+        if (owner instanceof Lifecycle) {
+            ((Lifecycle)owner).removeObserver(this);
+        } else if (owner instanceof LifecycleOwner) {
+            ((LifecycleOwner)owner).getLifecycle().removeObserver(this);
+        }
+    }
+
+    /**
      * Class <tt>AbsSQLiteTask</tt> is an implementation of a {@link Runnable}.
      * @hide
      */
@@ -120,29 +199,35 @@ public abstract class DatabaseHandler implements Factory<Object> {
         /* package */ String sortOrder;
         /* package */ String selection;
         /* package */ String[] selectionArgs;
+        /* package */ DatabaseHandler handler;
 
         /**
          * Runs on the UI thread after {@link #run()},
          * do not call this method directly.
          * @hide
          */
-        public abstract void onPostExecute(Object result);
-
-        /**
-         * Clears all fields for recycle.
-         */
-        /* package */ final void clearForRecycle() {
-            this.values = null;
-            this.sortOrder = null;
-            this.selection = null;
-            this.selectionArgs = null;
+        public final void dispatchMessage(Object result) {
+            if (handler.mDestroyed) {
+                handler.onDestroy(token, result);
+            } else {
+                final Pool<Object> taskPool = handler.mTaskPool;
+                handleMessage(result);
+                values  = null;
+                handler = null;
+                selectionArgs = null;
+                taskPool.recycle(this);
+            }
         }
 
         /**
          * Runs on the UI thread after {@link #run()}.
          */
-        /* package */ final void onPostExecute(DatabaseHandler handler, Object result) {
+        /* package */ void handleMessage(Object result) {
             switch (message) {
+            case MESSAGE_CALL:
+                handler.onCallComplete(token, (Bundle)result);
+                break;
+
             case MESSAGE_QUERY:
             case MESSAGE_RAWQUERY:
                 handler.onQueryComplete(token, (Cursor)result);
@@ -158,6 +243,18 @@ public abstract class DatabaseHandler implements Factory<Object> {
 
             case MESSAGE_DELETE:
                 handler.onDeleteComplete(token, (int)result);
+                break;
+
+            case MESSAGE_REPLACE:
+                handler.onReplaceComplete(token, (long)result);
+                break;
+
+            case MESSAGE_INSERTS:
+                handler.onBulkInsertComplete(token, (int)result);
+                break;
+
+            case MESSAGE_BATCH:
+                handler.onApplyBatchComplete(token, (ContentProviderResult[])result);
                 break;
 
             default:

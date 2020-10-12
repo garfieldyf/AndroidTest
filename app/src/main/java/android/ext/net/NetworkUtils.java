@@ -217,7 +217,7 @@ public final class NetworkUtils {
      * Prints the contents of the connection headers.
      */
     private static void dumpHeaders(Printer printer, StringBuilder result, Map<String, ?> headers) {
-        if (ArrayUtils.getSize(headers) > 0) {
+        if (!ArrayUtils.isEmpty(headers)) {
             for (Entry<String, ?> header : headers.entrySet()) {
                 result.setLength(0);
                 result.append("  ").append(header.getKey()).append(" = ").append(header.getValue());

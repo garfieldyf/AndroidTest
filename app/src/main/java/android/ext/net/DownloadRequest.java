@@ -275,7 +275,7 @@ public class DownloadRequest {
      * @see #requestHeader(String, String)
      */
     public final DownloadRequest requestHeaders(Map<String, String> headers) {
-        if (ArrayUtils.getSize(headers) > 0) {
+        if (!ArrayUtils.isEmpty(headers)) {
             for (Entry<String, String> header : headers.entrySet()) {
                 mConnection.setRequestProperty(header.getKey(), header.getValue());
             }

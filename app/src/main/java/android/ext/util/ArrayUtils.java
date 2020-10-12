@@ -25,6 +25,7 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(int[])
      * @see #getSize(Object[])
+     * @see #getSize(Collection)
      */
     public static int getSize(byte[] array) {
         return (array != null ? array.length : 0);
@@ -37,6 +38,7 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(byte[])
      * @see #getSize(Object[])
+     * @see #getSize(Collection)
      */
     public static int getSize(int[] array) {
         return (array != null ? array.length : 0);
@@ -49,20 +51,10 @@ public final class ArrayUtils {
      * @return The number of elements.
      * @see #getSize(int[])
      * @see #getSize(byte[])
+     * @see #getSize(Collection)
      */
     public static int getSize(Object[] array) {
         return (array != null ? array.length : 0);
-    }
-
-    /**
-     * Returns the number of elements in the <em>map</em>,
-     * handling <tt>null Map</tt>.
-     * @param map The <tt>Map</tt>.
-     * @return The number of elements.
-     * @see #getSize(Collection)
-     */
-    public static int getSize(Map<?, ?> map) {
-        return (map != null ? map.size() : 0);
     }
 
     /**
@@ -70,10 +62,34 @@ public final class ArrayUtils {
      * handling <tt>null Collection</tt>.
      * @param collection The <tt>Collection</tt>.
      * @return The number of elements.
-     * @see #getSize(Map)
+     * @see #getSize(int[])
+     * @see #getSize(byte[])
+     * @see #getSize(Object[])
      */
     public static int getSize(Collection<?> collection) {
         return (collection != null ? collection.size() : 0);
+    }
+
+    /**
+     * Tests if the <em>map</em> contains no key-value mappings, handling
+     * <tt>null Map</tt>.
+     * @return <tt>true</tt> if the <em>map</em> is <tt>null</tt> or empty,
+     * <tt>false</tt> otherwise.
+     * @see #isEmpty(Collection)
+     */
+    public static boolean isEmpty(Map<?, ?> map) {
+        return (map == null || map.isEmpty());
+    }
+
+    /**
+     * Tests if the <em>collection</em> contains no elements, handling
+     * <tt>null Collection</tt>.
+     * @return <tt>true</tt> if the <em>collection</em> is <tt>null</tt>
+     * or empty, <tt>false</tt> otherwise.
+     * @see #isEmpty(Map)
+     */
+    public static boolean isEmpty(Collection<?> collection) {
+        return (collection == null || collection.isEmpty());
     }
 
     /**
@@ -271,7 +287,7 @@ public final class ArrayUtils {
      * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > list.size()</tt>
      */
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
-        if (ArrayUtils.getSize(list) > 0) {
+        if (!ArrayUtils.isEmpty(list)) {
             DebugUtils.__checkRange(start, end - start, list.size());
             final List<T> subList = list.subList(start, end);
             if (comparator != null) {
@@ -335,7 +351,7 @@ public final class ArrayUtils {
      * @return The <em>collection</em>.
      */
     public static <E, T extends Collection<? super E>> T filter(T collection, Filter<? super E> filter) {
-        if (ArrayUtils.getSize(collection) > 0) {
+        if (!ArrayUtils.isEmpty(collection)) {
             final Iterator<E> itor = (Iterator<E>)collection.iterator();
             while (itor.hasNext()) {
                 if (!filter.accept(itor.next())) {

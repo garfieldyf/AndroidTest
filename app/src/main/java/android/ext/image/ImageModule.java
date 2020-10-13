@@ -46,7 +46,6 @@ import android.util.Xml;
 import android.widget.ImageView;
 import java.io.File;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -73,17 +72,17 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      */
     public final Context mContext;
 
-    /* package */ final String mCacheDir;
+    private final Cache mImageCache;
+    private final FileCache mFileCache;
+    private final BitmapPool mBitmapPool;
+    private final SparseArray mResources;
+
+    /* package */ final File mCacheDir;
     /* package */ final Executor mExecutor;
     /* package */ final Pool<Task> mTaskPool;
     /* package */ final Pool<byte[]> mBufferPool;
     /* package */ final Pool<Options> mOptionsPool;
     /* package */ final Pool<Object[]> mParamsPool;
-
-    private final Cache mImageCache;
-    private final FileCache mFileCache;
-    private final BitmapPool mBitmapPool;
-    private final SparseArray mResources;
 
     /**
      * Constructor
@@ -94,7 +93,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param bitmapPool May be <tt>null</tt>. The {@link BitmapPool} to reuse the bitmap when decoding bitmap.
      */
     /* package */ ImageModule(Context context, Executor executor, Cache imageCache, FileCache fileCache, BitmapPool bitmapPool) {
-        final int maxPoolSize = ((ThreadPoolExecutor)executor).getMaximumPoolSize();
+        final int maxPoolSize = ((ThreadPool)executor).getMaximumPoolSize();
         mContext  = context.getApplicationContext();
         mCacheDir = getCacheDir(context, fileCache);
         mExecutor = executor;
@@ -431,10 +430,10 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         }
     }
 
-    private static String getCacheDir(Context context, FileCache fileCache) {
+    private static File getCacheDir(Context context, FileCache fileCache) {
         DebugUtils.__checkStartMethodTracing();
-        final String cacheDir = (fileCache != null ? new File(fileCache.getCacheDir().getParent(), "._temp_cache!").getPath() : FileUtils.getCacheDir(context, "._temp_cache!").getPath());
-        FileUtils.deleteFiles(cacheDir, false);
+        final File cacheDir = (fileCache != null ? new File(fileCache.getCacheDir().getParent(), "._temp_cache!") : FileUtils.getCacheDir(context, "._temp_cache!"));
+        FileUtils.deleteFiles(cacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir");
         return cacheDir;
     }

@@ -7,59 +7,49 @@ import android.ext.annotation.CursorField;
 import android.ext.database.DatabaseUtils;
 import android.ext.net.AsyncDownloadTask;
 import android.ext.net.DownloadRequest;
-import android.ext.util.ByteArrayBuffer;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
+import android.ext.util.MessageDigests;
+import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.ProcessUtils.CrashDatabase;
+import android.ext.util.StringUtils;
 import android.net.Uri;
 import android.util.JsonWriter;
 import android.util.Log;
-import android.util.LogPrinter;
+import java.io.File;
 import java.io.FileWriter;
-import java.net.HttpURLConnection;
 import java.net.URLConnection;
 import java.util.List;
 import java.util.RandomAccess;
 
 public final class JSONTest {
     public static void testDownload() {
-        new DownloadTask().execute("http://111.170.234.234/app.znds.com/down/20190902/dptvb_1.0_dangbei.apk");
+        new DownloadTask().execute("https://dl.google.com/android/repository/commandlinetools-win-6609375_latest.zip");
     }
 
-    /* package */ static final class DownloadTask extends AsyncDownloadTask<String, Object, ByteArrayBuffer> {
+    /* package */ static final class DownloadTask extends AsyncDownloadTask<String, Object, Integer> {
+        private final File mFile = new File("/sdcard/commandlinetools-win.zip");
+
         @Override
         protected DownloadRequest newDownloadRequest(String[] urls) throws Exception {
             return new DownloadRequest(urls[0]).readTimeout(30000).connectTimeout(30000);
         }
 
         @Override
-        protected void onPostExecute(String[] s, ByteArrayBuffer result) {
+        protected void onPostExecute(String[] s, Integer result) {
             Log.i("abcd", "onPostExecute = " + DeviceUtils.toString(result));
         }
 
         @Override
-        protected void onCancelled(ByteArrayBuffer result) {
-            Log.i("abcd", "onCancelled = " + DeviceUtils.toString(result));
-        }
-
-        @Override
-        public ByteArrayBuffer onDownload(URLConnection conn, int statusCode, String[] urls) throws Exception {
-            ByteArrayBuffer result = null;
-            Log.i("abcd", "begin download");
-            if (statusCode == HttpURLConnection.HTTP_OK) {
-                result = download();
-            }
-
-            if (result != null) {
-                result.dump(new LogPrinter(Log.INFO, "abcd"));
-            } else {
-                Log.i("abcd", "download failed!");
-            }
-
-            //Cancelable cancelable = this;
-            //cancelable.cancel(false);
-            return result;
+        public Integer onDownload(URLConnection conn, int statusCode, String[] urls) throws Exception {
+            Log.d("abcd", "start download");
+            download(mFile, statusCode);
+            Log.d("abcd", "stop download");
+            Log.d("abcd", "start hash");
+            final String hash = StringUtils.toHexString(MessageDigests.computeFile(mFile.getPath(), Algorithm.SHA256));
+            Log.d("abcd", "stop hash = " + hash);
+            return statusCode;
         }
     }
 

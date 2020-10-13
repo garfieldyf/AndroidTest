@@ -143,7 +143,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     @Override
     protected final void onRecycle(Object[] params) {
         ImageModule.__checkParameters(params, PARAMS_LENGTH - 1);
-        Arrays.fill(params, null);  // Prevent memory leak.
+        Arrays.fill(params, null);  // Clear for recycle.
         mModule.mParamsPool.recycle(params);
     }
 
@@ -262,7 +262,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
             Image result = null;
 
             if (imageFile.exists()) {
-                // Decodes the image file, If file cache hit.
+                // Decodes the image file, If exists.
                 if ((result = mDecoder.decodeImage(imageFile, target, params, flags, buffer)) != null) {
                     return result;
                 }

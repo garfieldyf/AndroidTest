@@ -1,9 +1,8 @@
 package com.tencent.test;
 
 import android.content.Intent;
-import android.ext.content.AsyncTask;
-import android.ext.service.IntentService;
 import android.util.Log;
+import com.tencent.temp.IntentService;
 
 public class MmsService extends IntentService {
     public static final String ACTION_MMS = "com.tencent.test.ACTION_MMS";
@@ -13,7 +12,6 @@ public class MmsService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        mSerialExecutor = AsyncTask.SERIAL_EXECUTOR;
         Log.i("yf", "onCreate");
     }
 
@@ -30,7 +28,7 @@ public class MmsService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(Intent intent, int startId) {
+    protected void onHandleIntent(Intent intent) {
         final String action = intent.getAction();
         try {
             Thread.sleep(2000);
@@ -38,6 +36,6 @@ public class MmsService extends IntentService {
             e.printStackTrace();
         }
 
-        Log.i("yf", "process = " + action + ", extra = " + intent.getStringExtra(EXTRA_DATA) + ", startId = " + startId);
+        Log.i("yf", "process = " + action + ", extra = " + intent.getStringExtra(EXTRA_DATA));
     }
 }

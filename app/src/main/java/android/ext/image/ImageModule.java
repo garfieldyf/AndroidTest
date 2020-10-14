@@ -41,6 +41,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Process;
 import android.text.TextUtils;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.util.LogPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
 import android.util.TypedValue;
@@ -252,46 +254,6 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         return (ImageLoader)getResource(id, this);
     }
 
-    public final void dump(Printer printer) {
-        Pools.dumpPool(mTaskPool, printer);
-        Pools.dumpPool(mParamsPool, printer);
-        Pools.dumpPool(mBufferPool, printer);
-        Pools.dumpPool(mOptionsPool, printer);
-        Cache.dumpCache(mContext, printer, mImageCache);
-        Cache.dumpCache(mContext, printer, mFileCache);
-        if (mBitmapPool instanceof LinkedBitmapPool) {
-            ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
-        }
-
-        final StringBuilder result = new StringBuilder(130);
-        final Resources res = mContext.getResources();
-        final int size = mResources.size();
-        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
-
-        final TypedValue value = new TypedValue();
-        for (int i = 0; i < size; ++i) {
-            res.getValue(mResources.keyAt(i), value, true);
-            final Object object = mResources.valueAt(i);
-
-            result.setLength(0);
-            result.append("  ").append(value.string).append(" ==> ");
-            if (object instanceof Parameters) {
-                ((Parameters)object).dump(printer, result);
-            } else if (object instanceof GIFImageBinder) {
-                ((GIFImageBinder)object).dump(printer, result);
-            } else if (object instanceof TransitionBinder) {
-                ((TransitionBinder)object).dump(printer, result);
-            } else if (object instanceof RoundedBitmapBinder) {
-                ((RoundedBitmapBinder)object).dump(printer, result);
-            } else {
-                printer.println(DeviceUtils.toString(object, result).toString());
-            }
-        }
-
-        result.setLength(0);
-        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
-    }
-
     @Override
     public final Object[] newInstance() {
         return new Object[PARAMS_LENGTH];
@@ -305,6 +267,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     @Override
     public void onTrimMemory(int level) {
         DebugUtils.__checkUIThread("onTrimMemory");
+        this.__checkDumpCache(level);
         DebugUtils.__checkStartMethodTracing();
         Pools.BYTE_ARRAY_POOL.clear();
         if (mBitmapPool != null) {
@@ -433,17 +396,6 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         return result;
     }
 
-    /* package */ static void __checkParameters(Object[] params, int index) {
-        if (params == null) {
-            throw new AssertionError("Invalid parameter - params == null");
-        }
-
-        final int minLength = index + 1;
-        if (params.length < minLength) {
-            throw new AssertionError("Invalid parameter - params.length(" + params.length + ") must be >= " + minLength);
-        }
-    }
-
     private static Method getFactory(Context context) {
         final ApplicationInfo info = context.getApplicationInfo();
         final String className = (TextUtils.isEmpty(info.name) ? info.className : info.name);
@@ -522,6 +474,62 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
 
         default:
             return Integer.toString(level);
+        }
+    }
+
+    private void __checkDumpCache(int level) {
+        if (level != TRIM_MEMORY_UI_HIDDEN) {
+            return;
+        }
+
+        final Printer printer = new LogPrinter(Log.DEBUG, "ImageModule");
+        Pools.dumpPool(mTaskPool, printer);
+        Pools.dumpPool(mParamsPool, printer);
+        Pools.dumpPool(mBufferPool, printer);
+        Pools.dumpPool(mOptionsPool, printer);
+        Cache.dumpCache(mContext, printer, mImageCache);
+        Cache.dumpCache(mContext, printer, mFileCache);
+        if (mBitmapPool instanceof LinkedBitmapPool) {
+            ((LinkedBitmapPool)mBitmapPool).dump(mContext, printer);
+        }
+
+        final StringBuilder result = new StringBuilder(130);
+        final Resources res = mContext.getResources();
+        final int size = mResources.size();
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
+
+        final TypedValue value = new TypedValue();
+        for (int i = 0; i < size; ++i) {
+            res.getValue(mResources.keyAt(i), value, true);
+            final Object object = mResources.valueAt(i);
+
+            result.setLength(0);
+            result.append("  ").append(value.string).append(" ==> ");
+            if (object instanceof Parameters) {
+                ((Parameters)object).dump(printer, result);
+            } else if (object instanceof GIFImageBinder) {
+                ((GIFImageBinder)object).dump(printer, result);
+            } else if (object instanceof TransitionBinder) {
+                ((TransitionBinder)object).dump(printer, result);
+            } else if (object instanceof RoundedBitmapBinder) {
+                ((RoundedBitmapBinder)object).dump(printer, result);
+            } else {
+                printer.println(DeviceUtils.toString(object, result).toString());
+            }
+        }
+
+        result.setLength(0);
+        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
+    }
+
+    /* package */ static void __checkParameters(Object[] params, int index) {
+        if (params == null) {
+            throw new AssertionError("Invalid parameter - params == null");
+        }
+
+        final int minLength = index + 1;
+        if (params.length < minLength) {
+            throw new AssertionError("Invalid parameter - params.length(" + params.length + ") must be >= " + minLength);
         }
     }
 

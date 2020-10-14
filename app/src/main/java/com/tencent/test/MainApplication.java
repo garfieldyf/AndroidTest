@@ -15,7 +15,6 @@ import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
 import android.support.annotation.Keep;
 import android.util.Log;
-import android.util.LogPrinter;
 
 public final class MainApplication extends Application {
     public static MainApplication sInstance;
@@ -32,12 +31,6 @@ public final class MainApplication extends Application {
         ProcessUtils.installUncaughtExceptionHandler(this);
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
-    }
-
-    @Override
-    public void onTrimMemory(int level) {
-        ImageModule.with(this).dump(new LogPrinter(Log.DEBUG, "ImageModule"));
-        super.onTrimMemory(level);
     }
 
     public final PackageInfo myPackageInfo() {

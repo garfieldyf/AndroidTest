@@ -6,7 +6,6 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
-import android.ext.image.ImageLoader.LoadRequest;
 import android.ext.image.ImageModule;
 import android.ext.image.ImageModule.Builder;
 import android.ext.util.DebugUtils;
@@ -23,7 +22,6 @@ public final class MainApplication extends Application {
 //    public static final ThreadPool sThreadPool;
 
     private PackageInfo mPackageInfo;
-    private ImageModule mImageModule;
 
     @Override
     public void onCreate() {
@@ -33,36 +31,13 @@ public final class MainApplication extends Application {
         DebugUtils.startMethodTracing();
         ProcessUtils.installUncaughtExceptionHandler(this);
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
-        mImageModule = new Builder(this)
-            .setScaleMemory(DeviceUtils.isLowMemory() ? 0 : 0.4f)
-            .setImageSize(128)
-//            .setBitmapPoolSize(20)
-            .setFileSize(1000)
-//            .setFileCache(new SimpleFileCache2(this, "._image_cache", 20 * 1024 *1024))
-            .build();
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
     }
 
     @Override
     public void onTrimMemory(int level) {
-        mImageModule.dump(new LogPrinter(Log.DEBUG, "ImageModule"));
+        ImageModule.with(this).dump(new LogPrinter(Log.DEBUG, "ImageModule"));
         super.onTrimMemory(level);
-    }
-
-    public final ImageModule getImageModule() {
-        return mImageModule;
-    }
-
-    public final LoadRequest load(int id, String uri) {
-        return mImageModule.load(id, uri);
-    }
-
-    public final void pause(int id) {
-        mImageModule.pause(id);
-    }
-
-    public final void resume(int id) {
-        mImageModule.resume(id);
     }
 
     public final PackageInfo myPackageInfo() {
@@ -71,6 +46,15 @@ public final class MainApplication extends Application {
 
     public static String[] obtainUrls() {
         return Urls;
+    }
+
+    @Keep
+    @SuppressWarnings("unused")
+    private static ImageModule createImageModule(Builder builder) {
+        return builder.setScaleMemory(DeviceUtils.isLowMemory() ? 0.1f : 0.4f)
+            .setImageSize(128)
+            .setFileSize(1000)
+            .build();
     }
 
     @SuppressWarnings("unused")
@@ -90,7 +74,6 @@ public final class MainApplication extends Application {
     static {
         System.loadLibrary("androidext");
 //        sThreadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
-//        AsyncTask.setDefaultExecutor(sThreadPool);
         ImageDrawable.initAttrs(R.attr.autoMirrored);
     }
 

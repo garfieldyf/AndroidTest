@@ -2,6 +2,7 @@ package android.ext.image;
 
 import android.content.ComponentCallbacks2;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -45,13 +46,32 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.ImageView;
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * Class <tt>ImageModule</tt> for managing the loader, cache, pool and parameters etc.
+ * Class <tt>ImageModule</tt> for managing the image loaders, caches, pools and parameters etc.
+ * <h3>Creating an ImageModule</h3>
+ * <p>Implement the static method <b>createImageModule</b> in your application class.</p>
+ * <p>Here is an example:</p><pre>
+ * public class MyApplication extends Application {
+ *    {@code @Keep} // Prevent proguard
+ *     private static ImageModule createImageModule(ImageModule.Builder builder) {
+ *         return builder
+ *             .setScaleMemory(0.4f)    // The memory cache size.
+ *             .setFileSize(1000)       // The file cache size.
+ *             .build();
+ *     }
+ * }</pre>
+ * <h3>Usage</h3><pre>
+ * ImageModule.with(context)
+ *     .load(R.xml.image_loader, uri)
+ *     .parameters(R.xml.decode_params)
+ *     .placeholder(R.drawable.ic_placeholder)
+ *     .into(imageView);</pre>
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -66,6 +86,11 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     private static final int MAX_POOL_SIZE = 32;
     private static final int MIN_THREAD_COUNT = 2;
     private static final int MAX_THREAD_COUNT = 4;
+
+    /**
+     * A singleton <tt>ImageModule</tt>.
+     */
+    private static ImageModule sInstance;
 
     /**
      * The application <tt>Context</tt>.
@@ -86,7 +111,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
 
     /**
      * Constructor
-     * @param context The <tt>Context</tt>.
+     * @param context The application <tt>Context</tt>.
      * @param executor The {@link Executor} to executing load task.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded images.
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
@@ -94,8 +119,8 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      */
     /* package */ ImageModule(Context context, Executor executor, Cache imageCache, FileCache fileCache, BitmapPool bitmapPool) {
         final int maxPoolSize = ((ThreadPool)executor).getMaximumPoolSize();
-        mContext  = context.getApplicationContext();
         mCacheDir = getCacheDir(context, fileCache);
+        mContext  = context;
         mExecutor = executor;
         mFileCache   = fileCache;
         mBitmapPool  = bitmapPool;
@@ -109,17 +134,24 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Equivalent to calling <tt>get(id).load(uri)</tt>.
+     * Returns a singleton {@link ImageModule} associated with this class.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * <h3>Usage</h3>
-     * <p>Here is an example:</p><pre>
-     * module.load(R.xml.image_loader, uri)
-     *     .parameters(R.xml.decode_params)
-     *     .placeholder(R.drawable.ic_placeholder)
-     *     .into(imageView);</pre>
+     */
+    public static ImageModule with(Context context) {
+        DebugUtils.__checkUIThread("with");
+        if (sInstance == null) {
+            sInstance = createImageModule(context.getApplicationContext());
+        }
+
+        return sInstance;
+    }
+
+    /**
+     * Equivalent to calling <tt>getImageLoader(id).load(uri)</tt>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
-     * @see #get(int)
+     * @see #getImageLoader(int)
      * @see ImageLoader#load(URI)
      */
     public final <URI> LoadRequest load(int id, URI uri) {
@@ -127,20 +159,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Return an {@link ImageLoader} object associated with a resource id.
-     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
-     * @return The <tt>ImageLoader</tt>.
-     * @throws NotFoundException if the given <em>id</em> does not exist.
-     * @see #load(int, URI)
-     * @see ImageLoader#load(URI)
-     */
-    public final <URI, Image> ImageLoader<URI, Image> get(int id) {
-        return (ImageLoader)getResource(id, this);
-    }
-
-    /**
-     * Equivalent to calling <tt>get(id).pause()</tt>.
+     * Equivalent to calling <tt>getImageLoader(id).pause()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #resume(int)
@@ -154,7 +173,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Equivalent to calling <tt>get(id).resume()</tt>.
+     * Equivalent to calling <tt>getImageLoader(id).resume()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @see #pause(int)
@@ -168,7 +187,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Equivalent to calling <tt>get(id).remove(uri)</tt>.
+     * Equivalent to calling <tt>getImageLoader(id).remove(uri)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to remove.
@@ -182,7 +201,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Equivalent to calling <tt>get(id).cancelTask(target, false)</tt>.
+     * Equivalent to calling <tt>getImageLoader(id).cancelTask(target, false)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param target The target to find the task.
@@ -216,6 +235,18 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      */
     public final <URI, Image> Cache<URI, Image> getImageCache() {
         return mImageCache;
+    }
+
+    /**
+     * Return an {@link ImageLoader} object associated with a resource id.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @return The <tt>ImageLoader</tt>.
+     * @throws NotFoundException if the given <em>id</em> does not exist.
+     * @see #load(int, URI)
+     */
+    public final <URI, Image> ImageLoader<URI, Image> getImageLoader(int id) {
+        return (ImageLoader)getResource(id, this);
     }
 
     public final void dump(Printer printer) {
@@ -410,6 +441,31 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         }
     }
 
+    private static Method getFactory(Context context) {
+        final ApplicationInfo info = context.getApplicationInfo();
+        final String className = (TextUtils.isEmpty(info.name) ? info.className : info.name);
+        try {
+            return ReflectUtils.getDeclaredMethod(Class.forName(className), "createImageModule", Builder.class);
+        } catch (ReflectiveOperationException e) {
+            DebugUtils.__checkWarning(true, ImageModule.class.getName(), "The factory method cannot be found - " + className);
+            return null;
+        }
+    }
+
+    private static ImageModule createImageModule(Context context) {
+        final Method factory  = getFactory(context);
+        final Builder builder = new Builder(context);
+        if (factory == null) {
+            return builder.setScaleMemory(0.25f).setFileSize(500).build();
+        }
+
+        try {
+            return (ImageModule)factory.invoke(null, builder);
+        } catch (ReflectiveOperationException e) {
+            throw new RuntimeException("Couldn't create ImageModule", e);
+        }
+    }
+
     private ImageLoader.ImageDecoder createImageDecoder(String className) throws ReflectiveOperationException {
         if (TextUtils.isEmpty(className)) {
             return new BitmapDecoder(this);
@@ -468,14 +524,6 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
 
     /**
      * Class <tt>Builder</tt> to creates an {@link ImageModule}.
-     * <h3>Usage</h3>
-     * <p>Here is an example:</p><pre>
-     * private ImageModule mImageModule;
-     *
-     * mImageModule = new Builder(context)
-     *     .setScaleMemory(0.4f)   // The memory cache size.
-     *     .setFileSize(1000)      // The file cache size.
-     *     .build();</pre>
      */
     public static final class Builder {
         private int mPriority;
@@ -484,13 +532,17 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         private int mMaxThreads;
         private Object mFileCache;
         private Object mImageCache;
-        private final Context mContext;
+
+        /**
+         * The application <tt>Context</tt>.
+         */
+        public final Context mContext;
 
         /**
          * Constructor
-         * @param context The <tt>Context</tt>.
+         * @param context The application <tt>Context</tt>.
          */
-        public Builder(Context context) {
+        /* package */ Builder(Context context) {
             mContext  = context;
             mPriority = Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
         }

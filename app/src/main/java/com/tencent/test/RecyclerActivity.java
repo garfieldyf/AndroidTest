@@ -2,6 +2,7 @@ package com.tencent.test;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.ext.image.ImageModule;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
 import android.os.Bundle;
@@ -102,7 +103,7 @@ public class RecyclerActivity extends Activity implements OnPageChangeListener {
         @Override
         public void onBindViewHolder(ItemViewHolder holder, int position) {
             holder.text.setText(Integer.toString(position));
-            MainApplication.sInstance.load(R.xml.image_loader, mUrls.get(position))
+            ImageModule.with(holder.itemView.getContext()).load(R.xml.image_loader, mUrls.get(position))
                 .binder(R.xml.transition_binder)
                 .placeholder(R.drawable.ic_placeholder)
                 .into(holder.image);

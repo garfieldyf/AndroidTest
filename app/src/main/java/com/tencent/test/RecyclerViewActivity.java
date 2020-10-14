@@ -3,6 +3,7 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AsyncTask;
+import android.ext.image.ImageModule;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
 import android.ext.widget.PageAdapter2;
@@ -81,9 +82,9 @@ public class RecyclerViewActivity extends Activity {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-                MainApplication.sInstance.pause(R.xml.image_loader);
+                ImageModule.with(RecyclerViewActivity.this).pause(R.xml.image_loader);
             } else {
-                MainApplication.sInstance.resume(R.xml.image_loader);
+                ImageModule.with(RecyclerViewActivity.this).resume(R.xml.image_loader);
             }
         }
     };
@@ -235,7 +236,7 @@ public class RecyclerViewActivity extends Activity {
 
         @Override
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
-            MainApplication.sInstance.load(R.xml.image_loader, itemData)
+            ImageModule.with(activity).load(R.xml.image_loader, itemData)
                 .binder(R.xml.rounded_transition_binder)
 //                .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
@@ -264,7 +265,7 @@ public class RecyclerViewActivity extends Activity {
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
 //            title.setText(itemData);
             title.setText(Integer.toString(position));
-            MainApplication.sInstance.load(R.xml.image_loader, itemData)
+            ImageModule.with(activity).load(R.xml.image_loader, itemData)
                 .binder(R.xml.rounded_transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)

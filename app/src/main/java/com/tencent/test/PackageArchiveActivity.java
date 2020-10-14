@@ -3,8 +3,9 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.ext.cache.LruCache;
-import android.ext.content.AsyncTask;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.content.AsyncTask;
+import android.ext.image.ImageModule;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.FileUtils;
@@ -34,7 +35,7 @@ public class PackageArchiveActivity extends Activity {
         DebugUtils.stopMethodTracing("yf", "setContentView");
 
         DebugUtils.startMethodTracing();
-        mIconLoader = new PackageIconLoader<String>(MainApplication.sInstance.getImageModule(), new LruCache<String, Object>(64));
+        mIconLoader = new PackageIconLoader<String>(ImageModule.with(this), new LruCache<String, Object>(64));
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);

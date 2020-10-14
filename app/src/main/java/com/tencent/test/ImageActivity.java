@@ -28,6 +28,7 @@ import android.ext.database.DatabaseUtils;
 import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.drawable.OvalBitmapDrawable;
 import android.ext.graphics.drawable.RoundedBitmapDrawable;
+import android.ext.image.ImageModule;
 import android.ext.json.JSONArray;
 import android.ext.json.JSONObject;
 import android.ext.json.JSONUtils;
@@ -1220,9 +1221,9 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            MainApplication.sInstance.resume(R.xml.image_loader);
+            ImageModule.with(this).resume(R.xml.image_loader);
         } else {
-            MainApplication.sInstance.pause(R.xml.image_loader);
+            ImageModule.with(this).pause(R.xml.image_loader);
         }
     }
 
@@ -1319,7 +1320,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //                    .placeholder(R.drawable.ic_placeholder)
 //                    .into(image);
 //            } else {
-            MainApplication.sInstance.load(R.xml.image_loader, itemData)
+            ImageModule.with(ImageActivity.this).load(R.xml.image_loader, itemData)
 //                    .flags(ImageLoader.FLAG_DUMP_OPTIONS)
 //                    .parameters(R.xml.size_params)
 //                    .binder(R.xml.ring_bitmap_binder)
@@ -1337,6 +1338,11 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             super(activity, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen);
             setOwnerActivity(activity);
             setOnCancelListener(this);
+
+//            ImageModule.with(context)
+//                .load(R.xml.image_loader, url)
+//                .placeholder(R.drawable.ic_placeholder)
+//                .into(imageView);
         }
 
         @Override

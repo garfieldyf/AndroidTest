@@ -1,6 +1,7 @@
 package android.ext.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * Class ReflectUtils
@@ -18,6 +19,22 @@ public final class ReflectUtils {
      */
     public static <T> Constructor<T> getConstructor(Class<T> clazz, Class<?>... parameterTypes) throws NoSuchMethodException {
         final Constructor<T> result = clazz.getDeclaredConstructor(parameterTypes);
+        result.setAccessible(true);
+        return result;
+    }
+
+    /**
+     * Returns a {@link Method} object with the specified <em>clazz</em> and <em>name</em>.
+     * The returned <tt>Method</tt> object accessible flag is <tt>true</tt>.
+     * @param clazz The <tt>Class</tt> which is declared the method.
+     * @param name The name of the method.
+     * @param parameterTypes The parameter types of the method or <em>(Class[])null</em> is
+     * equivalent to the empty array.
+     * @return A <tt>Method</tt> object.
+     * @throws NoSuchMethodException if the requested method cannot be found.
+     */
+    public static Method getDeclaredMethod(Class<?> clazz, String name, Class<?>... parameterTypes) throws NoSuchMethodException {
+        final Method result = clazz.getDeclaredMethod(name, parameterTypes);
         result.setAccessible(true);
         return result;
     }

@@ -12,6 +12,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.cache.LinkedBitmapPool;
 import android.ext.cache.LruBitmapCache;
+import android.ext.cache.LruBitmapCache2;
 import android.ext.cache.LruCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
@@ -140,7 +141,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     public static ImageModule with(Context context) {
         DebugUtils.__checkUIThread("with");
         if (sInstance == null) {
+            DebugUtils.__checkStartMethodTracing();
             sInstance = createImageModule(context.getApplicationContext());
+            DebugUtils.__checkStopMethodTracing("ImageModule", "createImageModule");
         }
 
         return sInstance;
@@ -681,10 +684,14 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
             if (maxSize <= 0) {
                 return null;
             } else if (mImageSize <= 0) {
-                return new LruBitmapCache(maxSize, bitmapPool);
+                return createBitmapCache(maxSize, bitmapPool);
             } else {
-                return new LruImageCache(new LruBitmapCache(maxSize, bitmapPool), new LruCache(mImageSize));
+                return new LruImageCache(createBitmapCache(maxSize, bitmapPool), new LruCache(mImageSize));
             }
+        }
+
+        private Cache createBitmapCache(int maxSize, BitmapPool bitmapPool) {
+            return (bitmapPool != null ? new LruBitmapCache2(maxSize, bitmapPool) : new LruBitmapCache(maxSize));
         }
     }
 }

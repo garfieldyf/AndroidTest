@@ -217,7 +217,7 @@ public final class ProcessUtils {
          *     "brand": "BRAND",
          *     "sdk": 19,
          *     "version": "4.4.4",
-         *     "abis": "arm64-v8a|armeabi-v7a|armeabi",
+         *     "abis": ["arm64-v8a", "armeabi-v7a", "armeabi"],
          *     "package": "com.xxxx",
          *     "crashes": [{
          *         "_date": 1537852558991,
@@ -248,7 +248,7 @@ public final class ProcessUtils {
          * "brand": "BRAND",
          * "sdk": 19,
          * "version": "4.4.4",
-         * "abis": "arm64-v8a|armeabi-v7a|armeabi",
+         * "abis": ["arm64-v8a", "armeabi-v7a", "armeabi"],
          * "package": "com.xxxx"</pre>
          * @param writer The {@link JsonWriter} to write to.
          * @param packageName The application's package name.
@@ -257,22 +257,21 @@ public final class ProcessUtils {
          * @see #write(JsonWriter, Cursor, String)
          */
         public static JsonWriter writeDeviceInfo(JsonWriter writer, String packageName) throws IOException {
-            return writer.name("model").value(Build.MODEL)
+            return writeSupportedABIs(writer.name("model").value(Build.MODEL)
                 .name("brand").value(Build.BRAND)
                 .name("sdk").value(Build.VERSION.SDK_INT)
                 .name("version").value(Build.VERSION.RELEASE)
-                .name("abis").value(getSupportedABIs())
+                .name("abis"))
                 .name("package").value(packageName);
         }
 
-        private static String getSupportedABIs() {
-            final String[] abis = DeviceUtils.SUPPORTED_ABIS;
-            final StringBuilder result = new StringBuilder(48).append(abis[0]);
-            for (int i = 1; i < abis.length; ++i) {
-                result.append('|').append(abis[i]);
+        private static JsonWriter writeSupportedABIs(JsonWriter writer) throws IOException {
+            writer.beginArray();
+            for (String abi : DeviceUtils.SUPPORTED_ABIS) {
+                writer.value(abi);
             }
 
-            return result.toString();
+            return writer.endArray();
         }
     }
 

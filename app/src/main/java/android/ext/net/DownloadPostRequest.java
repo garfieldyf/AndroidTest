@@ -139,7 +139,6 @@ public final class DownloadPostRequest extends DownloadRequest {
 
     @Override
     /* package */ int connect() throws IOException {
-        __checkDumpHeaders(true);
         if (mData instanceof Collection || mData instanceof Map || mData instanceof Object[] || mData instanceof JSONObject || mData instanceof JSONArray) {
             connectImpl();
             postData(mData);
@@ -160,6 +159,7 @@ public final class DownloadPostRequest extends DownloadRequest {
             postData((String)mData, (int)mParams[0], (int)mParams[1]);
         } else {
             DebugUtils.__checkError(mData != null, DeviceUtils.toString(mData, new StringBuilder("Unsupported POST type - ")).toString());
+            __checkDumpHeaders(true);
             mConnection.connect();
         }
 
@@ -175,6 +175,7 @@ public final class DownloadPostRequest extends DownloadRequest {
     private void connectImpl() throws IOException {
         ((HttpURLConnection)mConnection).setRequestMethod("POST");
         mConnection.setDoOutput(true);
+        __checkDumpHeaders(true);
         mConnection.connect();
     }
 

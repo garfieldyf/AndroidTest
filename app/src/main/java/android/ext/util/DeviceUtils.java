@@ -1,5 +1,8 @@
 package android.ext.util;
 
+import static android.content.Context.ACTIVITY_SERVICE;
+import static android.content.Context.STORAGE_SERVICE;
+import static android.content.Context.WINDOW_SERVICE;
 import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.ActivityManager.MemoryInfo;
@@ -172,7 +175,7 @@ public final class DeviceUtils {
 
         // Dumps display infos.
         final DisplayMetrics dm = res.getDisplayMetrics();
-        final Display display = ((WindowManager)context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        final Display display = ((WindowManager)context.getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
         final Point size = new Point();
         display.getRealSize(size);
 
@@ -189,7 +192,7 @@ public final class DeviceUtils {
         printer.println(infos.toString());
 
         // Dumps the memory infos.
-        final ActivityManager am = (ActivityManager)context.getSystemService(Context.ACTIVITY_SERVICE);
+        final ActivityManager am = (ActivityManager)context.getSystemService(ACTIVITY_SERVICE);
         final MemoryInfo info = new MemoryInfo();
         am.getMemoryInfo(info);
 
@@ -438,7 +441,7 @@ public final class DeviceUtils {
 
     @TargetApi(24)
     private static String dumpExternalStorageInfo(Context context, StatFs statFs, StringBuilder out) {
-        final StorageVolume[] volumes = ((StorageManager)context.getSystemService(Context.STORAGE_SERVICE)).getVolumeList();
+        final StorageVolume[] volumes = ((StorageManager)context.getSystemService(STORAGE_SERVICE)).getVolumeList();
         for (int i = 0, size = ArrayUtils.getSize(volumes); i < size; ++i) {
             final StorageVolume volume = volumes[i];
             final String path = volume.getPath();

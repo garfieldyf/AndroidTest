@@ -1,5 +1,6 @@
 package android.ext.net;
 
+import static android.content.Context.CONNECTIVITY_SERVICE;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -157,7 +158,7 @@ public final class NetworkUtils {
      * @see #isNetworkConnected(ConnectivityManager)
      */
     public static boolean isNetworkConnected(Context context) {
-        final NetworkInfo info = ((ConnectivityManager)context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        final NetworkInfo info = ((ConnectivityManager)context.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
         return (info != null && info.isConnected());
     }
 
@@ -180,7 +181,7 @@ public final class NetworkUtils {
      * @see ConnectivityManager#getActiveNetworkInfo()
      */
     public static NetworkInfo getActiveNetworkInfo(Context context) {
-        return ((ConnectivityManager)context.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        return ((ConnectivityManager)context.getApplicationContext().getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
     }
 
     /**

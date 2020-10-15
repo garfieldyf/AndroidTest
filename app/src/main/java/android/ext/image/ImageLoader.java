@@ -432,6 +432,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * The <tt>ImageDecoder</tt> class used to decode the image data.
      */
     public static interface ImageDecoder<Image> {
+//        /**
+//         * Called on the UI thread when the {@link ImageLoader} has been shut
+//         * down. Subclasses should override this method to clear the resources.
+//         */
+//        default void onShutdown() {
+//        }
+
         /**
          * Decodes an image from the specified <em>uri</em>.
          * @param uri The uri to decode.

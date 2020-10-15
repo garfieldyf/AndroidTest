@@ -40,6 +40,8 @@
         <activity
             android:name=".TestFragmentActivity" />
         <activity
+            android:name=".TestMediatorActivity" />
+        <activity
             android:name=".ThemeActivity"
             android:screenOrientation="landscape"
             android:theme="@style/AppLightTheme" />

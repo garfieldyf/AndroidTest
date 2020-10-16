@@ -161,6 +161,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see ImageLoader#load(URI)
      */
     public final <URI> LoadRequest load(int id, URI uri) {
+        DebugUtils.__checkUIThread("load");
         return ((ImageLoader)getResource(id, this)).load(uri);
     }
 
@@ -379,7 +380,6 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @throws NotFoundException if the given <em>id</em> does not exist.
      */
     /* package */ final Object getResource(int id, XmlResourceInflater inflater) {
-        DebugUtils.__checkUIThread("getResource");
         Object result = mResources.get(id, null);
         if (result == null) {
             DebugUtils.__checkStartMethodTracing();
@@ -434,6 +434,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     private static ImageModule createImageModule(Context context) {
+        DebugUtils.__checkError(context == null, "Invalid parameter - context == null");
         final Method factory  = getFactory(context);
         final Builder builder = new Builder(context);
         if (factory == null) {

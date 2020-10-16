@@ -102,10 +102,10 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         DebugUtils.__checkUIThread("execute");
         switch (mStatus) {
         case RUNNING:
-            throw new IllegalStateException("Cannot execute task: the task is already running.");
+            throw new IllegalStateException("Cannot execute task: this task is already running.");
 
         case FINISHED:
-            throw new IllegalStateException("Cannot execute task: the task has already been executed (a task can be executed only once)");
+            throw new IllegalStateException("Cannot execute task: this task has already been executed (a task can be executed only once)");
         }
 
         mStatus = Status.RUNNING;

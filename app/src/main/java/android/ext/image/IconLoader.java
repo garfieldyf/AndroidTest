@@ -20,9 +20,9 @@ import android.widget.ImageView;
  *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
  * ImageModule.with(context)
- *     .load(R.xml.icon_loader, resolveInfo.activityInfo.name or packageItemInfo.packageName)
+ *     .load(R.xml.icon_loader, [ resolveInfo.activityInfo.name | packageItemInfo.packageName ])
  *     .placeholder(R.drawable.ic_placeholder)
- *     .parameters(resolveInfo or packageItemInfo)
+ *     .parameters([ resolveInfo | packageItemInfo ])
  *     .into(imageView);</pre>
  * @author Garfield
  */

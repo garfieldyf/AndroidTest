@@ -33,10 +33,18 @@ import java.util.Arrays;
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;[ ImageLoader | loader ]
+ *      xmlns:android="http://schemas.android.com/apk/res/android"
  *      xmlns:app="http://schemas.android.com/apk/res-auto"
  *      class="classFullName"
- *      app:flags="[ none | noFileCache | noMemoryCache ]"
- *      app:decoder="[ BitmapDecoder | ImageDecoder | ContactPhotoDecoder | classFullName ]" /&gt;</pre>
+ *      app:flags="[ none | noFileCache | noMemoryCache ]"&gt;
+ *
+ *      &lt;!-- Optional ImageDecoder --&gt;
+ *      &lt;[ BitmapDecoder | ImageDecoder | ContactPhotoDecoder | decoder ]
+ *          class="classFullName"
+ *          app:attribute1="value1"
+ *          app:attribute2="value2"
+ *          ... ... /&gt;
+ * &lt;/[ ImageLoader | loader ]&gt;</pre>
  * @author Garfield
  */
 public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {

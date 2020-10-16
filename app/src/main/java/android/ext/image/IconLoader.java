@@ -19,7 +19,8 @@ import android.widget.ImageView;
  *     class="classFullName"
  *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
- * module.load(R.xml.icon_loader, resolveInfo.activityInfo.name or packageItemInfo.packageName)
+ * ImageModule.with(context)
+ *     .load(R.xml.icon_loader, resolveInfo.activityInfo.name or packageItemInfo.packageName)
  *     .placeholder(R.drawable.ic_placeholder)
  *     .parameters(resolveInfo or packageItemInfo)
  *     .into(imageView);</pre>
@@ -33,7 +34,7 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
-    public IconLoader(ImageModule module, Cache<URI, Object> iconCache) {
+    protected IconLoader(ImageModule module, Cache<URI, Object> iconCache) {
         super(module, iconCache);
         mPackageManager = module.mContext.getPackageManager();
     }

@@ -49,6 +49,7 @@ import android.util.TypedValue;
 import android.util.Xml;
 import android.widget.ImageView;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -306,16 +307,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
 
     @Override
     public final Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
-        String className = parser.getName();
-        if (className.equals("loader") && (className = parser.getAttributeValue(null, "class")) == null) {
-            throw new XmlPullParserException(parser.getPositionDescription() + ": The <loader> tag requires a valid 'class' attribute");
-        }
-
-        final String packageName = context.getPackageName();
-        final AttributeSet attrs = Xml.asAttributeSet(parser);
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "ImageLoader"));
-        final int flags = a.getInt(ReflectUtils.getResourceStyleable(packageName, "ImageLoader_flags"), 0);
-        final String name = a.getString(ReflectUtils.getResourceStyleable(packageName, "ImageLoader_decoder"));
+        final String className = parseClassName(parser, "loader");
+        final TypedArray a = context.obtainStyledAttributes(Xml.asAttributeSet(parser), ReflectUtils.getResourceStyleable(context.getPackageName(), "ImageLoader"));
+        final int flags = a.getInt(0 /* R.styleable.ImageLoader_flags */, 0);
         a.recycle();
 
         final Cache imageCache = ((flags & FLAG_NO_MEMORY_CACHE) == 0 ? mImageCache : null);
@@ -325,14 +319,14 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         if (className.equals("IconLoader")) {
             return new IconLoader(this, imageCache);
         } else if (className.equals("ImageLoader")) {
-            return new ImageLoader(this, imageCache, fileCache, createImageDecoder(name));
+            return new ImageLoader(this, imageCache, fileCache, createImageDecoder(parser));
         }
 
         final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
         if (IconLoader.class.isAssignableFrom(clazz)) {
             return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
         } else {
-            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(name));
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(parser));
         }
     }
 
@@ -396,6 +390,38 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         return result;
     }
 
+    private ImageLoader.ImageDecoder createImageDecoder(XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
+        try {
+            // Moves to the first start tag position.
+            int type;
+            while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
+                // Empty loop
+            }
+
+            if (type != XmlPullParser.START_TAG) {
+                // No decoder tag, returns default decoder.
+                return new BitmapDecoder(this);
+            }
+
+            final String className = parseClassName(parser, "decoder");
+            switch (className) {
+            case "BitmapDecoder":
+                return new BitmapDecoder(this);
+
+            case "ImageDecoder":
+                return new ImageDecoder(this);
+
+            case "ContactPhotoDecoder":
+                return new ContactPhotoDecoder(this);
+
+            default:
+                return ReflectUtils.newInstance(className, new Class[] { ImageModule.class, AttributeSet.class }, this, Xml.asAttributeSet(parser));
+            }
+        } catch (IOException e) {
+            throw new XmlPullParserException(null, parser, e);
+        }
+    }
+
     private static Method getFactory(Context context) {
         final ApplicationInfo info = context.getApplicationInfo();
         final String className = (TextUtils.isEmpty(info.name) ? info.className : info.name);
@@ -421,32 +447,21 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         }
     }
 
-    private ImageLoader.ImageDecoder createImageDecoder(String className) throws ReflectiveOperationException {
-        if (TextUtils.isEmpty(className)) {
-            return new BitmapDecoder(this);
-        }
-
-        switch (className) {
-        case "BitmapDecoder":
-            return new BitmapDecoder(this);
-
-        case "ImageDecoder":
-            return new ImageDecoder(this);
-
-        case "ContactPhotoDecoder":
-            return new ContactPhotoDecoder(this);
-
-        default:
-            return ReflectUtils.newInstance(className, new Class[] { ImageModule.class }, this);
-        }
-    }
-
     private static File getCacheDir(Context context, FileCache fileCache) {
         DebugUtils.__checkStartMethodTracing();
         final File cacheDir = (fileCache != null ? new File(fileCache.getCacheDir().getParent(), "._temp_cache!") : FileUtils.getCacheDir(context, "._temp_cache!"));
         FileUtils.deleteFiles(cacheDir.getPath(), false);
         DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir");
         return cacheDir;
+    }
+
+    private static String parseClassName(XmlPullParser parser, String tag) throws XmlPullParserException {
+        String className = parser.getName();
+        if (className.equals(tag) && (className = parser.getAttributeValue(null, "class")) == null) {
+            throw new XmlPullParserException(parser.getPositionDescription() + ": The <" + tag + "> tag requires a valid 'class' attribute");
+        }
+
+        return className;
     }
 
     private static String toString(int level) {

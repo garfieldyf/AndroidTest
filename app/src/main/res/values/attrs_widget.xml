@@ -33,7 +33,6 @@
 
     <!-- ImageLoader styleable -->
     <declare-styleable name="ImageLoader">
-        <attr name="decoder" format="string" />
         <attr name="flags">
             <flag name="none" value="0" />
             <flag name="noFileCache" value="0x01" />

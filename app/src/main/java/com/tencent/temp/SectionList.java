@@ -209,7 +209,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
     public boolean addSection(List<?> section) {
         DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
         if (this == EMPTY_IMMUTABLE_LIST) {
-            throw new UnsupportedOperationException("Unsupported operation - The SectionList is immutable");
+            throw new UnsupportedOperationException("The SectionList is immutable");
         }
 
         final int size = section.size();
@@ -242,7 +242,7 @@ public class SectionList<E> extends AbstractList<E> implements Cloneable {
         DebugUtils.__checkError(section == null, "Invalid parameter - section == null");
         DebugUtils.__checkError(sectionIndex < 0 || sectionIndex > mCount, "Invalid parameter - sectionIndex out of bounds [ sectionIndex = " + sectionIndex + ", sectionCount = " + mCount + " ]");
         if (this == EMPTY_IMMUTABLE_LIST) {
-            throw new UnsupportedOperationException("Unsupported operation - The SectionList is immutable");
+            throw new UnsupportedOperationException("The SectionList is immutable");
         }
 
         if (sectionIndex == mCount) {

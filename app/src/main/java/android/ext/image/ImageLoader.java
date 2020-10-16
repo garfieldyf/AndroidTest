@@ -92,7 +92,6 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * <li>android.resource ({@link #SCHEME_ANDROID_RESOURCE})</li></ul>
      * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
-     * @see #loadSync(URI, int, int)
      */
     public LoadRequest load(URI uri) {
         DebugUtils.__checkUIThread("load");
@@ -108,13 +107,14 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
      * @param uri The uri to load.
-     * @param resId The xml resource id of the {@link Parameters} to decode image.
+     * @param resId May be <tt>0</tt>. The xml resource id of the {@link Parameters} to decode image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
      * @see #load(URI)
      */
     public final Image loadSync(URI uri, int resId, int flags) {
-        return loadSync(uri, flags, XmlResources.<Parameters>load(mModule.mContext, resId));
+        final Parameters parameters = (resId != 0 ? XmlResources.load(mModule.mContext, resId) : null);
+        return loadSync(uri, flags, parameters);
     }
 
     @Override

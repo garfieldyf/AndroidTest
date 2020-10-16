@@ -1,5 +1,6 @@
 package android.ext.database;
 
+import android.annotation.SuppressLint;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.Lifecycle.Event;
@@ -19,6 +20,7 @@ import java.lang.ref.WeakReference;
  * Abstract class <tt>DatabaseHandler</tt>.
  * @author Garfield
  */
+@SuppressLint("RestrictedApi")
 public abstract class DatabaseHandler implements Factory<Object>, GenericLifecycleObserver {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;

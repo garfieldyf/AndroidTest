@@ -1,5 +1,6 @@
 package android.ext.content;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
@@ -16,7 +17,7 @@ import java.util.concurrent.Executor;
 /**
  * Like as {@link android.os.AsyncTask}, but this class has an owner <tt>Object</tt> (the owner may be
  * an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.) to avoid potential memory
- * leaks and listen the owner's lifecycle when the owner destroy this task will be cancelled.
+ * leaks. This class listen the owner's lifecycle when the owner destroy this task will be cancel.
  * @author Garfield
  */
 public abstract class AsyncTask<Params, Progress, Result> implements Cancelable {
@@ -264,6 +265,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     /**
      * Class <tt>Worker</tt> is an implementation of a {@link Task}.
      */
+    @SuppressLint("RestrictedApi")
     @SuppressWarnings("unchecked")
     /* package */ final class Worker extends Task implements GenericLifecycleObserver {
         @Override

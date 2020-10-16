@@ -15,9 +15,21 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
     /**
      * Constructor
      * @param config The {@link Config}, which defines how the adapter will load data.
+     * @see #PageAdapter2(Config, Object)
      */
     public PageAdapter2(Config config) {
         super(config);
+    }
+
+    /**
+     * Constructor
+     * @param config The {@link Config}, which defines how the adapter will load data.
+     * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+     * @see #PageAdapter2(Config)
+     */
+    public PageAdapter2(Config config, Object owner) {
+        super(config);
+        mOwner = owner;
     }
 
     /**

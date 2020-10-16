@@ -7,97 +7,22 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
-import com.tencent.temp.AnimatorDrawable;
+import android.widget.FrameLayout;
 
 public class WaveActivity extends Activity {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(200, 200);
-        // params.gravity = Gravity.CENTER;
-        // WaterWaveView view = new WaterWaveView(this);
-        // setContentView(view, params);
-
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//        setContentView(new ClipView(this));
-
-//        mDrawable = new AnimatorDrawable(this, R.drawable.onkeyopt_scanning, R.animator.rotate);
-//        mDrawable.start();
-//
-//        final ImageView view = new ImageView(this);
-//        view.setScaleType(ScaleType.CENTER_INSIDE);
-//        view.setImageDrawable(mDrawable);
-//        setContentView(view);
-
-        setContentView(new AnimatorView(this));
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-//        mDrawable.stop();
-    }
-
-//    AnimatorDrawable mDrawable;
-
-    public static class AnimatorView extends View {
-        AnimatorDrawable mDrawable;
-
-        public AnimatorView(Context context) {
-            super(context);
-            mDrawable = new AnimatorDrawable(context, R.drawable.onkeyopt_scanning, R.animator.rotate);
-            mDrawable.setCallback(this);
-            mDrawable.start();
-        }
-
-        @Override
-        protected void onDetachedFromWindow() {
-            super.onDetachedFromWindow();
-            mDrawable.stop();
-        }
-
-        @Override
-        protected boolean verifyDrawable(Drawable who) {
-            return (who == mDrawable || super.verifyDrawable(who));
-        }
-
-        @Override
-        public void draw(Canvas canvas) {
-            final int width = getWidth();
-            final int height = getHeight();
-            final int w = mDrawable.getIntrinsicWidth();
-            final int h = mDrawable.getIntrinsicHeight();
-
-            mDrawable.setBounds((width - w) / 2, (height - h) / 2, (width + w) / 2, (height + h) / 2);
-            mDrawable.draw(canvas);
-        }
-    }
-
-    public static class ClipView extends View {
-        private Paint mPaint;
-        private Rect mBounds;
-
-        public ClipView(Context context) {
-            super(context);
-
-            mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            mPaint.setColor(Color.RED);
-            mBounds = new Rect(786, 216, 1434, 864);
-        }
-
-        @Override
-        protected void onDraw(Canvas canvas) {
-            canvas.drawRect(mBounds, mPaint);
-        }
+         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(200, 200);
+         params.gravity = Gravity.CENTER;
+         WaterWaveView view = new WaterWaveView(this);
+         setContentView(view, params);
     }
 
     /**

@@ -42,19 +42,11 @@
         <activity
             android:name=".TestMediatorActivity" />
         <activity
-            android:name=".ThemeActivity"
-            android:screenOrientation="landscape"
-            android:theme="@style/AppLightTheme" />
-        <activity
             android:name=".RecyclerActivity"
             android:configChanges="keyboard|orientation"
             android:exported="true"
             android:screenOrientation="landscape"
             android:theme="@style/TransitionsTheme" />
-        <activity
-            android:name=".AndroidTestActivity"
-            android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
         <activity
             android:name=".DrawActivity"
             android:screenOrientation="portrait" />
@@ -70,7 +62,6 @@
         <activity
             android:name=".MainActivity"
             android:screenOrientation="landscape" />
-        <activity android:name=".RoundedRectActivity" />
         <activity
             android:name=".GIFImageActivity"
             android:screenOrientation="landscape" />
@@ -96,24 +87,13 @@
             android:screenOrientation="portrait"
             android:theme="@android:style/Theme.DeviceDefault"></activity>
         <activity android:name=".PrinterActivity" />
-        <activity android:name=".ViewPagerActivity" />
         <activity
             android:name=".SensorActivity"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".PercentActivity"
-            android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.Holo.Light.NoActionBar.Fullscreen" />
         <activity android:name=".PackageActivity" />
         <activity android:name=".RecyclerViewActivity" />
         <activity android:name=".PackageArchiveActivity" />
         <activity android:name=".ui.VideoActivity" />
-
-        <service
-            android:name=".CrashService"
-            android:process=":crash" />
-        <service android:name=".MmsService" />
-        <service android:name=".TestService" />
 
         <provider
             android:name="android.support.v4.content.FileProvider"

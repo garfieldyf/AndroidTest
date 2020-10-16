@@ -39,11 +39,6 @@ public class BlurActivity extends Activity implements OnClickListener {
         Bitmap bitmap3 = bitmap1.copy(bitmap1.getConfig(), true);
 
         DebugUtils.startMethodTracing();
-        bitmap1 = FastBlur.doBlur(bitmap1, radius, true);
-        DebugUtils.stopMethodTracing("yf", "FastBlur.doBlur");
-        ((ImageView)findViewById(R.id.imageView1)).setImageBitmap(bitmap1);
-
-        DebugUtils.startMethodTracing();
         BitmapUtils.blurBitmap(bitmap2, radius);
         DebugUtils.stopMethodTracing("yf", "BitmapUtils.blurBitmap");
         ((ImageView)findViewById(R.id.imageView2)).setImageBitmap(bitmap2);

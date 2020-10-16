@@ -65,7 +65,6 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -539,17 +538,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         Log.i("yf", "w = " + w + ", h = " + h);
 
         // float i = (DisplayMetrics.DENSITY_HIGH / DisplayMetrics.DENSITY_MEDIUM);
-    }
-
-    private void testBlackList() {
-        Uri u = BlackList.insert(this, "323773", "mplay", "战地枪王", "http://img.funtv.bestv.com.cn/sdw?oid=d00650d3624d1ae572f40b3c8dfc4bf8&w=530&h=298");
-        Log.i("yf", u.toString());
-
-        boolean in = BlackList.isInBlackList(this, "323773", "mplay");
-        Log.i("yf", "isInBlackList = " + in);
-
-        in = BlackList.isInBlackList(this, "323783", "mplay");
-        Log.i("yf", "isInBlackList = " + in);
     }
 
     private void testDrawableDensity() {
@@ -1255,14 +1243,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 
         case 3:
             startActivity(new Intent(this, PrinterActivity.class));
-            break;
-
-        case 4:
-            TestService.stopService(this, 101);
-            break;
-
-        case 5:
-            TestService.stopService(this, 1);
             break;
         }
 

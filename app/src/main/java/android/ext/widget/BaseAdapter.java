@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import static android.ext.widget.UIHandler.MESSAGE_NOTIFICATION;
+import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.util.DebugUtils;
 import android.os.Message;
 import android.support.v7.widget.RecyclerView;
@@ -114,8 +115,8 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
         final ViewHolder holder = mRecyclerView.findViewHolderForItemId(id);
         if (holder != null) {
             final int position = holder.getAdapterPosition();
-            DebugUtils.__checkWarning(position == RecyclerView.NO_POSITION, "BaseAdapter", "The item has no position - id = " + id);
-            if (position != RecyclerView.NO_POSITION) {
+            DebugUtils.__checkWarning(position == NO_POSITION, "BaseAdapter", "The item has been removed from this adapter - id = " + id);
+            if (position != NO_POSITION) {
                 postNotifyItemRangeChanged(position, 1, payload);
             }
         }

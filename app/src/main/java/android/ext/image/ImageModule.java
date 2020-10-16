@@ -1,5 +1,9 @@
 package android.ext.image;
 
+import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
+import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -394,11 +398,11 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         try {
             // Moves to the first start tag position.
             int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
+            while ((type = parser.next()) != START_TAG && type != END_DOCUMENT) {
                 // Empty loop
             }
 
-            if (type != XmlPullParser.START_TAG) {
+            if (type != START_TAG) {
                 // No decoder tag, returns default decoder.
                 return new BitmapDecoder(this);
             }
@@ -571,7 +575,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          */
         /* package */ Builder(Context context) {
             mContext  = context;
-            mPriority = Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE;
+            mPriority = THREAD_PRIORITY_BACKGROUND + THREAD_PRIORITY_MORE_FAVORABLE;
         }
 
         /**

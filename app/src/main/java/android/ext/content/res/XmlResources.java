@@ -1,5 +1,7 @@
 package android.ext.content.res;
 
+import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
+import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.Resources.NotFoundException;
@@ -52,11 +54,11 @@ public final class XmlResources {
         try (final XmlResourceParser parser = context.getResources().getXml(id)) {
             // Moves to the first start tag position.
             int type;
-            while ((type = parser.next()) != XmlPullParser.START_TAG && type != XmlPullParser.END_DOCUMENT) {
+            while ((type = parser.next()) != START_TAG && type != END_DOCUMENT) {
                 // Empty loop
             }
 
-            if (type != XmlPullParser.START_TAG) {
+            if (type != START_TAG) {
                 throw new XmlPullParserException("No start tag found");
             }
 

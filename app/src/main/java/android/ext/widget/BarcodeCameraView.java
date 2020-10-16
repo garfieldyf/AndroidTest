@@ -1,5 +1,9 @@
 package android.ext.widget;
 
+import static android.hardware.Camera.CameraInfo.CAMERA_FACING_BACK;
+import static android.hardware.Camera.Parameters.FOCUS_MODE_AUTO;
+import static android.hardware.Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE;
+import static android.hardware.Camera.Parameters.SCENE_MODE_BARCODE;
 import android.content.Context;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
@@ -214,7 +218,7 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         try {
-            mCamera = Camera.open(CameraInfo.CAMERA_FACING_BACK);
+            mCamera = Camera.open(CAMERA_FACING_BACK);
             if (mCamera == null) {
                 throw new SecurityException("Unable to open the camera, Check whether the camera is enabled.");
             }
@@ -303,16 +307,16 @@ public class BarcodeCameraView extends SurfaceView implements Callback, Runnable
         }
 
         // Sets the camera focus mode and scene mode.
-        final boolean autoFocus = !contains(params.getSupportedFocusModes(), Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-        params.setFocusMode(autoFocus ? Parameters.FOCUS_MODE_AUTO : Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        final boolean autoFocus = !contains(params.getSupportedFocusModes(), FOCUS_MODE_CONTINUOUS_PICTURE);
+        params.setFocusMode(autoFocus ? FOCUS_MODE_AUTO : FOCUS_MODE_CONTINUOUS_PICTURE);
 
-        if (contains(params.getSupportedSceneModes(), Parameters.SCENE_MODE_BARCODE)) {
-            params.setSceneMode(Parameters.SCENE_MODE_BARCODE);
+        if (contains(params.getSupportedSceneModes(), SCENE_MODE_BARCODE)) {
+            params.setSceneMode(SCENE_MODE_BARCODE);
         }
 
         // Gets the camera device orientation.
         final CameraInfo info = new CameraInfo();
-        Camera.getCameraInfo(CameraInfo.CAMERA_FACING_BACK, info);
+        Camera.getCameraInfo(CAMERA_FACING_BACK, info);
         this.__checkDumpCameraInfo(params, info);
 
         // Sets the camera parameters.

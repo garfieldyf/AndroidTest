@@ -1,5 +1,7 @@
 package android.ext.database;
 
+import static java.lang.reflect.Modifier.ABSTRACT;
+import static java.lang.reflect.Modifier.INTERFACE;
 import android.content.ContentResolver;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -274,7 +276,7 @@ public final class DatabaseUtils {
      */
     public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || componentType == null, "Invalid parameters - cursor == null || componentType == null");
-        DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
+        DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (ABSTRACT | INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
         final int count = cursor.getCount();
         final List<T> result = new ArrayList<T>(count);
         if (count > 0) {
@@ -298,7 +300,7 @@ public final class DatabaseUtils {
      */
     public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
         DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
-        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (Modifier.ABSTRACT | Modifier.INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
+        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (ABSTRACT | INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
         return newInstance(cursor, ReflectUtils.getConstructor(clazz, (Class<?>[])null), getCursorFields(clazz));
     }
 

@@ -1,5 +1,13 @@
 package android.ext.graphics;
 
+import static android.view.Gravity.BOTTOM;
+import static android.view.Gravity.CENTER_HORIZONTAL;
+import static android.view.Gravity.CENTER_VERTICAL;
+import static android.view.Gravity.HORIZONTAL_GRAVITY_MASK;
+import static android.view.Gravity.LEFT;
+import static android.view.Gravity.RIGHT;
+import static android.view.Gravity.TOP;
+import static android.view.Gravity.VERTICAL_GRAVITY_MASK;
 import android.annotation.SuppressLint;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools.RectFPool;
@@ -211,12 +219,12 @@ public final class DrawUtils {
         DebugUtils.__checkError(width <= 0 || height <= 0, "Invalid parameters - width(" + width + ") and height(" + height + ") must be > 0");
         DebugUtils.__checkError(!(source instanceof Bitmap || source instanceof View), "Invalid source - " + source.getClass().getName());
         float scale, dx = 0, dy = 0, startX = 0, stopX = 0, startY = 0, stopY = 0;
-        if (direction == Gravity.LEFT || direction == Gravity.RIGHT) {
+        if (direction == LEFT || direction == RIGHT) {
             dx = width;
             scale = -1.0f;
             width = width * percent + 0.5f;
             stopY = startY = height * 0.5f;
-            if (direction == Gravity.LEFT) {
+            if (direction == LEFT) {
                 dx = width;
                 startX = width;
             } else {
@@ -227,7 +235,7 @@ public final class DrawUtils {
             scale  = 1.0f;
             height = height * percent + 0.5f;
             startX = stopX = width * 0.5f;
-            if (direction == Gravity.TOP) {
+            if (direction == TOP) {
                 dy = height;
                 startY = height;
             } else {
@@ -274,27 +282,27 @@ public final class DrawUtils {
     public static void computeLine(RectF outRect, float left, float top, float right, float bottom, int gravity) {
         outRect.set(left, top, right, bottom);
         switch (gravity) {
-        case Gravity.LEFT:
+        case LEFT:
             outRect.right = left;
             break;
 
-        case Gravity.TOP:
+        case TOP:
             outRect.bottom = top;
             break;
 
-        case Gravity.RIGHT:
+        case RIGHT:
             outRect.left = right;
             break;
 
-        case Gravity.BOTTOM:
+        case BOTTOM:
             outRect.top = bottom;
             break;
 
-        case Gravity.CENTER_VERTICAL:
+        case CENTER_VERTICAL:
             outRect.left = outRect.right = (left + right) * 0.5f;
             break;
 
-        case Gravity.CENTER_HORIZONTAL:
+        case CENTER_HORIZONTAL:
             outRect.top = outRect.bottom = (top + bottom) * 0.5f;
             break;
 
@@ -344,18 +352,18 @@ public final class DrawUtils {
     private static Align computeText(Paint paint, RectF outRect, float left, float top, float right, float bottom, int gravity) {
         // Computes x-coordinate.
         final Align textAlign;
-        switch (gravity & Gravity.HORIZONTAL_GRAVITY_MASK) {
-        case Gravity.RIGHT:
+        switch (gravity & HORIZONTAL_GRAVITY_MASK) {
+        case RIGHT:
             outRect.left = right;
             textAlign = Align.RIGHT;
             break;
 
-        case Gravity.CENTER_HORIZONTAL:
+        case CENTER_HORIZONTAL:
             outRect.left = (left + right) * 0.5f;
             textAlign = Align.CENTER;
             break;
 
-        // Gravity.LEFT
+        // LEFT
         default:
             outRect.left = left;
             textAlign = Align.LEFT;
@@ -363,16 +371,16 @@ public final class DrawUtils {
 
         // Computes y-coordinate.
         final FontMetrics fm = FontMetricsPool.sInstance.obtain(paint);
-        switch (gravity & Gravity.VERTICAL_GRAVITY_MASK) {
-        case Gravity.BOTTOM:
+        switch (gravity & VERTICAL_GRAVITY_MASK) {
+        case BOTTOM:
             outRect.top = bottom - fm.descent;
             break;
 
-        case Gravity.CENTER_VERTICAL:
+        case CENTER_VERTICAL:
             outRect.top = (top + bottom - fm.bottom - fm.ascent) * 0.5f;
             break;
 
-        // Gravity.TOP
+        // TOP
         default:
             outRect.top = top - fm.ascent;
         }

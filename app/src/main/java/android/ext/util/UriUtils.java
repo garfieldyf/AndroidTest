@@ -2,8 +2,8 @@ package android.ext.util;
 
 import static android.content.ContentResolver.SCHEME_ANDROID_RESOURCE;
 import static android.content.ContentResolver.SCHEME_FILE;
+import static android.content.res.AssetManager.ACCESS_STREAMING;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.net.Uri;
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,7 +63,7 @@ public final class UriUtils {
         } else if ("file://".regionMatches(true, 0, uriString, 0, SCHEME_FILE_LENGTH)) {
             return new FileInputStream(uriString.substring(SCHEME_FILE_LENGTH) /* Skips 'file://' */);
         } else if ("android.asset://".regionMatches(true, 0, uriString, 0, SCHEME_ASSET_LENGTH)) {
-            return context.getAssets().open(uriString.substring(SCHEME_ASSET_LENGTH) /* Skips 'android.asset://' */, AssetManager.ACCESS_STREAMING);
+            return context.getAssets().open(uriString.substring(SCHEME_ASSET_LENGTH) /* Skips 'android.asset://' */, ACCESS_STREAMING);
         } else {
             return context.getContentResolver().openInputStream(uri instanceof Uri ? (Uri)uri : Uri.parse(uriString));
         }

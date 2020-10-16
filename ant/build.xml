@@ -155,7 +155,9 @@
     <!-- target -post-compile -->
     <target name="-post-compile">
         <copy file="${source.dir}/res/values/attrs_widget.xml" tofile="${out.dir}/attrs_widget.xml" />
+        <!--
         <copy file="${source.dir}/res/values/attrs_barcode_widget.xml" tofile="${out.dir}/attrs_barcode_widget.xml" />
+        -->
         <echo level="info">Deleting temp files...</echo>
         <delete includeemptydirs="true">
             <fileset dir="${basedir}">

@@ -13,7 +13,7 @@ import android.util.StateSet;
 import android.view.View;
 
 /**
- * Class <tt>FocusDrawable</tt>
+ * Class FocusDrawable
  * @author Garfield
  */
 public final class FocusDrawable {
@@ -44,20 +44,20 @@ public final class FocusDrawable {
     /**
      * Callback method to be invoked when the view's state has been changed.
      */
-    public void drawableStateChanged(View view) {
+    public final void drawableStateChanged(View view) {
         if (mDrawable.isStateful() && mDrawable.setState(view.getDrawableState())) {
             view.invalidate();
         }
     }
 
     /**
-     * Draw this focus drawable with the specified the {@link View} states.
+     * Draw this focus drawable with the specified the {@link View} state.
      * @param canvas The canvas to draw into.
-     * @param view The <tt>View</tt> obtains the current states.
-     * @param stateSpec An array of required {@link View} states. If this
+     * @param view The <tt>View</tt> obtains the current state.
+     * @param stateSpec An array of required {@link View} state. If this
      * focus drawable is state full, This parameter will be ignored.
      */
-    public void draw(Canvas canvas, View view, int[] stateSpec) {
+    public final void draw(Canvas canvas, View view, int[] stateSpec) {
         if (mDrawable.isStateful()) {
             final Drawable drawable = mDrawable.getCurrent();
             if (drawable != null) {

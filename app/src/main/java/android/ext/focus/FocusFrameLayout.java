@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.FrameLayout;
 
 /**
- * Class <tt>FocusFrameLayout</tt>
+ * Class FocusFrameLayout
  * <h3>Usage</h3>
  * <p>Here is a resource example:</p><pre>
  * &lt;xxx.focus.FocusFrameLayout

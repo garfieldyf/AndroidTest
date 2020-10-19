@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.RelativeLayout;
 
 /**
- * Class <tt>FocusRelativeLayout</tt>
+ * Class FocusRelativeLayout
  * <h3>Usage</h3>
  * <p>Here is a resource example:</p><pre>
  * &lt;xxx.focus.FocusRelativeLayout

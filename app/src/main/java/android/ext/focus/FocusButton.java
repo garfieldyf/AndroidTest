@@ -6,7 +6,7 @@ import android.util.AttributeSet;
 import android.widget.Button;
 
 /**
- * Class <tt>FocusButton</tt>
+ * Class FocusButton
  * <h3>Usage</h3>
  * <p>Here is a resource example:</p><pre>
  * &lt;xxx.focus.FocusButton

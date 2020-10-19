@@ -75,7 +75,7 @@ import org.xmlpull.v1.XmlPullParserException;
  *     }
  * }</pre>
  * <h3>Usage</h3><pre>
- * ImageModule.with(context)
+ * ImageModule.getInstance(context)
  *     .load(R.xml.image_loader, uri)
  *     .parameters(R.xml.decode_params)
  *     .placeholder(R.drawable.ic_placeholder)
@@ -145,8 +145,8 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * Returns a singleton {@link ImageModule} associated with this class.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      */
-    public static ImageModule with(Context context) {
-        DebugUtils.__checkUIThread("with");
+    public static ImageModule getInstance(Context context) {
+        DebugUtils.__checkUIThread("getInstance");
         if (sInstance == null) {
             DebugUtils.__checkStartMethodTracing();
             sInstance = createImageModule(context.getApplicationContext());

@@ -1209,9 +1209,9 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
     @Override
     public void onScrollStateChanged(AbsListView view, int scrollState) {
         if (scrollState == OnScrollListener.SCROLL_STATE_IDLE) {
-            ImageModule.with(this).resume(R.xml.image_loader);
+            ImageModule.getInstance(this).resume(R.xml.image_loader);
         } else {
-            ImageModule.with(this).pause(R.xml.image_loader);
+            ImageModule.getInstance(this).pause(R.xml.image_loader);
         }
     }
 
@@ -1300,7 +1300,8 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
 //                    .placeholder(R.drawable.ic_placeholder)
 //                    .into(image);
 //            } else {
-            ImageModule.with(ImageActivity.this).load(R.xml.image_loader, itemData)
+            ImageModule.getInstance(ImageActivity.this)
+                    .load(R.xml.image_loader, itemData)
 //                    .flags(ImageLoader.FLAG_DUMP_OPTIONS)
 //                    .parameters(R.xml.size_params)
 //                    .binder(R.xml.ring_bitmap_binder)
@@ -1318,11 +1319,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             super(activity, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen);
             setOwnerActivity(activity);
             setOnCancelListener(this);
-
-//            ImageModule.with(context)
-//                .load(R.xml.image_loader, url)
-//                .placeholder(R.drawable.ic_placeholder)
-//                .into(imageView);
         }
 
         @Override

@@ -19,7 +19,7 @@ import android.widget.ImageView;
  *     class="classFullName"
  *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
- * ImageModule.with(context)
+ * ImageModule.getInstance(context)
  *     .load(R.xml.icon_loader, [ resolveInfo.activityInfo.name | packageItemInfo.packageName ])
  *     .placeholder(R.drawable.ic_placeholder)
  *     .parameters([ resolveInfo | packageItemInfo ])

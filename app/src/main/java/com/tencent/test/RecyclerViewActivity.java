@@ -82,9 +82,9 @@ public class RecyclerViewActivity extends Activity {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-                ImageModule.with(RecyclerViewActivity.this).pause(R.xml.image_loader);
+                ImageModule.getInstance(RecyclerViewActivity.this).pause(R.xml.image_loader);
             } else {
-                ImageModule.with(RecyclerViewActivity.this).resume(R.xml.image_loader);
+                ImageModule.getInstance(RecyclerViewActivity.this).resume(R.xml.image_loader);
             }
         }
     };
@@ -236,7 +236,7 @@ public class RecyclerViewActivity extends Activity {
 
         @Override
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
-            ImageModule.with(activity).load(R.xml.image_loader, itemData)
+            ImageModule.getInstance(activity).load(R.xml.image_loader, itemData)
                 .binder(R.xml.rounded_transition_binder)
 //                .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)
@@ -265,7 +265,8 @@ public class RecyclerViewActivity extends Activity {
         public void bindValue(RecyclerViewActivity activity, int position, String itemData) {
 //            title.setText(itemData);
             title.setText(Integer.toString(position));
-            ImageModule.with(activity).load(R.xml.image_loader, itemData)
+            ImageModule.getInstance(activity)
+                .load(R.xml.image_loader, itemData)
                 .binder(R.xml.rounded_transition_binder)
                 .parameters(R.xml.size_params)
                 .placeholder(R.drawable.ic_placeholder)

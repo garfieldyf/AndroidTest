@@ -35,7 +35,7 @@ public class PackageArchiveActivity extends Activity {
         DebugUtils.stopMethodTracing("yf", "setContentView");
 
         DebugUtils.startMethodTracing();
-        mIconLoader = new PackageIconLoader<String>(ImageModule.with(this), new LruCache<String, Object>(64));
+        mIconLoader = new PackageIconLoader<String>(ImageModule.getInstance(this), new LruCache<String, Object>(64));
         mPackageList = (ListView)findViewById(R.id.packages);
         mAdapter = new PackageAdapter();
         mPackageList.setAdapter(mAdapter);

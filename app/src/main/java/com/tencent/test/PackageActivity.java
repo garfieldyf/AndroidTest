@@ -61,7 +61,8 @@ public class PackageActivity extends Activity {
             holder.packageName.setText(PackageUtils.getPackageName(info));
             holder.name.setText(info.loadLabel(getPackageManager()));
 
-            ImageModule.with(PackageActivity.this).load(R.xml.icon_loader, info.activityInfo.name)
+            ImageModule.getInstance(PackageActivity.this)
+                .load(R.xml.icon_loader, info.activityInfo.name)
                 .placeholder(R.drawable.ic_placeholder)
                 .parameters(info)
 //                .binder(this)

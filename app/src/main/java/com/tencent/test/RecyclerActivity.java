@@ -103,7 +103,7 @@ public class RecyclerActivity extends Activity implements OnPageChangeListener {
         @Override
         public void onBindViewHolder(ItemViewHolder holder, int position) {
             holder.text.setText(Integer.toString(position));
-            ImageModule.with(holder.itemView.getContext()).load(R.xml.image_loader, mUrls.get(position))
+            ImageModule.getInstance(holder.itemView.getContext()).load(R.xml.image_loader, mUrls.get(position))
                 .binder(R.xml.transition_binder)
                 .placeholder(R.drawable.ic_placeholder)
                 .into(holder.image);

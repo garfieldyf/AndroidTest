@@ -68,24 +68,20 @@ public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
     public static void setImage(ImageView view, GIFImage image, boolean autoStart, boolean oneShot) {
         DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
         final Drawable origDrawable = view.getDrawable();
+        final GIFDrawable drawable;
         if (origDrawable instanceof GIFDrawable) {
-            final GIFDrawable drawable = (GIFDrawable)origDrawable;
-            final boolean isRunning = drawable.isRunning();
+            drawable = (GIFDrawable)origDrawable;
             drawable.setImage(image);
 
             // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
-            view.setImageDrawable(drawable);
-
-            if (isRunning) {
-                drawable.start();
-            }
         } else {
-            final GIFDrawable drawable = new GIFDrawable(image);
-            drawable.setOneShot(oneShot);
-            drawable.setAutoStart(autoStart);
-            view.setImageDrawable(drawable);
+            drawable = new GIFDrawable(image);
         }
+
+        drawable.setOneShot(oneShot);
+        drawable.setAutoStart(autoStart);
+        view.setImageDrawable(drawable);
     }
 
     /**

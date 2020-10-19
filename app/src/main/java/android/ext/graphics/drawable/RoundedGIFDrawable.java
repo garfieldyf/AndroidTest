@@ -193,25 +193,21 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     public static void setImage(ImageView view, GIFImage image, float[] radii, boolean autoStart, boolean oneShot) {
         DebugUtils.__checkError(view == null || image == null, "Invalid parameters - view == null || image == null");
         final Drawable origDrawable = view.getDrawable();
+        final RoundedGIFDrawable drawable;
         if (origDrawable instanceof RoundedGIFDrawable) {
-            final RoundedGIFDrawable drawable = (RoundedGIFDrawable)origDrawable;
-            final boolean isRunning = drawable.isRunning();
+            drawable = (RoundedGIFDrawable)origDrawable;
             drawable.setImage(image);
-            drawable.setCornerRadii(radii);
 
             // Force update the ImageView's mDrawable.
             view.setImageDrawable(null);
-            view.setImageDrawable(drawable);
-
-            if (isRunning) {
-                drawable.start();
-            }
         } else {
-            final RoundedGIFDrawable drawable = new RoundedGIFDrawable(image, radii);
-            drawable.setOneShot(oneShot);
-            drawable.setAutoStart(autoStart);
-            view.setImageDrawable(drawable);
+            drawable = new RoundedGIFDrawable(image);
         }
+
+        drawable.setOneShot(oneShot);
+        drawable.setCornerRadii(radii);
+        drawable.setAutoStart(autoStart);
+        view.setImageDrawable(drawable);
     }
 
     /**

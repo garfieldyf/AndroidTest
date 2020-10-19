@@ -21,7 +21,7 @@ import java.util.Arrays;
 
 public class GIFImageActivity extends Activity {
     private ListView mListView;
-    private ImageLoader<String, Object> mImageLoader;
+    private ImageLoader<Object> mImageLoader;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

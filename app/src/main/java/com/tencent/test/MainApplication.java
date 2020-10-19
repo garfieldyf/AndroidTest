@@ -51,14 +51,14 @@ public final class MainApplication extends Application {
     }
 
     @SuppressWarnings("unused")
-    private static final class MainImageLoader extends ImageLoader<String, Object> {
+    private static final class MainImageLoader extends ImageLoader<Object> {
         @Keep
-        public MainImageLoader(ImageModule module, Cache<String, Object> cache, FileCache fileCache, ImageDecoder<Object> decoder) {
+        public MainImageLoader(ImageModule module, Cache<Object, Object> cache, FileCache fileCache, ImageDecoder<Object> decoder) {
             super(module, cache, fileCache, decoder);
         }
 
         @Override
-        protected Object loadInBackground(Task task, String uri, Object[] params, int flags) {
+        protected Object loadInBackground(Task task, Object uri, Object[] params, int flags) {
             Log.i("abcd", "loadInBackground - uri = " + uri);
             return super.loadInBackground(task, uri, params, flags);
         }

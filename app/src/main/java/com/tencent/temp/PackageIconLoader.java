@@ -27,19 +27,19 @@ import android.support.annotation.Keep;
  *     .into(viewHolder);</pre>
  * @author Garfield
  */
-public final class PackageIconLoader<URI> extends IconLoader<URI> {
+public final class PackageIconLoader extends IconLoader {
     /**
      * Constructor
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
     @Keep
-    public PackageIconLoader(ImageModule module, Cache<URI, Object> iconCache) {
+    public PackageIconLoader(ImageModule module, Cache<Object, Object> iconCache) {
         super(module, iconCache);
     }
 
     @Override
-    protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected Object loadInBackground(Task task, Object uri, Object[] params, int flags) {
         try {
             final ApplicationInfo info = ImageModule.getParameters(params);
             DebugUtils.__checkError(info == null, "Invalid parameter - applicationInfo == null");

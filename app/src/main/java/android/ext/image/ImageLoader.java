@@ -26,10 +26,6 @@ import java.util.Arrays;
 /**
  * Class <tt>ImageLoader</tt> allows to load the image from the URI
  * on a background thread and bind it to target on the UI thread.
- * <h3>ImageLoader's generic types</h3>
- * <p>The two types used by an image loader are the following:</p>
- * <ol><li><tt>URI</tt>, The uri type of the image loader's key.</li>
- * <li><tt>Image</tt>, The image type of the load result.</li></ol>
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
  * &lt;[ ImageLoader | loader ]
@@ -47,7 +43,7 @@ import java.util.Arrays;
  * &lt;/[ ImageLoader | loader ]&gt;</pre>
  * @author Garfield
  */
-public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> implements Binder<URI, Object, Image> {
+public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> implements Binder<Object, Object, Image> {
     /**
      * If set the image loader will be dump the {@link Options} when
      * it will be load image.<p>This flag can be used DEBUG mode.</p>
@@ -55,7 +51,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     public static final int FLAG_DUMP_OPTIONS = 0x04000000;    /* flags 0x0F000000 */
 
     private final LoadRequest mRequest;
-    private final Loader<URI, Image> mLoader;
+    private final Loader<Image> mLoader;
 
     protected final ImageModule mModule;
     protected final ImageDecoder<Image> mDecoder;
@@ -67,7 +63,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param fileCache May be <tt>null</tt>. The {@link FileCache} to store the loaded image files.
      * @param decoder The {@link ImageDecoder} to decode the image data.
      */
-    protected ImageLoader(ImageModule module, Cache<URI, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
+    protected ImageLoader(ImageModule module, Cache<Object, Image> imageCache, FileCache fileCache, ImageDecoder<Image> decoder) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
         mRequest = new LoadRequest();
@@ -93,7 +89,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
      */
-    public LoadRequest load(URI uri) {
+    public LoadRequest load(Object uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = (uri instanceof String && ((String)uri).isEmpty() ? null : uri);
         mRequest.mFlags  = 0;
@@ -110,15 +106,15 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param resId May be <tt>0</tt>. The xml resource id of the {@link Parameters} to decode image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #load(URI)
+     * @see #load(Object)
      */
-    public final Image loadSync(URI uri, int resId, int flags) {
+    public final Image loadSync(Object uri, int resId, int flags) {
         final Parameters parameters = (resId != 0 ? XmlResources.load(mModule.mContext, resId) : null);
         return loadSync(uri, flags, parameters);
     }
 
     @Override
-    public Image remove(URI uri) {
+    public Image remove(Object uri) {
         if (mLoader != null) {
             mLoader.remove(uri);
         }
@@ -127,7 +123,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    public void bindValue(URI uri, Object[] params, Object target, Image value, int state) {
+    public void bindValue(Object uri, Object[] params, Object target, Image value, int state) {
         final ImageView view = (ImageView)target;
         if (value != null) {
             view.setImageBitmap((Bitmap)value);
@@ -137,7 +133,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     }
 
     @Override
-    protected Image loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected Image loadInBackground(Task task, Object uri, Object[] params, int flags) {
         final byte[] buffer = mModule.mBufferPool.obtain();
         try {
             final Object target = getTarget(task);
@@ -190,7 +186,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      * @param module The {@link ImageModule}.
      * @param imageCache May be <tt>null</tt>. The {@link Cache} to store the loaded image.
      */
-    /* package */ ImageLoader(ImageModule module, Cache<URI, Image> imageCache) {
+    /* package */ ImageLoader(ImageModule module, Cache<Object, Image> imageCache) {
         super(module.mExecutor, imageCache, module.mTaskPool);
 
         mModule  = module;
@@ -202,13 +198,13 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Interface <tt>Loader</tt> used to load image from the specified url.
      */
-    private static interface Loader<URI, Image> {
+    private static interface Loader<Image> {
         /**
          * Removes the cache file for the specified
          * <em>uri</em> from the cache of this loader.
          * @param uri The uri to remove.
          */
-        default void remove(URI uri) {
+        default void remove(Object uri) {
         }
 
         /**
@@ -227,7 +223,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>URLLoader</tt> is an implementation of a {@link Loader}.
      */
-    /* package */ final class URLLoader implements Loader<URI, Image> {
+    /* package */ final class URLLoader implements Loader<Image> {
         @Override
         public Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mModule.mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
@@ -242,7 +238,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
     /**
      * Class <tt>FileCacheLoader</tt> is an implementation of a {@link Loader}.
      */
-    private final class FileCacheLoader implements Loader<URI, Image> {
+    private final class FileCacheLoader implements Loader<Image> {
         private final FileCache mCache;
 
         /**
@@ -254,7 +250,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
         }
 
         @Override
-        public void remove(URI uri) {
+        public void remove(Object uri) {
             final String uriString = uri.toString();
             if (matchScheme(uriString)) {
                 DebugUtils.__checkStartMethodTracing();
@@ -305,7 +301,7 @@ public class ImageLoader<URI, Image> extends AsyncLoader<URI, Object, Image> imp
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public final class LoadRequest {
-        /* package */ URI mUri;
+        /* package */ Object mUri;
         /* package */ int mFlags;
         /* package */ Binder mBinder;
         /* package */ Object[] mParams;

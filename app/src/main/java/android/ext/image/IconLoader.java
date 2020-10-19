@@ -26,7 +26,7 @@ import android.widget.ImageView;
  *     .into(imageView);</pre>
  * @author Garfield
  */
-public class IconLoader<URI> extends ImageLoader<URI, Object> {
+public class IconLoader extends ImageLoader<Object> {
     protected final PackageManager mPackageManager;
 
     /**
@@ -34,13 +34,13 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
      * @param module The {@link ImageModule}.
      * @param iconCache May be <tt>null</tt>. The {@link Cache} to store the loaded icon.
      */
-    protected IconLoader(ImageModule module, Cache<URI, Object> iconCache) {
+    protected IconLoader(ImageModule module, Cache<Object, Object> iconCache) {
         super(module, iconCache);
         mPackageManager = module.mContext.getPackageManager();
     }
 
     @Override
-    public void bindValue(URI uri, Object[] params, Object target, Object value, int state) {
+    public void bindValue(Object uri, Object[] params, Object target, Object value, int state) {
         final ImageView view = (ImageView)target;
         if (value != null) {
             view.setImageDrawable((Drawable)value);
@@ -50,7 +50,7 @@ public class IconLoader<URI> extends ImageLoader<URI, Object> {
     }
 
     @Override
-    protected Object loadInBackground(Task task, URI uri, Object[] params, int flags) {
+    protected Object loadInBackground(Task task, Object uri, Object[] params, int flags) {
         final Object param = params[PARAMETERS];
         DebugUtils.__checkError(param == null, "Invalid parameter - param == null");
         if (param instanceof ResolveInfo) {

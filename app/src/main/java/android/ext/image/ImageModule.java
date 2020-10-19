@@ -162,9 +162,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to load.
      * @see #getImageLoader(int)
-     * @see ImageLoader#load(URI)
+     * @see ImageLoader#load(Object)
      */
-    public final <URI> LoadRequest load(int id, URI uri) {
+    public final LoadRequest load(int id, Object uri) {
         DebugUtils.__checkUIThread("load");
         return ((ImageLoader)getResource(id, this)).load(uri);
     }
@@ -203,7 +203,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @param uri The uri to remove.
      */
-    public final <URI> void remove(int id, URI uri) {
+    public final void remove(int id, Object uri) {
         DebugUtils.__checkUIThread("remove");
         final ImageLoader loader = (ImageLoader)mResources.get(id, null);
         if (loader != null) {
@@ -254,9 +254,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the <tt>ImageLoader</tt>.
      * @return The <tt>ImageLoader</tt>.
      * @throws NotFoundException if the given <em>id</em> does not exist.
-     * @see #load(int, URI)
+     * @see #load(int, Object)
      */
-    public final <URI, Image> ImageLoader<URI, Image> getImageLoader(int id) {
+    public final <Image> ImageLoader<Image> getImageLoader(int id) {
         return (ImageLoader)getResource(id, this);
     }
 

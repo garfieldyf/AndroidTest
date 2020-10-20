@@ -360,7 +360,7 @@ public final class FileUtils {
      * @param file The file or directory to compute, must be absolute file path.
      * @return The total number of bytes or <tt>0</tt> if the file does not exist.
      */
-    public static native long computeFiles(String file);
+    public static native long computeFileSize(String file);
 
     /**
      * Compares the two specified file's contents are equal.

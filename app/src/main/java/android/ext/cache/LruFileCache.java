@@ -47,7 +47,7 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
      */
     public final long getCacheSize() {
         DebugUtils.__checkStartMethodTracing();
-        final long result = FileUtils.computeFiles(mCacheDir.getPath());
+        final long result = FileUtils.computeFileSize(mCacheDir.getPath());
         DebugUtils.__checkStopMethodTracing("LruFileCache", "getCacheSize = " + result + "(" + FileUtils.formatFileSize(result) + ")");
         return result;
     }
@@ -136,7 +136,7 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
 
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(100);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", listFiles().size(), FileUtils.formatFileSize(FileUtils.computeFiles(mCacheDir.getPath())));
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping LruFileCache [ files = %d, size = %s ] ", listFiles().size(), FileUtils.formatFileSize(FileUtils.computeFileSize(mCacheDir.getPath())));
         result.setLength(0);
         printer.println(result.append("  cacheDir = ").append(mCacheDir).toString());
     }

@@ -275,8 +275,7 @@ public final class DatabaseUtils {
      * @throws ReflectiveOperationException if the elements cannot be created.
      */
     public static <T> List<T> parse(Cursor cursor, Class<? extends T> componentType) throws ReflectiveOperationException {
-        DebugUtils.__checkError(cursor == null || componentType == null, "Invalid parameters - cursor == null || componentType == null");
-        DebugUtils.__checkError(componentType.isPrimitive() || componentType.getName().startsWith("java.lang") || (componentType.getModifiers() & (ABSTRACT | INTERFACE)) != 0, "Unsupported component type - " + componentType.getName());
+        DatabaseUtils.__checkClass(cursor, componentType);
         final int count = cursor.getCount();
         final List<T> result = new ArrayList<T>(count);
         if (count > 0) {
@@ -299,8 +298,7 @@ public final class DatabaseUtils {
      * @throws ReflectiveOperationException if the object cannot be created.
      */
     public static <T> T parseObject(Cursor cursor, Class<? extends T> clazz) throws ReflectiveOperationException {
-        DebugUtils.__checkError(cursor == null || clazz == null, "Invalid parameters - cursor == null || clazz == null");
-        DebugUtils.__checkError(clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (ABSTRACT | INTERFACE)) != 0, "Unsupported class - " + clazz.getName());
+        DatabaseUtils.__checkClass(cursor, clazz);
         return newInstance(cursor, ReflectUtils.getConstructor(clazz, (Class<?>[])null), getCursorFields(clazz));
     }
 
@@ -341,8 +339,7 @@ public final class DatabaseUtils {
      * @see #toJSONArray(Cursor, String[])
      */
     public static JSONObject toJSONObject(Cursor cursor, String[] names, int... columnIndexes) {
-        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "Invalid parameters - cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "Invalid parameters - columnIndexes.length(" + columnIndexes.length + ") must be == names.length(" + names.length + ")");
+        DatabaseUtils.__checkColumns(cursor, columnIndexes, names);
         final JSONObject result = new JSONObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];
@@ -411,8 +408,7 @@ public final class DatabaseUtils {
      * @see #writeCursor(JsonWriter, Cursor, String[])
      */
     public static JsonWriter writeCursorRow(JsonWriter writer, Cursor cursor, String[] names, int... columnIndexes) throws IOException {
-        DebugUtils.__checkError(cursor == null || columnIndexes == null || names == null, "Invalid parameters - cursor == null || columnIndexes == null || names == null");
-        DebugUtils.__checkError(columnIndexes.length != names.length, "Invalid parameters - columnIndexes.length(" + columnIndexes.length + ") must be == names.length(" + names.length + ")");
+        DatabaseUtils.__checkColumns(cursor, columnIndexes, names);
         writer.beginObject();
         for (int i = 0; i < columnIndexes.length; ++i) {
             final int columnIndex = columnIndexes[i];
@@ -518,6 +514,26 @@ public final class DatabaseUtils {
         return result;
     }
 
+    private static void __checkClass(Cursor cursor, Class<?> clazz) {
+        if (cursor == null || clazz == null) {
+            throw new AssertionError("Invalid parameters - cursor == null || clazz == null");
+        }
+
+        if (clazz.isPrimitive() || clazz.getName().startsWith("java.lang") || (clazz.getModifiers() & (ABSTRACT | INTERFACE)) != 0) {
+            throw new AssertionError("Unsupported class - " + clazz.getName());
+        }
+    }
+
+    private static void __checkColumns(Cursor cursor, int[] columnIndexes, String[] names) {
+        if (cursor == null || columnIndexes == null || names == null) {
+            throw new AssertionError("Invalid parameters - cursor == null || columnIndexes == null || names == null");
+        }
+
+        if (columnIndexes.length != names.length) {
+            throw new AssertionError("Invalid parameters - columnIndexes.length(" + columnIndexes.length + ") must be == names.length(" + names.length + ")");
+        }
+    }
+
     private static void __checkDumpCursorFields(Class<?> clazz, List<Pair<Field, String>> cursorFields) {
         final Printer printer = new LogPrinter(Log.DEBUG, "DatabaseUtils");
         final StringBuilder result = new StringBuilder(100);
@@ -531,8 +547,8 @@ public final class DatabaseUtils {
             }
 
             printer.println(result.append(cursorField.first.getType().getSimpleName())
-                   .append(' ').append(cursorField.first.getName())
-                   .append(" { columnName = ").append(cursorField.second).append(" }").toString());
+                .append(' ').append(cursorField.first.getName())
+                .append(" { columnName = ").append(cursorField.second).append(" }").toString());
         }
     }
 

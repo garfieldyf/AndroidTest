@@ -66,7 +66,11 @@ public final class GIFImage {
      * @see #decode(Context, Object, byte[])
      */
     public static GIFImage decode(InputStream is, byte[] tempStorage) {
-        DebugUtils.__checkError(is == null, "is == null");
+        if (is == null) {
+            DebugUtils.__checkLogError(true, "GIFImage", "Invalid parameter - is == null");
+            return null;
+        }
+
         final long nativeImage;
         if (is instanceof FileInputStream) {
             nativeImage = nativeDecodeFile(getFileDescriptor(is));
@@ -153,13 +157,7 @@ public final class GIFImage {
      * @see #createBitmapCanvas()
      */
     public final boolean draw(Bitmap bitmapCanvas, int frameIndex) {
-        DebugUtils.__checkError(bitmapCanvas == null, "Invalid parameter - bitmapCanvas == null");
-        DebugUtils.__checkError(bitmapCanvas.isRecycled(), "The bitmap canvas was recycled.");
-        DebugUtils.__checkError(!bitmapCanvas.isMutable(), "The bitmap canvas must be a mutable bitmap.");
-        DebugUtils.__checkError(bitmapCanvas.getConfig() != Config.ARGB_8888, "The bitmap canvas pixel format must be ARGB_8888");
-        DebugUtils.__checkError(bitmapCanvas.getWidth() < width, "The bitmap canvas width (" + bitmapCanvas.getWidth() + ") must be >= GIF image width (" + width + ")");
-        DebugUtils.__checkError(bitmapCanvas.getHeight() < height, "The bitmap canvas height (" + bitmapCanvas.getHeight() + ") must be >= GIF image height (" + height + ")");
-        DebugUtils.__checkError(frameIndex < 0 || frameIndex >= getFrameCount(), "Invalid parameter - frameIndex out of bounds [ frameIndex = " + frameIndex + ", frameCount = " + getFrameCount() + " ]");
+        this.__checkBitmapCanvas(bitmapCanvas, frameIndex);
         return nativeDraw(bitmapCanvas, mNativeImage, frameIndex);
     }
 
@@ -217,6 +215,37 @@ public final class GIFImage {
             return ((FileInputStream)is).getFD();
         } catch (IOException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void __checkBitmapCanvas(Bitmap bitmapCanvas, int frameIndex) {
+        if (bitmapCanvas == null) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas == null");
+        }
+
+        if (bitmapCanvas.isRecycled()) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas was recycled.");
+        }
+
+        if (!bitmapCanvas.isMutable()) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas must be a mutable bitmap.");
+        }
+
+        if (bitmapCanvas.getConfig() != Config.ARGB_8888) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas pixel format must be ARGB_8888");
+        }
+
+        if (bitmapCanvas.getWidth() < width) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas width (" + bitmapCanvas.getWidth() + ") must be >= GIF image width (" + width + ")");
+        }
+
+        if (bitmapCanvas.getHeight() < height) {
+            throw new AssertionError("Invalid parameter - bitmapCanvas height (" + bitmapCanvas.getHeight() + ") must be >= GIF image height (" + height + ")");
+        }
+
+        final int frameCount = getFrameCount();
+        if (frameIndex < 0 || frameIndex >= frameCount) {
+            throw new AssertionError("Invalid parameter - frameIndex out of bounds [ frameIndex = " + frameIndex + ", frameCount = " + frameCount + " ]");
         }
     }
 

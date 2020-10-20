@@ -20,7 +20,8 @@ import android.support.annotation.Keep;
  *     class="classFullName"
  *     app:flags="[ none | noMemoryCache ]" /&gt;
  *
- * module.load(R.xml.package_icon_loader, applicationInfo.packageName)
+ * ImageModule.getInstance(context)
+ *     .load(R.xml.package_icon_loader, applicationInfo.packageName)
  *     .placeholder(R.drawable.ic_placeholder)
  *     .parameters(applicationInfo)
  *     .binder(binder)

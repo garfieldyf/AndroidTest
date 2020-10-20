@@ -26,7 +26,7 @@ import java.util.Map;
  *     .setCharset("UTF-8")
  *     .setErrorCorrection(ErrorCorrectionLevel.H);
  *
- * encoder.startEncode(executor, contents, format, width, height, listener);</pre>
+ * encoder.startEncode(contents, format, width, height, listener);</pre>
  * @author Garfield
  */
 public class BarcodeEncoder {

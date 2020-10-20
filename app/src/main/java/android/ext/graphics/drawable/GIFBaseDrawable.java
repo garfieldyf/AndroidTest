@@ -177,7 +177,8 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
     @Override
     protected void draw(Canvas canvas, RectF bounds, Paint paint) {
-        if ((mFlags & FLAG_SCHED) == 0) {
+        final boolean unschedule = ((mFlags & FLAG_SCHED) == 0);
+        if (unschedule) {
             // Draws the GIF image current frame to bitmap canvas.
             DebugUtils.__checkStartMethodTracing();
             mState.mImage.draw(mState.mCanvas, mFrameIndex);
@@ -185,14 +186,14 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
         }
 
         // Draws the bitmap canvas to canvas.
-        DebugUtils.__checkDebug((mFlags & FLAG_SCHED) != 0, getClass().getName(), "No schedule the GIF image frame " + mFrameIndex + " - do not call nativeDraw");
+        DebugUtils.__checkDebug(!unschedule, getClass().getName(), "Unschedule the GIF image frame " + mFrameIndex + " - do not call nativeDraw");
         drawFrame(canvas, mState.mCanvas, bounds, paint);
 
         // Schedules the GIF image next frame.
         if (isRunning()) {
             if (isOneShot() && mFrameIndex == mState.mImage.getFrameCount() - 1) {
                 unscheduleSelf();
-            } else if ((mFlags & FLAG_SCHED) == 0) {
+            } else if (unschedule) {
                 mFlags |= FLAG_SCHED;
                 scheduleSelf(this, SystemClock.uptimeMillis() + mState.mImage.getFrameDelay(mFrameIndex));
             }

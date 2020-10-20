@@ -4,8 +4,6 @@ import android.animation.Animator;
 import android.animation.AnimatorInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 
 /**
  * Class ViewUtils
@@ -27,22 +25,6 @@ public final class ViewUtils {
         }
 
         return animator;
-    }
-
-    /**
-     * Returns an {@link Animation} object, which can be used to animate on the <em>view</em>.
-     * @param view The {@link View} whose will be animate.
-     * @param resId The resource id of the animation.
-     * @return The <tt>Animation</tt> associated with the <em>view</em>.
-     */
-    public static Animation animation(View view, int resId) {
-        Animation animation = (Animation)view.getTag(resId);
-        if (animation == null) {
-            animation = AnimationUtils.loadAnimation(view.getContext(), resId);
-            view.setTag(resId, animation);
-        }
-
-        return animation;
     }
 
     /**

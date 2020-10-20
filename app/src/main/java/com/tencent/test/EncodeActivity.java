@@ -33,7 +33,8 @@ public class EncodeActivity extends Activity implements OnClickListener, OnEncod
         super.onCreate(savedInstanceState);
         setContentView(R.layout.encode);
 
-        mEncoder = new BarcodeEncoder().setMargin(0)
+        mEncoder = new BarcodeEncoder()
+            .setMargin(0)
             .setCharset("UTF-8")
             .setErrorCorrection(ErrorCorrectionLevel.H);
 

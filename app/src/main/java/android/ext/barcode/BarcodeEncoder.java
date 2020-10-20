@@ -8,6 +8,7 @@ import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.util.DisplayMetrics;
+import android.util.Pair;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
@@ -39,14 +40,6 @@ public class BarcodeEncoder {
     public BarcodeEncoder() {
         mWriter = new MultiFormatWriter();
         mHints  = new EnumMap<EncodeHintType, Object>(EncodeHintType.class);
-    }
-
-    /**
-     * Returns the additional parameters with this encoder.
-     * @return The additional parameters.
-     */
-    public final Map<EncodeHintType, Object> getHints() {
-        return mHints;
     }
 
     /**
@@ -129,6 +122,18 @@ public class BarcodeEncoder {
     }
 
     /**
+     * Sets the parameter to use when generating the barcode.
+     * @param hintType The {@link EncodeHintType} to set.
+     * @param value The value to set.
+     * @return This encoder.
+     * @see EncodeHintType
+     */
+    public final BarcodeEncoder setParameter(EncodeHintType hintType, Object value) {
+        mHints.put(hintType, value);
+        return this;
+    }
+
+    /**
      * Encodes a barcode image with the specified <em>contents</em> synchronously.
      * <p><b>Note: This method will block the calling thread until it was returned.</b></p>
      * @param contents The contents to encode.
@@ -158,9 +163,9 @@ public class BarcodeEncoder {
     public void startEncode(String contents, BarcodeFormat format, int width, int height, OnEncodeListener listener) {
         DebugUtils.__checkError(listener == null, "Invalid parameter - listener == null");
         /*
-         * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener, null }
+         * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener }
          */
-        new EncodeTask().execute(this, contents, format, width, height, listener, null);
+        new EncodeTask().execute(this, contents, format, width, height, listener);
     }
 
     /**
@@ -178,22 +183,21 @@ public class BarcodeEncoder {
     /**
      * Class <tt>EncodeTask</tt> is an implementation of an {@link AsyncTask}.
      */
-    /* package */ static final class EncodeTask extends AsyncTask<Object, Object, Bitmap> {
+    /* package */ static final class EncodeTask extends AsyncTask<Object, Object, Pair<BitMatrix, Bitmap>> {
         @Override
-        protected Bitmap doInBackground(Object[] params) {
+        protected Pair<BitMatrix, Bitmap> doInBackground(Object[] params) {
             /*
-             * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener, BitMatrix }
+             * params - { BarcodeEncoder, contents, format, width, height, OnEncodeListener }
              */
-            DebugUtils.__checkError(params.length != 7, "params.length must be == 7");
+            DebugUtils.__checkError(params.length != 6, "params.length must be == 6");
             final BarcodeEncoder encoder = (BarcodeEncoder)params[0];
             final BitMatrix bitMatrix = encoder.encode((String)params[1], (BarcodeFormat)params[2], (int)params[3], (int)params[4]);
-            params[6] = bitMatrix;
-            return (bitMatrix != null ? ((OnEncodeListener)params[5]).convertToBitmap(bitMatrix, encoder.mHints) : null);
+            return new Pair<BitMatrix, Bitmap>(bitMatrix, (bitMatrix != null ? ((OnEncodeListener)params[5]).convertToBitmap(bitMatrix, encoder.mHints) : null));
         }
 
         @Override
-        protected void onPostExecute(Object[] params, Bitmap result) {
-            ((OnEncodeListener)params[5]).onEncodeComplete((BitMatrix)params[6], result);
+        protected void onPostExecute(Object[] params, Pair<BitMatrix, Bitmap> result) {
+            ((OnEncodeListener)params[5]).onEncodeComplete(result.first, result.second);
         }
     }
 

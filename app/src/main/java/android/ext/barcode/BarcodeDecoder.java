@@ -73,7 +73,7 @@ public class BarcodeDecoder {
      * @see #decode(byte[], int, int, int, int, int, int)
      */
     public final Result decode(byte[] data, int width, int height, Rect clipBounds) {
-        return decode(data, width, height, clipBounds.left, clipBounds.top, clipBounds.right, clipBounds.bottom);
+        return decode(new PlanarYUVLuminanceSource(data, width, height, clipBounds.left, clipBounds.top, clipBounds.width(), clipBounds.height(), false));
     }
 
     /**

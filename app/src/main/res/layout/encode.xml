@@ -4,38 +4,36 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:orientation="vertical"
-    android:padding="10dp" >
+    android:padding="10dp">
 
-    <TextView
-        android:layout_width="match_parent"
+    <TextView android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:text="请输入"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
-    <EditText
-        android:id="@+id/input"
+    <EditText android:id="@+id/input"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="http://phapp.tv.funshion.com" />
 
-    <CheckBox
-        android:id="@+id/add_logo"
+    <CheckBox android:id="@+id/add_logo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
         android:text="添加 Logo" />
 
-    <Button
-        android:id="@+id/create_barcode"
+    <Button android:id="@+id/create_barcode"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:text="创建二维码" />
+        android:layout_marginBottom="10dp"
+        android:text="创建二维码">
 
-    <ImageView
-        android:id="@+id/barcode_image"
+        <requestFocus />
+    </Button>
+
+    <ImageView android:id="@+id/barcode_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"

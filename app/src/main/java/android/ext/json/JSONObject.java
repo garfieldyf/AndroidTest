@@ -1,7 +1,6 @@
 package android.ext.json;
 
 import android.annotation.TargetApi;
-import android.ext.util.DebugUtils;
 import android.util.Printer;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -80,7 +79,6 @@ public class JSONObject implements Map<String, Object> {
      */
     @Override
     public JSONObject put(String name, Object value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         values.put(name, value);
         return this;
@@ -93,7 +91,6 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, int value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         values.put(name, value);
         return this;
     }
@@ -105,7 +102,6 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, long value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         values.put(name, value);
         return this;
     }
@@ -117,7 +113,6 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, boolean value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         values.put(name, value);
         return this;
     }
@@ -130,7 +125,6 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, float value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         values.put(name, value);
         return this;
@@ -144,7 +138,6 @@ public class JSONObject implements Map<String, Object> {
      * @return This object.
      */
     public JSONObject put(String name, double value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         values.put(name, value);
         return this;
@@ -152,7 +145,6 @@ public class JSONObject implements Map<String, Object> {
 
     @Override
     public Object putIfAbsent(String name, Object value) {
-        DebugUtils.__checkError(name == null, "Invalid parameter - name == null");
         JSONUtils.__checkDouble(value);
         return values.putIfAbsent(name, value);
     }

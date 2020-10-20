@@ -402,7 +402,7 @@ public final class JSONUtils {
 
         while (reader.hasNext()) {
             if (cancelable.isCancelled()) {
-                DebugUtils.__checkDebug(true, "JSONUtils", "parseArray was cancelled.");
+                DebugUtils.__checkDebug(true, "JSONUtils", "parseArray is cancelled.");
                 return result;
             }
 
@@ -449,7 +449,7 @@ public final class JSONUtils {
 
         while (reader.hasNext()) {
             if (cancelable.isCancelled()) {
-                DebugUtils.__checkDebug(true, "JSONUtils", "parseObject was cancelled.");
+                DebugUtils.__checkDebug(true, "JSONUtils", "parseObject is cancelled.");
                 return result;
             }
 

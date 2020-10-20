@@ -209,7 +209,6 @@ public abstract class GIFBaseDrawable<T extends GIFBaseDrawable.GIFBaseState> ex
 
         mState.initialize(GIFImage.decode(res, id));
         mState.setFlags(results[1] /* android.R.attr.autoStart */, FLAG_AUTO_START);
-        DebugUtils.__checkError(mState.mImage == null, parser.getPositionDescription() + ": The <" + parser.getName() + "> tag requires a valid 'src' attribute");
     }
 
     /**

@@ -109,15 +109,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Equivalent to calling <tt>loadSync(key, 0, (Params[])null)</tt>.
-     * @param key The key to find value.
-     * @see #loadSync(Key, int, Params[])
-     */
-    public final Value loadSync(Key key) {
-        return loadSync(key, 0, (Params[])null);
-    }
-
-    /**
      * Loads the value synchronously. Call this method, pass the {@link #loadInBackground}
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
@@ -126,7 +117,6 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @param params The parameters to load. If no parameters, you can pass <em>(Params[])null</em>
      * instead of allocating an empty array.
      * @return The result, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #loadSync(Key)
      */
     public Value loadSync(Key key, int flags, Params... params) {
         DebugUtils.__checkError((flags & FLAG_MASK) > 0xFFFF, "The custom flags (0x" + Integer.toHexString(flags & FLAG_MASK) + ") must be range of [0 - 0xFFFF]");

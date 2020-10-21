@@ -8,7 +8,6 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
-import android.ext.content.res.XmlResources;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;
@@ -89,9 +88,9 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
      * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
      */
-    public LoadRequest load(Object uri) {
+    public final LoadRequest load(Object uri) {
         DebugUtils.__checkUIThread("load");
-        mRequest.mUri = (uri instanceof String && ((String)uri).isEmpty() ? null : uri);
+        mRequest.mUri = resolveUri(uri);
         mRequest.mFlags  = 0;
         mRequest.mBinder = this;
         mRequest.mParams = mModule.mParamsPool.obtain();
@@ -99,30 +98,14 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
     }
 
     /**
-     * Loads the image synchronously. Call this method, pass the {@link #loadInBackground}
-     * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
-     * the calling thread until it was returned.</b></p>
+     * Equivalent to calling <tt>loadSync(uri, 0, parameters)</tt>.
      * @param uri The uri to load.
      * @param parameters May be <tt>null</tt>. The {@link Parameters} to decode image.
-     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #loadSync(Object, int, int)
+     * @see #loadSync(Object, int, Object[])
      */
-    public final Image loadSync(Object uri, Parameters parameters, int flags) {
-        return loadSync(uri, flags, parameters);
-    }
-
-    /**
-     * Equivalent to calling <tt>loadSync(uri, XmlResources.load(context, resId), flags)</tt>.
-     * @param uri The uri to load.
-     * @param resId May be <tt>0</tt>. The xml resource id of the {@link Parameters} to decode image.
-     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
-     * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #loadSync(Object, Parameters, int)
-     */
-    public final Image loadSync(Object uri, int resId, int flags) {
-        final Parameters parameters = (resId != 0 ? XmlResources.load(mModule.mContext, resId) : null);
-        return loadSync(uri, flags, parameters);
+    public final Image loadSync(Object uri, Parameters parameters) {
+        return loadSync(resolveUri(uri), 0, parameters);
     }
 
     @Override
@@ -205,6 +188,13 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
         mLoader  = null;
         mDecoder = null;
         mRequest = new LoadRequest();
+    }
+
+    /**
+     * Resolves an empty (0-length) string to <tt>null</tt>.
+     */
+    private static Object resolveUri(Object uri) {
+        return (uri instanceof String && ((String)uri).isEmpty() ? null : uri);
     }
 
     /**

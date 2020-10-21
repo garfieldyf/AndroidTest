@@ -257,6 +257,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see #load(int, Object)
      */
     public final <Image> ImageLoader<Image> getImageLoader(int id) {
+        DebugUtils.__checkUIThread("getImageLoader");
         return (ImageLoader)getResource(id, this);
     }
 
@@ -516,7 +517,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         final StringBuilder result = new StringBuilder(130);
         final Resources res = mContext.getResources();
         final int size = mResources.size();
-        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources cache [ size = %d ] ", size);
+        DeviceUtils.dumpSummary(printer, result, 130, " Dumping XmlResources [ size = %d ] ", size);
 
         final TypedValue value = new TypedValue();
         for (int i = 0; i < size; ++i) {

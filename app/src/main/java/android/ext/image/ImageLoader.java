@@ -103,10 +103,22 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
      * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
      * the calling thread until it was returned.</b></p>
      * @param uri The uri to load.
+     * @param parameters May be <tt>null</tt>. The {@link Parameters} to decode image.
+     * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
+     * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
+     * @see #loadSync(Object, int, int)
+     */
+    public final Image loadSync(Object uri, Parameters parameters, int flags) {
+        return loadSync(uri, flags, parameters);
+    }
+
+    /**
+     * Equivalent to calling <tt>loadSync(uri, XmlResources.load(context, resId), flags)</tt>.
+     * @param uri The uri to load.
      * @param resId May be <tt>0</tt>. The xml resource id of the {@link Parameters} to decode image.
      * @param flags Loading flags. May be <tt>0</tt> or any combination of <tt>FLAG_XXX</tt> constants.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #load(Object)
+     * @see #loadSync(Object, Parameters, int)
      */
     public final Image loadSync(Object uri, int resId, int flags) {
         final Parameters parameters = (resId != 0 ? XmlResources.load(mModule.mContext, resId) : null);

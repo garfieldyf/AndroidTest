@@ -116,7 +116,7 @@ public class Parameters {
 
     /**
      * Returns the default {@link Parameters} used to decode the bitmap.
-     * The default <tt>Parameters</tt> sample size = 1, config = RGB_565.
+     * The default <tt>Parameters</tt> sampleSize = 1, config = RGB_565.
      */
     public static Parameters defaultParameters() {
         return DefaultParameters.sInstance;

@@ -52,15 +52,16 @@ public abstract class Loader<Key> implements Factory<Task> {
 
     /**
      * Shutdown this loader, stop all actively running tasks
-     * and no new tasks will be accepted.
+     * and no new tasks will be accepted. <p><b>Note: This
+     * method must be invoked on the UI thread.</b></p>
      * @see #isShutdown()
      */
-    public synchronized void shutdown() {
+    public synchronized final void shutdown() {
         DebugUtils.__checkUIThread("shutdown");
-        DebugUtils.__checkDebug(true, getClass().getName(), "shutdown()");
         mState = SHUTDOWN;
         cancelAll();
         notifyAll();
+        onShutdown();
     }
 
     /**
@@ -135,6 +136,13 @@ public abstract class Loader<Key> implements Factory<Task> {
     @Override
     public Task newInstance() {
         throw new AssertionError("Must be implementation!");
+    }
+
+    /**
+     * Called on the UI thread when this loader has been shut down.
+     */
+    protected void onShutdown() {
+        DebugUtils.__checkDebug(true, getClass().getName(), "shutdown()");
     }
 
     /**

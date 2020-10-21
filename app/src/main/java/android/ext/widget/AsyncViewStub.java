@@ -16,8 +16,8 @@ import android.view.ViewGroup.LayoutParams;
 /**
  * Like as {@link ViewStub}, but this class can be inflated a layout resource on a background thread.
  * <ul><li>For a layout to be inflated asynchronously it needs to have a parent whose
- * {@link ViewGroup#generateLayoutParams(AttributeSet)} is thread-safely and all the <tt>Views</tt>
- * being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</li>
+ * {@link ViewGroup#generateLayoutParams(AttributeSet)} is thread-safely.</li>
+ * <li>All the <tt>Views</tt> being constructed as part of inflation must NOT call {@link Looper#myLooper()}.</li>
  * <li>This <tt>AsyncViewStub</tt> does not support inflating layouts that contain fragments.</li></ul>
  * @author Garfield
  */

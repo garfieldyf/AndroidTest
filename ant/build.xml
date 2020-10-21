@@ -74,7 +74,6 @@
     <target name="-delete-barcode-if" unless="${INCLUDE_BARCODE}">
         <echo level="info">Deleting barcode source files...</echo>
         <delete dir="${src.dir}/${JNI_PACKAGE}/barcode" />
-        <delete file="${src.dir}/${JNI_PACKAGE}/widget/BarcodeDecorView.java" />
         <delete file="${src.dir}/${JNI_PACKAGE}/widget/BarcodeCameraView.java" />
     </target>
 

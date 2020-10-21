@@ -1,11 +1,10 @@
-package android.ext.widget;
+package com.tencent.temp;
 
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 import static android.util.TypedValue.COMPLEX_UNIT_SP;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.DrawUtils;
-import android.ext.util.ReflectUtils;
 import android.ext.util.StringUtils;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -18,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import com.tencent.test.R;
 
 /**
  * Class BarcodeDecorView
@@ -50,26 +50,24 @@ public class BarcodeDecorView extends View {
         super(context, attrs, defStyleAttr);
 
         mScanningBounds = new Rect();
-        final String packageName = context.getPackageName();
-        final DisplayMetrics dm  = getResources().getDisplayMetrics();
+        final DisplayMetrics dm = getResources().getDisplayMetrics();
+        final TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.BarcodeDecorView);
+        mMaskColor    = a.getColor(R.styleable.BarcodeDecorView_maskColor, 0x80000000);
+        mBorderColor  = a.getColor(R.styleable.BarcodeDecorView_borderColor, 0xff808080);
+        mCornerColor  = a.getColor(R.styleable.BarcodeDecorView_cornerColor, 0xff80ff00);
+        mCornerWidth  = getDimension(a, R.styleable.BarcodeDecorView_cornerWidth, 15, COMPLEX_UNIT_DIP, dm);
+        mCornerHeight = getDimension(a, R.styleable.BarcodeDecorView_cornerHeight, 3, COMPLEX_UNIT_DIP, dm);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView"));
-        mMaskColor    = a.getColor(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_maskColor"), 0x80000000);
-        mBorderColor  = a.getColor(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_borderColor"), 0xff808080);
-        mCornerColor  = a.getColor(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_cornerColor"), 0xff80ff00);
-        mCornerWidth  = getDimension(packageName, "BarcodeDecorView_cornerWidth", a, 15, COMPLEX_UNIT_DIP, dm);
-        mCornerHeight = getDimension(packageName, "BarcodeDecorView_cornerHeight", a, 3, COMPLEX_UNIT_DIP, dm);
-
-        mText = a.getText(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_android_text"));
-        mTextColor  = a.getColor(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_android_textColor"), 0xffa4a4a4);
-        mTextOffset = getDimension(packageName, "BarcodeDecorView_textOffset", a, 20, COMPLEX_UNIT_DIP, dm);
+        mText = a.getText(R.styleable.BarcodeDecorView_android_text);
+        mTextColor  = a.getColor(R.styleable.BarcodeDecorView_android_textColor, 0xffa4a4a4);
+        mTextOffset = getDimension(a, R.styleable.BarcodeDecorView_textOffset, 20, COMPLEX_UNIT_DIP, dm);
 
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mPaint.setTextSize(getDimension(packageName, "BarcodeDecorView_android_textSize", a, 15, COMPLEX_UNIT_SP, dm));
-        mPaint.setStrokeWidth(getDimension(packageName, "BarcodeDecorView_borderWidth", a, 1, COMPLEX_UNIT_DIP, dm));
+        mPaint.setTextSize(getDimension(a, R.styleable.BarcodeDecorView_android_textSize, 15, COMPLEX_UNIT_SP, dm));
+        mPaint.setStrokeWidth(getDimension(a, R.styleable.BarcodeDecorView_borderWidth, 1, COMPLEX_UNIT_DIP, dm));
 
-        mScanningIndicator = a.getDrawable(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_scanningIndicator"));
-        mScanningIndicatorHeight = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "BarcodeDecorView_scanningIndicatorHeight"), 0);
+        mScanningIndicator = a.getDrawable(R.styleable.BarcodeDecorView_scanningIndicator);
+        mScanningIndicatorHeight = a.getDimensionPixelOffset(R.styleable.BarcodeDecorView_scanningIndicatorHeight, 0);
 
         if (mScanningIndicatorHeight <= 0 && mScanningIndicator != null) {
             mScanningIndicatorHeight = mScanningIndicator.getIntrinsicHeight();
@@ -375,8 +373,8 @@ public class BarcodeDecorView extends View {
         }
     }
 
-    private static float getDimension(String packageName, String name, TypedArray array, float defaultValue, int unit, DisplayMetrics dm) {
-        final float value = array.getDimension(ReflectUtils.getResourceStyleable(packageName, name), 0);
+    private static float getDimension(TypedArray array, int index, float defaultValue, int unit, DisplayMetrics dm) {
+        final float value = array.getDimension(index, 0f);
         return (value != 0f ? value : TypedValue.applyDimension(unit, defaultValue, dm));
     }
 }

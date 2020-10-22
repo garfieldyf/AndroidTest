@@ -273,9 +273,12 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);
             }
 
-            // Recycles this task to avoid potential memory leaks.
-            final Pool<Task> taskPool = mLoader.mTaskPool;
+            // Recycles this task.
             mLoader.onRecycle(params);
+            recycle(mLoader.mTaskPool);
+        }
+
+        private void recycle(Pool<Task> taskPool) {
             clearForRecycle();
             mKey = null;
             mTarget = null;

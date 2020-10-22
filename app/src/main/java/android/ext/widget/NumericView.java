@@ -22,22 +22,22 @@ import android.view.View;
  *     xmlns:app="http://schemas.android.com/apk/res-auto"
  *     android:layout_width="wrap_content"
  *     android:layout_height="wrap_content"
- *     app:numberWidth="40dp"
- *     app:numberHeight="60dp"
+ *     app:digitWidth="40dp"
+ *     app:digitHeight="60dp"
  *     app:dotWidth="20dp"
  *     app:value="51.1"
  *     app:horizontalMargin="5dp"
- *     app:drawables="@array/number_drawables" /&gt;</pre>
+ *     app:drawables="@array/digit_drawables" /&gt;</pre>
  * @author Garfield
  */
 public class NumericView extends View {
     private int mDotWidth;
-    private int mNumberWidth;
-    private int mNumberHeight;
+    private int mDigitWidth;
+    private int mDigitHeight;
     private int mHorizontalMargin;
 
     private String mValue;
-    private final Value[] mValues;
+    private final Digit[] mDigits;
 
     public NumericView(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
@@ -49,25 +49,29 @@ public class NumericView extends View {
         final String packageName = context.getPackageName();
         final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "NumericView"));
         mValue  = checkValue(a.getString(ReflectUtils.getResourceStyleable(packageName, "NumericView_value")));
-        mValues = initValues(a.getResourceId(ReflectUtils.getResourceStyleable(packageName, "NumericView_drawables"), 0));
+        mDigits = initDigits(a.getResourceId(ReflectUtils.getResourceStyleable(packageName, "NumericView_drawables"), 0));
         mDotWidth = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_dotWidth"), 0);
-        mNumberWidth  = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_numberWidth"), 0);
-        mNumberHeight = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_numberHeight"), 0);
+        mDigitWidth  = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_digitWidth"), 0);
+        mDigitHeight = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_digitHeight"), 0);
         mHorizontalMargin = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_horizontalMargin"), 0);
         a.recycle();
 
         final Resources res = context.getResources();
-        if (mNumberWidth == 0) {
-            mNumberWidth = mValues[0].getDrawable(res).getIntrinsicWidth();
+        if (mDigitWidth == 0) {
+            mDigitWidth = mDigits[0].getDrawable(res).getIntrinsicWidth();
         }
 
-        if (mNumberHeight == 0) {
-            mNumberHeight = mValues[0].getDrawable(res).getIntrinsicHeight();
+        if (mDigitHeight == 0) {
+            mDigitHeight = mDigits[0].getDrawable(res).getIntrinsicHeight();
         }
 
         if (mDotWidth == 0) {
-            mDotWidth = mValues[mValues.length - 1].getDrawable(res).getIntrinsicWidth();
+            mDotWidth = mDigits[mDigits.length - 1].getDrawable(res).getIntrinsicWidth();
         }
+
+        DebugUtils.__checkError(mDotWidth <= 0, "Invalid parameter - dotWidth(" + mDotWidth + ") must be > 0");
+        DebugUtils.__checkError(mDigitWidth <= 0, "Invalid parameter - digitWidth(" + mDigitWidth + ") must be > 0");
+        DebugUtils.__checkError(mDigitHeight <= 0, "Invalid parameter - digitHeight(" + mDigitHeight + ") must be > 0");
     }
 
     /**
@@ -95,7 +99,7 @@ public class NumericView extends View {
      * @see #setValue(float)
      * @see #setValue(String)
      */
-    public final void setValue(int value) {
+    public void setValue(int value) {
         setValueInternal(Integer.toString(value));
     }
 
@@ -104,7 +108,7 @@ public class NumericView extends View {
      * @see #setValue(int)
      * @see #setValue(String)
      */
-    public final void setValue(float value) {
+    public void setValue(float value) {
         setValueInternal(Float.toString(value));
     }
 
@@ -129,47 +133,47 @@ public class NumericView extends View {
     }
 
     /**
-     * Returns the width of the number drawable.
-     * @return The width of the number drawable, in pixels.
+     * Returns the width of the digit drawable.
+     * @return The width of the digit drawable, in pixels.
      */
-    public int getNumberWidth() {
-        return mNumberWidth;
+    public int getDigitWidth() {
+        return mDigitWidth;
     }
 
     /**
-     * Sets the width of the number drawable.
-     * @param width The width of the number drawable, in pixels.
+     * Sets the width of the digit drawable.
+     * @param width The width of the digit drawable, in pixels.
      */
-    public void setNumberWidth(int width) {
-        if (mNumberWidth != width) {
-            mNumberWidth = width;
+    public void setDigitWidth(int width) {
+        if (mDigitWidth != width) {
+            mDigitWidth = width;
             requestLayout();
             invalidate();
         }
     }
 
     /**
-     * Returns the height of the number drawable.
-     * @return The height of the number drawable, in pixels.
+     * Returns the height of the digit drawable.
+     * @return The height of the digit drawable, in pixels.
      */
-    public int getNumberHeight() {
-        return mNumberHeight;
+    public int getDigitHeight() {
+        return mDigitHeight;
     }
 
     /**
-     * Sets the height of the number drawable.
-     * @param height The height of the number drawable, in pixels.
+     * Sets the height of the digit drawable.
+     * @param height The height of the digit drawable, in pixels.
      */
-    public void setNumberHeight(int height) {
-        if (mNumberHeight != height) {
-            mNumberHeight = height;
+    public void setDigitHeight(int height) {
+        if (mDigitHeight != height) {
+            mDigitHeight = height;
             requestLayout();
             invalidate();
         }
     }
 
     /**
-     * Returns the horizontal margin between each number drawable in this view.
+     * Returns the horizontal margin between each digit drawable in this view.
      * @return The horizontal margin, in pixels.
      */
     public int getHorizontalMargin() {
@@ -177,7 +181,7 @@ public class NumericView extends View {
     }
 
     /**
-     * Sets the horizontal margin between each number drawable in this view.
+     * Sets the horizontal margin between each digit drawable in this view.
      * @param horizontalMargin The horizontal margin, in pixels.
      */
     public void setHorizontalMargin(int horizontalMargin) {
@@ -190,9 +194,9 @@ public class NumericView extends View {
 
     public final void dump(Printer printer) {
         final StringBuilder result = new StringBuilder(128);
-        DeviceUtils.dumpSummary(printer, result, 100, " Dumping NumericView [ value = %s, size = %d ] ", mValue, mValues.length);
-        for (int i = 0; i < mValues.length; ++i) {
-            mValues[i].dump(printer, i, result);
+        DeviceUtils.dumpSummary(printer, result, 100, " Dumping NumericView [ value = %s, size = %d ] ", mValue, mDigits.length);
+        for (int i = 0; i < mDigits.length; ++i) {
+            mDigits[i].dump(printer, (mDigits.length > 10 && i == mDigits.length - 1 ? '.' : (char)('0' + i)), result);
         }
     }
 
@@ -205,20 +209,20 @@ public class NumericView extends View {
 
         final Resources res = getResources();
         final int top = getPaddingTop();
-        final int bottom = top + mNumberHeight;
+        final int bottom = top + mDigitHeight;
 
         for (int i = 0, left = getPaddingLeft(); i < length; ++i) {
-            final char digit = mValue.charAt(i);
+            final char c = mValue.charAt(i);
             final int width, index;
-            if (digit == '.') {
+            if (c == '.') {
                 width = mDotWidth;
-                index = mValues.length - 1;
+                index = mDigits.length - 1;
             } else {
-                index = digit - '0';
-                width = mNumberWidth;
+                index = c - '0';
+                width = mDigitWidth;
             }
 
-            final Drawable drawable = mValues[index].getDrawable(res);
+            final Drawable drawable = mDigits[index].getDrawable(res);
             drawable.setBounds(left, top, left + width, bottom);
             drawable.draw(canvas);
             left += width + mHorizontalMargin;
@@ -238,8 +242,8 @@ public class NumericView extends View {
         final Resources res  = getResources();
         final int[] stateSet = getDrawableState();
         for (int i = 0; i < length; ++i) {
-            final char digit = mValue.charAt(i);
-            final Drawable drawable = mValues[digit == '.' ? mValues.length - 1 : digit - '0'].getDrawable(res);
+            final char c = mValue.charAt(i);
+            final Drawable drawable = mDigits[c == '.' ? mDigits.length - 1 : c - '0'].getDrawable(res);
             if (drawable.isStateful()) {
                 changed |= drawable.setState(stateSet);
             }
@@ -255,26 +259,26 @@ public class NumericView extends View {
         int measuredWidth = 0, measuredHeight = 0;
         final int length = mValue.length();
         if (length > 0) {
-            measuredWidth  = getPaddingLeft() + getPaddingRight() + (mNumberWidth + mHorizontalMargin) * (length - 1) + (mValue.indexOf('.') == -1 ? mNumberWidth : mDotWidth);
-            measuredHeight = getPaddingTop() + getPaddingBottom() + mNumberHeight;
+            measuredWidth  = getPaddingLeft() + getPaddingRight() + (mDigitWidth + mHorizontalMargin) * (length - 1) + (mValue.indexOf('.') == -1 ? mDigitWidth : mDotWidth);
+            measuredHeight = getPaddingTop() + getPaddingBottom() + mDigitHeight;
         }
 
         setMeasuredDimension(measuredWidth, measuredHeight);
     }
 
-    private Value[] initValues(int id) {
+    private Digit[] initDigits(int id) {
         DebugUtils.__checkError(id == 0, "The <NumericView> tag requires a valid 'drawables' attribute");
         final TypedArray a = getResources().obtainTypedArray(id);
         final int length = a.length();
         DebugUtils.__checkError(length < 10, "The drawable array must be >= 10");
 
-        final Value[] values = new Value[length];
+        final Digit[] digits = new Digit[length];
         for (int i = 0; i < length; ++i) {
-            values[i] = new Value(a.getResourceId(i, 0));
+            digits[i] = new Digit(a.getResourceId(i, 0));
         }
 
         a.recycle();
-        return values;
+        return digits;
     }
 
     private String checkValue(String value) {
@@ -297,13 +301,13 @@ public class NumericView extends View {
     }
 
     /**
-     * Class <tt>Value</tt> wrapped a drawable and a resource id.
+     * Class <tt>Digit</tt> wrapped a drawable and a resource id.
      */
-    private static final class Value {
+    private static final class Digit {
         private final int id;
         private Drawable drawable;
 
-        public Value(int id) {
+        public Digit(int id) {
             DebugUtils.__checkError(id == 0, "Invalid drawable id");
             this.id = id;
         }
@@ -317,9 +321,9 @@ public class NumericView extends View {
             return drawable;
         }
 
-        public final void dump(Printer printer, int index, StringBuilder result) {
+        public final void dump(Printer printer, char digit, StringBuilder result) {
             result.setLength(0);
-            printer.println(result.append("  [ index = ").append(index).append(", id = 0x").append(Integer.toHexString(id)).append(", drawable = ").append(drawable).append(" ]").toString());
+            printer.println(result.append("  [ digit = ").append(digit).append(", id = 0x").append(Integer.toHexString(id)).append(", drawable = ").append(drawable).append(" ]").toString());
         }
     }
 }

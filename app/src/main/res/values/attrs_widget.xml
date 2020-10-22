@@ -50,8 +50,8 @@
         <attr name="value" format="string" />
         <attr name="dotWidth" format="dimension" />
         <attr name="drawables" format="reference" />
-        <attr name="numberWidth" format="dimension" />
-        <attr name="numberHeight" format="dimension" />
+        <attr name="digitWidth" format="dimension" />
+        <attr name="digitHeight" format="dimension" />
         <attr name="horizontalMargin" format="dimension" />
     </declare-styleable>
 </resources>

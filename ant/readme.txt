@@ -38,7 +38,14 @@
     }
 
 使用说明
-1、DebugUtils 中的所有方法只能在开发过程中使用，不能集成到发布版本中。
-2、所有 @hide 注释的类和方法不能使用。
-3、所有以双下划线(__) 命名的方法和变量都不能使用。
-4、所有 dump、dumpXXXX 方法只能在开发过程中使用，不能集成到发布版本中。
+1、在 Application 初始化加载 so
+    public class MyApplication extends Application {
+        static {
+            System.loadLibrary("xxx");
+        }
+    }
+
+2、DebugUtils 中的所有方法只能在开发过程中使用，不能集成到发布版本中。
+3、所有 @hide 注释的类和方法不能使用。
+4、所有以双下划线(__) 命名的方法和变量都不能使用。
+5、所有 dump、dumpXXXX 方法只能在开发过程中使用，不能集成到发布版本中。

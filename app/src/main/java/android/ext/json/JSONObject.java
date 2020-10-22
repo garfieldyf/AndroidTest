@@ -198,25 +198,6 @@ public class JSONObject implements Map<String, Object> {
     }
 
     /**
-     * Equivalent to calling <tt>optString(name, "")</tt>.
-     * @see #optString(String, String)
-     */
-    public String optString(String name) {
-        return JSONUtils.toString(values.get(name), "");
-    }
-
-    /**
-     * Returns the value mapped by <em>name</em> if it exists, coercing it
-     * if necessary. Returns <em>fallback</em> if no such mapping exists.
-     * @param name The JSON property name.
-     * @return The <tt>String</tt> value or <em>fallback</em>.
-     * @see #optString(String)
-     */
-    public String optString(String name, String fallback) {
-        return JSONUtils.toString(values.get(name), fallback);
-    }
-
-    /**
      * Equivalent to calling <tt>optFloat(name, 0)</tt>.
      * @see #optFloat(String, float)
      */
@@ -271,6 +252,25 @@ public class JSONObject implements Map<String, Object> {
      */
     public boolean optBoolean(String name, boolean fallback) {
         return JSONUtils.toBoolean(values.get(name), fallback);
+    }
+
+    /**
+     * Equivalent to calling <tt>optString(name, null)</tt>.
+     * @see #optString(String, String)
+     */
+    public String optString(String name) {
+        return JSONUtils.toString(values.get(name), null);
+    }
+
+    /**
+     * Returns the value mapped by <em>name</em> if it exists, coercing it
+     * if necessary. Returns <em>fallback</em> if no such mapping exists.
+     * @param name The JSON property name.
+     * @return The <tt>String</tt> value or <em>fallback</em>.
+     * @see #optString(String)
+     */
+    public String optString(String name, String fallback) {
+        return JSONUtils.toString(values.get(name), fallback);
     }
 
     /**

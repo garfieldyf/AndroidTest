@@ -319,11 +319,11 @@ public class JSONArray implements List<Object>, RandomAccess {
     }
 
     /**
-     * Equivalent to calling <tt>optString(index, "")</tt>.
+     * Equivalent to calling <tt>optString(index, null)</tt>.
      * @see #optString(int, String)
      */
     public String optString(int index) {
-        return JSONUtils.toString(opt(index), "");
+        return JSONUtils.toString(opt(index), null);
     }
 
     /**

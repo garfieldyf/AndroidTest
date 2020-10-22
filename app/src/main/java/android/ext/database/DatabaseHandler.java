@@ -212,13 +212,16 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
             if (handler.mDestroyed) {
                 handler.onDestroy(token, result);
             } else {
-                final Pool<Object> taskPool = handler.mTaskPool;
                 handleMessage(result);
-                values  = null;
-                handler = null;
-                selectionArgs = null;
-                taskPool.recycle(this);
+                recycle(handler.mTaskPool);
             }
+        }
+
+        private void recycle(Pool<Object> taskPool) {
+            values  = null;
+            handler = null;
+            selectionArgs = null;
+            taskPool.recycle(this);
         }
 
         /**

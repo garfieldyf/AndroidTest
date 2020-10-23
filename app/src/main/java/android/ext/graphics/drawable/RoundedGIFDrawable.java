@@ -129,12 +129,14 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
      * @see #setCornerRadii(float, float, float, float)
      */
     public void setCornerRadii(float[] radii) {
-        if (radiusEquals(radii, 0, +0.0f)) {
-            mState.mRadii = null;
-            invalidateSelf(mState.mShader, false);
-        } else {
-            mState.mRadii = radii;
-            invalidateSelf(mState.mShader, true);
+        if (mState.mRadii != radii) {
+            if (radiusEquals(radii, 0, +0.0f)) {
+                mState.mRadii = null;
+                invalidateSelf(mState.mShader, false);
+            } else {
+                mState.mRadii = radii;
+                invalidateSelf(mState.mShader, true);
+            }
         }
     }
 

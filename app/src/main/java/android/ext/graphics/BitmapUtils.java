@@ -1,5 +1,6 @@
 package android.ext.graphics;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -160,6 +161,7 @@ public final class BitmapUtils {
      * @param paint May be <tt>null</tt>. The paint used to draw the bitmap.
      * @return An inverted bitmap.
      */
+    @SuppressLint("RtlHardcoded")
     public static Bitmap createInvertedBitmap(Object source, int width, int height, int alpha, float percent, int direction, Paint paint) {
         DebugUtils.__checkError(source == null, "Invalid parameter - source == null");
         DebugUtils.__checkError(width <= 0 || height <= 0, "Invalid parameters - width(" + width + ") and height(" + height + ") must be > 0");

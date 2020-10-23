@@ -112,7 +112,7 @@ public final class Pools {
         }
 
         @Override
-        /* package */ Rect newInstance() {
+        /* package */ final Rect newInstance() {
             return new Rect();
         }
     }
@@ -142,7 +142,7 @@ public final class Pools {
         }
 
         @Override
-        /* package */ RectF newInstance() {
+        /* package */ final RectF newInstance() {
             return new RectF();
         }
     }
@@ -160,7 +160,7 @@ public final class Pools {
         }
 
         @Override
-        /* package */ Matrix newInstance() {
+        /* package */ final Matrix newInstance() {
             return new Matrix();
         }
     }

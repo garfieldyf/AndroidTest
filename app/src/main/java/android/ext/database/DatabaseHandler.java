@@ -1,6 +1,7 @@
 package android.ext.database;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.Lifecycle.Event;
@@ -33,9 +34,13 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
-    /* package */ boolean mDestroyed;
+    private boolean mDestroyed;
+    private WeakReference<Object> mOwner;
+
+    /**
+     * The {@link AbsSQLiteTask} pool.
+     */
     /* package */ final Pool<Object> mTaskPool;
-    /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -91,7 +96,7 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     }
 
     /**
-     * Called when the owner has been destroyed on the UI thread.
+     * Called when this handler has been destroyed on the UI thread.
      * @param token The token.
      * @param result The result.
      */
@@ -167,6 +172,25 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     }
 
     /**
+     * Tests if this handler is destroyed.
+     */
+    /* package */ final boolean isDestroyed() {
+        if (mDestroyed) {
+            return true;
+        }
+
+        if (mOwner != null) {
+            final Object owner = mOwner.get();
+            if (owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                return (activity.isFinishing() || activity.isDestroyed());
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
      */
     private void addLifecycleObserver(Object owner) {
@@ -209,7 +233,7 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
          * @hide
          */
         public final void dispatchMessage(Object result) {
-            if (handler.mDestroyed) {
+            if (handler.isDestroyed()) {
                 handler.onDestroy(token, result);
             } else {
                 handleMessage(result);

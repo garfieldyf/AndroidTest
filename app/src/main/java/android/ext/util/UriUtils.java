@@ -28,7 +28,7 @@ public final class UriUtils {
             return ((Uri)uri).getScheme();
         } else {
             final String uriString = uri.toString();
-            final int index = uriString.indexOf("://");
+            final int index = uriString.indexOf(SCHEME_SEPARATOR);
             return (index != -1 ? uriString.substring(0, index) : null);
         }
     }
@@ -100,7 +100,7 @@ public final class UriUtils {
      */
     public static String getFileUri(String path) {
         DebugUtils.__checkError(path == null, "Invalid parameter - path == null");
-        return (SCHEME_FILE + "://" + path);
+        return (SCHEME_FILE + SCHEME_SEPARATOR + path);
     }
 
     /**
@@ -111,7 +111,7 @@ public final class UriUtils {
      */
     public static String getAssetUri(String filename) {
         DebugUtils.__checkError(filename == null, "Invalid parameter - filename == null");
-        return (SCHEME_ANDROID_ASSET + "://" + filename);
+        return (SCHEME_ANDROID_ASSET + SCHEME_SEPARATOR + filename);
     }
 
     /**
@@ -124,9 +124,10 @@ public final class UriUtils {
      */
     public static String getResourceUri(String packageName, Object resource) {
         DebugUtils.__checkError(packageName == null || resource == null, "Invalid parameters - packageName == null || resource == null");
-        return (SCHEME_ANDROID_RESOURCE + "://" + packageName + "/" + resource);
+        return (SCHEME_ANDROID_RESOURCE + SCHEME_SEPARATOR + packageName + "/" + resource);
     }
 
+    private static final String SCHEME_SEPARATOR = "://";
     private static final int SCHEME_FILE_LENGTH  = 7;   /* file:// */
     private static final int SCHEME_ASSET_LENGTH = 16;  /* android.asset:// */
 

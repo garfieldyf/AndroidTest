@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
-import android.os.Process;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -172,16 +171,12 @@ public final class AsyncViewStub extends View {
 
         @Override
         protected View doInBackground(Object[] params) {
-            final int priority = Process.getThreadPriority(Process.myTid());
             final AsyncViewStub viewStub = (AsyncViewStub)params[0];
             try {
-                Process.setThreadPriority(Process.THREAD_PRIORITY_DEFAULT);
                 return mInflater.inflate(viewStub.mLayoutId, (ViewGroup)viewStub.getParent(), false);
             } catch (RuntimeException e) {
                 DebugUtils.__checkWarning(true, AsyncViewStub.class.getName(), "Failed to inflate resource - ID #0x" + Integer.toHexString(viewStub.mLayoutId) + " in the background! Retrying on the UI thread\n" + e);
                 return null;
-            } finally {
-                Process.setThreadPriority(priority);
             }
         }
 

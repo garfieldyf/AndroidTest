@@ -462,7 +462,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
             .execute(url1);
 
 //        mVisibility.show(1100);
-        mListView.postDelayed(new Runnable() {
+        mListView.post(new Runnable() {
             @Override
             public void run() {
                 final AsyncViewStub view = (AsyncViewStub)findViewById(R.id.btn_cancel_stub);
@@ -474,7 +474,7 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
                     }
                 });
             }
-        }, 1000);
+        });
 
 //        PackageInfo pi = PackageUtils.myPackageInfo(this, PackageManager.GET_SHARED_LIBRARY_FILES);
 //        pi.applicationInfo.dump(new LogPrinter(Log.DEBUG, "abc"), "");

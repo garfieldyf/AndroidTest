@@ -5,6 +5,8 @@ import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.Transformations;
+import android.ext.net.NetworkLiveData;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
@@ -48,6 +50,13 @@ public class TestMediatorActivity extends FragmentActivity {
             @Override
             public void onChanged(Integer o) {
                 Log.d(TAG,"myMediatorLiveData="+o);
+            }
+        });
+
+        NetworkLiveData.getInstance(this).observe(this, new Observer<NetworkInfo>() {
+            @Override
+            public void onChanged(NetworkInfo info) {
+                Log.d(TAG, "NetworkInfo = " + info);
             }
         });
     }

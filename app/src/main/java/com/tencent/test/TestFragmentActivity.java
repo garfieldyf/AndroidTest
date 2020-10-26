@@ -9,13 +9,13 @@ import android.ext.json.JSONObject;
 import android.ext.net.AsyncDownloadTask;
 import android.ext.net.DownloadPostRequest;
 import android.ext.net.DownloadRequest;
+import android.ext.net.NetworkLiveData;
 import android.ext.util.DeviceUtils;
-import android.net.NetworkInfo.State;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import com.tencent.temp.NetworkStateLiveData;
 
 public class TestFragmentActivity extends FragmentActivity implements Observer<JSONObject> {
     public static final String TAG = "abcd";
@@ -41,10 +41,10 @@ public class TestFragmentActivity extends FragmentActivity implements Observer<J
         // 164, 165, 181
         new JSONLoader(this).execute(164);
 
-        NetworkStateLiveData.getInstance(this).observe(this, new Observer<State>() {
+        NetworkLiveData.getInstance(this).observe(this, new Observer<NetworkInfo>() {
             @Override
-            public void onChanged(State state) {
-                Log.d(TAG, "NetworkState = " + state);
+            public void onChanged(NetworkInfo info) {
+                Log.d(TAG, "NetworkInfo = " + info);
             }
         });
     }

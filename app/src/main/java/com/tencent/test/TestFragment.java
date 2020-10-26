@@ -1,9 +1,12 @@
 package com.tencent.test;
 
+import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.ext.content.AsyncTask;
+import android.ext.net.NetworkLiveData;
 import android.ext.util.DeviceUtils;
 import android.graphics.Color;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -23,6 +26,13 @@ public class TestFragment extends Fragment {
 
         TestViewModel viewModel = ViewModelProviders.of(getActivity()).get(TestViewModel.class);
         Log.d(TestFragmentActivity.TAG, "TestViewModel = " + DeviceUtils.toString(viewModel) + ", Data = " + DeviceUtils.toString(viewModel.getData()) + ", Value = " + DeviceUtils.toString(viewModel.getData().getValue()));
+
+        NetworkLiveData.getInstance(getContext()).observe(this, new Observer<NetworkInfo>() {
+            @Override
+            public void onChanged(NetworkInfo info) {
+                Log.d(TAG, "NetworkInfo = " + info);
+            }
+        });
 
         return view;
     }

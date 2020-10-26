@@ -70,15 +70,12 @@ public class ThreadPool extends ThreadPoolExecutor {
     /**
      * Creates a new <tt>ThreadPool</tt> to execute the given task.
      * @param maxThreads The maximum number of threads to allow in this pool.
-     * @param keepAliveTime The maximum time that excess idle threads will wait for new tasks
-     * before terminating.
-     * @param unit The time unit for the <em>keepAliveTime</em> parameter.
      * @param priority The priority to run the work thread at. The value supplied must be from
      * {@link Process} and not from {@link Thread}.
      * @return A {@link ThreadPool} instance.
      */
-    public static ThreadPool createImageThreadPool(int maxThreads, long keepAliveTime, TimeUnit unit, int priority) {
-        return new ThreadPool(maxThreads, keepAliveTime, unit, "ImagePool-", priority);
+    public static ThreadPool createImageThreadPool(int maxThreads, int priority) {
+        return new ThreadPool(maxThreads, 60, TimeUnit.SECONDS, "ImagePool-", priority);
     }
 
     /**

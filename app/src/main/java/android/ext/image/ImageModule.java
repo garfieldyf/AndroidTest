@@ -56,7 +56,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -680,7 +679,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         public final ImageModule build() {
             final int maxThreads = (mMaxThreads > 0 ? mMaxThreads : ArrayUtils.rangeOf(Runtime.getRuntime().availableProcessors(), MIN_THREAD_COUNT, MAX_THREAD_COUNT));
             final BitmapPool bitmapPool = (mPoolSize > 0 ? new LinkedBitmapPool(mPoolSize) : null);
-            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, 60, TimeUnit.SECONDS, mPriority), createImageCache(bitmapPool), createFileCache(), bitmapPool);
+            return new ImageModule(mContext, ThreadPool.createImageThreadPool(maxThreads, mPriority), createImageCache(bitmapPool), createFileCache(), bitmapPool);
         }
 
         private FileCache createFileCache() {

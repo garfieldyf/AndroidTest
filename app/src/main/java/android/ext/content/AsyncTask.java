@@ -116,6 +116,14 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
         return this;
     }
 
+    /**
+     * Equivalent to calling <tt>THREAD_POOL_EXECUTOR.execute(runnable)</tt>.
+     * @param runnable The runnable task.
+     */
+    public static void execute(Runnable runnable) {
+        THREAD_POOL_EXECUTOR.execute(runnable);
+    }
+
     @Override
     public final boolean isCancelled() {
         return mWorker.isCancelled();

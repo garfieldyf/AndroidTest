@@ -187,14 +187,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     }
 
     /**
-     * Called when an asynchronous insert is completed on the UI thread.
-     * @param token The token to identify the insert, passed in from {@link #startInsert}.
-     * @param newUri The URL of the newly created row.
-     */
-    protected void onInsertComplete(int token, Uri newUri) {
-    }
-
-    /**
      * Executes custom query on a background thread.
      * @param resolver The {@link ContentResolver}.
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
@@ -271,15 +263,6 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             }
 
             UIHandler.sInstance.sendMessage(this, result);
-        }
-
-        @Override
-        /* package */ final void handleMessage(Object result) {
-            if (message == MESSAGE_INSERT) {
-                ((AsyncQueryHandler)handler).onInsertComplete(token, (Uri)result);
-            } else {
-                super.handleMessage(result);
-            }
         }
 
         private Cursor execQuery(ContentResolver resolver) {

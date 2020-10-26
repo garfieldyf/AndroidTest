@@ -13,6 +13,7 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
@@ -140,6 +141,22 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     }
 
     /**
+     * Called when an asynchronous insert is completed on the UI thread.
+     * @param token The token to identify the insert, passed in from {@link #startInsert}.
+     * @param id The row ID of the newly inserted row, or -1 if an error occurred.
+     */
+    protected void onInsertComplete(int token, long id) {
+    }
+
+    /**
+     * Called when an asynchronous insert is completed on the UI thread.
+     * @param token The token to identify the insert, passed in from {@link #startInsert}.
+     * @param newUri The URL of the newly created row.
+     */
+    protected void onInsertComplete(int token, Uri newUri) {
+    }
+
+    /**
      * Called when an asynchronous update is completed on the UI thread.
      * @param token The token to identify the update, passed in from {@link #startUpdate}.
      * @param rowsAffected The number of rows affected.
@@ -232,27 +249,17 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
          * do not call this method directly.
          * @hide
          */
-        public final void dispatchMessage(Object result) {
+        public final void handleMessage(Object result) {
             if (handler.isDestroyed()) {
                 handler.onDestroy(token, result);
-            } else {
-                handleMessage(result);
-                recycle(handler.mTaskPool);
+                return;
             }
-        }
 
-        private void recycle(Pool<Object> taskPool) {
-            values  = null;
-            handler = null;
-            selectionArgs = null;
-            taskPool.recycle(this);
-        }
-
-        /**
-         * Runs on the UI thread after {@link #run()}.
-         */
-        /* package */ void handleMessage(Object result) {
             switch (message) {
+            case MESSAGE_INSERT:
+                onInsertComplete(result);
+                break;
+
             case MESSAGE_CALL:
                 handler.onCallComplete(token, (Bundle)result);
                 break;
@@ -288,6 +295,23 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
 
             default:
                 throw new IllegalStateException("Unknown message: " + message);
+            }
+
+            recycle(handler.mTaskPool);
+        }
+
+        private void recycle(Pool<Object> taskPool) {
+            values  = null;
+            handler = null;
+            selectionArgs = null;
+            taskPool.recycle(this);
+        }
+
+        private void onInsertComplete(Object result) {
+            if (result instanceof Uri) {
+                handler.onInsertComplete(token, (Uri)result);
+            } else {
+                handler.onInsertComplete(token, (long)result);
             }
         }
     }

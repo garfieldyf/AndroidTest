@@ -170,14 +170,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     }
 
     /**
-     * Called when an asynchronous insert is completed on the UI thread.
-     * @param token The token to identify the insert, passed in from {@link #startInsert}.
-     * @param id The row ID of the newly inserted row, or -1 if an error occurred.
-     */
-    protected void onInsertComplete(int token, long id) {
-    }
-
-    /**
      * Executes SQL statements on a background thread.
      * @param db The {@link SQLiteDatabase}.
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
@@ -252,15 +244,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             }
 
             UIHandler.sInstance.sendMessage(this, result);
-        }
-
-        @Override
-        /* package */ final void handleMessage(Object result) {
-            if (message == MESSAGE_INSERT) {
-                ((AsyncSQLiteHandler)handler).onInsertComplete(token, (long)result);
-            } else {
-                super.handleMessage(result);
-            }
         }
 
         private Cursor execQuery(SQLiteDatabase db) {

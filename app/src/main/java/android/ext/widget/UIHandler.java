@@ -52,7 +52,7 @@ public final class UIHandler extends Handler implements Executor {
 
         // Dispatch the DatabaseHandler messages.
         case MESSAGE_DATABASE:
-            ((AbsSQLiteTask)msg.getCallback()).dispatchMessage(msg.obj);
+            ((AbsSQLiteTask)msg.getCallback()).handleMessage(msg.obj);
             break;
 
         // Dispatch the BaseAdapter messages.

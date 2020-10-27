@@ -1,6 +1,7 @@
 package android.ext.json;
 
 import android.annotation.TargetApi;
+import android.ext.util.ArrayUtils;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -490,6 +491,18 @@ public class JSONArray implements List<Object>, RandomAccess {
     @Override
     public void sort(Comparator<? super Object> comparator) {
         values.sort(comparator);
+    }
+
+    /**
+     * Sorts the specified range in this array using the given <em>comparator</em>. If the
+     * <em>comparator</em> is <tt>null</tt> sorts this array in ascending natural order.
+     * @param start The inclusive start index in this array.
+     * @param end The exclusive end index in this array.
+     * @param comparator May be <tt>null</tt>. The {@link Comparator} to compare.
+     * @throws IndexOutOfBoundsException if <tt>start < 0, start > end</tt> or <tt>end > list.size()</tt>
+     */
+    public void sort(int start, int end, Comparator<? super Object> comparator) {
+        ArrayUtils.sort(values, start, end, comparator);
     }
 
     @Override

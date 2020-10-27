@@ -289,12 +289,7 @@ public final class ArrayUtils {
     public static <T> void sort(List<T> list, int start, int end, Comparator<? super T> comparator) {
         if (!ArrayUtils.isEmpty(list)) {
             DebugUtils.__checkRange(start, end - start, list.size());
-            final List<T> subList = list.subList(start, end);
-            if (comparator != null) {
-                Collections.sort(subList, comparator);
-            } else {
-                Collections.sort((List<Comparable>)subList);
-            }
+            Collections.sort(list.size() == (end - start) ? list : list.subList(start, end), comparator);
         }
     }
 

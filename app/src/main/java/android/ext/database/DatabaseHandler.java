@@ -308,10 +308,10 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
         }
 
         private void onInsertComplete(Object result) {
-            if (result instanceof Uri) {
-                handler.onInsertComplete(token, (Uri)result);
-            } else {
+            if (result instanceof Long) {
                 handler.onInsertComplete(token, (long)result);
+            } else {
+                handler.onInsertComplete(token, (Uri)result);
             }
         }
     }

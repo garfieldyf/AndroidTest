@@ -124,6 +124,15 @@ public final class DebugUtils {
     /**
      * Called on the DEBUG mode, do not call this method directly.
      */
+    public static void __checkWarning(boolean report, String tag, String message, Throwable e) {
+        if (report) {
+            Log.w(tag, "WARNING: " + message, e);
+        }
+    }
+
+    /**
+     * Called on the DEBUG mode, do not call this method directly.
+     */
     public static void __checkLogError(boolean report, String tag, String message) {
         if (report) {
             Log.e(tag, "ERROR: " + message);

@@ -430,9 +430,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         final ApplicationInfo info = context.getApplicationInfo();
         final String className = (TextUtils.isEmpty(info.name) ? info.className : info.name);
         try {
-            return ReflectUtils.getDeclaredMethod(Class.forName(className), "createImageModule", Builder.class);
+            return (TextUtils.isEmpty(className) ? null : ReflectUtils.getDeclaredMethod(Class.forName(className), "createImageModule", Builder.class));
         } catch (ReflectiveOperationException e) {
-            DebugUtils.__checkWarning(true, "ImageModule", "The factory method cannot be found - " + className);
+            DebugUtils.__checkWarning(true, "ImageModule", "The factory method cannot be found - " + className, e);
             return null;
         }
     }

@@ -456,7 +456,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         DebugUtils.__checkStartMethodTracing();
         final File cacheDir = (fileCache != null ? new File(fileCache.getCacheDir().getParent(), "._temp_cache!") : FileUtils.getCacheDir(context, "._temp_cache!"));
         FileUtils.deleteFiles(cacheDir.getPath(), false);
-        DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir");
+        DebugUtils.__checkStopMethodTracing("ImageModule", "getCacheDir - cacheDir = " + (fileCache != null ? fileCache.getCacheDir().getPath() : "null") + ", tempDir = " + cacheDir);
         return cacheDir;
     }
 
@@ -695,7 +695,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
 
         private Cache createImageCache(BitmapPool bitmapPool) {
             if (mImageCache == null) {
-                return null;
+                return (mImageSize > 0 ? new LruCache(mImageSize) : null);
             } else if (mImageCache instanceof Cache) {
                 return (Cache)mImageCache;
             }

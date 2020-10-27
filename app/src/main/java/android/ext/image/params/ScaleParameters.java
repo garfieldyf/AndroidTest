@@ -31,7 +31,7 @@ public class ScaleParameters extends Parameters {
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(context.getPackageName(), "ScaleParameters"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getAttributes(context.getPackageName(), "ScaleParameters"));
         this.value = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
         DebugUtils.__checkError((float)value < 0f || (float)value > 1.0f, "The scale " + value + " out of range [0 - 1.0]");
         a.recycle();

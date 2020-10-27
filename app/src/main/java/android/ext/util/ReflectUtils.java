@@ -69,13 +69,24 @@ public final class ReflectUtils {
     }
 
     /**
-     * Returns the <em>packageName</em>.R.styleable.<em>name</em> field value, do not call this method directly.
+     * Returns the attributes, do not call this method directly.
      * @hide
      */
-    @SuppressWarnings("unchecked")
-    public static <T> T getResourceStyleable(String packageName, String name) {
+    public static int[] getAttributes(String packageName, String name) {
         try {
-            return (T)Class.forName(packageName + ".R$styleable").getField(name).get(null);
+            return (int[])Class.forName(packageName + ".R$styleable").getField(name).get(null);
+        } catch (Throwable e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * Returns the index of attribute, do not call this method directly.
+     * @hide
+     */
+    public static int getAttributeIndex(String packageName, String name) {
+        try {
+            return Class.forName(packageName + ".R$styleable").getField(name).getInt(null);
         } catch (Throwable e) {
             throw new AssertionError(e);
         }

@@ -313,7 +313,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     @Override
     public final Object inflate(Context context, XmlPullParser parser) throws XmlPullParserException, ReflectiveOperationException {
         final String className = parseClassName(parser, "loader");
-        final TypedArray a = context.obtainStyledAttributes(Xml.asAttributeSet(parser), ReflectUtils.getResourceStyleable(context.getPackageName(), "ImageLoader"));
+        final TypedArray a = context.obtainStyledAttributes(Xml.asAttributeSet(parser), ReflectUtils.getAttributes(context.getPackageName(), "ImageLoader"));
         final int flags = a.getInt(0 /* R.styleable.ImageLoader_flags */, 0);
         a.recycle();
 

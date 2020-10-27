@@ -109,15 +109,15 @@ public final class AsyncViewStub extends View {
 
     @Override
     @SuppressLint("MissingSuperCall")
-    public void draw(Canvas canvas) {
+    public final void draw(Canvas canvas) {
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
+    protected final void dispatchDraw(Canvas canvas) {
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected final void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(0, 0);
     }
 

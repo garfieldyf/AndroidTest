@@ -35,7 +35,7 @@ public final class FocusDrawable {
      * @see #FocusDrawable(Drawable)
      */
     public FocusDrawable(Context context, AttributeSet attrs) {
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(context.getPackageName(), "FocusDrawable"));
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getAttributes(context.getPackageName(), "FocusDrawable"));
         mDrawable = a.getDrawable(0 /* R.styleable.FocusDrawable_focus */);
         DebugUtils.__checkError(mDrawable == null, "Requires a valid 'focus' attribute");
         a.recycle();

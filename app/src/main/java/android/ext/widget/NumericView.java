@@ -47,13 +47,13 @@ public class NumericView extends View {
         super(context, attrs, defStyleAttr);
 
         final String packageName = context.getPackageName();
-        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getResourceStyleable(packageName, "NumericView"));
-        mValue  = checkValue(a.getString(ReflectUtils.getResourceStyleable(packageName, "NumericView_value")));
-        mDigits = initDigits(a.getResourceId(ReflectUtils.getResourceStyleable(packageName, "NumericView_drawables"), 0));
-        mDotWidth = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_dotWidth"), 0);
-        mDigitWidth  = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_digitWidth"), 0);
-        mDigitHeight = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_digitHeight"), 0);
-        mHorizontalMargin = a.getDimensionPixelOffset(ReflectUtils.getResourceStyleable(packageName, "NumericView_horizontalMargin"), 0);
+        final TypedArray a = context.obtainStyledAttributes(attrs, ReflectUtils.getAttributes(packageName, "NumericView"));
+        mValue  = checkValue(a.getString(ReflectUtils.getAttributeIndex(packageName, "NumericView_value")));
+        mDigits = initDigits(a.getResourceId(ReflectUtils.getAttributeIndex(packageName, "NumericView_drawables"), 0));
+        mDotWidth = a.getDimensionPixelOffset(ReflectUtils.getAttributeIndex(packageName, "NumericView_dotWidth"), 0);
+        mDigitWidth  = a.getDimensionPixelOffset(ReflectUtils.getAttributeIndex(packageName, "NumericView_digitWidth"), 0);
+        mDigitHeight = a.getDimensionPixelOffset(ReflectUtils.getAttributeIndex(packageName, "NumericView_digitHeight"), 0);
+        mHorizontalMargin = a.getDimensionPixelOffset(ReflectUtils.getAttributeIndex(packageName, "NumericView_horizontalMargin"), 0);
         a.recycle();
 
         final Resources res = context.getResources();

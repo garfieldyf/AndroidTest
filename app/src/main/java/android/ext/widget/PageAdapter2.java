@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import android.ext.content.AsyncTask;
+import android.ext.util.DebugUtils;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -33,10 +34,11 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
     }
 
     /**
-     * Sets the object that owns the internal task.
+     * Sets the object that owns this adapter.
      * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
      */
     public final void setOwner(Object owner) {
+        DebugUtils.__checkError(mOwner != null, "The owner is already exists (a PageAdapter can be setOwner only once)");
         mOwner = owner;
     }
 

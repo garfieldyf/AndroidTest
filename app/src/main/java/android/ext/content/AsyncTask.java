@@ -1,16 +1,9 @@
 package android.ext.content;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.arch.lifecycle.GenericLifecycleObserver;
-import android.arch.lifecycle.Lifecycle;
-import android.arch.lifecycle.Lifecycle.Event;
-import android.arch.lifecycle.LifecycleOwner;
 import android.ext.concurrent.ThreadPool;
 import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
-import android.ext.util.DeviceUtils;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
@@ -71,8 +64,9 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     public final AsyncTask<Params, Progress, Result> setOwner(Object owner) {
         DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
+        DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
         mOwner = new WeakReference<Object>(owner);
-        addLifecycleObserver(owner);
+        mWorker.addLifecycleObserver(owner);
         return this;
     }
 
@@ -207,43 +201,6 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     protected abstract void onPostExecute(Params[] params, Result result);
 
-    /**
-     * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
-     */
-    private void addLifecycleObserver(Object owner) {
-        if (owner instanceof Lifecycle) {
-            ((Lifecycle)owner).addObserver(mWorker);
-        } else if (owner instanceof LifecycleOwner) {
-            ((LifecycleOwner)owner).getLifecycle().addObserver(mWorker);
-        }
-    }
-
-    /**
-     * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
-     * @return <tt>true</tt> if the owner has been destroyed, <tt>false</tt> otherwise.
-     */
-    /* package */ final boolean removeLifecycleObserver() {
-        final Object owner = mOwner.get();
-        if (owner == null) {
-            DebugUtils.__checkDebug(true, getClass().getName(), "The owner released by the GC: the task will be call onCancelled()");
-            return true;
-        }
-
-        if (owner instanceof Lifecycle) {
-            ((Lifecycle)owner).removeObserver(mWorker);
-        } else if (owner instanceof LifecycleOwner) {
-            ((LifecycleOwner)owner).getLifecycle().removeObserver(mWorker);
-        }
-
-        if (!mWorker.isCancelled() && owner instanceof Activity) {
-            final Activity activity = (Activity)owner;
-            DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), getClass().getName(), "The Activity - " + DeviceUtils.toString(owner) + " has been destroyed: the task will be call onCancelled()");
-            return (activity.isFinishing() || activity.isDestroyed());
-        }
-
-        return false;
-    }
-
     static {
         final ThreadPool threadPool = new ThreadPool(ThreadPool.computeMaximumThreads());
         THREAD_POOL_EXECUTOR = threadPool;
@@ -273,9 +230,8 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     /**
      * Class <tt>Worker</tt> is an implementation of a {@link Task}.
      */
-    @SuppressLint("RestrictedApi")
     @SuppressWarnings("unchecked")
-    /* package */ final class Worker extends Task implements GenericLifecycleObserver {
+    /* package */ final class Worker extends Task {
         @Override
         public void onProgress(Object value) {
             onProgressUpdate((Progress[])value);
@@ -288,11 +244,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
         @Override
         public void onPostExecute(Object result) {
-            if (mOwner != null && removeLifecycleObserver()) {
-                // Force update the state is cancelled.
-                setCancelled();
-            }
-
+            removeLifecycleObserver(mOwner);
             if (isCancelled()) {
                 AsyncTask.this.onCancelled((Result)result);
             } else {
@@ -302,14 +254,6 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
             // Prevent memory leak.
             mParams = null;
             mStatus = Status.FINISHED;
-        }
-
-        @Override
-        public void onStateChanged(LifecycleOwner source, Event event) {
-            if (event == Event.ON_DESTROY) {
-                cancel(false);
-                DebugUtils.__checkDebug(true, AsyncTask.this.getClass().getName(), "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed: the task will be call onCancelled()");
-            }
         }
     }
 }

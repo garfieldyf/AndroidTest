@@ -1,5 +1,11 @@
 package android.ext.content;
 
+import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.arch.lifecycle.GenericLifecycleObserver;
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.Lifecycle.Event;
+import android.arch.lifecycle.LifecycleOwner;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -7,6 +13,7 @@ import android.ext.util.Pools;
 import android.ext.util.Pools.Pool;
 import android.ext.widget.UIHandler;
 import android.util.Printer;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -188,7 +195,8 @@ public abstract class Loader<Key> {
     /**
      * This abstract class should be implemented by any class whose instances are intended to be execute.
      */
-    public static abstract class Task implements Runnable, Cancelable {
+    @SuppressLint("RestrictedApi")
+    public static abstract class Task implements Runnable, Cancelable, GenericLifecycleObserver {
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
@@ -247,29 +255,11 @@ public abstract class Loader<Key> {
             UIHandler.sInstance.finish(this, result);
         }
 
-        /**
-         * Clears all fields for recycle.
-         */
-        /* package */ final void clearForRecycle() {
-            mParams = null;
-            mRunner = null;
-            mState.set(RUNNING);
-        }
-
-        /**
-         * Sets the current state is cancelled.
-         */
-        /* package */ final void setCancelled() {
-            mState.set(CANCELLED);
-        }
-
-        /**
-         * This method can be invoked to publish progress value to update UI.
-         * @param value The progress value to update.
-         */
-        /* package */ final void setProgress(Object value) {
-            if (mState.get() == RUNNING) {
-                UIHandler.sInstance.setProgress(this, value);
+        @Override
+        public final void onStateChanged(LifecycleOwner source, Event event) {
+            if (event == Event.ON_DESTROY) {
+                cancel(false);
+                DebugUtils.__checkDebug(true, "Task", "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed");
             }
         }
 
@@ -294,5 +284,70 @@ public abstract class Loader<Key> {
          * @see #onPostExecute(Object)
          */
         public abstract Object doInBackground(Object params);
+
+        /**
+         * Clears all fields for recycle.
+         */
+        /* package */ final void clearForRecycle() {
+            mParams = null;
+            mRunner = null;
+            mState.set(RUNNING);
+        }
+
+        /**
+         * This method can be invoked to publish progress value to update UI.
+         * @param value The progress value to update.
+         */
+        /* package */ final void setProgress(Object value) {
+            if (mState.get() == RUNNING) {
+                UIHandler.sInstance.setProgress(this, value);
+            }
+        }
+
+        /**
+         * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
+         */
+        /* package */ final void addLifecycleObserver(Object owner) {
+            if (owner instanceof Lifecycle) {
+                ((Lifecycle)owner).addObserver(this);
+            } else if (owner instanceof LifecycleOwner) {
+                ((LifecycleOwner)owner).getLifecycle().addObserver(this);
+            }
+        }
+
+        /**
+         * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
+         */
+        /* package */ final void removeLifecycleObserver(WeakReference<Object> ownerRef) {
+            if (ownerRef != null && removeLifecycleObserver(ownerRef.get())) {
+                // Force update the state is cancelled.
+                mState.set(CANCELLED);
+            }
+        }
+
+        /**
+         * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
+         * @return <tt>true</tt> if the owner has been destroyed, <tt>false</tt> otherwise.
+         */
+        private boolean removeLifecycleObserver(Object owner) {
+            if (owner == null) {
+                DebugUtils.__checkDebug(true, "Task", "The owner released by the GC");
+                return true;
+            }
+
+            if (owner instanceof Lifecycle) {
+                ((Lifecycle)owner).removeObserver(this);
+            } else if (owner instanceof LifecycleOwner) {
+                ((LifecycleOwner)owner).getLifecycle().removeObserver(this);
+            }
+
+            if (mState.get() != CANCELLED && owner instanceof Activity) {
+                final Activity activity = (Activity)owner;
+                DebugUtils.__checkDebug(activity.isFinishing() || activity.isDestroyed(), "Task", "The Activity - " + DeviceUtils.toString(owner) + " has been destroyed");
+                return (activity.isFinishing() || activity.isDestroyed());
+            }
+
+            return false;
+        }
     }
 }

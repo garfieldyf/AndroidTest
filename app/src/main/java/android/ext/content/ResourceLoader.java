@@ -209,12 +209,12 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
     }
 
     /**
-     * Callback interface when a {@link ResourceLoader} has finished loading its data.
+     * Callback interface when a load task has finished loading its data.
      */
     public static interface OnLoadCompleteListener<Params, Result> {
         /**
          * Called on the UI thread when the load is complete.
-         * @param params The parameters, passed earlier by {@link #execute}.
+         * @param params The parameters of the load task.
          * @param result A result of the load or <tt>null</tt>.
          */
         void onLoadComplete(Params[] params, Result result);

@@ -1,11 +1,9 @@
 package android.ext.content;
 
-import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
-import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
 import android.ext.widget.UIHandler;
 import android.util.Printer;
@@ -19,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * An abstract class that performs asynchronous loading of data.
  * @author Garfield
  */
-public abstract class Loader<Key> implements Factory<Task> {
+public abstract class Loader<Key> {
     /* package */ static final int RUNNING  = 0;
     /* package */ static final int PAUSED   = 1;
     /* package */ static final int SHUTDOWN = 2;
@@ -29,16 +27,6 @@ public abstract class Loader<Key> implements Factory<Task> {
 
     /* package */ final Pool<Task> mTaskPool;
     /* package */ final Map<Key, Task> mRunningTasks;
-
-    /**
-     * Constructor
-     */
-    /* package */ Loader(Executor executor, int maxPoolSize) {
-        DebugUtils.__checkMemoryLeaks(getClass());
-        mExecutor = executor;
-        mTaskPool = Pools.newPool(this, maxPoolSize);
-        mRunningTasks = new HashMap<Key, Task>();
-    }
 
     /**
      * Constructor
@@ -131,11 +119,6 @@ public abstract class Loader<Key> implements Factory<Task> {
                 printer.println(DeviceUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
             }
         }
-    }
-
-    @Override
-    public Task newInstance() {
-        throw new AssertionError("Must be implementation!");
     }
 
     /**

@@ -37,7 +37,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * Constructor
      * @param executor The <tt>Executor</tt> to executing load task.
      * @param cache May be <tt>null</tt>. The {@link Cache} to store the loaded values.
-     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
+     * @param maxPoolSize The maximum number of tasks to allow in the task pool.
      * @see #AsyncLoader(Executor, Cache, Pool)
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache, int maxPoolSize) {

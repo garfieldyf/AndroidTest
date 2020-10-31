@@ -19,7 +19,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
 
     /**
      * Constructor
-     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
+     * @param maxPoolSize The maximum number of tasks to allow in the task pool.
      * @see #AsyncTaskLoader(int, Object)
      */
     public AsyncTaskLoader(int maxPoolSize) {
@@ -30,7 +30,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
     /**
      * Constructor
      * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @param maxPoolSize The maximum number of tasks to allow in the internal pool.
+     * @param maxPoolSize The maximum number of tasks to allow in the task pool.
      * @see #AsyncTaskLoader(int)
      */
     public AsyncTaskLoader(int maxPoolSize, Object owner) {
@@ -95,6 +95,11 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
         /* package */ OnLoadCompleteListener<Params, Result> mListener;
 
         @Override
+        public Object doInBackground(Object params) {
+            return loadInBackground(this, (Params[])params);
+        }
+
+        @Override
         public void onPostExecute(Object result) {
             removeLifecycleObserver(mOwner);
             if (!isCancelled()) {
@@ -105,11 +110,6 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
             clearForRecycle();
             mListener = null;
             mTaskPool.recycle(this);
-        }
-
-        @Override
-        public Object doInBackground(Object params) {
-            return (isCancelled() ? null : loadInBackground(this, (Params[])params));
         }
     }
 }

@@ -1,8 +1,6 @@
 package android.ext.widget;
 
-import android.ext.content.Loader.Task;
-import android.ext.database.DatabaseHandler.AbsSQLiteTask;
-import android.ext.widget.BaseAdapter.NotificationCallback;
+import android.ext.util.DebugUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -19,14 +17,39 @@ public final class UIHandler extends Handler implements Executor {
     public static final UIHandler sInstance = new UIHandler();
 
     /**
-     * Runs the specified <em>action</em> on the UI thread. If the
-     * current thread is the UI thread, then the action is executed
-     * immediately. If the current thread is not the UI thread, the
-     * action is posted to the event queue of the UI thread.
+     * Runs the specified <em>action</em> on the UI thread. If the current thread is the UI thread, then the action is executed
+     * immediately. If the current thread is not the UI thread, the action is posted to the event queue of the UI thread.
      * @param action The action to run on the UI thread.
      */
     public static void runOnUIThread(Runnable action) {
         sInstance.execute(action);
+    }
+
+    /**
+     * Equivalent to calling <tt>sendMessage(obtianMessage(callback, obj))</tt>.
+     * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
+     * @param obj The value to assign to the returned {@link Message#obj} field.
+     * @see #obtianMessage(MessageRunnable, Object)
+     */
+    public final void sendMessage(MessageRunnable callback, Object obj) {
+        DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
+        final Message msg = Message.obtain(this, callback);
+        msg.obj = obj;
+        sendMessage(msg);
+    }
+
+    /**
+     * Same as {@link Message#obtain(Handler, Runnable)}, except that it also set the obj member of the returned {@link Message}.
+     * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
+     * @param obj The value to assign to the returned {@link Message#obj} field.
+     * @return A <tt>Message</tt> from the global message pool.
+     * @see #sendMessage(MessageRunnable, Object)
+     */
+    public final Message obtianMessage(MessageRunnable callback, Object obj) {
+        DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
+        final Message msg = Message.obtain(this, callback);
+        msg.obj = obj;
+        return msg;
     }
 
     @Override
@@ -40,76 +63,53 @@ public final class UIHandler extends Handler implements Executor {
 
     @Override
     public void dispatchMessage(Message msg) {
-        switch (msg.what) {
-        // Dispatch the Task messages.
-        case MESSAGE_PROGRESS:
-            ((Task)msg.getCallback()).onProgress(msg.obj);
-            break;
-
-        case MESSAGE_FINISHED:
-            ((Task)msg.getCallback()).onPostExecute(msg.obj);
-            break;
-
-        // Dispatch the DatabaseHandler messages.
-        case MESSAGE_DATABASE:
-            ((AbsSQLiteTask)msg.getCallback()).handleMessage(msg.obj);
-            break;
-
-        // Dispatch the BaseAdapter messages.
-        case MESSAGE_NOTIFICATION:
-            ((NotificationCallback)msg.getCallback()).handleMessage(msg);
-            break;
-
-        default:
+        final Runnable callback = msg.getCallback();
+        if (callback instanceof MessageRunnable) {
+            ((MessageRunnable)callback).handleMessage(msg);
+        } else {
             super.dispatchMessage(msg);
         }
     }
-
-    /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     * @hide
-     */
-    public final void finish(Task task, Object result) {
-        sendMessage(task, MESSAGE_FINISHED, result);
-    }
-
-    /**
-     * Called on the {@link Task} internal, do not call this method directly.
-     * @hide
-     */
-    public final void setProgress(Task task, Object value) {
-        sendMessage(task, MESSAGE_PROGRESS, value);
-    }
-
-    /**
-     * Called on the {@link DatabaseHandler} internal, do not call this method directly.
-     * @hide
-     */
-    public final void sendMessage(AbsSQLiteTask task, Object result) {
-        sendMessage(task, MESSAGE_DATABASE, result);
-    }
-
-    private void sendMessage(Runnable callback, int what, Object obj) {
-        final Message msg = Message.obtain(this, callback);
-        msg.what = what;
-        msg.obj  = obj;
-        sendMessage(msg);
-    }
-
-    // The Task messages.
-    private static final int MESSAGE_PROGRESS = 0xDEDEDEDE;
-    private static final int MESSAGE_FINISHED = 0xDFDFDFDF;
-
-    // The DatabaseHandler messages.
-    private static final int MESSAGE_DATABASE = 0xEFEFEFEF;
-
-    // The BaseAdapter messages.
-    /* package */ static final int MESSAGE_NOTIFICATION = 0xFEFEFEFE;
 
     /**
      * This class cannot be instantiated.
      */
     private UIHandler() {
         super(Looper.getMainLooper());
+    }
+
+    /**
+     * The <tt>MessageRunnable</tt> allows us to perform operations
+     * on a background thread and handle message on the UI thread.
+     * <h3>Usage</h3>
+     * <p>Here is an example of subclassing:</p><pre>
+     * public static class DownloadTask implements MessageRunnable {
+     *    {@code @Override}
+     *     public void run() {
+     *         // Performs download
+     *         // ... ...
+     *
+     *         final Message msg = UIHandler.sInstance.obtianMessage(this, result);
+     *         msg.what = what;
+     *         msg.arg1 = arg1;
+     *         ... ...
+     *         UIHandler.sInstance.sendMessage(msg);
+     *     }
+     *
+     *    {@code @Override}
+     *     public void handleMessage(Message msg) {
+     *         // Handle message here
+     *         // ... ...
+     *     }
+     * }
+     *
+     * AsyncTask.execute(new DownloadTask());</pre>
+     */
+    public static interface MessageRunnable extends Runnable {
+        /**
+         * Called on the UI thread to receive messages.
+         * @param msg The <tt>Message</tt> to handle.
+         */
+        void handleMessage(Message msg);
     }
 }

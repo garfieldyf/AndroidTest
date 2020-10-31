@@ -31,8 +31,8 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #AsyncSQLiteHandler(SQLiteDatabase)
      */
     public AsyncSQLiteHandler(SQLiteDatabase db, Object owner) {
-        super(owner);
         mDatabase = db;
+        setOwner(owner);
     }
 
     /**
@@ -49,7 +49,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
     public final void startExecute(int token, String table, String arg1, String arg2, Object... params) {
-        DebugUtils.__checkUIThread("startExecute");
         final SQLiteTask task = obtainTask(token, MESSAGE_EXECUTE, table, arg1, null, params);
         task.sortOrder = arg2;
         SERIAL_EXECUTOR.execute(task);
@@ -65,7 +64,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[], String, String[], String)
      */
     public final void startQuery(int token, String sql, String[] selectionArgs) {
-        DebugUtils.__checkUIThread("startQuery");
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
     }
 
@@ -84,7 +82,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @see #startQuery(int, String, String[])
      */
     public final void startQuery(int token, String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        DebugUtils.__checkUIThread("startQuery");
         final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
         SERIAL_EXECUTOR.execute(task);
@@ -104,7 +101,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * names and the values the column values.
      */
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
-        DebugUtils.__checkUIThread("startInsert");
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
     }
 
@@ -121,7 +117,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * translated to NULL.
      */
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
-        DebugUtils.__checkUIThread("startReplace");
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
     }
 
@@ -137,7 +132,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
-        DebugUtils.__checkUIThread("startUpdate");
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
     }
 
@@ -152,7 +146,6 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * The values will be bound as Strings.
      */
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
-        DebugUtils.__checkUIThread("startDelete");
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
     }
 
@@ -187,6 +180,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * Retrieves a new {@link SQLiteTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
     private SQLiteTask obtainTask(int token, int message, String table, String selection, String[] selectionArgs, Object values) {
+        DebugUtils.__checkUIThread("obtainTask");
         final SQLiteTask task = (SQLiteTask)mTaskPool.obtain();
         task.token = token;
         task.table = table;

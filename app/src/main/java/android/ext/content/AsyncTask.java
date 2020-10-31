@@ -230,29 +230,18 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
     /* package */ final class Worker extends Task {
         /* package */ WeakReference<Object> mOwner;
 
-        /**
-         * Sets the object that owns this task.
-         * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
-         */
-        public final void setOwner(Object owner) {
-            DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
-            DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
-            mOwner = new WeakReference<Object>(owner);
-            addLifecycleObserver(owner);
-        }
-
         @Override
-        public void onProgress(Object value) {
+        /* package */ void onProgress(Object value) {
             onProgressUpdate((Progress[])value);
         }
 
         @Override
-        public Object doInBackground(Object params) {
+        /* package */ Object doInBackground(Object params) {
             return AsyncTask.this.doInBackground((Params[])params);
         }
 
         @Override
-        public void onPostExecute(Object result) {
+        /* package */ void onPostExecute(Object result) {
             removeLifecycleObserver(mOwner);
             if (isCancelled()) {
                 AsyncTask.this.onCancelled((Result)result);
@@ -263,6 +252,17 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
             // Prevent memory leak.
             mParams = null;
             mStatus = Status.FINISHED;
+        }
+
+        /**
+         * Sets the object that owns this task.
+         * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+         */
+        /* package */ final void setOwner(Object owner) {
+            DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
+            DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
+            mOwner = new WeakReference<Object>(owner);
+            addLifecycleObserver(owner);
         }
     }
 }

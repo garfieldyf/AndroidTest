@@ -13,8 +13,10 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.ext.widget.UIHandler.MessageRunnable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
 
@@ -23,7 +25,7 @@ import java.lang.ref.WeakReference;
  * @author Garfield
  */
 @SuppressLint("RestrictedApi")
-public abstract class DatabaseHandler implements Factory<Object>, GenericLifecycleObserver {
+/* package */ abstract class DatabaseHandler implements Factory<Object>, GenericLifecycleObserver {
     /* package */ static final int MESSAGE_CALL     = 1;
     /* package */ static final int MESSAGE_BATCH    = 2;
     /* package */ static final int MESSAGE_QUERY    = 3;
@@ -35,7 +37,14 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     /* package */ static final int MESSAGE_EXECUTE  = 9;
     /* package */ static final int MESSAGE_RAWQUERY = 10;
 
+    /**
+     * Indicates the onwer has been destroyed.
+     */
     private boolean mDestroyed;
+
+    /**
+     * The onwer that owns this handler.
+     */
     private WeakReference<Object> mOwner;
 
     /**
@@ -45,21 +54,10 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
 
     /**
      * Constructor
-     * @see #DatabaseHandler(Object)
      */
     /* package */ DatabaseHandler() {
         DebugUtils.__checkMemoryLeaks(getClass());
         mTaskPool = Pools.newPool(this, 8);
-    }
-
-    /**
-     * Constructor
-     * @param owner The owner object. See {@link #setOwner(Object)}.
-     * @see #DatabaseHandler()
-     */
-    /* package */ DatabaseHandler(Object owner) {
-        this();
-        setOwner(owner);
     }
 
     /**
@@ -75,6 +73,7 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
     }
 
     public final void dump(Printer printer) {
+        DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
     }
 
@@ -235,9 +234,8 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
 
     /**
      * Class <tt>AbsSQLiteTask</tt> is an implementation of a {@link Runnable}.
-     * @hide
      */
-    public static abstract class AbsSQLiteTask implements Runnable {
+    /* package */ static abstract class AbsSQLiteTask implements MessageRunnable {
         /* package */ int token;
         /* package */ int message;
         /* package */ Object values;
@@ -246,12 +244,9 @@ public abstract class DatabaseHandler implements Factory<Object>, GenericLifecyc
         /* package */ String[] selectionArgs;
         /* package */ DatabaseHandler handler;
 
-        /**
-         * Runs on the UI thread after {@link #run()},
-         * do not call this method directly.
-         * @hide
-         */
-        public final void handleMessage(Object result) {
+        @Override
+        public final void handleMessage(Message msg) {
+            final Object result = msg.obj;
             if (handler.isDestroyed()) {
                 handler.onDestroy(token, result);
                 return;

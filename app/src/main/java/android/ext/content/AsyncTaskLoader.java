@@ -70,6 +70,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
     }
 
     public final void dump(Printer printer) {
+        DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
     }
 
@@ -95,12 +96,12 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
         /* package */ OnLoadCompleteListener<Params, Result> mListener;
 
         @Override
-        public Object doInBackground(Object params) {
+        /* package */ Object doInBackground(Object params) {
             return loadInBackground(this, (Params[])params);
         }
 
         @Override
-        public void onPostExecute(Object result) {
+        /* package */ void onPostExecute(Object result) {
             removeLifecycleObserver(mOwner);
             if (!isCancelled()) {
                 mListener.onLoadComplete((Params[])mParams, (Result)result);

@@ -253,7 +253,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         /* package */ AsyncLoader mLoader;
 
         @Override
-        public Object doInBackground(Object params) {
+        /* package */ Object doInBackground(Object params) {
             mLoader.waitResumeIfPaused();
             Object value = null;
             if (!mLoader.isTaskCancelled(this)) {
@@ -267,7 +267,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
         }
 
         @Override
-        public void onPostExecute(Object value) {
+        /* package */ void onPostExecute(Object value) {
             final Object[] params = (Object[])mParams;
             if (!mLoader.isTaskCancelled(mTarget, this)) {
                 mBinder.bindValue(mKey, params, mTarget, value, mFlags | Binder.STATE_LOAD_FROM_BACKGROUND);

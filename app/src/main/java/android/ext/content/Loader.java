@@ -12,6 +12,8 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Pool;
 import android.ext.widget.UIHandler;
+import android.ext.widget.UIHandler.MessageRunnable;
+import android.os.Message;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -196,7 +198,8 @@ public abstract class Loader<Key> {
      * This abstract class should be implemented by any class whose instances are intended to be execute.
      */
     @SuppressLint("RestrictedApi")
-    public static abstract class Task implements Runnable, Cancelable, GenericLifecycleObserver {
+    public static abstract class Task implements MessageRunnable, Cancelable, GenericLifecycleObserver {
+        private static final int MESSAGE_PROGRESS = 1;
         private static final int CANCELLED = 1;
         private static final int COMPLETED = 2;
 
@@ -252,7 +255,16 @@ public abstract class Loader<Key> {
                 }
             }
 
-            UIHandler.sInstance.finish(this, result);
+            UIHandler.sInstance.sendMessage(this, result);
+        }
+
+        @Override
+        public final void handleMessage(Message msg) {
+            if (msg.what == MESSAGE_PROGRESS) {
+                onProgress(msg.obj);
+            } else {
+                onPostExecute(msg.obj);
+            }
         }
 
         @Override
@@ -267,7 +279,7 @@ public abstract class Loader<Key> {
          * Runs on the UI thread after {@link #setProgress} is invoked.
          * @param value The progress value to update.
          */
-        public void onProgress(Object value) {
+        /* package */ void onProgress(Object value) {
         }
 
         /**
@@ -275,7 +287,7 @@ public abstract class Loader<Key> {
          * @param result The result, returned earlier by {@link #doInBackground}.
          * @see #doInBackground(Object)
          */
-        public abstract void onPostExecute(Object result);
+        /* package */ abstract void onPostExecute(Object result);
 
         /**
          * Overrides this method to perform a computation on a background thread.
@@ -283,7 +295,7 @@ public abstract class Loader<Key> {
          * @return A result, defined by the subclass of this task.
          * @see #onPostExecute(Object)
          */
-        public abstract Object doInBackground(Object params);
+        /* package */ abstract Object doInBackground(Object params);
 
         /**
          * Clears all fields for recycle.
@@ -300,7 +312,9 @@ public abstract class Loader<Key> {
          */
         /* package */ final void setProgress(Object value) {
             if (mState.get() == RUNNING) {
-                UIHandler.sInstance.setProgress(this, value);
+                final Message msg = UIHandler.sInstance.obtianMessage(this, value);
+                msg.what = MESSAGE_PROGRESS;
+                UIHandler.sInstance.sendMessage(msg);
             }
         }
 

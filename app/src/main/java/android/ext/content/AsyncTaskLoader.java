@@ -35,7 +35,8 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
      */
     public AsyncTaskLoader(int maxPoolSize, Object owner) {
         this(maxPoolSize);
-        setOwner(owner);
+        mOwner = new WeakReference<Object>(owner);
+        DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
     }
 
     /**

@@ -26,7 +26,6 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
 
     /* package */ Status mStatus;
     /* package */ final Worker mWorker;
-    /* package */ WeakReference<Object> mOwner;
 
     /**
      * Constructor
@@ -45,7 +44,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     public AsyncTask(Object owner) {
         this();
-        setOwner(owner);
+        mWorker.setOwner(owner);
     }
 
     /**
@@ -63,10 +62,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #getOwner()
      */
     public final AsyncTask<Params, Progress, Result> setOwner(Object owner) {
-        DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
-        DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
-        mOwner = new WeakReference<Object>(owner);
-        mWorker.addLifecycleObserver(owner);
+        mWorker.setOwner(owner);
         return this;
     }
 
@@ -138,8 +134,8 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     @SuppressWarnings("unchecked")
     protected final <T> T getOwner() {
-        DebugUtils.__checkError(mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
-        return (T)mOwner.get();
+        DebugUtils.__checkError(mWorker.mOwner == null, "The " + getClass().getName() + " did not call setOwner()");
+        return (T)mWorker.mOwner.get();
     }
 
     /**
@@ -232,6 +228,19 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      */
     @SuppressWarnings("unchecked")
     /* package */ final class Worker extends Task {
+        /* package */ WeakReference<Object> mOwner;
+
+        /**
+         * Sets the object that owns this task.
+         * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+         */
+        public final void setOwner(Object owner) {
+            DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
+            DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
+            mOwner = new WeakReference<Object>(owner);
+            addLifecycleObserver(owner);
+        }
+
         @Override
         public void onProgress(Object value) {
             onProgressUpdate((Progress[])value);

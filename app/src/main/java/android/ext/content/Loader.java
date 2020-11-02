@@ -270,7 +270,8 @@ public abstract class Loader<Key> {
         @Override
         public final void onStateChanged(LifecycleOwner source, Event event) {
             if (event == Event.ON_DESTROY) {
-                cancel(false);
+                // Force update the state is cancelled.
+                mState.set(CANCELLED);
                 DebugUtils.__checkDebug(true, "Task", "The LifecycleOwner - " + DeviceUtils.toString(source) + " has been destroyed");
             }
         }

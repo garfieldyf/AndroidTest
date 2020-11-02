@@ -255,7 +255,7 @@ public abstract class Loader<Key> {
                 }
             }
 
-            UIHandler.sInstance.sendMessage(this, result);
+            UIHandler.sInstance.post(this, result);
         }
 
         @Override

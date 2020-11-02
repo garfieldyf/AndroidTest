@@ -31,7 +31,7 @@ public final class UIHandler extends Handler implements Executor {
      * @param obj The value to assign to the returned {@link Message#obj} field.
      * @see #obtianMessage(MessageRunnable, Object)
      */
-    public final void sendMessage(MessageRunnable callback, Object obj) {
+    public final void post(MessageRunnable callback, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
         final Message msg = Message.obtain(this, callback);
         msg.obj = obj;
@@ -43,7 +43,7 @@ public final class UIHandler extends Handler implements Executor {
      * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
      * @param obj The value to assign to the returned {@link Message#obj} field.
      * @return A <tt>Message</tt> from the global message pool.
-     * @see #sendMessage(MessageRunnable, Object)
+     * @see #post(MessageRunnable, Object)
      */
     public final Message obtianMessage(MessageRunnable callback, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
@@ -79,17 +79,17 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * The <tt>MessageRunnable</tt> allows us to perform operations
+     * The <tt>MessageRunnable</tt> class allows us to perform operations
      * on a background thread and handle message on the UI thread.
      * <h3>Usage</h3>
      * <p>Here is an example of subclassing:</p><pre>
      * public static class DownloadTask implements MessageRunnable {
      *    {@code @Override}
      *     public void run() {
-     *         // Performs download
+     *         // Performs download on the background thread
      *         // ... ...
      *
-     *         final Message msg = UIHandler.sInstance.obtianMessage(this, result);
+     *         final Message msg = Message.obtain(UIHandler.sInstance, this);
      *         msg.what = what;
      *         msg.arg1 = arg1;
      *         ... ...
@@ -98,7 +98,7 @@ public final class UIHandler extends Handler implements Executor {
      *
      *    {@code @Override}
      *     public void handleMessage(Message msg) {
-     *         // Handle message here
+     *         // Handle message here on the UI thread
      *         // ... ...
      *     }
      * }

@@ -255,7 +255,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
                 throw new IllegalStateException("Unknown message: " + message);
             }
 
-            UIHandler.sInstance.sendMessage(this, result);
+            UIHandler.sInstance.post(this, result);
         }
 
         private Cursor execQuery(ContentResolver resolver) {

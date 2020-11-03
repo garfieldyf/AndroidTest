@@ -229,8 +229,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
 
     private void sendMessage(int what, int arg1, int arg2, Object obj) {
         DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-        final Message msg = UIHandler.sInstance.obtianMessage(this, obj);
-        msg.what = what;
+        final Message msg = UIHandler.sInstance.obtianMessage(this, what, obj);
         msg.arg1 = arg1;
         msg.arg2 = arg2;
         UIHandler.sInstance.sendMessage(msg);

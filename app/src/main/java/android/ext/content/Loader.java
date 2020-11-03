@@ -313,9 +313,7 @@ public abstract class Loader<Key> {
          */
         /* package */ final void setProgress(Object value) {
             if (mState.get() == RUNNING) {
-                final Message msg = UIHandler.sInstance.obtianMessage(this, value);
-                msg.what = MESSAGE_PROGRESS;
-                UIHandler.sInstance.sendMessage(msg);
+                UIHandler.sInstance.sendMessage(UIHandler.sInstance.obtianMessage(this, MESSAGE_PROGRESS, value));
             }
         }
 

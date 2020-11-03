@@ -26,10 +26,10 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * Equivalent to calling <tt>sendMessage(obtianMessage(callback, obj))</tt>.
+     * Equivalent to calling <tt>sendMessage(obtianMessage(callback, 0, obj))</tt>.
      * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
-     * @param obj The value to assign to the returned {@link Message#obj} field.
-     * @see #obtianMessage(MessageRunnable, Object)
+     * @param obj The value to assign to the {@link Message#obj} field.
+     * @see #obtianMessage(MessageRunnable, int, Object)
      */
     public final void post(MessageRunnable callback, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
@@ -39,16 +39,18 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * Same as {@link Message#obtain(Handler, Runnable)}, except that it also set the obj member of the returned {@link Message}.
+     * Same as {@link Message#obtain(Handler, Runnable)}, except that it also sets the what and obj members of the returned {@link Message}.
      * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
+     * @param what The value to assign to the returned {@link Message#what} field.
      * @param obj The value to assign to the returned {@link Message#obj} field.
      * @return A <tt>Message</tt> from the global message pool.
      * @see #post(MessageRunnable, Object)
      */
-    public final Message obtianMessage(MessageRunnable callback, Object obj) {
+    public final Message obtianMessage(MessageRunnable callback, int what, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
         final Message msg = Message.obtain(this, callback);
-        msg.obj = obj;
+        msg.what = what;
+        msg.obj  = obj;
         return msg;
     }
 

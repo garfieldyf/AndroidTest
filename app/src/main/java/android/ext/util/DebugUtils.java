@@ -80,7 +80,7 @@ public final class DebugUtils {
      * Called on the DEBUG mode, do not call this method directly.
      */
     public static void __checkUIThread(String method) {
-        if (Looper.getMainLooper() != Looper.myLooper()) {
+        if (Looper.getMainLooper().getThread() != Thread.currentThread()) {
             throw new AssertionError("The " + method + " method must be invoked on the UI thread.");
         }
     }

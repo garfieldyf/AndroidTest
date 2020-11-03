@@ -168,30 +168,23 @@ public final class Pools {
     /**
      * Class <tt>SimplePool</tt> is an implementation of a {@link Pool}.
      */
-    /* package */ static abstract class SimplePool<T> {
+    /* package */ static abstract class SimplePool<T> implements Pool<T> {
         private T element;
 
-        /**
-         * Retrieves an element from this <tt>Pool</tt>. Allows us to avoid
-         * allocating new elements in many cases. When the element can no
-         * longer be used, The caller should be call {@link #recycle(T)} to
-         * recycles the element.
-         * @return The element.
-         * @see #recycle(T)
-         */
-        public synchronized final T obtain() {
+        @Override
+        public synchronized void clear() {
+            element = null;
+        }
+
+        @Override
+        public synchronized T obtain() {
             final T element = this.element;
             this.element = null;
             return (element != null ? element : newInstance());
         }
 
-        /**
-         * Recycles the specified <em>element</em> to this <tt>Pool</tt>. After
-         * calling this function you must not ever touch the <em>element</em> again.
-         * @param element The element to recycle.
-         * @see #obtain()
-         */
-        public synchronized final void recycle(T element) {
+        @Override
+        public synchronized void recycle(T element) {
             DebugUtils.__checkError(element == null, "Invalid parameter - element == null");
             this.element = element;
         }

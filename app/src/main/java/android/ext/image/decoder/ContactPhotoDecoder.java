@@ -34,19 +34,20 @@ public class ContactPhotoDecoder<Image> extends BitmapDecoder<Image> {
         if (opts.inJustDecodeBounds) {
             decodeContactPhoto(resolver, contactUri, opts);
             if (opts.outWidth <= 0) {
-                sPhotoLocal.set(null);  // Clear the contact photo data.
+                sPhotoLocal.remove();   // Clear the contact photo data.
                 decodePhotoBounds(resolver, contactUri, opts);
             }
         } else {
-            final Bitmap photo = decodeContactPhoto(resolver, contactUri, opts);
+            Bitmap photo = decodeContactPhoto(resolver, contactUri, opts);
             if (photo != null) {
                 return photo;
             }
 
             // Decode the contact's thumbnail photo.
             final byte[] data = sPhotoLocal.get();
-            if (data != null) {
-                return BitmapFactory.decodeByteArray(data, 0, data.length, opts);
+            if (data != null && (photo = BitmapFactory.decodeByteArray(data, 0, data.length, opts)) != null) {
+                sPhotoLocal.remove();   // Clear the contact photo data.
+                return photo;
             }
         }
 

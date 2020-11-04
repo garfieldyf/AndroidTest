@@ -38,13 +38,6 @@ public final class NetworkLiveData extends LiveData<NetworkInfo> {
         return sInstance;
     }
 
-    /**
-     * This class cannot be instantiated.
-     */
-    private NetworkLiveData(Context context) {
-        mContext = context.getApplicationContext();
-    }
-
     @Override
     @SuppressWarnings("deprecation")
     protected void onActive() {
@@ -56,6 +49,13 @@ public final class NetworkLiveData extends LiveData<NetworkInfo> {
     protected void onInactive() {
         DebugUtils.__checkDebug(true, "NetworkLiveData", "onInactive - unregisterReceiver");
         mContext.unregisterReceiver(mReceiver);
+    }
+
+    /**
+     * This class cannot be instantiated.
+     */
+    private NetworkLiveData(Context context) {
+        mContext = context.getApplicationContext();
     }
 
     /**

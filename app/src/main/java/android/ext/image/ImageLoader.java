@@ -139,6 +139,13 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
         }
     }
 
+//    @Override
+//    protected void onShutdown() {
+//        if (mDecoder != null) {
+//            mDecoder.onShutdown();
+//        }
+//    }
+
     @Override
     protected final void onRecycle(Object[] params) {
         ImageModule.__checkParameters(params, PARAMS_LENGTH - 1);

@@ -8,9 +8,9 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 
 /**
- * Like as {@link android.os.AsyncTask}, but this class has an owner <tt>Object</tt> (the owner may be
- * an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.) to avoid potential memory
- * leaks. This class listen the owner's lifecycle when the owner destroy this task will be cancel.
+ * Like as {@link android.os.AsyncTask}, but this class has an owner <tt>Object</tt> (the owner may
+ * be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.) to avoid potential
+ * memory leaks. This class listen the owner's lifecycle when the owner destroy it will be cancel.
  * @author Garfield
  */
 public abstract class AsyncTask<Params, Progress, Result> implements Cancelable {

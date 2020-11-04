@@ -98,7 +98,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
     }
 
     /**
-     * Sets An {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
+     * Sets an {@link OnLoadCompleteListener} to receive callbacks when a load is complete.
      * The listener is internally held as {@link WeakReference weak reference}.
      * @param listener The <tt>OnLoadCompleteListener</tt> to set.
      * @return This <em>loader</em>.

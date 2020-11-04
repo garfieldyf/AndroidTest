@@ -103,6 +103,7 @@ import java.lang.ref.WeakReference;
      * @param result The result.
      */
     protected void onDestroy(int token, Object result) {
+        DebugUtils.__checkDebug(true, getClass().getName(), "onDestroy token = " + token + ", result = " + result);
         // Closes the Cursor to avoid memory leak.
         if (result instanceof Cursor) {
             ((Cursor)result).close();

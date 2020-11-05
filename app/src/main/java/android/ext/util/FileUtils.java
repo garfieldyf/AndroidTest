@@ -1202,9 +1202,12 @@ public final class FileUtils {
             return 31 * type + path.hashCode();
         }
 
+        /**
+         * @see #equalsIgnoreCase(Dirent)
+         */
         @Override
         public boolean equals(Object object) {
-            if (object == this) {
+            if (this == object) {
                 return true;
             }
 
@@ -1217,10 +1220,24 @@ public final class FileUtils {
         }
 
         /**
+         * Compares this <tt>Dirent</tt> to another <tt>Dirent</tt>, ignoring
+         * the {@link #path} field case differences.
+         * @param another The <tt>Dirent</tt> to compare.
+         * @return <tt>true</tt> if the given the <tt>Dirent</tt> equivalent
+         * to this <tt>Dirent</tt>, <tt>false</tt> otherwise.
+         * @see #equals(Object)
+         */
+        public boolean equalsIgnoreCase(Dirent another) {
+            return (another != null && type == another.type && path.equalsIgnoreCase(another.path));
+        }
+
+        /**
          * @see #compareToIgnoreCase(Dirent)
+         * @see #caseInsensitiveOrder()
          */
         @Override
         public int compareTo(Dirent another) {
+            DebugUtils.__checkError(another == null, "Invalid parameter - another == null");
             if (type != another.type) {
                 if (type == DT_DIR) {
                     return -1;
@@ -1233,8 +1250,8 @@ public final class FileUtils {
         }
 
         /**
-         * Compares the specified <tt>Dirent</tt> to this <tt>Dirent</tt>, ignoring
-         * the {@link #path} field case differences.
+         * Compares this <tt>Dirent</tt> to another <tt>Dirent</tt>, ignoring the
+         * {@link #path} field case differences.
          * @param another The <tt>Dirent</tt> to compare.
          * @return <tt>0</tt> if the <tt>Dirent</tt>s are equal; a negative integer
          * if this <tt>Dirent</tt> is less than <em>another</em>; a positive integer
@@ -1243,6 +1260,7 @@ public final class FileUtils {
          * @see #caseInsensitiveOrder()
          */
         public int compareToIgnoreCase(Dirent another) {
+            DebugUtils.__checkError(another == null, "Invalid parameter - another == null");
             if (type != another.type) {
                 if (type == DT_DIR) {
                     return -1;

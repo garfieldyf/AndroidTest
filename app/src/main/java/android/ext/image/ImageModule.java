@@ -224,6 +224,14 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
+     * Returns the maximum allowed number of threads in the internal thread pool.
+     * @return The maximum number of threads.
+     */
+    public final int getMaximumThreads() {
+        return ((ThreadPool)mExecutor).getMaximumPoolSize();
+    }
+
+    /**
      * Returns the {@link FileCache} associated with this object.
      * @return The <tt>FileCache</tt> or <tt>null</tt>.
      */

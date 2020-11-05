@@ -139,12 +139,12 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
         }
     }
 
-//    @Override
-//    protected void onShutdown() {
-//        if (mDecoder != null) {
-//            mDecoder.onShutdown();
-//        }
-//    }
+    @Override
+    protected void onShutdown() {
+        if (mDecoder != null) {
+            mDecoder.onDestroy();
+        }
+    }
 
     @Override
     protected final void onRecycle(Object[] params) {
@@ -445,12 +445,12 @@ public class ImageLoader<Image> extends AsyncLoader<Object, Object, Image> imple
      * The <tt>ImageDecoder</tt> class used to decode the image data.
      */
     public static interface ImageDecoder<Image> {
-//        /**
-//         * Called on the UI thread when the {@link ImageLoader} has been shut
-//         * down. Subclasses should override this method to clear the resources.
-//         */
-//        default void onShutdown() {
-//        }
+        /**
+         * Perform any final cleanup before this decoder is destroyed.
+         * This can happen the {@link ImageLoader} has been shut down.
+         */
+        default void onDestroy() {
+        }
 
         /**
          * Decodes an image from the specified <em>uri</em>.

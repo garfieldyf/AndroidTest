@@ -112,8 +112,8 @@ public class SimpleLruCache<K, V> implements Cache<K, V> {
             // Entering list of cached background apps, clear this cache.
             clear();
         } else if (level >= TRIM_MEMORY_UI_HIDDEN || level == TRIM_MEMORY_RUNNING_CRITICAL) {
-            // The app's UI is no longer visible, or app is in the foreground but system is running critically low on memory.
-            // Remove the oldest half of this cache.
+            // The app's UI is no longer visible, or app is in the foreground but system
+            // is running critically low on memory. Remove the oldest half of this cache.
             trimToSize(maxSize / 2, true);
         }
     }

@@ -10,6 +10,7 @@ import static android.view.Gravity.TOP;
 import static android.view.Gravity.VERTICAL_GRAVITY_MASK;
 import android.annotation.SuppressLint;
 import android.ext.util.DebugUtils;
+import android.ext.util.Pools.FontMetricsPool;
 import android.ext.util.Pools.RectFPool;
 import android.ext.util.Pools.RectPool;
 import android.graphics.Bitmap;
@@ -387,33 +388,6 @@ public final class DrawUtils {
 
         FontMetricsPool.sInstance.recycle(fm);
         return textAlign;
-    }
-
-    /**
-     * Class <tt>FontMetricsPool</tt> is an one-size {@link FontMetrics} pool.
-     */
-    private static final class FontMetricsPool {
-        public static final FontMetricsPool sInstance = new FontMetricsPool();
-        private FontMetrics mMetrics;
-
-        public final FontMetrics obtain(Paint paint) {
-            FontMetrics metrics;
-            synchronized (this) {
-                metrics  = mMetrics;
-                mMetrics = null;
-            }
-
-            if (metrics == null) {
-                metrics = new FontMetrics();
-            }
-
-            paint.getFontMetrics(metrics);
-            return metrics;
-        }
-
-        public synchronized final void recycle(FontMetrics metrics) {
-            mMetrics = metrics;
-        }
     }
 
     /**

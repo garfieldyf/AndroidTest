@@ -1,6 +1,8 @@
 package android.ext.util;
 
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Paint.FontMetrics;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.Log;
@@ -162,6 +164,36 @@ public final class Pools {
         @Override
         /* package */ final Matrix newInstance() {
             return new Matrix();
+        }
+    }
+
+    /**
+     * Class <tt>FontMetricsPool</tt> is an <b>one-size</b> {@link FontMetrics} pool.
+     */
+    public static final class FontMetricsPool extends SimplePool<FontMetrics> {
+        public static final FontMetricsPool sInstance = new FontMetricsPool();
+
+        /**
+         * This class cannot be instantiated.
+         */
+        private FontMetricsPool() {
+        }
+
+        /**
+         * Equivalent to calling<pre>
+         * final FontMetrics fm = obtain();
+         * paint.getFontMetrics(fm);</pre>
+         * @see #obtain()
+         */
+        public final FontMetrics obtain(Paint paint) {
+            final FontMetrics result = obtain();
+            paint.getFontMetrics(result);
+            return result;
+        }
+
+        @Override
+        /* package */ final FontMetrics newInstance() {
+            return new FontMetrics();
         }
     }
 

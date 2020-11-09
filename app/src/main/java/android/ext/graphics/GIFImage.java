@@ -162,8 +162,8 @@ public final class GIFImage {
     }
 
     /**
-     * Returns the minimum number of bytes that can
-     * be used to store the bitmap canvas pixels.
+     * Returns the number of bytes that can be
+     * used to store the bitmap canvas pixels.
      */
     public final int getBitmapCanvasBytes() {
         return width * height * 4;

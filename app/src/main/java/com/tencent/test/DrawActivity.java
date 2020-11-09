@@ -1,10 +1,15 @@
 package com.tencent.test;
 
 import android.app.Activity;
+import android.ext.graphics.BitmapUtils;
 import android.ext.graphics.GIFImage;
 import android.ext.graphics.drawable.GIFBaseDrawable;
 import android.ext.graphics.drawable.GIFBaseDrawable.AnimationCallback;
 import android.ext.graphics.drawable.RoundedGIFDrawable;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapFactory.Options;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,6 +32,21 @@ public class DrawActivity extends Activity implements AnimationCallback, Runnabl
         mImageView.setImageDrawable(drawable);
         mTextView = (TextView)findViewById(R.id.start);
         //mImageView.postDelayed(this, 100);
+
+        final Options opts = new Options();
+        opts.inMutable = true;
+        opts.inPreferredConfig = Config.ARGB_8888;
+
+        ((ImageView)findViewById(R.id.image)).setImageResource(R.drawable.video);
+        ImageView view = findViewById(R.id.mirror_h);
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.video, opts);
+        BitmapUtils.mirrorBitmap(bitmap, true);
+        view.setImageBitmap(bitmap);
+
+        view = findViewById(R.id.mirror_v);
+        bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.video, opts);
+        BitmapUtils.mirrorBitmap(bitmap, false);
+        view.setImageBitmap(bitmap);
     }
 
     @Override

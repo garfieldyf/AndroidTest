@@ -12,7 +12,6 @@ import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.util.Log;
 import android.view.Gravity;
@@ -34,7 +33,6 @@ public final class BitmapUtils {
     /**
      * Inverses the given the <em>bitmap</em>.
      * <pre>Algorithm : R = 255 - R, G = 255 - G, B = 255 - B</pre>
-     * <p>Note that this method only supports {@link PixelFormat#OPAQUE}.</p>
      * @param bitmap A mutable bitmap to inverse, must be {@link Config#ARGB_8888} pixel format.
      * @return <tt>true</tt> if the operation succeeded, <tt>false</tt> otherwise.
      */

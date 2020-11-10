@@ -274,10 +274,10 @@ public class DownloadRequest {
      * @return This request.
      * @see #requestHeader(String, String)
      */
-    public final DownloadRequest requestHeaders(Map<String, String> headers) {
+    public final DownloadRequest requestHeaders(Map<String, ?> headers) {
         if (!ArrayUtils.isEmpty(headers)) {
-            for (Entry<String, String> header : headers.entrySet()) {
-                mConnection.setRequestProperty(header.getKey(), header.getValue());
+            for (Entry<String, ?> header : headers.entrySet()) {
+                mConnection.setRequestProperty(header.getKey(), header.getValue().toString());
             }
         }
 

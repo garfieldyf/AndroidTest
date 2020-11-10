@@ -9,6 +9,27 @@ public final class Algorithms {
         0, 8, 5, 41, 1, 0, 9, 60, 121, 43, -1, 454, 967,
     };
 
+    public static int binarySearch(int key) {
+        final int[] numbers = NUMBERS.clone();
+        Arrays.sort(numbers);
+
+        int low = 0, high = numbers.length - 1;
+        while (low <= high) {
+            final int mid = (low + high) / 2;
+            final int value = numbers[mid];
+
+            if (value < key) {
+                low = mid + 1;
+            } else if (value > key) {
+                high = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+
+        return -1;
+    }
+
     public static void remove() {
         // 5, 41, 0, 60, 43, -1, 967
         final int[] indexes = { 1, 6, 8, 4, 0, 11 };

@@ -1,13 +1,122 @@
 package com.tencent.test;
 
+import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public final class Algorithms {
     private static final int[] NUMBERS = {
-        0, 8, 5, 41, 1, 0, 9, 60, 121, 43, -1, 454, 967,
+        0, 8, 5, 41, 1, 7, 9, 60, 121, 43, -1, 454, 967,
     };
+
+    public static class Node {
+        public int value;
+        public Node next;
+    }
+
+    private static Node makeCircular() {
+        Node head = null, last = null;
+        for (int i = 0; i < 6; ++i) {
+            Node node = new Node();
+            node.value = NUMBERS[i];
+            node.next = head;
+            head = node;
+            if (i == 0) {
+                last = node;
+            }
+        }
+
+        last.next = head;
+        return head;
+    }
+
+    private static void printCircular(Node head) {
+        if (head == null) {
+            return;
+        }
+
+        StringBuilder s = new StringBuilder();
+        Node node = head;
+        do {
+            s.append(node.value).append(' ');
+            node = node.next;
+        } while (head != node);
+
+        Log.d("abcd", "printCircular = " + s.toString());
+    }
+
+    private static Node make() {
+        Node head = null;
+        for (int i = 0; i < 6; ++i) {
+            Node node  = new Node();
+            node.value = NUMBERS[i];
+            node.next  = head;
+            head = node;
+        }
+
+        return head;
+    }
+
+    private static void print(Node head) {
+        StringBuilder s = new StringBuilder();
+        while (head != null) {
+            s.append(head.value).append(' ');
+            head = head.next;
+        }
+
+        Log.d("abcd", "print = " + s.toString());
+    }
+
+    public static Node reverse(Node head) {
+        Node newHead = null;
+        while (head != null) {
+            final Node node = head;
+            head = head.next;
+            node.next = newHead;
+            newHead = node;
+        }
+
+        return newHead;
+    }
+
+    public static Node reverseCircular(Node head) {
+        if (head == null) {
+            return null;
+        }
+
+        Node newHead = null, start = head;
+        do {
+            final Node node = head;
+            head = head.next;
+            node.next = newHead;
+            newHead = node;
+        } while (start != head);
+
+        // 0 8 5 41 1 7
+        head.next = newHead;
+        return newHead;
+    }
+
+    public static void reverse() {
+        final Node head = make();
+        // 7 1 41 5 8 0
+        print(head);
+
+        final Node newHead = reverse(head);
+        // 0 8 5 41 1 7
+        print(newHead);
+    }
+
+    public static void reverseCircular() {
+        final Node head = makeCircular();
+        // 7 1 41 5 8 0
+        printCircular(head);
+
+        final Node newHead = reverseCircular(head);
+        // 0 8 5 41 1 7
+        printCircular(newHead);
+    }
 
     public static int binarySearch(int key) {
         final int[] numbers = NUMBERS.clone();

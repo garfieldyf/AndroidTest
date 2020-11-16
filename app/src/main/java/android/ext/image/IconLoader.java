@@ -5,6 +5,7 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.ext.cache.Cache;
+import android.ext.content.Task;
 import android.ext.util.DebugUtils;
 import android.graphics.drawable.Drawable;
 import android.widget.ImageView;

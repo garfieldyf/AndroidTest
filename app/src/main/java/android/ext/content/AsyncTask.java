@@ -1,7 +1,6 @@
 package android.ext.content;
 
 import android.ext.concurrent.ThreadPool;
-import android.ext.content.Loader.Task;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import java.lang.ref.WeakReference;

@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.pm.PackageInfo;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
+import android.ext.content.Task;
 import android.ext.graphics.drawable.ImageDrawable;
 import android.ext.image.ImageLoader;
 import android.ext.image.ImageModule;

@@ -57,7 +57,7 @@
         </replace>
 
         <!-- replace the GenericLifecycleObserver to LifecycleEventObserver -->
-        <replace file="${src.dir}/${JNI_PACKAGE}/content/Loader.java" token="GenericLifecycleObserver" value="LifecycleEventObserver" encoding="UTF-8" />
+        <replace file="${src.dir}/${JNI_PACKAGE}/content/Task.java" token="GenericLifecycleObserver" value="LifecycleEventObserver" encoding="UTF-8" />
         <replace file="${src.dir}/${JNI_PACKAGE}/database/DatabaseHandler.java" token="GenericLifecycleObserver" value="LifecycleEventObserver" encoding="UTF-8" />
     </target>
 

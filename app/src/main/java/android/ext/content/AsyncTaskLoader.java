@@ -1,6 +1,5 @@
 package android.ext.content;
 
-import android.ext.content.Loader.Task;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;

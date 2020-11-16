@@ -8,6 +8,7 @@ import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
+import android.ext.content.Task;
 import android.ext.image.params.Parameters;
 import android.ext.net.DownloadRequest;
 import android.ext.util.DebugUtils;

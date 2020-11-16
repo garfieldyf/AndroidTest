@@ -21,7 +21,7 @@ import android.ext.cache.LruCache;
 import android.ext.cache.LruFileCache;
 import android.ext.cache.LruImageCache;
 import android.ext.concurrent.ThreadPool;
-import android.ext.content.Loader.Task;
+import android.ext.content.Task;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.image.ImageLoader.LoadRequest;

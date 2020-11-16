@@ -2,13 +2,18 @@ package android.ext.content;
 
 import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Pool;
+import android.util.Printer;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 
 /**
- * Class <tt>AsyncLoader</tt> allows to load the resource on
- * a background thread and bind it to target on the UI thread.
+ * Class <tt>AsyncLoader</tt> allows to load the resource on a background
+ * thread and bind it to target on the UI thread.
  * <h3>AsyncLoader's generic types</h3>
  * <p>The three types used by a loader are the following:</p>
  * <ol><li><tt>Key</tt>, The loader's key type.</li>
@@ -17,7 +22,7 @@ import java.util.concurrent.Executor;
  * @author Garfield
  */
 @SuppressWarnings({ "unchecked", "rawtypes" })
-public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
+public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * If set the loader will be ignored the memory cache when it will be load value.
      */
@@ -28,10 +33,16 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     private static final int FLAG_MASK = 0xF3FFFFFF;
 
-    /**
-     * The {@link Cache} to store the loaded values.
-     */
+    private static final int RUNNING  = 0;
+    private static final int PAUSED   = 1;
+    private static final int SHUTDOWN = 2;
+
+    /* package */ final Pool<Task> mTaskPool;
     /* package */ final Cache<Key, Value> mCache;
+
+    private volatile int mState;
+    private final Executor mExecutor;
+    private final Map<Object, Task> mRunningTasks;
 
     /**
      * Constructor
@@ -52,8 +63,11 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      * @see #AsyncLoader(Executor, Cache, int)
      */
     public AsyncLoader(Executor executor, Cache<Key, Value> cache, Pool<Task> taskPool) {
-        super(executor, taskPool);
+        DebugUtils.__checkMemoryLeaks(getClass());
         mCache = cache;
+        mExecutor = executor;
+        mTaskPool = taskPool;
+        mRunningTasks = new HashMap<Object, Task>();
     }
 
     /**
@@ -138,6 +152,51 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
+     * Shutdown this loader, stop all actively running tasks
+     * and no new tasks will be accepted. <p><b>Note: This
+     * method must be invoked on the UI thread.</b></p>
+     * @see #isShutdown()
+     */
+    public synchronized final void shutdown() {
+        DebugUtils.__checkUIThread("shutdown");
+        mState = SHUTDOWN;
+        cancelAll();
+        notifyAll();
+        onShutdown();
+    }
+
+    /**
+     * Returns <tt>true</tt> if this loader has been shut down.
+     * @return <tt>true</tt> if this loader has been shut down,
+     * <tt>false</tt> otherwise.
+     * @see #shutdown()
+     */
+    public final boolean isShutdown() {
+        return (mState == SHUTDOWN);
+    }
+
+    /**
+     * Temporarily stops all actively running tasks.
+     * @see #resume()
+     */
+    public synchronized final void pause() {
+        if (mState != SHUTDOWN) {
+            mState = PAUSED;
+        }
+    }
+
+    /**
+     * Resumes all actively running tasks.
+     * @see #pause()
+     */
+    public synchronized final void resume() {
+        if (mState != SHUTDOWN) {
+            mState = RUNNING;
+            notifyAll();
+        }
+    }
+
+    /**
      * Removes the value for the specified <em>key</em> from the
      * cache of this loader.
      * @param key The key to remove.
@@ -149,11 +208,49 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
+     * Attempts to stop execution of the task with specified <em>target</em>.
+     * <p><b>Note: This method must be invoked on the UI thread.</b></p>
+     * @param target The target to find the task.
+     * @param mayInterruptIfRunning <tt>true</tt> if the thread executing the
+     * task should be interrupted, <tt>false</tt> otherwise.
+     * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
+     * @see #shutdown()
+     * @see #isTaskCancelled(Task)
+     */
+    public final boolean cancelTask(Object target, boolean mayInterruptIfRunning) {
+        DebugUtils.__checkUIThread("cancelTask");
+        final Task task = mRunningTasks.remove(target);
+        return (task != null && task.cancel(mayInterruptIfRunning));
+    }
+
+    /**
+     * Returns the {@link Executor} associated with this loader.
+     * @return The <tt>Executor</tt>.
+     */
+    public final Executor getExecutor() {
+        return mExecutor;
+    }
+
+    /**
      * Returns the {@link Cache} associated with this loader.
      * @return The <tt>Cache</tt> or <tt>null</tt>.
      */
     public final Cache<Key, Value> getCache() {
         return mCache;
+    }
+
+    public final void dump(Printer printer) {
+        DebugUtils.__checkUIThread("dump");
+        Pools.dumpPool(mTaskPool, printer);
+        final int size = mRunningTasks.size();
+        if (size > 0) {
+            final StringBuilder result = new StringBuilder(80);
+            DeviceUtils.dumpSummary(printer, result, 80, " Dumping Running Tasks [ size = %d ] ", size);
+            for (Entry<Object, Task> entry : mRunningTasks.entrySet()) {
+                result.setLength(0);
+                printer.println(DeviceUtils.toString(entry.getKey(), result.append("  ")).append(" ==> ").append(entry.getValue()).toString());
+            }
+        }
     }
 
     /**
@@ -173,6 +270,27 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
      */
     protected final Object getTarget(Task task) {
         return (task != null ? ((LoadTask)task).mTarget : null);
+    }
+
+    /**
+     * Returns <tt>true</tt> if the <em>task</em> was cancelled before it completed
+     * normally or this loader has been shut down. To ensure that the <em>task</em>
+     * is cancelled as quickly as possible, you should always check the return value
+     * of this method, if possible (inside a loop for instance.)
+     * @param task May be <tt>null</tt>. The {@link Task} to test.
+     * @return <tt>true</tt> if the <em>task</em> was cancelled or this loader has
+     * been shut down, <tt>false</tt> otherwise.
+     * @see #cancelTask(Object, boolean)
+     */
+    protected final boolean isTaskCancelled(Task task) {
+        return (mState == SHUTDOWN || (task != null && task.isCancelled()));
+    }
+
+    /**
+     * Called on the UI thread when this loader has been shut down.
+     */
+    protected void onShutdown() {
+        DebugUtils.__checkDebug(true, getClass().getName(), "shutdown()");
     }
 
     /**
@@ -203,6 +321,49 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
+     * Waits if necessary for this loader has been resume. (after call {@link #resume()})
+     */
+    /* package */ synchronized final void waitResumeIfPaused() {
+        while (mState == PAUSED) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                // Ignored.
+            }
+        }
+    }
+
+    /**
+     * Returns <tt>true</tt> if the <em>task</em> was cancelled.
+     */
+    /* package */ final boolean isTaskCancelled(Object target, Task task) {
+        if (mState == SHUTDOWN) {
+            return true;
+        }
+
+        // Removes the task from running tasks if exists.
+        if (mRunningTasks.get(target) == task) {
+            DebugUtils.__checkDebug(task.isCancelled(), "AsyncLoader", "remove task - target = " + target);
+            mRunningTasks.remove(target);
+        }
+
+        return task.isCancelled();
+    }
+
+    /**
+     * Stops all running tasks.
+     */
+    private void cancelAll() {
+        if (mRunningTasks.size() > 0) {
+            for (Task task : mRunningTasks.values()) {
+                task.cancel(false);
+            }
+
+            mRunningTasks.clear();
+        }
+    }
+
+    /**
      * Tests the specified task is running.
      */
     private boolean isTaskRunning(Key key, Object target) {
@@ -219,7 +380,7 @@ public abstract class AsyncLoader<Key, Params, Value> extends Loader<Object> {
     }
 
     /**
-     * Retrieves a new {@link Task} from the task pool. Allows us to avoid allocating new tasks in many cases.
+     * Retrieves a new {@link LoadTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
     private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder binder) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();

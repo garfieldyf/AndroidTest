@@ -3,6 +3,7 @@ package com.tencent.temp;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.ext.cache.Cache;
+import android.ext.content.Task;
 import android.ext.image.IconLoader;
 import android.ext.image.ImageModule;
 import android.ext.util.DebugUtils;

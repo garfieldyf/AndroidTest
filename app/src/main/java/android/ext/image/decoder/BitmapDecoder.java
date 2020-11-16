@@ -1,6 +1,6 @@
 package android.ext.image.decoder;
 
-import static android.ext.image.ImageLoader.FLAG_DUMP_OPTIONS;
+import static android.ext.image.AbsImageLoader.FLAG_DUMP_OPTIONS;
 import android.ext.cache.BitmapPool;
 import android.ext.image.AbsImageDecoder;
 import android.ext.image.ImageModule;

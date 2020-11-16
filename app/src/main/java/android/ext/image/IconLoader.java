@@ -27,7 +27,7 @@ import android.widget.ImageView;
  *     .into(imageView);</pre>
  * @author Garfield
  */
-public class IconLoader extends ImageLoader<Object> {
+public class IconLoader extends AbsImageLoader<Object> {
     protected final PackageManager mPackageManager;
 
     /**

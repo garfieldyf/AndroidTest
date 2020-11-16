@@ -24,7 +24,7 @@ import android.ext.concurrent.ThreadPool;
 import android.ext.content.Task;
 import android.ext.content.res.XmlResources;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
-import android.ext.image.ImageLoader.LoadRequest;
+import android.ext.image.AbsImageLoader.LoadRequest;
 import android.ext.image.binder.GIFImageBinder;
 import android.ext.image.binder.RoundedBitmapBinder;
 import android.ext.image.binder.TransitionBinder;
@@ -158,25 +158,25 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Equivalent to calling <tt>getImageLoader(id).load(uri)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
      * @param uri The uri to load.
      * @see #getImageLoader(int)
-     * @see ImageLoader#load(Object)
+     * @see AbsImageLoader#load(Object)
      */
     public final LoadRequest load(int id, Object uri) {
         DebugUtils.__checkUIThread("load");
-        return ((ImageLoader)getResource(id, this)).load(uri);
+        return ((AbsImageLoader)getResource(id, this)).load(uri);
     }
 
     /**
      * Equivalent to calling <tt>getImageLoader(id).pause()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
      * @see #resume(int)
      */
     public final void pause(int id) {
         DebugUtils.__checkUIThread("pause");
-        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
         if (loader != null) {
             loader.pause();
         }
@@ -185,12 +185,12 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Equivalent to calling <tt>getImageLoader(id).resume()</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
      * @see #pause(int)
      */
     public final void resume(int id) {
         DebugUtils.__checkUIThread("resume");
-        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
         if (loader != null) {
             loader.resume();
         }
@@ -199,12 +199,12 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Equivalent to calling <tt>getImageLoader(id).remove(uri)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
      * @param uri The uri to remove.
      */
     public final void remove(int id, Object uri) {
         DebugUtils.__checkUIThread("remove");
-        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
         if (loader != null) {
             loader.remove(uri);
         }
@@ -213,22 +213,14 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Equivalent to calling <tt>getImageLoader(id).cancelTask(target, false)</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
      * @param target The target to find the task.
      * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
      */
     public final boolean cancel(int id, Object target) {
         DebugUtils.__checkUIThread("cancel");
-        final ImageLoader loader = (ImageLoader)mResources.get(id, null);
+        final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
         return (loader != null && loader.cancelTask(target, false));
-    }
-
-    /**
-     * Returns the maximum allowed number of threads in the internal thread pool.
-     * @return The maximum number of threads.
-     */
-    public final int getMaximumThreads() {
-        return ((ThreadPool)mExecutor).getMaximumPoolSize();
     }
 
     /**
@@ -256,16 +248,16 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     }
 
     /**
-     * Return an {@link ImageLoader} object associated with a resource id.
+     * Return an image loader object associated with a resource id.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
-     * @param id The xml resource id of the <tt>ImageLoader</tt>.
-     * @return The <tt>ImageLoader</tt>.
+     * @param id The xml resource id of the image loader.
+     * @return The image loader.
      * @throws NotFoundException if the given <em>id</em> does not exist.
      * @see #load(int, Object)
      */
-    public final <Image> ImageLoader<Image> getImageLoader(int id) {
+    public final <T extends AbsImageLoader> T getImageLoader(int id) {
         DebugUtils.__checkUIThread("getImageLoader");
-        return (ImageLoader)getResource(id, this);
+        return (T)getResource(id, this);
     }
 
     @Override
@@ -299,8 +291,8 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             for (int i = mResources.size() - 1; i >= 0; --i) {
                 final Object value = mResources.valueAt(i);
-                if (value instanceof ImageLoader) {
-                    ((ImageLoader)value).shutdown();
+                if (value instanceof AbsImageLoader) {
+                    ((AbsImageLoader)value).shutdown();
                 }
             }
 
@@ -335,17 +327,17 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
             return new ImageLoader(this, imageCache, fileCache, createImageDecoder(parser));
         }
 
-        final Class<ImageLoader> clazz = (Class<ImageLoader>)Class.forName(className);
-        if (IconLoader.class.isAssignableFrom(clazz)) {
-            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
-        } else {
+        final Class clazz = Class.forName(className);
+        if (ImageLoader.class.isAssignableFrom(clazz)) {
             return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class, FileCache.class, ImageLoader.ImageDecoder.class }, this, imageCache, fileCache, createImageDecoder(parser));
+        } else {
+            return ReflectUtils.newInstance(clazz, new Class[] { ImageModule.class, Cache.class }, this, imageCache);
         }
     }
 
     /**
      * Returns the parameters associated with the <em>params</em>.
-     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @param params The parameters, passed earlier by {@link AbsImageLoader#load}.
      * @return The parameters or <tt>null</tt>.
      */
     public static <T> T getParameters(Object[] params) {
@@ -356,7 +348,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Sets the placeholder drawable associated with the <em>params</em> to the {@link ImageView}.
      * @param view The <tt>ImageView</tt> to set.
-     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @param params The parameters, passed earlier by {@link AbsImageLoader#load}.
      * @see #getPlaceholder(Resources, Object[])
      */
     public static void setPlaceholder(ImageView view, Object[] params) {
@@ -372,7 +364,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     /**
      * Returns the placeholder drawable associated with the <em>params</em>.
      * @param res The <tt>Resources</tt>.
-     * @param params The parameters, passed earlier by {@link ImageLoader#load}.
+     * @param params The parameters, passed earlier by {@link AbsImageLoader#load}.
      * @return The placeholder <tt>Drawable</tt> or <tt>null</tt>.
      * @see #setPlaceholder(ImageView, Object[])
      */

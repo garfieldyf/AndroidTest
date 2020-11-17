@@ -1,6 +1,8 @@
 package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
@@ -134,6 +136,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         }
     }
 
+    @WorkerThread
     private Result download(Params[] params) {
         Result result = null;
         try {
@@ -147,6 +150,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         return result;
     }
 
+    @WorkerThread
     @SuppressWarnings("unchecked")
     private boolean loadFromCache(Params[] params, File cacheFile) {
         final int priority = Process.getThreadPriority(Process.myTid());
@@ -169,6 +173,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
         return false;
     }
 
+    @WorkerThread
     private Result download(Params[] params, String cacheFile, boolean hitCache) {
         final File tempFile = new File(cacheFile + ".tmp");
         Result result = null;
@@ -217,6 +222,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @param params The parameters of the load task.
          * @param result A result of the load or <tt>null</tt>.
          */
+        @UiThread
         void onLoadComplete(Params[] params, Result result);
     }
 
@@ -231,6 +237,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @param params The parameters, passed earlier by {@link #execute}.
          * @return The path of the cache file, or <tt>null</tt> if no cache file.
          */
+        @WorkerThread
         default File getCacheFile(Context context, Params[] params) {
             return null;
         }
@@ -243,6 +250,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @return The {@link DownloadRequest}.
          * @throws Exception if an error occurs while opening the connection.
          */
+        @WorkerThread
         default DownloadRequest newDownloadRequest(Context context, Params[] params) throws Exception {
             return null;
         }
@@ -256,6 +264,7 @@ public class ResourceLoader<Params, Result> extends AsyncTask<Params, Result, Re
          * @return A result or <tt>null</tt>, defined by the subclass.
          * @throws Exception if the data can not be parse.
          */
+        @WorkerThread
         Result parseResult(Context context, Params[] params, File cacheFile, Cancelable cancelable) throws Exception;
     }
 }

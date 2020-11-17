@@ -1,6 +1,8 @@
 package android.ext.content;
 
 import android.annotation.SuppressLint;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
@@ -81,6 +83,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
     }
 
     @Override
+    @UiThread
     public final void handleMessage(Message msg) {
         if (msg.what == MESSAGE_PROGRESS) {
             onProgress(msg.obj);
@@ -102,6 +105,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
      * Runs on the UI thread after {@link #setProgress} is invoked.
      * @param value The progress value to update.
      */
+    @UiThread
     /* package */ void onProgress(Object value) {
     }
 
@@ -110,6 +114,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
      * @param result The result, returned earlier by {@link #doInBackground}.
      * @see #doInBackground(Object)
      */
+    @UiThread
     /* package */ abstract void onPostExecute(Object result);
 
     /**
@@ -118,11 +123,13 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
      * @return A result, defined by the subclass of this task.
      * @see #onPostExecute(Object)
      */
+    @WorkerThread
     /* package */ abstract Object doInBackground(Object params);
 
     /**
      * Clears all fields for recycle.
      */
+    @UiThread
     /* package */ final void clearForRecycle() {
         mParams = null;
         mRunner = null;
@@ -142,6 +149,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
     /**
      * Adds a <tt>LifecycleObserver</tt> that will be notified when the <tt>Lifecycle</tt> changes state.
      */
+    @UiThread
     /* package */ final void addLifecycleObserver(Object owner) {
         if (owner instanceof Lifecycle) {
             ((Lifecycle)owner).addObserver(this);
@@ -153,6 +161,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
     /**
      * Removes the <tt>LifecycleObserver</tt> from the <tt>Lifecycle</tt>.
      */
+    @UiThread
     /* package */ final void removeLifecycleObserver(WeakReference<Object> ownerRef) {
         if (ownerRef != null && removeLifecycleObserver(ownerRef.get())) {
             // Force update the state is cancelled.

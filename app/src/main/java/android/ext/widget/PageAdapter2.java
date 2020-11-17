@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import android.annotation.WorkerThread;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.support.v7.widget.RecyclerView.ViewHolder;
@@ -56,6 +57,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
+    @WorkerThread
     protected abstract List<E> loadPage(AsyncTask<?, ?, ?> task, int pageIndex, int startPosition, int loadSize);
 
     /**

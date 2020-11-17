@@ -2,6 +2,7 @@ package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
+import android.annotation.WorkerThread;
 import android.ext.content.AsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.ByteArrayBuffer;
@@ -79,6 +80,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @see #download(OutputStream)
      */
     @Override
+    @WorkerThread
     public Result onDownload(URLConnection conn, int statusCode, Params[] params) throws Exception {
         return (statusCode == HTTP_OK ? mRequest.<Result>downloadImpl(this) : null);
     }
@@ -89,6 +91,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @return The instance of {@link DownloadRequest}.
      * @throws Exception if an error occurs while opening the connection.
      */
+    @WorkerThread
     protected abstract DownloadRequest newDownloadRequest(Params[] params) throws Exception;
 
     /**
@@ -97,6 +100,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
+    @WorkerThread
     protected final ByteArrayBuffer download() throws IOException {
         final ByteArrayBuffer result = new ByteArrayBuffer();
         mRequest.downloadImpl(result, this, null);
@@ -109,6 +113,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
+    @WorkerThread
     protected final void download(OutputStream out) throws IOException {
         mRequest.downloadImpl(out, this, null);
     }
@@ -121,6 +126,7 @@ public abstract class AsyncDownloadTask<Params, Progress, Result> extends AsyncT
      * @throws IOException if an error occurs while downloading to the resource.
      * @see #onDownload(URLConnection, int, Params[])
      */
+    @WorkerThread
     protected final void download(File file, int statusCode) throws IOException {
         switch (statusCode) {
         case HTTP_OK:

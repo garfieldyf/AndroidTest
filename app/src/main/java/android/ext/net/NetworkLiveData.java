@@ -1,5 +1,6 @@
 package android.ext.net;
 
+import android.annotation.UiThread;
 import android.arch.lifecycle.LiveData;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -29,6 +30,7 @@ public final class NetworkLiveData extends LiveData<NetworkInfo> {
      * Returns a singleton {@link NetworkLiveData} associated with this class.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      */
+    @UiThread
     public static NetworkLiveData getInstance(Context context) {
         DebugUtils.__checkUIThread("getInstance");
         if (sInstance == null) {

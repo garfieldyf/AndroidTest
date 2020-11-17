@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler.MessageRunnable;
 import android.os.Message;
@@ -38,6 +39,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * a layout then this method will be post the change using a <tt>Handler</tt>.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      */
+    @UiThread
     public final void postNotifyDataSetChanged() {
         DebugUtils.__checkUIThread("postNotifyDataSetChanged");
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
@@ -53,6 +55,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param position The position of the item that was removed.
      * @see #postNotifyItemRangeRemoved(int, int)
      */
+    @UiThread
     public final void postNotifyItemRemoved(int position) {
         postNotifyItemRangeRemoved(position, 1);
     }
@@ -62,6 +65,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param position The position of the item that was inserted.
      * @see #postNotifyItemRangeInserted(int, int)
      */
+    @UiThread
     public final void postNotifyItemInserted(int position) {
         postNotifyItemRangeInserted(position, 1);
     }
@@ -72,6 +76,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @see #postNotifyItemChanged(int, Object)
      * @see #postNotifyItemRangeChanged(int, int, Object)
      */
+    @UiThread
     public final void postNotifyItemChanged(int position) {
         postNotifyItemRangeChanged(position, 1, null);
     }
@@ -83,6 +88,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @see #postNotifyItemChanged(int)
      * @see #postNotifyItemRangeChanged(int, int, Object)
      */
+    @UiThread
     public final void postNotifyItemChanged(int position, Object payload) {
         postNotifyItemRangeChanged(position, 1, payload);
     }
@@ -92,6 +98,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param id The id of the item.
      * @see #postNotifyItemChanged(long, Object)
      */
+    @UiThread
     public final void postNotifyItemChanged(long id) {
         postNotifyItemChanged(id, null);
     }
@@ -104,6 +111,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param payload Optional parameter, pass to {@link #notifyItemChanged(int, Object)}.
      * @see #postNotifyItemChanged(long)
      */
+    @UiThread
     public final void postNotifyItemChanged(long id, Object payload) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final ViewHolder holder = mRecyclerView.findViewHolderForItemId(id);
@@ -123,6 +131,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param fromPosition The previous position of the item.
      * @param toPosition The new position of the item.
      */
+    @UiThread
     public final void postNotifyItemMoved(int fromPosition, int toPosition) {
         DebugUtils.__checkUIThread("postNotifyItemMoved");
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
@@ -141,6 +150,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param itemCount The number of items removed.
      * @see #postNotifyItemRemoved(int)
      */
+    @UiThread
     public final void postNotifyItemRangeRemoved(int positionStart, int itemCount) {
         DebugUtils.__checkUIThread("postNotifyItemRangeRemoved");
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
@@ -159,6 +169,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @param itemCount The number of items inserted.
      * @see #postNotifyItemInserted(int)
      */
+    @UiThread
     public final void postNotifyItemRangeInserted(int positionStart, int itemCount) {
         DebugUtils.__checkUIThread("postNotifyItemRangeInserted");
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {
@@ -179,6 +190,7 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * @see #postNotifyItemChanged(int)
      * @see #postNotifyItemChanged(int, Object)
      */
+    @UiThread
     public final void postNotifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
         DebugUtils.__checkUIThread("postNotifyItemRangeChanged");
         if (mRecyclerView != null && mRecyclerView.isComputingLayout()) {

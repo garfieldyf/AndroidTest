@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import android.annotation.SuppressLint;
+import android.annotation.UiThread;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncTask;
@@ -121,6 +122,7 @@ public final class AsyncViewStub extends View {
         setMeasuredDimension(0, 0);
     }
 
+    @UiThread
     /* package */ final void onFinishInflate(ViewGroup parent, View view, OnInflateListener listener) {
         // Sets the inflated view id.
         if (mInflatedId != NO_ID) {
@@ -156,6 +158,7 @@ public final class AsyncViewStub extends View {
          * @param view The inflated <tt>View</tt>.
          * @param layoutId The layout resource id to inflate.
          */
+        @UiThread
         void onFinishInflate(AsyncViewStub stub, View view, int layoutId);
     }
 

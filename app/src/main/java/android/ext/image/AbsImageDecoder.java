@@ -1,5 +1,6 @@
 package android.ext.image;
 
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.image.params.Parameters;
@@ -50,6 +51,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @see UriUtils#openInputStream(Context, Object)
      */
     @Override
+    @WorkerThread
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mModule.mOptionsPool.obtain();
         try {
@@ -118,6 +120,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @return The <tt>Bitmap</tt>, or <tt>null</tt> if the image data cannot be decode.
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      */
+    @WorkerThread
     protected Bitmap decodeBitmap(Object uri, Options opts) throws Exception {
         try (final InputStream is = UriUtils.openInputStream(mModule.mContext, uri)) {
             return BitmapFactory.decodeStream(is, null, opts);
@@ -136,5 +139,6 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @throws Exception if an error occurs while decode from <em>uri</em>.
      * @see #decodeImage(Object, Object, Object[], int, byte[])
      */
+    @WorkerThread
     protected abstract Image decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception;
 }

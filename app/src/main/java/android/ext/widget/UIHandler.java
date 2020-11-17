@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.os.Handler;
 import android.os.Looper;
@@ -112,6 +113,7 @@ public final class UIHandler extends Handler implements Executor {
          * Called on the UI thread to receive messages.
          * @param msg The <tt>Message</tt> to handle.
          */
+        @UiThread
         void handleMessage(Message msg);
     }
 }

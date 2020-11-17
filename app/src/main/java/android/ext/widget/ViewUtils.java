@@ -2,6 +2,7 @@ package android.ext.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
+import android.annotation.UiThread;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -16,6 +17,7 @@ public final class ViewUtils {
      * @param resId The resource id of the property animation.
      * @return The <tt>Animator</tt> associated with the <em>view</em>.
      */
+    @UiThread
     public static Animator animate(View view, int resId) {
         Animator animator = (Animator)view.getTag(resId);
         if (animator == null) {
@@ -33,6 +35,7 @@ public final class ViewUtils {
      * @param resId The resource id of the property animation.
      * @param invalidateParent Whether the <em>view's</em> parent should be invalidated as well.
      */
+    @UiThread
     public static void startAnimation(View view, int resId, boolean invalidateParent) {
         if (invalidateParent) {
             final View parent = (View)view.getParent();

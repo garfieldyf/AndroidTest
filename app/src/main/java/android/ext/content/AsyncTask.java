@@ -1,5 +1,7 @@
 package android.ext.content;
 
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.ext.concurrent.ThreadPool;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
@@ -72,6 +74,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @return This <em>task</em>.
      * @see #executeOnExecutor(Executor, Params[])
      */
+    @UiThread
     @SuppressWarnings("unchecked")
     public final AsyncTask<Params, Progress, Result> execute(Params... params) {
         return executeOnExecutor(THREAD_POOL_EXECUTOR, params);
@@ -86,6 +89,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @return This <em>task</em>.
      * @see #execute(Params[])
      */
+    @UiThread
     @SuppressWarnings("unchecked")
     public final AsyncTask<Params, Progress, Result> executeOnExecutor(Executor executor, Params... params) {
         DebugUtils.__checkError(executor == null, "Invalid parameter - executor == null");
@@ -153,6 +157,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * by {@link #setProgress}.
      * @see #setProgress(Progress[])
      */
+    @UiThread
     protected void onProgressUpdate(Progress[] values) {
     }
 
@@ -162,6 +167,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #doInBackground(Params[])
      * @see #onPostExecute(Params[], Result)
      */
+    @UiThread
     protected void onPreExecute(Params[] params) {
     }
 
@@ -173,6 +179,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #doInBackground(Params[])
      * @see #onPostExecute(Params[], Result)
      */
+    @UiThread
     protected void onCancelled(Result result) {
     }
 
@@ -184,6 +191,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #onCancelled(Result)
      * @see #onPostExecute(Params[], Result)
      */
+    @WorkerThread
     protected abstract Result doInBackground(Params[] params);
 
     /**
@@ -194,6 +202,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
      * @see #onCancelled(Result)
      * @see #doInBackground(Params[])
      */
+    @UiThread
     protected abstract void onPostExecute(Params[] params, Result result);
 
     static {

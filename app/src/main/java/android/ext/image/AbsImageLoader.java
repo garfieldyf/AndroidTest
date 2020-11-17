@@ -3,6 +3,7 @@ package android.ext.image;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
+import android.annotation.UiThread;
 import android.ext.cache.Cache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
@@ -62,6 +63,7 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
      * @param uri May be <tt>null</tt>. The uri to load.
      * @return The {@link LoadRequest}.
      */
+    @UiThread
     public final LoadRequest load(Object uri) {
         DebugUtils.__checkUIThread("load");
         mRequest.mUri = resolveUri(uri);

@@ -1,6 +1,8 @@
 package android.ext.database;
 
 import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -48,6 +50,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
+    @UiThread
     public final void startExecute(int token, String table, String arg1, String arg2, Object... params) {
         final SQLiteTask task = obtainTask(token, MESSAGE_EXECUTE, table, arg1, null, params);
         task.sortOrder = arg2;
@@ -63,6 +66,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * values from <em>selectionArgs</em>. The values will be bound as Strings.
      * @see #startQuery(int, String, String[], String, String[], String)
      */
+    @UiThread
     public final void startQuery(int token, String sql, String[] selectionArgs) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_RAWQUERY, null, sql, selectionArgs, null));
     }
@@ -81,6 +85,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      * @see #startQuery(int, String, String[])
      */
+    @UiThread
     public final void startQuery(int token, String table, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final SQLiteTask task = obtainTask(token, MESSAGE_QUERY, table, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
@@ -100,6 +105,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param values The map contains the initial column values for the row. The keys should be the column
      * names and the values the column values.
      */
+    @UiThread
     public final void startInsert(int token, String table, String nullColumnHack, ContentValues values) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERT, table, nullColumnHack, null, values));
     }
@@ -116,6 +122,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param values A map from column names to new column values. <tt>null</tt> is a valid value that will be
      * translated to NULL.
      */
+    @UiThread
     public final void startReplace(int token, String table, String nullColumnHack, ContentValues values) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_REPLACE, table, nullColumnHack, null, values));
     }
@@ -131,6 +138,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
+    @UiThread
     public final void startUpdate(int token, String table, ContentValues values, String whereClause, String[] whereArgs) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_UPDATE, table, whereClause, whereArgs, values));
     }
@@ -145,6 +153,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
+    @UiThread
     public final void startDelete(int token, String table, String whereClause, String[] whereArgs) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_DELETE, table, whereClause, whereArgs, null));
     }
@@ -172,6 +181,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
      * @param params The parameters passed in from {@link #startExecute}.
      * @return The execution result.
      */
+    @WorkerThread
     protected Object onExecute(SQLiteDatabase db, int token, String table, String arg1, String arg2, Object[] params) {
         return null;
     }
@@ -179,6 +189,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
     /**
      * Retrieves a new {@link SQLiteTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
+    @UiThread
     private SQLiteTask obtainTask(int token, int message, String table, String selection, String[] selectionArgs, Object values) {
         DebugUtils.__checkUIThread("obtainTask");
         final SQLiteTask task = (SQLiteTask)mTaskPool.obtain();
@@ -240,6 +251,7 @@ public abstract class AsyncSQLiteHandler extends DatabaseHandler {
             UIHandler.sInstance.post(this, result);
         }
 
+        @WorkerThread
         private Cursor execQuery(SQLiteDatabase db) {
             DebugUtils.__checkStartMethodTracing();
             final Cursor cursor;

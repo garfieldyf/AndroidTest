@@ -1,5 +1,6 @@
 package android.ext.widget;
 
+import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.view.View;
@@ -26,6 +27,7 @@ public final class ViewVisibility implements Runnable {
      * Show the view with the specified <em>delayMillis</em>.
      * @param delayMillis The delay in milliseconds until the view will be show.
      */
+    @UiThread
     public final void show(long delayMillis) {
         DebugUtils.__checkUIThread("show");
         final ViewGroup parent = (ViewGroup)mView.getParent();
@@ -46,6 +48,7 @@ public final class ViewVisibility implements Runnable {
      * Hide the view, but do not dismiss it.
      * @see #dismiss()
      */
+    @UiThread
     public final void hide() {
         DebugUtils.__checkUIThread("hide");
         hide(false);
@@ -55,6 +58,7 @@ public final class ViewVisibility implements Runnable {
      * Dismiss the view, removing it from the parent.
      * @see #hide()
      */
+    @UiThread
     public final void dismiss() {
         DebugUtils.__checkUIThread("dismiss");
         hide(true);

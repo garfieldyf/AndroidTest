@@ -4,6 +4,7 @@ import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE;
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
+import android.annotation.UiThread;
 import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -144,6 +145,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * Returns a singleton {@link ImageModule} associated with this class.
      * <p><b>Note: This method must be invoked on the UI thread.</b></p>
      */
+    @UiThread
     public static ImageModule getInstance(Context context) {
         DebugUtils.__checkUIThread("getInstance");
         if (sInstance == null) {
@@ -163,6 +165,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @see #getImageLoader(int)
      * @see AbsImageLoader#load(Object)
      */
+    @UiThread
     public final LoadRequest load(int id, Object uri) {
         DebugUtils.__checkUIThread("load");
         return ((AbsImageLoader)getResource(id, this)).load(uri);
@@ -174,6 +177,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the image loader.
      * @see #resume(int)
      */
+    @UiThread
     public final void pause(int id) {
         DebugUtils.__checkUIThread("pause");
         final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
@@ -188,6 +192,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the image loader.
      * @see #pause(int)
      */
+    @UiThread
     public final void resume(int id) {
         DebugUtils.__checkUIThread("resume");
         final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
@@ -202,6 +207,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param id The xml resource id of the image loader.
      * @param uri The uri to remove.
      */
+    @UiThread
     public final void remove(int id, Object uri) {
         DebugUtils.__checkUIThread("remove");
         final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
@@ -217,6 +223,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @param target The target to find the task.
      * @return <tt>true</tt> if the task was cancelled, <tt>false</tt> otherwise.
      */
+    @UiThread
     public final boolean cancel(int id, Object target) {
         DebugUtils.__checkUIThread("cancel");
         final AbsImageLoader loader = (AbsImageLoader)mResources.get(id, null);
@@ -255,6 +262,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
      * @throws NotFoundException if the given <em>id</em> does not exist.
      * @see #load(int, Object)
      */
+    @UiThread
     public final <T extends AbsImageLoader> T getImageLoader(int id) {
         DebugUtils.__checkUIThread("getImageLoader");
         return (T)getResource(id, this);

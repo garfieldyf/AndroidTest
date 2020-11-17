@@ -1,6 +1,8 @@
 package android.ext.database;
 
 import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -58,6 +60,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param params The parameters passed into {@link #onExecute}. If no parameters, you
      * can pass <em>(Object[])null</em> instead of allocating an empty array.
      */
+    @UiThread
     public final void startExecute(int token, Uri uri, String arg1, String arg2, Object... params) {
         final AsyncQueryTask task = obtainTask(token, MESSAGE_EXECUTE, uri, arg1, null, params);
         task.sortOrder = arg2;
@@ -77,6 +80,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param sortOrder How to order the rows, formatted as an SQL ORDER BY clause (excluding the ORDER BY itself).
      * Passing <tt>null</tt> will use the default sort order, which may be unordered.
      */
+    @UiThread
     public final void startQuery(int token, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         final AsyncQueryTask task = obtainTask(token, MESSAGE_QUERY, uri, selection, selectionArgs, projection);
         task.sortOrder = sortOrder;
@@ -93,6 +97,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param arg The provider-defined <tt>String</tt> argument. May be <tt>null</tt>.
      * @param extras The provider-defined <tt>Bundle</tt> argument. May be <tt>null</tt>.
      */
+    @UiThread
     public final void startCall(int token, Uri uri, String method, String arg, Bundle extras) {
         final AsyncQueryTask task = obtainTask(token, MESSAGE_CALL, uri, method, null, extras);
         task.sortOrder = arg;
@@ -107,6 +112,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param values The map contains the initial column values the newly inserted row. The keys should be the
      * column names and the values the column values. Passing an empty ContentValues will create an empty row.
      */
+    @UiThread
     public final void startInsert(int token, Uri uri, ContentValues values) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERT, uri, null, null, values));
     }
@@ -122,6 +128,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
+    @UiThread
     public final void startUpdate(int token, Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_UPDATE, uri, whereClause, whereArgs, values));
     }
@@ -136,6 +143,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param whereArgs You may include ? in whereClause, which will be replaced by the values from <em>whereArgs</em>.
      * The values will be bound as Strings.
      */
+    @UiThread
     public final void startDelete(int token, Uri uri, String whereClause, String[] whereArgs) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_DELETE, uri, whereClause, whereArgs, null));
     }
@@ -149,6 +157,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param values The map contains the initial column values the newly inserted row. The
      * keys should be the column names and the values the column values.
      */
+    @UiThread
     public final void startBulkInsert(int token, Uri uri, ContentValues[] values) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_INSERTS, uri, null, null, values));
     }
@@ -161,6 +170,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param authority The authority of the <tt>ContentProvider</tt> to which this batch should be applied.
      * @param operations The operations to apply.
      */
+    @UiThread
     public final void startApplyBatch(int token, String authority, ArrayList<ContentProviderOperation> operations) {
         SERIAL_EXECUTOR.execute(obtainTask(token, MESSAGE_BATCH, null, authority, null, operations));
     }
@@ -188,6 +198,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
      * @param params The parameters passed in from {@link #startExecute}.
      * @return The execution result.
      */
+    @WorkerThread
     protected Object onExecute(ContentResolver resolver, int token, Uri uri, String arg1, String arg2, Object[] params) {
         return null;
     }
@@ -195,6 +206,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
     /**
      * Retrieves a new {@link AsyncQueryTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
+    @UiThread
     private AsyncQueryTask obtainTask(int token, int message, Uri uri, String selection, String[] selectionArgs, Object values) {
         DebugUtils.__checkUIThread("obtainTask");
         final AsyncQueryTask task = (AsyncQueryTask)mTaskPool.obtain();
@@ -258,6 +270,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             UIHandler.sInstance.post(this, result);
         }
 
+        @WorkerThread
         private Cursor execQuery(ContentResolver resolver) {
             DebugUtils.__checkStartMethodTracing();
             Cursor cursor = null;
@@ -276,6 +289,7 @@ public abstract class AsyncQueryHandler extends DatabaseHandler {
             return cursor;
         }
 
+        @WorkerThread
         @SuppressWarnings("unchecked")
         private ContentProviderResult[] applyBatch(ContentResolver resolver) {
             try {

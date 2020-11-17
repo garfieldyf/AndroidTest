@@ -1,5 +1,7 @@
 package android.ext.content;
 
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
@@ -44,6 +46,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
      * @param params The parameters of the load task. If the task no parameters, you can pass <em>(Params[])null</em>
      * instead of allocating an empty array.
      */
+    @UiThread
     @SuppressWarnings("unchecked")
     public final void load(OnLoadCompleteListener<Params, Result> listener, Params... params) {
         DebugUtils.__checkUIThread("load");
@@ -68,6 +71,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
         mOwner = new WeakReference<Object>(owner);
     }
 
+    @UiThread
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
@@ -85,6 +89,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
      * @return A result, defined by the subclass of this loader.
      * @see #load(OnLoadCompleteListener, Params[])
      */
+    @WorkerThread
     protected abstract Result loadInBackground(Task task, Params[] params);
 
     /**

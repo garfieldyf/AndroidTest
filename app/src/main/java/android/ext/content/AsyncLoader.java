@@ -1,5 +1,7 @@
 package android.ext.content;
 
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -77,6 +79,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * @param binder The {@link Binder} used to bind value to <em>target</em>.
      * @see #load(Key, Object, int, Binder, Params[])
      */
+    @UiThread
     public final void load(Key key, Object target, Binder<Key, Params, Value> binder) {
         load(key, target, 0, binder, (Params[])null);
     }
@@ -93,6 +96,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * <em>(Params[])null</em> instead of allocating an empty array.
      * @see #load(Key, Object, Binder)
      */
+    @UiThread
     public void load(Key key, Object target, int flags, Binder<Key, Params, Value> binder, Params... params) {
         DebugUtils.__checkUIThread("load");
         DebugUtils.__checkError(target == null || binder == null, "Invalid parameters - target == null || binder == null");
@@ -157,6 +161,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * method must be invoked on the UI thread.</b></p>
      * @see #isShutdown()
      */
+    @UiThread
     public synchronized final void shutdown() {
         DebugUtils.__checkUIThread("shutdown");
         mState = SHUTDOWN;
@@ -179,6 +184,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * Temporarily stops all actively running tasks.
      * @see #resume()
      */
+    @UiThread
     public synchronized final void pause() {
         if (mState != SHUTDOWN) {
             mState = PAUSED;
@@ -189,6 +195,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * Resumes all actively running tasks.
      * @see #pause()
      */
+    @UiThread
     public synchronized final void resume() {
         if (mState != SHUTDOWN) {
             mState = RUNNING;
@@ -217,6 +224,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * @see #shutdown()
      * @see #isTaskCancelled(Task)
      */
+    @UiThread
     public final boolean cancelTask(Object target, boolean mayInterruptIfRunning) {
         DebugUtils.__checkUIThread("cancelTask");
         final Task task = mRunningTasks.remove(target);
@@ -239,6 +247,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
         return mCache;
     }
 
+    @UiThread
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
@@ -289,6 +298,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Called on the UI thread when this loader has been shut down.
      */
+    @UiThread
     protected void onShutdown() {
         DebugUtils.__checkDebug(true, getClass().getName(), "shutdown()");
     }
@@ -297,6 +307,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * Called on the UI thread to recycle the <em>params</em>.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
      */
+    @UiThread
     protected void onRecycle(Params[] params) {
     }
 
@@ -311,6 +322,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
      * @see #loadSync(Key, int, Params[])
      * @see #load(Key, Object, int, Binder, Params[])
      */
+    @WorkerThread
     protected abstract Value loadInBackground(Task task, Key key, Params[] params, int flags);
 
     /**
@@ -323,6 +335,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Waits if necessary for this loader has been resume. (after call {@link #resume()})
      */
+    @WorkerThread
     /* package */ synchronized final void waitResumeIfPaused() {
         while (mState == PAUSED) {
             try {
@@ -336,6 +349,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Returns <tt>true</tt> if the <em>task</em> was cancelled.
      */
+    @UiThread
     /* package */ final boolean isTaskCancelled(Object target, Task task) {
         if (mState == SHUTDOWN) {
             return true;
@@ -353,6 +367,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Stops all running tasks.
      */
+    @UiThread
     private void cancelAll() {
         if (mRunningTasks.size() > 0) {
             for (Task task : mRunningTasks.values()) {
@@ -366,6 +381,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Tests the specified task is running.
      */
+    @UiThread
     private boolean isTaskRunning(Key key, Object target) {
         final LoadTask task = (LoadTask)mRunningTasks.get(target);
         if (task != null && !task.isCancelled()) {
@@ -382,6 +398,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Retrieves a new {@link LoadTask} from the task pool. Allows us to avoid allocating new tasks in many cases.
      */
+    @UiThread
     private LoadTask obtain(Key key, Params[] params, Object target, int flags, Binder binder) {
         final LoadTask task = (LoadTask)mTaskPool.obtain();
         task.mKey = key;
@@ -396,6 +413,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     /**
      * Binds the specified <em>value</em> to the specified <em>target</em>.
      */
+    @UiThread
     private void bindValue(Binder binder, Key key, Params[] params, Object target, Value value, int state) {
         // Cancel the task associated with the target.
         cancelTask(target, false);
@@ -469,6 +487,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
          * @param state May be <tt>0</tt> or any combination of <tt>STATE_XXX</tt> and
          * <tt>FLAG_XXX</tt> constants.
          */
+        @UiThread
         void bindValue(Key key, Params[] params, Object target, Value value, int state);
 
         /**

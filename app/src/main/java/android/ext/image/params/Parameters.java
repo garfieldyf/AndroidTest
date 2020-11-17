@@ -1,6 +1,7 @@
 package android.ext.image.params;
 
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
@@ -80,6 +81,7 @@ public class Parameters {
     /**
      * Return whether the decoded <tt>Bitmap</tt> will be mutable.
      */
+    @WorkerThread
     public boolean isMutable() {
         // Bitmaps with Config.HARWARE are always immutable.
         return (Build.VERSION.SDK_INT < 26 || config != Config.HARDWARE);
@@ -91,6 +93,7 @@ public class Parameters {
      * @param opts The {@link Options} to compute. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
      */
+    @WorkerThread
     public void computeSampleSize(Object target, Options opts) {
         opts.inSampleSize = (int)value;
     }
@@ -102,6 +105,7 @@ public class Parameters {
      * <tt>out...</tt> fields are set.
      * @return The number of bytes.
      */
+    @WorkerThread
     public int computeByteCount(Options opts) {
         DebugUtils.__checkError(opts.inSampleSize <= 0 || opts.outWidth <= 0 || opts.outHeight <= 0, "opts.inSampleSize(" + opts.inSampleSize + ") and opts.outWidth(" + opts.outWidth + ") and opts.outHeight(" + opts.outHeight + ") must be > 0");
         return (int)((float)opts.outWidth / opts.inSampleSize + 0.5f) * (int)((float)opts.outHeight / opts.inSampleSize + 0.5f) * getBytesPerPixel(opts);

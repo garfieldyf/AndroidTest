@@ -1,5 +1,6 @@
 package android.ext.cache;
 
+import android.annotation.UiThread;
 import android.content.Context;
 import android.util.Printer;
 
@@ -44,6 +45,7 @@ public interface Cache<K, V> {
      * @param level The integer represents a trim level as specified in
      * {@link android.content.ComponentCallbacks2}.
      */
+    @UiThread
     default void trimMemory(int level) {
     }
 

@@ -1,5 +1,6 @@
 package android.ext.barcode;
 
+import android.annotation.UiThread;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
@@ -359,6 +360,7 @@ public class BarcodeDecoder {
          * @param result The contents of the image if succeeded,
          * <tt>null</tt> otherwise.
          */
+        @UiThread
         void onDecodeComplete(LuminanceSource source, Result result);
     }
 

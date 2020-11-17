@@ -1,6 +1,8 @@
 package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.Task;
@@ -112,6 +114,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
      * @param buffer The temporary byte array to used for loading image data.
      * @return The image, or <tt>null</tt> if the load failed or cancelled.
      */
+    @WorkerThread
     protected Image loadImage(Task task, String url, File imageFile, Object target, Object[] params, int flags, byte[] buffer) {
         try {
             final DownloadRequest request = new DownloadRequest(url).connectTimeout(30000).readTimeout(30000);
@@ -145,6 +148,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
          * @param buffer The temporary byte array to use for loading image data.
          * @return The image, or <tt>null</tt> if the load failed or cancelled.
          */
+        @WorkerThread
         Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer);
     }
 
@@ -153,6 +157,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
      */
     /* package */ final class URLLoader implements Loader<Image> {
         @Override
+        @WorkerThread
         public Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final File imageFile = new File(mModule.mCacheDir, Integer.toString(Thread.currentThread().hashCode()));
             try {
@@ -188,6 +193,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
         }
 
         @Override
+        @WorkerThread
         public Image load(Task task, String url, Object target, Object[] params, int flags, byte[] buffer) {
             final String hashKey = StringUtils.toHexString(buffer, 0, MessageDigests.computeString(url, buffer, 0, Algorithm.SHA1));
             final File imageFile = mCache.get(hashKey);
@@ -226,6 +232,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
          * Called when the {@link ImageLoader} has been shut down, for
          * subclasses to release any other resources associated with it.
          */
+        @UiThread
         default void releaseResources() {
         }
 

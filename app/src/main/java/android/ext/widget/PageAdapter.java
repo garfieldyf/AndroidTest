@@ -1,6 +1,7 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
+import android.annotation.UiThread;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
@@ -59,6 +60,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param itemCount The total number of items in this adapter.
      * @see #getItemCount()
      */
+    @UiThread
     public void setItemCount(int itemCount) {
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") must be >= 0");
@@ -78,6 +80,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getItem(int, E)
      * @see #getItem(ViewHolder)
      */
+    @UiThread
     public final E getItem(int position) {
         return getItem(position, null);
     }
@@ -92,6 +95,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getItem(View)
      * @see #getItem(ViewHolder)
      */
+    @UiThread
     public E getItem(int position, E fallback) {
         DebugUtils.__checkUIThread("getItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid position = " + position + ", itemCount = " + mItemCount);
@@ -127,6 +131,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getItem(int, E)
      * @see #getItem(ViewHolder)
      */
+    @UiThread
     public final E getItem(View child) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int position = mRecyclerView.getChildAdapterPosition(child);
@@ -141,6 +146,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #getItem(View)
      * @see #getItem(int, E)
      */
+    @UiThread
     public final E getItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
         return (position != NO_POSITION ? getItem(position, null) : null);
@@ -154,6 +160,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * or <tt>null</tt> if the item not found.
      * @see #setItem(int, E, Object)
      */
+    @UiThread
     public final E setItem(int position, E value) {
         return setItem(position, value, null);
     }
@@ -169,6 +176,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @return The previous item at the specified <em>position</em> or <tt>null</tt> if the item not found.
      * @see #setItem(int, E)
      */
+    @UiThread
     public E setItem(int position, E value, Object payload) {
         DebugUtils.__checkUIThread("setItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid parameter - position out of bounds [ position = " + position + ", itemCount = " + mItemCount + " ]");
@@ -193,6 +201,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #peekItem(View)
      * @see #peekItem(ViewHolder)
      */
+    @UiThread
     public E peekItem(int position) {
         DebugUtils.__checkUIThread("peekItem");
         DebugUtils.__checkError(position < 0 || position >= mItemCount, "Invalid parameter - position out of bounds [ position = " + position + ", itemCount = " + mItemCount + " ]");
@@ -209,6 +218,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #peekItem(int)
      * @see #peekItem(ViewHolder)
      */
+    @UiThread
     public final E peekItem(View child) {
         DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
         final int position = mRecyclerView.getChildAdapterPosition(child);
@@ -222,6 +232,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @see #peekItem(int)
      * @see #peekItem(View)
      */
+    @UiThread
     public final E peekItem(ViewHolder viewHolder) {
         final int position = viewHolder.getAdapterPosition();
         return (position != NO_POSITION ? peekItem(position) : null);
@@ -233,6 +244,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param page May be <tt>null</tt>. The page to add.
      * @see #setPage(int, List, Object)
      */
+    @UiThread
     public final void setPage(int pageIndex, List<?> page) {
         setPage(pageIndex, page, null);
     }
@@ -247,6 +259,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
      * @see #setPage(int, List)
      */
+    @UiThread
     @SuppressWarnings("unchecked")
     public void setPage(int pageIndex, List<?> page, Object payload) {
         DebugUtils.__checkUIThread("setPage");
@@ -307,6 +320,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         return (pageIndex > 0 ? (pageIndex - 1) * mConfig.pageSize + mConfig.initialSize : 0);
     }
 
+    @UiThread
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         if (mPageCache instanceof ArrayMapCache) {
@@ -348,6 +362,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
+    @UiThread
     protected abstract List<E> loadPage(int pageIndex, int startPosition, int loadSize);
 
     /**
@@ -357,6 +372,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
      * @param pageIndex The index of the page.
      * @return The page at the specified index, or <tt>null</tt> if there was not present.
      */
+    @UiThread
     private List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
         List<E> page = mPageCache.get(pageIndex);

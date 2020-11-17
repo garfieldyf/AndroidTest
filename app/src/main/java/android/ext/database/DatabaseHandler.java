@@ -1,6 +1,7 @@
 package android.ext.database;
 
 import android.annotation.SuppressLint;
+import android.annotation.UiThread;
 import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
@@ -72,6 +73,7 @@ import java.lang.ref.WeakReference;
         addLifecycleObserver(owner);
     }
 
+    @UiThread
     public final void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         Pools.dumpPool(mTaskPool, printer);
@@ -102,6 +104,7 @@ import java.lang.ref.WeakReference;
      * @param token The token.
      * @param result The result.
      */
+    @UiThread
     protected void onDestroy(int token, Object result) {
         DebugUtils.__checkDebug(true, getClass().getName(), "onDestroy token = " + token + ", result = " + result);
         // Closes the Cursor to avoid memory leak.
@@ -115,6 +118,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the call, passed in from {@link #startCall}.
      * @param result A result <tt>Bundle</tt> holding the results from the call.
      */
+    @UiThread
     protected void onCallComplete(int token, Bundle result) {
     }
 
@@ -123,6 +127,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the execute, passed in from {@link #startExecute}.
      * @param result The result, returned earlier by {@link #onExecute}.
      */
+    @UiThread
     protected void onExecuteComplete(int token, Object result) {
     }
 
@@ -131,6 +136,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the query, passed in from {@link #startQuery}.
      * @param cursor The cursor holding the results from the query.
      */
+    @UiThread
     protected void onQueryComplete(int token, Cursor cursor) {
     }
 
@@ -139,6 +145,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the replace, passed in from {@link #startReplace}.
      * @param id The row ID of the newly inserted row, or -1 if an error occurred.
      */
+    @UiThread
     protected void onReplaceComplete(int token, long id) {
     }
 
@@ -147,6 +154,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the insert, passed in from {@link #startInsert}.
      * @param id The row ID of the newly inserted row, or -1 if an error occurred.
      */
+    @UiThread
     protected void onInsertComplete(int token, long id) {
     }
 
@@ -155,6 +163,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the insert, passed in from {@link #startInsert}.
      * @param newUri The URL of the newly created row.
      */
+    @UiThread
     protected void onInsertComplete(int token, Uri newUri) {
     }
 
@@ -163,6 +172,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the update, passed in from {@link #startUpdate}.
      * @param rowsAffected The number of rows affected.
      */
+    @UiThread
     protected void onUpdateComplete(int token, int rowsAffected) {
     }
 
@@ -171,6 +181,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the delete, passed in from {@link #startDelete}.
      * @param rowsAffected The number of rows affected.
      */
+    @UiThread
     protected void onDeleteComplete(int token, int rowsAffected) {
     }
 
@@ -179,6 +190,7 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the insert, passed in from {@link #startBulkInsert}.
      * @param newRows The number of newly created rows.
      */
+    @UiThread
     protected void onBulkInsertComplete(int token, int newRows) {
     }
 
@@ -187,12 +199,14 @@ import java.lang.ref.WeakReference;
      * @param token The token to identify the apply, passed in from {@link #startApplyBatch}.
      * @param results The results of the applications.
      */
+    @UiThread
     protected void onApplyBatchComplete(int token, ContentProviderResult[] results) {
     }
 
     /**
      * Tests if this handler is destroyed.
      */
+    @UiThread
     /* package */ final boolean isDestroyed() {
         if (mDestroyed) {
             return true;

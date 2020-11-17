@@ -1,5 +1,6 @@
 package android.ext.concurrent;
 
+import android.annotation.WorkerThread;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
@@ -221,6 +222,7 @@ public class ThreadPoolManager extends ThreadPool {
          * <p>This method won't be invoked if this task was cancelled.</p>
          * @see #doInBackground()
          */
+        @WorkerThread
         protected abstract void onCompletion();
 
         /**
@@ -228,6 +230,7 @@ public class ThreadPoolManager extends ThreadPool {
          * won't be invoked if this task was cancelled when it has no start.</p>
          * @see #onCompletion()
          */
+        @WorkerThread
         protected abstract void doInBackground();
     }
 }

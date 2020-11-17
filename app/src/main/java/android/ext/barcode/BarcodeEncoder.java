@@ -2,6 +2,8 @@ package android.ext.barcode;
 
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
+import android.annotation.UiThread;
+import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
@@ -213,6 +215,7 @@ public class BarcodeEncoder {
          * or <tt>null</tt> if encode failed.
          * @see #convertToBitmap(BitMatrix, Map)
          */
+        @UiThread
         void onEncodeComplete(BitMatrix bitMatrix, Bitmap result);
 
         /**
@@ -223,6 +226,7 @@ public class BarcodeEncoder {
          * @see BarcodeBuilder
          * @see #onEncodeComplete(BitMatrix, Bitmap)
          */
+        @WorkerThread
         default Bitmap convertToBitmap(BitMatrix bitMatrix, Map<EncodeHintType, ?> hints) {
             final int margin = (int)(20.0f * DEVICE_DENSITY / DENSITY_DEFAULT);
             DebugUtils.__checkDebug(true, "BarcodeEncoder", "deviceDensity = " + DEVICE_DENSITY + ", defaultDensity = " + DENSITY_DEFAULT + ", margin = " + margin);

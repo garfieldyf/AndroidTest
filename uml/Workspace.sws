@@ -4,8 +4,8 @@
 
 <Workspace>
 	<Local Expanded="Yes">
-		<Model Expanded="Yes" ID="{93BCA215-5793-4234-AF10-533A5AE27405}" Name="ImageLoader" Type="{18112060-1A4B-11D1-83D9-444553540000}" URL="ImageLoader.oom"/>
-		<Model Expanded="Yes" ID="{F4A5E0A7-1332-4FE0-ADB9-137335EE8A02}" Name="DownloadManager" Type="{18112060-1A4B-11D1-83D9-444553540000}" URL="DownloadManager.oom"/>
+		<Model Expanded="Yes" ID="{93BCA215-5793-4234-AF10-533A5AE27405}" Name="ImageLoader" Selected="Yes" Type="{18112060-1A4B-11D1-83D9-444553540000}" URL="ImageLoader.oom"/>
+		<Model Expanded="Yes" ID="{F4A5E0A7-1332-4FE0-ADB9-137335EE8A02}" Loaded="No" Name="DownloadManager" Type="{18112060-1A4B-11D1-83D9-444553540000}" URL="DownloadManager.oom"/>
 	</Local>
 	<BrowserModule Name="Repository"/>
 </Workspace>

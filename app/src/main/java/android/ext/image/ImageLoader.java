@@ -90,7 +90,7 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
 
     @Override
     protected void onShutdown() {
-        mDecoder.onDestroy();
+        mDecoder.releaseResources();
     }
 
     /**
@@ -223,10 +223,10 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
      */
     public static interface ImageDecoder<Image> {
         /**
-         * Perform any final cleanup before this decoder is destroyed.
-         * This can happen the {@link ImageLoader} has been shut down.
+         * Called when the {@link ImageLoader} has been shut down, for
+         * subclasses to release any other resources associated with it.
          */
-        default void onDestroy() {
+        default void releaseResources() {
         }
 
         /**

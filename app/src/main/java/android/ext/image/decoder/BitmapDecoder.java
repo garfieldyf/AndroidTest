@@ -5,6 +5,7 @@ import android.ext.cache.BitmapPool;
 import android.ext.image.AbsImageDecoder;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
+import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -19,6 +20,8 @@ import android.util.Log;
  * @author Garfield
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
+    private static final Parameters defaultParameters = new SizeParameters(0, 0);
+
     /**
      * Constructor
      * @param module The {@link ImageModule}.
@@ -29,8 +32,9 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     @Override
     @SuppressWarnings("unchecked")
-    protected Image decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
+    protected Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
         // Computes the sample size.
+        final Parameters parameters = getParameters(params);
         parameters.computeSampleSize(target, opts);
 
         // Retrieves the bitmap from bitmap pool to reuse it.
@@ -58,6 +62,11 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
         BitmapDecoder.__checkBitmap(bitmap, opts);
         return (Image)bitmap;
+    }
+
+    private static Parameters getParameters(Object[] params) {
+        final Parameters parameters = ImageModule.getParameters(params);
+        return (parameters != null ? parameters : defaultParameters);
     }
 
     private static void __checkBitmap(Bitmap bitmap, Options opts) {

@@ -1,10 +1,9 @@
 package android.ext.image;
 
-import static android.ext.image.ImageModule.PARAMETERS;
+import static android.ext.image.ImageModule.CONFIG;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
-import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.ext.util.UriUtils;
 import android.graphics.Bitmap;
@@ -48,7 +47,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @param flags The flags, passed earlier by {@link ImageLoader#load}.
      * @param tempStorage The temporary storage to use for decoding. Suggest 16K.
      * @return The image, or <tt>null</tt> if the image data cannot be decode.
-     * @see #decodeImage(Object, Object, Parameters, int, Options)
+     * @see #decodeImage(Object, Object, Object[], int, Options)
      * @see UriUtils#openInputStream(Context, Object)
      */
     @Override
@@ -56,15 +55,14 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mModule.mOptionsPool.obtain();
         try {
-            Parameters parameters = (Parameters)params[PARAMETERS];
-            if (parameters == null) {
-                parameters = Parameters.defaultParameters();
-            }
+            final Config config = getConfig(params);
+            opts.inTempStorage  = tempStorage;
+            opts.inPreferredConfig = config;
+
+            // Bitmaps with Config.HARWARE are always immutable
+            opts.inMutable = (Build.VERSION.SDK_INT < 26 || config != Config.HARDWARE);
 
             // Decodes the image bounds.
-            opts.inTempStorage = tempStorage;
-            opts.inMutable = parameters.isMutable();
-            opts.inPreferredConfig  = parameters.config;
             opts.inJustDecodeBounds = true;
             AbsImageDecoder.__checkOptions(opts);
             decodeBitmap(uri, opts);
@@ -72,7 +70,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
 
             // Decodes the image pixels.
             DebugUtils.__checkLogError(opts.outWidth <= 0, "AbsImageDecoder", "decodeImage failed - outWidth = " + opts.outWidth + ", uri = " + uri);
-            return (opts.outWidth > 0 ? decodeImage(uri, target, parameters, flags, opts) : null);
+            return (opts.outWidth > 0 ? decodeImage(uri, target, params, flags, opts) : null);
         } catch (Exception e) {
             Log.e(getClass().getName(), "Couldn't decode image from - " + uri + "\n" + e);
             return null;
@@ -107,6 +105,12 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         mModule.mOptionsPool.recycle(opts);
     }
 
+    private static Config getConfig(Object[] params) {
+        ImageModule.__checkParameters(params, CONFIG);
+        final Config config = (Config)params[CONFIG];
+        return (config != null ? config : Config.RGB_565);
+    }
+
     private static void __checkOptions(Options opts) {
         if (Build.VERSION.SDK_INT >= 26 && opts.inMutable && opts.inPreferredConfig == Config.HARDWARE) {
             throw new AssertionError("Bitmaps with Config.HARWARE are always immutable");
@@ -132,7 +136,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * Decodes an image from the specified <em>uri</em>.
      * @param uri The uri to decode, passed earlier by {@link #decodeImage}.
      * @param target The target, passed earlier by {@link #decodeImage}.
-     * @param parameters The parameters, passed earlier by {@link #decodeImage}.
+     * @param params The parameters, passed earlier by {@link #decodeImage}.
      * @param flags The flags, passed earlier by {@link #decodeImage}.
      * @param opts The {@link Options} used to decode. The <em>opts's</em>
      * <tt>out...</tt> fields are set.
@@ -141,5 +145,5 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
      * @see #decodeImage(Object, Object, Object[], int, byte[])
      */
     @WorkerThread
-    protected abstract Image decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception;
+    protected abstract Image decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception;
 }

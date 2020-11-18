@@ -6,7 +6,6 @@ import android.content.res.TypedArray;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.ReflectUtils;
-import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
 import android.util.Printer;
@@ -15,9 +14,7 @@ import android.util.Printer;
  * Class <tt>ScaleParameters</tt> is an implementation of a {@link Parameters}.
  * <h3>Usage</h3>
  * <p>Here is a xml resource example:</p><pre>
- * &lt;ScaleParameters
- *      xmlns:app="http://schemas.android.com/apk/res-auto"
- *      app:config="[ argb_8888 | rgb_565 | hardware | rgba_f16 ]"
+ * &lt;ScaleParameters xmlns:app="http://schemas.android.com/apk/res-auto"
  *      app:scale="70%" /&gt;</pre>
  * @author Garfield
  */
@@ -26,7 +23,7 @@ public class ScaleParameters extends Parameters {
      * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
-     * @see #ScaleParameters(Config, float)
+     * @see #ScaleParameters(float)
      */
     public ScaleParameters(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -40,12 +37,11 @@ public class ScaleParameters extends Parameters {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
-     * @param config The {@link Config} to decode.
      * @param scale The scale amount of the image's size to decode.
      * @see #ScaleParameters(Context, AttributeSet)
      */
-    public ScaleParameters(Config config, float scale) {
-        super(scale, config);
+    public ScaleParameters(float scale) {
+        super(scale);
         DebugUtils.__checkError(scale < 0f || scale > 1.0f, "The scale " + scale + " out of range [0 - 1.0]");
     }
 
@@ -72,8 +68,7 @@ public class ScaleParameters extends Parameters {
     @Override
     public void dump(Printer printer, StringBuilder result) {
         printer.println(result.append(getClass().getSimpleName())
-            .append(" { config = ").append(config.name())
-            .append(", scale = ").append(value)
+            .append(" { scale = ").append(value)
             .append(", deviceDensity = ").append(DeviceUtils.toDensity(DEVICE_DENSITY))
             .append(" }").toString());
     }

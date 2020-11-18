@@ -11,12 +11,6 @@
 
     <!-- Parameters styleable -->
     <declare-styleable name="Parameters">
-        <attr name="config">
-            <enum name="argb_8888" value="0" />
-            <enum name="rgb_565" value="1" />
-            <enum name="hardware" value="2" />
-            <enum name="rgba_f16" value="3" />
-        </attr>
         <attr name="sampleSize" format="integer" />
     </declare-styleable>
 

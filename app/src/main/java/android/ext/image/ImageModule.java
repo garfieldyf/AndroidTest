@@ -77,6 +77,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * <h3>Usage</h3><pre>
  * ImageModule.getInstance(context)
  *     .load(R.xml.image_loader, uri)
+ *     .config(Config.RGB_565)
  *     .parameters(R.xml.decode_params)
  *     .placeholder(R.drawable.ic_placeholder)
  *     .into(imageView);</pre>
@@ -87,9 +88,10 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
-    /* package */ static final int PARAMETERS  = 0;
-    /* package */ static final int PLACEHOLDER = 1;
-    /* package */ static final int PARAMS_LENGTH = 2;
+    /* package */ static final int CONFIG      = 0;
+    /* package */ static final int PARAMETERS  = 1;
+    /* package */ static final int PLACEHOLDER = 2;
+    /* package */ static final int PARAMS_LENGTH = 3;
 
     private static final int MAX_POOL_SIZE = 32;
     private static final int MIN_THREAD_COUNT = 2;
@@ -545,9 +547,6 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
                 printer.println(DeviceUtils.toString(object, result).toString());
             }
         }
-
-        result.setLength(0);
-        Parameters.defaultParameters().dump(printer, result.append("  default ==> "));
     }
 
     /* package */ static void __checkParameters(Object[] params, int index) {

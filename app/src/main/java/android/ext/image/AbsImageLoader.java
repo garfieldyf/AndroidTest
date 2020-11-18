@@ -1,5 +1,6 @@
 package android.ext.image;
 
+import static android.ext.image.ImageModule.CONFIG;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
@@ -9,6 +10,7 @@ import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
 import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
+import android.graphics.Bitmap.Config;
 import android.graphics.drawable.Drawable;
 import java.io.File;
 import java.util.Arrays;
@@ -74,14 +76,15 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
     }
 
     /**
-     * Equivalent to calling <tt>loadSync(uri, 0, parameters)</tt>.
+     * Equivalent to calling <tt>loadSync(uri, 0, config, parameters)</tt>.
      * @param uri The uri to load.
+     * @param config May be <tt>null</tt>. The desired {@link Config} to decode bitmap.
      * @param parameters May be <tt>null</tt>. The {@link Parameters} to decode image.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
      * @see #loadSync(Object, int, Object[])
      */
-    public final Image loadSync(Object uri, Parameters parameters) {
-        return loadSync(resolveUri(uri), 0, parameters);
+    public final Image loadSync(Object uri, Config config, Parameters parameters) {
+        return loadSync(resolveUri(uri), 0, config, parameters);
     }
 
     @Override
@@ -103,6 +106,7 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
      * <h3>Usage</h3>
      * <p>Here is an example:</p><pre>
      * loader.load(uri)
+     *     .config(Config.RGB_565)
      *     .parameters(R.xml.decode_params)
      *     .placeholder(R.drawable.ic_placeholder)
      *     .into(imageView);</pre>
@@ -154,6 +158,16 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
         }
 
         /**
+         * Sets the desired {@link Config} to decode bitmap.
+         * @param config The config to decode.
+         * @return This request.
+         */
+        public final LoadRequest config(Config config) {
+            mParams[CONFIG] = config;
+            return this;
+        }
+
+        /**
          * Sets the {@link Parameters} to decode image.
          * @param id The xml resource id of the <tt>Parameters</tt>.
          * @return This request.
@@ -166,7 +180,7 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
 
         /**
          * Sets the parameters to decode image.
-         * @param parameters The <tt>Object</tt> to decode.
+         * @param parameters The parameters to decode.
          * @return This request.
          * @see #parameters(int)
          */

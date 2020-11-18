@@ -161,7 +161,7 @@ public abstract class AsyncImageTask<URI> extends AsyncTask<URI, Object, Object[
 
                 // Computes the sample size.
                 opts.inMutable = true;
-                opts.inPreferredConfig = mParameters.config;
+                //opts.inPreferredConfig = mParameters.config;
                 mParameters.computeSampleSize(null, opts);
             }
 

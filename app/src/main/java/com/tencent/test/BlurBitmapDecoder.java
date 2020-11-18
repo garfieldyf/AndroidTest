@@ -3,15 +3,13 @@ package com.tencent.test;
 import android.content.res.TypedArray;
 import android.ext.image.ImageModule;
 import android.ext.image.decoder.BitmapDecoder;
-import android.ext.image.params.Parameters;
 import android.ext.renderscript.RenderScriptBlur;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory.Options;
 import android.util.AttributeSet;
 import android.util.Log;
-import java.io.Closeable;
 
-public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeable {
+public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> {
     private RenderScriptBlur mRenderScript;
 
     public BlurBitmapDecoder(ImageModule module, AttributeSet attrs) {
@@ -27,13 +25,13 @@ public class BlurBitmapDecoder extends BitmapDecoder<Bitmap> implements Closeabl
     }
 
     @Override
-    public void close() {
+    public void releaseResources() {
         mRenderScript.close();
     }
 
     @Override
-    protected Bitmap decodeImage(Object uri, Object target, Parameters parameters, int flags, Options opts) throws Exception {
-        final Bitmap bitmap = super.decodeImage(uri, target, parameters, flags, opts);
+    protected Bitmap decodeImage(Object uri, Object target, Object[] params, int flags, Options opts) throws Exception {
+        final Bitmap bitmap = super.decodeImage(uri, target, params, flags, opts);
         mRenderScript.blur(bitmap, 10);
         return bitmap;
     }

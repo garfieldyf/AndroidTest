@@ -52,6 +52,7 @@ public class IconLoader extends AbsImageLoader<Object> {
 
     @Override
     protected Object loadInBackground(Task task, Object uri, Object[] params, int flags) {
+        ImageModule.__checkParameters(params, PARAMETERS);
         final Object param = params[PARAMETERS];
         DebugUtils.__checkError(param == null, "Invalid parameter - param == null");
         if (param instanceof ResolveInfo) {

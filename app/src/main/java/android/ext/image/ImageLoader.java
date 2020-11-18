@@ -39,12 +39,12 @@ import java.io.File;
  */
 public class ImageLoader<Image> extends AbsImageLoader<Image> {
     /**
-     * The {@link Loader} to load image data.
+     * The {@link Loader} used to load image data.
      */
     private final Loader<Image> mLoader;
 
     /**
-     * The {@link ImageDecoder} to decode image.
+     * The {@link ImageDecoder} used to decode image.
      */
     protected final ImageDecoder<Image> mDecoder;
 

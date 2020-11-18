@@ -1,5 +1,6 @@
 package android.ext.image;
 
+import static android.ext.image.ImageModule.PARAMETERS;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
@@ -55,7 +56,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mModule.mOptionsPool.obtain();
         try {
-            Parameters parameters = ImageModule.getParameters(params);
+            Parameters parameters = (Parameters)params[PARAMETERS];
             if (parameters == null) {
                 parameters = Parameters.defaultParameters();
             }

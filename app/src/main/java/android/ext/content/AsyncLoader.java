@@ -304,7 +304,7 @@ public abstract class AsyncLoader<Key, Params, Value> {
     }
 
     /**
-     * Called on the UI thread to recycle the <em>params</em>.
+     * Called on the UI thread when the load task is being recycled.
      * @param params The parameters to recycle, passed earlier by {@link #load}.
      */
     @UiThread

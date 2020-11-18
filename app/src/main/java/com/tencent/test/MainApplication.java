@@ -47,7 +47,7 @@ public final class MainApplication extends Application {
     private static ImageModule createImageModule(Builder builder) {
         return builder.setScaleMemory(DeviceUtils.isLowMemory() ? 0.1f : 0.4f)
             .setImageSize(128)
-            .setFileSize(1000)
+            .setFileCacheSize(1000)
             .build();
     }
 

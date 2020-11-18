@@ -70,7 +70,7 @@ import org.xmlpull.v1.XmlPullParserException;
  *     private static ImageModule createImageModule(ImageModule.Builder builder) {
  *         return builder
  *             .setScaleMemory(0.4f)    // The memory cache size.
- *             .setFileSize(1000)       // The file cache size.
+ *             .setFileCacheSize(1000)  // The file cache size.
  *             .build();
  *     }
  * }</pre>
@@ -452,7 +452,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
         final Method factory  = getFactory(context);
         final Builder builder = new Builder(context);
         if (factory == null) {
-            return builder.setScaleMemory(0.25f).setFileSize(500).build();
+            return builder.setScaleMemory(0.25f).setFileCacheSize(500).build();
         }
 
         try {
@@ -633,7 +633,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * @param size The maximum number of files.
          * @return This builder.
          */
-        public final Builder setFileSize(int size) {
+        public final Builder setFileCacheSize(int size) {
             mFileCache = size;
             return this;
         }

@@ -35,6 +35,17 @@ public class SizeParameters extends Parameters {
 
     /**
      * Constructor
+     * @param minWidth The minimum width to decode, in pixels.
+     * @param minHeight The minimum height to decode, in pixels.
+     * @see #SizeParameters(Context, AttributeSet)
+     */
+    public SizeParameters(int minWidth, int minHeight) {
+        this.minWidth = minWidth;
+        this.value = minHeight;
+    }
+
+    /**
+     * Constructor
      * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #SizeParameters(int, int)
@@ -46,17 +57,6 @@ public class SizeParameters extends Parameters {
         this.minWidth = a.getDimensionPixelOffset(MIN_WIDTH_INDEX /* android.R.attr.minWidth */, 0);
         this.value = a.getDimensionPixelOffset(MIN_HEIGHT_INDEX /* android.R.attr.minHeight */, 0);
         a.recycle();
-    }
-
-    /**
-     * Constructor
-     * @param minWidth The minimum width to decode, in pixels.
-     * @param minHeight The minimum height to decode, in pixels.
-     * @see #SizeParameters(Context, AttributeSet)
-     */
-    public SizeParameters(int minWidth, int minHeight) {
-        super(Integer.valueOf(minHeight));
-        this.minWidth = minWidth;
     }
 
     @Override

@@ -22,6 +22,17 @@ public class ScaleParameters extends Parameters {
     /**
      * Constructor
      * @param context The <tt>Context</tt>.
+     * @param scale The scale amount of the image's size to decode.
+     * @see #ScaleParameters(Context, AttributeSet)
+     */
+    public ScaleParameters(float scale) {
+        this.value = scale;
+        DebugUtils.__checkError(scale < 0f || scale > 1.0f, "The scale " + scale + " out of range [0 - 1.0]");
+    }
+
+    /**
+     * Constructor
+     * @param context The <tt>Context</tt>.
      * @param attrs The attributes of the XML tag that is inflating the data.
      * @see #ScaleParameters(float)
      */
@@ -32,17 +43,6 @@ public class ScaleParameters extends Parameters {
         this.value = a.getFraction(0 /* R.styleable.ScaleParameters_scale */, 1, 1, 0);
         DebugUtils.__checkError((float)value < 0f || (float)value > 1.0f, "The scale " + value + " out of range [0 - 1.0]");
         a.recycle();
-    }
-
-    /**
-     * Constructor
-     * @param context The <tt>Context</tt>.
-     * @param scale The scale amount of the image's size to decode.
-     * @see #ScaleParameters(Context, AttributeSet)
-     */
-    public ScaleParameters(float scale) {
-        super(scale);
-        DebugUtils.__checkError(scale < 0f || scale > 1.0f, "The scale " + scale + " out of range [0 - 1.0]");
     }
 
     @Override

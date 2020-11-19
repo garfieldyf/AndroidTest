@@ -21,8 +21,8 @@ import java.util.Arrays;
  */
 public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, Image> implements Binder<Object, Object, Image> {
     /**
-     * If set the image loader will be dump the {@link Options} when
-     * it will be load image.<p>This flag can be used DEBUG mode.</p>
+     * If set the image loader will be dump the {@link Options} when it
+     * will be decode image.<p>This flag can be used in DEBUG mode.</p>
      */
     public static final int FLAG_DUMP_OPTIONS = 0x04000000;    /* flags 0x0F000000 */
 
@@ -246,8 +246,8 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
 //         */
 //        public final void preload() {
 //            DebugUtils.__checkError(mUri == null, "Invalid parameter - uri == null");
-//            DebugUtils.__checkWarning(getCache() == null, "ImageLoader", "No image cache, invoking this method has no effect.");
-//            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "ImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, invoking this method has no effect.");
+//            DebugUtils.__checkWarning(getCache() == null, "AbsImageLoader", "No image cache, invoking this method has no effect.");
+//            DebugUtils.__checkWarning((mFlags & FLAG_IGNORE_MEMORY_CACHE) != 0, "AbsImageLoader", "The FLAG_IGNORE_MEMORY_CACHE is set, invoking this method has no effect.");
 //            if (getCache() != null && (mFlags & FLAG_IGNORE_MEMORY_CACHE) == 0) {
 //                load(mUri, mUri, mFlags, Binder.emptyBinder(), mParams);
 //            }

@@ -50,11 +50,9 @@ public class Parameters {
     }
 
     /**
-     * Constructor
-     * @param value The Object by user-defined to decode.
+     * The default constructor used by subclasses.
      */
-    protected Parameters(Object value) {
-        this.value = value;
+    protected Parameters() {
     }
 
     /**

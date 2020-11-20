@@ -73,6 +73,7 @@ public class ThreadPool extends ThreadPoolExecutor {
      * @param priority The priority to run the work thread at. The value supplied must be from
      * {@link Process} and not from {@link Thread}.
      * @return A {@link ThreadPool} instance.
+     * @hide
      */
     public static ThreadPool createImageThreadPool(int maxThreads, int priority) {
         return new ThreadPool(maxThreads, 60, TimeUnit.SECONDS, "ImagePool-", priority);

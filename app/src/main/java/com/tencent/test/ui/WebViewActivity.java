@@ -29,8 +29,9 @@ public class WebViewActivity extends Activity {
         settings.setLoadWithOverviewMode(true);
         settings.setNeedInitialFocus(true);
 
-        //mWebView.addJavascriptInterface(new JavaScriptInterface(this), "appStore");
-        mWebView.loadUrl("http://reader-test.efunbox.cn/build/stage/index/index.html?wareId=1604565055981663");
+        String wareId = "1604565194934616";
+//        String wareId = "1604565055981663";
+        mWebView.loadUrl("http://reader-test.efunbox.cn/build/stage/index/index.html?wareId=" + wareId);
     }
 
     @Override

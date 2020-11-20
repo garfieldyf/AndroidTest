@@ -90,7 +90,7 @@ public final class LruFileCache implements FileCache, ScanCallback, Runnable, Co
         if (level >= TRIM_MEMORY_UI_HIDDEN) {
             // The app's UI is no longer visible.
             // Remove the oldest files of this cache.
-            AsyncTask.THREAD_POOL_EXECUTOR.execute(this);
+            AsyncTask.SERIAL_EXECUTOR.execute(this);
         }
     }
 

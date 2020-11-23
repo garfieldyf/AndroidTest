@@ -67,6 +67,7 @@ import java.lang.ref.WeakReference;
      * @see #getOwner()
      */
     public final void setOwner(Object owner) {
+        DebugUtils.__checkUIThread("setOwner");
         DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
         DebugUtils.__checkError(mOwner != null, "The owner is already exists (a DatabaseHandler can be set owner only once)");
         mOwner = new WeakReference<Object>(owner);

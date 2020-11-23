@@ -267,6 +267,7 @@ public abstract class AsyncTask<Params, Progress, Result> implements Cancelable 
          * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
          */
         /* package */ final void setOwner(Object owner) {
+            DebugUtils.__checkUIThread("setOwner");
             DebugUtils.__checkError(owner == null, "Invalid parameter - owner == null");
             DebugUtils.__checkError(mOwner != null, "The owner is already exists (a task can be setOwner only once)");
             mOwner = new WeakReference<Object>(owner);

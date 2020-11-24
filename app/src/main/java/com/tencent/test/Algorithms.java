@@ -346,4 +346,53 @@ public final class Algorithms {
 
         printList(newHead);
     }
+
+    ////////////////////////////////// select sort //////////////////////////////////
+
+    // O（n²）
+    public static void selectSort() {
+        final int[] values = NUMBERS.clone();
+
+        int minIndex = 0;
+        for (int i = 0; i < values.length - 1; ++i) {
+            minIndex = i;
+            for (int j = i + 1; j < values.length; ++j) {
+                if (values[minIndex] > values[j]) {
+                    minIndex = j;
+                }
+            }
+
+            if (minIndex != i) {
+                int value = values[minIndex];
+                values[minIndex] = values[i];
+                values[i] = value;
+            }
+        }
+
+        Log.d("abcd", Arrays.toString(values));
+    }
+
+    ////////////////////////////////// bubble sort //////////////////////////////////
+
+    // O（n²）
+    public static void bubbleSort() {
+        final int[] values = NUMBERS.clone();
+
+        boolean swap;
+        int size = values.length;
+
+        do {
+            swap = false;
+            for (int i = 0; i < size - 1; ++i) {
+                if (values[i] > values[i + 1]) {
+                    swap = true;
+                    int value = values[i];
+                    values[i] = values[i + 1];
+                    values[i + 1] = value;
+                }
+            }
+        } while (--size > 1 && swap);
+
+        Log.d("abcd", Arrays.toString(values));
+    }
 }

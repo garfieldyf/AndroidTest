@@ -123,7 +123,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child))</tt>.
+     * Equivalent to calling <tt>getItem(recyclerView.getChildAdapterPosition(child), null)</tt>.
      * @param child The child of the <tt>RecyclerView</tt> to query for the
      * <tt>ViewHolder</tt>'s adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
@@ -139,7 +139,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition())</tt>.
+     * Equivalent to calling <tt>getItem(viewHolder.getAdapterPosition(), null)</tt>.
      * @param viewHolder The {@link ViewHolder} to query its adapter position.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #getItem(int)

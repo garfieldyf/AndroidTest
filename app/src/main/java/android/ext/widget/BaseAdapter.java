@@ -113,7 +113,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      */
     @UiThread
     public final void postNotifyItemChanged(long id, Object payload) {
-        DebugUtils.__checkError(mRecyclerView == null, "This adapter not attached to RecyclerView.");
+        if (mRecyclerView == null) {
+            DebugUtils.__checkWarning(true, "BaseAdapter", "This adapter not attached to RecyclerView.");
+            return;
+        }
+
         final ViewHolder holder = mRecyclerView.findViewHolderForItemId(id);
         if (holder != null) {
             final int position = holder.getAdapterPosition();

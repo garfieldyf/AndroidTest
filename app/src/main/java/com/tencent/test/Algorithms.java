@@ -1,6 +1,7 @@
 package com.tencent.test;
 
 import android.util.Log;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -394,5 +395,97 @@ public final class Algorithms {
         } while (--size > 1 && swap);
 
         Log.d("abcd", Arrays.toString(values));
+    }
+
+    ////////////////////////////////// big integer multiply //////////////////////////////////
+
+    static final String number1 = "987654321987654321";
+    static final String number2 = "123456789123456789";
+
+    public static void mul() {
+        BigInteger n1 = new BigInteger(number1);
+        BigInteger n2 = new BigInteger(number2);
+        BigInteger result = n1.multiply(n2);
+        // 121932631112635269
+        Log.d("abcd", "mul      result = " + result.toString());
+    }
+
+    public static void multiply() {
+        if ("0".equals(number1) || "0".equals(number2)) {
+            return;
+        }
+
+        String result = null;
+        for (int i = number1.length() - 1, off = 0; i >= 0; --i, ++off) {
+            int value = Character.digit(number1.charAt(i), 10);
+            String s = mul(value, number2, off);
+            result = add(s, result);
+        }
+
+        Log.d("abcd", "multiply result = " + result);
+    }
+
+    private static String mul(int value, String number, int off) {
+        final StringBuilder result = new StringBuilder();
+        int carry = 0;
+        for (int i = number.length() - 1; i >= 0; --i) {
+            int n = Character.digit(number.charAt(i), 10) * value + carry;
+            if (n >= 10) {
+                carry = n / 10;
+                n = n % 10;
+            } else {
+                carry = 0;
+            }
+
+            result.insert(0, n);
+        }
+
+        if (carry > 0) {
+            result.insert(0, carry);
+        }
+
+        for (int i = 0; i < off; ++i) {
+            result.append('0');
+        }
+
+        return result.toString();
+    }
+
+    private static String add(String number1, String number2) {
+        if (number2 == null) {
+            return number1;
+        }
+
+        final StringBuilder result = new StringBuilder();
+        int index1 = number1.length() - 1;
+        int index2 = number2.length() - 1;
+        int carry = 0;
+        while (index1 >= 0 || index2 >= 0) {
+            int value1 = 0;
+            if (index1 >= 0) {
+                value1 = Character.digit(number1.charAt(index1--), 10);
+            }
+
+            int value2 = 0;
+            if (index2 >= 0) {
+                value2 = Character.digit(number2.charAt(index2--), 10);
+            }
+
+            int n = value1 + value2 + carry;
+            if (n >= 10) {
+                carry = 1;
+                n -= 10;
+            } else {
+                carry = 0;
+            }
+
+            result.insert(0, n);
+        }
+
+        if (carry > 0) {
+            result.insert(0, carry);
+        }
+
+        return result.toString();
     }
 }

@@ -135,14 +135,8 @@ public final class MessageDigests {
      * @see #computeByteArray(byte[], int, int, byte[], int, Algorithm)
      */
     public static byte[] computeByteArray(byte[] data, Algorithm algorithm) {
-        DebugUtils.__checkError(algorithm == null, "Invalid parameter - algorithm == null");
-        if (data == null) {
-            throw new NullPointerException("Invalid parameter - data == null");
-        }
-
-        final byte[] result = new byte[algorithm.digestLength];
-        computeByteArray(data, 0, data.length, result, 0, algorithm.ordinal());
-        return result;
+        DebugUtils.__checkError(data == null || algorithm == null, "Invalid parameters - data == null || algorithm == null");
+        return computeByteArray(data, 0, data.length, algorithm);
     }
 
     /**

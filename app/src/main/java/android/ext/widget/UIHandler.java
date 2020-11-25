@@ -101,7 +101,7 @@ public final class UIHandler extends Handler implements Executor {
      *
      *    {@code @Override}
      *     public void handleMessage(Message msg) {
-     *         // Handle message here on the UI thread
+     *         // Handle message on the UI thread
      *         // ... ...
      *     }
      * }

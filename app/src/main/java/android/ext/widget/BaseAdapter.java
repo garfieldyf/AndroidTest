@@ -13,7 +13,7 @@ import android.support.v7.widget.RecyclerView.ViewHolder;
  * Class BaseAdapter implementation for an {@link Adapter} that can be used in {@link RecyclerView}.
  * @author Garfield
  */
-public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> implements MessageRunnable {
+public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     private static final int MESSAGE_ITEM_MOVED    = 1;
     private static final int MESSAGE_DATA_CHANGED  = 2;
     private static final int MESSAGE_ITEM_REMOVED  = 3;
@@ -24,6 +24,11 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
      * The owner <tt>RecyclerView</tt>.
      */
     protected RecyclerView mRecyclerView;
+
+    /**
+     * The <tt>MessageRunnable</tt> to notify the content has changed.
+     */
+    private MessageRunnable mCallback;
 
     /**
      * Returns the {@link RecyclerView} associated with this adapter.
@@ -210,44 +215,53 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> imp
         mRecyclerView = recyclerView;
     }
 
-    @Override
-    public final void handleMessage(Message msg) {
-        switch (msg.what) {
-        case MESSAGE_DATA_CHANGED:
-            notifyDataSetChanged();
-            break;
-
-        case MESSAGE_ITEM_MOVED:
-            notifyItemMoved(msg.arg1, msg.arg2);
-            break;
-
-        case MESSAGE_ITEM_REMOVED:
-            notifyItemRangeRemoved(msg.arg1, msg.arg2);
-            break;
-
-        case MESSAGE_ITEM_INSERTED:
-            notifyItemRangeInserted(msg.arg1, msg.arg2);
-            break;
-
-        case MESSAGE_ITEM_CHANGED:
-            notifyItemRangeChanged(msg.arg1, msg.arg2, msg.obj);
-            break;
-
-        default:
-            throw new IllegalStateException("Unknown message: " + msg.what);
-        }
-    }
-
-    @Override
-    public final void run() {
-        throw new AssertionError("No Implementation, This method is a stub!");
-    }
-
     private void sendMessage(int what, int arg1, int arg2, Object obj) {
         DebugUtils.__checkDebug(true, "BaseAdapter", "The RecyclerView is computing layout, post the change using a Handler.");
-        final Message msg = UIHandler.sInstance.obtianMessage(this, what, obj);
+        if (mCallback == null) {
+            mCallback = new NotificationRunnable();
+        }
+
+        final Message msg = UIHandler.sInstance.obtianMessage(mCallback, what, obj);
         msg.arg1 = arg1;
         msg.arg2 = arg2;
         UIHandler.sInstance.sendMessage(msg);
+    }
+
+    /**
+     * Class <tt>NotificationRunnable</tt> is an implementation of a {@link MessageRunnable}.
+     */
+    /* package */ final class NotificationRunnable implements MessageRunnable {
+        @Override
+        public final void handleMessage(Message msg) {
+            switch (msg.what) {
+            case MESSAGE_DATA_CHANGED:
+                notifyDataSetChanged();
+                break;
+
+            case MESSAGE_ITEM_MOVED:
+                notifyItemMoved(msg.arg1, msg.arg2);
+                break;
+
+            case MESSAGE_ITEM_REMOVED:
+                notifyItemRangeRemoved(msg.arg1, msg.arg2);
+                break;
+
+            case MESSAGE_ITEM_INSERTED:
+                notifyItemRangeInserted(msg.arg1, msg.arg2);
+                break;
+
+            case MESSAGE_ITEM_CHANGED:
+                notifyItemRangeChanged(msg.arg1, msg.arg2, msg.obj);
+                break;
+
+            default:
+                throw new IllegalStateException("Unknown message: " + msg.what);
+            }
+        }
+
+        @Override
+        public final void run() {
+            throw new AssertionError("No Implementation, This method is a stub!");
+        }
     }
 }

@@ -14,6 +14,7 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.PackageUtils;
 import android.ext.util.ProcessUtils;
 import android.ext.util.UriUtils;
+import android.os.StrictMode;
 import android.support.annotation.Keep;
 import android.util.Log;
 
@@ -32,6 +33,15 @@ public final class MainApplication extends Application {
         ProcessUtils.installUncaughtExceptionHandler(this);
         mPackageInfo = PackageUtils.myPackageInfo(this, 0);
         DebugUtils.stopMethodTracing("MainApplication", "onCreate", 'm');
+
+        if (BuildConfig.DEBUG) {
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+                .detectDiskReads()
+                .detectDiskWrites()
+                .detectNetwork()
+                .penaltyLog()
+                .build());
+        }
     }
 
     public final PackageInfo myPackageInfo() {

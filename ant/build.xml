@@ -109,6 +109,16 @@
         <!-- replace call writeUncaughtException() to storeUncaughtException() method -->
         <echo level="info">Replacing writeUncaughtException() to storeUncaughtException() in the ProcessUtils.java</echo>
         <replace file="${src.dir}/${JNI_PACKAGE}/util/ProcessUtils.java" token="this.writeUncaughtException" value="this.storeUncaughtException" encoding="UTF-8" />
+
+        <!-- compile java docs
+        <javadoc destdir="${out.dir}/docs" author="true" version="true" use="true" protected="true" windowtitle="Documentations"
+            classpath="${android.stubs.jar.path};${android.jar.path};${support.jar.path};${zxing.jar.path}">
+
+            <packageset dir="${src.dir}" defaultexcludes="yes">
+                <include name="${JNI_PACKAGE}/**"/>
+            </packageset>
+        </javadoc>
+        -->
     </target>
 
     <!-- target -compile-jar -->

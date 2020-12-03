@@ -45,7 +45,6 @@ public interface Cache<K, V> {
      * @param level The integer represents a trim level as specified in
      * {@link android.content.ComponentCallbacks2}.
      */
-    @UiThread
     default void trimMemory(int level) {
     }
 

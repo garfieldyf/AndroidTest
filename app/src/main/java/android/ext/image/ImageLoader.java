@@ -1,7 +1,6 @@
 package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import android.annotation.UiThread;
 import android.annotation.WorkerThread;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
@@ -232,7 +231,6 @@ public class ImageLoader<Image> extends AbsImageLoader<Image> {
          * Called when the {@link ImageLoader} has been shut down, for
          * subclasses to release any other resources associated with it.
          */
-        @UiThread
         default void releaseResources() {
         }
 

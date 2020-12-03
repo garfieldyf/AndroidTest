@@ -5,7 +5,6 @@ import android.ext.cache.BitmapPool;
 import android.ext.image.AbsImageDecoder;
 import android.ext.image.ImageModule;
 import android.ext.image.params.Parameters;
-import android.ext.image.params.SizeParameters;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -20,8 +19,6 @@ import android.util.Log;
  * @author Garfield
  */
 public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
-    private static final Parameters defaultParameters = new SizeParameters(0, 0);
-
     /**
      * Constructor
      * @param module The {@link ImageModule}.
@@ -66,7 +63,7 @@ public class BitmapDecoder<Image> extends AbsImageDecoder<Image> {
 
     private static Parameters getParameters(Object[] params) {
         final Parameters parameters = ImageModule.getParameters(params);
-        return (parameters != null ? parameters : defaultParameters);
+        return (parameters != null ? parameters : Parameters.defaultParameters());
     }
 
     private static void __checkBitmap(Bitmap bitmap, Options opts) {

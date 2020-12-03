@@ -86,6 +86,13 @@ public class Parameters {
     }
 
     /**
+     * Returns the default {@link Parameters} used to decode the bitmap.
+     */
+    public static Parameters defaultParameters() {
+        return DefaultParameters.sInstance;
+    }
+
+    /**
      * Computes the number of bytes that can be used to
      * store the image's pixels when decoding the image.
      */
@@ -118,5 +125,12 @@ public class Parameters {
         } else if (opts.inPreferredConfig == null) {
             throw new AssertionError("opts.inPreferredConfig == null");
         }
+    }
+
+    /**
+     * Class <tt>DefaultParameters</tt>
+     */
+    private static final class DefaultParameters {
+        public static final Parameters sInstance = new SizeParameters(0, 0);
     }
 }

@@ -1,6 +1,5 @@
 package android.ext.image;
 
-import static android.ext.image.ImageModule.CONFIG;
 import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
@@ -55,7 +54,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
     public Image decodeImage(Object uri, Object target, Object[] params, int flags, byte[] tempStorage) {
         final Options opts = mModule.mOptionsPool.obtain();
         try {
-            final Config config = getConfig(params);
+            final Config config = ImageLoader.parseConfig(flags);
             opts.inTempStorage  = tempStorage;
             opts.inPreferredConfig = config;
 
@@ -103,12 +102,6 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         }
 
         mModule.mOptionsPool.recycle(opts);
-    }
-
-    private static Config getConfig(Object[] params) {
-        ImageModule.__checkParameters(params, CONFIG);
-        final Config config = (Config)params[CONFIG];
-        return (config != null ? config : Config.RGB_565);
     }
 
     private static void __checkOptions(Options opts) {

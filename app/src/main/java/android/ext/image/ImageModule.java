@@ -88,10 +88,9 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
     private static final int FLAG_NO_FILE_CACHE   = 0x01;
     private static final int FLAG_NO_MEMORY_CACHE = 0x02;
 
-    /* package */ static final int CONFIG      = 0;
-    /* package */ static final int PARAMETERS  = 1;
-    /* package */ static final int PLACEHOLDER = 2;
-    /* package */ static final int PARAMS_LENGTH = 3;
+    /* package */ static final int PARAMETERS  = 0;
+    /* package */ static final int PLACEHOLDER = 1;
+    /* package */ static final int PARAMS_LENGTH = 2;
 
     private static final int MAX_POOL_SIZE = 32;
     private static final int MIN_THREAD_COUNT = 2;
@@ -547,6 +546,10 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
                 printer.println(DeviceUtils.toString(object, result).toString());
             }
         }
+
+        result.setLength(0);
+        result.append("  default ==> ");
+        Parameters.defaultParameters().dump(printer, result);
     }
 
     /* package */ static void __checkParameters(Object[] params, int index) {
@@ -599,7 +602,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * Sets the maximum number of bytes to allow in the internal bitmap cache.
          * @param size The maximum number of bytes.
          * @return This builder.
-         * @see #setMemorySize(int)
+         * @see #setScaleMemory(float)
          */
         public final Builder setMemorySize(int size) {
             mImageCache = size;
@@ -611,7 +614,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * percentage of this application maximum memory of the current device.
          * @param scaleMemory The scale of memory of the bitmap cache.
          * @return This builder.
-         * @see #setScaleMemory(float)
+         * @see #setMemorySize(int)
          */
         public final Builder setScaleMemory(float scaleMemory) {
             mImageCache = scaleMemory;
@@ -632,6 +635,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * Sets the maximum number of files to allow in the internal {@link FileCache}.
          * @param size The maximum number of files.
          * @return This builder.
+         * @see #setFileCache(FileCache)
          */
         public final Builder setFileCacheSize(int size) {
             mFileCache = size;
@@ -642,6 +646,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * Sets the {@link FileCache} to store the loaded image files.
          * @param cache The <tt>FileCache</tt>.
          * @return This builder.
+         * @see #setFileCacheSize(int)
          */
         public final Builder setFileCache(FileCache cache) {
             mFileCache = cache;
@@ -663,6 +668,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * must be from {@link Process} and not from {@link Thread}.
          * @param priority The priority.
          * @return This builder.
+         * @see #setMaximumThreads(int)
          */
         public final Builder setThreadPriority(int priority) {
             mPriority = priority;
@@ -673,6 +679,7 @@ public final class ImageModule implements ComponentCallbacks2, Factory<Object[]>
          * Sets the maximum number of threads to allow in the internal thread pool.
          * @param maxThreads The maximum number of threads.
          * @return This builder.
+         * @see #setThreadPriority(int)
          */
         public final Builder setMaximumThreads(int maxThreads) {
             mMaxThreads = maxThreads;

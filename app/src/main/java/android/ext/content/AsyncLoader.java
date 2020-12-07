@@ -31,9 +31,9 @@ public abstract class AsyncLoader<Key, Params, Value> {
     public static final int FLAG_IGNORE_MEMORY_CACHE = 0x08000000;    /* flags 0x0F000000 */
 
     /**
-     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_DUMP_OPTIONS);
+     * FLAG_MASK = ~(FLAG_IGNORE_MEMORY_CACHE | FLAG_DUMP_OPTIONS | CONFIG_MASK);
      */
-    private static final int FLAG_MASK = 0xF3FFFFFF;
+    private static final int FLAG_MASK = 0xF30FFFFF;
 
     private static final int RUNNING  = 0;
     private static final int PAUSED   = 1;

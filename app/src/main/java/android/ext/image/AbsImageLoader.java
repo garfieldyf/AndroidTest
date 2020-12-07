@@ -1,9 +1,9 @@
 package android.ext.image;
 
-import static android.ext.image.ImageModule.CONFIG;
 import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
+import android.annotation.TargetApi;
 import android.annotation.UiThread;
 import android.ext.cache.Cache;
 import android.ext.content.AsyncLoader;
@@ -25,6 +25,13 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
      * will be decode image.<p>This flag can be used in DEBUG mode.</p>
      */
     public static final int FLAG_DUMP_OPTIONS = 0x04000000;    /* flags 0x0F000000 */
+
+    /* The bitmap config flags 0x00F00000 */
+    private static final int ARGB_8888 = 0x00000000;
+    private static final int RGB_565   = 0x00100000;
+    private static final int HARDWARE  = 0x00200000;
+    private static final int RGBA_F16  = 0x00300000;
+    private static final int CONFIG_MASK = 0x00F00000;
 
     /**
      * The {@link LoadRequest}.
@@ -76,15 +83,16 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
     }
 
     /**
-     * Equivalent to calling <tt>loadSync(uri, 0, config, parameters)</tt>.
+     * Loads the image synchronously. Call this method, pass the {@link #loadInBackground}
+     * the <em>task</em> parameter always <tt>null</tt>.<p><b>Note: This method will block
+     * the calling thread until it was returned.</b></p>
      * @param uri The uri to load.
-     * @param config May be <tt>null</tt>. The desired {@link Config} to decode bitmap.
+     * @param config The desired {@link Config} to decode bitmap.
      * @param parameters May be <tt>null</tt>. The {@link Parameters} to decode image.
      * @return The image, or <tt>null</tt> if load failed or this loader was shut down.
-     * @see #loadSync(Object, int, Object[])
      */
     public final Image loadSync(Object uri, Config config, Parameters parameters) {
-        return loadSync(resolveUri(uri), 0, config, parameters);
+        return loadSync(resolveUri(uri), convert(config), parameters);
     }
 
     @Override
@@ -92,6 +100,48 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
         ImageModule.__checkParameters(params, PARAMS_LENGTH - 1);
         Arrays.fill(params, null);  // Clear for recycle.
         mModule.mParamsPool.recycle(params);
+    }
+
+    /**
+     * Converts the {@link Config} to a config flag.
+     * @see #parseConfig(int)
+     */
+    /* package */ static int convert(Config config) {
+        DebugUtils.__checkError(config == null, "Invalid parameter - config == null");
+        switch (config) {
+        case RGB_565:
+            return RGB_565;
+
+        case HARDWARE:
+            return HARDWARE;
+
+        case RGBA_F16:
+            return RGBA_F16;
+
+        default:
+            return ARGB_8888;
+        }
+    }
+
+    /**
+     * Parses the <em>flags</em> to a {@link Config}.
+     * @see #convert(Config)
+     */
+    @TargetApi(26)
+    /* package */ static Config parseConfig(int flags) {
+        switch (flags & CONFIG_MASK) {
+        case RGB_565:
+            return Config.RGB_565;
+
+        case HARDWARE:
+            return Config.HARDWARE;
+
+        case RGBA_F16:
+            return Config.RGBA_F16;
+
+        default:
+            return Config.ARGB_8888;
+        }
     }
 
     /**
@@ -163,7 +213,7 @@ public abstract class AbsImageLoader<Image> extends AsyncLoader<Object, Object, 
          * @return This request.
          */
         public final LoadRequest config(Config config) {
-            mParams[CONFIG] = config;
+            mFlags = ((mFlags & ~CONFIG_MASK) | convert(config));
             return this;
         }
 

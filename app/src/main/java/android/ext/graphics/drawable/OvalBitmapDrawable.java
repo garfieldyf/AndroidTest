@@ -41,6 +41,7 @@ public class OvalBitmapDrawable extends ShapeBitmapDrawable<OvalBitmapDrawable.O
     public OvalBitmapDrawable(Bitmap bitmap) {
         super(new OvalBitmapState(bitmap));
         invalidateSelf(mState.mShader, true);
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     @Override

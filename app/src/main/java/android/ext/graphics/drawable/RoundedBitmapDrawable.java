@@ -41,6 +41,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
      */
     public RoundedBitmapDrawable(Bitmap bitmap) {
         super(new RoundedBitmapState(bitmap));
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     /**
@@ -54,6 +55,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     public RoundedBitmapDrawable(Bitmap bitmap, float cornerRadius) {
         super(new RoundedBitmapState(bitmap));
         setCornerRadii(cornerRadius);
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     /**
@@ -69,6 +71,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     public RoundedBitmapDrawable(Bitmap bitmap, float[] radii) {
         super(new RoundedBitmapState(bitmap));
         setCornerRadii(radii);
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     /**
@@ -85,6 +88,7 @@ public class RoundedBitmapDrawable extends ShapeBitmapDrawable<RoundedBitmapDraw
     public RoundedBitmapDrawable(Bitmap bitmap, float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
         super(new RoundedBitmapState(bitmap));
         setCornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     /**

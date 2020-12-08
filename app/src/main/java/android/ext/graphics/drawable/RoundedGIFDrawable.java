@@ -41,6 +41,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
      */
     public RoundedGIFDrawable(GIFImage image) {
         super(new RoundedGIFState(image));
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
     }
 
     /**
@@ -54,6 +55,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     public RoundedGIFDrawable(GIFImage image, float cornerRadius) {
         super(new RoundedGIFState(image));
         setCornerRadii(cornerRadius);
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
     }
 
     /**
@@ -69,6 +71,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     public RoundedGIFDrawable(GIFImage image, float[] radii) {
         super(new RoundedGIFState(image));
         setCornerRadii(radii);
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
     }
 
     /**
@@ -85,6 +88,7 @@ public class RoundedGIFDrawable extends ShapeGIFDrawable<RoundedGIFDrawable.Roun
     public RoundedGIFDrawable(GIFImage image, float topLeftRadius, float topRightRadius, float bottomLeftRadius, float bottomRightRadius) {
         super(new RoundedGIFState(image));
         setCornerRadii(topLeftRadius, topRightRadius, bottomLeftRadius, bottomRightRadius);
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
     }
 
     /**

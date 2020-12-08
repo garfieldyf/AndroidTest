@@ -29,6 +29,7 @@ public class GIFDrawable extends GIFBaseDrawable<GIFDrawable.GIFImageState> {
      */
     public GIFDrawable(GIFImage image) {
         super(new GIFImageState(image));
+        DebugUtils.__checkError(image == null, "Invalid parameter - image == null");
     }
 
     @Override

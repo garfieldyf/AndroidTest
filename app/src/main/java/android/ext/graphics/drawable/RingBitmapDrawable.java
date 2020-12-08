@@ -44,6 +44,7 @@ public class RingBitmapDrawable extends ShapeBitmapDrawable<RingBitmapDrawable.R
     public RingBitmapDrawable(Bitmap bitmap, float innerRadius) {
         super(new RingBitmapState(bitmap, innerRadius));
         invalidateSelf(mState.mShader, true);
+        DebugUtils.__checkError(bitmap == null, "Invalid parameter - bitmap == null");
     }
 
     /**

@@ -380,6 +380,20 @@ public class DownloadRequest {
     }
 
     /**
+     * Returns the value of the <tt>content-length</tt> header field.
+     * @param conn The {@link URLConnection}.
+     * @return The content length of the resource, <tt>-1</tt> if the
+     * content length is not known.
+     */
+    public static long getContentLength(URLConnection conn) {
+        try {
+            return Long.parseLong(conn.getHeaderField("content-length"));
+        } catch (Exception e) {
+            return -1;
+        }
+    }
+
+    /**
      * Connects to the remote server with the arguments supplied to this request.
      */
     /* package */ int connect() throws IOException {

@@ -1,6 +1,5 @@
 package android.ext.image.params;
 
-import android.annotation.WorkerThread;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.graphics.BitmapUtils;
@@ -8,6 +7,7 @@ import android.ext.util.DebugUtils;
 import android.ext.util.ReflectUtils;
 import android.graphics.BitmapFactory.Options;
 import android.os.Build;
+import android.support.annotation.WorkerThread;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Printer;

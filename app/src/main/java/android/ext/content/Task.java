@@ -1,8 +1,6 @@
 package android.ext.content;
 
 import android.annotation.SuppressLint;
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
@@ -14,6 +12,8 @@ import android.ext.util.DeviceUtils;
 import android.ext.widget.UIHandler;
 import android.ext.widget.UIHandler.MessageRunnable;
 import android.os.Message;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.atomic.AtomicInteger;
 

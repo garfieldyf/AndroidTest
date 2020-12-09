@@ -1,13 +1,13 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
-import android.annotation.UiThread;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.support.annotation.UiThread;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;

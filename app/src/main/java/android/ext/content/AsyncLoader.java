@@ -1,12 +1,12 @@
 package android.ext.content;
 
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.ext.cache.Cache;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Pool;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.Printer;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,10 +1,10 @@
 package android.ext.content;
 
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.ext.concurrent.ThreadPool;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 

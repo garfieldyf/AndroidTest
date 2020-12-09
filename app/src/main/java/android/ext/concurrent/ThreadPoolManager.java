@@ -1,10 +1,10 @@
 package android.ext.concurrent;
 
-import android.annotation.WorkerThread;
 import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.os.Process;
+import android.support.annotation.WorkerThread;
 import android.util.Printer;
 import java.util.ArrayList;
 import java.util.Collection;

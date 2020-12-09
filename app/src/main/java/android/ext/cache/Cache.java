@@ -1,6 +1,5 @@
 package android.ext.cache;
 
-import android.annotation.UiThread;
 import android.content.Context;
 import android.util.Printer;
 

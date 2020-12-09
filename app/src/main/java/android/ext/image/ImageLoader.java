@@ -1,7 +1,6 @@
 package android.ext.image;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import android.annotation.WorkerThread;
 import android.ext.cache.Cache;
 import android.ext.cache.FileCache;
 import android.ext.content.Task;
@@ -12,6 +11,7 @@ import android.ext.util.MessageDigests;
 import android.ext.util.MessageDigests.Algorithm;
 import android.ext.util.StringUtils;
 import android.graphics.Bitmap;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import android.widget.ImageView;
 import java.io.File;

@@ -18,8 +18,8 @@
     <!-- env.LOCAL_LIBS_ROOT = E:\Include\java -->
     <property name="local.libs.dir" value="${env.LOCAL_LIBS_ROOT}" />
 
-    <property name="api.level" value="26" />
-    <property name="sdk.version" value="8.0" />
+    <property name="api.level" value="28" />
+    <property name="sdk.version" value="9.0" />
     <property name="zxing.jar.path" value="${local.libs.dir}/zxing/zxing.jar" />
     <property name="android.jar.path" value="${sdk.dir}/platforms/android-${api.level}/android.jar" />
     <property name="android.stubs.jar.path" value="${local.libs.dir}/android/android-sdk-stubs.jar" />
@@ -49,9 +49,10 @@
         <echo level="info">Replacing the package android.support to androidx</echo>
         <replace dir="${src.dir}" includes="**/*.java" encoding="UTF-8">
             <replacefilter token="android.arch.lifecycle" value="androidx.lifecycle" />
-            <replacefilter token="android.support.annotation.Keep" value="androidx.annotation.Keep" />
+            <replacefilter token="android.support.annotation" value="androidx.annotation" />
             <replacefilter token="android.support.v4.content.FileProvider" value="androidx.core.content.FileProvider" />
             <replacefilter token="android.support.v7.widget.RecyclerView" value="androidx.recyclerview.widget.RecyclerView" />
+            <replacefilter token="android.support.constraint.ConstraintLayout" value="androidx.constraintlayout.widget.ConstraintLayout" />
             <replacefilter token="android.support.v7.widget.LinearLayoutManager" value="androidx.recyclerview.widget.LinearLayoutManager" />
             <replacefilter token="android.support.v4.content.LocalBroadcastManager" value="androidx.localbroadcastmanager.content.LocalBroadcastManager" />
         </replace>

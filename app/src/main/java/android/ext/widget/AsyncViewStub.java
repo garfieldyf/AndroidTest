@@ -1,12 +1,12 @@
 package android.ext.widget;
 
 import android.annotation.SuppressLint;
-import android.annotation.UiThread;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Canvas;
+import android.support.annotation.UiThread;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;

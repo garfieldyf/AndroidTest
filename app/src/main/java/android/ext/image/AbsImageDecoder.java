@@ -1,6 +1,5 @@
 package android.ext.image;
 
-import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.image.ImageLoader.ImageDecoder;
 import android.ext.util.DebugUtils;
@@ -10,6 +9,7 @@ import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.os.Build;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.io.InputStream;
 

@@ -1,12 +1,12 @@
 package android.ext.barcode;
 
-import android.annotation.UiThread;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Color;
 import android.graphics.Rect;
+import android.support.annotation.UiThread;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;

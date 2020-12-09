@@ -1,8 +1,6 @@
 package android.ext.content;
 
 import static java.net.HttpURLConnection.HTTP_OK;
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.net.DownloadRequest;
 import android.ext.util.Cancelable;
@@ -10,6 +8,8 @@ import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.util.FileUtils;
 import android.os.Process;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.io.File;
 import java.lang.ref.WeakReference;

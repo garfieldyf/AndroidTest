@@ -1,8 +1,8 @@
 package android.ext.widget;
 
-import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
+import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;

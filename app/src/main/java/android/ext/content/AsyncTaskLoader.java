@@ -1,12 +1,12 @@
 package android.ext.content;
 
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.util.DebugUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
 

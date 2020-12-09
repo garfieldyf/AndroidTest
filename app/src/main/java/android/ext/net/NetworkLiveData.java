@@ -1,6 +1,5 @@
 package android.ext.net;
 
-import android.annotation.UiThread;
 import android.arch.lifecycle.LiveData;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -9,6 +8,7 @@ import android.content.IntentFilter;
 import android.ext.util.DebugUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.support.annotation.UiThread;
 
 /**
  * Class <tt>NetworkLiveData</tt> used to listen the network state change.

@@ -1,10 +1,10 @@
 package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
-import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler.MessageRunnable;
 import android.os.Message;
+import android.support.annotation.UiThread;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.Adapter;
 import android.support.v7.widget.RecyclerView.ViewHolder;

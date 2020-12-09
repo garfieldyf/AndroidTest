@@ -1,13 +1,13 @@
 package android.ext.database;
 
 import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 
 /**
  * Class <tt>AsyncSQLiteHandler</tt> is a helper class to help make

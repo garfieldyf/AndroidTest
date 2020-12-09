@@ -1,8 +1,6 @@
 package android.ext.database;
 
 import static android.ext.content.AsyncTask.SERIAL_EXECUTOR;
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.ContentResolver;
@@ -13,6 +11,8 @@ import android.ext.util.DebugUtils;
 import android.ext.widget.UIHandler;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.util.ArrayList;
 

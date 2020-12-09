@@ -1,10 +1,10 @@
 package android.ext.widget;
 
-import android.annotation.UiThread;
 import android.ext.util.DebugUtils;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.UiThread;
 import java.util.concurrent.Executor;
 
 /**

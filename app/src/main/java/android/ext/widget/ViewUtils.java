@@ -2,7 +2,7 @@ package android.ext.widget;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
-import android.annotation.UiThread;
+import android.support.annotation.UiThread;
 import android.view.View;
 import android.view.ViewGroup;
 

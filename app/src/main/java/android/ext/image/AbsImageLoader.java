@@ -4,7 +4,6 @@ import static android.ext.image.ImageModule.PARAMETERS;
 import static android.ext.image.ImageModule.PARAMS_LENGTH;
 import static android.ext.image.ImageModule.PLACEHOLDER;
 import android.annotation.TargetApi;
-import android.annotation.UiThread;
 import android.ext.cache.Cache;
 import android.ext.content.AsyncLoader;
 import android.ext.content.AsyncLoader.Binder;
@@ -12,6 +11,7 @@ import android.ext.image.params.Parameters;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.UiThread;
 import java.io.File;
 import java.util.Arrays;
 

@@ -1,7 +1,6 @@
 package android.ext.database;
 
 import android.annotation.SuppressLint;
-import android.annotation.UiThread;
 import android.app.Activity;
 import android.arch.lifecycle.GenericLifecycleObserver;
 import android.arch.lifecycle.Lifecycle;
@@ -18,6 +17,7 @@ import android.ext.widget.UIHandler.MessageRunnable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.annotation.UiThread;
 import android.util.Printer;
 import java.lang.ref.WeakReference;
 

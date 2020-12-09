@@ -12,7 +12,7 @@ import android.widget.Button;
  * &lt;xxx.focus.FocusButton
  *     xmlns:android="http://schemas.android.com/apk/res/android"
  *     xmlns:app="http://schemas.android.com/apk/res-auto"
- *     &lt;!-- android:singleLine="false" must be false --&gt;
+ *     android:singleLine="false"&lt;!-- must be false --&gt;
  *     app:focus="@drawable/focused_image"
  *     ... ... /&gt;</pre>
  * @author Garfield

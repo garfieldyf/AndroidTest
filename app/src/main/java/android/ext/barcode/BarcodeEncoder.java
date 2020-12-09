@@ -2,13 +2,13 @@ package android.ext.barcode;
 
 import static android.ext.util.DeviceUtils.DEVICE_DENSITY;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
-import android.annotation.UiThread;
-import android.annotation.WorkerThread;
 import android.content.Context;
 import android.ext.content.AsyncTask;
 import android.ext.util.DebugUtils;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
+import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.util.DisplayMetrics;
 import android.util.Pair;
 import com.google.zxing.BarcodeFormat;

@@ -2,10 +2,10 @@ package android.ext.net;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 import static java.net.HttpURLConnection.HTTP_PARTIAL;
-import android.annotation.WorkerThread;
 import android.ext.content.AsyncTask;
 import android.ext.net.DownloadRequest.DownloadCallback;
 import android.ext.util.ByteArrayBuffer;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 import java.io.File;
 import java.io.IOException;

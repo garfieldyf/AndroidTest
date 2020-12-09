@@ -24,7 +24,7 @@ public class WebViewActivity extends Activity {
 
         final WebSettings settings = mWebView.getSettings();
         settings.setJavaScriptEnabled(true);
-        settings.setPluginsEnabled(true);
+//        settings.setPluginsEnabled(true);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
         settings.setNeedInitialFocus(true);

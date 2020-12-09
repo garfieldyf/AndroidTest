@@ -2,12 +2,13 @@
 <resources>
     <!-- AUTO-GENERATED FILE. DO NOT MODIFY. -->
 
-    <!-- Attributes format -->
+    <!-- Attributes format
     <attr name="autoMirrored">
         <enum name="none" value="0" />
         <enum name="horizontal" value="0x40000000" />
         <enum name="vertical" value="0x80000000" />
     </attr>
+    -->
 
     <!-- Parameters styleable -->
     <declare-styleable name="Parameters">
@@ -34,12 +35,13 @@
         </attr>
     </declare-styleable>
 
-    <!-- FocusDrawable styleable -->
+    <!-- FocusDrawable styleable
     <declare-styleable name="FocusDrawable">
         <attr name="focus" format="reference|color" />
     </declare-styleable>
+    -->
 
-    <!-- NumericView styleable -->
+    <!-- NumericView styleable
     <declare-styleable name="NumericView">
         <attr name="value" format="string" />
         <attr name="dotWidth" format="dimension" />
@@ -48,4 +50,5 @@
         <attr name="digitHeight" format="dimension" />
         <attr name="horizontalMargin" format="dimension" />
     </declare-styleable>
+    -->
 </resources>

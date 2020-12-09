@@ -62,7 +62,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
     }
 
     /**
-     * Sets the object that owns this loader.
+     * Sets the object that owns this loader. This method can only be called before the {@link #load}.
      * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
      */
     public final void setOwner(Object owner) {

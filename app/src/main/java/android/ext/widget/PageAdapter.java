@@ -447,7 +447,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         /**
          * The page {@link Cache} or maximum number of pages.
          */
-        /* package */ final Object mPageCache;
+        /* package */ final Object pageCache;
 
         /**
          * Returns the maximum number of pages in the page cache.
@@ -455,7 +455,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          * cache is <b>unlimitted-size</b> or <tt>-1</tt> if unknown.
          */
         public final int getMaximumPageCount() {
-            return (mPageCache == null ? 0 : (mPageCache instanceof Integer ? (int)mPageCache : -1));
+            return (pageCache == null ? 0 : (pageCache instanceof Integer ? (int)pageCache : -1));
         }
 
         /**
@@ -463,7 +463,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          */
         /* package */ Config(Object pageCache, int initialSize, int pageSize, int prefetchDistance) {
             this.pageSize    = pageSize;
-            this.mPageCache  = pageCache;
+            this.pageCache   = pageCache;
             this.initialSize = initialSize;
             this.prefetchDistance = prefetchDistance;
         }
@@ -480,11 +480,11 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
          */
         @SuppressWarnings("unchecked")
         /* package */ final <E> Cache<Integer, List<E>> createPageCache() {
-            if (mPageCache instanceof Cache) {
-                return (Cache<Integer, List<E>>)mPageCache;
+            if (pageCache instanceof Cache) {
+                return (Cache<Integer, List<E>>)pageCache;
             }
 
-            final int maxPageCount = (mPageCache instanceof Integer ? (int)mPageCache : 0);
+            final int maxPageCount = (pageCache instanceof Integer ? (int)pageCache : 0);
             return (maxPageCount != 0 ? new LruPageCache<E>(maxPageCount - 1) : new ArrayMapCache<Integer, List<E>>(8));
         }
 

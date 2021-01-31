@@ -321,7 +321,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     @UiThread
-    public final void dump(Printer printer) {
+    public void dump(Printer printer) {
         DebugUtils.__checkUIThread("dump");
         if (mPageCache instanceof ArrayMapCache) {
             dump(printer, ((ArrayMapCache<Integer, List<E>>)mPageCache).entrySet());

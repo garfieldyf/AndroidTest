@@ -10,7 +10,7 @@ import android.ext.util.Cancelable;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.ext.widget.UIHandler;
-import android.ext.widget.UIHandler.MessageRunnable;
+import android.ext.widget.UIHandler.HandlerRunnable;
 import android.os.Message;
 import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
@@ -21,8 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * This abstract class should be implemented by any class whose instances are intended to be execute.
  */
 @SuppressLint("RestrictedApi")
-public abstract class Task implements MessageRunnable, Cancelable, GenericLifecycleObserver {
-    private static final int MESSAGE_PROGRESS = 1;
+public abstract class Task implements HandlerRunnable, Cancelable, GenericLifecycleObserver {
     private static final int RUNNING   = 0;
     private static final int CANCELLED = 1;
     private static final int COMPLETED = 2;
@@ -79,16 +78,16 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
             }
         }
 
-        UIHandler.sInstance.post(this, result);
+        UIHandler.sInstance.sendMessage(UIHandler.sInstance.obtianMessage(this, COMPLETED, result));
     }
 
     @Override
     @UiThread
     public final void handleMessage(Message msg) {
-        if (msg.what == MESSAGE_PROGRESS) {
-            onProgress(msg.obj);
-        } else {
+        if (msg.what == COMPLETED) {
             onPostExecute(msg.obj);
+        } else {
+            onProgress(msg.obj);
         }
     }
 
@@ -142,7 +141,7 @@ public abstract class Task implements MessageRunnable, Cancelable, GenericLifecy
      */
     /* package */ final void setProgress(Object value) {
         if (mState.get() == RUNNING) {
-            UIHandler.sInstance.sendMessage(UIHandler.sInstance.obtianMessage(this, MESSAGE_PROGRESS, value));
+            UIHandler.sInstance.post(this, value);
         }
     }
 

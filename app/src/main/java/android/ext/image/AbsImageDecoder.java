@@ -63,7 +63,6 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
 
             // Decodes the image bounds.
             opts.inJustDecodeBounds = true;
-            AbsImageDecoder.__checkOptions(opts);
             decodeBitmap(uri, opts);
             opts.inJustDecodeBounds = false;
 
@@ -78,6 +77,7 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void recycleOptions(Options opts) {
         opts.inBitmap  = null;
         opts.inDensity = 0;
@@ -102,12 +102,6 @@ public abstract class AbsImageDecoder<Image> implements ImageDecoder<Image> {
         }
 
         mModule.mOptionsPool.recycle(opts);
-    }
-
-    private static void __checkOptions(Options opts) {
-        if (Build.VERSION.SDK_INT >= 26 && opts.inMutable && opts.inPreferredConfig == Config.HARDWARE) {
-            throw new AssertionError("Bitmaps with Config.HARWARE are always immutable");
-        }
     }
 
     /**

@@ -2,7 +2,7 @@ package android.ext.widget;
 
 import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.util.DebugUtils;
-import android.ext.widget.UIHandler.MessageRunnable;
+import android.ext.widget.UIHandler.HandlerRunnable;
 import android.os.Message;
 import android.support.annotation.UiThread;
 import android.support.v7.widget.RecyclerView;
@@ -26,9 +26,9 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     protected RecyclerView mRecyclerView;
 
     /**
-     * The <tt>MessageRunnable</tt> to notify the content has changed.
+     * The <tt>HandlerRunnable</tt> to notify the content has changed.
      */
-    private MessageRunnable mCallback;
+    private HandlerRunnable mCallback;
 
     /**
      * Returns the {@link RecyclerView} associated with this adapter.
@@ -228,9 +228,9 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
     }
 
     /**
-     * Class <tt>NotificationRunnable</tt> is an implementation of a {@link MessageRunnable}.
+     * Class <tt>NotificationRunnable</tt> is an implementation of a {@link HandlerRunnable}.
      */
-    /* package */ final class NotificationRunnable implements MessageRunnable {
+    /* package */ final class NotificationRunnable implements HandlerRunnable {
         @Override
         public final void handleMessage(Message msg) {
             switch (msg.what) {
@@ -257,11 +257,6 @@ public abstract class BaseAdapter<VH extends ViewHolder> extends Adapter<VH> {
             default:
                 throw new IllegalStateException("Unknown message: " + msg.what);
             }
-        }
-
-        @Override
-        public final void run() {
-            throw new AssertionError("No Implementation, This method is a stub!");
         }
     }
 }

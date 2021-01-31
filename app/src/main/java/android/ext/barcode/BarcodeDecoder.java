@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class BarcodeDecoder
+ * Class <tt>BarcodeDecoder</tt> used to decodes a barcode image to {@link Result}.
  * @author Garfield
  */
 public class BarcodeDecoder {

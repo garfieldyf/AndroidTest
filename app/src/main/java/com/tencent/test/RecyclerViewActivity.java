@@ -3,6 +3,7 @@ package com.tencent.test;
 import android.app.Activity;
 import android.content.Context;
 import android.ext.content.AsyncTask;
+import android.ext.content.Task;
 import android.ext.image.ImageModule;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
@@ -70,7 +71,7 @@ public class RecyclerViewActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
 
-        final Printer printer = new LogPrinter(Log.DEBUG, "aaaa");
+        final Printer printer = new LogPrinter(Log.ERROR, "yuanfeng");
         mAdapter.dump(printer);
     }
 
@@ -136,7 +137,7 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public List<String> loadPage(AsyncTask<?, ?, ?> task, int page, int startPosition, int loadSize) {
+        public List<String> loadPage(Task task, int page, int startPosition, int loadSize) {
             //Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
 //            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, loadSize);
 //            return null;

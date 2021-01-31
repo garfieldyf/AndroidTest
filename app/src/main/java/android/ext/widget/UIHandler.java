@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import java.util.concurrent.Executor;
 
 /**
@@ -28,11 +29,11 @@ public final class UIHandler extends Handler implements Executor {
 
     /**
      * Equivalent to calling <tt>sendMessage(obtianMessage(callback, 0, obj))</tt>.
-     * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
+     * @param callback The {@link HandlerRunnable} that will call {@link HandlerRunnable#handleMessage(Message)} when the message is handled.
      * @param obj The value to assign to the {@link Message#obj} field.
-     * @see #obtianMessage(MessageRunnable, int, Object)
+     * @see #obtianMessage(HandlerRunnable, int, Object)
      */
-    public final void post(MessageRunnable callback, Object obj) {
+    public final void post(HandlerRunnable callback, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
         final Message msg = Message.obtain(this, callback);
         msg.obj = obj;
@@ -41,13 +42,13 @@ public final class UIHandler extends Handler implements Executor {
 
     /**
      * Same as {@link Message#obtain(Handler, Runnable)}, except that it also sets the what and obj members of the returned {@link Message}.
-     * @param callback The {@link MessageRunnable} that will call {@link MessageRunnable#handleMessage(Message)} when the message is handled.
+     * @param callback The {@link HandlerRunnable} that will call {@link HandlerRunnable#handleMessage(Message)} when the message is handled.
      * @param what The value to assign to the returned {@link Message#what} field.
      * @param obj The value to assign to the returned {@link Message#obj} field.
      * @return A <tt>Message</tt> from the global message pool.
-     * @see #post(MessageRunnable, Object)
+     * @see #post(HandlerRunnable, Object)
      */
-    public final Message obtianMessage(MessageRunnable callback, int what, Object obj) {
+    public final Message obtianMessage(HandlerRunnable callback, int what, Object obj) {
         DebugUtils.__checkError(callback == null, "Invalid parameter - callback == null");
         final Message msg = Message.obtain(this, callback);
         msg.what = what;
@@ -67,8 +68,8 @@ public final class UIHandler extends Handler implements Executor {
     @Override
     public void dispatchMessage(Message msg) {
         final Runnable callback = msg.getCallback();
-        if (callback instanceof MessageRunnable) {
-            ((MessageRunnable)callback).handleMessage(msg);
+        if (callback instanceof HandlerRunnable) {
+            ((HandlerRunnable)callback).handleMessage(msg);
         } else {
             super.dispatchMessage(msg);
         }
@@ -82,11 +83,11 @@ public final class UIHandler extends Handler implements Executor {
     }
 
     /**
-     * The <tt>MessageRunnable</tt> class allows us to perform operations
+     * The <tt>HandlerRunnable</tt> class allows us to perform operations
      * on a background thread and handle message on the UI thread.
      * <h3>Usage</h3>
      * <p>Here is an example of subclassing:</p><pre>
-     * public static class DownloadTask implements MessageRunnable {
+     * public static class DownloadTask implements HandlerRunnable {
      *    {@code @Override}
      *     public void run() {
      *         // Performs download on the background thread
@@ -108,12 +109,18 @@ public final class UIHandler extends Handler implements Executor {
      *
      * AsyncTask.execute(new DownloadTask());</pre>
      */
-    public static interface MessageRunnable extends Runnable {
+    public static interface HandlerRunnable extends Runnable {
         /**
          * Called on the UI thread to receive messages.
          * @param msg The <tt>Message</tt> to handle.
          */
         @UiThread
         void handleMessage(Message msg);
+
+        @Override
+        @WorkerThread
+        default void run() {
+            throw new AssertionError("No Implementation, The subclass must be implements.");
+        }
     }
 }

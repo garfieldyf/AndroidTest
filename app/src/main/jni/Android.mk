@@ -4,7 +4,7 @@ LOCAL_GIF_MODULE      := gif
 LOCAL_IMGALGTH_MODULE := imgalgth
 
 ifeq ($(origin LOCAL_INCLUDE_PATH), undefined)
-LOCAL_INCLUDE_PATH := E:/Include
+LOCAL_INCLUDE_PATH := D:/Projects/Include
 endif
 
 ifeq ($(origin LOCAL_MODULE_PATH), undefined)

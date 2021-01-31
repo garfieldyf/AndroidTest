@@ -13,7 +13,7 @@ import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
-import android.ext.widget.UIHandler.MessageRunnable;
+import android.ext.widget.UIHandler.HandlerRunnable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Message;
@@ -251,7 +251,7 @@ import java.lang.ref.WeakReference;
     /**
      * Class <tt>AbsSQLiteTask</tt> is an implementation of a {@link Runnable}.
      */
-    /* package */ static abstract class AbsSQLiteTask implements MessageRunnable {
+    /* package */ static abstract class AbsSQLiteTask implements HandlerRunnable {
         /* package */ int token;
         /* package */ int message;
         /* package */ Object values;

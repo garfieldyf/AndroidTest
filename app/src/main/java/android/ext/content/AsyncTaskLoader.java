@@ -93,6 +93,16 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
     protected abstract Result loadInBackground(Task task, Params[] params);
 
     /**
+     * Returns the {@link OnLoadCompleteListener} associated with the <em>task</em>.
+     * @param task The {@link Task}.
+     * @return The <tt>OnLoadCompleteListener</tt>.
+     */
+    @SuppressWarnings("unchecked")
+    protected final OnLoadCompleteListener<Params, Result> getListener(Task task) {
+        return ((LoadTask)task).mListener;
+    }
+
+    /**
      * Class <tt>LoadTask</tt> is an implementation of a {@link Task}.
      */
     @SuppressWarnings("unchecked")

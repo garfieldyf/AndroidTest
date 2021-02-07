@@ -153,7 +153,7 @@
         <!-- compile c++ files -->
         <ant antfile="${source.dir}/jni/build.xml" target="${ndk.target}" inheritAll="false" inheritRefs="false" >
             <!-- optional ndk_args NDK_STL=1 -->
-            <property name="ndk_args" value="NDK_ABI=&quot;${ABI}&quot; -B all=1 LOCAL_MODULE_NAME=${MODULE_NAME} PACKAGE_GRAPHICS=${JNI_PACKAGE}/graphics/ PACKAGE_UTILITIES=${JNI_PACKAGE}/util/" />
+            <property name="ndk_args" value="NDK_STL=${STL} NDK_ABI=&quot;${ABI}&quot; -B all=1 LOCAL_MODULE_NAME=${MODULE_NAME} PACKAGE_GRAPHICS=${JNI_PACKAGE}/graphics/ PACKAGE_UTILITIES=${JNI_PACKAGE}/util/" />
         </ant>
 
         <!-- copy so file -->

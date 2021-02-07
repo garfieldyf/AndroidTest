@@ -5,27 +5,22 @@
 // Creation Date : 2012/4/16
 
 #ifdef __BUILD_GIFIMAGE__
-#pragma message "Compiling " PACKAGE_GRAPHICS "GIFImage native methods."
 #include "gifimage.h"
 #endif
 
 #ifdef __BUILD_FILEUTILS__
-#pragma message "Compiling " PACKAGE_UTILITIES "FileUtils native methods."
 #include "fileutils.h"
 #endif
 
 #ifdef __BUILD_MESSAGEDIGESTS__
-#pragma message "Compiling " PACKAGE_UTILITIES "MessageDigests native methods."
 #include "msgdigts.h"
 #endif
 
 #ifdef __BUILD_BITMAPUTILS__
-#pragma message "Compiling " PACKAGE_UTILITIES "BitmapUtils native methods."
 #include "bmputils.h"
 #endif
 
 #ifdef __BUILD_PROCUTILS__
-#pragma message "Compiling " PACKAGE_UTILITIES "ProcessUtils native methods."
 #include "procutils.h"
 #endif
 

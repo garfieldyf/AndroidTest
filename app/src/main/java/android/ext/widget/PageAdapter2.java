@@ -3,6 +3,7 @@ package android.ext.widget;
 import android.ext.content.AsyncTaskLoader;
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.content.Task;
+import android.support.annotation.UiThread;
 import android.support.annotation.WorkerThread;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;

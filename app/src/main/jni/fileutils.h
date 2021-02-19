@@ -60,10 +60,10 @@ enum
 // Global variables
 //
 
-// Class FileUtils method IDs.
+// Class FileUtils setStat method ID.
 static jmethodID _setStatID;
 
-// Class ScanCallback method IDs.
+// Class ScanCallback onScanFile method ID.
 static jmethodID _onScanFileID;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -554,11 +554,11 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
     assert(env);
     LOGD("Register class " PACKAGE_UTILITIES "FileUtils native methods.\n");
 
-    // Initializes class ScanCallback method IDs.
+    // Initializes class ScanCallback onScanFile method ID.
     _onScanFileID = JNI::jclass_t(env, PACKAGE_UTILITIES "FileUtils$ScanCallback").getMethodID("onScanFile", "(Ljava/lang/String;ILjava/lang/Object;)I");
     assert(_onScanFileID != NULL);
 
-    // Initializes class FileUtils method IDs.
+    // Initializes class FileUtils setStat method ID.
     const JNI::jclass_t clazz(env, PACKAGE_UTILITIES "FileUtils");
     _setStatID = clazz.getStaticMethodID("setStat", "(L" PACKAGE_UTILITIES "FileUtils$Stat;IIIJJJJ)V");
     assert(_setStatID != NULL);

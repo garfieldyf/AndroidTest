@@ -31,7 +31,7 @@ namespace GIFImage {
 // Global variables
 //
 
-// Class FileDescriptor field IDs.
+// Class FileDescriptor descriptor field ID.
 static jfieldID _descriptorID;
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -222,7 +222,7 @@ __STATIC_INLINE__ jint registerNativeMethods(JNIEnv* env)
     assert(env);
     LOGD("Register class " PACKAGE_GRAPHICS "GIFImage native methods.\n");
 
-    // Initializes class FileDescriptor field IDs.
+    // Initializes class FileDescriptor descriptor field ID.
     _descriptorID = JNI::jclass_t(env, "java/io/FileDescriptor").getFieldID("descriptor", "I");
     assert(_descriptorID != NULL);
 

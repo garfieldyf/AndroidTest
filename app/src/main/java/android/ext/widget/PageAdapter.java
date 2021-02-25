@@ -33,7 +33,6 @@ import java.util.Set;
  */
 public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> implements OnLoadCompleteListener<Integer, List<?>> {
     private int mItemCount;
-    private int mMaxPageIndex;
     private int mLastPosition;
 
     private final Config mConfig;
@@ -91,10 +90,9 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         DebugUtils.__checkUIThread("setItemCount");
         DebugUtils.__checkError(itemCount < 0, "Invalid parameter - itemCount(" + itemCount + ") must be >= 0");
         mItemCount = itemCount;
+        mLastPosition = 0;
         mPageCache.clear();
         mLoadStates.clear();
-        mLastPosition = 0;
-        mMaxPageIndex = (int)Math.ceil((double)(itemCount - mConfig.initialSize) / mConfig.pageSize);
         postNotifyDataSetChanged();
     }
 
@@ -136,7 +134,7 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
                 DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex - 1) + ", itemIndex = " + itemIndex + ", position = " + position);
                 getPage(pageIndex - 1);
             }
-        } else if (pageIndex < mMaxPageIndex) {
+        } else if (pageIndex < mConfig.getMaxPageIndex(mItemCount)) {
             // Prefetch the pageIndex next page data.
             if (itemIndex == mConfig.getPrefetchIndex(pageIndex)) {
                 DebugUtils.__checkDebug(true, "PageAdapter", "prefetch data pageIndex = " + (pageIndex + 1) + ", itemIndex = " + itemIndex + ", position = " + position);
@@ -466,6 +464,13 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
             this.pageCache   = pageCache;
             this.initialSize = initialSize;
             this.prefetchDistance = prefetchDistance;
+        }
+
+        /**
+         * Returns the maximum page index in the adapter.
+         */
+        /* package */ final int getMaxPageIndex(int itemCount) {
+            return (int)Math.ceil((double)(itemCount - initialSize) / pageSize);
         }
 
         /**

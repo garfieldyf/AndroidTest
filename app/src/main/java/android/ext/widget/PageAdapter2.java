@@ -13,8 +13,8 @@ import java.util.List;
  * Class PageAdapter2
  * @author Garfield
  */
-public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter<E, VH> implements OnLoadCompleteListener<Integer, List<E>> {
-    private final Loader<E> mLoader;
+public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter<E, VH> implements OnLoadCompleteListener<Integer, List<?>> {
+    private final Loader mLoader;
 
     /**
      * Constructor
@@ -23,7 +23,7 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      */
     public PageAdapter2(Config config) {
         super(config);
-        mLoader = new Loader<E>();
+        mLoader = new Loader();
     }
 
     /**
@@ -53,12 +53,12 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
     }
 
     @Override
-    public void onLoadComplete(Integer[] params, List<E> result) {
+    public void onLoadComplete(Integer[] params, List<?> result) {
         setPage(params[0], result, null);
     }
 
     @Override
-    protected List<E> loadPage(int pageIndex, int startPosition, int loadSize) {
+    protected List<?> loadPage(int pageIndex, int startPosition, int loadSize) {
         mLoader.load(this, pageIndex, startPosition, loadSize);
         return null;
     }
@@ -72,12 +72,12 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
      * @return The page, or <tt>null</tt>.
      */
     @WorkerThread
-    protected abstract List<E> loadPage(Task task, int pageIndex, int startPosition, int loadSize);
+    protected abstract List<?> loadPage(Task task, int pageIndex, int startPosition, int loadSize);
 
     /**
      * Class <tt>Loader</tt> is an implementation of a {@link AsyncTaskLoader}.
      */
-    private static final class Loader<E> extends AsyncTaskLoader<Integer, List<E>> {
+    private static final class Loader extends AsyncTaskLoader<Integer, List<?>> {
         /**
          * Constructor
          */
@@ -86,8 +86,8 @@ public abstract class PageAdapter2<E, VH extends ViewHolder> extends PageAdapter
         }
 
         @Override
-        protected List<E> loadInBackground(Task task, Integer[] params) {
-            return ((PageAdapter2<E, ?>)getListener(task)).loadPage(task, params[0], params[1], params[2]);
+        protected List<?> loadInBackground(Task task, Integer[] params) {
+            return ((PageAdapter2<?, ?>)getListener(task)).loadPage(task, params[0], params[1], params[2]);
         }
     }
 }

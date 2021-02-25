@@ -4,10 +4,14 @@ import static android.support.v7.widget.RecyclerView.NO_POSITION;
 import android.ext.cache.ArrayMapCache;
 import android.ext.cache.Cache;
 import android.ext.cache.SimpleLruCache;
+import android.ext.content.AsyncTaskLoader;
+import android.ext.content.ResourceLoader.OnLoadCompleteListener;
+import android.ext.content.Task;
 import android.ext.util.ArrayUtils;
 import android.ext.util.DebugUtils;
 import android.ext.util.DeviceUtils;
 import android.support.annotation.UiThread;
+import android.support.annotation.WorkerThread;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.util.Printer;
 import android.view.View;
@@ -27,24 +31,46 @@ import java.util.Set;
  * will be used by the adapter.</li></ol>
  * @author Garfield
  */
-public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> {
+public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<VH> implements OnLoadCompleteListener<Integer, List<?>> {
     private int mItemCount;
     private int mMaxPageIndex;
     private int mLastPosition;
 
     private final Config mConfig;
+    private final Loader mLoader;
     private final BitSet mLoadStates;
     private final Cache<Integer, List<E>> mPageCache;
 
     /**
      * Constructor
      * @param config The {@link Config}, which defines how the adapter will load data.
+     * @see #PageAdapter(Config, Object)
      */
     public PageAdapter(Config config) {
         DebugUtils.__checkError(config == null, "Invalid parameter - config == null");
         mConfig = config;
+        mLoader = new Loader();
         mLoadStates = new BitSet();
         mPageCache  = config.createPageCache();
+    }
+
+    /**
+     * Constructor
+     * @param config The {@link Config}, which defines how the adapter will load data.
+     * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+     * @see #PageAdapter(Config)
+     */
+    public PageAdapter(Config config, Object owner) {
+        this(config);
+        mLoader.setOwner(owner);
+    }
+
+    /**
+     * Sets the object that owns this adapter.
+     * @param owner May be an <tt>Activity, LifecycleOwner, Lifecycle</tt> or <tt>Fragment</tt> etc.
+     */
+    public final void setOwner(Object owner) {
+        mLoader.setOwner(owner);
     }
 
     /**
@@ -87,8 +113,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the item when the
-     * item was not present.</p>
+     * <p>This method will be call {@link #loadPage} to retrieve the item when the item was not
+     * present.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The item at the specified position, or <em>fallback</em> if there was not present.
      * @see #getItem(int)
@@ -168,8 +194,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     /**
      * Sets the item at the specified <em>position</em> in this adapter with the specified <em>value</em>.
      * This method will be call {@link #notifyItemChanged(int, Object)} when the <em>value</em> has set.
-     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)} when
-     * the item was not present.</p>
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage} when the item was not
+     * present.</p>
      * @param position The adapter position of the item in this adapter.
      * @param value The value to set.
      * @param payload Optional parameter, pass to {@link #notifyItemChanged}.
@@ -194,8 +220,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
 
     /**
      * Returns the item associated with the specified position <em>position</em> in this adapter.
-     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage(int, int, int)}
-     * when the item was not present.</p>
+     * <p>Unlike {@link #getItem}, this method do <b>not</b> call {@link #loadPage} when the item
+     * was not present.</p>
      * @param position The adapter position of the item in this adapter.
      * @return The item at the specified position, or <tt>null</tt> if there was not present.
      * @see #peekItem(View)
@@ -238,40 +264,21 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         return (position != NO_POSITION ? peekItem(position) : null);
     }
 
-    /**
-     * Equivalent to calling <tt>setPage(pageIndex, page, null)</tt>.
-     * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The page to add.
-     * @see #setPage(int, List, Object)
-     */
-    @UiThread
-    public final void setPage(int pageIndex, List<?> page) {
-        setPage(pageIndex, page, null);
-    }
-
-    /**
-     * Sets the page at the specified <em>pageIndex</em> in this adapter. This
-     * method will be call {@link #notifyItemRangeChanged(int, int, Object)}
-     * when the <em>page</em> has added. <p>This is useful when asynchronously
-     * loading to prevent blocking the UI.</p>
-     * @param pageIndex The index of the page.
-     * @param page May be <tt>null</tt>. The page to add.
-     * @param payload Optional parameter, pass to {@link #notifyItemRangeChanged}.
-     * @see #setPage(int, List)
-     */
-    @UiThread
+    @Override
     @SuppressWarnings("unchecked")
-    public void setPage(int pageIndex, List<?> page, Object payload) {
-        DebugUtils.__checkUIThread("setPage");
-        DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
+    public void onLoadComplete(Integer[] params, List<?> result) {
+        /*
+         * params - { pageIndex, startPosition, loadSize }
+         */
+        final int pageIndex = params[0];
+        mLoadStates.clear(pageIndex);   // Clears the page loading state.
 
-        // Clears the page loading state when the page is load complete.
-        mLoadStates.clear(pageIndex);
-        final int size = ArrayUtils.getSize(page);
+        // Adds the result to page cache.
+        final int size = ArrayUtils.getSize(result);
         if (size > 0) {
-            DebugUtils.__checkDebug(true, "PageAdapter", "setPage - pageIndex = " + pageIndex + ", startPosition = " + getPositionForPage(pageIndex) + ", size = " + size);
-            mPageCache.put(pageIndex, (List<E>)page);
-            postNotifyItemRangeChanged(getPositionForPage(pageIndex), size, payload);
+            DebugUtils.__checkDebug(true, "PageAdapter", "addPage - pageIndex = " + pageIndex + ", startPosition = " + params[1] + ", size = " + size);
+            mPageCache.put(pageIndex, (List<E>)result);
+            postNotifyItemRangeChanged(params[1], size, null);
         }
     }
 
@@ -328,6 +335,8 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
         } else if (mPageCache instanceof SimpleLruCache) {
             dump(printer, ((SimpleLruCache<Integer, List<E>>)mPageCache).snapshot().entrySet());
         }
+
+        mLoader.dump(printer);
     }
 
     /**
@@ -353,52 +362,42 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
     }
 
     /**
-     * Returns a page at the given the <em>pageIndex</em>. Subclasses must implement
-     * this method to return <tt>List</tt> for a particular page. <p>If you want to
-     * asynchronously load the page data to prevent blocking the UI, it is possible
-     * to return <tt>null</tt> and at a later time call {@link #setPage}.<p>
+     * Called on a background thread to load a page with given the <em>pageIndex</em>.
+     * @param task The current {@link Task} whose executing this method.
      * @param pageIndex The index of the page whose data should be load.
      * @param startPosition The start position of data to load.
      * @param loadSize The number of items should be load.
      * @return The page, or <tt>null</tt>.
      */
-    @UiThread
-    protected abstract List<?> loadPage(int pageIndex, int startPosition, int loadSize);
+    @WorkerThread
+    protected abstract List<?> loadPage(Task task, int pageIndex, int startPosition, int loadSize);
 
     /**
      * Returns the page associated with the specified <em>pageIndex</em> in this adapter.
-     * <p>This method will be call {@link #loadPage(int, int, int)} to retrieve the page
-     * when the page was not present.</p>
+     * <p>This method will be call {@link #loadPage} to retrieve the page when the page
+     * was not present.</p>
      * @param pageIndex The index of the page.
      * @return The page at the specified index, or <tt>null</tt> if there was not present.
      */
     @UiThread
-    @SuppressWarnings("unchecked")
     private List<E> getPage(int pageIndex) {
         DebugUtils.__checkError(pageIndex < 0, "Invalid parameter - pageIndex(" + pageIndex + ") must be >= 0");
-        List<E> page = mPageCache.get(pageIndex);
-        if (page != null || mLoadStates.get(pageIndex)) {
-            return page;
-        }
+        final List<E> page = mPageCache.get(pageIndex);
+        if (page == null && !mLoadStates.get(pageIndex)) {
+            // Computes the startPosition and loadSize to load.
+            final int startPosition, loadSize;
+            if (pageIndex == 0) {
+                loadSize = mConfig.initialSize;
+                startPosition = 0;
+            } else {
+                loadSize = mConfig.pageSize;
+                startPosition = (pageIndex - 1) * mConfig.pageSize + mConfig.initialSize;
+            }
 
-        // Computes the startPosition and loadSize to load.
-        final int startPosition, loadSize;
-        if (pageIndex == 0) {
-            loadSize = mConfig.initialSize;
-            startPosition = 0;
-        } else {
-            loadSize = mConfig.pageSize;
-            startPosition = (pageIndex - 1) * mConfig.pageSize + mConfig.initialSize;
-        }
-
-        // Loads the page data and sets the page loading state.
-        DebugUtils.__checkDebug(true, "PageAdapter", "loadPage - pageIndex = " + pageIndex + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
-        mLoadStates.set(pageIndex);
-        page = (List<E>)loadPage(pageIndex, startPosition, loadSize);
-        if (ArrayUtils.getSize(page) > 0) {
-            // Clears the page loading state.
-            mLoadStates.clear(pageIndex);
-            mPageCache.put(pageIndex, page);
+            // Loads the page data and sets the page loading state.
+            DebugUtils.__checkDebug(true, "PageAdapter", "loadPage - pageIndex = " + pageIndex + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
+            mLoadStates.set(pageIndex);
+            mLoader.load(this, pageIndex, startPosition, loadSize);
         }
 
         return page;
@@ -584,6 +583,23 @@ public abstract class PageAdapter<E, VH extends ViewHolder> extends BaseAdapter<
                     throw new AssertionError("Invalid parameter - prefetchDistance(" + mPrefetchDistance + ") must be < " + pageSize);
                 }
             }
+        }
+    }
+
+    /**
+     * Class <tt>Loader</tt> is an implementation of a {@link AsyncTaskLoader}.
+     */
+    private static final class Loader extends AsyncTaskLoader<Integer, List<?>> {
+        /**
+         * Constructor
+         */
+        public Loader() {
+            super(4);
+        }
+
+        @Override
+        protected List<?> loadInBackground(Task task, Integer[] params) {
+            return ((PageAdapter<?, ?>)getListener(task)).loadPage(task, params[0], params[1], params[2]);
         }
     }
 

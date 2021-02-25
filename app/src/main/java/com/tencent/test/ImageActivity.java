@@ -20,7 +20,6 @@ import android.ext.annotation.CursorField;
 import android.ext.content.AsyncTask;
 import android.ext.content.ResourceLoader;
 import android.ext.content.ResourceLoader.LoadParams;
-import android.ext.content.Task;
 import android.ext.content.res.XmlResources.XmlResourceInflater;
 import android.ext.database.AsyncQueryHandler;
 import android.ext.database.AsyncSQLiteHandler;
@@ -56,8 +55,6 @@ import android.ext.util.ZipUtils;
 import android.ext.widget.AsyncViewStub;
 import android.ext.widget.AsyncViewStub.OnInflateListener;
 import android.ext.widget.CountDownTimer;
-import android.ext.widget.PageAdapter;
-import android.ext.widget.PageAdapter2;
 import android.ext.widget.ViewVisibility;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
@@ -73,7 +70,6 @@ import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.format.DateFormat;
 import android.util.DisplayMetrics;
 import android.util.JsonWriter;
@@ -1400,52 +1396,6 @@ public class ImageActivity extends Activity implements OnScrollListener, OnItemC
         @Override
         public String toString() {
             return super.toString();
-        }
-    }
-
-    private static final class VideoViewHolder extends ViewHolder {
-        public VideoViewHolder(View itemView) {
-            super(itemView);
-        }
-    }
-
-    private static final class VideoPageAdapter extends PageAdapter<JSONObject, VideoViewHolder> {
-        public VideoPageAdapter(Config config) {
-            super(config);
-        }
-
-        @Override
-        public VideoViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-            return null;
-        }
-
-        @Override
-        public void onBindViewHolder(VideoViewHolder holder, int position) {
-        }
-
-        @Override
-        protected List<?> loadPage(int pageIndex, int startPosition, int loadSize) {
-            return new JSONArray();
-        }
-    }
-
-    private static final class VideoPageAdapter2 extends PageAdapter2<JSONObject, VideoViewHolder> {
-        public VideoPageAdapter2(Config config, Object owner) {
-            super(config, owner);
-        }
-
-        @Override
-        public VideoViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-            return null;
-        }
-
-        @Override
-        public void onBindViewHolder(VideoViewHolder holder, int position) {
-        }
-
-        @Override
-        protected List<?> loadPage(Task task, int pageIndex, int startPosition, int loadSize) {
-            return new JSONArray();
         }
     }
 }

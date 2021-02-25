@@ -7,7 +7,7 @@ import android.ext.content.Task;
 import android.ext.image.ImageModule;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.ext.widget.PageAdapter2;
+import android.ext.widget.PageAdapter;
 import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -90,7 +90,7 @@ public class RecyclerViewActivity extends Activity {
         }
     };
 
-    private final class RecyclerAdapter extends PageAdapter2<String, BaseHolder> {
+    private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
         public RecyclerAdapter() {
             super(new Config.Builder()
                 .setPageSize(PAGE_SIZE)
@@ -137,10 +137,8 @@ public class RecyclerViewActivity extends Activity {
         }
 
         @Override
-        public List<String> loadPage(Task task, int page, int startPosition, int loadSize) {
+        public List<?> loadPage(Task task, int page, int startPosition, int loadSize) {
             //Log.i("PageAdapter", "loadPage - page = " + page + ", startPosition = " + startPosition + ", loadSize = " + loadSize);
-//            new LoadTask(RecyclerViewActivity.this, page).executeOnExecutor(MainApplication.sThreadPool, startPosition, loadSize);
-//            return null;
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -149,61 +147,6 @@ public class RecyclerViewActivity extends Activity {
             return mData.subList(startPosition, startPosition + loadSize);
         }
     }
-
-    private static final class LoadTask extends AsyncTask<Integer, Integer, List<String>> {
-        private int page;
-
-        public LoadTask(RecyclerViewActivity activity, int page) {
-            super(activity);
-            this.page = page;
-        }
-
-        @Override
-        protected List<String> doInBackground(Integer[] params) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-            }
-
-            final RecyclerViewActivity activity = getOwner();
-            return (activity != null ? activity.mData.subList(params[0], params[0] + params[1]) : null);
-        }
-
-        @Override
-        protected void onPostExecute(Integer[] params, List<String> result) {
-            final RecyclerViewActivity activity = getOwner();
-            if (activity != null) {
-                activity.mAdapter.setPage(page, result);
-            }
-        }
-    }
-
-//    private static final class DataPage implements Page<String> {
-//        private final String[] mData;
-//        private final int mOffset;
-//        private final int mCount;
-//
-//        public DataPage(String[] data, int offset, int count) {
-//            mData = data;
-//            mOffset = offset;
-//            mCount = count;
-//        }
-//
-//        @Override
-//        public int getCount() {
-//            return mCount;
-//        }
-//
-//        @Override
-//        public String getItem(int position) {
-//            return mData[position + mOffset];
-//        }
-//
-//        @Override
-//        public String setItem(int position, String value) {
-//            return null;
-//        }
-//    }
 
     private static class BaseHolder extends ViewHolder implements OnFocusChangeListener {
         public BaseHolder(View itemView) {

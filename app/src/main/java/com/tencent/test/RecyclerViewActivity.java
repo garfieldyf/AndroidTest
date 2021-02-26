@@ -2,12 +2,11 @@ package com.tencent.test;
 
 import android.app.Activity;
 import android.content.Context;
-import android.ext.content.AsyncTask;
 import android.ext.content.Task;
 import android.ext.image.ImageModule;
 import android.ext.widget.LayoutManagerHelper;
 import android.ext.widget.LayoutManagerHelper.MarginItemDecoration;
-import android.ext.widget.PageAdapter;
+import android.ext.widget.PageAdapter2;
 import android.ext.widget.ViewUtils;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -90,7 +89,7 @@ public class RecyclerViewActivity extends Activity {
         }
     };
 
-    private final class RecyclerAdapter extends PageAdapter<String, BaseHolder> {
+    private final class RecyclerAdapter extends PageAdapter2<String, BaseHolder> {
         public RecyclerAdapter() {
             super(new Config.Builder()
                 .setPageSize(PAGE_SIZE)

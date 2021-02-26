@@ -2,6 +2,7 @@ package android.ext.content;
 
 import android.ext.content.ResourceLoader.OnLoadCompleteListener;
 import android.ext.util.DebugUtils;
+import android.ext.util.DeviceUtils;
 import android.ext.util.Pools;
 import android.ext.util.Pools.Factory;
 import android.ext.util.Pools.Pool;
@@ -117,6 +118,7 @@ public abstract class AsyncTaskLoader<Params, Result> implements Factory<Object>
         @Override
         /* package */ void onPostExecute(Object result) {
             removeLifecycleObserver(mOwner);
+            DebugUtils.__checkDebug(isCancelled(), AsyncTaskLoader.this.getClass().getName(), "The LoadTask was cancelled, do not call onLoadComplete().");
             if (!isCancelled()) {
                 mListener.onLoadComplete((Params[])mParams, (Result)result);
             }

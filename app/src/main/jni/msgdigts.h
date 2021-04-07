@@ -69,8 +69,9 @@ __STATIC_INLINE__ jint computeFileImpl(const __NS::File& file, JNIEnv* env, jbyt
     TMessageDigest digest;
     u_char buffer[_BUF_SIZE];
 
-    while ((readBytes = file.read(buffer, sizeof(buffer))) > 0)
+    while ((readBytes = file.read(buffer, sizeof(buffer))) > 0) {
         digest.update(buffer, readBytes);
+    }
 
     return (readBytes == 0 ? digestImpl(digest, env, result, offset) : 0);
 }
@@ -104,8 +105,9 @@ __STATIC_INLINE__ jint computeByteArrayImpl(JNIEnv* env, jbyteArray data, jint d
     u_char buffer[_BUF_SIZE];
 
     __NS::ByteArrayInputStream is(env, data, dataLength, dataOffset);
-    while ((readBytes = is.read(buffer, _countof(buffer))) > 0)
+    while ((readBytes = is.read(buffer, _countof(buffer))) > 0) {
         digest.update(buffer, readBytes);
+    }
 
     return digestImpl(digest, env, result, offset);
 }

@@ -117,15 +117,15 @@ __STATIC_INLINE__ ssize_t readFile(const __NS::File& file, uint8_t (&buf)[_BUF_S
     ssize_t count = 0, readBytes;
     while ((readBytes = file.read(buf + count, _countof(buf) - count)) != 0)
     {
-        if (readBytes == -1)
-        {
+        if (readBytes == -1) {
             count = -1;
             break;
         }
 
         count += readBytes;
-        if (count == _countof(buf))
+        if (count == _countof(buf)) {
             break;
+        }
     }
 
     return count;
@@ -148,8 +148,9 @@ __STATIC_INLINE__ jint scanFilesImpl(JNIEnv* env, const char* path, size_t lengt
         for (struct dirent* entry; (errnum = dir.read(entry)) == 0 && entry != NULL; )
         {
             ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
-            if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE)
+            if (env->CallIntMethod(callback, _onScanFileID, JNI::jstringRef_t(env, filePath).get(), (jint)entry->d_type, cookie) != SC_CONTINUE) {
                 break;
+            }
         }
     }
 
@@ -166,10 +167,11 @@ __STATIC_INLINE__ void buildUniqueFileName(char (&path)[MAX_PATH], const stdutil
     {
         // Builds the unique filename.
         char format[MAX_PATH];
-        if (const char* ext = ::strrchr(name, '.'))
+        if (const char* ext = ::strrchr(name, '.')) {
             ::snprintf(format, _countof(format), "%.*s/%.*s-%%d%s", dirPath.size, dirPath.data, (uint32_t)(ext - name), name, ext);
-        else
+        } else {
             ::snprintf(format, _countof(format), "%.*s/%s-%%d", dirPath.size, dirPath.data, name);
+        }
 
         int index = 0;
         do
@@ -185,7 +187,7 @@ __STATIC_INLINE__ jlong computeFileBytes(const char* path, size_t /*length*/)
     assert(path);
 
     std::list<std::string> dirPaths;
-    dirPaths.push_back(path);
+    dirPaths.emplace_back(path);
 
     jlong result = 0;
     do
@@ -206,7 +208,7 @@ __STATIC_INLINE__ jlong computeFileBytes(const char* path, size_t /*length*/)
                 ::strlcpy(filePath + offset, entry->d_name, _countof(filePath) - offset);
                 if (entry->d_type == DT_DIR) {
                     // If filePath is a directory adds it to dirPaths.
-                    dirPaths.push_back(filePath);
+                    dirPaths.emplace_back(filePath);
                 } else if (::stat(filePath, &buf) == 0) {
                     result += (jlong)buf.st_size;
                 }
@@ -225,7 +227,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, size_t
     assert(callback);
 
     std::list<std::string> dirPaths;
-    dirPaths.push_back(path);
+    dirPaths.emplace_back(path);
 
     jint errnum = 0;
     do
@@ -253,7 +255,7 @@ __STATIC_INLINE__ jint scanDescendentFiles(JNIEnv* env, const char* path, size_t
                     continue;
                 } else if (entry->d_type == DT_DIR) {
                     // If filePath is a directory adds it to dirPaths.
-                    dirPaths.push_back(filePath);
+                    dirPaths.emplace_back(filePath);
                 }
             }
         }
@@ -374,10 +376,11 @@ JNIEXPORT_METHOD(jint) scanFiles(JNIEnv* env, jclass /*clazz*/, jstring dirPath,
     jint result, errnum;
     const JNI::jstring_t jdirPath(env, dirPath);
 
-    if (flags & FLAG_SCAN_FOR_DESCENDENTS)
+    if (flags & FLAG_SCAN_FOR_DESCENDENTS) {
         errnum = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanDescendentFiles<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie, result) : scanDescendentFiles<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie, result));
-    else
+    } else {
         errnum = ((flags & FLAG_IGNORE_HIDDEN_FILE) ? scanFilesImpl<__NS::IgnoreHiddenFilter>(env, jdirPath, jdirPath.length, callback, cookie) : scanFilesImpl<__NS::DefaultFilter>(env, jdirPath, jdirPath.length, callback, cookie));
+    }
 
     return errnum;
 }
@@ -399,8 +402,9 @@ JNIEXPORT_METHOD(jint) createFile(JNIEnv* env, jclass /*clazz*/, jstring filenam
         __NS::File file;
         if ((errnum = file.open(jfilename)) == 0)
         {
-            if (length > 0 && (errnum = file.truncate(length)) != 0)
+            if (length > 0 && (errnum = file.truncate(length)) != 0) {
                 ::remove(jfilename);    // Deletes file, if truncate failure.
+            }
         }
     }
 
@@ -489,8 +493,9 @@ JNIEXPORT_METHOD(jint) getFileStatus(JNIEnv* env, jclass clazz, jstring path, jo
     const JNI::jstring_t jpath(env, path);
 
     const jint errnum = __verify((::stat(jpath, &buf) == 0 ? 0 : errno), "Couldn't get file '%s' status", jpath.str());
-    if (errnum == 0)
+    if (errnum == 0) {
         env->CallStaticVoidMethod(clazz, _setStatID, outStat, (jint)buf.st_mode, (jint)buf.st_uid, (jint)buf.st_gid, (jlong)buf.st_size, (jlong)buf.st_blocks, (jlong)buf.st_blksize, (jlong)buf.st_mtime * MILLISECONDS);
+    }
 
     return errnum;
 }
@@ -535,10 +540,11 @@ JNIEXPORT_METHOD(jstring) createUniqueFile(JNIEnv* env, jclass /*clazz*/, jstrin
         __NS::File file;
         if (file.open(path) == 0)
         {
-            if (length <= 0 || file.truncate(length) == 0)
+            if (length <= 0 || file.truncate(length) == 0) {
                 result = env->NewStringUTF(path);
-            else
+            } else {
                 ::remove(path);     // Deletes file, if truncate failure.
+            }
         }
     }
 

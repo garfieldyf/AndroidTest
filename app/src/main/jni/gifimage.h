@@ -80,10 +80,11 @@ __STATIC_INLINE__ __NS::GIFImage* GifDecodeImage(_Ty& userData)
     __NS::GIFImage* result = NULL;
     if (GifFileType* GIF = ::DGifOpen(&userData, GifReadProc<_Ty>, NULL))
     {
-        if (::DGifSlurp(GIF) == GIF_OK && GIF->ImageCount >= 1 && GIF->SWidth > 0 && GIF->SHeight > 0)
+        if (::DGifSlurp(GIF) == GIF_OK && GIF->ImageCount >= 1 && GIF->SWidth > 0 && GIF->SHeight > 0) {
             result = new __NS::GIFImage(GIF);
-        else
+        } else {
             ::DGifCloseFile(GIF, NULL);
+        }
     }
 #endif  // NDEBUG
 
@@ -150,8 +151,9 @@ JNIEXPORT_METHOD(jboolean) nativeDraw(JNIEnv* env, jclass /*clazz*/, jobject bit
     void* canvas = NULL;
     __NS::Bitmap jbitmapCanvas(env, bitmapCanvas);
     const jboolean successful = (jbitmapCanvas.lockPixels(canvas) == ANDROID_BITMAP_RESULT_SUCCESS);
-    if (successful)
+    if (successful) {
         reinterpret_cast<__NS::GIFImage*>(nativeImage)->draw((uint32_t*)canvas, frameIndex);
+    }
 
     return successful;
 }

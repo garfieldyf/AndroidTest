@@ -2,7 +2,7 @@
 # APP_ABI := arm64-v8a armeabi-v7a x86_64 x86
 
 APP_PLATFORM := android-16
-APP_CPPFLAGS += -std=c++11
+APP_CPPFLAGS += -std=c++1y
 
 ifeq ($(origin NDK_ABI), undefined)
 APP_ABI := arm64-v8a armeabi-v7a

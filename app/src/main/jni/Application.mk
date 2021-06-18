@@ -19,4 +19,4 @@ APP_ABI := $(NDK_ABI)
 endif
 
 APP_PLATFORM := android-16
-APP_CPPFLAGS += -std=c++1y -fno-exceptions
+APP_CPPFLAGS += -std=c++17 -fno-exceptions
